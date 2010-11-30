@@ -1,51 +1,46 @@
-function trx = FlyBowlCalibrate(expdir,protocol,varargin)
+function trx = CalibrateTrx(inTrxName,varargin)
 
-requiredParams = {...
-  'calibrationMarkFileStr',...
-  'movieFileStr',...
-  'annFileStr',...
-  'inTrxFileStr',...
-  'outTrxFileStr'...
-  };
+if ~exist(inTrxName,'file'),
+  error('matfile %s containing trx does not exist',inTrxName);
+end
 
-% load parameters
-params = FlyBowlProtocol2Params('FlyBowlCalibrate',protocol,varargin{:});
-paramsRead = ismember(requiredParams,params(1,:));
-if ~all(paramsRead),
-  error(['The following required parameters were not read: ',sprintf('\n%s',requiredParams{~paramRead})]);
-end
-% add to workspace
-for i = 1:size(params,2),
-  eval(sprintf('%s = params{2,%d};',params{1,i},i));
-end
+[annName,movieName,incalibrationfile,...
+  outCalibrationFile,detectCalibrationParams,...
+  outTrxName] = ...
+  myparse(varargin,...
+  'annname','',...
+  'moviename','',...
+  'incalibrationfile','',...
+  'outcalibrationfile','',...
+  'detectcalibrationparams',{},...
+  'outtrxname','');
+
+if ~isempty(incalibrationfile),
+  calibrationData = load(incalibrationfile);
+  calibrationData = detectCalibrationMarks('calibrationData',calibrationData);
+else
+   
+  if ~exist(annName,'file'),
+    error('annfile %s does not exist',annName);
+  end
+  if ~exist(movieName,'file'),
+    error('moviefile %s does not exist',movieName);
+  end
+
+  % get video size
+  [~,~,fid,headerinfo] = get_readframe_fcn(movieName);
+  nr = headerinfo.nr;
+  nc = headerinfo.nc;
+  fclose(fid);
   
-% load parameters for mark detection
-detectCalibrationMarksParams = ...
-  FlyBowlProtocol2Params('detectCalibrationMarks',protocol,varargin{:});
-
-% movie to calibrate
-movieName = fullfile(expdir,movieFileStr);
-annName = fullfile(expdir,annFileStr);
-inTrxName = fullfile(expdir,inTrxFileStr);
-
-% get video size
-[readframe,nframes,fid,headerinfo] = get_readframe_fcn(movieName);
-nr = headerinfo.nr;
-nc = headerinfo.nc;
-fclose(fid);
-clear readframe;
-
-% file to save results to
-calibrationMarkName = fullfile(expdir,calibrationMarkFileStr);
-outTrxName = fullfile(expdir,outTrxFileStr);
-
-% detect the calibration marks
-calibrationData = detectCalibrationMarks(detectCalibrationMarksParams{:},...
-  'annName',annName,'saveName',calibrationMarkName,...
-  'nr',nr,'nc',nc);
+  % detect the calibration marks
+  calibrationData = detectCalibrationMarks(detectCalibrationParams{:},...
+    'annName',annName,'saveName',calibrationMarkName,...
+    'nr',nr,'nc',nc);
+end
 
 % apply to trajectories
-trx = load_ctrax(inTrxName,movieName,annName);
+trx = load_tracks(inTrxName,movieName,'annname',annName);
 for fly = 1:length(trx),
   
   % apply transformation to 4 extremal points on the ellipse
@@ -78,4 +73,11 @@ for fly = 1:length(trx),
   trx(fly).theta_mm = theta1;
 end
 
-save(outTrxName,'trx');
+if ~isempty(outCalibrationFile),
+  tmp = rmfield(calibrationData,'registerfn');
+  save(outCalibrationFile,'-struct',tmp);
+end
+
+if ~isempty(outTrxName),
+  save(outTrxName,'trx');
+end

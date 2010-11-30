@@ -18,10 +18,10 @@ obj.nc = size(im,2);
 obj.ncolors = size(im,3);
 
 % read annotation
-if obj.DEBUG,
+if obj.NOWRITEACCESS,
   tmp = regexp(obj.expdir,'/?([^/]+)/?$','tokens','once');
   obj.expdir_base = tmp{1};
-  obj.annfile = fullfile(obj.resultsdir,[obj.expdir_base,'.ann']);
+  obj.annfile = fullfile(obj.resultsdir,obj.expdir_base,obj.annfilestr);
 else
   obj.annfile = fullfile(obj.expdir,obj.annfilestr);
 end
@@ -39,4 +39,15 @@ for i = 1:length(obj.ann_images),
   if isfield(obj.ann,fn),
     obj.ann.(fn) = reshape(obj.ann.(fn),[obj.nr,obj.nc,numel(obj.ann.(fn))/(obj.nr*obj.nc)]);
   end
+end
+
+% read trajectories
+obj.ctraxfile = fullfile(obj.expdir,obj.ctraxfilestr);
+obj.trxfile = fullfile(obj.expdir,obj.trxfilestr);
+if exist(trxfile,'file'),
+  obj.trx = load_tracks(trxfile);
+else
+  obj.trx = load_tracks(ctraxfile);
+  % TODO: implement calibration
+  %obj.trx = calibrate_trx(obj.trx,'savefile',obj.trxfile);
 end
