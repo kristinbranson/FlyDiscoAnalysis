@@ -4,7 +4,7 @@
 function [trx,units] = ComputeLandmarkMeasurements(trx,params,landmarks_file)
 
 nflies = length(trx);
-fns = {'dist2wall','wallangle','angle2wall'};
+fns = {'dist2wall','wallangle','angle2wall','arena_r'};
 
 isfile = exist('landmarks_file','var');
 
@@ -23,6 +23,7 @@ else
     % distance to wall
     dcenter = sqrt((trx(fly).x_mm - params.arena_center_mm(1)).^2 + ...
       (trx(fly).y_mm - params.arena_center_mm(2)).^2);
+    landmarks(fly).arena_r = dcenter;
     landmarks(fly).dist2wall = params.arena_radius_mm - dcenter;
     
     % polar angle of closest point on the wall

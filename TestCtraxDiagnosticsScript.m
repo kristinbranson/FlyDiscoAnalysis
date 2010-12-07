@@ -30,23 +30,28 @@ detectregistrationparams.bowlMarkerPairTheta_true = -3*pi/4;
 detectregistrationparams.debug = true;
 detectregistrationparams.isBowlMarker = false;
 
-heatmapparams_conditions = @(x) x.velmag >= 1.3; % mm / second
-
 %% initialize data
 
 obj = CtraxDiagnostics('rootdatadir',rootdatadir,...
   'ctraxfilestr','fixerrors_results.mat',...
   'NOWRITEACCESS',false,...
   'detectregistrationparams',detectregistrationparams);
+obj.AddExpDir(expdir);
+
+%% derive some more measurements
+obj.ComputeSpeedMeasurements();
+obj.ComputeLandmarkMeasurements();
 
 %% where in the arena do the flies spend time?
 
 hfig = 1;
-obj.heatmapparams_conditions = heatmapparams_conditions;
-obj.CenterPositionHeatmap('hfig',hfig,'doplot',true);
-obj.CenterPositionHeatmapPolar('hfig',hfig,'doplot',true,'nbins_r',5,'nbins_theta',20);
-hfig = hfig+1;
-obj.CenterPositionBinEntriesPolar('hfig',hfig,'doplot',true,'nbins_r',5,'nbins_theta',20);
+obj.CenterPositionHeatmap('hfig',hfig,'doplot',true,'nbins',50,...
+  'minspeed',1.3,'fraclogscale',true);
+
+
+%obj.CenterPositionHeatmapPolar('hfig',hfig,'doplot',true,'nbins_r',5,'nbins_theta',20);
+%hfig = hfig+1;
+%obj.CenterPositionBinEntriesPolar('hfig',hfig,'doplot',true,'nbins_r',5,'nbins_theta',20);
 
 %% is there a bias toward one side of the arena
 

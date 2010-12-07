@@ -29,7 +29,8 @@ end
   axesstyleparams,...
   ploterrorbars,plotperfly,plotperexp,clim,docomputestd,docomputestderr,...
   binmode_x,binmode_y,figpos,fraclogscale,...
-  squareaxes] = ...
+  squareaxes,...
+  cm] = ...
   myparse(varargin,...
   'edges_x',[],'edges_y',[],...
   'nbins_x',obj.histogramtwomeasurements_nbins_x,...
@@ -60,7 +61,8 @@ end
   'binmode_y','linear',...
   'figpos',obj.histogramtwomeasurements_figpos,...
   'fraclogscale',false,...
-  'squareaxes',true);
+  'squareaxes',true,...
+  'colormap',jet(256));
 
 %% take the intersection of specified flies and expdirs
 
@@ -84,7 +86,7 @@ nexpdirs = length(ns);
 
 % save for returning
 res.ns = ns;
-res.nflies = nflies;
+res.flies = flies;
 
 % check that there is at least one experiment selected
 if nexpdirs == 0,
@@ -132,7 +134,7 @@ if isempty(nbins_x),
 end
 % we'll need to do this twice, so put it in a function:
 % choose edges_x
-edges_x = get_edges(fn_x,edges_x,nbins_x,lim_x,lim_prctile_x,outputfun_x,binmode_x);
+[edges_x,nbins_x] = get_edges(fn_x,edges_x,nbins_x,lim_x,lim_prctile_x,outputfun_x,binmode_x);
 centers_x = (edges_x(1:end-1)+edges_x(2:end))/2;
 
 % y edges
@@ -141,7 +143,7 @@ centers_x = (edges_x(1:end-1)+edges_x(2:end))/2;
 if isempty(nbins_y),
   nbins_y = nbins;
 end
-edges_y = get_edges(fn_y,edges_y,nbins_y,lim_y,lim_prctile_y,outputfun_y,binmode_y);
+[edges_y,nbins_y] = get_edges(fn_y,edges_y,nbins_y,lim_y,lim_prctile_y,outputfun_y,binmode_y);
 centers_y = (edges_y(1:end-1)+edges_y(2:end))/2;
 
 % store for returning
@@ -211,6 +213,9 @@ for i = 1:length(ns),
   nfliespermovie(i) = length(movie2flies{i});
 end
 fly2movie = full(n2idx(obj.fly2movie(flies)));
+res.expdirs = expdirs;
+res.movie2flies = movie2flies;
+res.fly2movie = fly2movie;
 
 %% per-fly histograms
 
@@ -218,6 +223,16 @@ fly2movie = full(n2idx(obj.fly2movie(flies)));
 % quick and will speed up jackknifing, so compute them
 Zperfly = sum(sum(countsperfly,2),3);
 fracperfly = bsxfun(@rdivide,countsperfly,Zperfly);
+res.fracperfly = fracperfly;
+res.Zperfly = Zperfly;
+
+%% per-exp histograms
+
+fracperexp = nan(nexpdirs,nbins_y,nbins_x);
+for n = 1:nexpdirs,
+  fracperexp(n,:,:) = compute_frac(1:nflies,n);
+end
+res.fracperexp = fracperexp;
 
 %% compute frac using all the data
 
@@ -225,6 +240,7 @@ fracperfly = bsxfun(@rdivide,countsperfly,Zperfly);
 frac = compute_frac(1:nflies,1:nexpdirs);
 
 res.frac = frac;
+res.averaging = averaging;
 
 %% jackknife to get an estimate of standard deviation
 
@@ -372,6 +388,7 @@ if doplot,
     elseif ishandle(hfig(figi_main)),
       % there is a figure, so clear it
       clf(hfig(figi_main));
+      figpos = get(hfig(figi_main),'Position');
     else
       % handle input, but figure does not exist, so make it
       figure(hfig(figi_main));
@@ -380,7 +397,11 @@ if doplot,
       end
     end
     % create the axes
-    hax(axi_main) = createsubplots(1,nax_main,.05,hfig(figi_main));
+    hax_main = createsubplots(1,nax_main,.05,hfig(figi_main));
+    if doploterrorbars,
+      hax_main = hax_main([2,1,3]);
+    end
+    hax(axi_main) = hax_main;
   else
     hfig(figi_main) = get(hax(axi_hist),'Parent');
   end
@@ -454,28 +475,19 @@ if doplot,
     cla(hax(axi));
   end  
 
-  % TODO: move this
-  % user data for main plot
-  plotinfo = struct;
-  plotinfo.expdirs = expdirs;
-  plotinfo.flies = flies;
-  plotinfo.averaging = averaging;
-  plotinfo.jackknife = jackknife;
-  set(hax(axi_hist),'UserData',plotinfo);
-
+  % store
+  res.plotparams.hfig = hfig;
+  res.plotparams.hax = hax;
+  
   % for clim
   minv = inf;
   maxv = -inf;
   
   %% plot the main histogram
-  if fraclogscale,
-    im = log(frac);
-  else
-    im = frac;
-  end
+  im = frac;
   hhist = imagesc(edges_x([1,nbins_x+1]),...
     edges_y([1,nbins_y+1]),im,'parent',hax(axi_hist),...
-    'tag','mainhist','userdata',plotinfo);
+    'tag','mainhist');
   colorbar('peer',hax(axi_hist));
   % update limits
   minv = min(minv,min(im(~isinf(im))));
@@ -495,6 +507,14 @@ if doplot,
   end
   
   title(hax(axi_hist),s);
+
+  % user data for main plot
+  plotinfo = struct;
+  plotinfo.expdirs = expdirs;
+  plotinfo.flies = flies;
+  plotinfo.averaging = averaging;
+  plotinfo.jackknife = jackknife;
+  set(hax(axi_hist),'UserData',plotinfo);
   
   %% plot standard error/standard deviation
   
@@ -508,7 +528,7 @@ if doplot,
         error('Unknown ploterrorbars type %s',ploterrorbars);
     end
     
-    errinfo = struct;
+    errinfo = plotinfo;
     errinfo.jackknife = jackknife;
     if strcmpi(jackknife,'perfly'),
       errinfo.n = nflies;
@@ -516,123 +536,54 @@ if doplot,
       errinfo.n = nexpdirs;
     end
     
-    if fraclogscale,
-      im = log(frac-err);
-    else
-      im = frac-err;
-    end
+    im = max(0,frac-err);
     herr_minus = imagesc(edges_x([1,nbins_x+1]),...
-      edges_y([1,nbins_y+1]),im,'parent',hax(axi_minuserr),...
+      edges_y([1,nbins_y+1]),im,'parent',hax(axi_minuserror),...
       'tag',sprintf('minuserr_%s',ploterrorbars),'userdata',errinfo);
+    colorbar('peer',hax(axi_minuserror));
     % update limits
     minv = min(minv,min(im(~isinf(im))));
 
-    if fraclogscale,
-      im = log(frac+err);
-    else
-      im = frac+err;
-    end
+    im = frac+err;
     herr_plus = imagesc(edges_x([1,nbins_x+1]),...
-      edges_y([1,nbins_y+1]),im,'parent',hax(axi_pluserr),...
+      edges_y([1,nbins_y+1]),im,'parent',hax(axi_pluserror),...
       'tag',sprintf('pluserr_%s',ploterrorbars),'userdata',errinfo);
-
+    colorbar('peer',hax(axi_pluserror));
+    
     maxv = max(maxv,max(im(~isinf(im))));
 
     res.plotparams.herr_minus = herr_minus;
     res.plotparams.herr_plus = herr_plus;
     
-    title(hax(axi_minuserr),sprintf('- %s',ploterrorbars));
-    title(hax(axi_pluserr),sprintf('+ %s',ploterrorbars));
+    s = sprintf('- %s',ploterrorbars);
+    title(hax(axi_minuserror),s);
+    s = sprintf('+ %s',ploterrorbars);
+    title(hax(axi_pluserror),s);
         
-  end
-
-  %% create axes for experiments
-
-  nax_perexp = 0;
-  figi_perexp = figi_main;
-  axi_off = nax_main;
-  if nexpdirs > 1 && plotperexp,
-    figi_perexp = figi_main + 1;
-    nax_perexp = nexpdirs;
-    figpos_perexp = get(hfig(figi_main),'Position');
-    figpos_perexp(4) = figpos_perexp(4)*nax_main/nax_perexp;
-    if numel(hax) < axi_off + nax_perexp,
-      if numel(hfig) < figi_perexp,
-        hfig(figi_perexp) = figure;
-        set(hfig(figi_perexp),'Position',figpos_perexp);
-      elseif ishandle(hfig(figi_perexp)),
-        clf(hfig(figi_perexp));
-      else
-        figure(hfig(figi_perexp));
-        set(hfig(figi_perexp),'Position',figpos_perexp);
-      end
-      hax = [hax,createsubplots(1,nax_perexp,.05,hfig(figi_perexp))];
-    else
-      hfig(figi_perexp) = get(hax(axi_off+1),'Parent');
-    end
-    for axi = axis_off+1:axi_off+nax_perexp,
-      cla(hax(axi));
-      %hold(hax(axi),'on');
-    end
   end
 
   %% plot per-experiment histogram
   
-  if plotperexp && nexpdirs > 1,
+  if doplotperexp,
     hperexphist = zeros(1,nexpdirs);
     for n = 1:nexpdirs,
       expinfo = struct('n',ns(n),'flies',flies(movie2flies{n}),'expdir',expdirs{n},'ndataperfly',Zperfly(movie2flies{n}));
-      fracperexpcurr = compute_frac(1:nflies,n);
-      if fraclogscale,
-        fracperexpcurr = log(fracperexpcurr);
-      else
-        %fracperexpcurr = fracperexpcurr;
-      end
+      fracperexpcurr = permute(fracperexp(n,:,:),[2,3,1]);
+      im = fracperexpcurr;
 
       % update limits
-      minv = min(minv,min(fracperexpcurr(~isinf(fracperexpcurr))));
-      maxv = max(maxv,max(fracperexpcurr(~isinf(fracperexpcurr))));
+      minv = min(minv,min(im(~isinf(im))));
+      maxv = max(maxv,max(im(~isinf(im))));
       hperexphist(n) = ...
         imagesc(edges_x([1,nbins_x+1]),...
-        edges_y([1,nbins_y+1]),fracperexpcurr,'parent',hax(axi_off+n),...
+        edges_y([1,nbins_y+1]),im',hax(axi_perexp(n)),...
         'tag',sprintf('exp%d',n),'userdata',expinfo);
-      title(hax(axi_off+n),expdirs{n},'interpreter','none');
+      title(hax(axi_perexp(n)),expdirs{n},'interpreter','none');
     end
     res.plotparams.hperexphist = hperexphist;
     
   end
   
-  %% create axes for flies
-  
-  if nflies > 1 && plotperfly,
-    figi_perfly = figi_perexp + 1;
-    axi_off = axi_off + nax_perexp;
-    nax_perfly = nflies;
-    figpos_perfly = get(hfig(figi_main),'Position');
-    figpos_perfly(4) = figpos_perfly(4)*nax_main/nax_perfly;
-    if numel(hax) < axi_off + nax_perfly,
-      if numel(hfig) < figi_perfly,
-        hfig(figi_perfly) = figure;
-        set(hfig(figi_perfly),'Position',figpos_perfly);
-      elseif ishandle(hfig(figi_perfly)),
-        clf(hfig(figi_perfly));
-      else
-        figure(hfig(figi_perfly));
-        set(hfig(figi_perfly),'Position',figpos_perfly);
-      end
-      hax = [hax,createsubplots(1,nax_perfly,[[.01,.01];[.1,.1]],hfig(figi_perfly))];
-    else
-      hfig(figi_perfly) = get(hax(axi_off+1),'Parent');
-    end
-    for axi = axi_off+1:axi_off+nax_perfly,
-      cla(hax(axi));
-      %hold(hax(axi),'on');
-    end
-  end
-      
-  res.plotparams.hax = hax;
-  res.plotparams.hfig = hfig;
-
   %% plot the per-fly histograms
   if plotperfly && nflies > 1,
     hperflyhist = zeros(1,nflies);
@@ -643,30 +594,21 @@ if doplot,
       flyofmovie = find(flyglobal == obj.movie2flies{nglobal},1);
       flyinfo = struct('fly',flyglobal,'n',nglobal,'expdir',expdir,'ndata',Zperfly(fly),'flyofmovie',flyofmovie);
       
-      if fraclogscale,
-        im = log(fracperfly(fly,:,:));
-      else
-        im = fracperfly(fly,:,:);
-      end
+      fracperflycurr = permute(fracperfly(fly,:,:),[2,3,1]);
+      im = fracperflycurr;
 
       hperflyhist(fly) = ...
         imagesc(edges_x([1,nbins_x+1]),...
-        edges_y([1,nbins_y+1]),permute(im,[2,3,1]),...
-        'parent',hax(axi_off+fly),...
+        edges_y([1,nbins_y+1]),im,...
+        'parent',hax(axi_perfly(fly)),...
         'tag',sprintf('fly%d',fly),'userdata',flyinfo);
-      title(hax(axi_off+fly),sprintf('Fly %d of %s',flyofmovie,expdir),'interpreter','none');
-      axis(hax(axi_off+fly),'off');
+      title(hax(axi_perfly(fly)),sprintf('%d,%d',nglobal,flyglobal),'interpreter','none');
+      axis(hax(axi_perfly(fly)),'off');
     end
     
     % update limits
-    if fraclogscale,
-      minv = min(minv,log(min(fracperfly(fracperfly>0))));
-      maxv = max(maxv,log(max(fracperfly(fracperfly>0))));
-    else
-      minv = min(minv,min(fracperfly(:)));
-      maxv = max(maxv,max(fracperfly(:)));
-    end
-
+    minv = min(minv,min(im(~isinf(im))));
+    maxv = max(maxv,max(im(~isinf(im))));
 
     res.plotparams.hperflyhist = hperflyhist;
     
@@ -680,20 +622,33 @@ if doplot,
   if isnan(clim(2)),
     clim(2) = maxv;
   end
-  % make sure the y lims are positive
-  if fraclogscale,
-    clim = max(clim,log(min(frac(frac>0)))/2);
-  end
   for axi = 1:numel(hax),
     set(hax(axi),'clim',clim);
+    axis(hax(axi),'xy');
+    if squareaxes,
+      axis(hax(axi),'square');
+    end
+    if ~isempty(axesstyleparams),
+      set(hax(axi),axesstyleparams{:});
+    end
   end
-  linkaxes(hax);
-  linkprop(hax,'clim');
+  linkaxes(hax(1:nax));
+  linkprop(hax(1:nax),'clim');
   
   res.plotparams.clim = clim;
+  
+  %% set colormap
+
+  if fraclogscale,
+    cm = logscale_colormap(cm,clim);
+  end
+  for figi = 1:nfigs
+    set(hfig(figi),'Colormap',cm);
+  end
 
   %% labels
 
+  % x, y labels
   if ~isempty(outputfun_x),
     if ~isempty(outputfun_string_x),
       s_x = sprintf('%s of %s',outputfun_string_x,fn_x);
@@ -714,19 +669,18 @@ if doplot,
   end
   hxlabel = nan(size(hax));
   hylabel = nan(size(hax));
-  for axi = 1:numel(hax),
-    if ~isempty(axesstyleparams),
-      set(hax(axi),axesstyleparams{:});
-    end
-    hxlabel(axi) = xlabel(hax(i),s_x,'interpreter','none');
-    hylabel(axi) = ylabel(hax(i),s_y,'interpreter','none');
+  for axi = 1:nax,
+    hxlabel(axi) = xlabel(hax(axi),s_x,'interpreter','none');
+    hylabel(axi) = ylabel(hax(axi),s_y,'interpreter','none');
   end
+  
+  % title
   plottitle = sprintf('%s vs %s',s_x,s_y);
   set(hfig(figi_main),'name',plottitle);
-  if plotperexp && nexpdirs > 1,
+  if doplotperexp,
     set(hfig(figi_perexp),'name',[plottitle,' per exp']);
   end
-  if plotperfly && nflies > 1,
+  if doplotperfly,
     set(hfig(figi_perfly),'name',[plottitle,' per fly']);
   end
   
@@ -734,6 +688,7 @@ if doplot,
   res.hylabel = hylabel;
     
 end
+
 
 %% compute_frac
 
@@ -812,7 +767,7 @@ function [edges,nbins] = get_edges(fn,edges,nbins,lim,lim_prctile,outputfun,binm
   
 % set edges if not input
 if ~isempty(edges),
-  nbins = length(edges);
+  nbins = length(edges)-1;
   return;
 end
 if any(isnan(lim)),
