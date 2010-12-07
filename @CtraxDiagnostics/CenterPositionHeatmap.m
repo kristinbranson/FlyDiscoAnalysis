@@ -1,10 +1,12 @@
+% heatmap = obj.CenterPositionHeatmap(varargin)
+
 function heatmap = CenterPositionHeatmap(obj,varargin)
 
 % parse inputs
 nbins = 100;
-[edges_x,edges_y,nbins_x,nbins_y,nbins,xlim,ylim] = ...
+[edges_x,edges_y,nbins_x,nbins_y,nbins,xlim,ylim,hfig,doplot,conditions] = ...
   myparse(varargin,'edges_x',[],'edges_y',[],'nbins_x',[],'nbins_y',[],'nbins',nbins,...
-  'xlim',nan(1,2),'ylim',nan(1,2));
+  'xlim',nan(1,2),'ylim',nan(1,2),'hfig',[],'doplot',false,'conditions',[]);
 
 % set edges if not input
 if isempty(edges_x),
@@ -12,10 +14,10 @@ if isempty(edges_x),
     nbins_x = nbins;
   end
   if isnan(xlim(1)),
-    xlim(1) = min([trx.x_mm]);
+    xlim(1) = min([obj.trx.x_mm]);
   end
   if isnan(xlim(2)),
-    xlim(2) = max([trx.x_mm]);
+    xlim(2) = max([obj.trx.x_mm]);
   end
   edges_x = linspace(xlim(1),xlim(2),nbins_x+1);
 else
@@ -26,10 +28,10 @@ if isempty(edges_y),
     nbins_y = nbins;
   end
   if isnan(ylim(1)),
-    ylim(1) = min([trx.y_mm]);
+    ylim(1) = min([obj.trx.y_mm]);
   end
   if isnan(ylim(2)),
-    ylim(2) = max([trx.y_mm]);
+    ylim(2) = max([obj.trx.y_mm]);
   end
   edges_y = linspace(ylim(1),ylim(2),nbins_y+1);
 else
@@ -74,3 +76,41 @@ heatmap.centers_x = centers_x;
 heatmap.centers_y = centers_y;
 heatmap.edges_x = edges_x;
 heatmap.edges_y = edges_y;
+
+if doplot,
+  doresize = isempty(hfig) || ~ishandle(hfig);
+  if isempty(hfig),
+    hfig = figure;
+  else
+    figure(hfig);
+    clf;
+  end
+  if doresize,
+    set(hfig,'Position',[1,1,1000,800]);
+  end
+  heatmap.hfig = hfig;
+  heatmap.hax = createsubplots(2,2,.05);
+  axes(heatmap.hax(1)); %#ok<*MAXES>
+  imagesc(heatmap.fracallflies);
+  axis image;
+  title('Fraction of time spent in each bin for all flies combined');
+  colorbar;
+  axes(heatmap.hax(2));
+  imagesc(heatmap.meanfracperfly);
+  axis image;
+  title('Mean fraction of time spent in each bin per fly');
+  colorbar;
+  axes(heatmap.hax(3));
+  imagesc(log(heatmap.fracallflies));
+  axis image;
+  title('Log-fraction of time spent in each bin for all flies combined');
+  colorbar;
+  axes(heatmap.hax(4));
+  imagesc(log(heatmap.meanfracperfly));
+  axis image;
+  title('Log-mean fraction of time spent in each bin per fly');
+  colorbar;
+
+  linkaxes(heatmap.hax);
+  
+end

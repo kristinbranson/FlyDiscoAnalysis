@@ -1,4 +1,4 @@
-function heatmap = CenterPositionBinEntriesPolar(obj,varargin)
+function heatmap = CenterPositionHeatmapPolar(obj,varargin)
 
 % parse inputs
 nbins_r = [];
@@ -28,8 +28,6 @@ for fly = 1:nflies,
 end
 
 % set edges if not input
-
-% set edges if not input
 if isempty(nbins_r),
   nbins_r = nbins;
 end
@@ -39,7 +37,7 @@ end
 if isnan(rlim(2)),
   rlim(2) = arena_radius;
 end
-binsize_r = (rlim(2)-rlim(1))/nbins_r;
+%binsize_r = (rlim(2)-rlim(1))/nbins_r;
 edges_r = linspace(rlim(1),rlim(2),nbins_r+1);
 
 if isempty(nbins_theta),
@@ -62,30 +60,23 @@ centers_theta = (edges_theta(1:end-1)+edges_theta(2:end))/2;
 heatmap.fracperfly = nan(nbins_r,nbins_theta,nflies);
 heatmap.counts = zeros(nbins_r,nbins_theta);
 % number of data points per fly
-heatmap.n = nan(1,nflies);
+heatmap.n = [obj.trx.nframes];
 
 % loop over flies
 for fly = 1:nflies,
   
-  % find which bin the fly is in
-  binr = floor((r{fly} - rlim(1))/binsize_r);
-  bintheta = floor((theta{fly} - thetalim(1))/binsize_theta);
-  
-  % find changes in bin
-  isnewbin = [true,(binr(1:end-1)~=binr(2:end)) | (bintheta(1:end-1)~=bintheta(2:end))];
-
-  % rehistogram -- probably inefficient, but whatever
-  countscurr = hist3([r{fly}(isnewbin);theta{fly}(isnewbin)]',{edges_r,edges_theta});
+  % histogram positions for the current fly
+  countscurr = hist3([r{fly};theta{fly}]',{edges_r,edges_theta});
   countscurr(:,end-1) = countscurr(:,end-1)+countscurr(:,end);
   countscurr(end-1,:) = countscurr(end-1,:)+countscurr(end,:);
   countscurr = countscurr(1:end-1,1:end-1);
   
   % normalize per fly
-  heatmap.n(fly) = nnz(isnewbin);
   heatmap.fracperfly(:,:,fly) = countscurr / heatmap.n(fly);
   
   % add to counts
   heatmap.counts = heatmap.counts + countscurr;
+  
 end
 
 % compute mean, std over flies
@@ -124,36 +115,36 @@ if doplot,
   if doresize,
     set(hfig,'Position',[4,1,1000,800]);
   end
-  hax = createsubplots(2,2,.05);
   heatmap.hfig = hfig;
+  hax = createsubplots(2,2,.05);
   heatmap.hax = hax;
   
   % heatmap of all flies' positions combined
   axes(hax(1)); %#ok<*MAXES>
   polarimagesc(edges_r,edges_theta,arena_center,heatmap.fracallfliespermm2);
   axis image;
-  title('Fraction of bin entries over all flies combined per mm^2');
+  title('Fraction of time spent in each bin for all flies combined per mm^2');
   colorbar;
 
   % heatmap of average fraction per fly
   axes(hax(2));
   polarimagesc(edges_r,edges_theta,arena_center,heatmap.meanfracperflypermm2);
   axis image;
-  title('Mean fraction of bin entries per fly per mm^2');
+  title('Mean fraction of time spent in each bin per fly per mm^2');
   colorbar;
 
   % heatmap of all flies' positions combined
   axes(hax(3));
   polarimagesc(edges_r,edges_theta,arena_center,log(heatmap.fracallfliespermm2));
   axis image;
-  title('Log-fraction of bin entries over all flies combined per mm^2');
+  title('Log-fraction of time spent in each bin for all flies combined per mm^2');
   colorbar;
 
   % heatmap of average fraction per fly
   axes(hax(4));
   polarimagesc(edges_r,edges_theta,arena_center,log(heatmap.meanfracperflypermm2));
   axis image;
-  title('Log-mean fraction of bin entries per fly per mm^2');
+  title('Log-mean fraction of time spent in each bin for per fly per mm^2');
   colorbar;
   
   linkaxes(hax);

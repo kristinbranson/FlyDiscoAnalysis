@@ -1,7 +1,7 @@
-function trx = FlyBowlCalibrate(expdir,protocol,varargin)
+function trx = FlyBowlRegister(expdir,protocol,varargin)
 
 requiredParams = {...
-  'calibrationMarkFileStr',...
+  'registrationMarkFileStr',...
   'movieFileStr',...
   'annFileStr',...
   'inTrxFileStr',...
@@ -9,7 +9,7 @@ requiredParams = {...
   };
 
 % load parameters
-params = FlyBowlProtocol2Params('FlyBowlCalibrate',protocol,varargin{:});
+params = FlyBowlProtocol2Params('FlyBowlRegister',protocol,varargin{:});
 paramsRead = ismember(requiredParams,params(1,:));
 if ~all(paramsRead),
   error(['The following required parameters were not read: ',sprintf('\n%s',requiredParams{~paramRead})]);
@@ -20,28 +20,28 @@ for i = 1:size(params,2),
 end
   
 % load parameters for mark detection
-detectCalibrationMarksParams = ...
-  FlyBowlProtocol2Params('detectCalibrationMarks',protocol,varargin{:});
+detectRegistrationMarksParams = ...
+  FlyBowlProtocol2Params('detectRegistrationMarks',protocol,varargin{:});
 
-% movie to calibrate
+% movie to register
 movieName = fullfile(expdir,movieFileStr);
 annName = fullfile(expdir,annFileStr);
 inTrxName = fullfile(expdir,inTrxFileStr);
 
 % get video size
-[readframe,nframes,fid,headerinfo] = get_readframe_fcn(movieName);
+[~,~,fid,headerinfo] = get_readframe_fcn(movieName);
 nr = headerinfo.nr;
 nc = headerinfo.nc;
 fclose(fid);
 clear readframe;
 
 % file to save results to
-calibrationMarkName = fullfile(expdir,calibrationMarkFileStr);
+registrationMarkName = fullfile(expdir,registrationMarkFileStr);
 outTrxName = fullfile(expdir,outTrxFileStr);
 
-% detect the calibration marks
-calibrationData = detectCalibrationMarks(detectCalibrationMarksParams{:},...
-  'annName',annName,'saveName',calibrationMarkName,...
+% detect the registration marks
+registrationData = detectRegistrationMarks(detectRegistrationMarksParams{:},...
+  'annName',annName,'saveName',registrationMarkName,...
   'nr',nr,'nc',nc);
 
 % apply to trajectories
@@ -57,10 +57,10 @@ for fly = 1:length(trx),
   yleft0 = trx(fly).y + 2*trx(fly).b.*sin(trx(fly).theta-pi/2);
   xright0 = trx(fly).x + 2*trx(fly).b.*cos(trx(fly).theta+pi/2);
   yright0 = trx(fly).y + 2*trx(fly).b.*sin(trx(fly).theta+pi/2);
-  [xnose1,ynose1] = calibrationData.registerfn(xnose0,ynose0);
-  [xtail1,ytail1] = calibrationData.registerfn(xtail0,ytail0);
-  [xleft1,yleft1] = calibrationData.registerfn(xleft0,yleft0);
-  [xright1,yright1] = calibrationData.registerfn(xright0,yright0);
+  [xnose1,ynose1] = registrationData.registerfn(xnose0,ynose0);
+  [xtail1,ytail1] = registrationData.registerfn(xtail0,ytail0);
+  [xleft1,yleft1] = registrationData.registerfn(xleft0,yleft0);
+  [xright1,yright1] = registrationData.registerfn(xright0,yright0);
   % compute the center as the mean of these four points
   x1 = (xnose1+xtail1+xleft1+xright1)/4;
   y1 = (ynose1+ytail1+yleft1+yright1)/4;
@@ -70,7 +70,7 @@ for fly = 1:length(trx),
   b1 = sqrt( (xleft1-xright1).^2 + (yleft1-yright1).^2 ) / 4;
   % compute the orientation from the nose and tail points only
   theta1 = atan2(ynose1-ytail1,xnose1-xtail1);
-  % store the calibrated positions
+  % store the registerd positions
   trx(fly).x_mm = x1;
   trx(fly).y_mm = y1;
   trx(fly).a_mm = a1;

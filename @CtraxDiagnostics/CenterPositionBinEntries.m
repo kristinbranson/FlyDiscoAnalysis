@@ -17,10 +17,10 @@ if isempty(nbins_x),
   nbins_x = nbins;
 end
 if isnan(xlim(1)),
-  xlim(1) = min([trx.x_mm]);
+  xlim(1) = min([obj.trx.x_mm]);
 end
 if isnan(xlim(2)),
-  xlim(2) = max([trx.x_mm]);
+  xlim(2) = max([obj.trx.x_mm]);
 end
 binwidth = (xlim(2)-xlim(1))/nbins_x;
 edges_x = linspace(xlim(1),xlim(2),nbins_x+1);
@@ -29,10 +29,10 @@ if isempty(nbins_y),
   nbins_y = nbins;
 end
 if isnan(ylim(1)),
-  ylim(1) = min([trx.y_mm]);
+  ylim(1) = min([obj.trx.y_mm]);
 end
 if isnan(ylim(2)),
-  ylim(2) = max([trx.y_mm]);
+  ylim(2) = max([obj.trx.y_mm]);
 end
 binheight = (ylim(2)-ylim(1))/nbins_y;
 edges_y = linspace(ylim(1),ylim(2),nbins_y+1);
@@ -88,12 +88,15 @@ heatmap.edges_y = edges_y;
 if doplot,
   
   % create the figure and subplots
+  doresize = isempty(hfig) || ~ishandle(hfig);
   if isempty(hfig),
     hfig = figure;
-    set(hfig,'position',[21 47 1000 825]);
   else
     figure(hfig);
     clf;
+  end
+  if doresize,
+    set(hfig,'Position',[21,1,1000,800]);
   end
   hax = createsubplots(2,2,.05);
   
