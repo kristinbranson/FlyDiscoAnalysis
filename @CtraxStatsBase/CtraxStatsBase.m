@@ -62,6 +62,25 @@ classdef CtraxStatsBase < handle
     histogrammeasurements_docomputestderr = true;
     histogrammeasurements_figpos = [1,1,1200,600];
     histogrammeasurements_lim_prctile = [1,99];
+
+    % HistogramTwoMeasurements parameters
+    histogramtwomeasurements_nbins = 100;
+    histogramtwomeasurements_nbins_x = [];
+    histogramtwomeasurements_nbins_y = [];
+    histogramtwomeasurements_doplot = true;
+    histogramtwomeasurements_averaging = 'perexp_perfly';
+    histogramtwomeasurements_jackknife = '';
+    histogramtwomeasurements_axesstyleparams = {'TickDir','out'};
+    histogramtwomeasurements_histstyleparams = {'linestyle','-','linewidth',4,'marker','.','color',zeros(1,3)};
+    histogramtwomeasurements_ploterrorbars = 'stderr';
+    histogramtwomeasurements_plotperfly = false;
+    histogramtwomeasurements_plotperexp = false;
+    histogramtwomeasurements_docomputestd = true;
+    histogramtwomeasurements_docomputestderr = true;
+    histogramtwomeasurements_figpos = [1,1,1200,600];
+    histogramtwomeasurements_lim_prctile_x = [1,99];
+    histogramtwomeasurements_lim_prctile_y = [1,99];
+
     
   end
   

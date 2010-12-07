@@ -1,14 +1,24 @@
 % TestCtraxStatsBase
 
 %% set up path
-addpath /groups/branson/home/bransonk/tracking/code/JCtrax/filehandling/
-addpath /groups/branson/home/bransonk/tracking/code/JCtrax/misc/
+
+if ispc,
+  addpath ../JCtrax/filehandling/
+  addpath ../JCtrax/misc/
+else
+  addpath /groups/branson/home/bransonk/tracking/code/JCtrax/filehandling/
+  addpath /groups/branson/home/bransonk/tracking/code/JCtrax/misc/
+end
 addpath ../FlyBowlDataCapture
 
 %% data
 
 % scratched polycarbonate
-rootdatadir = '/groups/branson/bransonlab/tracking_data/olympiad/FlyBowl/polycarbonate_scratched';
+if ispc,
+  rootdatadir = 'E:\Data\FlyBowl\polycarbonate_scratched';
+else
+  rootdatadir = '/groups/branson/bransonlab/tracking_data/olympiad/FlyBowl/polycarbonate_scratched';
+end
 expdir = 'DL-wildtype_TrpA_Rig1Plate01BowlC_20101112T152624';
 
 %% parameters
@@ -50,7 +60,15 @@ obj.histogrammeasurements_nbins = 25;
 
 warning('off','MATLAB:Axes:NegativeDataInLogAxis');
 
+%% histogramming two measurements parameters
+
+%% 
+
+obj.HistogramTwoMeasurements('x_mm','y_mm');
+
 %% histogram stuff
+
+if false,
 
 % fields to histogram
 fns_hist = {'absdtheta','velmag_ctr','du_ctr','velmag','du_cor','absdv_cor','flipdv_cor',...
@@ -125,3 +143,4 @@ for i = 1:length(fns_hist),
   pause(5);
 end
 
+end
