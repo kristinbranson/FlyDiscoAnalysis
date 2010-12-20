@@ -50,151 +50,30 @@ end
   'figpos',obj.histogrammeasurements_figpos,...
   'ylogscale',true);
 
-% take the intersection of specified flies and expdirs
+%% take the intersection of specified flies and expdirs
 
-% which expdirs will we look at?
-[didfind,ns] = ismember(expdirs,obj.expdir_bases);
-if ~all(didfind),
-  warning(['The following expdirs are not loaded: ',sprintf('%s ',expdirs{~didfind})]);
-end
-ns = ns(didfind);
-
-% which flies does this correspond to?
-allflies_perexp = [obj.movie2flies{ns}];
-flies = intersect(flies,allflies_perexp);
-ns = unique(obj.fly2movie(flies));
+[ns,flies] = obj.IntersectFliesExpdirs(flies,expdirs);
 nflies = length(flies);
+nexpdirs = length(ns);
+
 % save for returning
 res.ns = ns;
-res.nflies = nflies;
+res.flies = flies;
 
-% check that there is at least one experiment
-nexpdirs = length(ns);
+% check that there is at least one experiment selected
 if nexpdirs == 0,
   error('No experiments selected.');
 end
 
-% set jackknife method if not set
-if isempty(jackknife),
-  if nexpdirs > 1,
-    jackknife = 'perexp';
-  elseif nflies == 1,
-    jackknife = 'none';
-  else
-    jackknife = 'perfly';
-  end
-end
+%% set jackknife method if not set
 
-% to split over experiments, we need more than one experiment
-if nexpdirs == 1 && strcmpi(jackknife,'perexp'),
-  warning('Only one experiment selected, but jackknife = ''perexp''. Splitting over flies instead.');
-  jackknife = 'perfly';
-end
-% to split over flies, we need more than one fly
-if nflies == 1 && strcmpi(jackknife,'perfly'),
-  warning('Only one fly selected, but jackknife = ''perfly''. Splitting over frames not implemented. Not jackknifing.');
-  jackknife = 'none';
-end
+jackknife = SetJackKnifeMethod(jackknife,nflies,nexpdirs);
 res.jackknife = jackknife;
   
-% set edges if not input
-if isempty(edges),
-  if any(isnan(lim)),
-    minx = inf;
-    maxx = -inf;
-    % for now, don't worry about memory, store all the data
-    useprctile = any(~isnan(lim_prctile));
-    if useprctile,
-      xall = [];
-    end
-    for fly = flies,
-      if ~isempty(conditions),
-        x = obj.trx(fly).(fn)(conditions(obj.trx(fly)));
-      else
-        x = obj.trx(fly).(fn);
-      end
-      if ~isempty(outputfun),
-        x = outputfun(x);
-      end
-      badidx = isinf(x) | isnan(x);
-      minx = min(minx,min(x(~badidx)));
-      maxx = max(maxx,max(x(~badidx)));
-      if useprctile,
-        xall = [xall,x]; %#ok<AGROW>
-      end
-    end
-    if isnan(lim(1)),
-      if isnan(lim_prctile(1)),
-        lim(1) = minx;
-      else
-        lim(1) = prctile(xall,lim_prctile(1));
-      end
-    end
-    if isnan(lim(2)),
-      if isnan(lim_prctile(2)),
-        lim(2) = maxx;
-      else
-        lim(2) = prctile(xall,lim_prctile(2));
-      end
-    end
-  end
-  switch lower(binmode),
-    case 'linear',
-      edges = linspace(lim(1),lim(2),nbins+1);
-    case 'log',
-      % make sure >= 1
-      tmplim = lim - lim(1) + 1;
-      edges = exp(linspace(log(tmplim(1)),log(tmplim(2)),nbins+1));
-      edges = edges + lim(1) - 1;
-    case 'logabs',
-      % from lim(1) to 0, we do log spacing on neg value
-      % from 0 to lim(2), we do log spacing on pos value
-      
-      if lim(1) > 0,
-        % corner case: both are positive
-        tmplim = lim - lim(1) + 1;
-        edges = exp(linspace(log(tmplim(1)),log(tmplim(2)),nbins+1));
-        edges = edges + lim(1) - 1;
+%% set edges if not input
 
-      elseif lim(2) < 0,
-        % corner case: both are negative
-        tmplim = -lim;
-        tmplim = tmplim - tmplim(1) + 1;
-        edges = exp(linspace(log(tmplim(1)),log(tmplim(2)),nbins+1));
-        edges = fliplr(-(edges - lim(2) - 1));
-
-      else
-        % how much of data is below 0
-        fracneg = -lim(1) / (lim(2)-lim(1));
-        fracpos = 1 - fracneg;
-        % how many bins will we have on one side of 0
-        if fracneg > .5,
-          nbinsneg = floor(fracneg*nbins);
-          nbinspos = nbins - nbinsneg;
-        else
-          nbinspos = floor(fracpos*nbins);
-          nbinsneg = nbins - nbinspos;
-        end
-        % positive edges
-        tmplim = [0,lim(2)] + 1;
-        edgespos = exp(linspace(log(tmplim(1)),log(tmplim(2)),nbinspos+1));
-        edgespos = edgespos - 1;
-        % negative edges
-        tmplim = [0,-lim(1)];
-        tmplim = tmplim + 1;
-        edgesneg = exp(linspace(log(tmplim(1)),log(tmplim(2)),nbinsneg+1));
-        edgesneg = fliplr(-(edgesneg - 1));
-        edges = [edgesneg(1:end-1),edgespos];
-      end        
-        
-    otherwise,
-      error('Unknown binmode %s',binmode);
-  end
-else
-  nbins = length(edges) - 1;  
-end
-
-centers = (edges(1:end-1)+edges(2:end))/2;
+[edges,nbins,centers] = SelectHistEdges(obj,...
+  fn,edges,flies,conditions,nbins,lim,lim_prctile,outputfun,binmode);
 
 res.edges = edges;
 res.centers = centers;
@@ -226,27 +105,8 @@ end
 
 %% set up to index into data structures only computed for selected flies, selected exps
 
-% flyidx i corresponds to fly flies(i)
-fly2idx = sparse(ones(1,nflies),flies,1:nflies,1,obj.nflies);
-% expidx i corresponds to experiment ns(i)
-n2idx = sparse(ones(1,nexpdirs),ns,1:nexpdirs,1,obj.nexpdirs);
-
-expdirs = obj.expdir_bases(ns);
-movie2flies = cell(1,nexpdirs);
-nfliespermovie = zeros(1,nexpdirs);
-for i = 1:length(ns),
-  n = ns(i);
-  movie2flies{i} = full(fly2idx(obj.movie2flies{n}));
-  movie2flies{i}(movie2flies{i} == 0) = [];
-  nfliespermovie(i) = length(movie2flies{i});
-end
-fly2movie = full(n2idx(obj.fly2movie(flies)));
-
-% replace flies, ns with indexes
-%flies0 = flies;
-%ns0 = ns;
-%flies = 1:nflies;
-%ns = 1:nexpdirs;
+[expdirs,movie2flies,fly2movie,nfliespermovie] = ...
+  obj.SubsetDataStructs(flies,ns);
 
 %% per-fly histograms
 
@@ -258,88 +118,33 @@ fracperfly = bsxfun(@rdivide,countsperfly,Zperfly);
 %% compute frac using all the data
 
 % compute histogram using all the data
-frac = compute_frac(1:nflies,1:nexpdirs);
+frac = CtraxStatsBase.CollateHistograms(1:nflies,1:nexpdirs,...
+  countsperfly,movie2flies,...
+  fly2movie,averaging,fracperfly);
 
 res.frac = frac;
 
 %% jackknife to get an estimate of standard deviation
 
+jackknife_fun_handle = @(flies_in,ns_in) CtraxStatsBase.CollateHistograms(flies_in,ns_in,...
+  countsperfly,movie2flies,fly2movie,averaging,fracperfly);
+
 if docomputestd && ~strcmpi(jackknife,'none'),
 
-  jackknife_frac_mean = zeros(1,nbins);
-  jackknife_frac_std = zeros(1,nbins);
-  nsets = zeros(1,nbins);
-  switch jackknife,
-    case 'perfly',
-      for fly = 1:nflies,
-        % use only the current fly
-        frac_curr = compute_frac(fly,1:nexpdirs);
-        % make sure not nan
-        isdata = ~isnan(frac_curr);
-        nsets(isdata) = nsets(isdata) + 1;
-        % update mean, std estimates
-        jackknife_frac_mean(isdata) = jackknife_frac_mean(isdata) + frac_curr(isdata);
-        jackknife_frac_std(isdata) = jackknife_frac_std(isdata) + frac_curr(isdata).^2;
-      end
-    case 'perexp',
-      for n = 1:nexpdirs,
-        % use only the current exp
-        frac_curr = compute_frac(1:nflies,n);
-        % make sure not nan
-        isdata = ~isnan(frac_curr);
-        nsets(isdata) = nsets(isdata) + 1;
-        % update mean, stderr estimates
-        jackknife_frac_mean(isdata) = jackknife_frac_mean(isdata) + frac_curr(isdata);
-        jackknife_frac_std(isdata) = jackknife_frac_std(isdata) + frac_curr(isdata).^2;
-      end
-    otherwise
-      error('Unknown jackknife bagging unit %s',jackknife);
-  end
-  % normalize
-  jackknife_frac_mean = jackknife_frac_mean ./ nsets;
-  jackknife_frac_std = sqrt(jackknife_frac_std ./ nsets - jackknife_frac_mean.^2);
+  jackknife_frac_std = ...
+    CtraxStatsBase.JackKnifeStd(jackknife_fun_handle,nflies,nexpdirs,jackknife);
+  
 end
 
 res.jackknife_frac_std = jackknife_frac_std;
 
 %% jackknife to get an estimate of standard error
+
 if docomputestderr && ~strcmpi(jackknife,'none'),
 
-  jackknife_frac_mean = zeros(1,nbins);
-  jackknife_frac_stderr = zeros(1,nbins);
-  nsets = zeros(1,nbins);
-  switch jackknife,
-    case 'perfly',
-      for fly = 1:nflies,
-        % use all but the current fly
-        fliescurr = setdiff(1:nflies,fly);
-        frac_curr = compute_frac(fliescurr,1:nexpdirs);
-        % make sure not nan
-        isdata = ~isnan(frac_curr);
-        nsets(isdata) = nsets(isdata) + 1;
-        % update mean, stderr estimates
-        jackknife_frac_mean(isdata) = jackknife_frac_mean(isdata) + frac_curr(isdata);
-        jackknife_frac_stderr(isdata) = jackknife_frac_stderr(isdata) + frac_curr(isdata).^2;
-      end
-    case 'perexp',
-      for n = 1:nexpdirs,
-        % use only the current exp
-        expscurr = setdiff(1:nexpdirs,n);
-        frac_curr = compute_frac(1:nflies,expscurr);
-        % make sure not nan
-        isdata = ~isnan(frac_curr);
-        nsets(isdata) = nsets(isdata) + 1;
-        % update mean, stderr estimates
-        jackknife_frac_mean(isdata) = jackknife_frac_mean(isdata) + frac_curr(isdata);
-        jackknife_frac_stderr(isdata) = jackknife_frac_stderr(isdata) + frac_curr(isdata).^2;
-      end
-    otherwise
-      error('Unknown jackknife bagging unit %s',jackknife);
-  end
-  % normalize
-  jackknife_frac_mean = jackknife_frac_mean ./ nsets;
-  jackknife_frac_stderr = jackknife_frac_stderr ./ nsets - jackknife_frac_mean.^2;
-  jackknife_frac_stderr = sqrt(jackknife_frac_stderr .* (nsets-1)./nsets);
+  jackknife_frac_stderr = ...
+    CtraxStatsBase.JackKnifeStdErr(jackknife_fun_handle,nflies,nexpdirs,jackknife);
+  
 end
 
 res.jackknife_frac_stderr = jackknife_frac_stderr;
@@ -357,27 +162,7 @@ if doplot,
   plotinfo.jackknife = jackknife;
   
   %% get a handle for axes to plot in
-  if isempty(hax),
-    if isempty(hfig),
-      hfig = figure;
-      if ~isempty(figpos),
-        set(hfig,'Position',figpos);
-      end
-    elseif ishandle(hfig),
-      clf(hfig);
-    else
-      figure(hfig);
-      if ~isempty(figpos),
-        set(hfig,'Position',figpos);
-      end
-    end
-    hax = get(hfig,'CurrentAxes');
-    if isempty(hax),
-      hax = axes('parent',hfig);
-    end
-  else
-    hfig = get(hax,'Parent');
-  end
+  [hax,hfig] = get_axes(hax,hfig,'figpos',figpos);
   cla(hax);
   hold(hax,'on');
   set(hax,'UserData',plotinfo);
@@ -401,7 +186,7 @@ if doplot,
   
   % which flies, exps will be in the legend
   if nexpdirs > 1,
-    legendexps = [1,nexpdirs];
+    legendexps = 1:nexpdirs;
   else
     legendexps = 1;
   end
@@ -433,7 +218,12 @@ if doplot,
       errinfo.n = nexpdirs;
     end
     
-    herr = patch([centers,fliplr(centers)],[frac-err,fliplr(frac+err)],.8*ones(1,3),...
+    if ylogscale,
+      minv = min(frac(:))/2;
+    else
+      minv = 0;
+    end
+    herr = patch([centers,fliplr(centers)],max(minv,[frac-err,fliplr(frac+err)]),.8*ones(1,3),...
       'parent',hax,'edgecolor','none','tag',sprintf('err_%s',ploterrorbars),'userdata',errinfo);
     if ~isempty(errstyleparams),
       set(herr,errstyleparams{:});
@@ -515,7 +305,8 @@ if doplot,
     hperexphist = zeros(1,nexpdirs);
     for n = 1:nexpdirs,
       expinfo = struct('n',ns(n),'flies',flies(movie2flies{n}),'expdir',expdirs{n},'ndataperfly',Zperfly(movie2flies{n}));
-      fracperexpcurr = compute_frac(1:nflies,n);
+      fracperexpcurr = CtraxStatsBase.CollateHistograms(1:nflies,n,...
+        countsperfly,movie2flies,fly2movie,averaging,fracperfly);
       % update limits
       minv = min(minv,min(fracperexpcurr));
       maxv = max(maxv,max(fracperexpcurr));
@@ -616,77 +407,4 @@ if doplot,
   hlegend = legend(hax,legend_handles,legend_strings,'interpreter','none',legendstyleparams{:});
   res.hlegend = hlegend;
   
-end
-
-
-
-function my_frac = compute_frac(my_flies,my_ns)
-
-  % take the intersection of the specified flies and experiments
-  my_allflies_perexp = [movie2flies{my_ns}];
-  my_flies = intersect(my_flies,my_allflies_perexp);
-  my_ns = unique(fly2movie(my_flies));
-  
-  switch lower(averaging),
-    case 'allexps_allflies',
-      
-      % treat all frames of data the same: just add up all the counts
-      my_counts = sum(countsperfly(my_flies,:),1);
-      my_frac = my_counts / sum(my_counts);
-      
-    case 'allexps_perfly',
-      
-      % get per-fly fracs, but treat all flies in all experiments the same
-      my_frac = nanmean(fracperfly(my_flies,:),1);
-      
-    case 'perexp_allflies',
-      
-      % get per-exp fracs, but treat all frames within an experiment the
-      % same
-      
-      % loop over experiments
-      my_frac = zeros(1,nbins);
-      my_nexps = zeros(1,nbins);
-      for my_n = my_ns(:)',
-        % which flies in this experiment
-        my_flies_curr = intersect(my_flies,movie2flies{my_n});
-        % frac for these flies
-        my_frac_curr = sum(countsperfly(my_flies_curr,:),1);
-        my_frac_curr = my_frac_curr / sum(my_frac_curr);
-        % only include good data
-        my_isdata = ~isnan(my_frac_curr);
-        my_frac(my_isdata) = my_frac(my_isdata) + my_frac_curr(my_isdata);
-        my_nexps(my_isdata) = my_nexps(my_isdata) + 1;
-      end
-      % normalize
-      my_frac = my_frac ./ my_nexps;
-      
-    case 'perexp_perfly',
-      
-      % loop over experiments
-      my_frac = zeros(1,nbins);
-      my_nexps = zeros(1,nbins);
-      for my_n = my_ns(:)',
-        
-        % which flies in this experiment
-        my_flies_curr = intersect(my_flies,movie2flies{my_n});
-        
-        % average histogram for this experiment
-        my_frac_curr = nanmean(fracperfly(my_flies_curr,:),1);
-        
-        % only include good data
-        my_isdata = ~isnan(my_frac_curr);
-        my_frac(my_isdata) = my_frac(my_isdata) + my_frac_curr(my_isdata);
-        my_nexps(my_isdata) = my_nexps(my_isdata) + 1;
-        
-      end
-      % normalize
-      my_frac = my_frac ./ my_nexps;
-      
-    otherwise
-      error('Unknown averaging method %s',averaging);
-  end
-  
-end
-
 end

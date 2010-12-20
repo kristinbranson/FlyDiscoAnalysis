@@ -8,14 +8,18 @@ fns = {'dtheta','du_ctr','dv_ctr',...
   'dv_cor','velmag_ctr','velmag','accmag','signdtheta','absdv_cor',...
   'flipdv_cor','absdtheta','d2theta','absd2theta','smooththeta',...
   'smoothdtheta','abssmoothdtheta','smoothd2theta','abssmoothd2theta',...
-  'phi','yaw','absyaw'};
+  'phi','yaw','absyaw',...
+  'du_tail','dv_tail','absdu_tail','absdv_tail','dtheta_tail',...
+  'absdtheta_tail','phisideways','absphisideways'};
 
 isfile = exist('speed_file','var');
 
 if isfile && exist(speed_file,'file'),
+  fprintf('Loading speed measurements from file %s\n',speed_file);
   load(speed_file,'speed','units');
 else
   
+  fprintf('Computing speed measurements for file %s\n',speed_file);
   speed = structallocate(fns,[1,nflies]);
   units = struct;
   
@@ -97,6 +101,8 @@ else
     % acceleration magnitude
     if trx(fly).nframes < 2,
       speed(fly).accmag = [];
+    elseif trx(fly).nframes == 2,
+      speed(fly).accmag = 0;
     else
       % speed from frame 1 to 2 minus speed from 2 to 3 / time from 2 to 3
       tmp = sqrt(diff(dx./trx(fly).dt).^2 + diff(dy./trx(fly).dt).^2)./trx(fly).dt(2:end);
@@ -116,6 +122,8 @@ else
     units.absdtheta = parseunits('rad/s');
     if trx(fly).nframes < 2,
       speed(fly).d2theta = [];
+    elseif trx(fly).nframes == 2,
+      speed(fly).d2theta = 0;
     else
       speed(fly).d2theta = [0,modrange(diff(speed(fly).dtheta),-pi,pi)]./trx(fly).dt;
     end
@@ -137,6 +145,9 @@ else
     units.abssmoothdtheta = parseunits('rad/s');
     if trx(fly).nframes < 2,
       speed(fly).smoothd2theta = [];
+    elseif trx(fly).nframes == 2,
+      speed(fly).smoothd2theta = 0;
+
     else
       speed(fly).smoothd2theta = [0,modrange(diff(speed(fly).smoothdtheta),-pi,pi)]./trx(fly).dt;
     end
@@ -163,12 +174,67 @@ else
     units.yaw = parseunits('rad');
     speed(fly).absyaw = abs(speed(fly).yaw);
     units.absyaw = parseunits('rad');
+    
+    % crabwalk features
+    
+    % location of tail
+    tailx = trx(fly).x_mm + 2*cos(-trx(fly).theta).*trx(fly).a_mm;
+    taily = trx(fly).y_mm + 2*sin(-trx(fly).theta).*trx(fly).a_mm;
+    % location of nose
+    nosex = trx(fly).x_mm + 2*cos(trx(fly).theta).*trx(fly).a_mm;
+    nosey = trx(fly).y_mm + 2*sin(trx(fly).theta).*trx(fly).a_mm;
+
+    dx = diff(tailx);
+    dy = diff(taily);
+
+    % project onto body coords
+    if trx(fly).nframes < 2,
+      trx(fly).du_tail = [];
+      trx(fly).dv_tail = [];
+    else
+      trx(fly).du_tail = dx.*cos(trx(fly).theta(1:end-1)) + dy.*sin(trx(fly).theta(1:end-1))./trx(fly).dt;
+      trx(fly).dv_tail = dx.*cos(trx(fly).theta(1:end-1)+pi/2) + dy.*sin(trx(fly).theta(1:end-1)+pi/2)./trx(fly).dt;
+    end
+    trx(fly).units.du_tail = parseunits('mm/s');
+    trx(fly).units.dv_tail = parseunits('mm/s');
+    trx(fly).absdu_tail = abs(trx(fly).du_tail);
+    trx(fly).units.absdu_tail = parseunits('mm/s');
+    trx(fly).absdv_tail = abs(trx(fly).dv_tail);
+    trx(fly).units.absdv_tail = parseunits('mm/s');
+    
+    % compute the rotation of nose around mean tail location
+
+    if trx(fly).nframes < 2,
+      trx(fly).dtheta_tail = [];
+    else
+      meantailx = (tailx(1:end-1)+tailx(2:end))/2;
+      meantaily = (taily(1:end-1)+taily(2:end))/2;
+      anglenose1 = atan2(nosey(1:end-1)-meantaily,nosex(1:end-1)-meantailx);
+      anglenose2 = atan2(nosey(2:end)-meantaily,nosex(2:end)-meantailx);
+      trx(fly).dtheta_tail = modrange(anglenose2-anglenose1,-pi,pi)./trx(fly).dt;
+    end
+    trx(fly).units.dtheta_tail = parseunits('rad/s');
+    trx(fly).absdtheta_tail = abs(trx(fly).dtheta_tail);
+    trx(fly).units.absdtheta_tail = parseunits('rad/s');
+    
+    % how sideways is the velocity direction?
+    if trx(fly).nframes < 2,
+      trx(fly).phisideways = [];
+    else
+      phi = atan2(dy,dx);
+      trx(fly).phisideways = modrange(phi-trx(fly).theta(1:end-1),-pi/2,pi/2);
+    end
+    trx(fly).units.phisideways = parseunits('rad');
+    trx(fly).absphisideways = abs(trx(fly).phisideways);
+    trx(fly).units.absphisideways = parseunits('rad');
+    
   end
   
   
   
   
   if isfile,
+    fprintf('Saving speed measurements to file %s\n',speed_file);
     save(speed_file,'speed','units');
   end
 end

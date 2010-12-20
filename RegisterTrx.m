@@ -79,6 +79,9 @@ for fly = 1:length(trx),
     trx(fly).dt = repmat(1/trx(fly).fps,[1,trx(fly).nframes-1]);
   end
 
+  trx(fly).fps = 1/mean(trx(fly).dt);
+  trx(fly).pxpermm = 1 / registrationData.scale;
+  
 end
 
 if ~isempty(outRegistrationFile),

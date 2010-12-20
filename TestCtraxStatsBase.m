@@ -68,15 +68,17 @@ obj.HistogramTwoMeasurements('x_mm','y_mm');
 
 %% histogram stuff
 
-if false,
+if true,
 
 % fields to histogram
-fns_hist = {'absdtheta','velmag_ctr','du_ctr','velmag','du_cor','absdv_cor','flipdv_cor',...
-  'accmag','abssmoothdtheta','yaw','absyaw','dist2wall','wallangle','angle2wall'};
+fns_hist = {'velmag','du_cor','absdv_cor','absdtheta','absyaw','dist2wall','ddist2wall','angle2wall','dangle2wall'};
 
 % special bin mode
-binmode_log = {'absdtheta','velmag_ctr','velmag','absdv_cor','accmag','abssmoothdtheta','absyaw','dist2wall'};
-binmode_logabs = {'du_ctr','du_cor','flipdv_cor','yaw'};
+%binmode_log = {'velmag','absdv_cor','absdtheta','absyaw','dist2wall','angle2wall'};
+binmode_log = {};
+binmode_logabs = {};
+               
+%binmode_logabs = {'du_cor','ddist2wall','dangle2wall'};
 
 % special output functions
 outputfun = struct;
@@ -87,15 +89,13 @@ zerolim = [binmode_log,{'angle2wall'}];
 
 % special lim_prctile
 lim_prctile = struct;
-lim_prctile.abssmoothdtheta = [0,95];
 lim_prctile.absdv_cor = [0,95];
-lim_prctile.flipdv_cor = [5,95];
 lim_prctile.absdtheta = [0,95];
 
 % linear scale for y
 ylinearscale = {};
 
-hfig = 1;
+hfig = 10;
 for i = 1:length(fns_hist),
 
   fn = fns_hist{i};
@@ -136,7 +136,7 @@ for i = 1:length(fns_hist),
   end
   obj.HistogramMeasurement(fn,'hfig',hfig,'binmode',binmode_curr,...
     'outputfun',outputfun_curr,'lim',lim_curr,'lim_prctile',lim_prctile_curr,...
-    'ylogscale',ylogscale_curr);
+    'ylogscale',ylogscale_curr,'ploterrorbars','std');
 
   hfig = hfig + 1;
   

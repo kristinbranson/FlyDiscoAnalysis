@@ -6,6 +6,32 @@ classdef CtraxStatsBase < handle
     
     % base name of ann file
     annfilestr = 'movie.ufmf.ann';
+
+    % base name of metadata xml file
+    metadatafilestr = 'Metadata.xml';
+
+    % base name of temperature stream
+    temperaturefilestr = 'temperature.txt';
+    
+    % FBDC parameters file regexp
+    fbdcparamsfileregexp = 'FlyBowlDataCaptureParams*.txt';
+
+    % derived, per-frame measurement directory, relative to experiment directory
+    perframedir = 'perframe';
+    
+    % directory containing histograms of per-frame measurements, relative
+    % to experiment directory
+    histperframedir = 'hist_perframe';
+   
+    % directory containing summary statistics of per-frame measurements,
+    % relative to experiment directory
+    statsperframedir = 'stats_perframe';
+    
+    % quick stats
+    quickstatsfilestr = 'QuickStats.txt';
+    
+    % ufmf diagnostics
+    ufmfdiagnosticsfilestr = 'ufmf_diagnostics.txt';
     
     % base name of mat file
     ctraxfilestr = 'ctrax_results.mat';
@@ -28,6 +54,9 @@ classdef CtraxStatsBase < handle
 
     % parameters for registration
     detectregistrationparams = struct;
+    
+    % where the bowl marker should be, based on bowl
+    bowl2MarkerAngle = 3*pi/4;
     
     % if NOWRITEACCESS, we aren't able to write to the experiment directories
     % temporarily, data will be in resultsdir
@@ -81,7 +110,6 @@ classdef CtraxStatsBase < handle
     histogramtwomeasurements_lim_prctile_x = [1,99];
     histogramtwomeasurements_lim_prctile_y = [1,99];
 
-    
   end
   
   properties (SetAccess = private, GetAccess = public)
@@ -103,6 +131,11 @@ classdef CtraxStatsBase < handle
     closestflyfiles = {};
     speedfiles = {};
     registrationfiles = {};
+    metadatafiles = {};
+    temperaturefiles = {};
+    fbdcparamsfiles = {};
+    quickstatsfiles = {};
+    ufmfdiagnosticsfiles = {};
     
     % function handle for reading frames from current movie
     readframes = {};
@@ -157,6 +190,15 @@ classdef CtraxStatsBase < handle
     didComputeLandmarkMeasurements = false;
     didComputeClosestFlyMeasurements = false;
     didComputeSpeedMeasurements = false;
+    
+    % metadata read from the metadata xml file
+    metadata = {};
+    
+    % temperature streams
+    temperaturestreams = {};
+
+    registrationData = {};
+    
   end
   
   properties (Hidden = true)
@@ -211,7 +253,7 @@ classdef CtraxStatsBase < handle
     % obj.RemoveExpDir(expdir)
     % Removes the trajectories and all other data associated with experiment 
     % expdir to the data represented by obj. The movie file associated with
-    % expdir is also closed. 
+    % expdir is also closed.
     RemoveExpDir(obj,expdir)
     
     % obj.RemoveAllExpDirs()
@@ -284,9 +326,103 @@ classdef CtraxStatsBase < handle
     % experiments will be deleted.
     DeleteSpeedMeasurementFiles(obj,expdirs)
     
+    % ns = obj.expdir2n(expdirs)
+    % Returns the indices corresponding to the input experiment
+    % directories. Warnings are produced for experiments that are not
+    % currently loaded
+    ns = expdir2n(obj,expdirs)
+    
+    % [ns,flies] = obj.IntersectFliesExpdirs(flies,expdirs)
+    % Returns the flies, experiments that are both within FLIES and
+    % EXPDIRS. 
+    [ns,flies] = IntersectFliesExpdirs(obj,flies,expdirs)
+
+    % [edges,nbins,centers] = obj.SelectHistEdges(fn,flies,conditions,edges,nbins,...
+    % lim,lim_prctile,outputfun,binmode)
+    % Selects the edges based on all the information given in the input
+    % arguments. 
+    % If EDGES is not empty, then EDGES is used.
+    % Otherwise, it sets the lowest edge to LIM(1) if LIM(1) is not NaN. 
+    % Otherwise, it sets the lowest edge to the LIM_PRCTILE(1) of all data
+    % corresponding to field FN, flies FLIES, conditions CONDITIONS, and
+    % output function OUTPUTFUN. 
+    % Similarly, the highest edge is set to LIM(1) if LIM(1) is not NaN. 
+    % Otherwise, it sets the highest edge to the LIM_PRCTILE(2) of all data
+    % corresponding to field FN, flies FLIES, conditions CONDITIONS, and
+    % output function OUTPUTFUN. 
+    % It selects edges between these bounds according to BINMODE, which is
+    % either 'linear', 'log' (log binning), or 'logabs' (log binning in
+    % both directions from zero). 
+    [edges,nbins,centers] = SelectHistEdges(obj,fn,flies,conditions,edges,nbins,...
+      lim,lim_prctile,outputfun,binmode)
+    
+    % metadata = obj.getMetaDataField(fns,['expdir',expdirs],['n',ns])
+    % Get metadata field(s) FNS for the specified experiment(s) EXPDIRS or 
+    % NS. If multiple fields are specified or multiple experiments are
+    % specified, the result will be a cell of size nexpdirs x nfields.
+    % Either the expdirs or ns must be specified. If both are specified,
+    % then ns is used. 
+    metadata = getMetaDataField(obj,fns,varargin)
+
+    % [ns,expdirs] = obj.Metadata2Exp(fns,conditions)
+    % Find all experiments where the conditions specified by fns and
+    % conditions are satisfied. For each field in fns, we check if
+    % the corresponding element in conditions holds. conditions can either
+    % be a function handle, cell of possible char values, array of possible
+    % number values, single string, single number. 
+    [ns,expdirs] = Metadata2Exp(obj,fns,conditions)
+    
+    % res = obj.PlotTemperatureStreams(['param1',value1],...)
+    % Optional arguments:
+    % 'n': Index(es) of the experiments to plot. Default: 1:obj.nexpdirs
+    % 'expdir': Experiment directory(s) to plot. 'n' takes precedence over
+    % 'expdir' if 'n' is input. Default: []
+    % 'condition': Function handle which is applied to the metadata for
+    % each experiment specified by 'n'/'expdir'. Only experiments for which
+    % condition returns true are plotted. If empty, then no condition is
+    % applied. Default: []
+    % 'hax', 'hfig': Handles of axes, figure to plot into. These values are
+    % fed into get_axes to either select existing axes or create new axes
+    % as necessary. Default: hax = [], hfig = []
+    % 'figpos': Position to set the figure to. If empty, nothing is done to
+    % the figure position. Default: []
+    % 'plotstyleparams': Cell containing extra parameters to be fed into
+    % plotting. Default: {}
+    % 'condition2type':
+    % 'legendstyleparams'
+    res = PlotTemperatureStreams(obj,varargin)
+    res = PlotTrajectories(obj,varargin)
+    [bkgdImage,xdata,ydata] = getBkgdImage(obj,varargin)
+    
+    PlotTimeSeries(obj,fly,fnsplot,varargin)
+    
   end
   
   methods (Static)
+    
+    % [hfig,hax,nfigs,figi_main,figi_perexp,figi_perfly,...
+    % nax,axi_hist,axi_pluserror,axi_minuserror,axi_perexp,axi_perfly] = ...
+    % CtraxStatsBase.Create2DHistogramFigures(hax,hfig,nflies,nexpdirs,...
+    % doplotperexp,doplotperfly,doploterrorbars,figpos)
+    % Returns handles to figures, axes required for plotting 2D histograms.
+    % It uses axes in HAX, HFIG as possible, otherwise it creates new axes,
+    % figures based on number required by NFLIES, NEXPDIRS, DOPLOTPEREXP,
+    % DOPLOTPERFLY, DOPLOTERRORBARS.
+    [hfig,hax,nfigs,figi_main,figi_perexp,figi_perfly,...
+      nax,axi_hist,axi_pluserror,axi_minuserror,axi_perexp,axi_perfly] = ...
+      Create2DHistogramFigures(hax,hfig,nflies,nexpdirs,...
+      doplotperexp,doplotperfly,doploterrorbars,figpos,docla)
+    
+    [frac,varargout] = CollateHistograms(flies,ns,countsperfly,movie2flies,...
+      fly2movie,averaging,fracperfly)
+    
+    [jackknife_stat_std,jackknife_stat_mean] = ...
+      JackKnifeStd(statfun,nflies,nexpdirs,jackknife)
+    
+    [jackknife_stat_stderr,jackknife_stat_mean] = ...
+      JackKnifeStdErr(statfun,nflies,nexpdirs,jackknife)
+
+
     
   end
   

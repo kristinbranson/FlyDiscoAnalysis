@@ -1,7 +1,9 @@
 classdef CtraxDiagnostics < CtraxStatsBase
 
   properties
-            
+    
+    ExpBGFGModelMatFile = '';
+    
   end
   
   properties (SetAccess = private, GetAccess = public)
@@ -32,10 +34,7 @@ classdef CtraxDiagnostics < CtraxStatsBase
     end  
     
     heatmap = CenterPositionHeatmap(obj,varargin)
-    heatmap = CenterPositionBinEntries(obj,varargin)
     heatmap = CenterPositionHeatmapPolar(obj,varargin)
-    heatmap = CenterPositionBinEntriesPolar(obj,varargin)
-    
     heatmap = BowlAngleBias(obj,varargin)
     
   end

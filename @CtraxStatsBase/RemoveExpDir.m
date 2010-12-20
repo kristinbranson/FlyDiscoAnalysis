@@ -27,6 +27,9 @@ end
 if numel(obj.moviefiles) >= n,
   obj.moviefiles(n) = [];
 end
+if numel(obj.metadatafiles) >= n,
+  obj.metadatafiles(n) = [];
+end
 if numel(obj.annfiles) >= n,
   obj.annfiles(n) = [];
 end
@@ -69,6 +72,16 @@ if numel(obj.headerinfos) >= n,
   obj.headerinfos(n) = [];
 end
 
+% metadata
+if numel(obj.metadata) >= n,
+  obj.metadata(n) = [];
+end
+
+% registration data
+if numel(obj.registrationData) >= n,
+  obj.registrationData(n) = [];
+end
+
 % movie frame size
 if numel(obj.nrs) >= n,
   obj.nrs(n) = [];
@@ -91,18 +104,24 @@ if numel(obj.anns) >= n,
   obj.anns(n) = [];
 end
 
-% current trajectories
 if numel(obj.movie2flies) >= n,
   flies = obj.movie2flies{n};
+  nfliescurr = length(flies);
+else
+  flies = [];
+  nfliescurr = [];
+end
+
+% current trajectories
+if numel(obj.movie2flies) >= n,
   obj.trx(flies) = [];
 
   % index maps
   obj.fly2movie(flies) = [];
 
   % indexes for everything after current movie need to be decremented
-  nfliescurr = length(flies);
   for i = n+1:obj.nexpdirs,
-    obj.movie2fly{i} = obj.movie2fly{i} - nfliescurr;
+    obj.movie2flies{i} = obj.movie2flies{i} - nfliescurr;
   end
   obj.movie2flies(n) = [];
 end

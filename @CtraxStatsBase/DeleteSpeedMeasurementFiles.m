@@ -10,11 +10,7 @@ function DeleteSpeedMeasurementFiles(obj,expdirs)
 if ~exist('expdirs','var'),
   ns = 1:obj.nexpdirs;
 else
-  [didfind,ns] = ismember(expdirs,obj.expdirs);
-  for i = find(~didfind),
-    warning('Expdir %s not loaded.\n',expdirs{i});
-  end
-  ns = ns(didfind);
+  ns = obj.expdir2n(expdirs);
 end
 
 fprintf('Deleting the following speed measurment files:\n');
@@ -25,3 +21,5 @@ for n = ns,
   fprintf('  %s\n',obj.speedfiles{n});
   delete(obj.speedfiles{n});
 end
+
+obj.didComputeClosestFlyMeasurements = false;

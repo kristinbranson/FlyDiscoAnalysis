@@ -11,11 +11,7 @@ function DeleteClosestFlyMeasurementFiles(obj,expdirs)
 if ~exist('expdirs','var'),
   ns = 1:obj.nexpdirs;
 else
-  [didfind,ns] = ismember(expdirs,obj.expdirs);
-  for i = find(~didfind),
-    warning('Expdir %s not loaded.\n',expdirs{i});
-  end
-  ns = ns(didfind);
+  ns = obj.expdir2n(expdirs);
 end
 
 fprintf('Deleting the following closestfly measurment files:\n');

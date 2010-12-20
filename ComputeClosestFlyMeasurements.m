@@ -16,9 +16,11 @@ fns = {'dcenter','closestfly_center','dnose2ell','closestfly_nose2ell',...
 isfile = exist('closestfly_file','var');
 
 if isfile && exist(closestfly_file,'file'),
+  fprintf('Loading closest fly measurements from file %s\n',closestfly_file);
   load(closestfly_file,'closestfly','units');
 else
 
+  fprintf('Computing closest fly measurements for file %s\n',closestfly_file);
   closestfly = structallocate(fns,[1,nflies]);
   
   for fly1 = 1:nflies,
@@ -222,6 +224,7 @@ else
   end
   
   if isfile,
+    fprintf('Saving closest fly measurements to file %s\n',closestfly_file);
     save(closestfly_file,'closestfly','units');
   end
 end

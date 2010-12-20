@@ -112,149 +112,17 @@ Zperfly = heatmap.Zperfly;
 
 if doplot,
   
-  %% create figures and axes
-
-  % index within hfig
-  nfigs = 1;
-  figi_main = nfigs;
   doplotperexp = plotperexp && nexpdirs > 1;
-  if doplotperexp,
-    nfigs = nfigs + 1;
-    figi_perexp = nfigs;
-  end
   doplotperfly = plotperfly && nflies > 1;
-  if doplotperfly,
-    nfigs = nfigs + 1;
-    figi_perfly = nfigs;
-  end
-  
-  % index within hax
-  nax = 1;
-  axi_hist = nax;
   doploterrorbars = ~strcmpi(ploterrorbars,'none') && ~strcmpi(jackknife,'none');
-  if doploterrorbars,
-    nax = nax+1;
-    axi_pluserror = nax;
-    nax = nax+1;
-    axi_minuserror = nax;
-  end
-  if doploterrorbars,
-    nax_main = 3;
-    axi_main = [axi_hist,axi_pluserror,axi_minuserror];
-  else
-    nax_main = 1;
-    axi_main = axi_hist;
-  end
-  if doplotperexp,
-    axi_perexp = nax + (1:nexpdirs);
-    nax = nax + nexpdirs;
-  end
-  if doplotperfly,
-    axi_perfly = nax + (1:nflies);
-    nax = nax + nflies;
-  end
+  docla = true;
   
-  % get an axis for the main histogram, error hists
-  % if hax does not exist for all of these, then create all of them
-  if numel(hax) < max(axi_main) || ...
-      ~all(ishandle(hax(axi_main))),
-    % if no ax, check for figure
-    if numel(hfig) < figi_main,
-      % if no figure, create
-      hfig(figi_main) = figure;
-      if ~isempty(figpos),
-        set(hfig(figi_main),'Position',figpos);
-      end
-    elseif ishandle(hfig(figi_main)),
-      % there is a figure, so clear it
-      clf(hfig(figi_main));
-      figpos = get(hfig(figi_main),'Position');
-    else
-      % handle input, but figure does not exist, so make it
-      figure(hfig(figi_main));
-      if ~isempty(figpos),
-        set(hfig(figi_main),'Position',figpos);
-      end
-    end
-    % create the axes
-    hax_main = createsubplots(1,nax_main,.05,hfig(figi_main));
-    if doploterrorbars,
-      hax_main = hax_main([2,1,3]);
-    end
-    hax(axi_main) = hax_main;
-  else
-    hfig(figi_main) = get(hax(axi_hist),'Parent');
-  end
+  %% create figures and axes
+  [hfig,hax,nfigs,figi_main,figi_perexp,figi_perfly,...
+    nax,axi_hist,axi_pluserror,axi_minuserror,axi_perexp,axi_perfly] = ...
+    CraxStatsBase.Create2DHistogramFigures(hax,hfig,nflies,nexpdirs,...
+    doplotperexp,doplotperfly,doploterrorbars,figpos,docla);
   
-  if doplotperexp,
-    % get axes for exps
-    % if hax does not exist for all of these, then create all of them
-    if ~isempty(figpos),
-      figpos_perexp = get(hfig(figi_main),'Position');
-      figpos_perexp(4) = figpos_perexp(4)*nax_main/nexpdirs;
-    end
-    if numel(hax) < max(axi_perexp) || ~all(ishandle(hax(axi_perexp))),
-      % if no ax, check for figure
-      if numel(hfig) < figi_perexp,
-        % if no figure, create
-        hfig(figi_perexp) = figure;
-        if ~isempty(figpos),
-          set(hfig(figi_perexp),'Position',figpos_perexp);
-        end
-      elseif ishandle(hfig(figi_perexp)),
-        % there is a figure, so clear it
-        clf(hfig(figi_perexp));
-      else
-        % handle input, but figure does not exist, so make it
-        figure(hfig(figi_perexp));
-        if ~isempty(figpos),
-          set(hfig(figi_perexp),'Position',figpos_perexp);
-        end
-      end
-      % create the axes
-      hax(axi_perexp) = createsubplots(1,nexpdirs,.05,hfig(figi_perexp));
-    else
-      hfig(figi_perexp) = get(hax(axi_perexp(1)),'Parent');
-    end
-  end
-  
-  if doplotperfly,
-    % get axes for flies
-    % if hax does not exist for all of these, then create all of them
-    if ~isempty(figpos),
-      figpos_perfly = get(hfig(figi_main),'Position');
-      figpos_perfly(4) = figpos_perfly(4)*nax_main/nflies;
-    end
-    if numel(hax) < max(axi_perfly) || ~all(ishandle(hax(axi_perfly))),
-      % if no ax, check for figure
-      if numel(hfig) < figi_perfly,
-        % if no figure, create
-        hfig(figi_perfly) = figure;
-        if ~isempty(figpos),
-          set(hfig(figi_perfly),'Position',figpos_perfly);
-        end
-      elseif ishandle(hfig(figi_perfly)),
-        % there is a figure, so clear it
-        clf(hfig(figi_perfly));
-      else
-        % handle input, but figure does not exist, so make it
-        figure(hfig(figi_perfly));
-        if ~isempty(figpos),
-          set(hfig(figi_perfly),'Position',figpos_perfly);
-        end
-      end
-      % create the axes
-      hax(axi_perfly) = createsubplots(1,nflies,[[.01,.01];[.1,.1]],hfig(figi_perfly));
-    else
-      hfig(figi_perfly) = get(hax(axi_perfly(1)),'Parent');
-    end
-  end
-  
-  % clear the axes
-  for axi = 1:nax,
-    cla(hax(axi));
-  end  
-
   % store
   heatmap.plotparams.hfig = hfig;
   heatmap.plotparams.hax = hax;
@@ -354,7 +222,7 @@ if doplot,
       maxv = max(maxv,max(im(~isinf(im))));
       hperexphist(n) = polarimagesc(edges_r,edges_theta,obj.arena_center_mm,im',...
         'parent',hax(axi_perexp(n)),'tag',sprintf('exp%d',n),'userdata',expinfo);
-      title(hax(axi_perexp(n)),expdirs{n},'interpreter','none');
+      title(hax(axi_perexp(n)),expdirs{n}(end-20:end),'interpreter','none');
     end
     heatmap.plotparams.hperexphist = hperexphist;
     
