@@ -1,8 +1,15 @@
 %% set up path
-addpath /groups/branson/home/bransonk/tracking/code/JCtrax/filehandling/
-addpath /groups/branson/home/bransonk/tracking/code/JCtrax/misc/
-addpath ../FlyBowlDataCapture
-addpath(genpath('../FlyBowlDataCapture/jfrc_metadata_tools/src'));
+if ispc,
+  addpath ../JCtrax/filehandling/
+  addpath ../JCtrax/misc/
+  addpath ../FlyBowlDataCapture
+  addpath(genpath('../FlyBowlDataCapture/jfrc_metadata_tools/src'));
+else
+  addpath /groups/branson/home/bransonk/tracking/code/JCtrax/filehandling/
+  addpath /groups/branson/home/bransonk/tracking/code/JCtrax/misc/
+  addpath ../FlyBowlDataCapture
+  addpath(genpath('../FlyBowlDataCapture/jfrc_metadata_tools/src'));
+end
 
 %% data
 
