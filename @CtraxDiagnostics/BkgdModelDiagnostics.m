@@ -12,7 +12,9 @@ bkgd_diagnostics = struct;
   linestyleparams_histfracframesisback,...
   edges_llr,nbins_llr,lim_llr,clim_llr,...
   linestyleparams_llr,...
-  linestyleparams_histisinterp] = ...
+  linestyleparams_histisinterp,...
+  prctiles_bkgddev_compute,...
+  nframessample] = ...
   myparse(varargin,...
   'hax',[],'hfig',[],'figpos',[],...
   'expdir',[],'n',[],...
@@ -35,7 +37,9 @@ bkgd_diagnostics = struct;
   'lim_llr',[-60,60],...
   'clim_llr',[-60,60],...
   'linestyleparams_llr',{},...
-  'linestyleparams_histisinterp',{});
+  'linestyleparams_histisinterp',{},...
+  'prctiles_bkgddev_compute',[],...
+  'nframessample',200);
 
 % choose experiments to plot
 if isempty(n),
@@ -335,3 +339,71 @@ bkgd_diagnostics.edges_bkgdcenter_llr = edges_llr;
 bkgd_diagnostics.mean_bkgdcenter_llr = nanmean(llr(:));
 bkgd_diagnostics.min_bkgdcenter_llr = min(llr(:));
 bkgd_diagnostics.max_bkgdcenter_llr = max(llr(:));
+
+%% the following diagnostics involve sampling some frames from the video
+
+sampleframes = linspace(1,obj.nframes(n),nframessample);
+diffim_counts = zeros(1,256);
+centers = 0:255;
+frac_fg = 0;
+nfliessample = 0;
+minllrperfly = [];
+maxllrperfly = [];
+meanllrperfly = [];
+for i = 1:nframessample,
+  
+  t = sampleframes(i);
+  
+  % current image
+  im = obj.readframes{n}(t);
+  
+  % current positions
+  trxcurr = obj.trx.getmovieidx(n).getframe(t);
+  nfliescurr = numel(trxcurr);
+  nfliessample = nfliessample + nfliescurr;
+  
+  % background subtraction
+  [isfore,diffim] = obj.BackSub(im,n);
+  % use GMM with the tracked fly positions as initialization
+  cc = obj.AssignPixels(im,trxcurr);
+  
+  % experiment-wide llr
+  if isempty(obj.ExpBGFGModelMatFile) || ~exist(obj.ExpBGFGModelMatFile,'file'),
+    llr = zeros(obj.nrs(n),obj.ncs(n));
+  else
+    llr = ExpBGFGModel_lik(model,im);
+  end
+  
+  %% histogram of difference image
+  countscurr = hist(diffim(:),centers);
+  diffim_counts = diffim_counts + countscurr;
+  
+  %% number of foreground pixels
+  nforecurr = nnz(isfore);
+  frac_fg = frac_fg + nforecurr;
+  
+  %% histogram of log-likelihood ratio of foreground to background for some flies
+  for j = 1:numel(trxcurr),
+    countscurr = hist(llr(cc==j)',centers_llrfore);
+    %countscurr = [countscurr(1:end-2),counts(end-1)+counts(end)];
+    llr_counts = llr_counts + countscurr;
+  end
+  
+  %% Average, min, max log-likelihood ratio for some flies
+  for j = 1:numel(trxcurr),
+    llrcurr = llr(cc==j)';
+    minllrperfly(end+1) = min(llrcurr); %#ok<AGROW>
+    maxllrperfly(end+1) = max(llrcurr); %#ok<AGROW>
+    meanllrperfly(end+1) = mean(llrcurr); %#ok<AGROW>
+  end
+  
+end
+
+frac_fg = frac_fg / nframessample / (obj.nrs(n)*obj.ncs(n));
+frac_minllrperfly = hist(minllrperfly,centers_llrfore)/nfliessample;
+frac_maxllrperfly = hist(maxllrperfly,centers_llrfore)/nfliessample;
+frac_meanllrperfly = hist(meanllrperfly,centers_llrfore)/nfliessample;
+
+%% store background diagnostics
+
+obj.bkgd_diagnostics{n} = bkgd_diagnostics;

@@ -1,12 +1,12 @@
 classdef CtraxDiagnostics < CtraxStatsBase
 
   properties
-    
-    ExpBGFGModelMatFile = '';
-    
+        
   end
   
   properties (SetAccess = private, GetAccess = public)
+    
+    bkgd_diagnostics = {};
     
   end
   

@@ -27,6 +27,7 @@ switch datatype,
     resultsdir = '/groups/branson/home/bransonk/tracking/data/olympiad/FlyBowl/CtraxTest20101118';
     ctraxfilestr = 'fixerrors_results.mat';
     NOWRITEACCESS = false;
+    ExpBGFGModelMatFile = '';
     
   case 'pBDPGAL4U_CtraxTest20101118',
     
@@ -49,6 +50,7 @@ switch datatype,
       'pBDPGAL4U_TrpA_Rig1Plate01BowlD_20101021T133611'};
     ctraxfilestr = 'fixerrors_results.mat';
     NOWRITEACCESS = true;    
+    ExpBGFGModelMatFile = '/groups/branson/bransonlab/tracking_data/olympiad/FlyBowl/CtraxTest20101013/LearnCtraxParams/ExpBGFGModelResults20101029.mat';
     
   case 'GAL4_CtraxTest20101118',
     
@@ -76,6 +78,8 @@ switch datatype,
       };
     ctraxfilestr = 'ctrax_results.mat';
     NOWRITEACCESS = true;    
+    ExpBGFGModelMatFile = '/groups/branson/bransonlab/tracking_data/olympiad/FlyBowl/CtraxTest20101013/LearnCtraxParams/ExpBGFGModelResults20101029.mat';
+    
 end
 
 %% parameters
@@ -124,7 +128,7 @@ else
     'C',3*pi/4
     'D',pi/4};
   
-  expbgfgmodel = '/groups/branson/bransonlab/tracking_data/olympiad/FlyBowl/CtraxTest20101013/LearnCtraxParams/ExpBGFGModelResults20101029.mat';
+  ExpBGFGModelMatFile = '/groups/branson/bransonlab/tracking_data/olympiad/FlyBowl/CtraxTest20101013/LearnCtraxParams/ExpBGFGModelResults20101029.mat';
 
 end
 
@@ -134,16 +138,18 @@ obj = CtraxDiagnostics('rootdatadir',rootdatadir,...
   'ctraxfilestr',ctraxfilestr,...
   'NOWRITEACCESS',NOWRITEACCESS,...
   'detectregistrationparams',detectregistrationparams,...
-  'bowl2MarkerAngle',bowl2MarkerAngle);
+  'bowl2MarkerAngle',bowl2MarkerAngle,...
+  'ExpBGFGModelMatFile',ExpBGFGModelMatFile);
 
 %% add all the experiment directories
 
-for i = 1:numel(expdirs),
+%for i = 1:numel(expdirs),
+i = 1;
   obj.AddExpDir(expdirs{i});
 %  drawnow;
 %  tmp = fullfile(resultsdir,'figs',sprintf('registration_%s',obj.expdir_bases{i}));
 %  savefig(tmp,i,'png');
-end
+%end
 
 %% plot some trajectories
 

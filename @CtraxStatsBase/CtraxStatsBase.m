@@ -199,6 +199,9 @@ classdef CtraxStatsBase < handle
 
     registrationData = {};
     
+    % experiment-wide models
+    ExpBGFGModelMatFile = '';
+    
   end
   
   properties (Hidden = true)
