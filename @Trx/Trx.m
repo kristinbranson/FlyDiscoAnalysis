@@ -37,32 +37,20 @@ classdef Trx < handle
   % MAXDATACACHED: When the total number of doubles stored in data exceeds
   % MAXDATACACHED, the least recently used per-frame derived measurement is
   % cleared from the memory cache. 
-  
-  properties
-    
-  end
+
   
   properties (SetAccess = private, GetAccess = public)
-    
-    % number of trajectories
-    ntrx = 0;
+
+    % number of flies
+    nflies = 0;
     
     % number of experiment directories
     nexpdirs = 0;
     
-    % names of the experiment directories, relative to root data directory
-    expdir_bases = {};
+    % number of flies per movie
+    nfliespermovie = {};
     
-    % full path to experiment directories in rootreaddir
-    expdir_reads = {};
-    
-    % full path to experiment directories in rootwritedir
-    expdir_writes = {};
-    
-    % cached data
-    data = {};
-    
-    % parameters
+    %% parameters of data location
     
     % directory within which experiment movies are contained
     rootreaddir = '/groups/sciserv/flyolympiad/Olympiad_Screen/fly_bowl/bowl_data';
@@ -74,11 +62,23 @@ classdef Trx < handle
     % derived, per-frame measurement directory, relative to experiment directory
     perframedir = 'perframe';
     
-    % base name of mat file
-    ctraxfilestr = 'ctrax_results.mat';
-    
-    % after registering
+    % base name of file containing processed trajectories
     trxfilestr = 'registered_trx.mat';
+    
+    %% landmark parameters
+
+    % currently set to default arena center and radius
+    landmarkparams = struct('arena_center_mm',[0,0],'arena_radius_mm',127/2);
+    
+    %% per-frame parameters
+    
+    % default field of view for computing angle subtended
+    fov = pi;
+    
+    % smoothing orientation
+    thetafil = [1 4 6 4 1]/16;
+    
+    %% data caching
     
     % history of per-frame properties loaded & their last access time
     perframehistory = cell(0,2);
@@ -92,21 +92,40 @@ classdef Trx < handle
     % data cached for each experiment
     datacached = {};
     
-    % parameters for registration
-    detectregistrationparams = struct;
+    %% locations of data
     
-    % where the bowl marker should be, based on bowl
-    %bowl2MarkerAngle = 3*pi/4;
-        
-    % default arena center and radius
-    %arena_center_mm = [0,0];
-    %arena_radius_mm = 127/2;
+    % names of the experiment directories, relative to root data directory
+    expdir_bases = {};
     
-    % default field of view for computing angle subtended
-    fov = pi;
+    % full path to experiment directories in rootreaddir
+    expdir_reads = {};
     
-    % smoothing orientation
-    thetafil = [1 4 6 4 1]/16;
+    % full path to experiment directories in rootwritedir
+    expdir_writes = {};
+    
+    % names of mat files containing registered, processed trajectories
+    trxfiles = {};
+
+    %% video info
+    
+    % number of frames in the video
+    movie_nframes = [];
+    
+    % image sizes
+    nrs = [];
+    ncs = [];
+    ncolors = [];
+    
+    % movie size in mm
+    width_mms = [];
+    height_mms = [];
+    
+    pxpermm = [];
+    
+    %% indexing stuff
+    
+    exp2flies = {};
+    fly2exp = [];
     
   end
   
@@ -132,17 +151,34 @@ classdef Trx < handle
     % deconstructor
     function delete(obj)
 
-      obj.ntrx = 0;
+      obj.nflies = 0;
       obj.expdir_bases = {};
       obj.expdir_reads = {};
       obj.expdir_writes = {};
-      obj.data = {};
       obj.perframehistory = cell(0,2);
       obj.ndatacached = 0;
       obj.datacached = {};
       
     end
+    
+    %
+    
+    % function declarations
+    
+    % AddExpDir(obj,expdir,vidinfo)
+    % add a new experiment directory
+    AddExpDir(obj,expdir,vidinfo)
+    
+    % RemoveExpDir(obj,expdir)
+    % remove an experiment directory
+    RemoveExpDir(obj,expdir)
         
+    % StoreTrajectories(obj,n,traj)
+    % store trajectories traj for experiment n
+    StoreTrajectories(obj,n,traj)
+    
+    % 
+    
   end
   
 end
