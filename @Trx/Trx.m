@@ -48,7 +48,7 @@ classdef Trx < handle
     nexpdirs = 0;
     
     % number of flies per movie
-    nfliespermovie = {};
+    nfliespermovie = [];
     
     %% parameters of data location
     
@@ -78,16 +78,22 @@ classdef Trx < handle
     % smoothing orientation
     thetafil = [1 4 6 4 1]/16;
     
+    % units of per-frame properties
+    units = struct;
+    
     %% data caching
     
     % history of per-frame properties loaded & their last access time
     perframehistory = cell(0,2);
     
     % maximum number of doubles in data
-    maxdatacache = 2^27;
+    maxdatacached = 2^27;
     
     % number of doubles currently stored
     ndatacached = 0;
+    
+    % per experiment
+    ndatacachedperexp = [];
     
     % data cached for each experiment
     datacached = {};
@@ -106,6 +112,9 @@ classdef Trx < handle
     % names of mat files containing registered, processed trajectories
     trxfiles = {};
 
+    % movie locations
+    movienames = {};
+    
     %% video info
     
     % number of frames in the video
@@ -121,6 +130,13 @@ classdef Trx < handle
     height_mms = [];
     
     pxpermm = [];
+    fps = [];
+    
+    %% trajectory frames
+    
+    firstframes = [];
+    endframes = [];
+    nframes = [];
     
     %% indexing stuff
     
@@ -143,7 +159,7 @@ classdef Trx < handle
 
       % all arguments are parameters
       for i = 1:2:nargin-1,
-        set(obj,varargin{i},varargin{i+1});
+        obj.(varargin{i}) = varargin{i+1};
       end
       
     end
@@ -159,6 +175,10 @@ classdef Trx < handle
       obj.ndatacached = 0;
       obj.datacached = {};
       
+    end
+    
+    function flyidx = getFlyIdx(obj,n,fly)
+      flyidx = obj.exp2flies{n}(fly);
     end
     
     %
@@ -177,7 +197,30 @@ classdef Trx < handle
     % store trajectories traj for experiment n
     StoreTrajectories(obj,n,traj)
     
-    % 
+    FreeDataCache(obj,ndataadd)
+    
+    [varargout] = subsref(obj,s)
+    
+    [varargout] = GetPerFrameData(obj,fn,varargin)
+    
+    SetPerFrameData(obj,fn,x,varargin)
+    
+    UpdatePerFrameAccessTime(obj,fn)
+    
+    x = LoadPerFrameData(obj,fn,n)
+    
+    [x1,y1,x2,y2] = rfrac2center(obj,n,fly)
+    
+    [rfrac,isonfly] = center_of_rotation2(obj,n,fly,varargin)
+    
+    CleanPerFrameData(obj,fn,varargin)
+    
+
+  end
+  
+  methods(Static)
+    
+    fns = perFrameFieldNames()
     
   end
   

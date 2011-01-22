@@ -1,4 +1,4 @@
-function varargout = subsref(obj,s)
+function [varargout] = subsref(obj,s)
 
 n = numel(s);
 if n == 0,
@@ -43,7 +43,7 @@ switch s(i).type,
         elseif isnumeric(s(i).subs{j}),
           exps = s(i).subs{j};
           if any(exps < 1 | exps > obj.nexpdirs | exps ~= round(exps)),
-            error('Indices must be whole numbers between 1 and %d',obj.nexpdirs);
+            error('Experiment indices must be whole numbers between 1 and nexpdirs = %d',obj.nexpdirs);
           end
         else
           error('Bad experiment indexing argument');
@@ -68,12 +68,8 @@ switch s(i).type,
     
   case '.',
     
-    if ismember(s(i).subs,methods(obj)) && n == 2,
-      if nargout == 0,
-        obj.(s(i).subs)(s(i+1).subs{:});
-      else
-        varargout = obj.(s(i).subs)(s(i+1).subs{:});
-      end
+    if ismember(s(i).subs,methods(obj)) || ismember(s(i).subs,properties(obj)),
+      [varargout{1:nargout}] = builtin('subsref',obj,s);
       return;
     end
     
@@ -111,6 +107,34 @@ else
   t = s(i).subs{1};
 end
 
-for j = 1:numel(idx),
-  varargout{j} = obj.GetField(fn,idx(j),t);
+if strcmp(fn,'nframes'),
+  res = {obj.nframes(idx)};
+elseif strcmp(fn,'firstframe'),
+  res = {obj.firstframes(idx)};
+elseif strcmp(fn,'endframe'),
+  if ischar(t),
+    res = {obj.endframes};
+  else
+    res = {obj.endframes(idx)};
+  end  
+else
+  res = cell(1,numel(idx));
+  for j = 1:numel(idx),
+    x = obj.GetPerFrameData(fn,idx(j));
+    if ischar(t),
+      res{j} = x;
+    else
+      res{j} = x(t);
+    end
+  end
 end
+if nargout < numel(res),
+  if numel(res) == 1,
+    varargout{1:nargout} = res{1};
+  else
+    varargout{1:nargout} = res;
+  end
+else
+  varargout = res;
+end
+
