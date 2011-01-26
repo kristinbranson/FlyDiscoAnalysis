@@ -181,6 +181,18 @@ classdef Trx < handle
       flyidx = obj.exp2flies{n}(fly);
     end
     
+    function [n,fly] = getExpFly(obj,flyidx)
+      n = obj.fly2exp(flyidx);
+      fly = nan(size(flyidx));
+      for i = 1:numel(flyidx),
+        flycurr = find(obj.exp2flies{n} == flyidx(i),1);
+        if isempty(flycurr), 
+          error('Sanity check: flyidx %d mapped to exp %d, but this is not in exp2flies{%d}',flyidx(i),n,n);
+        end
+        fly(i) = flycurr;
+      end
+    end
+    
     %
     
     % function declarations

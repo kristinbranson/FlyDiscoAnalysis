@@ -5,6 +5,7 @@ traj_fns = {'x','y','theta','a','b','timestamps',...
 
 for i = 1:numel(traj_fns),
   fn = traj_fns{i};
+  if ~isfield(traj,fn), continue; end
   obj.SetPerFrameData(fn,{traj.(fn)},n);
   
   filename = obj.GetPerFrameFile(fn,n);

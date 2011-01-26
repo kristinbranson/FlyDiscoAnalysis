@@ -10,8 +10,8 @@ if nidx > 2,
   error('At most two indexing parameters allowed');
 end
 if nidx == 1,
-  flies = varargin{1};
-  ns = obj.fly2exp(flies);
+  flyidxes = varargin{1};
+  [ns,flies] = obj.getExpFly(flyidxes);
 else
   if ischar(varargin{1}),
     ns = find(strcmp(obj.expdir_bases,varargin{1}),1);

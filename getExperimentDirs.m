@@ -1,10 +1,15 @@
-function [expdirs,expdir_reads,expdir_writes,experiments] = getExperimentDirs(varargin)
+function [expdirs,expdir_reads,expdir_writes,experiments,rootreaddir,rootwritedir] = ...
+  getExperimentDirs(varargin)
 
 [protocol,daterange,linename,rig,plate,bowl,notstarted] = ...
   myparse(varargin,'protocol','',...
   'daterange',cell(1,2),'linename','','rig','','plate','','bowl','','notstarted',false);
 
 switch protocol,
+
+  case 'RegistrationTest20110125',
+    rootreaddir = '/groups/branson/bransonlab/tracking_data/olympiad/FlyBowl/RegistrationTest20110125';
+    rootwritedir = rootreaddir;    
   
   case 'scratched_polycarbonate_CtraxTest20101118',
     rootreaddir = '/groups/branson/bransonlab/tracking_data/olympiad/FlyBowl/polycarbonate_scratched';

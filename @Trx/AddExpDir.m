@@ -43,6 +43,11 @@ obj.datacached{n} = struct;
 obj.StoreTrajectories(n,traj);
 
 % movie size in mm
-obj.width_mms(n) = obj.ncs(n) / obj.pxpermm(n);
-obj.height_mms(n) = obj.nrs(n) / obj.pxpermm(n);
+if isfield(obj,'pxpermm'),
+  obj.width_mms(n) = obj.ncs(n) / obj.pxpermm(n);
+  obj.height_mms(n) = obj.nrs(n) / obj.pxpermm(n);
+else
+  obj.width_mms(n) = nan;
+  obj.height_mms(n) = nan;
+end
 
