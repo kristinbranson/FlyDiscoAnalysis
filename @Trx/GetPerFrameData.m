@@ -50,7 +50,11 @@ for i = 1:numel(ns),
 
   if ~isfield(obj.datacached{n},fn)
     x = obj.LoadPerFrameData(fn,n);
-    res{i} = x{fly};
+    if iscell(x),
+      res{i} = x{fly};
+    else
+      res{i} = x;
+    end
   else
     res{i} = obj.datacached{n}(fly).(fn);
   end

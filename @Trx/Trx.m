@@ -39,7 +39,7 @@ classdef Trx < handle
   % cleared from the memory cache. 
 
   
-  properties (SetAccess = private, GetAccess = public)
+  properties (SetAccess = protected, GetAccess = public)
 
     % number of flies
     nflies = 0;
@@ -70,6 +70,9 @@ classdef Trx < handle
     % currently set to default arena center and radius
     landmarkparams = struct('arena_center_mm',[0,0],'arena_radius_mm',127/2);
     
+    %% sex classification mat file
+    sexclassifiermatfile = '';
+    
     %% per-frame parameters
     
     % default field of view for computing angle subtended
@@ -77,6 +80,11 @@ classdef Trx < handle
     
     % smoothing orientation
     thetafil = [1 4 6 4 1]/16;
+    
+    % outlier smoothing of area
+    areasmooth_maxfreq = .005;
+    areasmooth_filterorder = 1;
+    areasmooth_maxerr = 1;
     
     % units of per-frame properties
     units = struct;
@@ -137,6 +145,10 @@ classdef Trx < handle
     firstframes = [];
     endframes = [];
     nframes = [];
+
+    %% fly sex
+    
+    sex = {};
     
     %% indexing stuff
     
@@ -193,6 +205,13 @@ classdef Trx < handle
       end
     end
     
+    function SetSexClassifier(obj,sexclassifiermatfile)
+      
+      obj.sexclassifiermatfile = sexclassifiermatfile;
+      
+    end
+    
+    
     %
     
     % function declarations
@@ -227,7 +246,9 @@ classdef Trx < handle
     
     CleanPerFrameData(obj,fn,varargin)
     
-
+    sex = ClassifySex(obj,varargin)
+    
+    
   end
   
   methods(Static)

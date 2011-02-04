@@ -1,9 +1,13 @@
 function [expdirs,expdir_reads,expdir_writes,experiments,rootreaddir,rootwritedir] = ...
   getExperimentDirs(varargin)
 
-[protocol,daterange,linename,rig,plate,bowl,notstarted] = ...
+[protocol,daterange,linename,rig,plate,bowl,notstarted,subreadfiles,subwritefiles,...
+  settingsdir,datalocparamsfilestr] = ...
   myparse(varargin,'protocol','',...
-  'daterange',cell(1,2),'linename','','rig','','plate','','bowl','','notstarted',false);
+  'daterange',cell(1,2),'linename','','rig','','plate','','bowl','','notstarted',false,...
+  'subreadfiles',{},'subwritefiles',{},...
+  'settingsdir','/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/settings',...
+  'datalocparamsfilestr','dataloc_params.txt');
 
 switch protocol,
 
@@ -23,10 +27,16 @@ switch protocol,
     rootreaddir = '/groups/branson/bransonlab/tracking_data/olympiad/FlyBowl/CtraxTest20110111';
     rootwritedir = rootreaddir;
     
+  case 'CtraxTest20110202',
+    rootreaddir = '/groups/branson/bransonlab/tracking_data/olympiad/FlyBowl/CtraxTest20110202';
+    rootwritedir = rootreaddir;  
+    
   otherwise
     
-    rootreaddir = '/groups/sciserv/flyolympiad/Olympiad_Screen/fly_bowl/bowl_data/';
-    rootwritedir = rootreaddir;
+    params = ReadParams(fullfile(settingsdir,protocol,datalocparamsfilestr));
+    
+    rootreaddir = params.rootreaddir;
+    rootwritedir = params.rootwritedir;
     
 end
 
@@ -108,6 +118,27 @@ for i = 1:numel(expdirs),
     if parsedcurr.notstarted ~= notstarted,
       continue;
     end
+  end
+  
+  % check for subfiles
+  doexist = true;
+  for j = 1:numel(subreadfiles),
+    if ~exist(fullfile(expdir_reads{i},subreadfiles{j}),'file')
+      doexist = false;
+      break;
+    end
+  end
+  if ~doexist,
+    continue;
+  end
+  for j = 1:numel(subwritefiles),
+    if ~exist(fullfile(expdir_writes{i},subwritefiles{j}),'file')
+      doexist = false;
+      break;
+    end
+  end
+  if ~doexist,
+    continue;
   end
   
   idx(i) = true;

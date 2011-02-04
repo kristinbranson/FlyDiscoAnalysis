@@ -73,4 +73,6 @@ fns = {'absphisideways'
   'ddnose2ell'
   'ddell2nose'
   'danglesub'
+  'sex'
+  'areasmooth'
   };

@@ -2,7 +2,18 @@ function [data,units] = ComputerPerFrameData(obj,fn,n)
 
 data = cell(1,obj.nfliespermovie(n));
 nflies = obj.nfliespermovie(n);
+nframes = obj.nframes(obj.exp2flies);
+
 switch fn,
+  
+  % area
+  case 'area',
+    for fly = 1:nflies,
+      a_mm = obj.GetPerFrameData('a_mm',n,fly);
+      b_mm = obj.GetPerFrameData('b_mm',n,fly);
+      data{fly} = (2*a_mm).*(2*b_mm)*pi;
+    end
+    units = parseunits('mm^2');
   
   % change in orientation
   case 'dtheta',
@@ -21,7 +32,7 @@ switch fn,
       theta_mm = obj.GetPerFrameData('theta_mm',n,fly);
       dt = obj.GetPerFrameData('dt',n,fly);
       % forward motion of body center
-      if obj.nframes(fly) < 2,
+      if nframes(fly) < 2,
         data{fly} = [];
       else
         data{fly} = (dx.*cos(theta_mm(1:end-1)) + dy.*sin(theta_mm(1:end-1)))./dt;
@@ -37,7 +48,7 @@ switch fn,
       theta_mm = obj.GetPerFrameData('theta_mm',n,fly);
       dt = obj.GetPerFrameData('dt',n,fly);
       % sideways motion of body center
-      if obj.nframes(fly) < 2,
+      if nframes(fly) < 2,
         data{fly} = [];
       else
         data{fly} = (dx.*cos(theta_mm(1:end-1)+pi/2) + dy.*sin(theta_mm(1:end-1)+pi/2))./dt;
@@ -48,7 +59,7 @@ switch fn,
   % center of rotation
   case 'corfrac_maj',
     for fly = 1:nflies,
-      if obj.nframes(fly) < 2,
+      if nframes(fly) < 2,
         data{fly} = [];
       else
         corfrac = obj.center_of_rotation2(n,fly,false);
@@ -59,7 +70,7 @@ switch fn,
     
   case 'corfrac_min',
     for fly = 1:nflies,
-      if obj.nframes(fly) < 2,
+      if nframes(fly) < 2,
         data{fly} = [];
       else
         corfrac = obj.center_of_rotation2(n,fly,false);
@@ -70,7 +81,7 @@ switch fn,
     
   case 'corisonfly',
     for fly = 1:nflies,
-      if obj.nframes(fly) < 2,
+      if nframes(fly) < 2,
         data{fly} = [];
       else
         [~,data{fly}] = obj.center_of_rotation2(n,fly,false);
@@ -87,7 +98,7 @@ switch fn,
   % forward motion of center of rotation
   case 'du_cor',
     for fly = 1:nflies,
-      if obj.nframes(fly) < 2,
+      if nframes(fly) < 2,
         data{fly} = [];
       else
         [x_cor_curr,y_cor_curr,x_cor_next,y_cor_next] = ...
@@ -105,7 +116,7 @@ switch fn,
   % sideways motion of center of rotation
   case 'dv_cor',
     for fly = 1:nflies,
-      if obj.nframes(fly) < 2,
+      if nframes(fly) < 2,
         data{fly} = [];
       else
         [x_cor_curr,y_cor_curr,x_cor_next,y_cor_next] = ...
@@ -123,7 +134,7 @@ switch fn,
   % magnitude of velocity
   case 'velmag_ctr',
     for fly = 1:nflies,
-      if obj.nframes(fly) < 2,
+      if nframes(fly) < 2,
         data{fly} = [];
       else
         dx = diff(obj.GetPerFrameData('x_mm',n,fly));
@@ -137,7 +148,7 @@ switch fn,
   % magnitude of velocity around center of rotation
   case 'velmag',
     for fly = 1:nflies,
-      if obj.nframes(fly) < 2,
+      if nframes(fly) < 2,
         data{fly} = [];
       else
         [x_cor_curr,y_cor_curr,x_cor_next,y_cor_next] = ...
@@ -151,13 +162,15 @@ switch fn,
         data{fly}(badidx) = velmag_ctr(badidx);
       end
     end
+    
+    units = parseunits('mm/s');
 
   % acceleration magnitude
   case 'accmag',
     for fly = 1:nflies,
-      if obj.nframes(fly) < 2,
+      if nframes(fly) < 2,
         data{fly} = [];
-      elseif obj.nframes(fly) == 2,
+      elseif nframes(fly) == 2,
         data{fly} = 0;
       else
         % speed from frame 1 to 2 minus speed from 2 to 3 / time from 2 to 3
@@ -198,9 +211,9 @@ switch fn,
     
   case 'd2theta',
     for fly = 1:nflies,
-      if obj.nframes(fly) < 2,
+      if nframes(fly) < 2,
         data{fly} = [];
-      elseif obj.nframes(fly) == 2,
+      elseif nframes(fly) == 2,
         data{fly} = 0;
       else
         dt = obj.GetPerFrameData('dt',n,fly);
@@ -226,7 +239,7 @@ switch fn,
     
   case 'smoothdtheta',
     for fly = 1:nflies,
-      if trx(fly).nframes < 2,
+      if nframes(fly) < 2,
         data{fly} = [];
       else
         theta_mm = obj.GetPerFrameData('theta_mm',n,fly);
@@ -245,9 +258,9 @@ switch fn,
 
   case 'smoothd2theta',
     for fly = 1:nflies,
-      if obj.nframes(fly) < 2,
+      if nframes(fly) < 2,
         data{fly} = [];
-      elseif obj.nframes(fly) == 2,
+      elseif nframes(fly) == 2,
         data{fly} = 0;
       else
         smoothdtheta = obj.GetPerFrameData('smoothdtheta',n,fly);
@@ -266,7 +279,7 @@ switch fn,
   % velocity direction
   case 'phi',
     for fly = 1:nflies,
-      if obj.nframes(fly) < 2,
+      if nframes(fly) < 2,
         % if only one frame, set to orientation
         data{fly} = obj.GetPerFrameData('theta_mm',n,fly);
       else
@@ -301,7 +314,7 @@ switch fn,
     
     for fly = 1:nflies,
       
-      if obj.nframes(fly) < 2,
+      if nframes(fly) < 2,
         data{fly} = [];
       else
         x_mm = obj.GetPerFrameData('x_mm',n,fly);
@@ -327,7 +340,7 @@ switch fn,
         
     for fly = 1:nflies,
       
-      if obj.nframes(fly) < 2,
+      if nframes(fly) < 2,
         data{fly} = [];
       else
         x_mm = obj.GetPerFrameData('x_mm',n,fly);
@@ -364,7 +377,7 @@ switch fn,
   % compute the rotation of nose around mean tail location
   case 'dtheta_tail',
     for fly = 1:nflies,
-      if obj.nframes(fly) < 2,
+      if nframes(fly) < 2,
         data{fly} = [];
       else
 
@@ -400,7 +413,7 @@ switch fn,
   % how sideways is the velocity direction?
   case 'phisideways',
     for fly = 1:nflies,
-      if obj.nframes(fly) < 2,
+      if nframes(fly) < 2,
         data{fly} = [];
       else
         x_mm = obj.GetPerFrameData('x_mm',n,fly);
@@ -700,7 +713,7 @@ switch fn,
       dt = obj.GetPerFrameData('dt',n,fly1);
       flyidx1 = obj.getFlyIdx(n,fly1);
       firstframe1 = obj.firstframes(flyidx1);
-      data{fly1} = nan(1,obj.nframes(flyidx1));
+      data{fly1} = nan(1,nframes(fly1));
       
       for fly2 = 1:nflies,
         if fly1 == fly2, continue; end
@@ -741,7 +754,7 @@ switch fn,
       dt = obj.GetPerFrameData('dt',n,fly1);
       flyidx1 = obj.getFlyIdx(n,fly1);
       firstframe1 = obj.firstframes(flyidx1);
-      data{fly1} = nan(1,obj.nframes(flyidx1)-1);
+      data{fly1} = nan(1,nframes(fly1)-1);
       vel_x = diff(x_mm1);
       vel_y = diff(y_mm1);
       
@@ -787,7 +800,7 @@ switch fn,
       theta_mm1 = obj.GetPerFrameData('theta_mm',n,fly1);
       flyidx1 = obj.getFlyIdx(n,fly1);
       firstframe1 = obj.firstframes(flyidx1);
-      data{fly1} = nan(1,obj.nframes(flyidx1)-1);
+      data{fly1} = nan(1,nframes(fly1)-1);
       
       for fly2 = 1:nflies,
         if fly1 == fly2, continue; end
@@ -821,7 +834,7 @@ switch fn,
       phi1 = obj.GetPerFrameData('phi',n,fly1);
       flyidx1 = obj.getFlyIdx(n,fly1);
       firstframe1 = obj.firstframes(flyidx1);
-      data{fly1} = nan(1,obj.nframes(flyidx1)-1);
+      data{fly1} = nan(1,nframes(fly1)-1);
       
       for fly2 = 1:nflies,
         if fly1 == fly2, continue; end
@@ -838,9 +851,9 @@ switch fn,
       
     end
     
-     case {'absanglefrom1to2_center','absanglefrom1to2_nose2ell',...
+  case {'absanglefrom1to2_center','absanglefrom1to2_nose2ell',...
       'absanglefrom1to2_ell2nose','absanglefrom1to2_anglesub'},
-
+    
     for fly1 = 1:nflies,
       switch fn,
         case 'absanglefrom1to2_center',
@@ -857,7 +870,7 @@ switch fn,
       theta_mm1 = obj.GetPerFrameData('y_mm',n,fly1);
       flyidx1 = obj.getFlyIdx(n,fly1);
       firstframe1 = obj.firstframes(flyidx1);
-      data{fly1} = nan(1,obj.nframes(flyidx1)-1);
+      data{fly1} = nan(1,nframes(fly1)-1);
       
       for fly2 = 1:nflies,
         if fly1 == fly2, continue; end
@@ -907,6 +920,40 @@ switch fn,
       
     end
     
+  case 'sex',
+    
+    data = obj.ClassifySex(n);
+    units = parseunits('unit');
+    
+  case 'areasmooth',
+
+    f = fdesign.lowpass('N,F3db',obj.areasmooth_filterorder,obj,areasmooth_maxfreq);
+    h = design(f,'butter');
+    h.PersistentMemory = true;
+
+    for fly = 1:nflies,
+      area = obj.GetPerFrameData('area',n,fly);
+      h.filter(fliplr(area));
+      areasmooth = h.filter(area);
+      isoutlier = abs(areasmooth - area) > obj.areasmooth_maxerr;
+      [starts,ends] = get_interval_ends(isoutlier);
+      ends = ends - 1;
+      areacurr = area;
+      for i = 1:numel(starts),
+        if starts(i) == 1 && ends(i) == nframes(fly),
+          break;
+        elseif starts(i) == 1,
+          areacurr(starts(i):ends(i)) = area(ends(i)+1);
+        elseif ends(i) == trx(fly).nframes,
+          areacurr(starts(i):ends(i)) = area(starts(i)-1);
+        else
+          areacurr(starts(i):ends(i)) = (area(starts(i)-1)+area(ends(i)+1))/2;
+        end
+      end
+      data{fly} = areacurr;
+    end
+    
+    units = parseunits('mm^2');
     
   otherwise
     error('Unknown per-frame data field name %s',fn);

@@ -1,19 +1,11 @@
-function fix_timestamps(filename)
+function fix_timestamps(trxfile,ctraxfile)
 
-load(filename,'trx');
-nflies = length(trx);  %#ok<NODEF>
-nframes = max([trx.endframe]);
-timestamps = nan(1,nframes);
-for fly = 1:nflies,
-  if numel(trx(fly).timestamps) ~= trx(fly).nframes,
-    continue;
-  end
-  idx = trx(fly).firstframe:trx(fly).endframe;
-  if any(~isnan(timestamps(idx)) & timestamps(idx) ~= trx(fly).timestamps),
-    error('Mismatch for fly %d',fly);
-  end
-  timestamps(idx) = trx(fly).timestamps;
-end
+load(trxfile,'trx');
+load(ctraxfile,'timestamps');
+
+trx = apply_convert_units(trx); %#ok<NODEF>
+
+nflies = length(trx);
 
 isok = true;
 for fly = 1:nflies,
@@ -25,21 +17,21 @@ for fly = 1:nflies,
 end
 
 if isok,
-  fprintf('No problems with %s\n',filename);
+  fprintf('No problems with %s\n',trxfile);
 else
-  fprintf('Fixing file %s...\n',filename);
+  fprintf('Fixing file %s...\n',trxfile);
 end
 
 if any(isnan(timestamps)),
   error('Did not set all timestamps');
 end
 
-if any(timestamps(1:end-1) >= timestamps(2:end)),
+if any(timestamps(1:end-1) >= timestamps(2:end)), %#ok<COLND>
   error('Timestamps not always increasing');
 end
 
 for fly = 1:nflies,
-  trx(fly).timestamps = timestamps(trx(fly).firstframe:trx(fly).endframe); %#ok<AGROW>
+  trx(fly).timestamps = timestamps(trx(fly).firstframe:trx(fly).endframe);
 end
 
 for fly = 1:nflies,
@@ -48,5 +40,5 @@ for fly = 1:nflies,
   end
 end
 
-copyfile(filename,[filename,'.bak']);
-save('-append',filename,'trx','timestamps');
+copyfile(trxfile,[trxfile,'.bak']);
+save('-append',trxfile,'trx','timestamps');

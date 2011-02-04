@@ -33,11 +33,16 @@ end
 for flyidx = 1:numel(flies),
   fly = flies(flyidx);
   % delete data from cache if necessary
-  ndataadd = numel(x{flyidx});
+  if iscell(x),
+    xcurr = x{flyidx};
+  else
+    xcurr = x;
+  end
+  ndataadd = numel(xcurr);
   obj.FreeDataCache(ndataadd);
 
   % add to cache
-  obj.datacached{n}(fly).(fn) = x{flyidx};
+  obj.datacached{n}(fly).(fn) = xcurr;
   
   % update cache size
   obj.ndatacached = obj.ndatacached + ndataadd;

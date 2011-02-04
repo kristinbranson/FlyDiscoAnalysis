@@ -8,7 +8,7 @@ function registration = detectRegistrationMarks(varargin)
   circleImageType,circleRLim,circleXLim,circleYLim,...
   circleImageThresh,circleCannyThresh,circleCannySigma,...
   circleNXTry,circleNYTry,circleNRTry,...
-  crossFilterRadius,nRotations,minCrossFeatureStrength,...
+  crossFilterRadius,nRotations,minTemplateFeatureStrength,...
   diskFilterRadius,minFeatureStrengthLow,minFeatureStrengthHigh,...
   minDistCenterFrac,maxDistCenterFrac,...
   maxDistCornerFrac_BowlLabel,...
@@ -20,9 +20,11 @@ function registration = detectRegistrationMarks(varargin)
   maxDThetaBowlMarkerPair,...
   markerPairAngle_true,...
   nBowlMarkers,...
+  bowlMarkerType,...
   DEBUG,...
   registration,...
-  nr,nc] = ...
+  nr,nc,...
+  imsavename] = ...
   myparse(varargin,...
   'saveName','',...
   'bkgdImage',[],...
@@ -42,7 +44,7 @@ function registration = detectRegistrationMarks(varargin)
   'circleNRTry',50,...
   'crossFilterRadius',9,...
   'nRotations',20,...
-  'minCrossFeatureStrength',.92,...
+  'minTemplateFeatureStrength',.92,...
   'diskFilterRadius',11,...
   'minFeatureStrengthLow',20,...
   'minFeatureStrengthHigh',30,...
@@ -58,9 +60,11 @@ function registration = detectRegistrationMarks(varargin)
   'maxDThetaBowlMarkerPair',pi/12,...
   'markerPairAngle_true',pi/6,...
   'nBowlMarkers',1,...
+  'bowlMarkerType','gradient',...
   'debug',false,...
   'registrationData',[],...
-  'nr',[],'nc',[]);
+  'nr',[],'nc',[],...
+  'imsavename','');
 
 iscircle = ismember(method,{'circle','circle_manual'});
 
@@ -225,14 +229,39 @@ if nBowlMarkers > 0,
   end
   
   % threshold max distance to some corner
-  filI4 = gradfilI;
+  switch bowlMarkerType,
+    case 'gradient',
+      filI4 = gradfilI;
+      methodcurr = 'grad2';
+    otherwise,
+      bowlMarkerTemplate = im2double(imread(bowlMarkerType));
+      bowlMarkerTemplate = bowlMarkerTemplate - min(bowlMarkerTemplate(:));
+      bowlMarkerTemplate = bowlMarkerTemplate / max(bowlMarkerTemplate(:));
+      bowlMarkerTemplate = 2*bowlMarkerTemplate-1;
+      bowlfils = cell(1,nRotations);
+      thetas = linspace(0,90,nRotations+1);
+      thetas = thetas(1:end-1);
+      for i = 1:nRotations,
+        bowlfils{i} = imrotate(bowlMarkerTemplate,thetas(i),'bilinear','loose');
+      end
+      % compute normalized maximum correlation
+      filI4 = -inf(nr,nc);
+      for i = 1:nRotations,
+        filI4 = max(filI4,imfilter(bkgdImage,bowlfils{i},'replicate') ./ ...
+          imfilter(bkgdImage,ones(size(bowlfils{i})),'replicate'));
+      end
+      methodcurr = 'template';
+  end
+
+  bowlMarkerIm = filI4;
+
   maxDistCorner_BowlLabel = maxDistCornerFrac_BowlLabel * r;
   filI4(distCorner > maxDistCorner_BowlLabel) = 0;
   
   bowlMarkerPoints = nan(2,nBowlMarkers);
   for i = 1:nBowlMarkers,
     % find maximum
-    [success,x,y] = getNextFeaturePoint(filI4,'grad2');
+    [success,x,y] = getNextFeaturePoint(filI4,methodcurr);
     if success,
       bowlMarkerPoints(:,i) = [x;y];
       filI4 = zeroOutDetection(bowlMarkerPoints(1,i),bowlMarkerPoints(2,i),filI4);
@@ -407,6 +436,98 @@ if ~isempty(saveName),
 end
 registration.registerfn = registerfn;
 
+%% create images illustrating fitting
+
+if ~isempty(imsavename),
+  nimsplot = 2 + double(nBowlMarkers > 0);
+  nskip = 10;
+  imsave_sz = [nr,nc*nimsplot+nskip*(nimsplot-1)];
+  imsave_r = zeros(imsave_sz);
+  imsave_g = zeros(imsave_sz);
+  imsave_b = zeros(imsave_sz);
+  
+  % background image
+  offc = 0;
+  imsave_r(:,offc+(1:nc)) = bkgdImage;
+  imsave_g(:,offc+(1:nc)) = bkgdImage;
+  imsave_b(:,offc+(1:nc)) = bkgdImage;
+  
+  % circle or registration point features
+  offc = offc + nc + nskip;
+  if iscircle,
+    Irgb = 255*colormap_image(circleim,jet(256));
+  else
+    Irgb = 255*colormap_image(filI2,jet(256));
+  end
+  imsave_r(:,offc+(1:nc)) = Irgb(:,:,1);
+  imsave_g(:,offc+(1:nc)) = Irgb(:,:,2);
+  imsave_b(:,offc+(1:nc)) = Irgb(:,:,3);
+  
+  offc = offc + nc + nskip;
+  if nBowlMarkers > 0,
+    Irgb = 255*colormap_image(bowlMarkerIm,jet(256));
+    imsave_r(:,offc+(1:nc)) = Irgb(:,:,1);
+    imsave_g(:,offc+(1:nc)) = Irgb(:,:,2);
+    imsave_b(:,offc+(1:nc)) = Irgb(:,:,3);
+  end
+  
+  offc = 0;
+  iscolor = 1;
+  for offi = 1:nimsplot,
+    % origin
+    r = min(nr,max(1,floor(originY)-5:ceil(originY)+5));
+    c = min(nc,max(1,floor(originX)-5:ceil(originX)+5));
+    imsave_r(r,offc+c) = 255*iscolor;
+    imsave_g(r,offc+c) = 0;
+    imsave_b(r,offc+c) = 0;
+    
+    if iscircle,
+      
+      % circle
+      
+      x = circleCenterX + circleRadius*cos(linspace(0,2*pi,round(2*pi*circleRadius)));
+      y = circleCenterY + circleRadius*sin(linspace(0,2*pi,round(2*pi*circleRadius)));
+      [d1,d2] = meshgrid(x,-2:2);
+      x = d1(:)+d2(:);
+      [d1,d2] = meshgrid(y,-2:2);
+      y = d1(:)+d2(:);
+      r = min(nr,max(1,round(y)));
+      c = min(nc,max(1,round(x)));
+      idx = sub2ind(imsave_sz,r,offc+c);
+      imsave_r(idx) = 255*iscolor;
+      imsave_g(idx) = 0;
+      imsave_b(idx) = 0;
+      
+    else
+      
+      c = min(nc,max(1,round(registrationPoints(1,:))));
+      r = min(nr,max(1,round(registrationPoints(2,:))));
+      idx = sub2ind(imsave_sz,r,offc+c);
+      imsave_r(idx) = 255*iscolor;
+      imsave_g(idx) = 0;
+      imsave_b(idx) = 0;
+      
+      
+    end
+    
+    % bowl marker points
+    for i = 1:nBowlMarkers,
+      c = min(nc,max(1,round(bowlMarkerPoints(1,i))+(-5:5)));
+      r = min(nr,max(1,round(bowlMarkerPoints(2,i))+(-5:5)));
+      imsave_r(r,offc+c) = 0;
+      imsave_g(r,offc+c) = 255*iscolor;
+      imsave_b(r,offc+c) = 0;
+    end
+    
+    offc = offc + nc + nskip;
+    iscolor = 0;
+    
+  end
+  
+  imsave = uint8(cat(3,imsave_r,imsave_g,imsave_b));
+  imwrite(imsave,imsavename);
+end
+
 %%
 
 if DEBUG,
@@ -420,7 +541,7 @@ if DEBUG,
   end
   hax = createsubplots(1,nsubplots,.05);
   %hax(1) = subplot(1,nsubplots,1);
-  axes(hax(1));
+  axes(hax(1)); %#ok<MAXES>
   imagesc(bkgdImage);
   hold on;
   if iscircle,
@@ -444,7 +565,7 @@ if DEBUG,
     plot(bowlMarkerPoints(1,:),bowlMarkerPoints(2,:),'mo');
   end
   axis image xy;
-  axes(hax(2));
+  axes(hax(2)); %#ok<MAXES>
   %hax(2) = subplot(1,nsubplots,2);
   if iscircle,
     imagesc(bkgdImage);
@@ -466,7 +587,7 @@ if DEBUG,
     plot(bowlMarkerPoints(1,:),bowlMarkerPoints(2,:),'mo');
   end
   axis image xy;
-  axes(hax(3));
+  axes(hax(3)); %#ok<MAXES>
   %hax(3) = subplot(1,nsubplots,3);
   if iscircle,
     imagesc(circleim);
@@ -491,7 +612,7 @@ if DEBUG,
   axis image xy;
   linkaxes(hax(1:3));
   if ~iscircle
-    axes(hax(4));
+    axes(hax(4)); %#ok<MAXES>
     %subplot(1,nsubplots,4);
     tmp = linspace(0,2*pi,100);
     plot(cos(tmp)*pairDist_mm/2,sin(tmp)*pairDist_mm/2,'b');
@@ -533,7 +654,7 @@ function [success,x,y,featureStrength,filI] = getNextFeaturePoint(filI,methodcur
       return;
     end
   else
-    if featureStrength < minCrossFeatureStrength,
+    if featureStrength < minTemplateFeatureStrength,
       return;
     end
   end

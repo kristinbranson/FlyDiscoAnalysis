@@ -39,39 +39,28 @@ classdef CtraxStatsBase < handle
     % after registering
     trxfilestr = 'registered_trx.mat';
     
-    % landmark-based measurements
-    landmarksfilestr = 'derived_landmarks_trx.mat';
-    % closest fly-based measurements
-    closestflyfilestr = 'derived_closestfly_trx.mat';
-    % speed-based measurements
-    speedfilestr = 'derived_speed_trx.mat';
+    % root directory containing all parameters
+    settings_dir = 'settings'
     
-    % root directory containing all experiment directories
-    rootdatadir = '/groups/sciserv/flyolympiad/Olympiad_Screen/fly_bowl/bowl_data';
+    % protocol for analysis, corresponds to a subdirectory of settings_dir
+    analysis_protocol = ''
+    
+    % registration parameters
+    registration_params = struct;
+    
+    % base name of registration parameters within
+    % settings_dir/analysis_protocol
+    registration_params_file = 'registration_params.txt'
+    
+    % directory within which experiment movies are contained
+    rootreaddir = '/groups/sciserv/flyolympiad/Olympiad_Screen/fly_bowl/bowl_data';
+    
+    % directory within which experiment tracking & analysis data are
+    % contained
+    rootwritedir = '/groups/branson/home/bransonk/tracking/data/olympiad/FlyBowl/CtraxTest20101118';
     
     % name of file to write registration results to
     registrationfilestr = 'registration_data.mat';
-
-    % parameters for registration
-    detectregistrationparams = struct;
-    
-    % where the bowl marker should be, based on bowl
-    bowl2MarkerAngle = 3*pi/4;
-    
-    % if NOWRITEACCESS, we aren't able to write to the experiment directories
-    % temporarily, data will be in resultsdir
-    NOWRITEACCESS = true;
-    resultsdir = '/groups/branson/home/bransonk/tracking/data/olympiad/FlyBowl/CtraxTest20101118';
-    
-    % default arena center and radius
-    arena_center_mm = [0,0];
-    arena_radius_mm = 127/2;
-    
-    % default field of view for computing angle subtended
-    fov = pi;
-    
-    % smoothing orientation
-    thetafil = [1 4 6 4 1]/16;
     
     % HistogramMeasurements parameters
     histogrammeasurements_nbins = 100;
@@ -118,18 +107,15 @@ classdef CtraxStatsBase < handle
     nexpdirs = 0;
     
     % open experiment directories
-    expdirs = {}; % full path for reading movie
-    write_expdirs = {}; % full path for reading trx, writing
-    expdir_bases = {}; % path within rootdatadir
+    expdirs = {}; %  path within rootdatadir
+    expdir_reads = {}; % full path for reading
+    expdir_writes = {}; % full path for writing
     
     % current file names
     moviefiles = {};
     annfiles = {};
     ctraxfiles = {};
     trxfiles = {};
-    landmarksfiles = {};
-    closestflyfiles = {};
-    speedfiles = {};
     registrationfiles = {};
     metadatafiles = {};
     temperaturefiles = {};

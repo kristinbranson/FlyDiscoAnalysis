@@ -1,7 +1,9 @@
-[expdirs,expdir_reads,expdir_writes,experiments,rootreaddir,rootwritedir] = ...
-  getExperimentDirs('protocol','RegistrationTest20110125');
+%% parameters
+
+protocol = 'RegistrationTest20110125';
 movieFileStr = 'movie.ufmf';
 annFileStr = 'movie.ufmf.ann';
+useAnnFile = false;
 params = {...
   'bkgdNSampleFrames',10,...
   'method','circle',...
@@ -23,19 +25,30 @@ params = {...
   'debug',true,...
   'nr',1024,'nc',1024};
 
-% diameter in mm: 127
+%% get data
 
-%%
+[expdirs,expdir_reads,expdir_writes,experiments,rootreaddir,rootwritedir] = ...
+  getExperimentDirs('protocol','RegistrationTest20110125');
+
+%% test registration
 
 clear registrationData;
 
 for i = 1:length(expdirs),
   movieName = fullfile(expdir_reads{i},movieFileStr);
-  annName = fullfile(expdir_reads{i},annFileStr);
-  %if ~exist(annName,'file'),
-  %  fprintf('Ann file %s does not exist, skipping.\n',annName);
-  %  continue;
-  %end
-  registrationData(i) = detectRegistrationMarks('movieName',movieName,params{:});
+  if useAnnFile,
+    annName = fullfile(expdir_reads{i},annFileStr);
+    if ~exist(annName,'file'),
+      fprintf('Ann file %s does not exist, skipping.\n',annName);
+      continue;
+    end
+    registrationData(i) = detectRegistrationMarks('annName',annName,params{:});
+  else
+    if ~exist(movieName,'file'),
+      fprintf('Movie %s does not exist, skipping.\n',movieName);
+      continue;
+    end
+    registrationData(i) = detectRegistrationMarks('movieName',movieName,params{:});
+  end    
   input(strrep(sprintf('movie %s: ',movieName),'\','\\'));
 end
