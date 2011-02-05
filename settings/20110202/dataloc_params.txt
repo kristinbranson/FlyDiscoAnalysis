@@ -17,3 +17,10 @@ ufmfdiagnosticsfilestr,ufmf_diagnostics.txt
 ufmflogfilestr,ufmf_log.txt
 perframedir,perframe
 registrationimagefilestr,registrationimage.png
+sexclassifiermatfilestr,sexclassifier.mat
+sexclassifiertxtfilestr,sexclassifier.txt
+registrationparamsfilestr,registration_params.txt
+sexclassifierparamsfilestr,sexclassifier_params.txt
+sexclassifierdiagnosticsfilestr,sexclassifier_diagnostics.txt
+perframeparamsfilestr,perframe_params.txt
+landmarkparamsfilestr,landmark_params.txt

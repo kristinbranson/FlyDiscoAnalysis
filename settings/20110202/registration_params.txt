@@ -15,5 +15,5 @@ maxDistCornerFrac_BowlLabel,.175
 featureRadius,11
 bowlMarkerPairTheta_true,-2.356194490192345
 nBowlMarkers,1
-bowlMarkerType,settings/20110202/Btemplate.png
+bowlMarkerType,/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/settings/20110202/Btemplate.png
 minTemplateFeatureStrength,.25

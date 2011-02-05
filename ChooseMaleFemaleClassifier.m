@@ -8,16 +8,21 @@ addpath /groups/branson/home/bransonk/tracking/code/lds/hmm;
 
 %% data locations
 
-protocol = '20110111';
-settingsdir = 'settings';
+protocol = '20110202';
+settingsdir = '/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/settings';
 dataloc_paramsfilestr = 'dataloc_params.txt';
 
 [expdirs,expdir_reads,expdir_writes,experiments,rootreaddir,rootwritedir] = ...
-  getExperimentDirs('protocol',['CtraxTest',protocol]);
+  getExperimentDirs('protocol',['CtraxTest',protocol],...
+  'subwritefiles',{'registered_trx.mat'});
 
 dataloc_params = ReadParams(fullfile(settingsdir,protocol,dataloc_paramsfilestr));
 
-sexclassifiermatfile = '/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/sexclassifier.mat';
+sexclassifierparamsfile = fullfile(settingsdir,protocol,dataloc_params.sexclassifierparamsfilestr);
+sexclassifiermatfile = fullfile(settingsdir,protocol,dataloc_params.sexclassifiermatfilestr);
+sexclassifiertxtfile = fullfile(settingsdir,protocol,dataloc_params.sexclassifiertxtfilestr);
+
+sexclassifier_params = ReadParams(sexclassifierparamsfile);
 
 %% load the data
 
@@ -36,10 +41,10 @@ end
 
 %% filter out areas that are maybe caused by tracking noise
 
-maxfreq = .005;
-filterorder = 1;
-outlierprctile = .1;
-mindur = 20;
+maxfreq = sexclassifier_params.areasmooth_maxfreq;
+filterorder = sexclassifier_params.areasmooth_filterorder;
+outlierprctile = sexclassifier_params.areasmooth_outlierprctile;
+mindur = sexclassifier_params.mindur;
 
 f = fdesign.lowpass('N,F3db',filterorder,maxfreq);
 h = design(f,'butter');
@@ -48,18 +53,11 @@ h.PersistentMemory = true;
 errx = [];
 areasmooth = cell(1,trx.nflies);
 for fly = 1:trx.nflies,
-  h.filter(fliplr(trx(fly).area));
-  areasmooth{fly} = h.filter(trx(fly).area);
+  areasmooth{fly} = LowPassFilterArea(trx(fly).area,filterorder,maxfreq);
   errx = [errx,abs(areasmooth{fly}-trx(fly).area)]; %#ok<AGROW>
 end
 
 maxerrx = prctile(errx,100-outlierprctile);
-
-isoutlierarea = cell(1,trx.nflies);
-for fly = 1:trx.nflies,
-  isoutlierarea{fly} = abs(areasmooth{fly}-trx(fly).area) > maxerrx;
-end
-
 
 %% learn a 2-state HMM for area in an unsupervised manner
 
@@ -69,31 +67,34 @@ if true,
   % break into smaller sequences where we're sure of area estimate
   X = cell(1,trx.nflies);
   for fly = 1:trx.nflies,
-    areacurr = trx(fly).area;
-    % interpolate across bad data
-    [starts,ends] = get_interval_ends(isoutlierarea{fly});
-    ends = ends - 1;
-    for i = 1:numel(starts),
-      if starts(i) == 1,
-        areacurr(starts(i):ends(i)) = areacurr(ends(i)+1);
-      elseif ends(i) == trx(fly).nframes,
-        areacurr(starts(i):ends(i)) = areacurr(starts(i)-1);
-      else
-        areacurr(starts(i):ends(i)) = (areacurr(starts(i)-1)+areacurr(ends(i)+1))/2;
-      end
-    end
+    areacurr = SmoothAreaOutliers(trx(fly).area,filterorder,maxfreq,maxerrx);
     X{fly} = areacurr(:);
   end
-%   X = trx.area;
-%   for i = 1:numel(X),
-%     X{i} = X{i}';
-%   end
   [mu_area,var_area,ptrans,prior,ll]=hmm_multiseq(X,nstates);
   state2sex{argmax(mu_area)} = 'F';
   state2sex{argmin(mu_area)} = 'M';
-  save sexclassifier.mat mu_area var_area ptrans prior ll nstates state2sex maxerrx;
+  save(sexclassifiermatfile,'mu_area','var_area','ptrans','prior','ll','nstates','state2sex','maxerrx',...
+    'maxfreq','filterorder');
+  
+  fid = fopen(sexclassifiertxtfile,'w');
+  ifemale = find(strcmp(state2sex,'F'));
+  imale = find(strcmp(state2sex,'M'));
+  fprintf(fid,'mu_area_female,%f\n',mu_area(ifemale));
+  fprintf(fid,'mu_area_male,%f\n',mu_area(imale));
+  fprintf(fid,'var_area,%f\n',var_area);
+  fprintf(fid,'ptrans_female_given_female,%f\n',ptrans(ifemale,ifemale));
+  fprintf(fid,'ptrans_male_given_female,%f\n',ptrans(ifemale,imale));
+  fprintf(fid,'ptrans_female_given_male,%f\n',ptrans(imale,ifemale));
+  fprintf(fid,'ptrans_male_given_male,%f\n',ptrans(imale,imale));
+  fprintf(fid,'prior_female,%f\n',prior(ifemale));
+  fprintf(fid,'prior_male,%f\n',prior(imale));
+  fprintf(fid,'areasmooth_maxerrx,%f\n',maxerrx);
+  fprintf(fid,'areasmooth_maxfreq,%f\n',maxfreq);
+  fprintf(fid,'areasmooth_filterorder,%f\n',filterorder);
+  fclose(fid);
+  
 else
-  load sexclassifier.mat;
+  load(sexclassifiermatfile);
 end
 
 %% apply the hmm

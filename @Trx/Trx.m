@@ -50,45 +50,51 @@ classdef Trx < handle
     % number of flies per movie
     nfliespermovie = [];
     
-    %% parameters of data location
+    %% parameters of data locations
     
-    % directory within which experiment movies are contained
-    rootreaddir = '/groups/sciserv/flyolympiad/Olympiad_Screen/fly_bowl/bowl_data';
+    settingsdir = '/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/settings';
     
-    % directory within which experiment tracking & analysis data are
-    % contained
-    rootwritedir = '/groups/branson/home/bransonk/tracking/data/olympiad/FlyBowl/CtraxTest20101118';
+    analysis_protocol = 'current';
     
-    % derived, per-frame measurement directory, relative to experiment directory
-    perframedir = 'perframe';
+    datalocparamsfilestr = 'dataloc_params.txt';
     
-    % base name of file containing processed trajectories
-    trxfilestr = 'registered_trx.mat';
+    dataloc_params = [];
+
+    % names of the experiment directories, relative to root data directory
+    expdir_bases = {};
+    
+    % full path to experiment directories in rootreaddir
+    expdir_reads = {};
+    
+    % full path to experiment directories in rootwritedir
+    expdir_writes = {};
+    
+    % names of mat files containing registered, processed trajectories,
+    % with sex classified
+    trxfiles = {};
+
+    % movie locations
+    movienames = {};
     
     %% landmark parameters
 
-    % currently set to default arena center and radius
-    landmarkparams = struct('arena_center_mm',[0,0],'arena_radius_mm',127/2);
-    
-    %% sex classification mat file
-    sexclassifiermatfile = '';
+    landmark_params = [];
     
     %% per-frame parameters
-    
+    perframe_params = [];
     % default field of view for computing angle subtended
-    fov = pi;
+    %fov = pi;
     
     % smoothing orientation
-    thetafil = [1 4 6 4 1]/16;
-    
-    % outlier smoothing of area
-    areasmooth_maxfreq = .005;
-    areasmooth_filterorder = 1;
-    areasmooth_maxerr = 1;
+    %thetafil = [1 4 6 4 1]/16;
     
     % units of per-frame properties
     units = struct;
+
     
+    %% sex classifier parameters
+    sexclassifier_params = [];
+        
     %% data caching
     
     % history of per-frame properties loaded & their last access time
@@ -105,23 +111,6 @@ classdef Trx < handle
     
     % data cached for each experiment
     datacached = {};
-    
-    %% locations of data
-    
-    % names of the experiment directories, relative to root data directory
-    expdir_bases = {};
-    
-    % full path to experiment directories in rootreaddir
-    expdir_reads = {};
-    
-    % full path to experiment directories in rootwritedir
-    expdir_writes = {};
-    
-    % names of mat files containing registered, processed trajectories
-    trxfiles = {};
-
-    % movie locations
-    movienames = {};
     
     %% video info
     
@@ -146,10 +135,6 @@ classdef Trx < handle
     endframes = [];
     nframes = [];
 
-    %% fly sex
-    
-    sex = {};
-    
     %% indexing stuff
     
     exp2flies = {};
@@ -174,8 +159,10 @@ classdef Trx < handle
         obj.(varargin{i}) = varargin{i+1};
       end
       
+      obj.ReadAllParams();
+      
     end
-    
+        
     % deconstructor
     function delete(obj)
 
@@ -204,18 +191,43 @@ classdef Trx < handle
         fly(i) = flycurr;
       end
     end
-    
-    function SetSexClassifier(obj,sexclassifiermatfile)
+
+%     function n = numel(obj)
+%       
+%       n = obj.nflies;
+%       
+%     end
+% 
+%     function varargout = size(obj)
+% 
+%       n = obj.nflies;
+%       if nargout <= 1,
+%         varargout = {n};
+%       else
+%         varargout = num2cell([1,n,ones(1,nargout-2)]);
+%       end
+%       
+%     end
+
+    function [data,units] = ComputePerFrameData(obj,fn,n)
       
-      obj.sexclassifiermatfile = sexclassifiermatfile;
+      funname = sprintf('compute_%s',fn);
+      [data,units] = feval(funname,obj,n);
+      filename = obj.GetPerFrameFile(fn,n);
+      save(filename,'data','units');
       
     end
-    
-    
+
     %
     
     % function declarations
-    
+
+    % read parameters
+    ReadAllParams(obj,varargin)
+    ReadLandmarkParams(obj)
+    ReadPerFrameParams(obj)
+    ReadSexClassifierParams(obj)
+        
     % AddExpDir(obj,expdir,vidinfo)
     % add a new experiment directory
     AddExpDir(obj,expdir,vidinfo)
@@ -240,20 +252,13 @@ classdef Trx < handle
     
     x = LoadPerFrameData(obj,fn,n)
     
-    [x1,y1,x2,y2] = rfrac2center(obj,n,fly)
-    
-    [rfrac,isonfly] = center_of_rotation2(obj,n,fly,varargin)
-    
     CleanPerFrameData(obj,fn,varargin)
-    
-    sex = ClassifySex(obj,varargin)
-    
     
   end
   
   methods(Static)
     
-    fns = perFrameFieldNames()
+    fns = PerFrameFieldNames()
     
   end
   

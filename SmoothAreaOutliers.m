@@ -1,16 +1,11 @@
 function areasmooth = SmoothAreaOutliers(area,filterorder,maxfreq,maxerr)
 
-f = fdesign.lowpass('N,F3db',filterorder,maxfreq);
-h = design(f,'butter');
-h.PersistentMemory = true;
-nframes = numel(area);
-
-h.filter(fliplr(area));
-areasmooth = h.filter(area);
+areasmooth = LowPassFilterArea(area,filterorder,maxfreq);
 isoutlier = abs(areasmooth - area) > maxerr;
 [starts,ends] = get_interval_ends(isoutlier);
 ends = ends - 1;
 areasmooth = area;
+nframes = numel(area);
 for i = 1:numel(starts),
   if starts(i) == 1 && ends(i) == nframes,
     break;

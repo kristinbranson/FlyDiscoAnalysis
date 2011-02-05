@@ -1,18 +1,20 @@
+%% set up paths
+
+addpath /groups/branson/home/bransonk/tracking/code/JCtrax/misc;
+addpath /groups/branson/home/bransonk/tracking/code/JCtrax/filehandling;
+
+%% data locations
+
 if ispc,
-  rootreaddir = 'E:\Data\FlyBowl\polycarbonate_scratched';
-  rootwritedir = 'E:\Data\FlyBowl\polycarbonate_scratched';
-  expdir = 'DL-wildtype_TrpA_Rig1Plate01BowlC_20101112T152624';
-  addpath E:\Code\JCtrax\misc;
-  addpath E:\Code\JCtrax\filehandling;
-  nframes = 9053;
 else
-  
+  protocol = 'CtraxTest20110202';
+  [expdirs,expdir_reads,expdir_writes,experiments,rootreaddir,rootwritedir] = ...
+    getExperimentDirs('protocol',protocol,'subreadfiles',{'ctrax_results.mat'});
+  expdir = expdirs{1};
+  [readframe,nframes,fid,vidinfo] = get_readframe_fcn(fullfile(expdir_reads{1},'movie.ufmf'));
+  fclose(fid);
 end
-nr = 1024;
-nc = 1024;
-ncolors = 1;
 
 %%
-vidinfo = struct('nr',nr,'nc',nc,'ncolors',ncolors,'nframes',nframes);
-obj = Trx('rootreaddir',rootreaddir,'rootwritedir',rootwritedir);
+obj = Trx();
 obj.AddExpDir(expdir,vidinfo);

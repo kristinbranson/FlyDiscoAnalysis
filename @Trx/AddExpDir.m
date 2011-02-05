@@ -10,8 +10,8 @@ obj.nexpdirs = obj.nexpdirs + 1;
 n = obj.nexpdirs;
 
 obj.expdir_bases{n} = expdir;
-obj.expdir_reads{n} = fullfile(obj.rootreaddir,expdir);
-obj.expdir_writes{n} = fullfile(obj.rootwritedir,expdir);
+obj.expdir_reads{n} = fullfile(obj.dataloc_params.rootreaddir,expdir);
+obj.expdir_writes{n} = fullfile(obj.dataloc_params.rootwritedir,expdir);
 
 % store video info
 obj.nrs(n) = vidinfo.nr;
@@ -20,7 +20,7 @@ obj.ncolors(n) = vidinfo.ncolors;
 obj.movie_nframes(n) = vidinfo.nframes;
 
 % read trajectories
-obj.trxfiles{n} = fullfile(obj.expdir_writes{n},obj.trxfilestr);
+obj.trxfiles{n} = fullfile(obj.expdir_writes{n},obj.dataloc_params.trxfilestr);
 if ~exist(obj.trxfiles{n},'file'),
   error('Trajectory file %s does not exist',obj.trxfiles{n});
 end

@@ -1,19 +1,17 @@
-function [data,units] = ComputerPerFrameData(obj,fn,n)
+function [data,units] = ComputePerFrameData(obj,fn,n)
 
 data = cell(1,obj.nfliespermovie(n));
 nflies = obj.nfliespermovie(n);
-nframes = obj.nframes(obj.exp2flies);
+nframes = obj.nframes(obj.exp2flies{n});
+
+funname = sprintf('compute_%s',fn);
+[data,units] = feval(funname,n,obj);
 
 switch fn,
   
   % area
   case 'area',
-    for fly = 1:nflies,
-      a_mm = obj.GetPerFrameData('a_mm',n,fly);
-      b_mm = obj.GetPerFrameData('b_mm',n,fly);
-      data{fly} = (2*a_mm).*(2*b_mm)*pi;
-    end
-    units = parseunits('mm^2');
+    [data,units] = compute_area(obj,n);
   
   % change in orientation
   case 'dtheta',
@@ -922,35 +920,29 @@ switch fn,
     
   case 'sex',
     
-    data = obj.ClassifySex(n);
+    if ~isstruct(obj.sexclassifier),
+      obj.sexclassifier = load(obj.sexclassifiermatfile);
+    end
+    
+    for fly = 1:nflies,
+      areasmooth = obj.GetPerFrameData('areasmooth',n,fly);
+      data{fly} = ClassifySex(areasmooth,sexclassifier.mu_area,...
+        sexclassifier.var_area,...
+        sexclassifier.ptrans,...
+        sexclassifier.state2sex);
+    end
     units = parseunits('unit');
     
   case 'areasmooth',
 
-    f = fdesign.lowpass('N,F3db',obj.areasmooth_filterorder,obj,areasmooth_maxfreq);
-    h = design(f,'butter');
-    h.PersistentMemory = true;
-
+    if ~isstruct(obj.sexclassifier),
+      obj.sexclassifier = load(obj.sexclassifiermatfile);
+    end
+    
     for fly = 1:nflies,
       area = obj.GetPerFrameData('area',n,fly);
-      h.filter(fliplr(area));
-      areasmooth = h.filter(area);
-      isoutlier = abs(areasmooth - area) > obj.areasmooth_maxerr;
-      [starts,ends] = get_interval_ends(isoutlier);
-      ends = ends - 1;
-      areacurr = area;
-      for i = 1:numel(starts),
-        if starts(i) == 1 && ends(i) == nframes(fly),
-          break;
-        elseif starts(i) == 1,
-          areacurr(starts(i):ends(i)) = area(ends(i)+1);
-        elseif ends(i) == trx(fly).nframes,
-          areacurr(starts(i):ends(i)) = area(starts(i)-1);
-        else
-          areacurr(starts(i):ends(i)) = (area(starts(i)-1)+area(ends(i)+1))/2;
-        end
-      end
-      data{fly} = areacurr;
+      data{fly} = SmoothAreaOutliers(area,sexclassifier.filterorder,...
+        sexclassifier.maxfreq,sexclassifier.maxerr);
     end
     
     units = parseunits('mm^2');
