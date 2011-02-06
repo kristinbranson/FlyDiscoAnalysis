@@ -211,8 +211,13 @@ classdef Trx < handle
 
     function [data,units] = ComputePerFrameData(obj,fn,n)
       
-      funname = sprintf('compute_%s',fn);
-      [data,units] = feval(funname,obj,n);
+      m = regexp(fn,'^magveldiff_(.*)$','once');
+      if ~isempty(m),
+        [data,units] = compute_magveldiff(obj,n,m{1});
+      else
+        funname = sprintf('compute_%s',fn);
+        [data,units] = feval(funname,obj,n);
+      end
       filename = obj.GetPerFrameFile(fn,n);
       save(filename,'data','units');
       

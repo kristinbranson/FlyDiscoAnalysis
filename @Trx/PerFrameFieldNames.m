@@ -1,7 +1,6 @@
-function fns = perFrameFieldNames()
+function fns = PerFrameFieldNames()
 
-fns = {'absphisideways'
-  'phisideways'
+fns = {'phisideways'
   'absdtheta_tail'
   'dtheta_tail'
   'absdv_tail'
