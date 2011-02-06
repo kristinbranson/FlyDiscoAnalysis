@@ -149,7 +149,7 @@ else
       speed(fly).smoothd2theta = 0;
 
     else
-      speed(fly).smoothd2theta = [0,modrange(diff(speed(fly).smoothdtheta),-pi,pi)]./trx(fly).dt;
+      speed(fly).smoothd2theta = [0,diff(speed(fly).smoothdtheta)]./trx(fly).dt;
     end
     units.smoothd2theta = parseunits('rad/s/s');
     speed(fly).abssmoothd2theta = abs(speed(fly).smoothd2theta);
@@ -163,8 +163,8 @@ else
       % if only one frame, set to orientation
       speed(fly).phi = trx(fly).theta_mm;
     else
-      dy1 = [trx(fly).y(2)-trx(fly).y(1),(trx(fly).y(3:end)-trx(fly).y(1:end-2))/2,trx(fly).y(end)-trx(fly).y(end-1)];
-      dx1 = [trx(fly).x(2)-trx(fly).x(1),(trx(fly).x(3:end)-trx(fly).x(1:end-2))/2,trx(fly).x(end)-trx(fly).x(end-1)];
+      dy1 = [trx(fly).y_mm(2)-trx(fly).y_mm(1),(trx(fly).y_mm(3:end)-trx(fly).y_mm(1:end-2))/2,trx(fly).y_mm(end)-trx(fly).y_mm(end-1)];
+      dx1 = [trx(fly).x_mm(2)-trx(fly).x_mm(1),(trx(fly).x_mm(3:end)-trx(fly).x_mm(1:end-2))/2,trx(fly).x_mm(end)-trx(fly).x_mm(end-1)];
       speed(fly).phi = atan2(dy1,dx1);
     end
     units.phi = parseunits('rad');
@@ -192,8 +192,8 @@ else
       trx(fly).du_tail = [];
       trx(fly).dv_tail = [];
     else
-      trx(fly).du_tail = dx.*cos(trx(fly).theta(1:end-1)) + dy.*sin(trx(fly).theta(1:end-1))./trx(fly).dt;
-      trx(fly).dv_tail = dx.*cos(trx(fly).theta(1:end-1)+pi/2) + dy.*sin(trx(fly).theta(1:end-1)+pi/2)./trx(fly).dt;
+      trx(fly).du_tail = dx.*cos(trx(fly).theta_mm(1:end-1)) + dy.*sin(trx(fly).theta_mm(1:end-1))./trx(fly).dt;
+      trx(fly).dv_tail = dx.*cos(trx(fly).theta_mm(1:end-1)+pi/2) + dy.*sin(trx(fly).theta_mm(1:end-1)+pi/2)./trx(fly).dt;
     end
     trx(fly).units.du_tail = parseunits('mm/s');
     trx(fly).units.dv_tail = parseunits('mm/s');
@@ -222,7 +222,7 @@ else
       trx(fly).phisideways = [];
     else
       phi = atan2(dy,dx);
-      trx(fly).phisideways = modrange(phi-trx(fly).theta(1:end-1),-pi/2,pi/2);
+      trx(fly).phisideways = modrange(phi-trx(fly).theta_mm(1:end-1),-pi/2,pi/2);
     end
     trx(fly).units.phisideways = parseunits('rad');
     trx(fly).absphisideways = abs(trx(fly).phisideways);

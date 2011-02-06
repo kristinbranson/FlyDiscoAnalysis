@@ -112,11 +112,9 @@ if strcmp(fn,'nframes'),
 elseif strcmp(fn,'firstframe'),
   res = {obj.firstframes(idx)};
 elseif strcmp(fn,'endframe'),
-  if ischar(t),
-    res = {obj.endframes};
-  else
-    res = {obj.endframes(idx)};
-  end  
+  res = {obj.endframes(idx)};
+elseif strcmp(fn,'off'),
+  res = {1-obj.firstframes(idx)};
 else
   res = cell(1,numel(idx));
   for j = 1:numel(idx),
