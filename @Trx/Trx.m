@@ -211,9 +211,24 @@ classdef Trx < handle
 
     function [data,units] = ComputePerFrameData(obj,fn,n)
       
-      m = regexp(fn,'^magveldiff_(.*)$','once');
-      if ~isempty(m),
-        [data,units] = compute_magveldiff(obj,n,m{1});
+      m_magveldiff = regexp(fn,'^magveldiff_(.*)$','tokens','once');
+      m_veltoward = regexp(fn,'^veltoward_(.*)$','tokens','once');
+      m_absthetadiff = regexp(fn,'^absthetadiff_(.*)$','tokens','once');
+      m_absphidiff = regexp(fn,'^absphidiff_(.*)$','tokens','once');
+      m_anglefrom1to2 = regexp(fn,'^anglefrom1to2_(.*)$','tokens','once');
+      m_absanglefrom1to2 = regexp(fn,'^absanglefrom1to2_(.*)$','tokens','once');
+      if ~isempty(m_magveldiff),
+        [data,units] = compute_magveldiff(obj,n,m_magveldiff{1});
+      elseif ~isempty(m_veltoward),
+        [data,units] = compute_veltoward(obj,n,m_veltoward{1});
+      elseif ~isempty(m_absthetadiff),
+        [data,units] = compute_absthetadiff(obj,n,m_absthetadiff{1});
+      elseif ~isempty(m_absphidiff),
+        [data,units] = compute_absphidiff(obj,n,m_absphidiff{1});
+      elseif ~isempty(m_anglefrom1to2),
+        [data,units] = compute_anglefrom1to2(obj,n,m_anglefrom1to2{1});
+      elseif ~isempty(m_absanglefrom1to2),
+        [data,units] = compute_absanglefrom1to2(obj,n,m_absanglefrom1to2{1});
       else
         funname = sprintf('compute_%s',fn);
         [data,units] = feval(funname,obj,n);
@@ -257,7 +272,9 @@ classdef Trx < handle
     
     x = LoadPerFrameData(obj,fn,n)
     
-    CleanPerFrameData(obj,fn,varargin)
+    CleanPerFrameData(obj,fns,varargin)
+    
+    varargout = drawfly(obj,fly,t,varargin)
     
   end
   

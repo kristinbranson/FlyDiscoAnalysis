@@ -1,6 +1,5 @@
-% magnitude of difference in velocity between fly and closest fly based on
-% type. 
-function [data,units] = compute_magveldiff(trx,n,type)
+% signed velocity in the direction of the closest fly, according to type
+function [data,units] = compute_veltoward(trx,n,type)
 
 flies = trx.exp2flies{n};
 nflies = numel(flies);
@@ -15,6 +14,8 @@ for i1 = 1:nflies,
   % velocity of fly1
   dx1 = diff(trx(fly1).x_mm);
   dy1 = diff(trx(fly1).y_mm);
+  x_mm1 = trx(fly1).x_mm;
+  y_mm1 = trx(fly1).y_mm;
 
   % loop over all flies
   for i2 = 1:nflies,
@@ -25,14 +26,20 @@ for i1 = 1:nflies,
     % frames where this fly is closest
     idx = find(closestfly(1:end-1) == fly2);
     if isempty(idx), continue; end
-
-    % velocity from these frames to the next frame
+    
+    % unit vector in direction of fly2 from fly1
     off = trx(fly1).firstframe - trx(fly2).firstframe;
-    dx2 = trx(fly2).x_mm(off+idx+1)-trx(fly2).x_mm(off+idx);
-    dy2 = trx(fly2).y_mm(off+idx+1)-trx(fly2).y_mm(off+idx);
+    dx2 = trx(fly2).x_mm(off+idx)-x_mm1(idx);
+    dy2 = trx(fly2).y_mm(off+idx)-y_mm1(idx);
+    dz2 = sqrt(dx2.^2 + dy2.^2);
+    dx2 = dx2 ./ dz2;
+    dy2 = dy2 ./ dz2;
+    dx2(dz2==0) = 0;
+    dy2(dz2==0) = 0;
+    
+    % project velocity of fly1 onto this vector
+    data{i1}(idx) = dx1(idx).*dx2 + dy1(idx).*dy2;
 
-    % magnitude of difference between velocity vectors
-    data{i1}(idx) = sqrt((dx1(idx)-dx2).^2 + (dy1(idx)-dy2).^2);
   end
 end
 

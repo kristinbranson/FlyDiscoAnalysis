@@ -1,5 +1,7 @@
 function d = dell2nose_pair(trx,fly1,fly2)
 
+nsamples = 20;
+
 % initialize
 d = nan(1,trx(fly1).nframes);
 
@@ -13,13 +15,23 @@ if t1 < t0,
 end
 
 % position of nose2
-xnose = trx(fly2).x_mm + 2*trx(fly1).a_mm.*cos(trx(fly2).theta_mm);
-ynose = trx(fly2).y_mm + 2*trx(fly1).a_mm.*sin(trx(fly2).theta_mm);
+xnose = trx(fly2).x_mm + 2*trx(fly2).a_mm.*cos(trx(fly2).theta_mm);
+ynose = trx(fly2).y_mm + 2*trx(fly2).a_mm.*sin(trx(fly2).theta_mm);
+
+% ellipse 1
+x_mm1 = trx(fly1).x_mm;
+y_mm1 = trx(fly1).y_mm;
+a_mm1 = trx(fly1).a_mm;
+b_mm1 = trx(fly1).b_mm;
+theta_mm1 = trx(fly1).theta_mm;
+
+off1 = trx(fly1).off;
+off2 = trx(fly2).off;
 
 for t = t0:t1,
-  i = t + trx(fly1).off;
-  j = t + trx(fly2).off;
-  d(i) = ellipsedist_hack(trx(fly1).x_mm(i),trx(fly1).y_mm(i),...
-    trx(fly1).a_mm(i),trx(fly1).b_mm(i),trx(fly1).theta_mm(i),...
-    xnose(j),ynose(j),50);
+  i = t + off1;
+  j = t + off2;
+  d(i) = ellipsedist_hack(x_mm1(i),y_mm1(i),...
+    2*a_mm1(i),2*b_mm1(i),theta_mm1(i),...
+    xnose(j),ynose(j),nsamples);
 end
