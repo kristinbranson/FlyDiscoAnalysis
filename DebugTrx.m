@@ -27,12 +27,12 @@ else
   expdir = expdirs{1};
   expdir_read = expdir_reads{1};
 end
-[readframe,nframes,fid,vidinfo] = get_readframe_fcn(fullfile(expdir_read,'movie.ufmf'));
-fclose(fid);
+% [readframe,nframes,fid,vidinfo] = get_readframe_fcn(fullfile(expdir_read,'movie.ufmf'));
+% fclose(fid);
 
 %% create Trx instance with one experiment
 obj = Trx('settingsdir',settingsdir,'analysis_protocol',analysis_protocol);
-obj.AddExpDir(expdir,vidinfo);
+obj.AddExpDir(expdir);
 
 %% try out all the per-frame properties
 

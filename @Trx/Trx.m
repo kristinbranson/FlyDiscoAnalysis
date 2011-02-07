@@ -248,9 +248,9 @@ classdef Trx < handle
     ReadPerFrameParams(obj)
     ReadSexClassifierParams(obj)
         
-    % AddExpDir(obj,expdir,vidinfo)
+    % AddExpDir(obj,expdir)
     % add a new experiment directory
-    AddExpDir(obj,expdir,vidinfo)
+    AddExpDir(obj,expdir)
     
     % RemoveExpDir(obj,expdir)
     % remove an experiment directory

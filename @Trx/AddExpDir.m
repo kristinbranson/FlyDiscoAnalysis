@@ -1,6 +1,6 @@
 % obj.AddExpDir(expdir)
 % Adds data associated with experiment expdir to the data represented by obj.
-function AddExpDir(obj,expdir,vidinfo)
+function AddExpDir(obj,expdir)
 
 if ismember(expdir,obj.expdir_bases),
   obj.RemoveExpDir(expdir);
@@ -13,11 +13,15 @@ obj.expdir_bases{n} = expdir;
 obj.expdir_reads{n} = fullfile(obj.dataloc_params.rootreaddir,expdir);
 obj.expdir_writes{n} = fullfile(obj.dataloc_params.rootwritedir,expdir);
 
+moviename = fullfile(obj.expdir_reads{n},obj.dataloc_params.moviefilestr);
+[~,nframes,fid,vidinfo] = get_readframe_fcn(moviename);
+fclose(fid);
+
 % store video info
 obj.nrs(n) = vidinfo.nr;
 obj.ncs(n) = vidinfo.nc;
 obj.ncolors(n) = vidinfo.ncolors;
-obj.movie_nframes(n) = vidinfo.nframes;
+obj.movie_nframes(n) = nframes;
 
 % read trajectories
 obj.trxfiles{n} = fullfile(obj.expdir_writes{n},obj.dataloc_params.trxfilestr);
