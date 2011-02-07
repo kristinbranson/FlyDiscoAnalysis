@@ -24,3 +24,4 @@ sexclassifierparamsfilestr,sexclassifier_params.txt
 sexclassifierdiagnosticsfilestr,sexclassifier_diagnostics.txt
 perframeparamsfilestr,perframe_params.txt
 landmarkparamsfilestr,landmark_params.txt
+perframefnsfilestr,perframefns.txt

@@ -1,6 +1,7 @@
 function fns = PerFrameFieldNames()
 
 fns = {
+  'absangle2wall'
   'abscorfrac_min'
   'absd2theta'
   'absdangle2wall'
@@ -14,6 +15,7 @@ fns = {
   'angle2wall'
   'anglesub'
   'area'
+  'areasmooth'
   'arena_angle'
   'arena_r'
   'closestfly_anglesub'
