@@ -21,14 +21,14 @@ for i1 = 1:nflies,
     end
     anglesub(i2,:) = anglesub_pair(trx,fly1,fly2);
   end
-  [maxanglesub{i1},closesti] = max(d,[],1);
+  [maxanglesub{i1},closesti] = max(anglesub,[],1);
   closestfly{i1} = flies(closesti);
 end
 
 % so that we don't compute dcenter twice
 if dosave_d,
-  data = mind; %#ok<NASGU>
-  units = parseunits('mm'); %#ok<NASGU>
+  data = maxanglesub; %#ok<NASGU>
+  units = parseunits('rad'); %#ok<NASGU>
   filename = trx.GetPerFrameFile('anglesub',n);
   save(filename,'data','units');
 end

@@ -1,7 +1,7 @@
 function StoreTrajectories(obj,n,traj)
 
 traj_fns = {'x','y','theta','a','b','timestamps',...
-  'x_mm','y_mm','a_mm','b_mm','theta_mm','dt'};
+  'x_mm','y_mm','a_mm','b_mm','theta_mm','dt','sex'};
 
 for i = 1:numel(traj_fns),
   fn = traj_fns{i};
@@ -21,6 +21,8 @@ for i = 1:numel(traj_fns),
       units = parseunits('s');
     case 'timestamps',
       units = parseunits('days');
+    case 'sex',
+      units = parseunits('unit');
   end
   save(filename,'data','units');
 end

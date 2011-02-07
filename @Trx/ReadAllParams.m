@@ -43,8 +43,8 @@ obj.dataloc_params.perframeparamsfile = ...
   fullfile(obj.settingsdir,obj.analysis_protocol,obj.dataloc_params.perframeparamsfilestr);
 obj.ReadPerFrameParams();
 
-%% read sex classification params
+%% read sex classifier
 
-obj.dataloc_params.sexclassifierparamsfile = ...
-  fullfile(obj.settingsdir,obj.analysis_protocol,obj.dataloc_params.sexclassifierparamsfilestr);
+obj.dataloc_params.sexclassifiertxtfile = ...
+  fullfile(obj.settingsdir,obj.analysis_protocol,obj.dataloc_params.sexclassifiertxtfilestr);
 obj.ReadSexClassifierParams();
