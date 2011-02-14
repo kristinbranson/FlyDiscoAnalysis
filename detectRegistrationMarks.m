@@ -108,7 +108,15 @@ if ~isBkgdImage && ~isempty(annName),
     nc = movie_width;
   end
   if isempty(nr) || isempty(nc),
-    error('Shape of movie could not be read from ann file');
+    if exist(movieName,'file'),
+      [readframe,~,fid,~] = get_readframe_fcn(movieName);
+      im = readframe(1);
+      nr = size(im,1);
+      nc = size(im,2);
+      fclose(fid);
+    else
+      error('Shape of movie could not be read from ann file of movie file');
+    end
   end
   bkgdImage = reshape(bkgdImage,[nr,nc]);
   isBkgdImage = true;

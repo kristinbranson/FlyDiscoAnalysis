@@ -33,10 +33,10 @@ switch s(i).type,
         j = 1;
         if ischar(s(i).subs{j}) && strcmp(s(i).subs{j},':'),
           exps = 1:obj.nexpdirs;
-        elseif ischar(s(i).subs{j}) && ismember(s(i).subs{j},obj.expdir_bases),
-          exps = find(strcmp(s(i).subs{j},obj.expdir_bases),1);
+        elseif ischar(s(i).subs{j}) && ismember(s(i).subs{j},obj.expdirs),
+          exps = find(strcmp(s(i).subs{j},obj.expdirs),1);
         elseif iscell(s(i).subs{j}),
-          [didfind,exps] = ismember(s(i).subs{j},obj.expdir_bases);
+          [didfind,exps] = ismember(s(i).subs{j},obj.expdirs);
           if any(~didfind),
             error(['Bad experiment indexing arguments: ',sprintf('%s ',s(i).subs{j}{~didfind})]);
           end

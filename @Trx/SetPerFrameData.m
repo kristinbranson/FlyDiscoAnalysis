@@ -8,7 +8,7 @@ if nidx > 2,
   error('At most two indexing parameters allowed');
 end
 if ischar(varargin{1}),
-  n = find(strcmp(obj.expdir_bases,varargin{1}),1);
+  n = find(strcmp(obj.expdirs,varargin{1}),1);
   if isempty(n),
     error('Unknown experiment %s',varargin{1});
   end

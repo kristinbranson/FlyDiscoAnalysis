@@ -14,12 +14,12 @@ if nidx == 1,
   [ns,flies] = obj.getExpFly(flyidxes);
 else
   if ischar(varargin{1}),
-    ns = find(strcmp(obj.expdir_bases,varargin{1}),1);
+    ns = find(strcmp(obj.expdirs,varargin{1}),1);
     if isempty(ns),
       error('Unknown experiment %s',varargin{1});
     end
   elseif iscell(varargin{1}),
-    [didfind,ns] = ismember(varargin{1},obj.expdir_bases);
+    [didfind,ns] = ismember(varargin{1},obj.expdirs);
     if any(~didfind),
       error(['Unknown experiments ',sprintf('%s ',varargin{1}{~didfind})]);
     end

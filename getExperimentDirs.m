@@ -2,42 +2,49 @@ function [expdirs,expdir_reads,expdir_writes,experiments,rootreaddir,rootwritedi
   getExperimentDirs(varargin)
 
 [protocol,daterange,linename,rig,plate,bowl,notstarted,subreadfiles,subwritefiles,...
-  settingsdir,datalocparamsfilestr] = ...
+  settingsdir,datalocparamsfilestr,rootdir] = ...
   myparse(varargin,'protocol','',...
   'daterange',cell(1,2),'linename','','rig','','plate','','bowl','','notstarted',false,...
   'subreadfiles',{},'subwritefiles',{},...
   'settingsdir','/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/settings',...
-  'datalocparamsfilestr','dataloc_params.txt');
+  'datalocparamsfilestr','dataloc_params.txt','rootdir','');
 
-switch protocol,
-
-  case 'RegistrationTest20110125',
-    rootreaddir = '/groups/branson/bransonlab/tracking_data/olympiad/FlyBowl/RegistrationTest20110125';
-    rootwritedir = rootreaddir;    
+if isempty(rootdir),
   
-  case 'scratched_polycarbonate_CtraxTest20101118',
-    rootreaddir = '/groups/branson/bransonlab/tracking_data/olympiad/FlyBowl/polycarbonate_scratched';
-    rootwritedir = '/groups/branson/home/bransonk/tracking/data/olympiad/FlyBowl/CtraxTest20101118';
+  switch protocol,
     
-  case 'CtraxTest20101118',
-    rootreaddir = '/groups/sciserv/flyolympiad/Olympiad_Screen/fly_bowl/bowl_data/';
-    rootwritedir = '/groups/branson/home/bransonk/tracking/data/olympiad/FlyBowl/CtraxTest20101118';
-    
-  case 'CtraxTest20110111',
-    rootreaddir = '/groups/branson/bransonlab/tracking_data/olympiad/FlyBowl/CtraxTest20110111';
-    rootwritedir = rootreaddir;
-    
-  case 'CtraxTest20110202',
-    rootreaddir = '/groups/branson/bransonlab/tracking_data/olympiad/FlyBowl/CtraxTest20110202';
-    rootwritedir = rootreaddir;  
-    
-  otherwise
-    
-    params = ReadParams(fullfile(settingsdir,protocol,datalocparamsfilestr));
-    
-    rootreaddir = params.rootreaddir;
-    rootwritedir = params.rootwritedir;
-    
+    case 'RegistrationTest20110125',
+      rootreaddir = '/groups/branson/bransonlab/tracking_data/olympiad/FlyBowl/RegistrationTest20110125';
+      rootwritedir = rootreaddir;
+      
+    case 'scratched_polycarbonate_CtraxTest20101118',
+      rootreaddir = '/groups/branson/bransonlab/tracking_data/olympiad/FlyBowl/polycarbonate_scratched';
+      rootwritedir = '/groups/branson/home/bransonk/tracking/data/olympiad/FlyBowl/CtraxTest20101118';
+      
+    case 'CtraxTest20101118',
+      rootreaddir = '/groups/sciserv/flyolympiad/Olympiad_Screen/fly_bowl/bowl_data/';
+      rootwritedir = '/groups/branson/home/bransonk/tracking/data/olympiad/FlyBowl/CtraxTest20101118';
+      
+    case 'CtraxTest20110111',
+      rootreaddir = '/groups/branson/bransonlab/tracking_data/olympiad/FlyBowl/CtraxTest20110111';
+      rootwritedir = rootreaddir;
+      
+    case 'CtraxTest20110202',
+      rootreaddir = '/groups/branson/bransonlab/tracking_data/olympiad/FlyBowl/CtraxTest20110202';
+      rootwritedir = rootreaddir;
+      
+    otherwise
+      
+      params = ReadParams(fullfile(settingsdir,protocol,datalocparamsfilestr));
+      
+      rootreaddir = params.rootreaddir;
+      rootwritedir = params.rootwritedir;
+      
+  end
+
+else
+  rootreaddir = rootdir;
+  rootwritedir = rootdir;
 end
 
 % date range

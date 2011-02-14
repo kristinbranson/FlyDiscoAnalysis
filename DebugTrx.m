@@ -21,9 +21,9 @@ if ispc,
 else
   settingsdir = '/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/settings';
   protocol = 'CtraxTest20110202';
-  analysis_protocol = '20110202';
+  analysis_protocol = '20110208';
   [expdirs,expdir_reads,expdir_writes,experiments,rootreaddir,rootwritedir] = ...
-    getExperimentDirs('protocol',protocol,'subreadfiles',{'ctrax_results.mat'});
+    getExperimentDirs('protocol',protocol,'subreadfiles',{'registered_trx.mat'});
   expdir = expdirs{1};
   expdir_read = expdir_reads{1};
 end

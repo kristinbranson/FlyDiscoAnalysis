@@ -6,7 +6,10 @@ nflies = numel(flies);
 data = cell(1,nflies);
 for i = 1:nflies,
   fly = flies(i);  
-  data{i} = modrange(diff(trx(fly).angle2wall),-pi,pi)./trx(fly).dt;
+  % set sign so that negative means going toward 0, positive means going
+  % away from 0
+  data{i} = sign(trx(fly).angle2wall(1:end-1)).*...
+    modrange(diff(trx(fly).angle2wall),-pi,pi)./trx(fly).dt;
 end
 units = parseunits('rad/s');
 

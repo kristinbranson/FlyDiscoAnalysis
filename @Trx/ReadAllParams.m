@@ -13,23 +13,8 @@ end
 dataloc_params = ReadParams(datalocparamsfile);
 
 % save
-old_dataloc_params = obj.dataloc_params;
 obj.dataloc_params = dataloc_params;
 obj.dataloc_params.datalocparamsfile = datalocparamsfile;
-
-%% reset global locations of data, and reload
-
-if ~isempty(old_dataloc_params) && ...
-    (~strcmp(old_dataloc_params.rootreaddir,dataloc_params.rootreaddir) || ...
-    ~strcmp(old_dataloc_params.rootwritedir,dataloc_params.rootwritedir)),
-  expdir_bases = obj.expdir_bases;
-  for i = 1:numel(expdir_bases),
-    obj.RemoveExpDir(expdir_bases{i});
-  end
-  for i = 1:numel(expdir_bases),
-    obj.AddExpDir(expdir_bases{i});
-  end
-end
 
 %% read landmark params
 

@@ -1,15 +1,13 @@
 function RemoveExpDir(obj,expdir)
 
 % which experiment
-n = find(strcmp(expdir,obj.expdir_bases),1);
+n = find(strcmp(expdir,obj.expdirs),1);
 if isempty(n),
   error('Experiment %s not loaded',expdir);
 end
 
 % clear file names
-obj.expdir_bases(n) = [];
-obj.expdir_reads(n) = [];
-obj.expdir_writes(n) = [];
+obj.expdirs(n) = [];
 
 % clear video info
 obj.nrs(n) = [];

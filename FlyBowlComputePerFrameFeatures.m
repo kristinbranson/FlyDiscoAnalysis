@@ -9,8 +9,12 @@ function FlyBowlComputePerFrameFeatures(expdir,varargin)
 
 %% load the trx
 
+fprintf('Initializing trx...\n');
+
 trx = Trx('analysis_protocol',analysis_protocol,'settingsdir',settingsdir,...
   'datalocparamsfilestr',datalocparamsfilestr);
+
+fprintf('Loading trajectories for %s...\n',expdir);
 
 trx.AddExpDir(expdir);
 

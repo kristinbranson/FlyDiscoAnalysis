@@ -60,14 +60,8 @@ classdef Trx < handle
     
     dataloc_params = [];
 
-    % names of the experiment directories, relative to root data directory
-    expdir_bases = {};
-    
-    % full path to experiment directories in rootreaddir
-    expdir_reads = {};
-    
-    % full path to experiment directories in rootwritedir
-    expdir_writes = {};
+    % names of the experiment directories
+    expdirs = {};
     
     % names of mat files containing registered, processed trajectories,
     % with sex classified
@@ -167,12 +161,20 @@ classdef Trx < handle
     function delete(obj)
 
       obj.nflies = 0;
-      obj.expdir_bases = {};
-      obj.expdir_reads = {};
-      obj.expdir_writes = {};
+      obj.expdirs = {};
       obj.perframehistory = cell(0,2);
       obj.ndatacached = 0;
       obj.datacached = {};
+      
+    end
+    
+    function file = getDataLoc(obj,s)
+      
+      if ~isfield(obj.dataloc_params,s),
+        error('Field %s of dataloc_params not set',s);
+      end
+      
+      file = fullfile(obj.settingsdir,obj.analysis_protocol,obj.dataloc_params.(s));
       
     end
     
@@ -273,6 +275,8 @@ classdef Trx < handle
     x = LoadPerFrameData(obj,fn,n)
     
     CleanPerFrameData(obj,fns,varargin)
+    
+    ClearDataCache(obj,fn,ns)
     
     varargout = drawfly(obj,fly,t,varargin)
     
