@@ -20,10 +20,10 @@ if ispc,
   
 else
   settingsdir = '/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/settings';
-  protocol = 'CtraxTest20110202';
+  protocol = '';
   analysis_protocol = '20110211';
   [expdirs,expdir_reads,expdir_writes,experiments,rootreaddir,rootwritedir] = ...
-    getExperimentDirs('protocol',protocol,'subreadfiles',{'registered_trx.mat'});
+    getExperimentDirs('protocol',analysis_protocol,'subreadfiles',{'registered_trx.mat'});
 end
 % [readframe,nframes,fid,vidinfo] = get_readframe_fcn(fullfile(expdir_read,'movie.ufmf'));
 % fclose(fid);
@@ -32,5 +32,5 @@ end
 
 for expdiri = randperm(numel(expdirs)),
   expdir = expdir_reads{expdiri};
-  FlyBowlComputePerFrameStats(expdir,'analysis_protocol',analysis_protocol);
+  FlyBowlComputePerFrameStats(expdir,'analysis_protocol',analysis_protocol,'visible','on');
 end

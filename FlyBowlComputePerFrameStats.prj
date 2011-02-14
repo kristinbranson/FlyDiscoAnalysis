@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <deployment-project>
-  <configuration target="target.standalone" target-name="Standalone Application" name="FlyBowlComputePerFrameStats" location="/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis" file="/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/FlyBowlComputePerFrameStats.prj" build-checksum="3290241269">
+  <configuration target="target.standalone" target-name="Standalone Application" name="FlyBowlComputePerFrameStats" location="/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis" file="/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/FlyBowlComputePerFrameStats.prj" build-checksum="3479723221">
     <param.project.name>/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/FlyBowlComputePerFrameStats.prj</param.project.name>
     <param.target.type>Standalone Application</param.target.type>
     <param.appname>FlyBowlComputePerFrameStats</param.appname>
@@ -67,8 +67,8 @@
       <file>${PROJECT_ROOT}/ReadHistPerFrameFeatures.m</file>
       <file>${PROJECT_ROOT}/ReadParams.m</file>
       <file>${PROJECT_ROOT}/ReadStatsPerFrameFeatures.m</file>
-      <file>${PROJECT_ROOT}/SavePerFrameHistTxtFile.m</file>
-      <file>${PROJECT_ROOT}/SavePerFrameStatsTxtFile.m</file>
+      <file>${PROJECT_ROOT}/SaveAllPerFrameHistTxtFile.m</file>
+      <file>${PROJECT_ROOT}/SaveAllPerFrameStatsTxtFile.m</file>
       <file>${PROJECT_ROOT}/SelectHistEdges.m</file>
       <file>${PROJECT_ROOT}/save2png.m</file>
       <file>/groups/branson/home/bransonk/tracking/code/JCtrax/filehandling</file>
