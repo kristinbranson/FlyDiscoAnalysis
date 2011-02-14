@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <deployment-project>
-  <configuration target="target.standalone" target-name="Standalone Application" name="FlyBowlRegisterTrx" location="/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis" file="/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/FlyBowlRegisterTrx.prj" build-checksum="2481590144">
+  <configuration target="target.standalone" target-name="Standalone Application" name="FlyBowlRegisterTrx" location="/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis" file="/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/FlyBowlRegisterTrx.prj" build-checksum="683116460">
     <param.project.name>/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/FlyBowlRegisterTrx.prj</param.project.name>
     <param.target.type>Standalone Application</param.target.type>
     <param.appname>FlyBowlRegisterTrx</param.appname>
@@ -59,79 +59,8 @@
       <file>${PROJECT_ROOT}/FlyBowlRegisterTrx.m</file>
     </fileset.main>
     <fileset.resources>
-      <file>${PROJECT_ROOT}/@Trx</file>
-      <file>${PROJECT_ROOT}/AnalyzeQuickStats.m</file>
-      <file>${PROJECT_ROOT}/AnalyzeQuickStats.m~</file>
-      <file>${PROJECT_ROOT}/AnalyzeQuickStatsScript.m</file>
-      <file>${PROJECT_ROOT}/AnalyzeQuickStatsScript.m~</file>
-      <file>${PROJECT_ROOT}/BgModelReview.m</file>
-      <file>${PROJECT_ROOT}/ChooseMaleFemaleClassifier.m</file>
-      <file>${PROJECT_ROOT}/ChooseMaleFemaleClassifier.m~</file>
-      <file>${PROJECT_ROOT}/ChooseTrackingParamsScript.m</file>
-      <file>${PROJECT_ROOT}/ChooseTrackingParamsScript.m~</file>
-      <file>${PROJECT_ROOT}/ClassifySex.m</file>
-      <file>${PROJECT_ROOT}/ComputeClosestFlyMeasurements.m</file>
-      <file>${PROJECT_ROOT}/ComputeLandmarkMeasurements.m</file>
-      <file>${PROJECT_ROOT}/ComputeLandmarkMeasurements.m~</file>
-      <file>${PROJECT_ROOT}/ComputeSpeedMeasurements.m</file>
-      <file>${PROJECT_ROOT}/DebugExperiment.m</file>
-      <file>${PROJECT_ROOT}/DebugFlyBowlRegisterTrx.m</file>
-      <file>${PROJECT_ROOT}/DebugRegisterTrxWrapper.m</file>
-      <file>${PROJECT_ROOT}/DebugTrx.m</file>
-      <file>${PROJECT_ROOT}/ExpBGFGModel_compute_log_lik_appearance_given_back.m</file>
-      <file>${PROJECT_ROOT}/ExpBGFGModel_compute_log_lik_appearance_given_fore.m</file>
-      <file>${PROJECT_ROOT}/ExpBGFGModel_compute_log_lik_dist_obj.m</file>
-      <file>${PROJECT_ROOT}/ExpBGFGModel_lik.m</file>
-      <file>${PROJECT_ROOT}/ExpFGBGModel_compute_log_lik.m</file>
-      <file>${PROJECT_ROOT}/ExpFGBGModel_compute_log_lik_ratio.m</file>
-      <file>${PROJECT_ROOT}/FlyBowlClassifySex.m</file>
-      <file>${PROJECT_ROOT}/FlyBowlProtocol.txt</file>
-      <file>${PROJECT_ROOT}/FlyBowlProtocol2Params.m</file>
-      <file>${PROJECT_ROOT}/FlyBowlRegisterTrx.m</file>
-      <file>${PROJECT_ROOT}/FlyBowlRegisterTrx.m~</file>
-      <file>${PROJECT_ROOT}/FlyBowlRegisterTrx.prj</file>
-      <file>${PROJECT_ROOT}/FlyBowlRegister_TestScript.m</file>
-      <file>${PROJECT_ROOT}/MakeVideosScript.m</file>
-      <file>${PROJECT_ROOT}/MakeVideosScript.m~</file>
-      <file>${PROJECT_ROOT}/MakeVideosScript20110111.m</file>
-      <file>${PROJECT_ROOT}/MakeVideosScript20110111.m~</file>
-      <file>${PROJECT_ROOT}/OldFlyBowlRegister.m</file>
       <file>${PROJECT_ROOT}/ReadParams.m</file>
-      <file>${PROJECT_ROOT}/RegisterTrx.m</file>
-      <file>${PROJECT_ROOT}/RegisterTrxWrapper.m</file>
-      <file>${PROJECT_ROOT}/RegisterTrxWrapper.m~</file>
-      <file>${PROJECT_ROOT}/SetJackKnifeMethod.m</file>
-      <file>${PROJECT_ROOT}/SmoothAreaOutliers.m</file>
-      <file>${PROJECT_ROOT}/TestCtraxDiagnosticsScript.m</file>
-      <file>${PROJECT_ROOT}/TestCtraxDiagnosticsScript.m~</file>
-      <file>${PROJECT_ROOT}/TestCtraxStatsBase.m</file>
-      <file>${PROJECT_ROOT}/TestCtraxStatsBase.m~</file>
-      <file>${PROJECT_ROOT}/TestFlyBowlRegisterTrx.m</file>
-      <file>${PROJECT_ROOT}/anglesubtended.m</file>
-      <file>${PROJECT_ROOT}/center_of_rotation.m</file>
-      <file>${PROJECT_ROOT}/center_of_rotation2.m</file>
       <file>${PROJECT_ROOT}/detectRegistrationMarks.m</file>
-      <file>${PROJECT_ROOT}/detectRegistrationMarks.m~</file>
-      <file>${PROJECT_ROOT}/detectRegistrationMarksScript.m</file>
-      <file>${PROJECT_ROOT}/detectRegistrationMarksScript.m~</file>
-      <file>${PROJECT_ROOT}/fix_timestamps.m</file>
-      <file>${PROJECT_ROOT}/getExperimentDirs.m</file>
-      <file>${PROJECT_ROOT}/getExperimentDirs.m~</file>
-      <file>${PROJECT_ROOT}/get_expdirs.m</file>
-      <file>${PROJECT_ROOT}/loadQuickStats.m</file>
-      <file>${PROJECT_ROOT}/load_ctrax.m</file>
-      <file>${PROJECT_ROOT}/parseExpDir.m</file>
-      <file>${PROJECT_ROOT}/parseunits.m</file>
-      <file>${PROJECT_ROOT}/readCheckTrackingResults.m</file>
-      <file>${PROJECT_ROOT}/readExpBGFGModel.m</file>
-      <file>${PROJECT_ROOT}/rfrac2center.m</file>
-      <file>${PROJECT_ROOT}/semilogy_with_zeros.m</file>
-      <file>${PROJECT_ROOT}/semilogy_with_zeros.m~</file>
-      <file>${PROJECT_ROOT}/sexclassifier.mat</file>
-      <file>${PROJECT_ROOT}/simple_behavior_statistics.m</file>
-      <file>${PROJECT_ROOT}/test_BgModelReview.m</file>
-      <file>${PROJECT_ROOT}/uninked_marker.jpg</file>
-      <file>${PROJECT_ROOT}/writeCheckTrackingResults.m</file>
       <file>/groups/branson/home/bransonk/tracking/code/JCtrax/filehandling</file>
       <file>/groups/branson/home/bransonk/tracking/code/JCtrax/misc</file>
     </fileset.resources>

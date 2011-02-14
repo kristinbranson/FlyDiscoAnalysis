@@ -1,0 +1,3 @@
+velmag,any,longtrx
+velmag,male,longtrx
+velmag,female,longtrx

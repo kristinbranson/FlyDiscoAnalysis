@@ -1,5 +1,5 @@
-rootreaddir,/groups/branson/bransonlab/tracking_data/olympiad/FlyBowl/CtraxTest20110202
-rootwritedir,/groups/branson/bransonlab/tracking_data/olympiad/FlyBowl/CtraxTest20110202
+rootreaddir,/groups/sciserv/flyolympiad/Olympiad_Screen/fly_bowl/bowl_data
+rootwritedir,/groups/sciserv/flyolympiad/Olympiad_Screen/fly_bowl/bowl_data
 moviefilestr,movie.ufmf
 annfilestr,movie.ufmf.ann
 ctraxfilestr,ctrax_results.mat
@@ -24,3 +24,19 @@ sexclassifierparamsfilestr,sexclassifier_params.txt
 sexclassifierdiagnosticsfilestr,sexclassifier_diagnostics.txt
 perframeparamsfilestr,perframe_params.txt
 landmarkparamsfilestr,landmark_params.txt
+perframefnsfilestr,perframefns.txt
+statsparamsfilestr,stats_params.txt
+statsperframefeaturesfilestr,stats_perframefeatures.txt
+statframeconditionfilestr,statframeconditions.txt
+statflyconditionfilestr,statflyconditions.txt
+statsperframetxtfilestr,stats_perframe.txt
+statsperframematfilestr,stats_perframe.mat
+histparamsfilestr,hist_params.txt
+histperframefeaturesfilestr,hist_perframefeatures.txt
+histperframedir,hist_perframe
+histperframebinsfilestr,hist_perframebins.mat
+histperframetxtfilestr,hist_perframe.txt
+histperframematfilestr,hist_perframe.mat
+figdir,analysis_plots
+histplotparamsfilestr,hist_plotparams.txt
+combine_experimentsfilestr,experiments.txt

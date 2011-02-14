@@ -2,18 +2,16 @@
 % Adds data associated with experiment expdir to the data represented by obj.
 function AddExpDir(obj,expdir)
 
-if ismember(expdir,obj.expdir_bases),
+if ismember(expdir,obj.expdirs),
   obj.RemoveExpDir(expdir);
 end
 
 obj.nexpdirs = obj.nexpdirs + 1;
 n = obj.nexpdirs;
 
-obj.expdir_bases{n} = expdir;
-obj.expdir_reads{n} = fullfile(obj.dataloc_params.rootreaddir,expdir);
-obj.expdir_writes{n} = fullfile(obj.dataloc_params.rootwritedir,expdir);
+obj.expdirs{n} = expdir;
 
-moviename = fullfile(obj.expdir_reads{n},obj.dataloc_params.moviefilestr);
+moviename = fullfile(obj.expdirs{n},obj.dataloc_params.moviefilestr);
 [~,nframes,fid,vidinfo] = get_readframe_fcn(moviename);
 fclose(fid);
 
@@ -24,7 +22,7 @@ obj.ncolors(n) = vidinfo.ncolors;
 obj.movie_nframes(n) = nframes;
 
 % read trajectories
-obj.trxfiles{n} = fullfile(obj.expdir_writes{n},obj.dataloc_params.trxfilestr);
+obj.trxfiles{n} = fullfile(obj.expdirs{n},obj.dataloc_params.trxfilestr);
 if ~exist(obj.trxfiles{n},'file'),
   error('Trajectory file %s does not exist',obj.trxfiles{n});
 end

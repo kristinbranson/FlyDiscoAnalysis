@@ -1,0 +1,4 @@
+male,sex,M
+female,sex,F
+walking,min_velmag,10,max_velmag,inf
+stopped,max_velmag,10

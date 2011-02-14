@@ -23,6 +23,11 @@ for i1 = 1:nflies,
     
     % frames where this fly is closest
     idx = find(closestfly(1:end-1) == fly2);
+    
+    % don't use the last frame of fly2
+    off = trx(fly1).firstframe - trx(fly2).firstframe;
+    idx(idx+off == trx(fly2).nframes) = [];
+    
     if isempty(idx), continue; end
     
     % orientation of fly2

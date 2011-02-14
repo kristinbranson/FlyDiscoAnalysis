@@ -24,7 +24,15 @@ for i = 1:numel(traj_fns),
     case 'sex',
       units = parseunits('unit');
   end
-  save(filename,'data','units');
+  try
+    save(filename,'data','units');
+  catch %#ok<CTCH>
+    if ~exist(filename,'file'),
+      error('Could not save to file %s',filename);
+    else
+      fprintf('Could not save to file %s, but file exists, so skipping\n',filename);
+    end
+  end
 end
 % conversion from pixels to mm
 if isfield(traj,'pxpermm'),

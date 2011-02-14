@@ -26,6 +26,10 @@ registration_params = ReadParams(registrationparamsfile);
 % name of annotation file
 annfile = fullfile(expdir,dataloc_params.annfilestr);
 
+% name of movie file
+moviefile = fullfile(expdir,dataloc_params.moviefilestr);
+
+
 registration_params = struct2paramscell(registration_params);
 % file to save image to
 if isfield(dataloc_params,'registrationimagefilestr'),
@@ -33,7 +37,7 @@ if isfield(dataloc_params,'registrationimagefilestr'),
 end
 % detect
 try
-  registration_data = detectRegistrationMarks(registration_params{:},'annName',annfile);
+  registration_data = detectRegistrationMarks(registration_params{:},'annName',annfile,'movieName',moviefile);
 catch ME,
   error(['Error detecting registration marks:\n',getReport(ME)]);
 end
