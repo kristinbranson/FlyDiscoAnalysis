@@ -37,8 +37,8 @@ statstxtsavename = fullfile(expdir,trx.dataloc_params.statsperframetxtfilestr);
 statsmatsavename = fullfile(expdir,trx.dataloc_params.statsperframematfilestr);
 
 % open the text file for writing
-statstxtfid = fopen(statstxtsavename,'w');
-fclose(statstxtfid);
+% statstxtfid = fopen(statstxtsavename,'w');
+% fclose(statstxtfid);
 
 statsperfly = struct;
 statsperexp = struct;
@@ -126,9 +126,11 @@ for i = 1:numel(stats_perframefeatures),
   fprintf('Analyzed %d / %d flies for condition %s, %s\n',nflies_analyzed,nfliestotal,frameconditionname,flyconditionname);
   
   % save to text file
-  SavePerFrameStatsTxtFile(statstxtsavename,fn,statsperflycurr,statsperexp.(fn));
+  %SavePerFrameStatsTxtFile(statstxtsavename,fn,statsperflycurr,statsperexp.(fn));
   
 end
+
+SaveAllPerFrameStatsTxtFile(statstxtsavename,statsperfly,statsperexp);
 
 % save to mat file
 save(statsmatsavename,'statsperfly','statsperexp','frameconditiondict',...
@@ -150,8 +152,8 @@ histtxtsavename = fullfile(expdir,trx.dataloc_params.histperframetxtfilestr);
 histmatsavename = fullfile(expdir,trx.dataloc_params.histperframematfilestr);
 
 % open the text file for writing
-histtxtfid = fopen(histtxtsavename,'w');
-fclose(histtxtfid);
+% histtxtfid = fopen(histtxtsavename,'w');
+% fclose(histtxtfid);
 
 histperfly = struct;
 histperexp = struct;
@@ -245,12 +247,13 @@ for i = 1:numel(hist_perframefeatures),
 
   
   % save to text file
-  SavePerFrameHistTxtFile(histtxtsavename,fn,histperflycurr,histperexp.(fn));
+  %SavePerFrameHistTxtFile(histtxtsavename,fn,histperflycurr,histperexp.(fn));
 
 end
 
 save(histmatsavename,'histperfly','histperexp','bins','frameconditiondict',...
   'flyconditiondict');
+SaveAllPerFrameHistTxtFile(histtxtsavename,histperfly,histperexp);
 
 %% create the plot directory if it does not exist
 figdir = fullfile(expdir,trx.dataloc_params.figdir);

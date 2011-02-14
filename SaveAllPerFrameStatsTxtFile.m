@@ -42,7 +42,7 @@ for i = 1:nfields,
   end
   
   % conditions concatenated together for this field
-  fprintf('%s_conditions',field);
+  fprintf(fid,'%s_conditions',field);
   for jj = 1:nidx,
     j = idx(jj);
     fprintf(fid,',fly%s_frame%s',flyconditions{j},frameconditions{j});
@@ -51,7 +51,7 @@ for i = 1:nfields,
   % number of flies analyzed per condition
   fprintf(fid,'\n%s_nflies_analyzed',field);  
   for jj = 1:nidx,
-    fprintf(fid,',%d',fn,nnz(isdata{jj}));
+    fprintf(fid,',%d',nnz(isdata{jj}));
   end
   
   % flies analyzed per condition
@@ -77,7 +77,7 @@ for i = 1:nfields,
   end
   
   % number of frames per fly
-  fprintf(fid,'\n%s_Z_perfly',fn);
+  fprintf(fid,'\n%s_Z_perfly',field);
   for jj = 1:nidx,
     j = idx(jj);
     fn = fns{j};
@@ -85,7 +85,7 @@ for i = 1:nfields,
   end
 
   % fraction of trajectory per fly
-  fprintf(fid,'\n%s_fracframesanalyzed_perfly',fn);
+  fprintf(fid,'\n%s_fracframesanalyzed_perfly',field);
   for jj = 1:nidx,
     j = idx(jj);
     fn = fns{j};
@@ -93,7 +93,7 @@ for i = 1:nfields,
   end
   
   % percentiles per fly
-  fprintf(fid,'\n%s_prctiles_perfly',fn);
+  fprintf(fid,'\n%s_prctiles_perfly',field);
   for jj = 1:nidx,
     j = idx(jj);
     fn = fns{j};
@@ -151,7 +151,7 @@ for i = 1:nfields,
     fn = fns{j};
     fprintf(fid,',%f',statsperexp.(fn).stdprctiles);
   end
-  fprintf('\n');
+  fprintf(fid,'\n');
 
 end
 
