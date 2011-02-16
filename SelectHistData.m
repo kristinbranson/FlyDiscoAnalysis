@@ -1,6 +1,6 @@
 function [centers,edges,meanfrac,stdfrac,stderrfrac,nfliesanalyzed] = ...
-    SelectHistData(fns,bininfo,hist_plot_params,plottype,...
-                   histperfly,histperexp);
+  SelectHistData(fns,bininfo,hist_plot_params,plottype,...
+  histperfly,histperexp)
 
 ntypes = numel(fns);
 
@@ -34,8 +34,6 @@ if nbinscombine == 1,
       meanfrac{typei} = histperexp.(fn).meanfrac_log;
       stdfrac{typei} = histperexp.(fn).stdfrac_log;
     end
-    stderrfrac{typei} = stdfrac{typei} / sqrt(histperexp.(fn).nflies);
-    nfliesanalyzed(typei) = histperexp.(fn).nflies;
   end
 
 else
@@ -89,6 +87,8 @@ end
 % these computations are the same whether we combine bins or not
 for typei = 1:ntypes,
   fn = fns{typei};
-  stderrfrac{typei} = stdfrac{typei} / sqrt(histperexp.(fn).nflies);
+  goodidx = ~isnan(histperfly.(fn).Z);
+  nflies = sum(histperfly.(fn).fracframesanalyzed(goodidx));
+  stderrfrac{typei} = stdfrac{typei} / sqrt(nflies);
   nfliesanalyzed(typei) = histperexp.(fn).nflies;
 end

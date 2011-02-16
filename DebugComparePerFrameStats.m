@@ -15,9 +15,10 @@ rootdir = '/groups/sciserv/flyolympiad/Olympiad_Screen/fly_bowl/bowl_data';
 settingsdir = '/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/settings';
 datalocparamsfilestr = 'dataloc_params.txt';
 analysis_protocol = '20110211';
-linename = 'pBDPGAL4U';
-requiredfiles = {'histperframematfilestr','statsperframematfilestr'};
-fn = 'velmag_flyany_frameany';
+linename1 = 'pBDPGAL4U';
+linename2 = 'GMR_15C06_AE_01';
+requiredfiles = {'statsperframematfilestr'};
+field = 'velmag';
 
 %% get all experiments that satisfy input conditions; currently parsing
 % directory structure
@@ -29,16 +30,29 @@ for i = 1:numel(requiredfiles),
 end
 subreadfiles = unique(subreadfiles);
 
-exp_params = {'rootdir',rootdir,'subreadfiles',subreadfiles,'linename',linename};
-
-[expdirs,expdir_reads,~,experiments,~,~] = ...
+%% experiments for line 1
+exp_params = {'rootdir',rootdir,'subreadfiles',subreadfiles,'linename',linename1};
+[~,expdirs1,~,~,~,~] = ...
   getExperimentDirs(exp_params{:});
-nexpdirs = numel(expdirs);
+nexpdirs1 = numel(expdirs1);
 
-if nexpdirs == 0,
+if nexpdirs1 == 0,
+  error('No experiments selected');
+end
+
+%% experiments for line 2
+exp_params = {'rootdir',rootdir,'subreadfiles',subreadfiles,'linename',linename2};
+[~,expdirs2,~,~,~,~] = ...
+  getExperimentDirs(exp_params{:});
+nexpdirs2 = numel(expdirs2);
+
+if nexpdirs2 == 0,
   error('No experiments selected');
 end
 
 
 %%
-hfig = CompareHistograms(expdir_reads,fn);
+colors = cat(1,repmat([0,0,0],[nexpdirs1,1]),...
+  repmat([.7,0,0],[nexpdirs2,1]));
+
+hfig = ComparePerFrameStats([expdirs1,expdirs2],field,'colors',colors,'sortby','none');

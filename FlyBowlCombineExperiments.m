@@ -24,7 +24,10 @@ subreadfiles = unique(subreadfiles);
 exp_params = [{'rootdir',rootdir,'subreadfiles',subreadfiles},leftovers];
 
 [expdirs,expdir_reads,~,experiments,~,~] = ...
-  getExperimentDirs(exp_params{:});
+  getExperimentDirs('settingsdir',settingsdir,...
+  'datalocparamsfilestr',datalocparamsfilestr,...
+  'protocol',analysis_protocol,...
+  exp_params{:});
 nexpdirs = numel(expdirs);
 
 if nexpdirs == 0,
@@ -83,6 +86,8 @@ if ~exist(outdir,'file'),
     error('Could not create directory %s for output:\n%s',outdir,msg);
   end
 end
+
+fprintf('Combining %d experiments into directory %s...\n',nexpdirs,outdir);
 
 %% save 
 
