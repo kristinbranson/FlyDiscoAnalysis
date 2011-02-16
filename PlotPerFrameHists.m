@@ -1,15 +1,18 @@
-function hfig = PlotPerFrameHists(field,hist_perframefeatures,...
+function handles = PlotPerFrameHists(field,hist_perframefeatures,...
   histperexp,histperfly,bininfo,hist_plot_params,expname,varargin)
 
 % parse plotting parameters
-[hfig,visible,position,axposition,...
-  linewidth,stdalpha] = ...
+[hfig,hax,visible,position,axposition,...
+  linewidth,stdalpha,linestyle,stdstyle] = ...
   myparse(varargin,'hfig',1,...
+  'hax',[],...
   'visible','off',...
   'position',[1 1 1000 500],...
   'axposition',[.1,.1,.85,.8],...
   'linewidth',2,...
-  'stdalpha',.2);
+  'stdalpha',.2,...
+  'linestyle','-',...
+  'stdstyle','patch');
 
 if isfield(hist_plot_params,field),
   plottype = hist_plot_params.(field);
@@ -19,14 +22,18 @@ end
 
 black = ones(1,3)/255;
 
-% set up figure
-if ~ishandle(hfig),
-  figure(hfig);
+%% set up figure
+if ~isempty(hax) && ishandle(hax),
+  hfig = get(hax,'Parent');
 else
-  clf(hfig);
+  if ~ishandle(hfig),
+    figure(hfig);
+  else
+    clf(hfig);
+  end
+  set(hfig,'Visible',visible,'Position',position);
+  hax = axes('Position',axposition,'Parent',hfig,'XColor',black,'YColor',black);
 end
-set(hfig,'Visible',visible,'Position',position);
-hax = axes('Position',axposition,'Parent',hfig,'XColor',black,'YColor',black);
 
 % which fields, conditions
 idx = find(strcmp({hist_perframefeatures.field},field));
@@ -54,17 +61,17 @@ end
 if any(isnan(typecolors(:,1))),
   newcolors = jet(64)*.7;
   missingcolors = find(isnan(typecolors(:,1)));
-  for i = missingcolors,
-    [~,j] = max(dist2(newcolors,typecolors));
+  for i = missingcolors',
+    [~,j] = max(min(dist2(newcolors,typecolors),[],2),[],1);
     typecolors(i,:) = newcolors(j,:);
   end
 end
 
 
 %% select out relevant histogram data
-[centers,edges,meanfrac,stdfrac,stderrfrac,nfliesanalyzed] = ...
-    SelectHistData(fns,bininfo,hist_plot_params,plottype,...
-                   histperfly,histperexp);
+[centers,edges,meanfrac,~,stderrfrac,nfliesanalyzed] = ...
+  SelectHistData(fns,bininfo,hist_plot_params,plottype,...
+  histperfly,histperexp);
 
 hold(hax,'on');
 
@@ -72,10 +79,16 @@ hold(hax,'on');
 hstd = nan(1,ntypes);
 for typei = 1:ntypes,
   typecolor = typecolors(typei,:);
-  hstd(typei) = patch([centers,fliplr(centers)],...
-    [meanfrac{typei}+stderrfrac{typei},...
-    fliplr(meanfrac{typei}-stderrfrac{typei})],...
-    typecolor,'facealpha',stdalpha,'LineStyle','none','parent',hax);
+  if strcmpi(stdstyle,'patch'),
+    hstd(typei) = patch([centers,fliplr(centers)],...
+      [meanfrac{typei}+stderrfrac{typei},...
+      fliplr(meanfrac{typei}-stderrfrac{typei})],...
+      typecolor,'facealpha',stdalpha,'LineStyle','none','parent',hax);
+  else
+    hstd(typei) = errorbar(centers,meanfrac{typei},stderrfrac{typei},'.',...
+      'parent',hax,'color',typecolor);
+  end
+    
 end
 
 % plot the type means
@@ -85,7 +98,7 @@ for typeii = 1:ntypes,
   typei = order(typeii);
   typecolor = typecolors(typei,:);
   htype(typei) = plot(hax,centers,meanfrac{typei},...
-    '-','color',typecolor,'linewidth',linewidth);
+    linestyle,'color',typecolor,'linewidth',linewidth);
 end
 
 % set axis limits
@@ -124,7 +137,17 @@ else
   end
 end
 
-legend(htype,typestrs,'Location','Best','Parent',hfig,'Interpreter','none');
-xlabel(hax,field,'Interpreter','none');
-ylabel(hax,'Fraction of frames');
-title(hax,{sprintf('Histogram of %s, %s binning',field,plottype),expname},'Interpreter','none');
+hleg = legend(htype,typestrs,'Location','Best','Parent',hfig,'Interpreter','none');
+hxlabel = xlabel(hax,field,'Interpreter','none');
+hylabel = ylabel(hax,'Fraction of frames');
+hti = title(hax,{sprintf('Histogram of %s, %s binning',field,plottype),expname},'Interpreter','none');
+
+handles = struct;
+handles.htype = htype;
+handles.hstd = hstd;
+handles.hfig = hfig;
+handles.hax = hax;
+handles.hleg = hleg;
+handles.hxlabel = hxlabel;
+handles.hylabel = hylabel;
+handles.hti = hti;

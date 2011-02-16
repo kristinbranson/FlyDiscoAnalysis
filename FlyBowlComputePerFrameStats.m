@@ -5,7 +5,7 @@ function FlyBowlComputePerFrameStats(expdir,varargin)
   'analysis_protocol','current',...
   'settingsdir','/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/settings',...
   'datalocparamsfilestr','dataloc_params.txt',...
-  'visible','off');
+  'visible','off'); %#ok<NASGU>
 
 %% load this experiment
 fprintf('Initializing trx...\n');
@@ -255,41 +255,41 @@ save(histmatsavename,'histperfly','histperexp','bins','frameconditiondict',...
   'flyconditiondict');
 SaveAllPerFrameHistTxtFile(histtxtsavename,histperfly,histperexp);
 
-%% create the plot directory if it does not exist
-figdir = fullfile(expdir,trx.dataloc_params.figdir);
-if ~exist(figdir,'file'),
-  [status,msg,~] = mkdir(figdir);
-  if ~status,
-    error('Could not create the figure directory %s:\n%s',figdir,msg);
-  end
-end
-
-%% read plotting parameters
-
-histplotparamsfile = fullfile(trx.settingsdir,trx.analysis_protocol,trx.dataloc_params.histplotparamsfilestr);
-hist_plot_params = ReadParams(histplotparamsfile);
-[~,expname] = fileparts(expdir);
-
-%% plot stuff
-% TODO: plot stats of controls for the previous X weeks behind these
-
-hist_fields = unique({hist_perframefeatures.field});
-for i = 1:numel(hist_fields),
-  
-  field = hist_fields{i};
-
-  hfig = PlotPerFrameHists(field,hist_perframefeatures,...
-    histperexp,histperfly,...
-    bins.(field),hist_plot_params,expname,...
-    'visible',visible);
-  drawnow;
-  savename = sprintf('hist_%s.png',hist_fields{i});
-  if exist(savename,'file'),
-    delete(savename);
-  end
-  save2png(fullfile(figdir,savename),hfig);
-  
-end
-
-close all;
+% %% create the plot directory if it does not exist
+% figdir = fullfile(expdir,trx.dataloc_params.figdir);
+% if ~exist(figdir,'file'),
+%   [status,msg,~] = mkdir(figdir);
+%   if ~status,
+%     error('Could not create the figure directory %s:\n%s',figdir,msg);
+%   end
+% end
+% 
+% %% read plotting parameters
+% 
+% histplotparamsfile = fullfile(trx.settingsdir,trx.analysis_protocol,trx.dataloc_params.histplotparamsfilestr);
+% hist_plot_params = ReadParams(histplotparamsfile);
+% [~,expname] = fileparts(expdir);
+% 
+% %% plot stuff
+% % TODO: plot stats of controls for the previous X weeks behind these
+% 
+% hist_fields = unique({hist_perframefeatures.field});
+% for i = 1:numel(hist_fields),
+%   
+%   field = hist_fields{i};
+% 
+%   hfig = PlotPerFrameHists(field,hist_perframefeatures,...
+%     histperexp,histperfly,...
+%     bins.(field),hist_plot_params,expname,...
+%     'visible',visible);
+%   drawnow;
+%   savename = sprintf('hist_%s.png',hist_fields{i});
+%   if exist(savename,'file'),
+%     delete(savename);
+%   end
+%   save2png(fullfile(figdir,savename),hfig);
+%   
+% end
+% 
+% close all;
 

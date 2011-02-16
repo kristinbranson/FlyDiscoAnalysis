@@ -5,11 +5,11 @@ my $MAXNJOBS = 12;
 
 my $nargs = $#ARGV + 1;
 if($nargs < 1){
-    print "Usage: fork_FlyBowlComputePerFrameStats.pl <expdirlist.txt>\n";
+    print "Usage: fork_FlyBowlPlotPerFrameStats.pl <expdirlist.txt>\n";
     exit(1);
 }
 
-my $SCRIPT = "/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/settings/20110211/run_FlyBowlComputePerFrameStats.sh";
+my $SCRIPT = "/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/settings/20110211/run_FlyBowlPlotPerFrameStats.sh";
 
 my $PERFRAMEDIR = "perframe";
 
@@ -55,7 +55,7 @@ while(my $expdir = <FILE>){
     print "*** $basename\n";
     
     # make a name for this job
-    my $sgeid = "kb_flybowlcomputeperframestats_$basename";
+    my $sgeid = "kb_flybowlplotperframestats_$basename";
     $sgeid =~ s/\//_/g;
     $sgeid =~ s/\./_/g;
     $sgeid =~ s/\;/_/g;
@@ -113,11 +113,11 @@ sub write_qsub_sh {
 	open(SHFILE,">$shfilename") || die "Cannot write $shfilename";
 
 	print SHFILE qq~#!/bin/bash
-# FlyBowlComputePerFrameStats test script.
+# FlyBowlPlotPerFrameStats test script.
 # this script will be qsubed
 export MCR_CACHE_ROOT=$MCR_CACHE_ROOT.$jobid
 
-$SCRIPT $MCR $expdir
+$SCRIPT $MCR $expdir visible on
 
 ~;
 	

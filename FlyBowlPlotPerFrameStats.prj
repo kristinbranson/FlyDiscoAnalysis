@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <deployment-project>
-  <configuration target="target.standalone" target-name="Standalone Application" name="FlyBowlComputePerFrameStats" location="/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis" file="/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/FlyBowlComputePerFrameStats.prj" build-checksum="1582641241">
-    <param.project.name>/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/FlyBowlComputePerFrameStats.prj</param.project.name>
+  <configuration target="target.standalone" target-name="Standalone Application" name="FlyBowlPlotPerFrameStats" location="/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis" file="/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/FlyBowlPlotPerFrameStats.prj" build-checksum="181136925">
+    <param.project.name>/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/FlyBowlPlotPerFrameStats.prj</param.project.name>
     <param.target.type>Standalone Application</param.target.type>
-    <param.appname>FlyBowlComputePerFrameStats</param.appname>
-    <param.intermediate>${PROJECT_ROOT}/FlyBowlComputePerFrameStats/src</param.intermediate>
-    <param.output>${PROJECT_ROOT}/FlyBowlComputePerFrameStats/distrib</param.output>
+    <param.appname>FlyBowlPlotPerFrameStats</param.appname>
+    <param.intermediate>${PROJECT_ROOT}/FlyBowlPlotPerFrameStats/src</param.intermediate>
+    <param.output>${PROJECT_ROOT}/FlyBowlPlotPerFrameStats/distrib</param.output>
     <param.embed.ctf>true</param.embed.ctf>
     <param.tbx_on_path>
       <item>all</item>
@@ -56,27 +56,21 @@
       <param.user.defined.mcr.options />
     </unset>
     <fileset.main>
-      <file>${PROJECT_ROOT}/FlyBowlComputePerFrameStats.m</file>
+      <file>${PROJECT_ROOT}/FlyBowlPlotPerFrameStats.m</file>
     </fileset.main>
     <fileset.resources>
-      <file>${PROJECT_ROOT}/@Trx</file>
-      <file>${PROJECT_ROOT}/ComputePerFrameStats.m</file>
-      <file>${PROJECT_ROOT}/FlyConditionCheck.m</file>
-      <file>${PROJECT_ROOT}/FrameConditionCheck.m</file>
-      <file>${PROJECT_ROOT}/HistPerFrameData.m</file>
+      <file>${PROJECT_ROOT}/PlotPerFrameHists.m</file>
       <file>${PROJECT_ROOT}/ReadHistPerFrameFeatures.m</file>
       <file>${PROJECT_ROOT}/ReadParams.m</file>
       <file>${PROJECT_ROOT}/ReadStatsPerFrameFeatures.m</file>
-      <file>${PROJECT_ROOT}/SaveAllPerFrameHistTxtFile.m</file>
-      <file>${PROJECT_ROOT}/SaveAllPerFrameStatsTxtFile.m</file>
-      <file>/groups/branson/home/bransonk/tracking/code/JCtrax/filehandling</file>
+      <file>${PROJECT_ROOT}/save2png.m</file>
       <file>/groups/branson/home/bransonk/tracking/code/JCtrax/misc</file>
     </fileset.resources>
     <fileset.package />
     <build-deliverables>
-      <file name="readme.txt" location="${PROJECT_ROOT}/FlyBowlComputePerFrameStats/distrib">/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/FlyBowlComputePerFrameStats/distrib/readme.txt</file>
-      <file name="run_FlyBowlComputePerFrameStats.sh" location="${PROJECT_ROOT}/FlyBowlComputePerFrameStats/distrib">/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/FlyBowlComputePerFrameStats/distrib/run_FlyBowlComputePerFrameStats.sh</file>
-      <file name="FlyBowlComputePerFrameStats" location="${PROJECT_ROOT}/FlyBowlComputePerFrameStats/distrib">/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/FlyBowlComputePerFrameStats/distrib/FlyBowlComputePerFrameStats</file>
+      <file name="FlyBowlPlotPerFrameStats" location="${PROJECT_ROOT}/FlyBowlPlotPerFrameStats/distrib">/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/FlyBowlPlotPerFrameStats/distrib/FlyBowlPlotPerFrameStats</file>
+      <file name="readme.txt" location="${PROJECT_ROOT}/FlyBowlPlotPerFrameStats/distrib">/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/FlyBowlPlotPerFrameStats/distrib/readme.txt</file>
+      <file name="run_FlyBowlPlotPerFrameStats.sh" location="${PROJECT_ROOT}/FlyBowlPlotPerFrameStats/distrib">/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/FlyBowlPlotPerFrameStats/distrib/run_FlyBowlPlotPerFrameStats.sh</file>
     </build-deliverables>
     <matlab>
       <root>/localhome/bransonk/software/matlab/R2010b</root>

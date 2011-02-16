@@ -9,8 +9,30 @@ end
 
 [expdirs,expdir_reads,expdir_writes,experiments,rootreaddir,rootwritedir] = ...
   getExperimentDirs('protocol','20110211','subreadfiles',{'perframe/velmag.mat'});
-fid = fopen('expdirs20110212.txt','w');
+[expdirs_done,expdir_reads_done] = ...
+  getExperimentDirs('protocol','20110211','subreadfiles',{'analysis_plots/hist_theta_mm.png'});
+
+expdir_reads = setdiff(expdir_reads,expdir_reads_done);
+
+fid = fopen('expdirs20110215.txt','w');
 for i = numel(expdir_reads):-1:1,
   fprintf(fid,'%s\n',expdir_reads{i});
 end
+fclose(fid);
+
+%%
+
+linenames = {'GMR_15D07*','GMR_15H01*','GMR_21C09*','GMR_14G05*','GMR_16C05*',...
+  'GMR_16E09*','GMR_16F09*'};
+fid = fopen('expdirs20110215avi.txt','w');
+for i = 1:numel(linenames),
+
+  [expdirs,expdir_reads,expdir_writes,experiments,rootreaddir,rootwritedir] = ...
+    getExperimentDirs('protocol','20110211','subreadfiles',{'analysis_plots/hist_theta_mm.png'},'linename',linenames{i});
+  for j = numel(expdir_reads):-1:1,
+    fprintf(fid,'%s\n',expdir_reads{j});
+  end
+  
+end
+
 fclose(fid);

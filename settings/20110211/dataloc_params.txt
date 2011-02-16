@@ -40,3 +40,6 @@ histperframematfilestr,hist_perframe.mat
 figdir,analysis_plots
 histplotparamsfilestr,hist_plotparams.txt
 combine_experimentsfilestr,experiments.txt
+ctraxresultsavifilestr,ctrax_results_movie
+ctraxresultsmovieparamsfilestr,ctraxresultsmovie_params.txt
+pBDPGAL4Ustatsdir,/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/settings/pBDPGAL4U_stats
