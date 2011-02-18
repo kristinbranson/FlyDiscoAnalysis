@@ -3,14 +3,16 @@ function FlyBowlCombineExperiments(rootdir,outdir,varargin)
 
 % parse arguments
 [settingsdir,analysis_protocol,datalocparamsfilestr,...
-  requiredfiles,subreadfiles,visible,leftovers] = ...
+  requiredfiles,subreadfiles,visible,controldatadirstr,plottitle,leftovers] = ...
   myparse_nocheck(varargin,...
   'settingsdir','/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/settings',...
   'analysis_protocol','current',...
   'datalocparamsfilestr','dataloc_params.txt',...
   'requiredfiles',{'histperframematfilestr','statsperframematfilestr'},...
   'subreadfiles',{},...
-  'visible','on');
+  'visible','on',...
+  'controldatadirstr','current',...
+  'plottitle','');
 
 %% get all experiments that satisfy input conditions; currently parsing
 % directory structure
@@ -166,32 +168,83 @@ end
 
 histplotparamsfile = fullfile(settingsdir,analysis_protocol,dataloc_params.histplotparamsfilestr);
 hist_plot_params = ReadParams(histplotparamsfile);
-[~,typename] = fileparts(outdir);
+if isempty(plottitle),
+  [~,plottitle] = fileparts(outdir);
+end
 histperframefeaturesfile = fullfile(settingsdir,analysis_protocol,dataloc_params.histperframefeaturesfilestr);
 hist_perframefeatures = ReadHistPerFrameFeatures(histperframefeaturesfile);
 histperframebinsfile = fullfile(settingsdir,analysis_protocol,dataloc_params.histperframebinsfilestr);
 load(histperframebinsfile,'bins');
+statsperframefeaturesfile = fullfile(settingsdir,analysis_protocol,dataloc_params.statsperframefeaturesfilestr);
+stats_perframefeatures = ReadStatsPerFrameFeatures(statsperframefeaturesfile);
 
-%% plot stuff
-% TODO: plot stats of controls for the previous X weeks behind these
+
+%% load control data
+
+if ~isempty(controldatadirstr),
+  
+  controldatadir = fullfile(dataloc_params.pBDPGAL4Ustatsdir,controldatadirstr);
+  controlstatsname = fullfile(controldatadir,dataloc_params.statsperframematfilestr);
+  controlstats = load(controlstatsname);
+  controlhistname = fullfile(controldatadir,dataloc_params.histperframematfilestr);
+  controlhist = load(controlhistname);
+  
+else
+  
+  controlstats = [];
+  controlhist = [];
+  
+end
+
+%% plot means, stds
+
+stathandles = PlotPerFrameStats(stats_perframefeatures,statsperfly,statsperexp,controlstats,plottitle,'visible',visible);
+drawnow;  
+savename = sprintf('stats.png');
+savename = fullfile(figdir,savename);
+if exist(savename,'file'),
+  delete(savename);
+end
+save2png(savename,stathandles.hfig);
+
+%% plot histograms
 
 hist_fields = unique({hist_perframefeatures.field});
 for i = 1:numel(hist_fields),
   
   field = hist_fields{i};
 
-  hfig = PlotPerFrameHists(field,hist_perframefeatures,...
+  if ~isempty(controlhist),
+    handles_control = PlotPerFrameHists(field,hist_perframefeatures,...
+      controlhist.histperexp,controlhist.histperfly,...
+      bins.(field),hist_plot_params,plottitle,...
+      'visible',visible,'linestyle',':','stdstyle','errorbar');
+    hax = handles_control.hax;
+  else
+    hax = [];
+  end
+  
+  handles = PlotPerFrameHists(field,hist_perframefeatures,...
     histperexp,histperfly,...
-    bins.(field),hist_plot_params,typename,...
-    'visible',visible);
+    bins.(field),hist_plot_params,plottitle,...
+    'visible',visible,...
+    'hax',hax);
+  
+  if ~isempty(controlhist),
+    % fix legend
+    s = get(handles.hleg,'String');
+    legend([handles_control.htype(1),handles.htype],[{'control'},s],'Parent',handles.hfig,'Interpreter','none');
+  end
+
+  
   drawnow;
-  savename = fullfile(figdir,sprintf('hist_%s.png',hist_fields{i}));
+  savename = sprintf('hist_%s.png',hist_fields{i});
+  savename = fullfile(figdir,savename);
   if exist(savename,'file'),
     delete(savename);
   end
-  save2png(savename,hfig);
+  save2png(savename,handles.hfig);
   
 end
 
 close all;
-

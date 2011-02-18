@@ -29,6 +29,11 @@ if ~exist(figdir,'file'),
   end
 end
 
+%% load stats params
+
+statsperframefeaturesfile = fullfile(settingsdir,analysis_protocol,dataloc_params.statsperframefeaturesfilestr);
+stats_perframefeatures = ReadStatsPerFrameFeatures(statsperframefeaturesfile);
+
 %% load hist params
 
 histperframefeaturesfile = fullfile(settingsdir,analysis_protocol,dataloc_params.histperframefeaturesfilestr);
@@ -59,8 +64,19 @@ else
   
 end
 
+%% plot means, stds
 
-%% plot stuff
+[~,basename] = fileparts(expdir);
+stathandles = PlotPerFrameStats(stats_perframefeatures,statsperfly,statsperexp,controlstats,basename,'visible',visible);
+drawnow;  
+savename = sprintf('stats.png');
+savename = fullfile(figdir,savename);
+if exist(savename,'file'),
+  delete(savename);
+end
+save2png(savename,stathandles.hfig);
+
+%% plot histograms
 
 hist_fields = unique({hist_perframefeatures.field});
 for i = 1:numel(hist_fields),
@@ -92,10 +108,11 @@ for i = 1:numel(hist_fields),
   
   drawnow;
   savename = sprintf('hist_%s.png',hist_fields{i});
+  savename = fullfile(figdir,savename);
   if exist(savename,'file'),
     delete(savename);
   end
-  save2png(fullfile(figdir,savename),handles.hfig);
+  save2png(savename,handles.hfig);
   
 end
 

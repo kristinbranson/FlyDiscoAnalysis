@@ -20,6 +20,16 @@ for i = numel(expdir_reads):-1:1,
 end
 fclose(fid);
 
+%% all experiments with stats_perframe data
+[expdirs,expdir_reads,expdir_writes,experiments,rootreaddir,rootwritedir] = ...
+  getExperimentDirs('protocol','20110211','subreadfiles',{'stats_perframe.mat'});
+
+fid = fopen('expdirs20110217plot.txt','w');
+for i = numel(expdir_reads):-1:1,
+  fprintf(fid,'%s\n',expdir_reads{i});
+end
+fclose(fid);
+
 %%
 
 linenames = {'GMR_15D07*','GMR_15H01*','GMR_21C09*','GMR_14G05*','GMR_16C05*',...

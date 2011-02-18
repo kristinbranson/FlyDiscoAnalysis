@@ -269,7 +269,7 @@ end
 fliesmaybeplot = find(nframesoverlap > 0);
 
 if isempty(zoomflies),
-  if length(fliesmaybeplot) <= nzoom,
+  if length(fliesmaybeplot) < nzoom,
     zoomflies = [fliesmaybeplot,nan(1,nzoom-length(fliesmaybeplot))];
     fprintf('Not enough flies to plot\n');
   else
@@ -286,17 +286,22 @@ rowszoom = floor(nr/nzoomr);
 
 % colors of the flies
 if isempty(colors),
+  zoomfliesreal = zoomflies(~isnan(zoomflies));
   colors0 = jet(nids);
   fliesnotplot = setdiff(1:nids,fliesmaybeplot);
-  fliesnotzoom = setdiff(fliesmaybeplot,zoomflies(:)');
+  fliesnotzoom = setdiff(fliesmaybeplot,zoomfliesreal(:)');
   colors = nan(nids,3);
-  coloridx = round(linspace(1,size(colors0,1),numel(zoomflies)));
-  colors(zoomflies(:),:) = colors0(coloridx,:);
+  coloridx = round(linspace(1,size(colors0,1),numel(zoomfliesreal)));
+  colors(zoomfliesreal(:),:) = colors0(coloridx,:);
   colors0(coloridx,:) = [];
-  coloridx = round(linspace(1,size(colors0,1),numel(fliesnotzoom)));
-  colors(fliesnotzoom,:) = colors0(coloridx,:);
-  colors0(coloridx,:) = [];
-  colors(fliesnotplot,:) = colors0;
+  if ~isempty(fliesnotzoom),
+    coloridx = round(linspace(1,size(colors0,1),numel(fliesnotzoom)));
+    colors(fliesnotzoom,:) = colors0(coloridx,:);
+    colors0(coloridx,:) = [];
+  end
+  if ~isempty(fliesnotplot),
+    colors(fliesnotplot,:) = colors0;
+  end
 elseif size(colors,1) ~= nids,
   colors = colors(modrange(0:nids-1,size(colors,1))+1,:);
 end

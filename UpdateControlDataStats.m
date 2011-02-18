@@ -12,7 +12,16 @@ function outdir = UpdateControlDataStats(rootdir,varargin)
 
 datalocparamsfile = fullfile(settingsdir,analysis_protocol,datalocparamsfilestr);
 dataloc_params = ReadParams(datalocparamsfile);
-outdir = fullfile(dataloc_params.pBDPGAL4Ustatsdir,datestr(now,30));
+timestamp = datestr(now,30);
+outdir = fullfile(dataloc_params.pBDPGAL4Ustatsdir,timestamp);
+
+if ~exist(dataloc_params.pBDPGAL4Ustatsdir,'file'),
+  mkdir(dataloc_params.pBDPGAL4Ustatsdir);
+end
+
+if ~exist(outdir,'file')
+  mkdir(outdir);
+end
 
 %% allowed dates
 
