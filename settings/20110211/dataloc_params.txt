@@ -1,5 +1,6 @@
 rootreaddir,/groups/sciserv/flyolympiad/Olympiad_Screen/fly_bowl/bowl_data
 rootwritedir,/groups/sciserv/flyolympiad/Olympiad_Screen/fly_bowl/bowl_data
+linedatadir,/groups/sciserv/flyolympiad/Olympiad_Screen/fly_bowl/line_data
 moviefilestr,movie.ufmf
 annfilestr,movie.ufmf.ann
 ctraxfilestr,ctrax_results.mat

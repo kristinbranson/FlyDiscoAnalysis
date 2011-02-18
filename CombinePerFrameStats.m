@@ -3,7 +3,8 @@ function statsperexp = CombinePerFrameStats(statsperfly)
 nprctiles = size(statsperfly.prctiles,1);
 
 % which flies we will look at
-goodidx = ~isnan(statsperfly.Z);
+goodidx = ~isnan(statsperfly.Z) & ~isnan(statsperfly.mean) & ...
+  ~isinf(statsperfly.mean);
 
 % total number of frames of data analyzed in this experiment
 statsperexp.Z = sum(statsperfly.Z(goodidx));
