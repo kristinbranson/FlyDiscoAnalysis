@@ -1,4 +1,4 @@
-function [centers,edges,meanfrac,stdfrac,stderrfrac,nfliesanalyzed] = ...
+function [centers,edges,meanfrac,stdfrac,stderrfrac,nfliesanalyzed,Zpertype] = ...
   SelectHistData(fns,bininfo,hist_plot_params,plottype,...
   histperfly,histperexp)
 
@@ -22,6 +22,7 @@ meanfrac = cell(1,ntypes);
 stdfrac = cell(1,ntypes);
 stderrfrac = cell(1,ntypes);
 nfliesanalyzed = nan(1,ntypes);
+Zpertype = nan(1,ntypes);
 
 if nbinscombine == 1,
 
@@ -91,4 +92,5 @@ for typei = 1:ntypes,
   nflies = sum(histperfly.(fn).fracframesanalyzed(goodidx));
   stderrfrac{typei} = stdfrac{typei} / sqrt(nflies);
   nfliesanalyzed(typei) = histperexp.(fn).nflies;
+  Zpertype(typei) = histperexp.(fn).Z;
 end

@@ -38,3 +38,5 @@ while true,
   end
 
 end
+
+fclose(fid);

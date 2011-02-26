@@ -27,17 +27,24 @@ defaults.zoomflies = [];
 defaults.nzoomr = 5;
 defaults.nzoomc = 3;
 defaults.compression = 'None';
-allowedcompressions = {'Indeo3', 'Indeo5', 'Cinepak', 'MSVC', 'RLE', 'None'};
+allowedcompressions = {'Indeo3', 'Indeo5', 'Cinepak', 'MSVC', 'RLE', 'None','Uncompressed AVI','Motion JPEG AVI'};
+useVideoWriter = exist('VideoWriter','file');
+mencoderoptions = '';
+mencoder_maxnframes = inf;
 [moviename,trxname,aviname,colors,zoomflies,nzoomr,nzoomc,boxradius,...
-  taillength,fps,maxnframes,firstframes,compression,figpos,movietitle] = ...
+  taillength,fps,maxnframes,firstframes,compression,figpos,movietitle,...
+  useVideoWriter,mencoderoptions,mencoder_maxnframes,...
+  avifileTempDataFile] = ...
   myparse(varargin,'moviename','','trxname','','aviname','','colors',[],'zoomflies',[],'nzoomr',nan,'nzoomc',nan,...
   'boxradius',nan,'taillength',nan,'fps',nan,'maxnframes',nan,'firstframes',[],'compression','',...
-  'figpos',[],'movietitle','');
+  'figpos',[],'movietitle','','useVideoWriter',useVideoWriter,...
+  'mencoderoptions',mencoderoptions,'mencoder_maxnframes',mencoder_maxnframes,...
+  'avifileTempDataFile','');
 
 if ~ischar(compression),
   compression = '';
 end
-if ~isempty(compression) && ~any(strcmpi(compression,allowedcompression)),
+if ~isempty(compression) && ~any(strcmpi(compression,allowedcompressions)),
   fprintf('Unknown compressor %s\n',compression);
   compression = '';
 end
@@ -149,7 +156,7 @@ end
 
 compressionprompt = ['Compressor (must be one of ',...
   sprintf('%s, ',allowedcompressions{1:end-1}),allowedcompressions{end},')'];
-if ~ispc,
+if ~ispc && ~useVideoWriter,
   compression = 'None';
 elseif isempty(compression),
   prompts{end+1} = compressionprompt;
@@ -329,6 +336,8 @@ htri = zeros(1,nids);
 scalefactor = rowszoom / (2*boxradius+1);
 hzoom = zeros(nzoomr,nzoomc);
 
+mencoder_nframes = 0;
+
 for segi = 1:numel(firstframes),
   firstframe = firstframes(segi);
   endframe = endframes(segi);
@@ -361,7 +370,7 @@ for segi = 1:numel(firstframes),
     % draw frame number text box
     framestr = sprintf('Frame %d, t = %.2f s',frame,timestamps(frame)-timestamps(1));
     if ~isempty(movietitle),
-      framestr = {framestr,movietitle};
+      framestr = {framestr,movietitle}; %#ok<AGROW>
     end
     if frame == firstframes(1),
       htext = text(.5,.5,framestr,'Parent',hax,'BackgroundColor','k','Color','g','VerticalAlignment','bottom','interpreter','none');
@@ -476,7 +485,27 @@ for segi = 1:numel(firstframes),
         figpos = get(1,'Position');
       end
       set(1,'visible','off');
-      aviobj = avifile(aviname,'fps',fps,'quality',100,'compression',compression); %#ok<TNMLP>
+      if useVideoWriter,
+        if strcmpi(compression,'None') || strcmpi(compression,'Uncompressed AVI'),
+          profile = 'Uncompressed AVI';
+        else
+          profile = 'Motion JPEG AVI';
+        end
+        aviobj = VideoWriter(aviname,profile);
+        set(aviobj,'FrameRate',fps);
+        if ~strcmpi(profile,'Uncompressed AVI'),
+          set(aviobj,'Quality',100);
+        end
+        open(aviobj);
+      else
+        if isempty(avifileTempDataFile),
+          aviobj = avifile(aviname,'fps',fps,'quality',100,'compression',compression); %#ok<TNMLP>
+        else
+          aviobj = myavifile(aviname,'fps',fps,'quality',100,'compression',compression,...
+            'TempDataFile',avifileTempDataFile); 
+          fprintf('Temporary data file for avi writing: %s\n',aviobj.TempDataFile);
+        end
+      end
     end
     
     if frame == firstframes(1),
@@ -485,14 +514,22 @@ for segi = 1:numel(firstframes),
     else
       fr = getframe_invisible(hax,[height,width]);
     end
-    aviobj = addframe(aviobj,fr);
+    if useVideoWriter,
+      writeVideo(aviobj,fr);
+    else
+      aviobj = addframe(aviobj,fr);
+    end
     set(1,'Position',figpos);
     
   end
   
 end
   
-aviobj = close(aviobj); %#ok<NASGU>
+if useVideoWriter,
+  close(aviobj);
+else
+  aviobj = close(aviobj); %#ok<NASGU>
+end
 if fid > 0,
   fclose(fid);
 end

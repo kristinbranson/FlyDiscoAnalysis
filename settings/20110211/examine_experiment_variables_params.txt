@@ -1,0 +1,1 @@
+requiredfiles,ctraxdiagnosticsfilestr,quickstatsfilestr,temperaturefilestr,ufmfdiagnosticsfilestr,registrationparamsfilestr,sexclassifiertxtfilestr,sexclassifierdiagnosticsfilestr

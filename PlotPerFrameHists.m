@@ -31,7 +31,7 @@ else
   else
     clf(hfig);
   end
-  set(hfig,'Visible',visible,'Position',position);
+  set(hfig,'Visible',visible,'Position',position,'Renderer','painters');
   hax = axes('Position',axposition,'Parent',hfig,'XColor',black,'YColor',black);
 end
 
@@ -62,38 +62,47 @@ if any(isnan(typecolors(:,1))),
   newcolors = jet(64)*.7;
   missingcolors = find(isnan(typecolors(:,1)));
   for i = missingcolors',
-    [~,j] = max(min(dist2(newcolors,typecolors),[],2),[],1);
+    [tmp,j] = max(min(dist2(newcolors,typecolors),[],2),[],1);
     typecolors(i,:) = newcolors(j,:);
   end
 end
 
 
 %% select out relevant histogram data
-[centers,edges,meanfrac,~,stderrfrac,nfliesanalyzed] = ...
+[centers,edges,meanfrac,tmp,stderrfrac,nfliesanalyzed,Zpertype] = ...
   SelectHistData(fns,bininfo,hist_plot_params,plottype,...
   histperfly,histperexp);
 
+%%
+
 hold(hax,'on');
 
+[tmp,order] = sort(Zpertype);
 % plot the type stderrs
 hstd = nan(1,ntypes);
-for typei = 1:ntypes,
+for typeii = 1:ntypes,
+  typei = order(typeii);
   typecolor = typecolors(typei,:);
   if strcmpi(stdstyle,'patch'),
-    hstd(typei) = patch([centers,fliplr(centers)],...
+    hstd(typeii) = patch([centers,fliplr(centers)],...
       [meanfrac{typei}+stderrfrac{typei},...
       fliplr(meanfrac{typei}-stderrfrac{typei})],...
-      typecolor,'facealpha',stdalpha,'LineStyle','none','parent',hax);
+      typecolor*stdalpha + (1-stdalpha),'LineStyle','none','parent',hax);
   else
-    hstd(typei) = errorbar(centers,meanfrac{typei},stderrfrac{typei},'.',...
+    hstd(typeii) = errorbar(centers,meanfrac{typei},stderrfrac{typei},'.',...
       'parent',hax,'color',typecolor);
   end
     
 end
 
+% put stds on the bottom
+if strcmpi(stdstyle,'patch'),
+  hchil = get(hax,'children');
+  set(hax,'Children',[setdiff(hchil,hstd),fliplr(hstd)]);
+end
+
 % plot the type means
 htype = nan(1,ntypes);
-[~,order] = sort(nfliesanalyzed);
 for typeii = 1:ntypes,
   typei = order(typeii);
   typecolor = typecolors(typei,:);

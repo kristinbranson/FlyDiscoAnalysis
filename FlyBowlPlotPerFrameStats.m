@@ -23,7 +23,7 @@ load(histmatsavename,'histperfly','histperexp');
 %% create the plot directory if it does not exist
 figdir = fullfile(expdir,dataloc_params.figdir);
 if ~exist(figdir,'file'),
-  [status,msg,~] = mkdir(figdir);
+  [status,msg] = mkdir(figdir);
   if ~status,
     error('Could not create the figure directory %s:\n%s',figdir,msg);
   end
@@ -45,7 +45,7 @@ load(histperframebinsfile,'bins');
 
 histplotparamsfile = fullfile(settingsdir,analysis_protocol,dataloc_params.histplotparamsfilestr);
 hist_plot_params = ReadParams(histplotparamsfile);
-[~,expname] = fileparts(expdir);
+[tmp,expname] = fileparts(expdir);
 
 %% get control data
 
@@ -66,7 +66,7 @@ end
 
 %% plot means, stds
 
-[~,basename] = fileparts(expdir);
+[tmp,basename] = fileparts(expdir);
 stathandles = PlotPerFrameStats(stats_perframefeatures,statsperfly,statsperexp,controlstats,basename,'visible',visible);
 drawnow;  
 savename = sprintf('stats.png');
