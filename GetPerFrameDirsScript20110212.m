@@ -30,6 +30,20 @@ for i = numel(expdir_reads):-1:1,
 end
 fclose(fid);
 
+%% all experiments with hists, stats but no plots
+
+[~,expdirs_ready] = ...
+  getExperimentDirs('protocol',analysis_protocol,'subreadfiles',{'hist_perframe.mat'});
+[~,expdirs_done] = ...
+  getExperimentDirs('protocol',analysis_protocol,'subreadfiles',{'analysis_plots/hist_velmag.png'});
+expdirs = setdiff(expdirs_ready,expdirs_done);
+
+fid = fopen('expdirs20110220plot.txt','w');
+for i = numel(expdirs):-1:1,
+  fprintf(fid,'%s\n',expdirs{i});
+end
+fclose(fid);
+
 %%
 
 linenames = {'GMR_15D07*','GMR_15H01*','GMR_21C09*','GMR_14G05*','GMR_16C05*',...

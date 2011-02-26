@@ -94,8 +94,8 @@ end
 %% colors
 
 colors = jet(nfns)*.7;
-[~,order] = sort(min(abs(meanmeans+stderrmean),abs(meanmeans-stderrmean)));
-[~,order] = sort(order);
+[tmp,order] = sort(min(abs(meanmeans+stderrmean),abs(meanmeans-stderrmean)));
+[tmp,order] = sort(order);
 colors = colors(order,:);
 
 %% plot stderr of control data
