@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <deployment-project>
-  <configuration target="target.standalone" target-name="Standalone Application" name="FlyBowlMakeCtraxResultsMovie" location="/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis" file="/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/FlyBowlMakeCtraxResultsMovie.prj" build-checksum="1611573161">
+  <configuration target="target.standalone" target-name="Standalone Application" name="FlyBowlMakeCtraxResultsMovie" location="/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis" file="/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/FlyBowlMakeCtraxResultsMovie.prj" build-checksum="3867169313">
     <param.project.name>/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/FlyBowlMakeCtraxResultsMovie.prj</param.project.name>
     <param.target.type>Standalone Application</param.target.type>
     <param.appname>FlyBowlMakeCtraxResultsMovie</param.appname>
@@ -59,10 +59,12 @@
       <file>${PROJECT_ROOT}/FlyBowlMakeCtraxResultsMovie.m</file>
     </fileset.main>
     <fileset.resources>
+      <file>${PROJECT_ROOT}/@myavifile</file>
       <file>${PROJECT_ROOT}/ReadParams.m</file>
       <file>${PROJECT_ROOT}/make_ctrax_result_movie.m</file>
       <file>/groups/branson/home/bransonk/tracking/code/JCtrax/filehandling</file>
       <file>/groups/branson/home/bransonk/tracking/code/JCtrax/misc</file>
+      <file>${MATLAB_ROOT}/toolbox/matlab/audiovideo/@avifile</file>
     </fileset.resources>
     <fileset.package />
     <build-deliverables>
@@ -73,8 +75,8 @@
     <matlab>
       <root>/localhome/bransonk/software/matlab/R2010b</root>
       <path>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/misc</directory>
         <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/filehandling</directory>
+        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/misc</directory>
         <directory>/groups/branson/home/bransonk/Documents/MATLAB</directory>
         <directory>${MATLAB_ROOT}/toolbox/matlab/general</directory>
         <directory>${MATLAB_ROOT}/toolbox/matlab/ops</directory>

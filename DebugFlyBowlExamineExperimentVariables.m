@@ -21,17 +21,16 @@ max_days_prev = 7;
 
 %% which experiments
 
-d = now;
-%format = 'yyyymmddTHHMMSS';
-format = 'yyyy-mm-ddTHH:MM:SS';
-maxdatenum = d - min_days_prev;
-mindatenum = d - max_days_prev;
-mindatestr = datestr(mindatenum,format);
-maxdatestr = datestr(maxdatenum,format);
+% d = now;
+% %format = 'yyyymmddTHHMMSS';
+% format = 'yyyy-mm-ddTHH:MM:SS';
+% maxdatenum = d - min_days_prev;
+% mindatenum = d - max_days_prev;
+% mindatestr = datestr(mindatenum,format);
+% maxdatestr = datestr(maxdatenum,format);
 
 params = {'settingsdir',settingsdir,...
-  'analysis_protocol',analysis_protocol,'hfig',hfig,...
-  'daterange',{mindatestr,maxdatestr}};
+  'analysis_protocol',analysis_protocol,'hfig',hfig};
 
 %% 
 
