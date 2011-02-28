@@ -9,9 +9,9 @@ examinestats = {};
 while true,
   s = fgetl(fid);
   if ~ischar(s), break; end
-  fns = regexp(s,',','split');
-  fns = strtrim(fns);
-  examinestats{end+1} = fns; %#ok<AGROW>
+  examinestats{end+1} = regexprep(s,',','_'); %#ok<AGROW>
+  %fns = strtrim(fns);
+  %examinestats{end+1} = fns; %#ok<AGROW>
 end
 
 fclose(fid);
