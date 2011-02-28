@@ -16,84 +16,93 @@ examine_params = ReadParams(examineparamsfile);
 examinefile = fullfile(settingsdir,analysis_protocol,dataloc_params.examineexperimentvariablesfilestr);
 examinestats = ReadExamineExperimentVariables(examinefile);
 
-%% which experiments?
+%% get data
+data_types = {'ufmf_diagnostics_summary_*','temperature_stream',...
+  'ctrax_diagnostics_*','registrationData_*','sexclassifier_daignostics_*'};
+%data_types = examinestats;
 
-subreadfiles = {};
-for i = 1:numel(examine_params.requiredfiles),
-  subreadfiles{end+1} = dataloc_params.(examine_params.requiredfiles{i}); %#ok<AGROW>
-end
-subreadfiles = unique(subreadfiles);
+queries = leftovers;
+queries(end+1:end+2) = {'data_type',data_types};
+data = SAGEGetBowlData(queries{:});
 
-exp_params = [{'rootdir',dataloc_params.rootreaddir,'subreadfiles',subreadfiles},leftovers];
-
-[expdir_bases,expdirs,~,experiments,~,~] = ...
-  getExperimentDirs('settingsdir',settingsdir,...
-  'datalocparamsfilestr',datalocparamsfilestr,...
-  'protocol',analysis_protocol,...
-  exp_params{:});
-nexpdirs = numel(expdirs);
-
-if nexpdirs == 0,
-  error('No experiments selected');
-end
-
-% sort by date
-date = {experiments.date};
-[~,order] = sort(date);
-expdirs = expdirs(order);
-%experiments = experiments(order);
-expdir_bases = expdir_bases(order);
-
-%% load experiment variables for each experiment
-
-data = [];
-
-for expdiri = 1:nexpdirs,
-  
-  expdir = expdirs{expdiri};
-  
-  datacurr = struct;
-  
-  % read ufmf diagnostics
-  ufmfdiagnosticsfile = fullfile(expdir,dataloc_params.ufmfdiagnosticsfilestr);
-  datacurr.ufmf_diagnostics = readUFMFDiagnostics(ufmfdiagnosticsfile);
-  
-  % read quickstats
-  quickstatsfile = fullfile(expdir,dataloc_params.quickstatsfilestr);
-  datacurr.quickstats = ReadParams(quickstatsfile);
-  
-  % read ctrax diagnostics
-  ctraxdiagnosticsfile = fullfile(expdir,dataloc_params.ctraxdiagnosticsfilestr);
-  datacurr.ctrax_diagnostics = ReadParams(ctraxdiagnosticsfile);
-  % add in mean_nsplit
-  datacurr.ctrax_diagnostics.mean_nsplit = ...
-    datacurr.ctrax_diagnostics.sum_nsplit / datacurr.ctrax_diagnostics.nlarge_split;
-  % add in nframes_not_tracked
-  datacurr.ctrax_diagnostics.nframes_not_tracked = ...
-    datacurr.ufmf_diagnostics.summary.nFrames - datacurr.ctrax_diagnostics.nframes_analyzed;
-  
-  % read registration data
-  registrationtxtfile = fullfile(expdir,dataloc_params.registrationtxtfilestr);
-  datacurr.registrationData = ReadParams(registrationtxtfile);
-
-  % read sex classification diagnostics
-  sexclassifierdiagnosticsfile = fullfile(expdir,dataloc_params.sexclassifierdiagnosticsfilestr);
-  datacurr.sexclassifierdiagnostics = ReadParams(sexclassifierdiagnosticsfile);
-
-  % read temperature file 
-  temperaturefile = fullfile(expdir,dataloc_params.temperaturefilestr);
-  tempdata = importdata(temperaturefile,',');
-  datacurr.temperature.stream = tempdata(:,2);
-  % add in mean, max, std, maxdiff, nreadings
-  datacurr.temperature.mean = nanmean(datacurr.temperature.stream);
-  datacurr.temperature.max = max(datacurr.temperature.stream);
-  datacurr.temperature.maxdiff = datacurr.temperature.max - min(datacurr.temperature.stream);
-  datacurr.temperature.nreadings = numel(datacurr.temperature.stream);
-  
-  data = structappend(data,datacurr);
-  
-end
-
+% %% which experiments?
+% 
+% subreadfiles = {};
+% for i = 1:numel(examine_params.requiredfiles),
+%   subreadfiles{end+1} = dataloc_params.(examine_params.requiredfiles{i}); %#ok<AGROW>
+% end
+% subreadfiles = unique(subreadfiles);
+% 
+% exp_params = [{'rootdir',dataloc_params.rootreaddir,'subreadfiles',subreadfiles},leftovers];
+% 
+% [expdir_bases,expdirs,~,experiments,~,~] = ...
+%   getExperimentDirs('settingsdir',settingsdir,...
+%   'datalocparamsfilestr',datalocparamsfilestr,...
+%   'protocol',analysis_protocol,...
+%   exp_params{:});
+% nexpdirs = numel(expdirs);
+% 
+% if nexpdirs == 0,
+%   error('No experiments selected');
+% end
+% 
+% % sort by date
+% date = {experiments.date};
+% [~,order] = sort(date);
+% expdirs = expdirs(order);
+% %experiments = experiments(order);
+% expdir_bases = expdir_bases(order);
+% 
+% %% load experiment variables for each experiment
+% 
+% data = [];
+% 
+% for expdiri = 1:nexpdirs,
+%   
+%   expdir = expdirs{expdiri};
+%   
+%   datacurr = struct;
+%   
+%   % read ufmf diagnostics
+%   ufmfdiagnosticsfile = fullfile(expdir,dataloc_params.ufmfdiagnosticsfilestr);
+%   datacurr.ufmf_diagnostics = readUFMFDiagnostics(ufmfdiagnosticsfile);
+%   
+%   % read quickstats
+%   quickstatsfile = fullfile(expdir,dataloc_params.quickstatsfilestr);
+%   datacurr.quickstats = ReadParams(quickstatsfile);
+%   
+%   % read ctrax diagnostics
+%   ctraxdiagnosticsfile = fullfile(expdir,dataloc_params.ctraxdiagnosticsfilestr);
+%   datacurr.ctrax_diagnostics = ReadParams(ctraxdiagnosticsfile);
+%   % add in mean_nsplit
+%   datacurr.ctrax_diagnostics.mean_nsplit = ...
+%     datacurr.ctrax_diagnostics.sum_nsplit / datacurr.ctrax_diagnostics.nlarge_split;
+%   % add in nframes_not_tracked
+%   datacurr.ctrax_diagnostics.nframes_not_tracked = ...
+%     datacurr.ufmf_diagnostics.summary.nFrames - datacurr.ctrax_diagnostics.nframes_analyzed;
+%   
+%   % read registration data
+%   registrationtxtfile = fullfile(expdir,dataloc_params.registrationtxtfilestr);
+%   datacurr.registrationData = ReadParams(registrationtxtfile);
+% 
+%   % read sex classification diagnostics
+%   sexclassifierdiagnosticsfile = fullfile(expdir,dataloc_params.sexclassifierdiagnosticsfilestr);
+%   datacurr.sexclassifierdiagnostics = ReadParams(sexclassifierdiagnosticsfile);
+% 
+%   % read temperature file 
+%   temperaturefile = fullfile(expdir,dataloc_params.temperaturefilestr);
+%   tempdata = importdata(temperaturefile,',');
+%   datacurr.temperature.stream = tempdata(:,2);
+%   % add in mean, max, std, maxdiff, nreadings
+%   datacurr.temperature.mean = nanmean(datacurr.temperature.stream);
+%   datacurr.temperature.max = max(datacurr.temperature.stream);
+%   datacurr.temperature.maxdiff = datacurr.temperature.max - min(datacurr.temperature.stream);
+%   datacurr.temperature.nreadings = numel(datacurr.temperature.stream);
+%   
+%   data = structappend(data,datacurr);
+%   
+% end
+% 
 %% get experiment variables
 
 nstats = numel(examinestats);
