@@ -1,6 +1,9 @@
 function handles = FlyBowlExamineExperimentVariables(varargin)
 
-[analysis_protocol,settingsdir,datalocparamsfilestr,hfig,period,maxdatenum,figpos,datenumnow,sage_params_path,sage_db,leftovers] = ...
+handles = struct;
+
+[analysis_protocol,settingsdir,datalocparamsfilestr,hfig,period,maxdatenum,...
+  figpos,datenumnow,sage_params_path,sage_db,username,leftovers] = ...
   myparse_nocheck(varargin,...
   'analysis_protocol','current',...
   'settingsdir','/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/settings',...
@@ -11,7 +14,10 @@ function handles = FlyBowlExamineExperimentVariables(varargin)
   'figpos',[],...
   'datenumnow',now,...
   'sage_params_path','',...
-  'sage_db',[]);
+  'sage_db',[],...
+  'username','');
+
+maxnundo = 5;
 
 if isempty(maxdatenum),
   maxdatenum = datenumnow;
@@ -33,6 +39,28 @@ examine_params = ReadParams(examineparamsfile);
 examinefile = fullfile(settingsdir,analysis_protocol,dataloc_params.examineexperimentvariablesfilestr);
 examinestats = ReadExamineExperimentVariables(examinefile);
 
+if exist(examine_params.rcfile,'file'),
+  rc = load(examine_params.rcfile);
+else
+  rc = struct('username','','savepath','');
+end
+
+%% get user name
+
+if isempty(username),
+  tmpusername = inputdlg('User name:','Set user name',1,{rc.username});
+  if isempty(tmpusername),
+    delete(hfig);
+    return;
+  end
+  rc.username = tmpusername{1};
+else
+  rc.username = username;
+end
+savefilename = fullfile(rc.savepath,sprintf('DataCuration_FlyBowl_%s_%sto%s.tsv',...
+  rc.username,datestr(mindatenum,30),datestr(maxdatenum,30)));
+needsave = false;
+
 %% string metadata
 
 flag_metadata_fns = {'flag_redo','flag_review'};
@@ -41,18 +69,18 @@ flag_options = {{'None',''},{'Rearing problem','Flies look sick',...
   'See behavioral notes','See technical notes'}};
 
 %% connect to SAGE for storing manualpf
-
-if isempty(sage_db) && ~isempty(sage_params_path),
-  try
-    sage_db = ConnectToSage(sage_params_path);
-  catch ME,
-    getReport(ME);
-    warning('Could not connect to Sage');
-    sage_db = [];
-  end
-else
-  sage_db = [];
-end
+% 
+% if isempty(sage_db) && ~isempty(sage_params_path),
+%   try
+%     sage_db = ConnectToSage(sage_params_path);
+%   catch ME,
+%     getReport(ME);
+%     warning('Could not connect to Sage');
+%     sage_db = [];
+%   end
+% else
+%   sage_db = [];
+% end
 
 %% get data
 data_types = {'ufmf_diagnostics_summary_*','temperature_stream',...
@@ -270,14 +298,14 @@ normstat = bsxfun(@rdivide,bsxfun(@minus,stat,mu),z);
 %% create figure
 
 if ishandle(hfig),
-  close(hfig);
+  delete(hfig);
 end
 figure(hfig);
 clf(hfig,'reset');
 if isempty(figpos),
   figpos = examine_params.figpos;
 end
-set(hfig,'Units','Pixels','Position',figpos);
+set(hfig,'Units','Pixels','Position',figpos,'MenuBar','none','ToolBar','figure');
 hax = axes('Parent',hfig,'Units','Normalized','Position',examine_params.axespos);
 % plot 0
 plot(hax,[0,nstats+1],[0,0],'k-','HitTest','off');
@@ -334,21 +362,30 @@ idx_visible = true(1,nexpdirs);
 set(h(idx_manual_p),'Marker','+');
 set(h(idx_manual_f),'Marker','x');
 
-%% options menu
+%% Examine menu
 
 hmenu = struct;
+hmenu.file = uimenu('Label','File','Parent',hfig);
 hmenu.options = uimenu('Label','Options','Parent',hfig);
+hmenu.set = uimenu('Label','Set','Parent',hfig);
+hmenu.info = uimenu('Label','Info','Parent',hfig);
 hmenu.plot_manual_p = uimenu(hmenu.options,'Label','Plot manual_pf = p',...
   'Checked','on','Callback',@plot_manual_p_Callback);
 hmenu.plot_manual_f = uimenu(hmenu.options,'Label','Plot manual_pf = f',...
   'Checked','on','Callback',@plot_manual_f_Callback);
-hmenu.set_rest_manual_p = uimenu(hmenu.options,'Label','Set manual_pf == u -> p',...
+hmenu.set_rest_manual_p = uimenu(hmenu.set,'Label','Set manual_pf == u -> p',...
   'Callback',@set_rest_manual_p_Callback);
-hmenu.set_rest_manual_f = uimenu(hmenu.options,'Label','Set manual_pf == u -> f',...
+hmenu.set_rest_manual_f = uimenu(hmenu.set,'Label','Set manual_pf == u -> f',...
   'Callback',@set_rest_manual_f_Callback);
-hmenu.daterange = uimenu(hmenu.options,'Label',...
-  sprintf('Date range: %s - %s ...',daterange{:}),...
-  'Callback',@daterange_Callback);
+hmenu.undo = uimenu(hmenu.set,'Label','Undo',...
+  'Callback',@undo_Callback,'Enable','off');
+hmenu.save = uimenu(hmenu.file,'Label','Save...',...
+  'Callback',@save_Callback);
+hmenu.daterange = uimenu(hmenu.info,'Label',...
+  sprintf('Date range: %s - %s ...',daterange{:}));
+hmenu.username = uimenu(hmenu.info,'Label',...
+  sprintf('User: %s',rc.username));
+set(hfig,'CloseRequestFcn',@close_fig_Callback);
 
 %% text box
 
@@ -371,20 +408,23 @@ h1 = 20;
 h2 = 30;
 c1 = ((figpos(4)-margin) + textpos_px(2))/2;
 manualpf_textpos = [textpos_px(1)+textpos_px(3)+margin,c1-h1/2,w1,h1];
-hmanualpf_text = uicontrol(hfig,'Style','text','Units','Pixels',...
+hmanualpf = struct;
+hmanualpf.text = uicontrol(hfig,'Style','text','Units','Pixels',...
   'Position',manualpf_textpos,'String','Manual PF:',...
   'BackgroundColor',get(hfig,'Color'),'Visible','off');
 manualpf_popuppos = [manualpf_textpos(1)+manualpf_textpos(3)+margin,...
   c1-h2/2,w2,h2];
-hmanualpf_popup = uicontrol(hfig,'Style','popupmenu','Units','Pixels',...
+hmanualpf.popup = uicontrol(hfig,'Style','popupmenu','Units','Pixels',...
   'Position',manualpf_popuppos,'String',{'Pass','Fail','Unknown'},...
   'Value',3,'Visible','off','Callback',@manualpf_popup_Callback);
 manualpf_pushbuttonpos = [manualpf_popuppos(1)+manualpf_popuppos(3)+margin,...
   c1-h2/2,w3,h2];
-hmanualpf_pushbutton = uicontrol(hfig,'Style','pushbutton','Units','Pixels',...
+hmanualpf.pushbutton = uicontrol(hfig,'Style','pushbutton','Units','Pixels',...
   'Position',manualpf_pushbuttonpos,'String','Add Note...',...
   'Callback',@manualpf_pushbutton_Callback,...
-  'Visible','off');   
+  'Visible','off');
+set([hmanualpf.text,hmanualpf.popup,hmanualpf.pushbutton],'Units','normalized');
+
 hnotes = struct;
 
 
@@ -400,18 +440,21 @@ margin = 5;
 nextpos = [axpos_px(1)+axpos_px(3)-w1,axpos_px(2)+axpos_px(4)+margin,w1,h1];
 currpos = [nextpos(1)-margin-w2,nextpos(2),w2,h1];
 prevpos = [currpos(1)-margin-w1,nextpos(2),w1,h1];
-hcurrdate = uicontrol(hfig,'Style','text','Units','Pixels',...
+hdate = struct;
+hdate.curr = uicontrol(hfig,'Style','text','Units','Pixels',...
   'Position',currpos,'String',...
   sprintf('%.1f - %.1f days ago',maxdaysprev,mindaysprev));
-hnextdate = uicontrol(hfig,'Style','pushbutton','Units','Pixels',...
+hdate.next = uicontrol(hfig,'Style','pushbutton','Units','Pixels',...
   'Position',nextpos,'String','>','Callback',@nextdate_Callback);
-hprevdate = uicontrol(hfig,'Style','pushbutton','Units','Pixels',...
+hdate.prev = uicontrol(hfig,'Style','pushbutton','Units','Pixels',...
   'Position',prevpos,'String','<','Callback',@prevdate_Callback);
 if mindaysprev < .0001,
-  set(hnextdate,'Enable','off');
+  set(hdate.prev,'Enable','off');
 else
-  set(hnextdate,'Enable','on');
+  set(hdate.next,'Enable','on');
 end
+set([hdate.curr,hdate.prev,hdate.next],'Units','normalized');
+
 %% rotate x-tick labels
 
 hx = rotateticklabel(hax,90);
@@ -435,6 +478,13 @@ set(hx,'Interpreter','none');
 
 set(hax,'ButtonDownFcn',@ButtonDownFcn);
 
+% hchil = findobj(hfig,'Units','Pixels');
+% set(hchil,'Units','normalized');
+
+%% undo list
+
+undolist = [];
+
 %% return values
 
 handles = struct;
@@ -444,9 +494,7 @@ handles.hfig = hfig;
 handles.h = h;
 handles.hselected = hselected;
 handles.htext = htext;
-handles.hprevdate = hprevdate;
-handles.hcurrdate = hcurrdate;
-handles.hnextdate = hnextdate;
+handles.hdate = hdate;
 % handles.hcmenu_manualpf = hcmenu_manualpf;
 % handles.hcmenu = hcmenu;
 
@@ -492,12 +540,12 @@ handles.hnextdate = hnextdate;
         stati_selected = [];
         expdiri_selected = [];
         set(htext,'String','');
-        set([hmanualpf_text,hmanualpf_popup,hmanualpf_pushbutton],'Visible','off');
+        set([hmanualpf.text,hmanualpf.popup,hmanualpf.pushbutton],'Visible','off');
         return;
       end
       
       SelectionType = get(hfig,'SelectionType');
-      set([hmanualpf_text,hmanualpf_popup,hmanualpf_pushbutton],'Visible','on');
+      set([hmanualpf.text,hmanualpf.popup,hmanualpf.pushbutton],'Visible','on');
 
       [expdiri_selected,stati_selected] = ind2sub([tmpn,nstats],closest);
       expdiri_selected = tmpidx(expdiri_selected);
@@ -512,20 +560,20 @@ handles.hnextdate = hnextdate;
       set(hx(stati_selected),'Color','r','FontWeight','bold');
 
       manual_pf_curr = data(expdiri_selected).manual_pf;
-      s = get(hmanualpf_popup,'String');
+      s = get(hmanualpf.popup,'String');
       vcurr = find(strncmpi(manual_pf_curr,s,1),1);
       if isempty(vcurr),
         error('Unknown manual_pf %s',manual_pf_curr);
       end
-      set(hmanualpf_popup,'Value',vcurr);
+      set(hmanualpf.popup,'Value',vcurr);
       
       if strcmp(SelectionType,'open'),
         
         % open experiment
         if ispc,
-          winopen(expdirs{expdiri});
+          winopen(expdirs{expdiri_selected});
         else
-          web(expdirs{expdiri},'-browser');
+          web(expdirs{expdiri_selected},'-browser');
         end
       end
       
@@ -576,7 +624,17 @@ handles.hnextdate = hnextdate;
 
 %% go to next date range
 
-  function nextdate_Callback(hObject,event) %#ok<INUSD>
+  function nextdate_Callback(hObject,event)
+    
+    if needsave,
+      answer = questdlg('Save manual_pf and notes?');
+      switch lower(answer),
+        case 'cancel',
+          return;
+        case 'yes',
+          save_Callback(hObject,event);
+      end
+    end
     
     maxdatenum = min(datenumnow,maxdatenum + period);
     handles = FlyBowlExamineExperimentVariables(...
@@ -588,14 +646,26 @@ handles.hnextdate = hnextdate;
       'maxdatenum',maxdatenum,...
       'figpos',get(hfig,'Position'),...
       'datenumnow',datenumnow,...
-      'sage_params_path',sage_params_path);
+      'sage_params_path',sage_params_path,...
+      'sage_db',sage_db,...
+      'username',rc.username);
 
   end
 
 %% go to previous date range
 
-  function prevdate_Callback(hObject,event) %#ok<INUSD>
+  function prevdate_Callback(hObject,event)
     
+    if needsave,
+      answer = questdlg('Save manual_pf and notes?');
+      switch lower(answer),
+        case 'cancel',
+          return;
+        case 'yes',
+          save_Callback(hObject,event);
+      end
+    end
+   
     maxdatenum = maxdatenum - period;
     handles = FlyBowlExamineExperimentVariables(...
       'analysis_protocol',analysis_protocol,...
@@ -605,7 +675,10 @@ handles.hnextdate = hnextdate;
       'period',period,...
       'maxdatenum',maxdatenum,...
       'figpos',get(hfig,'Position'),...
-      'datenumnow',datenumnow);
+      'datenumnow',datenumnow,...
+      'sage_params_path',sage_params_path,...
+      'sage_db',sage_db,...
+      'username',rc.username);
 
   end
 
@@ -618,12 +691,14 @@ handles.hnextdate = hnextdate;
       return;
     end
 
+    addToUndoList();
+    
     s = get(hObject,'String');
     vcurr = get(hObject,'Value');
     manual_pf_full = s{vcurr};
     manual_pf_new = manual_pf_full(1);
     data(expdiri_selected).manual_pf = manual_pf_new;
-    SetManualPF(data(expdiri_selected),sage_db);
+    %SetManualPF(data(expdiri_selected),sage_db);
     manual_pf(expdiri_selected) = manual_pf_new;
 
     switch lower(manual_pf_new),
@@ -670,6 +745,7 @@ handles.hnextdate = hnextdate;
         error('Unknown manual_pf value %s',manual_pf_new);
         
     end
+    needsave = true;
 
     
   end
@@ -715,9 +791,11 @@ handles.hnextdate = hnextdate;
 
   function notes_done_Callback(hObject,event) %#ok<INUSD>
     
+    addToUndoList();
+    
     data(expdiri_selected).notes_technical = get(hnotes.edit_technical,'String');
     data(expdiri_selected).notes_behavioral = get(hnotes.edit_behavioral,'String');
-    SetNotes(data(expdiri_selected),sage_db);
+    %SetNotes(data(expdiri_selected),sage_db);
     
     tmpi = find(strcmpi(examinestats,'notes_behavioral'),1);
     if ~isempty(tmpi),
@@ -740,7 +818,7 @@ handles.hnextdate = hnextdate;
       set(h(expdiri_selected),'YData',normstat(expdiri_selected,:));
       set(hselected,'YData',normstat(expdiri_selected,:));
     end
-
+    needsave = true;
     
     close(hnotes.dialog);
     
@@ -762,6 +840,8 @@ handles.hnextdate = hnextdate;
 
   function set_rest_manual_Callback(s)
 
+    addToUndoList();
+    
     b = questdlg(sprintf('Set all experiments plotted with manual_pf = U to %s?',s),...
       'Set manual_pf for rest?');
     if ~strcmpi(b,'Yes'),
@@ -769,9 +849,16 @@ handles.hnextdate = hnextdate;
     end
     
     idx = find(lower(manual_pf) == 'u');
+    
+    if isempty(idx),
+      return;
+    end
+    
+    needsave = true;
+    
     for tmpi = idx,
       data(tmpi).manual_pf = s;
-      SetManualPF(data(tmpi),sage_db);
+      %SetManualPF(data(tmpi),sage_db);
     end
     manual_pf(idx) = s;
     
@@ -799,6 +886,112 @@ handles.hnextdate = hnextdate;
       % update visible
       set(h(idx),'Visible',get(hmenu.plot_manual_f,'Checked'));
       
+    end
+    
+  end
+
+  function save_Callback(hObject,event) %#ok<INUSD>
+    
+    [savefilename1,savepath1] = uiputfile(savefilename,'Save manual_pf tsv');
+    if ~ischar(savefilename1),
+      return;
+    end
+    savefilename = fullfile(savepath1,savefilename1);
+    rc.savepath = savepath1;
+
+    fid = fopen(savefilename,'w');
+    fprintf(fid,'#experiment_name\tmanual_pf\tnotes_behavioral\tnotes_technical\n');
+    for tmpi = 1:nexpdirs,
+      fprintf(fid,'%s\t%s\t%s\t%s\n',...
+        data(tmpi).experiment_name,...
+        data(tmpi).manual_pf,...
+        regexprep(data(tmpi).notes_behavioral,'\s+',' '),...
+        regexprep(data(tmpi).notes_technical,'\s+',' '));
+    end
+    fclose(fid);
+    needsave = false;
+    
+  end
+
+  function close_fig_Callback(hObject,event)
+    
+    if needsave,
+      answer = questdlg('Save manual_pf and notes?');
+      switch lower(answer),
+        case 'cancel',
+          return;
+        case 'yes',
+          save_Callback(hObject,event);
+      end
+    end
+    
+    save(examine_params.rcfile,'-struct','rc');
+    
+    if ishandle(hObject),
+      delete(hObject);
+    end
+    
+  end
+
+%% add state to undo list
+
+  function addToUndoList()
+
+    if numel(undolist) >= maxnundo,
+      undolist = undolist(end-maxnundo+1:end);
+    end
+    undolist = structappend(undolist,...
+      struct('manual_pf',{[data.manual_pf]},...
+      'notes_behavioral',{{data.notes_behavioral}},...
+      'notes_technical',{{data.notes_technical}}));
+    set(hmenu.undo,'Enable','on');
+  end
+
+
+%% reset state
+
+  function setManualPFState(s)
+  
+    manual_pf = s.manual_pf;
+    for tmpi = 1:nexpdirs,
+      data(tmpi).manual_pf = s.manual_pf(tmpi);
+      data(tmpi).notes_behavioral = s.notes_behavioral{tmpi};
+      data(tmpi).notes_technical = s.notes_technical{tmpi};
+    end
+    idx_manual_p = lower(manual_pf) == 'p';
+    idx_manual_f = lower(manual_pf) == 'f';
+    idx_visible = true(1,nexpdirs);
+    if strcmpi(get(hmenu.plot_manual_p,'Checked'),'off'),
+      idx_visible(idx_manual_p) = false;
+    end
+    if strcmpi(get(hmenu.plot_manual_f,'Checked'),'off'),
+      idx_visible(idx_manual_f) = false;
+    end
+    set(h,'Marker','o');
+    set(h(idx_manual_p),'Marker','+');
+    set(h(idx_manual_f),'Marker','x');
+    set(h(idx_visible),'Visible','on');
+    set(h(~idx_visible),'Visible','off');
+    
+    if ~isempty(expdiri_selected),
+      manual_pf_curr = data(expdiri_selected).manual_pf;
+      s = get(hmanualpf.popup,'String');
+      vcurr = find(strncmpi(manual_pf_curr,s,1),1);
+      if isempty(vcurr),
+        error('Unknown manual_pf %s',manual_pf_curr);
+      end
+      set(hmanualpf.popup,'Value',vcurr);
+    end
+    
+  end
+
+  function undo_Callback(hObject,event) %#ok<INUSD>
+    
+    if isempty(undolist), return; end
+    setManualPFState(undolist(end));
+    undolist = undolist(1:end-1);
+    if isempty(undolist),
+      set(hmenu.undo,'Enable','off');
     end
     
   end
