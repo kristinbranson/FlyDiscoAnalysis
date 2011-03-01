@@ -18,6 +18,7 @@ analysis_protocol = '20110222';
 hfig = 1;
 min_days_prev = 0;
 max_days_prev = 7;
+sage_params_path = '';
 
 %% which experiments
 
@@ -30,7 +31,9 @@ max_days_prev = 7;
 % maxdatestr = datestr(maxdatenum,format);
 
 params = {'settingsdir',settingsdir,...
-  'analysis_protocol',analysis_protocol,'hfig',hfig};
+  'analysis_protocol',analysis_protocol,...
+  'hfig',hfig,...
+  'sage_params_path',sage_params_path};
 
 %% 
 
