@@ -253,9 +253,9 @@ normstat = bsxfun(@rdivide,bsxfun(@minus,stat,mu),z);
 
 %% create figure
 
-% if ishandle(hfig),
-%   close(hfig);
-% end
+if ishandle(hfig),
+  close(hfig);
+end
 figure(hfig);
 clf(hfig,'reset');
 if isempty(figpos),
@@ -272,6 +272,8 @@ drawnow;
 %% selected experiment
 
 hselected = plot(0,0,'o','color','k','Visible','off','HitTest','off','MarkerSize',10,'MarkerFaceColor','k');
+expdiri_selected = [];
+stati_selected = [];
 
 %% plot diagnostics
 
@@ -332,9 +334,16 @@ hmenu.daterange = uimenu(hmenu.options,'Label',...
 
 set(hax,'Units','normalized');
 axpos = get(hax,'Position');
-textpos = [axpos(1),axpos(2)+axpos(4),axpos(3)*.75,1-axpos(2)-axpos(4)-.01];
+textpos = [axpos(1),axpos(2)+axpos(4),axpos(3)/3,1-axpos(2)-axpos(4)-.01];
 htext = annotation('textbox',textpos,'BackgroundColor','k','Color','g',...
   'String','Experiment info','Interpreter','none');
+
+%% manual pf
+
+set(htext,'Units','Pixels');
+textpos_px = get(htext,'Position');
+set(htext,'Units','normalized');
+
 
 %% date
 
@@ -362,7 +371,6 @@ else
 end
 %% rotate x-tick labels
 
-hxselected = [];
 hx = rotateticklabel(hax,90);
 % make sure the ticks don't overlap the x-axis
 ex = get(hx(1),'Extent');
@@ -374,6 +382,11 @@ for i = 1:numel(hx),
   set(hx(i),'Position',pos);
 end
 set(hx,'Interpreter','none');
+
+%% context menu for setting manual_pf
+% hcmenu = uicontextmenu;
+% hcmenu_manualpf = uimenu(hcmenu,'Label','Set manual_pf...','Callback',@set_manual_pf_Callback);
+% set(hax,'uicontextmenu',hcmenu);
 
 %% set buttondownfcn
 
@@ -391,6 +404,8 @@ handles.htext = htext;
 handles.hprevdate = hprevdate;
 handles.hcurrdate = hcurrdate;
 handles.hnextdate = hnextdate;
+% handles.hcmenu_manualpf = hcmenu_manualpf;
+% handles.hcmenu = hcmenu;
 
 %% print function
 
@@ -414,7 +429,12 @@ handles.hnextdate = hnextdate;
   function ButtonDownFcn(varargin)
         
     try
-    
+      
+      if ~isempty(stati_selected),
+        set(hx(stati_selected),'Color','k','FontWeight','normal');
+      end
+
+      
       % get current point
       tmp = get(hax,'CurrentPoint');
       xclicked = tmp(1,1);
@@ -423,27 +443,28 @@ handles.hnextdate = hnextdate;
       tmpn = numel(tmpidx);
       [d,closest] = min( ((reshape(x(idx_visible,:),[1,tmpn*nstats])-xclicked)/dx).^2+...
         ((reshape(normstat(idx_visible,:),[1,tmpn*nstats])-yclicked)/dy).^2 );
+      
       if d > examine_params.maxdistclick,
         set(hselected,'Visible','off');
-        if ~isempty(hxselected),
-          set(hx(hxselected),'Color','k','FontWeight','normal');
-        end          
+        stati_selected = [];
+        expdiri_selected = [];
+        set(htext,'String','');
         return;
       end
       
       SelectionType = get(hfig,'SelectionType');
       
-      [expdiri_loc,stati_loc] = ind2sub([tmpn,nstats],closest);
-      expdiri_loc = tmpidx(expdiri_loc);
+      [expdiri_selected,stati_selected] = ind2sub([tmpn,nstats],closest);
+      expdiri_selected = tmpidx(expdiri_selected);
 
-      s = printfun(expdiri_loc,stati_loc);
+      s = printfun(expdiri_selected,stati_selected);
       set(htext,'String',s);
-      set(hselected,'XData',x(expdiri_loc,:),'YData',normstat(expdiri_loc,:),'Visible','on');
-      if ~isempty(hxselected),
-        set(hx(hxselected),'Color','k','FontWeight','normal');
+      set(hselected,'XData',x(expdiri_selected,:),'YData',normstat(expdiri_selected,:),'Visible','on');
+      if ~isempty(stati_selected),
+        set(hx(stati_selected),'Color','k','FontWeight','normal');
       end
-      hxselected = stati_loc;
-      set(hx(hxselected),'Color','r','FontWeight','bold');
+      %hxselected = stati_selected;
+      set(hx(stati_selected),'Color','r','FontWeight','bold');
       
       if strcmp(SelectionType,'open'),
         
@@ -473,9 +494,11 @@ handles.hnextdate = hnextdate;
     if strcmpi(v,'on'),
       set(hObject,'Checked','off');
       idx_visible(idx_manual_p) = false;
+      set(h(~idx_visible),'Visible','off');
     else
       set(hObject,'Checked','on');
       idx_visible(idx_manual_p) = true;
+      set(h(idx_visible),'Visible','on');
     end
     
   end
@@ -489,9 +512,11 @@ handles.hnextdate = hnextdate;
     if strcmpi(v,'on'),
       set(hObject,'Checked','off');
       idx_visible(idx_manual_f) = false;
+      set(h(~idx_visible),'Visible','off');
     else
       set(hObject,'Checked','on');
       idx_visible(idx_manual_f) = true;
+      set(h(idx_visible),'Visible','on');
     end
     
   end
@@ -530,4 +555,63 @@ handles.hnextdate = hnextdate;
 
   end
 
+%% set manual pf callback
+  
+  function set_manual_pf_Callback(hObject,event) %#ok<INUSD>
+    
+    if isempty(expdiri_selected),
+      warning('No experiment selected');
+    end
+    
+    manual_pf_new = SetManualPF(data(expdiri_selected));
+    manual_pf(expdiri_selected) = manual_pf_new;
+    idx_manual_p(expdiri_selected) = lower(manual_pf_new) == 'p';
+    idx_manual_f(expdiri_selected) = lower(manual_pf_new) == 'f';
+    switch lower(manual_pf_new),
+      
+      case 'p',
+        
+        % update indices
+        idx_manual_p(expdiri_selected) = true;
+        idx_manual_f(expdiri_selected) = false;
+
+        % update color
+        set(h(expdiri_selected),gray_p_color);
+
+        % update visible
+        set(h(expdiri_selected),'Visible',get(hmenu.plot_manual_p,'Checked'));
+
+      case 'f',
+
+        % update indices
+        idx_manual_p(expdiri_selected) = false;
+        idx_manual_f(expdiri_selected) = true;
+
+        % update color
+        set(h(expdiri_selected),gray_f_color);
+        
+        % update visible
+        set(h(expdiri_selected),'Visible',get(hmenu.plot_manual_f,'Checked'));
+        
+      case 'u',
+        
+        % update indices
+        idx_manual_p(expdiri_selected) = false;
+        idx_manual_f(expdiri_selected) = false;
+        
+        % update color
+        set(h(expdiri_selected),colors(expdiri_selected,:));
+
+        % update visible
+        idx_visible(expdiri_selected) = true;
+        set(h(expdiri_selected),'Visible','on');
+        
+      otherwise
+        
+        error('Unknown manual_pf value %s',manual_pf_new);
+        
+    end
+
+    
+  end
 end
