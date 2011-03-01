@@ -6,6 +6,10 @@ ufmf_diagnostics,summary,nFrames
 sexclassifier_diagnostics,mean_nflies
 sexclassifier_diagnostics,mean_nfemales
 sexclassifier_diagnostics,mean_nmales
+temperature,mean
+temperature,max
+temperature,maxdiff
+temperature,nreadings
 ctrax_diagnostics,ndeaths_notfixed
 sexclassifier_diagnostics,mean_nswaps
 ctrax_diagnostics,nframes_not_tracked
