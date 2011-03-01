@@ -1,6 +1,6 @@
 function handles = FlyBowlExamineExperimentVariables(varargin)
 
-[analysis_protocol,settingsdir,datalocparamsfilestr,hfig,period,maxdatenum,figpos,datenumnow,leftovers] = ...
+[analysis_protocol,settingsdir,datalocparamsfilestr,hfig,period,maxdatenum,figpos,datenumnow,sage_params_path,sage_db,leftovers] = ...
   myparse_nocheck(varargin,...
   'analysis_protocol','current',...
   'settingsdir','/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/settings',...
@@ -9,7 +9,9 @@ function handles = FlyBowlExamineExperimentVariables(varargin)
   'period',7,...
   'maxdatenum',[],...
   'figpos',[],...
-  'datenumnow',now);
+  'datenumnow',now,...
+  'sage_params_path','',...
+  'sage_db',[]);
 
 if isempty(maxdatenum),
   maxdatenum = datenumnow;
@@ -37,6 +39,20 @@ flag_metadata_fns = {'flag_redo','flag_review'};
 note_metadata_fns = {'notes_behavioral','notes_technical'};
 flag_options = {{'None',''},{'Rearing problem','Flies look sick',...
   'See behavioral notes','See technical notes'}};
+
+%% connect to SAGE for storing manualpf
+
+if isempty(sage_db) && ~isempty(sage_params_path),
+  try
+    sage_db = ConnectToSage(sage_params_path);
+  catch ME,
+    getReport(ME);
+    warning('Could not connect to Sage');
+    sage_db = [];
+  end
+else
+  sage_db = [];
+end
 
 %% get data
 data_types = {'ufmf_diagnostics_summary_*','temperature_stream',...
@@ -170,7 +186,7 @@ for i = 1:nstats,
   % special case: notes
   elseif ismember(examinestats{i},note_metadata_fns),
     
-    v = cellfun(@isempty,{data.(examinestats{i})});
+    v = cellfun(@(s) ~isempty(s) && ~strcmpi(s,'None'),{data.(examinestats{i})});
     stat(:,i) = double(v);
     
   % numbers
@@ -302,10 +318,10 @@ set(hax,'XLim',xlim,'YLim',ylim,'XTick',1:nstats,'XTickLabel',statnames,'XGrid',
 
 ylabel(hax,'Stds from mean');
 
-%% gray out manual_pf = p
+%% set manual_pf = p marker
 
-gray_p_color = [.7,.7,.7];
-gray_f_color = [.5,.5,.5];
+%gray_p_color = [.7,.7,.7];
+%gray_f_color = [.5,.5,.5];
 badidx = cellfun(@isempty,{data.manual_pf});
 for j = find(badidx),
   warning('No data for manual_pf, experiment %s',strtrim(data(j).experiment_name));
@@ -315,8 +331,8 @@ manual_pf(~badidx) = [data.manual_pf];
 idx_manual_p = lower(manual_pf) == 'p';
 idx_manual_f = lower(manual_pf) == 'f';
 idx_visible = true(1,nexpdirs);
-set(h(idx_manual_p),'Color',gray_p_color);
-set(h(idx_manual_f),'Color',gray_f_color);
+set(h(idx_manual_p),'Marker','+');
+set(h(idx_manual_f),'Marker','x');
 
 %% options menu
 
@@ -326,6 +342,10 @@ hmenu.plot_manual_p = uimenu(hmenu.options,'Label','Plot manual_pf = p',...
   'Checked','on','Callback',@plot_manual_p_Callback);
 hmenu.plot_manual_f = uimenu(hmenu.options,'Label','Plot manual_pf = f',...
   'Checked','on','Callback',@plot_manual_f_Callback);
+hmenu.set_rest_manual_p = uimenu(hmenu.options,'Label','Set manual_pf == u -> p',...
+  'Callback',@set_rest_manual_p_Callback);
+hmenu.set_rest_manual_f = uimenu(hmenu.options,'Label','Set manual_pf == u -> f',...
+  'Callback',@set_rest_manual_f_Callback);
 hmenu.daterange = uimenu(hmenu.options,'Label',...
   sprintf('Date range: %s - %s ...',daterange{:}),...
   'Callback',@daterange_Callback);
@@ -334,7 +354,7 @@ hmenu.daterange = uimenu(hmenu.options,'Label',...
 
 set(hax,'Units','normalized');
 axpos = get(hax,'Position');
-textpos = [axpos(1),axpos(2)+axpos(4),axpos(3)/3,1-axpos(2)-axpos(4)-.01];
+textpos = [axpos(1),axpos(2)+axpos(4),axpos(3)/2,1-axpos(2)-axpos(4)-.01];
 htext = annotation('textbox',textpos,'BackgroundColor','k','Color','g',...
   'String','Experiment info','Interpreter','none');
 
@@ -343,6 +363,29 @@ htext = annotation('textbox',textpos,'BackgroundColor','k','Color','g',...
 set(htext,'Units','Pixels');
 textpos_px = get(htext,'Position');
 set(htext,'Units','normalized');
+margin = 5;
+w1 = 60;
+w2 = 80;
+w3 = 80;
+h1 = 20;
+h2 = 30;
+c1 = ((figpos(4)-margin) + textpos_px(2))/2;
+manualpf_textpos = [textpos_px(1)+textpos_px(3)+margin,c1-h1/2,w1,h1];
+hmanualpf_text = uicontrol(hfig,'Style','text','Units','Pixels',...
+  'Position',manualpf_textpos,'String','Manual PF:',...
+  'BackgroundColor',get(hfig,'Color'),'Visible','off');
+manualpf_popuppos = [manualpf_textpos(1)+manualpf_textpos(3)+margin,...
+  c1-h2/2,w2,h2];
+hmanualpf_popup = uicontrol(hfig,'Style','popupmenu','Units','Pixels',...
+  'Position',manualpf_popuppos,'String',{'Pass','Fail','Unknown'},...
+  'Value',3,'Visible','off','Callback',@manualpf_popup_Callback);
+manualpf_pushbuttonpos = [manualpf_popuppos(1)+manualpf_popuppos(3)+margin,...
+  c1-h2/2,w3,h2];
+hmanualpf_pushbutton = uicontrol(hfig,'Style','pushbutton','Units','Pixels',...
+  'Position',manualpf_pushbuttonpos,'String','Add Note...',...
+  'Callback',@manualpf_pushbutton_Callback,...
+  'Visible','off');   
+hnotes = struct;
 
 
 %% date
@@ -449,11 +492,13 @@ handles.hnextdate = hnextdate;
         stati_selected = [];
         expdiri_selected = [];
         set(htext,'String','');
+        set([hmanualpf_text,hmanualpf_popup,hmanualpf_pushbutton],'Visible','off');
         return;
       end
       
       SelectionType = get(hfig,'SelectionType');
-      
+      set([hmanualpf_text,hmanualpf_popup,hmanualpf_pushbutton],'Visible','on');
+
       [expdiri_selected,stati_selected] = ind2sub([tmpn,nstats],closest);
       expdiri_selected = tmpidx(expdiri_selected);
 
@@ -465,6 +510,14 @@ handles.hnextdate = hnextdate;
       end
       %hxselected = stati_selected;
       set(hx(stati_selected),'Color','r','FontWeight','bold');
+
+      manual_pf_curr = data(expdiri_selected).manual_pf;
+      s = get(hmanualpf_popup,'String');
+      vcurr = find(strncmpi(manual_pf_curr,s,1),1);
+      if isempty(vcurr),
+        error('Unknown manual_pf %s',manual_pf_curr);
+      end
+      set(hmanualpf_popup,'Value',vcurr);
       
       if strcmp(SelectionType,'open'),
         
@@ -534,7 +587,8 @@ handles.hnextdate = hnextdate;
       'period',period,...
       'maxdatenum',maxdatenum,...
       'figpos',get(hfig,'Position'),...
-      'datenumnow',datenumnow);
+      'datenumnow',datenumnow,...
+      'sage_params_path',sage_params_path);
 
   end
 
@@ -557,16 +611,21 @@ handles.hnextdate = hnextdate;
 
 %% set manual pf callback
   
-  function set_manual_pf_Callback(hObject,event) %#ok<INUSD>
+  function manualpf_popup_Callback(hObject,event) %#ok<INUSD>
     
     if isempty(expdiri_selected),
       warning('No experiment selected');
+      return;
     end
-    
-    manual_pf_new = SetManualPF(data(expdiri_selected));
+
+    s = get(hObject,'String');
+    vcurr = get(hObject,'Value');
+    manual_pf_full = s{vcurr};
+    manual_pf_new = manual_pf_full(1);
+    data(expdiri_selected).manual_pf = manual_pf_new;
+    SetManualPF(data(expdiri_selected),sage_db);
     manual_pf(expdiri_selected) = manual_pf_new;
-    idx_manual_p(expdiri_selected) = lower(manual_pf_new) == 'p';
-    idx_manual_f(expdiri_selected) = lower(manual_pf_new) == 'f';
+
     switch lower(manual_pf_new),
       
       case 'p',
@@ -575,8 +634,8 @@ handles.hnextdate = hnextdate;
         idx_manual_p(expdiri_selected) = true;
         idx_manual_f(expdiri_selected) = false;
 
-        % update color
-        set(h(expdiri_selected),gray_p_color);
+        % update marker
+        set(h(expdiri_selected),'Marker','+');
 
         % update visible
         set(h(expdiri_selected),'Visible',get(hmenu.plot_manual_p,'Checked'));
@@ -587,8 +646,8 @@ handles.hnextdate = hnextdate;
         idx_manual_p(expdiri_selected) = false;
         idx_manual_f(expdiri_selected) = true;
 
-        % update color
-        set(h(expdiri_selected),gray_f_color);
+        % update marker
+        set(h(expdiri_selected),'Marker','x');
         
         % update visible
         set(h(expdiri_selected),'Visible',get(hmenu.plot_manual_f,'Checked'));
@@ -599,8 +658,8 @@ handles.hnextdate = hnextdate;
         idx_manual_p(expdiri_selected) = false;
         idx_manual_f(expdiri_selected) = false;
         
-        % update color
-        set(h(expdiri_selected),colors(expdiri_selected,:));
+        % update marker
+        set(h(expdiri_selected),'Marker','o');
 
         % update visible
         idx_visible(expdiri_selected) = true;
@@ -614,4 +673,134 @@ handles.hnextdate = hnextdate;
 
     
   end
+
+%% add note callback
+ function manualpf_pushbutton_Callback(hObject,event) %#ok<INUSD>
+    
+   hnotes.dialog = dialog('Name','Add notes','WindowStyle','Normal','Resize','on');
+   done_pos = [.29,.02,.2,.1];
+   cancel_pos = [.51,.02,.2,.1];
+   notes_behavioral_pos = [.02,.14,.96,.35];
+   text_behavioral_pos = [.02,.49,.96,.06];
+   notes_technical_pos = [.02,.57,.96,.35];
+   text_technical_pos = [.02,.92,.96,.06];
+
+   hnotes.pushbutton_done = uicontrol(hnotes.dialog,'Style','pushbutton',...
+     'Units','normalized','Position',done_pos,...
+     'String','Done','Callback',@notes_done_Callback);
+   hnotes.pushbutton_cancel = uicontrol(hnotes.dialog,'Style','pushbutton',...
+     'Units','normalized','Position',cancel_pos,...
+     'String','Cancel','Callback',@notes_cancel_Callback);
+   hnotes.edit_behavioral = uicontrol(hnotes.dialog,'Style','edit',...
+     'Units','normalized','Position',notes_behavioral_pos,...
+     'String',data(expdiri_selected).notes_behavioral,...
+     'HorizontalAlignment','left',...
+     'BackgroundColor','w');
+   hnotes.text_behavioral = uicontrol(hnotes.dialog,'Style','text',...
+     'Units','normalized','Position',text_behavioral_pos,...
+     'String','Behavior notes:',...
+     'HorizontalAlignment','left');
+   hnotes.edit_technical = uicontrol(hnotes.dialog,'Style','edit',...
+     'Units','normalized','Position',notes_technical_pos,...
+     'String',data(expdiri_selected).notes_technical,...
+     'HorizontalAlignment','left',...
+     'BackgroundColor','w');
+   hnotes.text_technical = uicontrol(hnotes.dialog,'Style','text',...
+     'Units','normalized','Position',text_technical_pos,...
+     'String','Technical notes:',...
+     'HorizontalAlignment','left');
+   uiwait(hnotes.dialog);
+   
+ end
+
+  function notes_done_Callback(hObject,event)
+    
+    data(expdiri_selected).notes_technical = get(hnotes.edit_technical,'String');
+    data(expdiri_selected).notes_behavioral = get(hnotes.edit_behavioral,'String');
+    SetNotes(data(expdiri_selected),sage_db);
+    
+    tmpi = find(strcmpi(examinestats,'notes_behavioral'),1);
+    if ~isempty(tmpi),
+      s = data(expdiri_selected).notes_behavioral;
+      v = ~isempty(s) && ~strcmpi(s,'None');
+      stat(expdiri_selected,tmpi) = double(v);
+      normstat(expdiri_selected,tmpi) = ...
+        (stat(expdiri_selected,tmpi) - mu(tmpi))/z(tmpi);
+      set(h(expdiri_selected),'YData',normstat(expdiri_selected,:));
+      set(hselected,'YData',normstat(expdiri_selected,:));
+    end
+
+    tmpi = find(strcmpi(examinestats,'notes_technical'),1);
+    if ~isempty(tmpi),
+      s = data(expdiri_selected).notes_technical;
+      v = ~isempty(s) && ~strcmpi(s,'None');
+      stat(expdiri_selected,tmpi) = double(v);
+      normstat(expdiri_selected,tmpi) = ...
+        (stat(expdiri_selected,tmpi) - mu(tmpi))/z(tmpi);
+      set(h(expdiri_selected),'YData',normstat(expdiri_selected,:));
+      set(hselected,'YData',normstat(expdiri_selected,:));
+    end
+
+    
+    close(hnotes.dialog);
+    
+  end
+
+  function notes_cancel_Callback(hObject,event)
+    
+    close(hnotes.dialog);
+    
+  end
+
+  function set_rest_manual_p_Callback(hObject,event)
+    set_rest_manual_Callback('P');
+  end
+
+  function set_rest_manual_f_Callback(hObject,event)
+    set_rest_manual_Callback('F');
+  end
+
+  function set_rest_manual_Callback(s)
+
+    b = questdlg(sprintf('Set all experiments plotted with manual_pf = U to %s?',s),...
+      'Set manual_pf for rest?');
+    if ~strcmpi(b,'Yes'),
+      return;
+    end
+    
+    idx = find(lower(manual_pf) == 'u');
+    for tmpi = idx,
+      data(tmpi).manual_pf = s;
+      SetManualPF(data(tmpi),sage_db);
+    end
+    manual_pf(idx) = s;
+    
+    if lower(s) == 'p',
+
+      % update indices
+      idx_manual_p(idx) = true;
+      idx_manual_f(idx) = false;
+      
+      % update marker
+      set(h(idx),'Marker','+');
+      
+      % update visible
+      set(h(idx),'Visible',get(hmenu.plot_manual_p,'Checked'));
+      
+    else
+
+      % update indices
+      idx_manual_p(idx) = false;
+      idx_manual_f(idx) = true;
+      
+      % update marker
+      set(h(idx),'Marker','x');
+      
+      % update visible
+      set(h(idx),'Visible',get(hmenu.plot_manual_f,'Checked'));
+      
+    end
+    
+  end
+
 end
