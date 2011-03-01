@@ -449,9 +449,9 @@ hdate.next = uicontrol(hfig,'Style','pushbutton','Units','Pixels',...
 hdate.prev = uicontrol(hfig,'Style','pushbutton','Units','Pixels',...
   'Position',prevpos,'String','<','Callback',@prevdate_Callback);
 if mindaysprev < .0001,
-  set(hdate.prev,'Enable','off');
+  set(hdate.next,'Enable','off');
 else
-  set(hdate.next,'Enable','on');
+  set(hdate.prev,'Enable','on');
 end
 set([hdate.curr,hdate.prev,hdate.next],'Units','normalized');
 
