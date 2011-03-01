@@ -6,10 +6,15 @@ ufmf_diagnostics,summary,nFrames
 sexclassifier_diagnostics,mean_nflies
 sexclassifier_diagnostics,mean_nfemales
 sexclassifier_diagnostics,mean_nmales
+num_flies_dead
+seconds_fliesloaded
+seconds_shiftflytemp
 temperature,mean
 temperature,max
 temperature,maxdiff
 temperature,nreadings
+temperature
+humidity
 ctrax_diagnostics,ndeaths_notfixed
 sexclassifier_diagnostics,mean_nswaps
 ctrax_diagnostics,nframes_not_tracked

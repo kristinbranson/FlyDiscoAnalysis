@@ -64,8 +64,8 @@ queries(end+1:end+2) = {'daterange',daterange};
 queries(end+1:end+2) = {'data_type',data_types};
 queries(end+1:end+2) = {'flag_aborted',0};
 queries(end+1:end+2) = {'automated_pf','P'};
-%data = SAGEGetBowlData(queries{:});
-load('datacache.mat','data');
+data = SAGEGetBowlData(queries{:});
+%load('datacache.mat','data');
 nexpdirs = numel(data);
 expdir_bases = {data.experiment_name};
 expdir_bases = cellfun(@(s) regexprep(s,'^FlyBowl_',''),expdir_bases,'UniformOutput',false);
@@ -364,9 +364,9 @@ set(htext,'Units','Pixels');
 textpos_px = get(htext,'Position');
 set(htext,'Units','normalized');
 margin = 5;
-w1 = 60;
-w2 = 80;
-w3 = 80;
+w1 = 80;
+w2 = 120;
+w3 = 120;
 h1 = 20;
 h2 = 30;
 c1 = ((figpos(4)-margin) + textpos_px(2))/2;
@@ -713,7 +713,7 @@ handles.hnextdate = hnextdate;
    
  end
 
-  function notes_done_Callback(hObject,event)
+  function notes_done_Callback(hObject,event) %#ok<INUSD>
     
     data(expdiri_selected).notes_technical = get(hnotes.edit_technical,'String');
     data(expdiri_selected).notes_behavioral = get(hnotes.edit_behavioral,'String');
@@ -746,17 +746,17 @@ handles.hnextdate = hnextdate;
     
   end
 
-  function notes_cancel_Callback(hObject,event)
+  function notes_cancel_Callback(hObject,event) %#ok<INUSD>
     
     close(hnotes.dialog);
     
   end
 
-  function set_rest_manual_p_Callback(hObject,event)
+  function set_rest_manual_p_Callback(hObject,event) %#ok<INUSD>
     set_rest_manual_Callback('P');
   end
 
-  function set_rest_manual_f_Callback(hObject,event)
+  function set_rest_manual_f_Callback(hObject,event) %#ok<INUSD>
     set_rest_manual_Callback('F');
   end
 
