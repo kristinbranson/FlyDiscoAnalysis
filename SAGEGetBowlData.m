@@ -78,10 +78,10 @@ if ~isempty(daterange),
     daterange = {daterange};
   end
   if ~isempty(daterange{1}),
-    allqueries{end+1} = SAGE.Query.Compare('date_time','>',daterange{1});
+    allqueries{end+1} = SAGE.Query.Compare('exp_datetime','>',daterange{1});
   end
   if numel(daterange) > 1 && ~isempty(daterange{2}),
-    allqueries{end+1} = SAGE.Query.Compare('date_time','<',daterange{2});
+    allqueries{end+1} = SAGE.Query.Compare('exp_datetime','<',daterange{2});
   end
 end
 
