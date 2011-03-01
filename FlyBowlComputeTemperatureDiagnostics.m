@@ -1,4 +1,4 @@
-function FlyBowlComputeTemperatureDiagnostics(expdir)
+function diagnostics = FlyBowlComputeTemperatureDiagnostics(expdir,varargin)
 
 %% parse parameters
 [analysis_protocol,settingsdir,datalocparamsfilestr] = ...
@@ -36,3 +36,13 @@ diagnostics.nreadings = numel(stream);
   
 % standard deviation
 diagnostics.std = nanstd(stream,1);
+
+%% write to file
+temperaturediagnosticsfile = fullfile(expdir,dataloc_params.temperaturediagnosticsfilestr);
+fid = fopen(temperaturediagnosticsfile,'w');
+fns = fieldnames(diagnostics);
+for i = 1:numel(fns),
+  fn = fns{i};
+  fprintf(fid,'%s,%s\n',fn,num2str(diagnostics.(fn)));
+end
+fclose(fid);
