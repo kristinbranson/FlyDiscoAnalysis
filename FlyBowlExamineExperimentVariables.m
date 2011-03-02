@@ -92,6 +92,7 @@ queries(end+1:end+2) = {'daterange',daterange};
 queries(end+1:end+2) = {'data_type',data_types};
 queries(end+1:end+2) = {'flag_aborted',0};
 queries(end+1:end+2) = {'automated_pf','P'};
+queries(end+1:end+2) = {'experiment_name','FlyBowl_*'};
 data = SAGEGetBowlData(queries{:});
 %load('datacache.mat','data');
 nexpdirs = numel(data);
@@ -313,12 +314,6 @@ hold(hax,'on');
 colors = jet(nexpdirs)*.7;
 drawnow;
 
-%% selected experiment
-
-hselected = plot(0,0,'o','color','k','Visible','off','HitTest','off','MarkerSize',10,'MarkerFaceColor','k');
-expdiri_selected = [];
-stati_selected = [];
-
 %% plot diagnostics
 
 if nexpdirs == 1,
@@ -346,7 +341,7 @@ set(hax,'XLim',xlim,'YLim',ylim,'XTick',1:nstats,'XTickLabel',statnames,'XGrid',
 
 ylabel(hax,'Stds from mean');
 
-%% set manual_pf = p marker
+%% set manual_pf = p, f marker
 
 %gray_p_color = [.7,.7,.7];
 %gray_f_color = [.5,.5,.5];
@@ -361,6 +356,13 @@ idx_manual_f = lower(manual_pf) == 'f';
 idx_visible = true(1,nexpdirs);
 set(h(idx_manual_p),'Marker','+');
 set(h(idx_manual_f),'Marker','x');
+
+%% selected experiment
+
+hselected = plot(0,0,'o','color','k','Visible','off','HitTest','off','MarkerSize',10,'MarkerFaceColor','k');
+expdiri_selected = [];
+stati_selected = [];
+
 
 %% Examine menu
 
@@ -423,9 +425,16 @@ hmanualpf.pushbutton = uicontrol(hfig,'Style','pushbutton','Units','Pixels',...
   'Position',manualpf_pushbuttonpos,'String','Add Note...',...
   'Callback',@manualpf_pushbutton_Callback,...
   'Visible','off');
+% manualpf_pushbutton_info_pos = [manualpf_pushbuttonpos(1)+manualpf_pushbuttonpos(3)+margin,...
+%   c1-h2/2,w3,h2];
+% hmanualpf.pushbutton_info = uicontrol(hfig,'Style','pushbutton','Units','Pixels',...
+%   'Position',manualpf_pushbutton_info_pos,'String','Add Info...',...
+%   'Callback',@manualpf_pushbutton_info_Callback,...
+%   'Visible','off');
 set([hmanualpf.text,hmanualpf.popup,hmanualpf.pushbutton],'Units','normalized');
 
 hnotes = struct;
+% hinfo = struct;
 
 
 %% date
@@ -995,5 +1004,59 @@ handles.hdate = hdate;
     end
     
   end
+
+%% add info callback
+%  function manualpf_pushbutton_info_Callback(hObject,event) %#ok<INUSD>
+% 
+%    nrstats = ceil(sqrt(nstats));
+%    ncstats = ceil(nstats/nrstats);
+%    checkbox_h = 20;
+%    checkbox_w = 100;
+%    border = 10;
+%    dialog_h = nrstats*checkbox_h+border*2;
+%    dialog_w = ncstats*checkbox_w+border*2;
+%    
+%    hinfo.dialog = dialog('Name','Add information','WindowStyle','Normal','Resize','on','Units','pixels');
+%    dialog_pos = get(hinfo.dialog,'Position');
+%    dialog_pos(1) = dialog_pos(1) - (dialog_w-dialog_pos(3))/2;
+%    dialog_pos(2) = dialog_pos(2) - (dialog_h-dialog_pos(4))/2;
+%    dialog_pos(3) = dialog_w;
+%    dialog_pos(4) = dialog_h;
+%    set(hinfo.dialog,'Position',dialog_pos);
+%    
+%    done_pos = [.29,.02,.2,.1];
+%    cancel_pos = [.51,.02,.2,.1];
+%    notes_behavioral_pos = [.02,.14,.96,.35];
+%    text_behavioral_pos = [.02,.49,.96,.06];
+%    notes_technical_pos = [.02,.57,.96,.35];
+%    text_technical_pos = [.02,.92,.96,.06];
+% 
+%    hnotes.pushbutton_done = uicontrol(hnotes.dialog,'Style','pushbutton',...
+%      'Units','normalized','Position',done_pos,...
+%      'String','Done','Callback',@notes_done_Callback);
+%    hnotes.pushbutton_cancel = uicontrol(hnotes.dialog,'Style','pushbutton',...
+%      'Units','normalized','Position',cancel_pos,...
+%      'String','Cancel','Callback',@notes_cancel_Callback);
+%    hnotes.edit_behavioral = uicontrol(hnotes.dialog,'Style','edit',...
+%      'Units','normalized','Position',notes_behavioral_pos,...
+%      'String',data(expdiri_selected).notes_behavioral,...
+%      'HorizontalAlignment','left',...
+%      'BackgroundColor','w');
+%    hnotes.text_behavioral = uicontrol(hnotes.dialog,'Style','text',...
+%      'Units','normalized','Position',text_behavioral_pos,...
+%      'String','Behavior notes:',...
+%      'HorizontalAlignment','left');
+%    hnotes.edit_technical = uicontrol(hnotes.dialog,'Style','edit',...
+%      'Units','normalized','Position',notes_technical_pos,...
+%      'String',data(expdiri_selected).notes_technical,...
+%      'HorizontalAlignment','left',...
+%      'BackgroundColor','w');
+%    hnotes.text_technical = uicontrol(hnotes.dialog,'Style','text',...
+%      'Units','normalized','Position',text_technical_pos,...
+%      'String','Technical notes:',...
+%      'HorizontalAlignment','left');
+%    uiwait(hnotes.dialog);
+%    
+%  end
 
 end

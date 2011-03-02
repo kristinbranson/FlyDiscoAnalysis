@@ -14,8 +14,14 @@ lim_llr,-60,60
 clim_llr,-60,60
 linestyleparams_llr,
 linestyleparams_histisinterp,
-prctiles_bkgddev_compute,0,1,5,25,50,75,95,99,100
+prctiles_compute,0,1,5,25,50,75,95,99,100
 nframessample,200
-figpos,10,30,1500,500
+figpos,10,30,1500,1500
 lim_llrfore,20,100
 nbins_llrfore,50
+lim_diffim,0,255
+nbins_diffim,50
+lim_imfore,0,255
+nbins_imfore,50
+linestyleparams_histimfore,
+linestyleparams_histdiffim,
