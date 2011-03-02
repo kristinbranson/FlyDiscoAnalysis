@@ -1,4 +1,4 @@
-function res = BkgdModelDiagnostics(expdir,varargin)
+function [bkgd_diagnostics,res] = BkgdModelDiagnostics(expdir,varargin)
 
 bkgd_diagnostics = struct;
 
@@ -41,14 +41,14 @@ annfile_images = {'background_median','background_mean',...
   'fracframesisback',...
   'background_center','background_dev',...
   'isarena'};
-nr = ann.movie_height;
-nc = ann.movie_width;
+nr = ann.movie_width;
+nc = ann.movie_height;
 
 % resize images read from annotation
 for i = 1:numel(annfile_images),
   fn = annfile_images{i};
   if isfield(ann,fn),
-    ann.(fn) = reshape(ann.(fn),[nr,nc,numel(ann.(fn))/(nr*nc)]);
+    ann.(fn) = permute(reshape(ann.(fn),[nc,nr,numel(ann.(fn))/(nr*nc)]),[2,1,3]);
   end
 end
 
@@ -338,6 +338,22 @@ moviefile = fullfile(expdir,dataloc_params.moviefilestr);
 trxfile = fullfile(expdir,dataloc_params.trxfilestr);
 load(trxfile,'trx');
 
+edges_llrfore = [-inf,linspace(params.lim_llrfore(1),params.lim_llrfore(2),...
+  params.nbins_llrfore-1),inf];
+centers_llrfore = (edges_llrfore(2:end-2)+edges_llrfore(3:end-1))/2;
+if isinf(edges_llrfore(end)),
+  centerend = 2*centers_llrfore(end) - centers_llrfore(end-1);
+else
+  centerend = (edges_llrfore(end-1)+edges_llrfore(end))/2;
+end
+if isinf(edges_llrfore(1)),
+  centerstart = 2*centers_llrfore(1) - centers_llrfore(2);
+else
+  centerstart = (edges_llrfore(1)+edges_llrfore(2))/2;
+end
+centers_llrfore = [centerstart,centers_llrfore,centerend];
+llrfore_counts = zeros(1,params.nbins_llrfore);
+
 sampleframes = round(linspace(1,nframes,params.nframessample));
 diffim_counts = zeros(1,256);
 centers = 0:255;
@@ -351,20 +367,21 @@ for i = 1:params.nframessample,
   t = sampleframes(i);
   
   % current image
-  im = readframe(t);
-  
-  % current positions
-  trxcurr = obj.trx.getmovieidx(n).getframe(t);
-  nfliescurr = numel(trxcurr);
+  im = double(readframe(t));
+%   
+%   % current positions
+%   trxcurr = obj.trx.getmovieidx(n).getframe(t);
+%   nfliescurr = numel(trxcurr);
+%   nfliessample = nfliessample + nfliescurr;
+%   
+  % background subtraction
+  [isfore,diffim] = BackSub(im,ann);
+  % use GMM with the tracked fly positions as initialization
+  [cc,nfliescurr] = AssignPixels(isfore,diffim,trx,t);
   nfliessample = nfliessample + nfliescurr;
   
-  % background subtraction
-  [isfore,diffim] = obj.BackSub(im,n);
-  % use GMM with the tracked fly positions as initialization
-  cc = obj.AssignPixels(im,trxcurr);
-  
   % experiment-wide llr
-  if isempty(obj.ExpBGFGModelMatFile) || ~exist(obj.ExpBGFGModelMatFile,'file'),
+  if ~exist('model','var'),
     llr = zeros(nr,nc);
   else
     llr = ExpBGFGModel_lik(model,im);
@@ -379,14 +396,10 @@ for i = 1:params.nframessample,
   frac_fg = frac_fg + nforecurr;
   
   %% histogram of log-likelihood ratio of foreground to background for some flies
-  for j = 1:numel(trxcurr),
-    countscurr = hist(llr(cc==j)',centers_llrfore);
-    %countscurr = [countscurr(1:end-2),counts(end-1)+counts(end)];
-    llr_counts = llr_counts + countscurr;
-  end
+  llrfore_counts = llrfore_counts + hist(llr(isfore)',centers_llrfore);
   
   %% Average, min, max log-likelihood ratio for some flies
-  for j = 1:numel(trxcurr),
+  for j = 1:nfliescurr,
     llrcurr = llr(cc==j)';
     minllrperfly(end+1) = min(llrcurr); %#ok<AGROW>
     maxllrperfly(end+1) = max(llrcurr); %#ok<AGROW>
@@ -395,15 +408,17 @@ for i = 1:params.nframessample,
   
 end
 
-frac_fg = frac_fg / params.nframessample / (nr*nc);
-frac_minllrperfly = hist(minllrperfly,centers_llrfore)/nfliessample;
-frac_maxllrperfly = hist(maxllrperfly,centers_llrfore)/nfliessample;
-frac_meanllrperfly = hist(meanllrperfly,centers_llrfore)/nfliessample;
+bkgd_diagnostics.diffim_frac = diffim_counts / params.nframessample / (nr*nc);
+bkgd_diagnostics.centers_diffim = centers;
+bkgd_diagnostics.llrfore_frac = llrfore_counts / frac_fg;
+bkgd_diagnostics.edges_llrfore = edges_llrfore;
+bkgd_diagnostics.frac_fg = frac_fg / params.nframessample / (nr*nc);
+bkgd_diagnostics.frac_minllrperfly = hist(minllrperfly,centers_llrfore)/nfliessample;
+bkgd_diagnostics.frac_maxllrperfly = hist(maxllrperfly,centers_llrfore)/nfliessample;
+bkgd_diagnostics.frac_meanllrperfly = hist(meanllrperfly,centers_llrfore)/nfliessample;
 
 %% link axes
 linkaxes(imax);
 fclose(fid);
 
-%% store background diagnostics
 
-obj.bkgd_diagnostics{n} = bkgd_diagnostics;
