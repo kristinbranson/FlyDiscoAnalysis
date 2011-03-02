@@ -17,3 +17,5 @@ linestyleparams_histisinterp,
 prctiles_bkgddev_compute,0,1,5,25,50,75,95,99,100
 nframessample,200
 figpos,10,30,1500,500
+lim_llrfore,20,100
+nbins_llrfore,50
