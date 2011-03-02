@@ -14,13 +14,15 @@ bkgd_diagnostics = struct;
 datalocparamsfile = fullfile(settingsdir,analysis_protocol,datalocparamsfilestr);
 dataloc_params = ReadParams(datalocparamsfile);
 bkgdmodeldiagnosticsparamsfile = fullfile(settingsdir,analysis_protocol,dataloc_params.bkgdmodeldiagnosticsparamsfilestr);
-params = ReadParams(bkgdmodeldiagnosticsfile);
+params = ReadParams(bkgdmodeldiagnosticsparamsfile);
 
 %% set up figure
 
 res = struct;
 hfig = 1;
 figure(hfig);
+clf(hfig,'reset');
+set(hfig,'Units','Pixels','Position',params.figpos);
 nax_r = 2;
 nax_c = 6;
 hax = createsubplots(nax_r,nax_c,.05,hfig);
@@ -29,28 +31,45 @@ res.hax = hax;
 res.hfig = hfig;
 imax = [];
 
+%% read annotation file
+
+annfile = fullfile(expdir,dataloc_params.annfilestr);
+ann = read_ann(annfile);
+% resize images
+annfile_images = {'background_median','background_mean',...
+  'background_mad','background_std',...
+  'fracframesisback',...
+  'background_center','background_dev',...
+  'isarena'};
+nr = ann.movie_height;
+nc = ann.movie_width;
+
+% resize images read from annotation
+for i = 1:numel(annfile_images),
+  fn = annfile_images{i};
+  if isfield(ann,fn),
+    ann.(fn) = reshape(ann.(fn),[nr,nc,numel(ann.(fn))/(nr*nc)]);
+  end
+end
+
 %% image of background center
-bkgd_diagnostics.background_center = obj.anns{n}.background_center;
-res.him_bkgdcenter = image(repmat(uint8(obj.anns{n}.background_center),[1,1,3]),'Parent',hax(1,1));
+bkgd_diagnostics.background_center = ann.background_center;
+res.him_bkgdcenter = image(repmat(uint8(ann.background_center),[1,1,3]),'Parent',hax(1,1));
 res.hti_bkgdcenter = title(hax(1,1),'Background Center');
 axis(hax(1,1),'image','xy','off');
 imax(end+1) = hax(1,1);
 
 %% histogram of background center intensity
-if isempty(edges_bkgdcenter),
-  edges_bkgdcenter = linspace(lim_bkgdcenter(1),lim_bkgdcenter(2),nbins_bkgdcenter+1);
-else
-  nbins_bkgdcenter = length(edges_bkgdcenter) - 1;
-end
+edges_bkgdcenter = linspace(params.lim_bkgdcenter(1),params.lim_bkgdcenter(2),params.nbins_bkgdcenter+1);
 centers_bkgdcenter = (edges_bkgdcenter(1:end-1)+edges_bkgdcenter(2:end))/2;
-counts = histc(obj.anns{n}.background_center(:)',edges_bkgdcenter);
+counts = histc(ann.background_center(:)',edges_bkgdcenter);
 counts = [counts(1:end-2),counts(end-1)+counts(end)];
-frac = counts / numel(obj.anns{n}.background_center);
+frac = counts / numel(ann.background_center);
 
 res.hline_histbkgdcenter = ...
   semilogy_with_zeros(hax(2,1),centers_bkgdcenter,frac,...
   [edges_bkgdcenter(1),edges_bkgdcenter(end)],1,...
-  'k.-',linestyleparams_bkgdcenter{:});
+  'k.-',params.linestyleparams_bkgdcenter{:});
 res.hti_histbkgdcenter = title(hax(2,1),'Bkgd Ctr Px Intensities');
 bkgd_diagnostics.frac_bkgdcenter = frac;
 bkgd_diagnostics.edges_bkgdcenter = edges_bkgdcenter;
@@ -58,36 +77,36 @@ bkgd_diagnostics.edges_bkgdcenter = edges_bkgdcenter;
 %% image of background deviation
 dev = [];
 devtype = '';
-if isfield(obj.anns{n},'background_mad'),
-  dev = obj.anns{n}.background_mad;
+if isfield(ann,'background_mad'),
+  dev = ann.background_mad;
   devtype = 'MAD';
-elseif isfield(obj.anns{n},'background_std'),
-  dev = obj.anns{n}.background_std;
+elseif isfield(ann,'background_std'),
+  dev = ann.background_std;
   devtype = 'Std';
-elseif isfield(obj.anns{n},'background_dev'),
-  dev = obj.anns{n}.background_dev;
+elseif isfield(ann,'background_dev'),
+  dev = ann.background_dev;
   devtype = 'Dev';
 end
 
 if ~isempty(dev),
-  if isnan(clim_bkgddev(2)),
-    clim_bkgddev(2) = max(dev(:));
+  if isnan(params.clim_bkgddev(2)),
+    params.clim_bkgddev(2) = max(dev(:));
   end
-  if isnan(clim_bkgddev(1)),
-    clim_bkgddev(1) = 0;
+  if isnan(params.clim_bkgddev(1)),
+    params.clim_bkgddev(1) = 0;
   end
-  res.him_bkgddev = imagesc(dev,'Parent',hax(1,2),clim_bkgddev);
+  res.him_bkgddev = imagesc(dev,'Parent',hax(1,2),params.clim_bkgddev);
   res.hti_bkgddev = title(hax(1,2),['Background ',devtype]);
-  res.hcb_bkgddev = colorbar('peer',hax(1,2),'Location','East','XColor','w','YColor','w');
+  res.hcb_bkgddev = colorbar('peer',hax(1,2),'Location','East');
   axis(hax(1,2),'image','xy','off');
   imax(end+1) = hax(1,2);
+  cbpos = get(res.hcb_bkgddev,'Position');
+  axpos = get(hax(1,2),'Position');
+  cbpos(1) = axpos(1)+axpos(3)+cbpos(3);
+  set(res.hcb_bkgddev,'Position',cbpos);
   
   %% histogram of background deviation
-  if isempty(edges_bkgddev),
-    edges_bkgddev = [linspace(lim_bkgddev(1),lim_bkgddev(2),nbins_bkgddev),inf];
-  else
-    %nbins_bkgddev = length(edges_bkgddev) - 1;
-  end
+  edges_bkgddev = [linspace(params.lim_bkgddev(1),params.lim_bkgddev(2),params.nbins_bkgddev),inf];
   if isinf(edges_bkgddev(end)),
     centers_bkgddev = (edges_bkgddev(1:end-2)+edges_bkgddev(2:end-1))/2;
     centers_bkgddev(end+1) = 2*centers_bkgddev(end) - centers_bkgddev(end-1);
@@ -98,9 +117,9 @@ if ~isempty(dev),
   counts = [counts(1:end-2),counts(end-1)+counts(end)];
   frac = counts / numel(dev);
   res.hline_histbkgddev = ...
-  semilogy_with_zeros(hax(2,2),centers_bkgddev,frac,...
-  [edges_bkgddev(1),edges_bkgddev(end)],1,...
-  'k.-',linestyleparams_bkgddev{:});
+    semilogy_with_zeros(hax(2,2),centers_bkgddev,frac,...
+    [edges_bkgddev(1),edges_bkgddev(end)],1,...
+    'k.-',params.linestyleparams_bkgddev{:});
   res.hti_histbkgddev = title(hax(2,2),['Bkgd ',devtype,' Hist']);
 
   bkgd_diagnostics.frac_bkgddev = frac;
@@ -108,10 +127,10 @@ if ~isempty(dev),
 
   %% maximum, percentiles of background median absolute deviation
   bkgd_diagnostics.max_bkgddev = max(dev(:));
-  if isempty(prctiles_bkgddev_compute),
+  if isempty(params.prctiles_bkgddev_compute),
     bkgd_diagnostics.prctiles_bkgddev = [];
   else
-    bkgd_diagnostics.prctiles_bkgddev = prctile(dev(:),prctiles_bkgddev_compute);
+    bkgd_diagnostics.prctiles_bkgddev = prctile(dev(:),params.prctiles_bkgddev_compute);
   end
   
 else
@@ -125,33 +144,33 @@ end
 
 %% Image of background center overlaid with areas that are not always
 % background (according to the alwaysbkgd mask) in red.
-if isfield(obj.anns{n},'isarena'),
-  isarena = obj.anns{n}.isarena~=0;
+if isfield(ann,'isarena'),
+  isarena = ann.isarena~=0;
 else
-  isarena = true([obj.nrs(n),obj.ncs(n)]);
-  if all(isfield(obj.anns{n},{'max_nonarena','background_center'})),
-    isarena = isarena & (obj.anns{n}.background_center > obj.anns{n}.max_nonarena);
+  isarena = true([nr,nc]);
+  if all(isfield(ann,{'max_nonarena','background_center'})),
+    isarena = isarena & (ann.background_center > ann.max_nonarena);
   end
-  if all(isfield(obj.anns{n},{'min_nonarena','background_center'})),
-    isarena = isarena & (obj.anns{n}.background_center < obj.anns{n}.min_nonarena);
+  if all(isfield(ann,{'min_nonarena','background_center'})),
+    isarena = isarena & (ann.background_center < ann.min_nonarena);
   end
-  if all(isfield(obj.anns{n},{'do_set_circular_arena',...
+  if all(isfield(ann,{'do_set_circular_arena',...
       'arena_center_x','arena_center_y','arena_radius'})) && ...
-      obj.anns{n}.do_set_circular_arena ~= 0,
-    [gridx,gridy] = meshgrid(0:obj.ncs(n)-1,0:obj.nrs(n)-1);
+      ann.do_set_circular_arena ~= 0,
+    [gridx,gridy] = meshgrid(0:nc-1,0:nr-1);
     isarena = isarena & ...
-      ( (gridx - obj.anns{n}.arena_center_x).^2 + ...
-      (gridy - obj.anns{n}.arena_center_y).^2 ) <= obj.anns{n}.arena_radius^2;
+      ( (gridx - ann.arena_center_x).^2 + ...
+      (gridy - ann.arena_center_y).^2 ) <= ann.arena_radius^2;
   end
 end
-tmp = obj.anns{n}.background_center;
+tmp = ann.background_center;
 tmp(~isarena) = tmp(~isarena)*2 + .5;
-imalwaysbkgd = uint8(cat(3,tmp,repmat(obj.anns{n}.background_center,[1,1,2])));
+imalwaysbkgd = uint8(cat(3,tmp,repmat(ann.background_center,[1,1,2])));
 res.him_alwaysbkgd = image(imalwaysbkgd,'Parent',hax(1,3));
 res.hti_alwaysbkgd = title(hax(1,3),'Always Bkgd');
 axis(hax(1,3),'image','xy','off');
-if all(isarena),
-  res.hte_alwaysbkgd = text(obj.ncs(n)/2,obj.nrs(n)/2,'(None)','color','r',...
+if all(isarena(:)),
+  res.hte_alwaysbkgd = text(nc/2,nr/2,'(None)','color','r',...
     'Parent',hax(1,3),'HorizontalAlignment','center');
 end
 imax(end+1) = hax(1,3);
@@ -160,47 +179,48 @@ bkgd_diagnostics.isarena = isarena;
 bkgd_diagnostics.imalwaysbkgd = imalwaysbkgd;
 
 %% fraction of pixels that are always background
-bkgd_diagnostics.fracpx_alwaysbkgd = nnz(isarena) / (obj.nrs(n)*obj.ncs(n));
+bkgd_diagnostics.fracpx_alwaysbkgd = nnz(isarena) / (nr*nc);
 
 %% histogram of background center intensities for pixels that are always
 % background
-if any(~isarena),
-  counts = histc(obj.anns{n}.background_center(~isarena)',edges_bkgdcenter);
+if any(~isarena(:)),
+  counts = histc(ann.background_center(~isarena)',edges_bkgdcenter);
   counts = [counts(1:end-2),counts(end-1)+counts(end)];
   frac = counts / nnz(~isarena);
 else
-  frac = zeros(1,nbins_bkgdcenter);
+  frac = zeros(1,params.nbins_bkgdcenter);
 end
 res.hline_histalwaysbkgd = ...
   semilogy_with_zeros(hax(2,3),centers_bkgdcenter,frac,...
   [edges_bkgdcenter(1),edges_bkgdcenter(end)],1,...
-  'k.-',linestyleparams_histalwaysbkgd{:});
+  'k.-',params.linestyleparams_histalwaysbkgd{:});
 res.hti_histalwaysbkgd = title(hax(2,3),'Always Bkgd Px Intensities');
 
 bkgd_diagnostics.frac_alwaysbkgd = frac;
 
 %% image of fraction of frames that are used to estimate background model
-if ~isfield(obj.anns{n},'use_expbgfgmodel') || ...
-    obj.anns{n}.use_expbgfgmodel == 0 || ...
-    ~isfield(obj.anns{n},'fracframesisback'),...
-  fracframesisback = ones(obj.nrs(n),obj.ncs(n));
+if ~isfield(ann,'use_expbgfgmodel') || ...
+    ann.use_expbgfgmodel == 0 || ...
+    ~isfield(ann,'fracframesisback'),
+  fracframesisback = ones(nr,nc);
 else
-  fracframesisback = obj.anns{n}.fracframesisback;
+  fracframesisback = ann.fracframesisback;
 end
 res.him_fracframesisback = imagesc(fracframesisback,'Parent',hax(1,4),[0,1]);
 res.hti_alwaysbkgd = title(hax(1,4),'Frac. Frames Used in Bkgd Model');
 axis(hax(1,4),'image','xy','off');
-res.hcb_fracframesisback = colorbar('peer',hax(1,4),'Location','East','XColor','w','YColor','w');
+res.hcb_fracframesisback = colorbar('peer',hax(1,4),'Location','East');
+cbpos = get(res.hcb_fracframesisback,'Position');
+axpos = get(hax(1,4),'Position');
+cbpos(1) = axpos(1)+axpos(3)+cbpos(3);
+set(res.hcb_fracframesisback,'Position',cbpos);
 imax(end+1) = hax(1,4);
 
 bkgd_diagnostics.fracframesisback = fracframesisback;
 
 %% histogram of fraction of frames used to estimate background
-if isempty(edges_fracframesisback),
-  edges_fracframesisback = linspace(lim_fracframesisback(1),lim_fracframesisback(2),nbins_fracframesisback+1);
-else
-  nbins_fracframesisback = length(edges_fracframesisback) - 1;
-end
+edges_fracframesisback = linspace(params.lim_fracframesisback(1),...
+  params.lim_fracframesisback(2),params.nbins_fracframesisback+1);
 centers_fracframesisback = (edges_fracframesisback(1:end-1)+edges_fracframesisback(2:end))/2;
 counts = histc(fracframesisback(:)',edges_fracframesisback);
 counts = [counts(1:end-2),counts(end-1)+counts(end)];
@@ -208,7 +228,7 @@ frac = counts / numel(fracframesisback);
 res.hline_histfracframesisback = ...
   semilogy_with_zeros(hax(2,4),centers_fracframesisback,frac,...
   [edges_fracframesisback(1),edges_fracframesisback(end)],1,...
-  'k.-',linestyleparams_histfracframesisback{:});
+  'k.-',params.linestyleparams_histfracframesisback{:});
 res.hti_histfracframesisback = title(hax(2,4),'Frac. Frames Used in Bkgd Model Hist');
 
 bkgd_diagnostics.frac_fracframesisback = frac;
@@ -220,67 +240,68 @@ bkgd_diagnostics.min_fracframesisback = min(fracframesisback(:));
 bkgd_diagnostics.max_fracframesisback = max(fracframesisback(:));
 
 %% Image of background center overlaid with areas that were interpolated in red
-if isfield(obj.anns{n},'min_frac_frames_isback'),
-  isinterpolated = fracframesisback < obj.anns{n}.min_frac_frames_isback;
+if isfield(ann,'min_frac_frames_isback'),
+  isinterpolated = fracframesisback < ann.min_frac_frames_isback;
 else
-  isinterpolated = false(obj.nrs(n),obj.ncs(n));
+  isinterpolated = false(nr,nc);
 end
 b = bwboundaries(imdilate(isinterpolated,ones(2)),8);
-res.him_isinterpolated = image(repmat(uint8(obj.anns{n}.background_center),[1,1,3]),'Parent',hax(1,6));
+res.him_isinterpolated = image(repmat(uint8(ann.background_center),[1,1,3]),'Parent',hax(1,6));
 hold(hax(1,6),'on');
 res.hli_isinterpolated = nan(size(b));
 for i = 1:numel(b),
   res.hli_isinterpolated(i) = plot(hax(1,6),b{i}(:,1),b{i}(:,2),'r-');
 end
+
 res.hti_isinterpolated = title(hax(1,6),'Bkgd Interpolated');
 axis(hax(1,6),'image','xy','off');
-if ~any(isinterpolated),
-  res.hte_isinterpolated = text(obj.ncs(n)/2,obj.nrs(n)/2,'(None)','color','r',...
+if ~any(isinterpolated(:)),
+  res.hte_isinterpolated = text(nc/2,nr/2,'(None)','color','r',...
     'Parent',hax(1,6),'HorizontalAlignment','center');
 end
 imax(end+1) = hax(1,6);
 bkgd_diagnostics.isinterpolated = isinterpolated;
 
 %% fraction of pixels that were interpolated
-bkgd_diagnostics.fracpx_interpolated = nnz(isinterpolated) / (obj.ncs(n)*obj.nrs(n));
+bkgd_diagnostics.fracpx_interpolated = nnz(isinterpolated) / (nc*nr);
 
 %% histogram of background center intensities for interpolated pixels
 
-if any(isinterpolated),
-  counts = histc(obj.anns{n}.background_center(isinterpolated)',edges_bkgdcenter);
+if any(isinterpolated(:)),
+  counts = histc(ann.background_center(isinterpolated)',edges_bkgdcenter);
   counts = [counts(1:end-2),counts(end-1)+counts(end)];
   frac = counts / nnz(isinterpolated);
 else
-  frac = zeros(1,nbins_bkgdcenter);
+  frac = zeros(1,params.nbins_bkgdcenter);
 end
 res.hline_histisinterp = ...
   semilogy_with_zeros(hax(2,6),centers_bkgdcenter,frac,...
   [edges_bkgdcenter(1),edges_bkgdcenter(end)],1,...
-  'k.-',linestyleparams_histisinterp{:});
+  'k.-',params.linestyleparams_histisinterp{:});
 res.hti_histisinterp = title(hax(2,6),'Bkgd Interpolated Px Intensities');
 
-linkaxes(imax);
 bkgd_diagnostics.frac_bkgdinterpolated = frac;
 
 %% Image of background center log-likelihood ratio of foreground to background
-if isempty(obj.ExpBGFGModelMatFile) || ~exist(obj.ExpBGFGModelMatFile,'file'),
-  llr = zeros(obj.nrs(n),obj.ncs(n));
+expbgfgmodelfile = fullfile(settingsdir,analysis_protocol,dataloc_params.expbgfgmodelmatfilestr);
+if isempty(expbgfgmodelfile) || ~exist(expbgfgmodelfile,'file'),
+  llr = zeros(nr,nc);
 else
-  model = load(obj.ExpBGFGModelMatFile);
-  llr = ExpBGFGModel_lik(model,obj.anns{n}.background_center);  
+  model = load(expbgfgmodelfile);
+  llr = ExpBGFGModel_lik(model,ann.background_center);  
 end
-res.him_llr = imagesc(llr,'Parent',hax(1,5),clim_llr);
+res.him_llr = imagesc(llr,'Parent',hax(1,5),params.clim_llr);
 res.hti_llr = title(hax(1,5),'LLR Fg over Bg');
 axis(hax(1,5),'image','xy','off');
-res.hcb_llr = colorbar('peer',hax(1,5),'Location','East','XColor','w','YColor','w');
+res.hcb_llr = colorbar('peer',hax(1,5),'Location','East');
+cbpos = get(res.hcb_llr,'Position');
+axpos = get(hax(1,5),'Position');
+cbpos(1) = axpos(1)+axpos(3)+cbpos(3);
+set(res.hcb_llr,'Position',cbpos);
 imax(end+1) = hax(1,5);
 
 %% histogram of background center llr
-if isempty(edges_llr),
-  edges_llr = [-inf,linspace(lim_llr(1),lim_llr(2),nbins_llr-1),inf];
-else
-  %nbins_llr = length(edges_llr) - 1;
-end
+edges_llr = [-inf,linspace(params.lim_llr(1),params.lim_llr(2),params.nbins_llr-1),inf];
 centers_llr = (edges_llr(2:end-2)+edges_llr(3:end-1))/2;
 if isinf(edges_llr(end)),
   centerend = 2*centers_llr(end) - centers_llr(end-1);
@@ -299,7 +320,7 @@ frac = counts / numel(dev);
 res.hline_histllr = ...
   semilogy_with_zeros(hax(2,5),centers_llr,frac,...
   [edges_llr(1),edges_llr(end)],1,...
-  'k.-',linestyleparams_llr{:});
+  'k.-',params.linestyleparams_llr{:});
 res.hti_histllr = title(hax(2,5),'LLR Fg over Bg Hist');
 
 bkgd_diagnostics.frac_bkgdcenter_llr = frac;
@@ -312,7 +333,12 @@ bkgd_diagnostics.max_bkgdcenter_llr = max(llr(:));
 
 %% the following diagnostics involve sampling some frames from the video
 
-sampleframes = linspace(1,obj.nframes(n),nframessample);
+moviefile = fullfile(expdir,dataloc_params.moviefilestr);
+[readframe,nframes,fid] = get_readframe_fcn(moviefile);
+trxfile = fullfile(expdir,dataloc_params.trxfilestr);
+load(trxfile,'trx');
+
+sampleframes = round(linspace(1,nframes,params.nframessample));
 diffim_counts = zeros(1,256);
 centers = 0:255;
 frac_fg = 0;
@@ -320,12 +346,12 @@ nfliessample = 0;
 minllrperfly = [];
 maxllrperfly = [];
 meanllrperfly = [];
-for i = 1:nframessample,
+for i = 1:params.nframessample,
   
   t = sampleframes(i);
   
   % current image
-  im = obj.readframes{n}(t);
+  im = readframe(t);
   
   % current positions
   trxcurr = obj.trx.getmovieidx(n).getframe(t);
@@ -339,7 +365,7 @@ for i = 1:nframessample,
   
   % experiment-wide llr
   if isempty(obj.ExpBGFGModelMatFile) || ~exist(obj.ExpBGFGModelMatFile,'file'),
-    llr = zeros(obj.nrs(n),obj.ncs(n));
+    llr = zeros(nr,nc);
   else
     llr = ExpBGFGModel_lik(model,im);
   end
@@ -369,10 +395,14 @@ for i = 1:nframessample,
   
 end
 
-frac_fg = frac_fg / nframessample / (obj.nrs(n)*obj.ncs(n));
+frac_fg = frac_fg / params.nframessample / (nr*nc);
 frac_minllrperfly = hist(minllrperfly,centers_llrfore)/nfliessample;
 frac_maxllrperfly = hist(maxllrperfly,centers_llrfore)/nfliessample;
 frac_meanllrperfly = hist(meanllrperfly,centers_llrfore)/nfliessample;
+
+%% link axes
+linkaxes(imax);
+fclose(fid);
 
 %% store background diagnostics
 

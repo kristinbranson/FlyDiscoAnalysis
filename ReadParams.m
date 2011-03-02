@@ -21,13 +21,17 @@ while true,
   m = regexp(s,',','split','once');
   try
     name = m{1};
-    valcell = regexp(m{2},',','split');
-    val = str2double(valcell);
-    if any(isnan(val)),
-      if numel(valcell) == 1,
-        val = valcell{1};
-      else
-        val = valcell;
+    if isempty(m{2}),
+      val = {};
+    else
+      valcell = regexp(m{2},',','split');
+      val = str2double(valcell);
+      if any(isnan(val)),
+        if numel(valcell) == 1,
+          val = valcell{1};
+        else
+          val = valcell;
+        end
       end
     end
     params.(name) = val;
