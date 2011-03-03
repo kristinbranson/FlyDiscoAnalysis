@@ -5,20 +5,19 @@ if ispc,
   addpath E:\Code\JCtrax\filehandling;
   addpath('E:\Code\SAGE\MATLABInterface\Trunk\')
   settingsdir = 'E:\Code\FlyBowlAnalysis\settings';
+  rootdatadir = 'O:\Olympiad_Screen\fly_bowl\bowl_data';
+  
 else
   addpath /groups/branson/home/bransonk/tracking/code/JCtrax/misc;
   addpath /groups/branson/home/bransonk/tracking/code/JCtrax/filehandling;
   addpath /groups/branson/bransonlab/projects/olympiad/SAGE/MATLABInterface/Trunk;
   settingsdir = '/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/settings';
+  rootdatadir = '/groups/sciserv/flyolympiad/Olympiad_Screen/fly_bowl/bowl_data';
 end
 
 %% parameters
 
 analysis_protocol = '20110222';
-hfig = 1;
-min_days_prev = 0;
-max_days_prev = 7;
-sage_params_path = '';
 
 %% which experiments
 
@@ -32,8 +31,7 @@ sage_params_path = '';
 
 params = {'settingsdir',settingsdir,...
   'analysis_protocol',analysis_protocol,...
-  'hfig',hfig,...
-  'sage_params_path',sage_params_path};
+  'rootdatadir',rootdatadir};
 
 %% 
 

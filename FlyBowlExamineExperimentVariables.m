@@ -3,7 +3,7 @@ function handles = FlyBowlExamineExperimentVariables(varargin)
 handles = struct;
 
 [analysis_protocol,settingsdir,datalocparamsfilestr,hfig,period,maxdatenum,...
-  figpos,datenumnow,sage_params_path,sage_db,username,leftovers] = ...
+  figpos,datenumnow,sage_params_path,sage_db,username,rootdatadir,leftovers] = ...
   myparse_nocheck(varargin,...
   'analysis_protocol','current',...
   'settingsdir','/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/settings',...
@@ -12,12 +12,20 @@ handles = struct;
   'period',7,...
   'maxdatenum',[],...
   'figpos',[],...
-  'datenumnow',now,...
+  'datenumnow',[],...
   'sage_params_path','',...
   'sage_db',[],...
-  'username','');
+  'username','',...
+  'rootdatadir','/groups/sciserv/flyolympiad/Olympiad_Screen/fly_bowl/bowl_data');
 
 maxnundo = 5;
+
+if isempty(datenumnow),
+  datenumnow = now;
+  daycurr = weekday(datenumnow);
+  daywant = 7;
+  datenumnow = floor(datenumnow)+daywant-daycurr;
+end
 
 if isempty(maxdatenum),
   maxdatenum = datenumnow;
@@ -58,7 +66,7 @@ else
   rc.username = username;
 end
 savefilename = fullfile(rc.savepath,sprintf('DataCuration_FlyBowl_%s_%sto%s.tsv',...
-  rc.username,datestr(mindatenum,30),datestr(maxdatenum,30)));
+  rc.username,datestr(mindatenum,'yyyymmdd'),datestr(maxdatenum,'yyyymmdd')));
 needsave = false;
 
 %% string metadata
@@ -191,7 +199,7 @@ for i = 1:nexpdirs,
   data(i).temperature_max = max(data(i).temperature_stream);
   data(i).temperature_maxdiff = data(i).temperature_max - min(data(i).temperature_stream);
   data(i).temperature_nreadings = numel(data(i).temperature_stream);
-  data(i).file_system_path = fullfile(dataloc_params.rootreaddir,expdir_bases{i});
+  data(i).file_system_path = fullfile(rootdatadir,expdir_bases{i});
 end
 expdirs = {data.file_system_path};
 
@@ -332,11 +340,12 @@ for expdiri = 1:nexpdirs,
 end
 
 xlim = [0,nstats+1];
-dx = nstats+1;
 miny = min(normstat(:));
 maxy = max(normstat(:));
 dy = maxy - miny;
 ylim = [miny-.01*dy,maxy+.01*dy];
+dx = diff(xlim)/figpos(3);
+dy = diff(ylim)/figpos(4);
 set(hax,'XLim',xlim,'YLim',ylim,'XTick',1:nstats,'XTickLabel',statnames,'XGrid','on');
 
 ylabel(hax,'Stds from mean');
@@ -383,8 +392,9 @@ hmenu.undo = uimenu(hmenu.set,'Label','Undo',...
   'Callback',@undo_Callback,'Enable','off');
 hmenu.save = uimenu(hmenu.file,'Label','Save...',...
   'Callback',@save_Callback);
+daterangeprint = {datestr(mindatenum,'yyyy-mm-dd'),datestr(maxdatenum,'yyyy-mm-dd')};
 hmenu.daterange = uimenu(hmenu.info,'Label',...
-  sprintf('Date range: %s - %s ...',daterange{:}));
+  sprintf('Date range: %s - %s ...',daterangeprint{:}));
 hmenu.username = uimenu(hmenu.info,'Label',...
   sprintf('User: %s',rc.username));
 set(hfig,'CloseRequestFcn',@close_fig_Callback);
@@ -404,8 +414,8 @@ textpos_px = get(htext,'Position');
 set(htext,'Units','normalized');
 margin = 5;
 w1 = 80;
-w2 = 120;
-w3 = 120;
+w2 = 100;
+w3 = 100;
 h1 = 20;
 h2 = 30;
 c1 = ((figpos(4)-margin) + textpos_px(2))/2;
@@ -451,9 +461,15 @@ nextpos = [axpos_px(1)+axpos_px(3)-w1,axpos_px(2)+axpos_px(4)+margin,w1,h1];
 currpos = [nextpos(1)-margin-w2,nextpos(2),w2,h1];
 prevpos = [currpos(1)-margin-w1,nextpos(2),w1,h1];
 hdate = struct;
+if mindaysprev < 7,
+  s = 'this week';
+elseif mindaysprev < 14,
+  s = 'last week';
+else
+  s = sprintf('%d weeks ago',ceil(mindaysprev/7));
+end
 hdate.curr = uicontrol(hfig,'Style','text','Units','Pixels',...
-  'Position',currpos,'String',...
-  sprintf('%.1f - %.1f days ago',maxdaysprev,mindaysprev));
+  'Position',currpos,'String',s);
 hdate.next = uicontrol(hfig,'Style','pushbutton','Units','Pixels',...
   'Position',nextpos,'String','>','Callback',@nextdate_Callback);
 hdate.prev = uicontrol(hfig,'Style','pushbutton','Units','Pixels',...
@@ -490,6 +506,10 @@ set(hax,'ButtonDownFcn',@ButtonDownFcn);
 
 % hchil = findobj(hfig,'Units','Pixels');
 % set(hchil,'Units','normalized');
+
+%% set motion function
+
+set(hfig,'WindowButtonMotionFcn',@MotionFcn,'BusyAction','queue');
 
 %% undo list
 
@@ -544,6 +564,7 @@ handles.hdate = hdate;
       tmpn = numel(tmpidx);
       [d,closest] = min( ((reshape(x(idx_visible,:),[1,tmpn*nstats])-xclicked)/dx).^2+...
         ((reshape(normstat(idx_visible,:),[1,tmpn*nstats])-yclicked)/dy).^2 );
+      d = sqrt(d);
       
       if d > examine_params.maxdistclick,
         set(hselected,'Visible','off');
@@ -560,15 +581,10 @@ handles.hdate = hdate;
       [expdiri_selected,stati_selected] = ind2sub([tmpn,nstats],closest);
       expdiri_selected = tmpidx(expdiri_selected);
 
-      s = printfun(expdiri_selected,stati_selected);
-      set(htext,'String',s);
+      UpdateStatSelected();
+      
       set(hselected,'XData',x(expdiri_selected,:),'YData',normstat(expdiri_selected,:),'Visible','on');
-      if ~isempty(stati_selected),
-        set(hx(stati_selected),'Color','k','FontWeight','normal');
-      end
-      %hxselected = stati_selected;
-      set(hx(stati_selected),'Color','r','FontWeight','bold');
-
+      
       manual_pf_curr = data(expdiri_selected).manual_pf;
       s = get(hmanualpf.popup,'String');
       vcurr = find(strncmpi(manual_pf_curr,s,1),1);
@@ -594,6 +610,20 @@ handles.hdate = hdate;
       rethrow(ME);
     end
     
+  end
+
+%% update stat selected-based stuff
+
+  function UpdateStatSelected()
+    
+    %set(hfig,'Interruptible','off');
+    s = printfun(expdiri_selected,stati_selected);
+    set(htext,'String',s);
+      
+    set(hx,'Color','k','FontWeight','normal');
+    set(hx(stati_selected),'Color','r','FontWeight','bold');
+    %set(hfig,'Interruptible','on');
+
   end
 
 %% manual_pf = p callback
@@ -908,7 +938,7 @@ handles.hdate = hdate;
     end
     savefilename = fullfile(savepath1,savefilename1);
     rc.savepath = savepath1;
-    [savepath2,savefilename2,saveext2] = fileparts(savefilename);
+    [savepath2,savefilename2] = fileparts(savefilename);
     savefilename2 = fullfile(savepath2,[savefilename2,'_diagnosticinfo.mat']);
 
     fid = fopen(savefilename,'w');
@@ -1048,13 +1078,35 @@ handles.hdate = hdate;
    
  end
 
-  function info_done_Callback(hObject,event)
+  function info_done_Callback(hObject,event) %#ok<INUSD>
     
     for tmpi = 1:nstats,
       info(expdiri_selected,tmpi) = get(hinfo.checkboxes(tmpi),'Value') == 1;
     end
     needsave = true;
     delete(hinfo.dialog);
+    
+  end
+
+  function MotionFcn(hObject,event) %#ok<INUSD>
+    
+    if isempty(expdiri_selected),
+      return;
+    end
+    
+    try
+      tmp = get(hax,'CurrentPoint');
+      xhover = tmp(1,1);
+      if xhover < 0 || xhover > nstats+1,
+        return;
+      end
+      stati_selected = min(nstats,max(1,round(xhover)));
+      UpdateStatSelected();
+    catch ME,
+      fprintf('Error evaluating motionfcn, disabling:\n');
+      set(hfig,'WindowButtonMotionFcn','');
+      rethrow(ME);
+    end
     
   end
 
