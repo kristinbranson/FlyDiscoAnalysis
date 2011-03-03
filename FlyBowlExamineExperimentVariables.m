@@ -101,8 +101,8 @@ queries(end+1:end+2) = {'data_type',data_types};
 queries(end+1:end+2) = {'flag_aborted',0};
 queries(end+1:end+2) = {'automated_pf','P'};
 queries(end+1:end+2) = {'experiment_name','FlyBowl_*'};
-%data = SAGEGetBowlData(queries{:});
-load('datacache.mat','data');
+data = SAGEGetBowlData(queries{:});
+%load('datacache.mat','data');
 nexpdirs = numel(data);
 expdir_bases = {data.experiment_name};
 expdir_bases = cellfun(@(s) regexprep(s,'^FlyBowl_',''),expdir_bases,'UniformOutput',false);
@@ -343,6 +343,9 @@ xlim = [0,nstats+1];
 miny = min(normstat(:));
 maxy = max(normstat(:));
 dy = maxy - miny;
+if dy == 0,
+  maxy = miny + .001;
+end
 ylim = [miny-.01*dy,maxy+.01*dy];
 dx = diff(xlim)/figpos(3);
 dy = diff(ylim)/figpos(4);
