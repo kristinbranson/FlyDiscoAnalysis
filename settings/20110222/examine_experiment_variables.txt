@@ -46,7 +46,6 @@ sexclassifier_diagnostics,std_nmales
 sexclassifier_diagnostics,mean_meanabsdev
 ufmf_diagnostics,summary,nFramesDroppedTotal
 ufmf_diagnostics,summary,meanCompressionRate
-ufmf_diagnostics,summary,meanNPxWritten
 ufmf_diagnostics,summary,nFramesUncompressed
 ufmf_diagnostics,summary,maxNPxWritten
 ufmf_diagnostics,summary,meanMeanPixelError
