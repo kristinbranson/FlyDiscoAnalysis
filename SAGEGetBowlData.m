@@ -102,16 +102,52 @@ data = convert2numeric(data);
 
 %% put the data together
 
+if isempty(data),
+  datamerge = data;
+  return;
+end
+
 [experiment_ids,uniqueidx,idxperrow] = unique([data.experiment_id]);
 datamerge = rmfield(data(uniqueidx),{'data','data_type'});
 for i = 1:numel(data),
   j = idxperrow(i);
-  % need to shorten some names
   fn = data(i).data_type;
+  % need to shorten some names
   fn = regexprep(fn,'^hist_perframe','hist');
   fn = regexprep(fn,'^stats_perframe','stats');
   datamerge(j).(fn) = data(i).data;
 end
+
+%% format stats, hist into substructs
+
+statfns = {'nflies_analyzed'
+  'flies_analyzed'
+  'mean_perfly'
+  'std_perfly'
+  'Z_perfly'
+  'fracframesanalyzed_perfly'
+  'prctiles_perfly'
+  'meanmean_perexp'
+  'stdmean_perexp'
+  'meanstd_perexp'
+  'Z_perexp'
+  'meanZ_perexp'
+  'meanprctiles_perexp'
+  'stdprctiles_perexp'};
+datamerge = format2substructs(datamerge,'stats',statfns,'stats_perframe');
+statfns = {'nflies_analyzed'
+  'flies_analyzed'
+  'frac_linear_perfly'
+  'frac_log_perfly'
+  'Z_perfly'
+  'fracframesanalyzed_perfly'
+  'mean_frac_linear_perexp'
+  'std_frac_linear_perexp'
+  'mean_frac_log_perexp'
+  'std_frac_log_perexp'
+  'Z_perexp'
+  'meanZ_perexp'};
+datamerge = format2substructs(datamerge,'hist',statfns,'hist_perframe');
 
 function in = convert2numeric(in)
 
@@ -144,4 +180,68 @@ for j = 1:numel(numeric_fields),
       end
     end
   end
+end
+
+function datamerge = format2substructs(datamerge,prefix,statfns,newprefix)
+
+% get all perframe fns
+expr = ['^',prefix,'_(?<perframefn>.+)_(?<statfn>',...
+  statfns{1},sprintf('|%s',statfns{2:end}),')$'];
+fns = fieldnames(datamerge);
+m = regexp(fns,expr,'names','once');
+statidx = ~cellfun(@isempty,m);
+m(~statidx) = [];
+fns(~statidx) = [];
+m = cell2mat(m);
+if isempty(m), return; end
+perframefns = {m.perframefn};
+[perframefns,~,idx] = unique(perframefns);
+statfns = {m.statfn};
+
+for i = 1:numel(perframefns),
+  perframefn = perframefns{i};
+  idxcurr = find(idx == i);
+  conditionfn = sprintf('%s_%s_conditions',prefix,perframefn);
+  newfn = sprintf('%s_%s',newprefix,perframefn);
+  nfliesanalyzedfn = sprintf('%s_%s_nflies_analyzed',prefix,perframefn);
+  if ~isfield(datamerge,conditionfn),
+    fprintf('Condition data %s does not exist, skipping reformatting for %s\n',conditionfn,perframefn);
+    continue;
+  end
+  for j = 1:numel(datamerge),
+    datamerge(j).(newfn) = struct;
+    conditions = datamerge(j).(conditionfn);
+    nconditions = numel(conditions);
+    nfliesanalyzed = datamerge(j).(nfliesanalyzedfn);
+    nfliesanalyzedtotal = sum(nfliesanalyzed);
+    for kk = 1:numel(idxcurr),
+      k = idxcurr(kk);
+      statfn = statfns{k};
+      fn = sprintf('%s_%s_%s',prefix,perframefn,statfn);
+      datamerge(j).(newfn).(statfn) = struct;
+      if strcmp(statfn,'flies_analyzed') || ...
+          (~isempty(regexp(statfn,'perfly$','once')) && ...
+          ~(strcmp(prefix,'hist') && ismember(statfn,{'Z_perfly','fracframesanalyzed_perfly'}))),
+        n = numel(datamerge(j).(fn))/nfliesanalyzedtotal;
+        if n ~= round(n),
+          error('Error splitting %s into different conditions: size of array not a multiple of nflies = %d',fn,nfliesanalyzedtotal); %#ok<SPERR>
+        end
+        datamerge(j).(fn) = mat2cell(reshape(datamerge(j).(fn),[n,nfliesanalyzedtotal]),n,nfliesanalyzed);
+        for l = 1:nconditions,
+          datamerge(j).(newfn).(statfn).(conditions{l}) = datamerge(j).(fn){l};
+        end
+      else
+        n = numel(datamerge(j).(fn)) / nconditions;
+        if n ~= round(n),
+          error('Error splitting %s into different conditions: size of array not a multiple of nconditions = %d',fn,nconditions); %#ok<SPERR>
+        end
+        datamerge(j).(fn) = reshape(datamerge(j).(fn),[n,nconditions]);
+        for l = 1:nconditions,
+          datamerge(j).(newfn).(statfn).(conditions{l}) = datamerge(j).(fn)(:,l)';
+        end
+      end
+    end
+  end
+  datamerge = rmfield(datamerge,[{conditionfn};fns(idxcurr)]);
+  
 end

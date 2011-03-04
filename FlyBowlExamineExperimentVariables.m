@@ -35,7 +35,7 @@ mindatenum = maxdatenum - period;
 mindatestr = datestr(mindatenum,format);
 maxdatestr = datestr(maxdatenum,format);
 daterange = {mindatestr,maxdatestr};
-maxdaysprev = datenumnow-mindatenum;
+%maxdaysprev = datenumnow-mindatenum;
 mindaysprev = datenumnow-maxdatenum;
 
 %% read parameters
@@ -92,7 +92,8 @@ flag_options = {{'None',''},{'Rearing problem','Flies look sick',...
 
 %% get data
 data_types = {'ufmf_diagnostics_summary_*','temperature_stream',...
-  'ctrax_diagnostics_*','registrationdata_*','sexclassifier_diagnostics_*'};
+  'ctrax_diagnostics_*','registrationdata_*','sexclassifier_diagnostics_*',...
+  'stats_perframe_areasmooth*'};
 %data_types = examinestats;
 
 queries = leftovers;
@@ -103,6 +104,10 @@ queries(end+1:end+2) = {'automated_pf','P'};
 queries(end+1:end+2) = {'experiment_name','FlyBowl_*'};
 data = SAGEGetBowlData(queries{:});
 %load('datacache.mat','data');
+% sort by date
+date = {data.exp_datetime};
+[~,order] = sort(date);
+data = data(order);
 nexpdirs = numel(data);
 expdir_bases = {data.experiment_name};
 expdir_bases = cellfun(@(s) regexprep(s,'^FlyBowl_',''),expdir_bases,'UniformOutput',false);
@@ -211,29 +216,33 @@ stat = nan(nexpdirs,nstats);
 for i = 1:nstats,
 
   % special case: flags
-  if ismember(examinestats{i},flag_metadata_fns),
+  if ismember(examinestats{i}{1},flag_metadata_fns),
     
     % which set of flags
     v = zeros(1,nexpdirs);
     for j = 1:numel(flag_options),
-      v(ismember({data.(examinestats{i})},flag_options{j})) = j;
+      v(ismember({data.(examinestats{i}{1})},flag_options{j})) = j;
     end
     stat(:,i) = v;
     
   % special case: notes
-  elseif ismember(examinestats{i},note_metadata_fns),
+  elseif ismember(examinestats{i}{1},note_metadata_fns),
     
-    v = cellfun(@(s) ~isempty(s) && ~strcmpi(s,'None'),{data.(examinestats{i})});
+    v = cellfun(@(s) ~isempty(s) && ~strcmpi(s,'None'),{data.(examinestats{i}{1})});
     stat(:,i) = double(v);
     
   % numbers
   else
     
-    badidx = cellfun(@isempty,{data.(examinestats{i})});
-    for j = find(badidx),
-      warning('No data for stat %s, experiment %s',examinestats{i},strtrim(data(j).experiment_name));
+    datacurr = {data.(examinestats{i}{1})};
+    for k = 2:numel(examinestats{i}),
+      datacurr = cellfun(@(s) s.(examinestats{i}{k}),datacurr,'UniformOutput',false);
     end
-    stat(~badidx,i) = [data.(examinestats{i})];
+    badidx = cellfun(@isempty,datacurr);
+    for j = find(badidx),
+      warning('No data for stat %s experiment %s',sprintf('%s,',examinestats{i}),strtrim(data(j).experiment_name));
+    end
+    stat(~badidx,i) = cell2mat(datacurr);
     
   end
 end
@@ -288,12 +297,16 @@ end
 statnames = cell(1,nstats);
 for i = 1:nstats,
   
-  statnames{i} = examinestats{i};
+  statnames{i} = sprintf('%s_',examinestats{i}{:});
+  statnames{i} = statnames{i}(1:end-1);
   statnames{i} = strrep(statnames{i},'ufmf_diagnostics_summary','ufmf');
   statnames{i} = strrep(statnames{i},'ufmf_diagnostics_stream','ufmf');
   statnames{i} = strrep(statnames{i},'ctrax_diagnostics','ctrax');
   statnames{i} = strrep(statnames{i},'registrationdata','reg');
   statnames{i} = strrep(statnames{i},'sexclassifier_diagnostics','sex');
+  statnames{i} = strrep(statnames{i},'stats_perframe_','');
+  statnames{i} = strrep(statnames{i},'flyany_frame','');
+  statnames{i} = strrep(statnames{i},'_perexp','');
   
 end
 
@@ -538,9 +551,9 @@ handles.hdate = hdate;
     s = cell(1,2);
     s{1} = expdir_bases{expdiri};
     % special case: flags
-    if ismember(examinestats{stati},flag_metadata_fns) || ...
-        ismember(examinestats{stati},note_metadata_fns),
-      s{2} = sprintf('%s = %s',statnames{stati},data(expdiri).(examinestats{stati}));
+    if ismember(examinestats{stati}{1},flag_metadata_fns) || ...
+        ismember(examinestats{stati}{1},note_metadata_fns),
+      s{2} = sprintf('%s = %s',statnames{stati},data(expdiri).(examinestats{stati}{1}));
     else
       s{2} = sprintf('%s = %s = %s std',statnames{stati},...
         num2str(stat(expdiri,stati)),num2str(normstat(expdiri,stati)));
