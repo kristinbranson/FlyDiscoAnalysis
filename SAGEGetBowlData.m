@@ -4,11 +4,12 @@ currdir = which('SAGEGetBowlData');
 [currdir,~] = fileparts(currdir);
 
 %% parse inputs
-[docheckflags,daterange,SAGEpath,leftovers] = ...
+[docheckflags,daterange,SAGEpath,removemissingdata,leftovers] = ...
   myparse_nocheck(varargin,...
   'checkflags',true,...
   'daterange',[],...
-  'SAGEpath',fullfile(currdir,'..','SAGE','MATLABInterface','Trunk'));
+  'SAGEpath',fullfile(currdir,'..','SAGE','MATLABInterface','Trunk'),...
+  'removemissingdata',true);
 
 %% add SAGE to path
 if ~exist('SAGE.Lab','class'),
@@ -134,7 +135,7 @@ statfns = {'nflies_analyzed'
   'meanZ_perexp'
   'meanprctiles_perexp'
   'stdprctiles_perexp'};
-datamerge = format2substructs(datamerge,'stats',statfns,'stats_perframe');
+datamerge = format2substructs(datamerge,'stats',statfns,'stats_perframe',removemissingdata);
 statfns = {'nflies_analyzed'
   'flies_analyzed'
   'frac_linear_perfly'
@@ -147,7 +148,7 @@ statfns = {'nflies_analyzed'
   'std_frac_log_perexp'
   'Z_perexp'
   'meanZ_perexp'};
-datamerge = format2substructs(datamerge,'hist',statfns,'hist_perframe');
+datamerge = format2substructs(datamerge,'hist',statfns,'hist_perframe',removemissingdata);
 
 function in = convert2numeric(in)
 
@@ -182,7 +183,7 @@ for j = 1:numel(numeric_fields),
   end
 end
 
-function datamerge = format2substructs(datamerge,prefix,statfns,newprefix)
+function datamerge = format2substructs(datamerge,prefix,statfns,newprefix,removemissingdata)
 
 % get all perframe fns
 expr = ['^',prefix,'_(?<perframefn>.+)_(?<statfn>',...
@@ -198,6 +199,7 @@ perframefns = {m.perframefn};
 [perframefns,~,idx] = unique(perframefns);
 statfns = {m.statfn};
 
+allmissingdata = false(size(datamerge));
 for i = 1:numel(perframefns),
   perframefn = perframefns{i};
   idxcurr = find(idx == i);
@@ -208,6 +210,8 @@ for i = 1:numel(perframefns),
     fprintf('Condition data %s does not exist, skipping reformatting for %s\n',conditionfn,perframefn);
     continue;
   end
+  missingdata = false(size(datamerge));
+  allconditions = {};
   for j = 1:numel(datamerge),
     datamerge(j).(newfn) = struct;
     conditions = datamerge(j).(conditionfn);
@@ -219,29 +223,61 @@ for i = 1:numel(perframefns),
       statfn = statfns{k};
       fn = sprintf('%s_%s_%s',prefix,perframefn,statfn);
       datamerge(j).(newfn).(statfn) = struct;
-      if strcmp(statfn,'flies_analyzed') || ...
-          (~isempty(regexp(statfn,'perfly$','once')) && ...
-          ~(strcmp(prefix,'hist') && ismember(statfn,{'Z_perfly','fracframesanalyzed_perfly'}))),
-        n = numel(datamerge(j).(fn))/nfliesanalyzedtotal;
-        if n ~= round(n),
-          error('Error splitting %s into different conditions: size of array not a multiple of nflies = %d',fn,nfliesanalyzedtotal); %#ok<SPERR>
-        end
-        datamerge(j).(fn) = mat2cell(reshape(datamerge(j).(fn),[n,nfliesanalyzedtotal]),n,nfliesanalyzed);
-        for l = 1:nconditions,
-          datamerge(j).(newfn).(statfn).(conditions{l}) = datamerge(j).(fn){l};
+      if nconditions == 0,
+        if isempty(datamerge(j).(fn)),
+          missingdata(j) = true;
+        else
+          error('For %s, nconditions = 0 but non-empty data',fn);
         end
       else
-        n = numel(datamerge(j).(fn)) / nconditions;
-        if n ~= round(n),
-          error('Error splitting %s into different conditions: size of array not a multiple of nconditions = %d',fn,nconditions); %#ok<SPERR>
+        allconditions = union(allconditions,conditions);
+        if strcmp(statfn,'flies_analyzed') || ...
+            (~isempty(regexp(statfn,'perfly$','once')) && ...
+            ~(strcmp(prefix,'hist') && ismember(statfn,{'Z_perfly','fracframesanalyzed_perfly'}))),
+          n = numel(datamerge(j).(fn))/nfliesanalyzedtotal;
+          if n ~= round(n),
+            error('Error splitting %s into different conditions: size of array not a multiple of nflies = %d',fn,nfliesanalyzedtotal); %#ok<SPERR>
+          end
+          datamerge(j).(fn) = mat2cell(reshape(datamerge(j).(fn),[n,nfliesanalyzedtotal]),n,nfliesanalyzed);
+          for l = 1:nconditions,
+            datamerge(j).(newfn).(statfn).(conditions{l}) = datamerge(j).(fn){l};
+          end
+        else
+          n = numel(datamerge(j).(fn)) / nconditions;
+          if n ~= round(n),
+            error('Error splitting %s into different conditions: size of array not a multiple of nconditions = %d',fn,nconditions); %#ok<SPERR>
+          end
+          datamerge(j).(fn) = reshape(datamerge(j).(fn),[n,nconditions]);
+          for l = 1:nconditions,
+            datamerge(j).(newfn).(statfn).(conditions{l}) = datamerge(j).(fn)(:,l)';
+          end
         end
-        datamerge(j).(fn) = reshape(datamerge(j).(fn),[n,nconditions]);
+      end
+    end
+  end
+  % create empty structs for missing data
+  if removemissingdata,
+    allmissingdata = allmissingdata | missingdata;
+  else
+    conditions = allconditions;
+    for j = find(missingdata),
+      for kk = 1:numel(idxcurr),
+        k = idxcurr(kk);
+        statfn = statfns{k};
+        warning('Missing data for %s, %s for experiment %s',newfn,statfn,datamerge(j).experiment_name);
         for l = 1:nconditions,
-          datamerge(j).(newfn).(statfn).(conditions{l}) = datamerge(j).(fn)(:,l)';
+          datamerge(j).(newfn).(statfn).(conditions{l}) = [];
         end
       end
     end
   end
   datamerge = rmfield(datamerge,[{conditionfn};fns(idxcurr)]);
-  
+end
+
+if removemissingdata,
+  if any(allmissingdata),
+    fprintf('Removing the following experiments, which were missing some data:\n');
+    fprintf('%s\n',datamerge(allmissingdata).experiment_name);
+    datamerge(allmissingdata) = [];
+  end
 end

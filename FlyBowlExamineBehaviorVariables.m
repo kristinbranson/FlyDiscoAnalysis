@@ -101,7 +101,7 @@ queries(end+1:end+2) = {'data_type','stats_perframe_*'};
 queries(end+1:end+2) = {'flag_aborted',0};
 queries(end+1:end+2) = {'automated_pf','P'};
 queries(end+1:end+2) = {'experiment_name','FlyBowl_*'};
-data = SAGEGetBowlData(queries{:});
+data = SAGEGetBowlData(queries{:},'removemissingdata',true);
 %load('datacache_beh.mat','data');
 % sort by date
 date = {data.exp_datetime};

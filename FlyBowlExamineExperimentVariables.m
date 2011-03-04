@@ -60,7 +60,7 @@ end
 if isempty(username),
   tmpusername = inputdlg('User name:','Set user name',1,{rc.username});
   if isempty(tmpusername),
-    delete(hfig);
+    if ishandle(hfig), delete(hfig); end
     return;
   end
   rc.username = tmpusername{1};
@@ -75,6 +75,7 @@ needsave = false;
 
 flag_metadata_fns = {'flag_redo','flag_review'};
 note_metadata_fns = {'notes_behavioral','notes_technical'};
+string_metadata_fns = {'line_name'};
 flag_options = {{'None',''},{'Rearing problem','Flies look sick',...
   'See behavioral notes','See technical notes'}};
 
@@ -104,7 +105,7 @@ queries(end+1:end+2) = {'data_type',data_types};
 queries(end+1:end+2) = {'flag_aborted',0};
 queries(end+1:end+2) = {'automated_pf','P'};
 queries(end+1:end+2) = {'experiment_name','FlyBowl_*'};
-data = SAGEGetBowlData(queries{:});
+data = SAGEGetBowlData(queries{:},'removemissingdata',true);
 %load('datacache.mat','data');
 % sort by date
 date = {data.exp_datetime};
@@ -226,13 +227,22 @@ for i = 1:nstats,
     for j = 1:numel(flag_options),
       v(ismember({data.(examinestats{i}{1})},flag_options{j})) = j;
     end
+    v = (v/numel(flag_options)*2-1)*3;
     stat(:,i) = v;
     
   % special case: notes
   elseif ismember(examinestats{i}{1},note_metadata_fns),
     
     v = cellfun(@(s) ~isempty(s) && ~strcmpi(s,'None'),{data.(examinestats{i}{1})});
-    stat(:,i) = double(v);
+    v = double(v)*2*3-3; % make -3, 3
+    stat(:,i) = v;
+
+  % special case: strings
+  elseif ismember(examinestats{i}{1},string_metadata_fns),
+    [~,~,v] = unique({data.(examinestats{i}{1})});
+    v = v - 1;
+    v = (v/max(v)*2-1)*3;
+    stat(:,i) = v;
     
   % numbers
   else
@@ -250,25 +260,6 @@ for i = 1:nstats,
   end
 end
   
-
-% for expdiri = 1:nexpdirs,
-%   
-%   for i = 1:nstats,
-% 
-%     pathcurr = examinestats{i};
-%   
-%     % get examine stats for all expdirs. maybe there is a more efficient way
-%     % to do this?
-%     statcurr = data(expdiri);
-%     for j = 1:numel(pathcurr),
-%       statcurr = statcurr.(pathcurr{j});
-%     end
-%     stat(expdiri,i) = statcurr;
-% 
-%   end
-% 
-% end
-
 %% get mean and standard deviation for z-scoring
 
 if isempty(examine_params.examineexperimentvariablesstatsfile),
@@ -514,11 +505,6 @@ for i = 1:numel(hx),
 end
 set(hx,'Interpreter','none');
 
-%% context menu for setting manual_pf
-% hcmenu = uicontextmenu;
-% hcmenu_manualpf = uimenu(hcmenu,'Label','Set manual_pf...','Callback',@set_manual_pf_Callback);
-% set(hax,'uicontextmenu',hcmenu);
-
 %% set buttondownfcn
 
 set(hax,'ButtonDownFcn',@ButtonDownFcn);
@@ -555,7 +541,8 @@ handles.hdate = hdate;
     s{1} = expdir_bases{expdiri};
     % special case: flags
     if ismember(examinestats{stati}{1},flag_metadata_fns) || ...
-        ismember(examinestats{stati}{1},note_metadata_fns),
+        ismember(examinestats{stati}{1},note_metadata_fns) || ...
+        ismember(examinestats{stati}{1},string_metadata_fns),
       s{2} = sprintf('%s = %s',statnames{stati},data(expdiri).(examinestats{stati}{1}));
     else
       s{2} = sprintf('%s = %s = %s std',statnames{stati},...
