@@ -45,9 +45,7 @@ dataloc_params = ReadParams(datalocparamsfile);
 examineparamsfile = fullfile(settingsdir,analysis_protocol,dataloc_params.examinebehaviorvariablesparamsfilestr);
 examine_params = ReadParams(examineparamsfile);
 examinefile = fullfile(settingsdir,analysis_protocol,dataloc_params.examinebehaviorvariablesfilestr);
-examinestats = ReadExamineExperimentVariables(examinefile);
-registrationparamsfile = fullfile(settingsdir,analysis_protocol,dataloc_params.registrationparamsfilestr);
-registration_params = ReadParams(registrationparamsfile);
+examinestats = ReadExamineBehaviorVariables(examinefile);
 
 if exist(examine_params.rcfile,'file'),
   rc = load(examine_params.rcfile);
@@ -75,6 +73,7 @@ needsave = false;
 
 flag_metadata_fns = {'flag_redo','flag_review'};
 note_metadata_fns = {'notes_behavioral','notes_technical'};
+string_metadata_fns = {'line_name'};
 flag_options = {{'None',''},{'Rearing problem','Flies look sick',...
   'See behavioral notes','See technical notes'}};
 
@@ -93,9 +92,7 @@ flag_options = {{'None',''},{'Rearing problem','Flies look sick',...
 % end
 
 %% get data
-data_types = {'ufmf_diagnostics_summary_*','temperature_stream',...
-  'ctrax_diagnostics_*','registrationdata_*','sexclassifier_diagnostics_*',...
-  'stats_perframe_areasmooth*'};
+data_types = {'stats_perframe_*'};
 %data_types = examinestats;
 
 queries = leftovers;
@@ -114,104 +111,13 @@ nexpdirs = numel(data);
 expdir_bases = {data.experiment_name};
 expdir_bases = cellfun(@(s) regexprep(s,'^FlyBowl_',''),expdir_bases,'UniformOutput',false);
 
-% %% which experiments?
-% 
-% subreadfiles = {};
-% for i = 1:numel(examine_params.requiredfiles),
-%   subreadfiles{end+1} = dataloc_params.(examine_params.requiredfiles{i}); %#ok<AGROW>
-% end
-% subreadfiles = unique(subreadfiles);
-% 
-% exp_params = [{'rootdir',dataloc_params.rootreaddir,'subreadfiles',subreadfiles},leftovers];
-% 
-% [expdir_bases,expdirs,~,experiments,~,~] = ...
-%   getExperimentDirs('settingsdir',settingsdir,...
-%   'datalocparamsfilestr',datalocparamsfilestr,...
-%   'protocol',analysis_protocol,...
-%   exp_params{:});
-% nexpdirs = numel(expdirs);
-% 
-% if nexpdirs == 0,
-%   error('No experiments selected');
-% end
-% 
-% % sort by date
-% date = {experiments.date};
-% [~,order] = sort(date);
-% expdirs = expdirs(order);
-% %experiments = experiments(order);
-% expdir_bases = expdir_bases(order);
-% 
-% %% load experiment variables for each experiment
-% 
-% data = [];
-% 
-% for expdiri = 1:nexpdirs,
-%   
-%   expdir = expdirs{expdiri};
-%   
-%   datacurr = struct;
-%   
-%   % read ufmf diagnostics
-%   ufmfdiagnosticsfile = fullfile(expdir,dataloc_params.ufmfdiagnosticsfilestr);
-%   datacurr.ufmf_diagnostics = readUFMFDiagnostics(ufmfdiagnosticsfile);
-%   
-%   % read quickstats
-%   quickstatsfile = fullfile(expdir,dataloc_params.quickstatsfilestr);
-%   datacurr.quickstats = ReadParams(quickstatsfile);
-%   
-%   % read ctrax diagnostics
-%   ctraxdiagnosticsfile = fullfile(expdir,dataloc_params.ctraxdiagnosticsfilestr);
-%   datacurr.ctrax_diagnostics = ReadParams(ctraxdiagnosticsfile);
-%   % add in mean_nsplit
-%   datacurr.ctrax_diagnostics.mean_nsplit = ...
-%     datacurr.ctrax_diagnostics.sum_nsplit / datacurr.ctrax_diagnostics.nlarge_split;
-%   % add in nframes_not_tracked
-%   datacurr.ctrax_diagnostics.nframes_not_tracked = ...
-%     datacurr.ufmf_diagnostics.summary.nFrames - datacurr.ctrax_diagnostics.nframes_analyzed;
-%   
-%   % read registration data
-%   registrationtxtfile = fullfile(expdir,dataloc_params.registrationtxtfilestr);
-%   datacurr.registrationData = ReadParams(registrationtxtfile);
-% 
-%   % read sex classification diagnostics
-%   sexclassifierdiagnosticsfile = fullfile(expdir,dataloc_params.sexclassifierdiagnosticsfilestr);
-%   datacurr.sexclassifierdiagnostics = ReadParams(sexclassifierdiagnosticsfile);
-% 
-%   % read temperature file 
-%   temperaturefile = fullfile(expdir,dataloc_params.temperaturefilestr);
-%   tempdata = importdata(temperaturefile,',');
-%   datacurr.temperature.stream = tempdata(:,2);
-%   % add in mean, max, std, maxdiff, nreadings
-%   datacurr.temperature.mean = nanmean(datacurr.temperature.stream);
-%   datacurr.temperature.max = max(datacurr.temperature.stream);
-%   datacurr.temperature.maxdiff = datacurr.temperature.max - min(datacurr.temperature.stream);
-%   datacurr.temperature.nreadings = numel(datacurr.temperature.stream);
-%   
-%   data = structappend(data,datacurr);
-%   
-% end
-% 
-
 %% for now, add on extra diagnostics here. we will store these later
 for i = 1:nexpdirs,
-  % add in mean_nsplit
-  data(i).ctrax_diagnostics_mean_nsplit = ...
-    data(i).ctrax_diagnostics_sum_nsplit / data(i).ctrax_diagnostics_nlarge_split;
-  % add in nframes_not_tracked
-  data(i).ctrax_diagnostics_nframes_not_tracked = ...
-    data(i).ufmf_diagnostics_summary_nFrames - data(i).ctrax_diagnostics_nframes_analyzed;
-  % add in mean, max, std, maxdiff, nreadings
-  data(i).temperature_mean = nanmean(data(i).temperature_stream);
-  data(i).temperature_max = max(data(i).temperature_stream);
-  data(i).temperature_maxdiff = data(i).temperature_max - min(data(i).temperature_stream);
-  data(i).temperature_nreadings = numel(data(i).temperature_stream);
   data(i).file_system_path = fullfile(rootdatadir,expdir_bases{i});
-  data(i).registrationdata_pxpermm = data(i).registrationdata_circleRadius / registration_params.circleRadius_mm;
 end
 expdirs = {data.file_system_path};
 
-%% get experiment variables
+%% get behavior variables
 
 nstats = numel(examinestats);
 stat = nan(nexpdirs,nstats);
@@ -233,7 +139,11 @@ for i = 1:nstats,
     
     v = cellfun(@(s) ~isempty(s) && ~strcmpi(s,'None'),{data.(examinestats{i}{1})});
     stat(:,i) = double(v);
-    
+
+  % special case: strings
+  elseif ismember(examinestats{i}{1},string_metadata_fns),
+    [~,~,stat(:,i)] = unique(data.(examinestats{i}{1}));
+
   % numbers
   else
     
@@ -249,49 +159,41 @@ for i = 1:nstats,
     
   end
 end
-  
-
-% for expdiri = 1:nexpdirs,
-%   
-%   for i = 1:nstats,
-% 
-%     pathcurr = examinestats{i};
-%   
-%     % get examine stats for all expdirs. maybe there is a more efficient way
-%     % to do this?
-%     statcurr = data(expdiri);
-%     for j = 1:numel(pathcurr),
-%       statcurr = statcurr.(pathcurr{j});
-%     end
-%     stat(expdiri,i) = statcurr;
-% 
-%   end
-% 
-% end
 
 %% get mean and standard deviation for z-scoring
 
-if isempty(examine_params.examineexperimentvariablesstatsfile),
+if isempty(examine_params.examinebehaviorvariablesstatsfile),
   mu = nanmean(stat,1);
   sig = nanstd(stat,1,1);  
 else
-  normstats = load(examine_params.examineexperimentvariablesstatsfile);
+  normstats = load(examine_params.examinevehaviorvariablesstatsfile,'statsperexp');
+  normstats = normstats.statsperexp;
   mu = nan(1,nstats);
   sig = nan(1,nstats);
   for i = 1:nstats,
-
-    pathcurr = examinestats{i};
-    statcurr = normstats.mu;
-    for j = 1:numel(pathcurr),
-      statcurr = statcurr.(pathcurr{j});
+    canload = true;
+    if isempty(regexp(examinestats{i}{1},'^stats_perframe','once')),
+      canload = false;
     end
-    mu(i) = statcurr;
-    statcurr = normstats.sig;
-    for j = 1:numel(pathcurr),
-      statcurr = statcurr.(pathcurr{j});
+    if canload,
+      if numel(examinestats{i}) ~= 3,
+        canload = false;
+      end
     end
-    sig(i) = statcurr;
-
+    if canload,
+      fn = sprintf('%s_%s',examinestats{i}{1},examinestats{i}{3});
+      canload = isfield(normstats,fn);
+    end
+    if canload,
+      mu(i) = normstats.(fn).meanmean;
+      sig(i) = normstats.(fn).stdmean;
+    else
+      mu(i) = 0;
+      sig(i) = 1;
+      fprintf('Not normalizing');
+      fprintf(' %s',examinestats{i}{:});
+      fprintf('\n');
+    end
   end
 end
 
@@ -302,14 +204,9 @@ for i = 1:nstats,
   
   statnames{i} = sprintf('%s_',examinestats{i}{:});
   statnames{i} = statnames{i}(1:end-1);
-  statnames{i} = strrep(statnames{i},'ufmf_diagnostics_summary','ufmf');
-  statnames{i} = strrep(statnames{i},'ufmf_diagnostics_stream','ufmf');
-  statnames{i} = strrep(statnames{i},'ctrax_diagnostics','ctrax');
-  statnames{i} = strrep(statnames{i},'registrationdata','reg');
-  statnames{i} = strrep(statnames{i},'sexclassifier_diagnostics','sex');
   statnames{i} = strrep(statnames{i},'stats_perframe_','');
+  statnames{i} = strrep(statnames{i},'meanmean_perexp_','');
   statnames{i} = strrep(statnames{i},'flyany_frame','');
-  statnames{i} = strrep(statnames{i},'_perexp','');
   
 end
 
