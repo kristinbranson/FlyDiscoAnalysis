@@ -58,7 +58,7 @@ end
 if isempty(username),
   tmpusername = inputdlg('User name:','Set user name',1,{rc.username});
   if isempty(tmpusername),
-    delete(hfig);
+    if ishandle(hfig), delete(hfig); end
     return;
   end
   rc.username = tmpusername{1};
@@ -199,9 +199,9 @@ else
     else
       mu(i) = 0;
       sig(i) = 1;
-      fprintf('Not normalizing');
-      fprintf(' %s',examinestats{i}{:});
-      fprintf('\n');
+%       fprintf('Not normalizing');
+%       fprintf(' %s',examinestats{i}{:});
+%       fprintf('\n');
     end
   end
 end
@@ -598,7 +598,7 @@ handles.hdate = hdate;
     end
     
     maxdatenum = min(datenumnow,maxdatenum + period);
-    handles = FlyBowlExamineExperimentVariables(...
+    handles = FlyBowlExamineBehaviorVariables(...
       'analysis_protocol',analysis_protocol,...
       'settingsdir',settingsdir,...
       'datalocparamsfilestr',datalocparamsfilestr,...
@@ -628,7 +628,7 @@ handles.hdate = hdate;
     end
    
     maxdatenum = maxdatenum - period;
-    handles = FlyBowlExamineExperimentVariables(...
+    handles = FlyBowlExamineBehaviorVariables(...
       'analysis_protocol',analysis_protocol,...
       'settingsdir',settingsdir,...
       'datalocparamsfilestr',datalocparamsfilestr,...
@@ -664,7 +664,7 @@ handles.hdate = hdate;
 
     switch lower(manual_behavior_new),
       
-      case 'p',
+      case 'n',
         
         % update indices
         idx_manual_n(expdiri_selected) = true;
@@ -676,7 +676,7 @@ handles.hdate = hdate;
         % update visible
         set(h(expdiri_selected),'Visible',get(hmenu.plot_manual_n,'Checked'));
 
-      case 'f',
+      case 'd',
 
         % update indices
         idx_manual_n(expdiri_selected) = false;
