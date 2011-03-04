@@ -46,6 +46,8 @@ examineparamsfile = fullfile(settingsdir,analysis_protocol,dataloc_params.examin
 examine_params = ReadParams(examineparamsfile);
 examinefile = fullfile(settingsdir,analysis_protocol,dataloc_params.examineexperimentvariablesfilestr);
 examinestats = ReadExamineExperimentVariables(examinefile);
+registrationparamsfile = fullfile(settingsdir,analysis_protocol,dataloc_params.registrationparamsfilestr);
+registration_params = ReadParams(registrationparamsfile);
 
 if exist(examine_params.rcfile,'file'),
   rc = load(examine_params.rcfile);
@@ -102,8 +104,8 @@ queries(end+1:end+2) = {'data_type',data_types};
 queries(end+1:end+2) = {'flag_aborted',0};
 queries(end+1:end+2) = {'automated_pf','P'};
 queries(end+1:end+2) = {'experiment_name','FlyBowl_*'};
-data = SAGEGetBowlData(queries{:});
-%load('datacache.mat','data');
+%data = SAGEGetBowlData(queries{:});
+load('datacache.mat','data');
 % sort by date
 date = {data.exp_datetime};
 [~,order] = sort(date);
@@ -205,6 +207,7 @@ for i = 1:nexpdirs,
   data(i).temperature_maxdiff = data(i).temperature_max - min(data(i).temperature_stream);
   data(i).temperature_nreadings = numel(data(i).temperature_stream);
   data(i).file_system_path = fullfile(rootdatadir,expdir_bases{i});
+  data(i).registrationdata_pxpermm = data(i).registrationdata_circleRadius / registration_params.circleRadius_mm;
 end
 expdirs = {data.file_system_path};
 
