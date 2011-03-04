@@ -1,4 +1,4 @@
-function examinestats = ReadExamineExperimentVariables(examinefile)
+function examinestats = ReadExamineBehaviorVariables(examinefile)
 
 if ~exist(examinefile,'file'),
   error('ExamineExperimentVariables file %s does not exist',examinefile);
