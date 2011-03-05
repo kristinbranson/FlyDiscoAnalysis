@@ -294,6 +294,7 @@ set(h(idx_manual_n),'Marker','x');
 %% selected experiment
 
 hselected = plot(0,0,'o','color','k','Visible','off','HitTest','off','MarkerSize',10,'MarkerFaceColor','k');
+hselected1 = plot(0,0,'o','color','r','Visible','off','HitTest','off','MarkerSize',10,'MarkerFaceColor','r');
 expdiri_selected = [];
 stati_selected = [];
 
@@ -443,6 +444,7 @@ handles.hax = hax;
 handles.hfig = hfig;
 handles.h = h;
 handles.hselected = hselected;
+handles.hselected1 = hselected1;
 handles.htext = htext;
 handles.hdate = hdate;
 % handles.hcmenu_manual_behavior = hcmenu_manual_behavior;
@@ -458,7 +460,12 @@ handles.hdate = hdate;
     if ismember(examinestats{stati}{1},flag_metadata_fns) || ...
         ismember(examinestats{stati}{1},note_metadata_fns) || ...
         ismember(examinestats{stati}{1},string_metadata_fns),
-      s{2} = sprintf('%s = %s',statnames{stati},data(expdiri).(examinestats{stati}{1}));
+      if iscell(data(expdiri).(examinestats{stati}{1})),
+        s1 = sprintf('%s ',data(expdiri).(examinestats{stati}{1}){:});
+      else
+        s1 = data(expdiri).(examinestats{stati}{1});
+      end
+      s{2} = sprintf('%s = %s',statnames{stati},s1);
     else
       s{2} = sprintf('%s = %s = %s std',statnames{stati},...
         num2str(stat(expdiri,stati)),num2str(normstat(expdiri,stati)));
@@ -489,6 +496,7 @@ handles.hdate = hdate;
       
       if d > examine_params.maxdistclick,
         set(hselected,'Visible','off');
+        set(hselected1,'Visible','off');
         stati_selected = [];
         expdiri_selected = [];
         set(htext,'String','');
@@ -540,7 +548,8 @@ handles.hdate = hdate;
     %set(hfig,'Interruptible','off');
     s = printfun(expdiri_selected,stati_selected);
     set(htext,'String',s);
-      
+    set(hselected1,'XData',x(expdiri_selected,stati_selected),...
+      'YData',normstat(expdiri_selected,stati_selected),'visible','on');
     set(hx,'Color','k','FontWeight','normal');
     set(hx(stati_selected),'Color','r','FontWeight','bold');
     %set(hfig,'Interruptible','on');
@@ -721,6 +730,17 @@ handles.hdate = hdate;
    text_behavioral_pos = [.02,.49,.96,.06];
    notes_technical_pos = [.02,.57,.96,.35];
    text_technical_pos = [.02,.92,.96,.06];
+   
+   if iscell(data(expdiri_selected).notes_technical),
+     notes_technical = data(expdiri_selected).notes_technical;
+   else
+     notes_technical = regexp(data(expdiri_selected).notes_technical,'\\n','split');
+   end
+   if iscell(data(expdiri_selected).notes_behavioral),
+     notes_behavioral = data(expdiri_selected).notes_behavioral;
+   else
+     notes_behavioral = regexp(data(expdiri_selected).notes_behavioral,'\\n','split');
+   end
 
    hnotes.pushbutton_done = uicontrol(hnotes.dialog,'Style','pushbutton',...
      'Units','normalized','Position',done_pos,...
@@ -730,7 +750,8 @@ handles.hdate = hdate;
      'String','Cancel','Callback',@notes_cancel_Callback);
    hnotes.edit_behavioral = uicontrol(hnotes.dialog,'Style','edit',...
      'Units','normalized','Position',notes_behavioral_pos,...
-     'String',data(expdiri_selected).notes_behavioral,...
+     'Min',0,'Max',10,...
+     'String',notes_behavioral,...
      'HorizontalAlignment','left',...
      'BackgroundColor','w');
    hnotes.text_behavioral = uicontrol(hnotes.dialog,'Style','text',...
@@ -739,7 +760,8 @@ handles.hdate = hdate;
      'HorizontalAlignment','left');
    hnotes.edit_technical = uicontrol(hnotes.dialog,'Style','edit',...
      'Units','normalized','Position',notes_technical_pos,...
-     'String',data(expdiri_selected).notes_technical,...
+     'Min',0,'Max',10,...
+     'String',notes_technical,...
      'HorizontalAlignment','left',...
      'BackgroundColor','w');
    hnotes.text_technical = uicontrol(hnotes.dialog,'Style','text',...
@@ -767,6 +789,7 @@ handles.hdate = hdate;
         (stat(expdiri_selected,tmpi) - mu(tmpi))/z(tmpi);
       set(h(expdiri_selected),'YData',normstat(expdiri_selected,:));
       set(hselected,'YData',normstat(expdiri_selected,:));
+      set(hselected1,'YData',normstat(expdiri_selected,stati_selected));
     end
 
     tmpi = find(strcmpi(examinestats,'notes_technical'),1);
@@ -778,6 +801,7 @@ handles.hdate = hdate;
         (stat(expdiri_selected,tmpi) - mu(tmpi))/z(tmpi);
       set(h(expdiri_selected),'YData',normstat(expdiri_selected,:));
       set(hselected,'YData',normstat(expdiri_selected,:));
+      set(hselected1,'YData',normstat(expdiri_selected,stati_selected));
     end
     needsave = true;
     
@@ -865,11 +889,21 @@ handles.hdate = hdate;
     fid = fopen(savefilename,'w');
     fprintf(fid,'#experiment_name\tmanual_behavior\tnotes_behavioral\tnotes_technical\n');
     for tmpi = 1:nexpdirs,
+      if iscell(data(tmpi).notes_behavioral),
+        notes_behavioral = sprintf('%s\\n',data(tmpi).notes_behavioral{:});
+      else
+        notes_behavioral = data(tmpi).notes_behavioral;
+      end
+       if iscell(data(tmpi).notes_technical),
+        notes_technical = sprintf('%s\\n',data(tmpi).notes_technical{:});
+      else
+        notes_technical = data(tmpi).notes_technical;
+      end
       fprintf(fid,'%s\t%s\t%s\t%s\n',...
         data(tmpi).experiment_name,...
         data(tmpi).manual_behavior,...
-        regexprep(data(tmpi).notes_behavioral,'\s+',' '),...
-        regexprep(data(tmpi).notes_technical,'\s+',' '));
+        notes_behavioral,...
+        notes_technical);
     end
     fclose(fid);
     save(savefilename2,'info','data','examinestats');
