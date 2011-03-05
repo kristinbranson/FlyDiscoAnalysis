@@ -115,85 +115,6 @@ nexpdirs = numel(data);
 expdir_bases = {data.experiment_name};
 expdir_bases = cellfun(@(s) regexprep(s,'^FlyBowl_',''),expdir_bases,'UniformOutput',false);
 
-% %% which experiments?
-% 
-% subreadfiles = {};
-% for i = 1:numel(examine_params.requiredfiles),
-%   subreadfiles{end+1} = dataloc_params.(examine_params.requiredfiles{i}); %#ok<AGROW>
-% end
-% subreadfiles = unique(subreadfiles);
-% 
-% exp_params = [{'rootdir',dataloc_params.rootreaddir,'subreadfiles',subreadfiles},leftovers];
-% 
-% [expdir_bases,expdirs,~,experiments,~,~] = ...
-%   getExperimentDirs('settingsdir',settingsdir,...
-%   'datalocparamsfilestr',datalocparamsfilestr,...
-%   'protocol',analysis_protocol,...
-%   exp_params{:});
-% nexpdirs = numel(expdirs);
-% 
-% if nexpdirs == 0,
-%   error('No experiments selected');
-% end
-% 
-% % sort by date
-% date = {experiments.date};
-% [~,order] = sort(date);
-% expdirs = expdirs(order);
-% %experiments = experiments(order);
-% expdir_bases = expdir_bases(order);
-% 
-% %% load experiment variables for each experiment
-% 
-% data = [];
-% 
-% for expdiri = 1:nexpdirs,
-%   
-%   expdir = expdirs{expdiri};
-%   
-%   datacurr = struct;
-%   
-%   % read ufmf diagnostics
-%   ufmfdiagnosticsfile = fullfile(expdir,dataloc_params.ufmfdiagnosticsfilestr);
-%   datacurr.ufmf_diagnostics = readUFMFDiagnostics(ufmfdiagnosticsfile);
-%   
-%   % read quickstats
-%   quickstatsfile = fullfile(expdir,dataloc_params.quickstatsfilestr);
-%   datacurr.quickstats = ReadParams(quickstatsfile);
-%   
-%   % read ctrax diagnostics
-%   ctraxdiagnosticsfile = fullfile(expdir,dataloc_params.ctraxdiagnosticsfilestr);
-%   datacurr.ctrax_diagnostics = ReadParams(ctraxdiagnosticsfile);
-%   % add in mean_nsplit
-%   datacurr.ctrax_diagnostics.mean_nsplit = ...
-%     datacurr.ctrax_diagnostics.sum_nsplit / datacurr.ctrax_diagnostics.nlarge_split;
-%   % add in nframes_not_tracked
-%   datacurr.ctrax_diagnostics.nframes_not_tracked = ...
-%     datacurr.ufmf_diagnostics.summary.nFrames - datacurr.ctrax_diagnostics.nframes_analyzed;
-%   
-%   % read registration data
-%   registrationtxtfile = fullfile(expdir,dataloc_params.registrationtxtfilestr);
-%   datacurr.registrationData = ReadParams(registrationtxtfile);
-% 
-%   % read sex classification diagnostics
-%   sexclassifierdiagnosticsfile = fullfile(expdir,dataloc_params.sexclassifierdiagnosticsfilestr);
-%   datacurr.sexclassifierdiagnostics = ReadParams(sexclassifierdiagnosticsfile);
-% 
-%   % read temperature file 
-%   temperaturefile = fullfile(expdir,dataloc_params.temperaturefilestr);
-%   tempdata = importdata(temperaturefile,',');
-%   datacurr.temperature.stream = tempdata(:,2);
-%   % add in mean, max, std, maxdiff, nreadings
-%   datacurr.temperature.mean = nanmean(datacurr.temperature.stream);
-%   datacurr.temperature.max = max(datacurr.temperature.stream);
-%   datacurr.temperature.maxdiff = datacurr.temperature.max - min(datacurr.temperature.stream);
-%   datacurr.temperature.nreadings = numel(datacurr.temperature.stream);
-%   
-%   data = structappend(data,datacurr);
-%   
-% end
-% 
-
 %% for now, add on extra diagnostics here. we will store these later
 for i = 1:nexpdirs,
   % add in mean_nsplit
@@ -379,6 +300,7 @@ set(h(idx_manual_f),'Marker','x');
 %% selected experiment
 
 hselected = plot(0,0,'o','color','k','Visible','off','HitTest','off','MarkerSize',10,'MarkerFaceColor','k');
+hselected1 = plot(0,0,'o','color','r','Visible','off','HitTest','off','MarkerSize',10,'MarkerFaceColor','r');
 expdiri_selected = [];
 stati_selected = [];
 
@@ -528,6 +450,7 @@ handles.hax = hax;
 handles.hfig = hfig;
 handles.h = h;
 handles.hselected = hselected;
+handles.hselected1 = hselected1;
 handles.htext = htext;
 handles.hdate = hdate;
 % handles.hcmenu_manualpf = hcmenu_manualpf;
@@ -543,7 +466,12 @@ handles.hdate = hdate;
     if ismember(examinestats{stati}{1},flag_metadata_fns) || ...
         ismember(examinestats{stati}{1},note_metadata_fns) || ...
         ismember(examinestats{stati}{1},string_metadata_fns),
-      s{2} = sprintf('%s = %s',statnames{stati},data(expdiri).(examinestats{stati}{1}));
+      if iscell(data(expdiri).(examinestats{stati}{1})),
+        s1 = sprintf('%s ',data(expdiri).(examinestats{stati}{1}){:});
+      else
+        s1 = data(expdiri).(examinestats{stati}{1});
+      end
+      s{2} = sprintf('%s = %s',statnames{stati},s1);
     else
       s{2} = sprintf('%s = %s = %s std',statnames{stati},...
         num2str(stat(expdiri,stati)),num2str(normstat(expdiri,stati)));
@@ -574,6 +502,7 @@ handles.hdate = hdate;
       
       if d > examine_params.maxdistclick,
         set(hselected,'Visible','off');
+        set(hselected1,'Visible','off');
         stati_selected = [];
         expdiri_selected = [];
         set(htext,'String','');
@@ -624,8 +553,9 @@ handles.hdate = hdate;
     
     %set(hfig,'Interruptible','off');
     s = printfun(expdiri_selected,stati_selected);
-    set(htext,'String',s);
-      
+    set(htext,'String',s); 
+    set(hselected1,'XData',x(expdiri_selected,stati_selected),...
+      'YData',normstat(expdiri_selected,stati_selected),'visible','on');
     set(hx,'Color','k','FontWeight','normal');
     set(hx(stati_selected),'Color','r','FontWeight','bold');
     %set(hfig,'Interruptible','on');
@@ -807,6 +737,17 @@ handles.hdate = hdate;
    notes_technical_pos = [.02,.57,.96,.35];
    text_technical_pos = [.02,.92,.96,.06];
 
+   if iscell(data(expdiri_selected).notes_technical),
+     notes_technical = data(expdiri_selected).notes_technical;
+   else
+     notes_technical = regexp(data(expdiri_selected).notes_technical,'\\n','split');
+   end
+   if iscell(data(expdiri_selected).notes_behavioral),
+     notes_behavioral = data(expdiri_selected).notes_behavioral;
+   else
+     notes_behavioral = regexp(data(expdiri_selected).notes_behavioral,'\\n','split');
+   end
+
    hnotes.pushbutton_done = uicontrol(hnotes.dialog,'Style','pushbutton',...
      'Units','normalized','Position',done_pos,...
      'String','Done','Callback',@notes_done_Callback);
@@ -815,7 +756,8 @@ handles.hdate = hdate;
      'String','Cancel','Callback',@notes_cancel_Callback);
    hnotes.edit_behavioral = uicontrol(hnotes.dialog,'Style','edit',...
      'Units','normalized','Position',notes_behavioral_pos,...
-     'String',data(expdiri_selected).notes_behavioral,...
+     'Min',0,'Max',10,...
+     'String',notes_behavioral,...
      'HorizontalAlignment','left',...
      'BackgroundColor','w');
    hnotes.text_behavioral = uicontrol(hnotes.dialog,'Style','text',...
@@ -824,7 +766,8 @@ handles.hdate = hdate;
      'HorizontalAlignment','left');
    hnotes.edit_technical = uicontrol(hnotes.dialog,'Style','edit',...
      'Units','normalized','Position',notes_technical_pos,...
-     'String',data(expdiri_selected).notes_technical,...
+     'Min',0,'Max',10,...
+     'String',notes_technical,...
      'HorizontalAlignment','left',...
      'BackgroundColor','w');
    hnotes.text_technical = uicontrol(hnotes.dialog,'Style','text',...
@@ -852,6 +795,7 @@ handles.hdate = hdate;
         (stat(expdiri_selected,tmpi) - mu(tmpi))/z(tmpi);
       set(h(expdiri_selected),'YData',normstat(expdiri_selected,:));
       set(hselected,'YData',normstat(expdiri_selected,:));
+      set(hselected1,'YData',normstat(expdiri_selected,stati_selected));
     end
 
     tmpi = find(strcmpi(examinestats,'notes_technical'),1);
@@ -863,6 +807,7 @@ handles.hdate = hdate;
         (stat(expdiri_selected,tmpi) - mu(tmpi))/z(tmpi);
       set(h(expdiri_selected),'YData',normstat(expdiri_selected,:));
       set(hselected,'YData',normstat(expdiri_selected,:));
+      set(hselected1,'YData',normstat(expdiri_selected,stati_selected));
     end
     needsave = true;
     
@@ -950,11 +895,21 @@ handles.hdate = hdate;
     fid = fopen(savefilename,'w');
     fprintf(fid,'#experiment_name\tmanual_pf\tnotes_behavioral\tnotes_technical\n');
     for tmpi = 1:nexpdirs,
+      if iscell(data(tmpi).notes_behavioral),
+        notes_behavioral = sprintf('%s\\n',data(tmpi).notes_behavioral{:});
+      else
+        notes_behavioral = data(tmpi).notes_behavioral;
+      end
+       if iscell(data(tmpi).notes_technical),
+        notes_technical = sprintf('%s\\n',data(tmpi).notes_technical{:});
+      else
+        notes_technical = data(tmpi).notes_technical;
+      end
       fprintf(fid,'%s\t%s\t%s\t%s\n',...
         data(tmpi).experiment_name,...
         data(tmpi).manual_pf,...
-        regexprep(data(tmpi).notes_behavioral,'\s+',' '),...
-        regexprep(data(tmpi).notes_technical,'\s+',' '));
+        notes_behavioral,...
+        notes_technical);
     end
     fclose(fid);
     save(savefilename2,'info','data','examinestats');
