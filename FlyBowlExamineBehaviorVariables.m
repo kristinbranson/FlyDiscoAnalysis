@@ -101,8 +101,8 @@ queries(end+1:end+2) = {'data_type','stats_perframe_*'};
 queries(end+1:end+2) = {'flag_aborted',0};
 queries(end+1:end+2) = {'automated_pf','P'};
 queries(end+1:end+2) = {'experiment_name','FlyBowl_*'};
-data = SAGEGetBowlData(queries{:},'removemissingdata',true);
-%load('datacache_beh.mat','data');
+%data = SAGEGetBowlData(queries{:},'removemissingdata',true);
+load('datacache_beh.mat','data');
 % sort by date
 date = {data.exp_datetime};
 [~,order] = sort(date);
@@ -318,6 +318,9 @@ hmenu.undo = uimenu(hmenu.set,'Label','Undo',...
   'Callback',@undo_Callback,'Enable','off');
 hmenu.save = uimenu(hmenu.file,'Label','Save...',...
   'Callback',@save_Callback);
+hmenu.open = uimenu(hmenu.file,'Label','View Experiment',...
+  'Callback',@open_Callback,'Enable','off');
+
 daterangeprint = {datestr(mindatenum,'yyyy-mm-dd'),datestr(maxdatenum,'yyyy-mm-dd')};
 hmenu.daterange = uimenu(hmenu.info,'Label',...
   sprintf('Date range: %s - %s ...',daterangeprint{:}));
@@ -497,6 +500,7 @@ handles.hdate = hdate;
       if d > examine_params.maxdistclick,
         set(hselected,'Visible','off');
         set(hselected1,'Visible','off');
+        set(hmenu.open,'Enable','off');
         stati_selected = [];
         expdiri_selected = [];
         set(htext,'String','');
@@ -513,6 +517,7 @@ handles.hdate = hdate;
       UpdateStatSelected();
       
       set(hselected,'XData',x(expdiri_selected,:),'YData',normstat(expdiri_selected,:),'Visible','on');
+      set(hmenu.open,'Enable','on');
       
       manual_behavior_curr = data(expdiri_selected).manual_behavior;
       s = get(hmanual_behavior.popup,'String');
@@ -550,6 +555,7 @@ handles.hdate = hdate;
     set(htext,'String',s);
     set(hselected1,'XData',x(expdiri_selected,stati_selected),...
       'YData',normstat(expdiri_selected,stati_selected),'visible','on');
+    set(hmenu.open,'Enable','on');
     set(hx,'Color','k','FontWeight','normal');
     set(hx(stati_selected),'Color','r','FontWeight','bold');
     %set(hfig,'Interruptible','on');
@@ -1063,6 +1069,20 @@ handles.hdate = hdate;
       rethrow(ME);
     end
     
+  end
+
+%% open experiment callback
+
+  function open_Callback(hObject,event)
+    % open experiment
+    if isempty(expdiri_selected),
+      return;
+    end
+    if ispc,
+      winopen(expdirs{expdiri_selected});
+    else
+      web(expdirs{expdiri_selected},'-browser');
+    end
   end
 
 end
