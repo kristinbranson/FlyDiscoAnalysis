@@ -324,6 +324,9 @@ hmenu.undo = uimenu(hmenu.set,'Label','Undo',...
   'Callback',@undo_Callback,'Enable','off');
 hmenu.save = uimenu(hmenu.file,'Label','Save...',...
   'Callback',@save_Callback);
+hmenu.open = uimenu(hmenu.file,'Label','View Experiment',...
+  'Callback',@open_Callback,'Enable','off');
+
 daterangeprint = {datestr(mindatenum,'yyyy-mm-dd'),datestr(maxdatenum,'yyyy-mm-dd')};
 hmenu.daterange = uimenu(hmenu.info,'Label',...
   sprintf('Date range: %s - %s ...',daterangeprint{:}));
@@ -519,7 +522,8 @@ handles.hdate = hdate;
       UpdateStatSelected();
       
       set(hselected,'XData',x(expdiri_selected,:),'YData',normstat(expdiri_selected,:),'Visible','on');
-      
+      set(hmenu.open,'Enable','on');
+
       manual_pf_curr = data(expdiri_selected).manual_pf;
       s = get(hmanualpf.popup,'String');
       vcurr = find(strncmpi(manual_pf_curr,s,1),1);
@@ -556,6 +560,7 @@ handles.hdate = hdate;
     set(htext,'String',s); 
     set(hselected1,'XData',x(expdiri_selected,stati_selected),...
       'YData',normstat(expdiri_selected,stati_selected),'visible','on');
+    set(hmenu.open,'Enable','on');
     set(hx,'Color','k','FontWeight','normal');
     set(hx(stati_selected),'Color','r','FontWeight','bold');
     %set(hfig,'Interruptible','on');
@@ -1069,6 +1074,20 @@ handles.hdate = hdate;
       rethrow(ME);
     end
     
+  end
+
+%% open experiment callback
+
+  function open_Callback(hObject,event)
+    % open experiment
+    if isempty(expdiri_selected),
+      return;
+    end
+    if ispc,
+      winopen(expdirs{expdiri_selected});
+    else
+      web(expdirs{expdiri_selected},'-browser');
+    end
   end
 
 end
