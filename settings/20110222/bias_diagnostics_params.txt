@@ -1,0 +1,5 @@
+minvelmag,1.5
+nbins_theta,100
+nbins_r,100
+sigma_theta,0.261799387799149
+sigma_r,0.041666666666667
