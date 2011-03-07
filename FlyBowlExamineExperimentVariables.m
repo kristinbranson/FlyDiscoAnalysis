@@ -19,12 +19,14 @@ handles = struct;
   'rootdatadir','/groups/sciserv/flyolympiad/Olympiad_Screen/fly_bowl/bowl_data');
 
 maxnundo = 5;
+maxperiodsprev = 10;
 
-if isempty(datenumnow),
+didinputweek = ~isempty(maxdatenum);
+if ~didinputweek,
   datenumnow = now;
   daycurr = weekday(datenumnow);
   daywant = 7;
-  datenumnow = floor(datenumnow)+daywant-daycurr;
+  datenumnow = floor(datenumnow)+daywant-daycurr-7;
 end
 
 if isempty(maxdatenum),
@@ -37,6 +39,18 @@ maxdatestr = datestr(maxdatenum,format);
 daterange = {mindatestr,maxdatestr};
 %maxdaysprev = datenumnow-mindatenum;
 mindaysprev = datenumnow-maxdatenum;
+
+% last possible date
+datenumnow_real = now;
+daycurr_real = weekday(datenumnow_real);
+daywant = 7;
+datenumnow_real = floor(datenumnow_real)+daywant-daycurr_real;
+
+% last day of week choices
+maxdatenum_choices = fliplr([datenumnow-period*maxperiodsprev:period:datenumnow-period,datenumnow:period:datenumnow_real]);
+mindatenum_choices = maxdatenum_choices - period;
+mindatestr_choices = datestr(mindatenum_choices,'yyyy-mm-dd');
+maxdatestr_choices = datestr(maxdatenum_choices,'yyyy-mm-dd');
 
 %% read parameters
 
@@ -57,16 +71,41 @@ end
 
 %% get user name
 
-if isempty(username),
-  tmpusername = inputdlg('User name:','Set user name',1,{rc.username});
-  if isempty(tmpusername),
-    if ishandle(hfig), delete(hfig); end
-    return;
-  end
-  rc.username = tmpusername{1};
-else
+havequestions = isempty(username) || ~didinputweek;
+
+if havequestions,
+  
+  if ~isempty(username),
   rc.username = username;
 end
+
+  if didinputweek,
+    daterange_strings = {sprintf('%s to %s',mindatestr,maxdatestr)};
+  else
+    daterange_strings = cellstr(cat(2,mindatestr_choices,...
+      repmat(' to ',[numel(maxdatenum_choices),1]),...
+      maxdatestr_choices));
+  end
+  weekidx = find(maxdatenum_choices == maxdatenum,1);
+  [success,newweekidx,newusername] = ExamineInitializeParams(daterange_strings,weekidx,rc.username);
+  if ~success,
+    return;
+  end
+  if ~isempty(username),
+    rc.username = newusername;
+  end
+  if ~didinputweek,
+    maxdatenum = maxdatenum_choices(newweekidx);
+    mindatenum = mindatenum_choices(newweekidx);
+    mindatestr = datestr(mindatenum,format);
+    maxdatestr = datestr(maxdatenum,format);
+    daterange = {mindatestr,maxdatestr};
+    %maxdaysprev = datenumnow-mindatenum;
+    mindaysprev = datenumnow-maxdatenum;
+  end
+  
+end
+
 savefilename = fullfile(rc.savepath,sprintf('DataCuration_FlyBowl_%s_%sto%s.tsv',...
   rc.username,datestr(mindatenum,'yyyymmdd'),datestr(maxdatenum,'yyyymmdd')));
 needsave = false;
@@ -106,6 +145,37 @@ queries(end+1:end+2) = {'flag_aborted',0};
 queries(end+1:end+2) = {'automated_pf','P'};
 queries(end+1:end+2) = {'experiment_name','FlyBowl_*'};
 data = SAGEGetBowlData(queries{:},'removemissingdata',true);
+if isempty(data),
+  warning('No data for date range %s to %s',daterange{:});
+  if didinputweek,
+    fprintf('Trying previous week...\n');
+    maxdatenum = maxdatenum - period;
+    handles = FlyBowlExamineExperimentVariables(...
+      'analysis_protocol',analysis_protocol,...
+      'settingsdir',settingsdir,...
+      'datalocparamsfilestr',datalocparamsfilestr,...
+      'period',period,...
+      'maxdatenum',maxdatenum,...
+      'datenumnow',datenumnow,...
+      'sage_params_path',sage_params_path,...
+      'sage_db',sage_db,...
+      'username',rc.username);
+    return;
+  else
+    fprintf('Choose a different week.\n');
+    handles = FlyBowlExamineExperimentVariables(...
+      'analysis_protocol',analysis_protocol,...
+      'settingsdir',settingsdir,...
+      'datalocparamsfilestr',datalocparamsfilestr,...
+      'period',period,...
+      'maxdatenum',[],...
+      'datenumnow',datenumnow,...
+      'sage_params_path',sage_params_path,...
+      'sage_db',sage_db,...
+      'username',rc.username);
+    return;
+  end
+end
 %load('datacache.mat','data');
 % sort by date
 date = {data.exp_datetime};
@@ -506,6 +576,7 @@ handles.hdate = hdate;
       if d > examine_params.maxdistclick,
         set(hselected,'Visible','off');
         set(hselected1,'Visible','off');
+        set(hmenu.open,'Enable','off');
         stati_selected = [];
         expdiri_selected = [];
         set(htext,'String','');
