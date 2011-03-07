@@ -21,34 +21,29 @@ handles = struct;
 maxnundo = 5;
 maxperiodsprev = 10;
 
-didinputweek = ~isempty(maxdatenum);
+didinputweek = ~isempty(maxdatenum) && ~isempty(datenumnow);
 if ~didinputweek,
   datenumnow = now;
-  daycurr = weekday(datenumnow);
-  daywant = 7;
-  datenumnow = floor(datenumnow)+daywant-daycurr-7;
 end
 
 if isempty(maxdatenum),
   maxdatenum = datenumnow;
+  daycurr = weekday(maxdatenum);
+  daywant = 7;
+  maxdatenum = floor(maxdatenum)+daywant-daycurr-7;
+
 end
 format = 'yyyy-mm-ddTHH:MM:SS';
 mindatenum = maxdatenum - period;
 mindatestr = datestr(mindatenum,format);
 maxdatestr = datestr(maxdatenum,format);
 daterange = {mindatestr,maxdatestr};
-%maxdaysprev = datenumnow-mindatenum;
+maxdaysprev = datenumnow-mindatenum;
 mindaysprev = datenumnow-maxdatenum;
 
-% last possible date
-datenumnow_real = now;
-daycurr_real = weekday(datenumnow_real);
-daywant = 7;
-datenumnow_real = floor(datenumnow_real)+daywant-daycurr_real;
-
-% last day of week choices
-maxdatenum_choices = fliplr([datenumnow-period*maxperiodsprev:period:datenumnow-period,datenumnow:period:datenumnow_real]);
-mindatenum_choices = maxdatenum_choices - period;
+% first day of week choices
+mindatenum_choices = fliplr([mindatenum-period*maxperiodsprev:period:mindatenum-period,mindatenum:period:datenumnow]);
+maxdatenum_choices = mindatenum_choices + period;
 mindatestr_choices = datestr(mindatenum_choices,'yyyy-mm-dd');
 maxdatestr_choices = datestr(maxdatenum_choices,'yyyy-mm-dd');
 
@@ -76,8 +71,8 @@ havequestions = isempty(username) || ~didinputweek;
 if havequestions,
   
   if ~isempty(username),
-  rc.username = username;
-end
+    rc.username = username;
+  end
 
   if didinputweek,
     daterange_strings = {sprintf('%s to %s',mindatestr,maxdatestr)};
@@ -100,7 +95,7 @@ end
     mindatestr = datestr(mindatenum,format);
     maxdatestr = datestr(maxdatenum,format);
     daterange = {mindatestr,maxdatestr};
-    %maxdaysprev = datenumnow-mindatenum;
+    maxdaysprev = datenumnow-mindatenum;
     mindaysprev = datenumnow-maxdatenum;
   end
   
@@ -144,7 +139,8 @@ queries(end+1:end+2) = {'data_type',data_types};
 queries(end+1:end+2) = {'flag_aborted',0};
 queries(end+1:end+2) = {'automated_pf','P'};
 queries(end+1:end+2) = {'experiment_name','FlyBowl_*'};
-data = SAGEGetBowlData(queries{:},'removemissingdata',true);
+%data = SAGEGetBowlData(queries{:},'removemissingdata',true);
+load('datacache.mat','data');
 if isempty(data),
   uiwait(warndlg(sprintf('No data for date range %s to %s',daterange{:}),'No data found'));
   if didinputweek,
@@ -176,7 +172,6 @@ if isempty(data),
     return;
   end
 end
-%load('datacache.mat','data');
 % sort by date
 date = {data.exp_datetime};
 [~,order] = sort(date);
@@ -688,7 +683,7 @@ handles.hdate = hdate;
       end
     end
     
-    maxdatenum = min(datenumnow,maxdatenum + period);
+    maxdatenum = maxdatenum + period;
     handles = FlyBowlExamineExperimentVariables(...
       'analysis_protocol',analysis_protocol,...
       'settingsdir',settingsdir,...
