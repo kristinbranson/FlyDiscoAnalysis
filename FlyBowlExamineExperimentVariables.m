@@ -146,7 +146,7 @@ queries(end+1:end+2) = {'automated_pf','P'};
 queries(end+1:end+2) = {'experiment_name','FlyBowl_*'};
 data = SAGEGetBowlData(queries{:},'removemissingdata',true);
 if isempty(data),
-  warning('No data for date range %s to %s',daterange{:});
+  uiwait(warndlg(sprintf('No data for date range %s to %s',daterange{:}),'No data found'));
   if didinputweek,
     fprintf('Trying previous week...\n');
     maxdatenum = maxdatenum - period;
@@ -244,7 +244,7 @@ for i = 1:nstats,
     end
     badidx = cellfun(@isempty,datacurr);
     for j = find(badidx),
-      warning('No data for stat %s experiment %s',sprintf('%s,',examinestats{i}),strtrim(data(j).experiment_name));
+      warning('No data for stat %s experiment %s',sprintf('%s,',examinestats{i}{:}),strtrim(data(j).experiment_name));
     end
     stat(~badidx,i) = cell2mat(datacurr);
     
@@ -466,9 +466,9 @@ nextpos = [axpos_px(1)+axpos_px(3)-w1,axpos_px(2)+axpos_px(4)+margin,w1,h1];
 currpos = [nextpos(1)-margin-w2,nextpos(2),w2,h1];
 prevpos = [currpos(1)-margin-w1,nextpos(2),w1,h1];
 hdate = struct;
-if mindaysprev < 7,
+if mindaysprev <= 0,
   s = 'this week';
-elseif mindaysprev < 14,
+elseif mindaysprev < 7,
   s = 'last week';
 else
   s = sprintf('%d weeks ago',ceil(mindaysprev/7));
