@@ -389,6 +389,8 @@ hmenu.undo = uimenu(hmenu.set,'Label','Undo',...
   'Callback',@undo_Callback,'Enable','off');
 hmenu.save = uimenu(hmenu.file,'Label','Save...',...
   'Callback',@save_Callback);
+hmenu.load = uimenu(hmenu.file,'Label','Load Spreadsheet...',...
+  'Callback',@load_Callback);
 hmenu.open = uimenu(hmenu.file,'Label','View Experiment',...
   'Callback',@open_Callback,'Enable','off');
 
@@ -1154,6 +1156,71 @@ handles.hdate = hdate;
     else
       web(expdirs{expdiri_selected},'-browser');
     end
+  end
+
+%% load curation spreadsheet callback
+
+  function load_Callback(hObject,event) %#ok<INUSD>
+    
+    if needsave,
+      res = questdlg('Load state from %s? All changes will be lost.');
+      if ~strcmpi(res,'yes'),
+        return;
+      end
+    end
+    addToUndoList();
+    
+    [loadfilename,loadpath] = uigetfile(savefilename,'Load data curation tsv');
+    if ~ischar(loadfilename),
+      return;
+    end
+    loadfilename = fullfile(loadpath,loadfilename);
+    [loadpath2,loadfilename2] = fileparts(loadfilename);
+    loadfilename2 = fullfile(loadpath2,[loadfilename2,'_diagnosticinfo.mat']);
+
+    state = undolist(end);
+    
+    fid = fopen(loadfilename,'r');
+    while true,
+      
+      ss = fgetl(fid);
+      % end of file
+      if ~ischar(ss), break; end
+      
+      % comments
+      if isempty(ss) || ~isempty(regexp(ss,'^\s*$','once')) || ...
+          ~isempty(regexp(ss,'^\s*#','once')),
+        continue;
+      end
+      
+      % split at tabs
+      m = regexp(ss,'\t','split');
+      if numel(m) ~= 4,
+        warning('Skipping line %s: wrong number of fields',s);
+      end
+      
+      experiment_name = m{1};
+      manual_pf_curr = m{2};
+      notes_behavioral = m{3};
+      notes_technical = m{4};
+      notes_behavioral = regexp(notes_behavioral,'\\n','split');
+      notes_technical = regexp(notes_technical,'\\n','split');
+      
+      tmpi = find(strcmp({data.experiment_name},experiment_name),1);
+      if isempty(tmpi),
+        fprintf('experiment %s not currently examined, skipping\n',experiment_name);
+        continue;
+      end
+      
+      state.manual_pf(tmpi) = manual_pf_curr(1);
+      state.notes_behavioral{tmpi} = notes_behavioral;
+      state.notes_technical{tmpi} = notes_technical;
+    
+    end
+    fclose(fid);
+    needsave = true;
+    setManualPFState(state);
+    
   end
 
 end

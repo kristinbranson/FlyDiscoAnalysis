@@ -48,9 +48,9 @@ fclose(fid);
 
 [~,expdirs] = ...
   getExperimentDirs('protocol',analysis_protocol,'subreadfiles',{'ctrax_results_movie_*.avi'},...
-  'daterange',{'20110301T000000',''});
+  'daterange',{'20110222T000000','20110301T000000'});
 
-fid = fopen('expdirs20110308diagnostics.txt','w');
+fid = fopen('expdirs20110308adiagnostics.txt','w');
 for i = numel(expdirs):-1:1,
   fprintf(fid,'%s\n',expdirs{i});
 end
