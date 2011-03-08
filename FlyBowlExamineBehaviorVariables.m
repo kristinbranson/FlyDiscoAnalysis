@@ -1209,7 +1209,7 @@ handles.hdate = hdate;
         continue;
       end
       
-      state.manual_behavior{tmpi} = manual_behavior_curr;
+      state.manual_behavior(tmpi) = manual_behavior_curr(1);
       state.notes_behavioral{tmpi} = notes_behavioral;
       state.notes_technical{tmpi} = notes_technical;
     
