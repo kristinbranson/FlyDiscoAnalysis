@@ -23,4 +23,4 @@ params = {'settingsdir',settingsdir,...
   'analysis_protocol',analysis_protocol};
 
 %% 
-[bias_diagnostics,res] = BowlBiasDiagnostics(expdir,params{:});
+[bias_diagnostics,hfig] = BowlBiasDiagnostics(expdir,params{:});
