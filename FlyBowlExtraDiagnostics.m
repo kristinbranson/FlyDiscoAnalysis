@@ -8,3 +8,5 @@ BkgdModelDiagnostics(expdir,varargin{:});
 
 %% compute bias diagnostics
 BowlBiasDiagnostics(expdir,varargin{:});
+
+close all;

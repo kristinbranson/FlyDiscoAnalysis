@@ -23,4 +23,4 @@ params = {'settingsdir',settingsdir,...
   'analysis_protocol',analysis_protocol};
 
 %% 
-[bias_diagnostics,hfig] = FlyBowlExtraDiagnostics(expdir,params{:});
+FlyBowlExtraDiagnostics(expdir,params{:});
