@@ -141,7 +141,7 @@ for i = 1:numel(expdirs),
   end
   for j = 1:numel(subwritefiles),
     %if ~exist(fullfile(expdir_writes{i},subwritefiles{j}),'file')
-    if isempty(dir(fullfile(expdir_writes{i},subreadfiles{j}))),
+    if isempty(dir(fullfile(expdir_writes{i},subwritefiles{j}))),
       doexist = false;
       break;
     end
