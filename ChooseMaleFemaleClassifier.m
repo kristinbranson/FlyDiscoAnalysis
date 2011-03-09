@@ -14,13 +14,16 @@ end
 
 %% data locations
 
-protocol = '20110202';
+protocol = '20110222';
 settingsdir = '/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/settings';
 dataloc_paramsfilestr = 'dataloc_params.txt';
+nexpdirs = 10;
 
-[expdirs,expdir_reads,expdir_writes,experiments,rootreaddir,rootwritedir] = ...
-  getExperimentDirs('protocol',['CtraxTest',protocol],...
+[~,expdirs,expdir_writes,experiments,rootreaddir,rootwritedir] = ...
+  getExperimentDirs('protocol',protocol,...
   'subwritefiles',{'registered_trx.mat'});
+expdir_idx = round(linspace(1,numel(expdirs),nexpdirs));
+expdirs = expdirs(expdir_idx);
 
 dataloc_params = ReadParams(fullfile(settingsdir,protocol,dataloc_paramsfilestr));
 
@@ -32,17 +35,11 @@ sexclassifier_params = ReadParams(sexclassifierparamsfile);
 
 %% load the data
 
-trx = Trx('rootreaddir',dataloc_params.rootreaddir,...
-  'rootwritedir',dataloc_params.rootwritedir,...
-  'perframedir',dataloc_params.perframedir,...
-  'trxfilestr',dataloc_params.trxfilestr,...
-  'sexclassifiermatfile',sexclassifiermatfile);
+trx = Trx('analysis_protocol',protocol,'settingsdir',settingsdir,...
+  'datalocparamsfilestr',dataloc_paramsfilestr);
 
 for i = 1:numel(expdirs),
-  moviefile = fullfile(rootreaddir,expdirs{i},dataloc_params.moviefilestr);
-  [~,~,fid,vidinfo] = get_readframe_fcn(moviefile);
-  fclose(fid);
-  trx.AddExpDir(expdirs{i},vidinfo);
+  trx.AddExpDir(expdirs{i});
 end
 
 %% filter out areas that are maybe caused by tracking noise
@@ -76,7 +73,7 @@ if true,
     areacurr = SmoothAreaOutliers(trx(fly).area,filterorder,maxfreq,maxerrx);
     X{fly} = areacurr(:);
   end
-  [mu_area,var_area,ptrans,prior,ll]=hmm_multiseq(X,nstates);
+  [mu_area,var_area,ptrans,prior,ll]=hmm_multiseq_1d(X,nstates);
   state2sex{argmax(mu_area)} = 'F';
   state2sex{argmin(mu_area)} = 'M';
   save(sexclassifiermatfile,'mu_area','var_area','ptrans','prior','ll','nstates','state2sex','maxerrx',...
