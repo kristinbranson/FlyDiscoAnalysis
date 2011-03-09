@@ -2,9 +2,15 @@
 
 %% set up path
 
-addpath /groups/branson/home/bransonk/tracking/code/JCtrax/filehandling;
-addpath /groups/branson/home/bransonk/tracking/code/JCtrax/misc;
-addpath /groups/branson/home/bransonk/tracking/code/lds/hmm;
+if ispc,
+  addpath E:\Code\JCtrax\misc;
+  addpath E:\Code\JCtrax\filehandling;
+  addpath E:\Code\hmm
+else
+  addpath /groups/branson/home/bransonk/tracking/code/JCtrax/filehandling;
+  addpath /groups/branson/home/bransonk/tracking/code/JCtrax/misc;
+  addpath /groups/branson/home/bransonk/tracking/code/lds/hmm;
+end
 
 %% data locations
 
