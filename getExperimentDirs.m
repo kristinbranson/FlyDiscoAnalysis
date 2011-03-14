@@ -130,7 +130,8 @@ for i = 1:numel(expdirs),
   % check for subfiles
   doexist = true;
   for j = 1:numel(subreadfiles),
-    if ~exist(fullfile(expdir_reads{i},subreadfiles{j}),'file')
+    %if ~exist(fullfile(expdir_reads{i},subreadfiles{j}),'file')
+    if isempty(dir(fullfile(expdir_reads{i},subreadfiles{j}))),
       doexist = false;
       break;
     end
@@ -139,7 +140,8 @@ for i = 1:numel(expdirs),
     continue;
   end
   for j = 1:numel(subwritefiles),
-    if ~exist(fullfile(expdir_writes{i},subwritefiles{j}),'file')
+    %if ~exist(fullfile(expdir_writes{i},subwritefiles{j}),'file')
+    if isempty(dir(fullfile(expdir_writes{i},subreadfiles{j}))),
       doexist = false;
       break;
     end
