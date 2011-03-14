@@ -6,7 +6,7 @@ else
   addpath /groups/branson/home/bransonk/tracking/code/JCtrax/misc;
   addpath /groups/branson/home/bransonk/tracking/code/JCtrax/filehandling;
 end
-
+%%
 [expdirs,expdir_reads,expdir_writes,experiments,rootreaddir,rootwritedir] = ...
   getExperimentDirs('protocol','20110211','subreadfiles',{'perframe/velmag.mat'});
 [expdirs_done,expdir_reads_done] = ...
@@ -39,6 +39,18 @@ fclose(fid);
 expdirs = setdiff(expdirs_ready,expdirs_done);
 
 fid = fopen('expdirs20110220plot.txt','w');
+for i = numel(expdirs):-1:1,
+  fprintf(fid,'%s\n',expdirs{i});
+end
+fclose(fid);
+
+%% all experiments with ctrax_results_movies
+
+[~,expdirs] = ...
+  getExperimentDirs('protocol',analysis_protocol,'subreadfiles',{'ctrax_results_movie_*.avi'},...
+  'daterange',{'20110222T000000','20110301T000000'});
+
+fid = fopen('expdirs20110308adiagnostics.txt','w');
 for i = numel(expdirs):-1:1,
   fprintf(fid,'%s\n',expdirs{i});
 end

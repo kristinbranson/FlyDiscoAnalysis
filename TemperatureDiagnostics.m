@@ -1,4 +1,4 @@
-function diagnostics = FlyBowlComputeTemperatureDiagnostics(expdir,varargin)
+function diagnostics = TemperatureDiagnostics(expdir,varargin)
 
 %% parse parameters
 [analysis_protocol,settingsdir,datalocparamsfilestr] = ...
