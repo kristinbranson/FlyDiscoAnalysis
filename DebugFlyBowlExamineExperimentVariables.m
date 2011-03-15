@@ -31,7 +31,8 @@ analysis_protocol = '20110222';
 
 params = {'settingsdir',settingsdir,...
   'analysis_protocol',analysis_protocol,...
-  'rootdatadir',rootdatadir};
+  'rootdatadir',rootdatadir,...
+  'dataset','score'};
 
 %% 
 
