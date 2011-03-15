@@ -3,7 +3,7 @@ function handles = FlyBowlExamineExperimentVariables(varargin)
 handles = struct;
 
 [analysis_protocol,settingsdir,datalocparamsfilestr,hfig,period,maxdatenum,...
-  figpos,datenumnow,sage_params_path,sage_db,username,rootdatadir,leftovers] = ...
+  figpos,datenumnow,sage_params_path,sage_db,username,rootdatadir,dataset,leftovers] = ...
   myparse_nocheck(varargin,...
   'analysis_protocol','current',...
   'settingsdir','/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/settings',...
@@ -16,7 +16,8 @@ handles = struct;
   'sage_params_path','',...
   'sage_db',[],...
   'username','',...
-  'rootdatadir','/groups/sciserv/flyolympiad/Olympiad_Screen/fly_bowl/bowl_data');
+  'rootdatadir','/groups/sciserv/flyolympiad/Olympiad_Screen/fly_bowl/bowl_data',...
+  'dataset','data');
 
 maxnundo = 5;
 maxperiodsprev = 10;
@@ -128,9 +129,9 @@ flag_options = {{'None',''},{'Rearing problem','Flies look sick',...
 % end
 
 %% get data
-data_types = {'ufmf_diagnostics_summary_*','temperature_stream',...
+data_types = {'ufmf_diagnostics_summary_*',...
   'ctrax_diagnostics_*','registrationdata_*','sexclassifier_diagnostics_*',...
-  'stats_perframe_areasmooth*'};
+  'bias_diagnostics_*','temperature_diagnostics_*','bkgd_diagnostics_*'};
 %data_types = examinestats;
 
 queries = leftovers;
@@ -139,8 +140,8 @@ queries(end+1:end+2) = {'data_type',data_types};
 queries(end+1:end+2) = {'flag_aborted',0};
 queries(end+1:end+2) = {'automated_pf','P'};
 queries(end+1:end+2) = {'experiment_name','FlyBowl_*'};
-data = SAGEGetBowlData(queries{:},'removemissingdata',true);
-%load('datacache.mat','data');
+data = SAGEGetBowlData(queries{:},'removemissingdata',true,'dataset',dataset);
+%load('datacache20110315.mat','data');
 if isempty(data),
   uiwait(warndlg(sprintf('No data for date range %s to %s',daterange{:}),'No data found'));
   if didinputweek,
@@ -155,7 +156,8 @@ if isempty(data),
       'datenumnow',datenumnow,...
       'sage_params_path',sage_params_path,...
       'sage_db',sage_db,...
-      'username',rc.username);
+      'username',rc.username,...
+      'dataset',dataset);
     return;
   else
     fprintf('Choose a different week.\n');
@@ -168,7 +170,8 @@ if isempty(data),
       'datenumnow',datenumnow,...
       'sage_params_path',sage_params_path,...
       'sage_db',sage_db,...
-      'username',rc.username);
+      'username',rc.username,...
+      'dataset',dataset);
     return;
   end
 end
@@ -189,10 +192,10 @@ for i = 1:nexpdirs,
   data(i).ctrax_diagnostics_nframes_not_tracked = ...
     data(i).ufmf_diagnostics_summary_nFrames - data(i).ctrax_diagnostics_nframes_analyzed;
   % add in mean, max, std, maxdiff, nreadings
-  data(i).temperature_mean = nanmean(data(i).temperature_stream);
-  data(i).temperature_max = max(data(i).temperature_stream);
-  data(i).temperature_maxdiff = data(i).temperature_max - min(data(i).temperature_stream);
-  data(i).temperature_nreadings = numel(data(i).temperature_stream);
+%   data(i).temperature_mean = nanmean(data(i).temperature_stream);
+%   data(i).temperature_max = max(data(i).temperature_stream);
+%   data(i).temperature_maxdiff = data(i).temperature_max - min(data(i).temperature_stream);
+%   data(i).temperature_nreadings = numel(data(i).temperature_stream);
   data(i).file_system_path = fullfile(rootdatadir,expdir_bases{i});
   data(i).registrationdata_pxpermm = data(i).registrationdata_circleRadius / registration_params.circleRadius_mm;
 end
@@ -281,6 +284,9 @@ for i = 1:nstats,
   statnames{i} = statnames{i}(1:end-1);
   statnames{i} = strrep(statnames{i},'ufmf_diagnostics_summary','ufmf');
   statnames{i} = strrep(statnames{i},'ufmf_diagnostics_stream','ufmf');
+  statnames{i} = strrep(statnames{i},'temperature_diagnostics','temp');
+  statnames{i} = strrep(statnames{i},'bias_diagnostics','bias');
+  statnames{i} = strrep(statnames{i},'bkgd_diagnostics','bkgd');
   statnames{i} = strrep(statnames{i},'ctrax_diagnostics','ctrax');
   statnames{i} = strrep(statnames{i},'registrationdata','reg');
   statnames{i} = strrep(statnames{i},'sexclassifier_diagnostics','sex');
@@ -697,7 +703,8 @@ handles.hdate = hdate;
       'datenumnow',datenumnow,...
       'sage_params_path',sage_params_path,...
       'sage_db',sage_db,...
-      'username',rc.username);
+      'username',rc.username,...
+      'dataset',dataset);
 
   end
 
@@ -727,7 +734,8 @@ handles.hdate = hdate;
       'datenumnow',datenumnow,...
       'sage_params_path',sage_params_path,...
       'sage_db',sage_db,...
-      'username',rc.username);
+      'username',rc.username,...
+      'dataset',dataset);
 
   end
 
