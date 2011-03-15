@@ -76,7 +76,7 @@ while(my $expdir = <FILE>){
     #system($shfilename);
     $njobs++;
 
-    #exit(1);
+    exit(1);
 
 }
 

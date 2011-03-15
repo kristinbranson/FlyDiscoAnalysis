@@ -112,10 +112,13 @@ if ~isempty(dev),
   res.hcb_bkgddev = colorbar('peer',hax(1,2),'Location','East');
   axis(hax(1,2),'image','off');
   imax(end+1) = hax(1,2);
-  cbpos = get(res.hcb_bkgddev,'Position');
-  axpos = get(hax(1,2),'Position');
-  cbpos(1) = axpos(1)+axpos(3)+cbpos(3);
-  set(res.hcb_bkgddev,'Position',cbpos);
+  %cbpos = get(res.hcb_bkgddev,'Position');
+  %axpos = get(hax(1,2),'Position');
+  %cbpos(1) = axpos(1)+axpos(3)+cbpos(3);
+  %set(res.hcb_bkgddev,'Position',cbpos);
+  % hardcode position because it seems to be doing weird things in
+  % nodisplay
+  set(res.hcb_bkgddev,'Position',params.cbpos_bkgddev);
   
   %% histogram of background deviation
   [edges_bkgddev,centers_bkgddev] = get_bins(params.nbins_bkgddev,params.lim_bkgddev,false,true);
@@ -230,10 +233,14 @@ res.him_fracframesisback = imagesc(fracframesisback,'Parent',hax(3,1),[0,1]);
 res.hti_fracframesisback = title(hax(3,1),'Frac. Frames Used in Bkgd Model');
 axis(hax(3,1),'image','off');
 res.hcb_fracframesisback = colorbar('peer',hax(3,1),'Location','East');
-cbpos = get(res.hcb_fracframesisback,'Position');
-axpos = get(hax(3,1),'Position');
-cbpos(1) = axpos(1)+axpos(3)+cbpos(3);
-set(res.hcb_fracframesisback,'Position',cbpos);
+%cbpos = get(res.hcb_fracframesisback,'Position');
+%axpos = get(hax(3,1),'Position');
+%cbpos(1) = axpos(1)+axpos(3)+cbpos(3);
+%set(res.hcb_fracframesisback,'Position',cbpos);
+% hardcode position because it seems to be doing weird things in
+% nodisplay
+set(res.hcb_fracframesisback,'Position',params.cbpos_fracframesisback);
+
 imax(end+1) = hax(3,1);
 
 bkgd_diagnostics.fracframesisback = fracframesisback;
@@ -318,10 +325,13 @@ res.him_llr = imagesc(llr,'Parent',hax(3,2),params.clim_llr);
 res.hti_llr = title(hax(3,2),'LLR Fg over Bg');
 axis(hax(3,2),'image','off');
 res.hcb_llr = colorbar('peer',hax(3,2),'Location','East');
-cbpos = get(res.hcb_llr,'Position');
-axpos = get(hax(3,2),'Position');
-cbpos(1) = axpos(1)+axpos(3)+cbpos(3);
-set(res.hcb_llr,'Position',cbpos);
+%cbpos = get(res.hcb_llr,'Position');
+%axpos = get(hax(3,2),'Position');
+%cbpos(1) = axpos(1)+axpos(3)+cbpos(3);
+%set(res.hcb_llr,'Position',cbpos);
+% hardcode position because it seems to be doing weird things in
+% nodisplay
+set(res.hcb_llr,'Position',params.cbpos_llr);
 imax(end+1) = hax(3,2);
 
 %% histogram of background center llr

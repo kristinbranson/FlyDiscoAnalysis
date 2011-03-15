@@ -4,12 +4,13 @@ currdir = which('SAGEGetBowlData');
 [currdir,~] = fileparts(currdir);
 
 %% parse inputs
-[docheckflags,daterange,SAGEpath,removemissingdata,leftovers] = ...
+[docheckflags,daterange,SAGEpath,removemissingdata,dataset,leftovers] = ...
   myparse_nocheck(varargin,...
   'checkflags',true,...
   'daterange',[],...
   'SAGEpath',fullfile(currdir,'..','SAGE','MATLABInterface','Trunk'),...
-  'removemissingdata',true);
+  'removemissingdata',true,...
+  'dataset','data');
 
 %% add SAGE to path
 if ~exist('SAGE.Lab','class'),
@@ -88,7 +89,7 @@ end
 
 %% grab data: put everything into as few queries as possible for speed
 
-bowlAssay_data = SAGE.Lab('olympiad').assay('bowl').dataSet('data');
+bowlAssay_data = SAGE.Lab('olympiad').assay('bowl').dataSet(dataset);
 
 if isempty(allqueries),
   data = bowlAssay_data.findData();
