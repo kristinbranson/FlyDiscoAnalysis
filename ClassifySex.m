@@ -1,6 +1,6 @@
 function [sex,diagnostics] = ClassifySex(area,mu_area,var_area,ptrans,state2sex)
 
-x_trans_fun = @(areacurr,areaprev,scurr) normpdf(areacurr,mu_area(scurr),var_area);
+x_trans_fun = @(areacurr,areaprev,scurr) normpdf(areacurr,mu_area(scurr),var_area(scurr));
 log_ptrans = log(ptrans);
 log_s_trans_fun = @(scurr,sprev) log_ptrans(sprev,scurr);
 

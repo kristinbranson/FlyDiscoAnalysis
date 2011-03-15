@@ -1174,10 +1174,26 @@ handles.hdate = hdate;
     loadfilename = fullfile(loadpath,loadfilename);
     [loadpath2,loadfilename2] = fileparts(loadfilename);
     loadfilename2 = fullfile(loadpath2,[loadfilename2,'_diagnosticinfo.mat']);
+    loadedinfo = false;
+    if ~exist(loadfilename2,'file'),
+      warndlg(sprintf('diagnostic info file %s does not exist',loadfilename2));
+    else
+      try
+        tmpinfo = load(loadfilename2,'info','data','examinestats');
+        tmpinfo.experiment_names = {tmpinfo.data.experiment_name};
+        loadedinfo = true;
+        if numel(examinestats) ~= numel(tmpinfo.examinestats),
+          warning('examined stats different, not loading diagnostic info');
+        end
+      catch ME,
+        warning('Could not load info from %s:\n%s',loadfilename2,getReport(ME));
+      end
+    end
 
     state = undolist(end);
     
     fid = fopen(loadfilename,'r');
+    experiment_names = {data.experiment_name};
     while true,
       
       ss = fgetl(fid);
@@ -1203,7 +1219,7 @@ handles.hdate = hdate;
       notes_behavioral = regexp(notes_behavioral,'\\n','split');
       notes_technical = regexp(notes_technical,'\\n','split');
       
-      tmpi = find(strcmp({data.experiment_name},experiment_name),1);
+      tmpi = find(strcmp(experiment_names,experiment_name),1);
       if isempty(tmpi),
         fprintf('experiment %s not currently examined, skipping\n',experiment_name);
         continue;
@@ -1215,6 +1231,12 @@ handles.hdate = hdate;
     
     end
     fclose(fid);
+
+    if loadedinfo,
+      [isintersect,idxcurr] = ismember(tmpinfo.experiment_names,experiment_names);
+      info(idxcurr(isintersect),:) = tmpinfo.info(isintersect,:);
+    end
+
     needsave = true;
     setManualPFState(state);
     
