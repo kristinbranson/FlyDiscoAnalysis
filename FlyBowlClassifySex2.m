@@ -1,11 +1,12 @@
 function trx = FlyBowlClassifySex2(expdir,varargin)
 
 %% parse parameters
-[analysis_protocol,settingsdir,datalocparamsfilestr] = ...
+[analysis_protocol,settingsdir,datalocparamsfilestr,dosave] = ...
   myparse(varargin,...
   'analysis_protocol','current',...
   'settingsdir','/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/settings',...
-  'datalocparamsfilestr','dataloc_params.txt');
+  'datalocparamsfilestr','dataloc_params.txt',...
+  'dosave',true);
 
 %% read in the data locations
 datalocparamsfile = fullfile(settingsdir,analysis_protocol,datalocparamsfilestr);
@@ -41,6 +42,11 @@ X = cell(1,nflies);
 for fly = 1:nflies,
   % compute area
   area = (2*trx(fly).a_mm).*(2*trx(fly).b_mm)*pi;
+  badidx = isinf(area) | isnan(area);
+  if any(isnan(area)),
+    warning('NaNs found in area for fly %d of experiment %s',fly,expdir);
+    area(badidx) = inf;
+  end
   areacurr = SmoothAreaOutliers(area,...
     sexclassifierin.areasmooth_filterorder,...
     sexclassifierin.areasmooth_maxfreq,...
@@ -64,8 +70,10 @@ filterorder = sexclassifierin.areasmooth_filterorder; %#ok<NASGU>
 maxfreq = sexclassifierin.areasmooth_maxfreq; %#ok<NASGU>
 maxerrx = sexclassifierin.areasmooth_maxerrx; %#ok<NASGU>
 
-save(sexclassifieroutmatfile,'mu_area','var_area','ptrans','prior','ll',...
-  'nstates','state2sex','maxerrx','maxfreq','filterorder');
+if dosave,
+  save(sexclassifieroutmatfile,'mu_area','var_area','ptrans','prior','ll',...
+    'nstates','state2sex','maxerrx','maxfreq','filterorder');
+end
 
 %% classify sex
 
@@ -93,13 +101,18 @@ counts.nflies = counts.nfemales + counts.nmales;
 
 %% write diagnostics
 sexclassifierdiagnosticsfile = fullfile(expdir,dataloc_params.sexclassifierdiagnosticsfilestr);
-fid = fopen(sexclassifierdiagnosticsfile,'w');
+if dosave,
+  fid = fopen(sexclassifierdiagnosticsfile,'w');
+else
+  fid = 1;
+end
 
 ifemale = find(strcmp(state2sex,'F'));
 imale = find(strcmp(state2sex,'M'));
-fprintf(fid,'classifier_mu_area_female,%f\n',mu_area(ifemale)); %#ok<FNDSB>
-fprintf(fid,'classifier_mu_area_male,%f\n',mu_area(imale)); %#ok<FNDSB>
-fprintf(fid,'classifier_var_area,%f\n',var_area);
+fprintf(fid,'classifier_mu_area_female,%f\n',mu_area(ifemale));
+fprintf(fid,'classifier_mu_area_male,%f\n',mu_area(imale));
+fprintf(fid,'classifier_var_area_female,%f\n',var_area(ifemale));
+fprintf(fid,'classifier_var_area_male,%f\n',var_area(imale));
 fprintf(fid,'classifier_loglik,%f\n',ll(end));
 fprintf(fid,'classifier_niters,%f\n',numel(ll));
 
@@ -123,8 +136,12 @@ for i = 1:numel(fns),
   fprintf(fid,'max_%s,%f\n',fn,max([counts.(fn)]));
 end
 
-fclose(fid);
+if dosave,
+  fclose(fid);
+end
 
 %% resave
 
-save('-append',trxfile,'trx');
+if dosave,
+  save('-append',trxfile,'trx');
+end

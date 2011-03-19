@@ -104,7 +104,6 @@ for i = 1:numel(hist_fields),
     s = get(handles.hleg,'String');
     legend([handles_control.htype(1),handles.htype],[{'control'},s],'Parent',handles.hfig,'Interpreter','none');
   end
-
   
   drawnow;
   savename = sprintf('hist_%s.png',hist_fields{i});
