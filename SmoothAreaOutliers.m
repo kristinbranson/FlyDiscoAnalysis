@@ -1,7 +1,7 @@
 function areasmooth = SmoothAreaOutliers(area,filterorder,maxfreq,maxerr)
 
 areasmooth = LowPassFilterArea(area,filterorder,maxfreq);
-isoutlier = abs(areasmooth - area) > maxerr;
+isoutlier = isinf(area) | isnan(area) | abs(areasmooth - area) > maxerr;
 [starts,ends] = get_interval_ends(isoutlier);
 ends = ends - 1;
 areasmooth = area;
