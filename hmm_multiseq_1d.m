@@ -159,6 +159,9 @@ for cycle=1:cyc
   for n = 1:N,
     lik=lik+sum(Scale{n});
   end
+  if isnan(lik),
+    error('lik is NaN');
+  end
   LL(cycle) = lik; %#ok<AGROW>
   fprintf('cycle %i log likelihood = %f ',cycle,lik);  
   

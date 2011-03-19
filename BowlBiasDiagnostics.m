@@ -121,10 +121,10 @@ bias_diagnostics.diffargextremaangle_sumfracallsmooth = diffargextremeangle_sumf
 
 %% maximum difference in mode in radius
 [maxfracsmooth,maxr_bin] = max(fracsmooth,[],1);
-maxr = centers_r(maxr_bin);
-[max_maxfracsmooth,max_maxr_angle_bin] = max(maxr);
+argmaxr_fracsmooth = centers_r(maxr_bin);
+[max_maxfracsmooth,max_maxr_angle_bin] = max(argmaxr_fracsmooth);
 argmaxangle_maxfracsmooth = centers_theta(max_maxr_angle_bin);
-[min_maxfracsmooth,min_maxr_angle_bin] = min(maxr);
+[min_maxfracsmooth,min_maxr_angle_bin] = min(argmaxr_fracsmooth);
 argminangle_maxfracsmooth = centers_theta(min_maxr_angle_bin);
 maxdiff_maxfracsmooth = (max_maxfracsmooth - min_maxfracsmooth) / trx.landmark_params.arena_radius_mm;
 diffargextremaangle_maxfracsmooth = abs(modrange(argmaxangle_maxfracsmooth - argminangle_maxfracsmooth,-pi,pi));
@@ -136,13 +136,14 @@ bias_diagnostics.argmaxangle_maxfracsmooth = argmaxangle_maxfracsmooth;
 bias_diagnostics.argminangle_minfracsmooth = argminangle_maxfracsmooth;
 bias_diagnostics.maxdiff_maxfracsmooth = maxdiff_maxfracsmooth;
 bias_diagnostics.diffargextremaangle_maxfracsmooth = diffargextremaangle_maxfracsmooth;
+bias_diagnostics.argmaxr_fracsmooth = argmaxr_fracsmooth;
 
 % all frames
 [maxfracallsmooth,maxr_bin] = max(fracallsmooth,[],1);
-maxr = centers_r(maxr_bin);
-[max_maxfracallsmooth,max_maxr_angle_bin] = max(maxr);
+argmaxr_fracallsmooth = centers_r(maxr_bin);
+[max_maxfracallsmooth,max_maxr_angle_bin] = max(argmaxr_fracallsmooth);
 argmaxangle_maxfracallsmooth = centers_theta(max_maxr_angle_bin);
-[min_maxfracallsmooth,min_maxr_angle_bin] = min(maxr);
+[min_maxfracallsmooth,min_maxr_angle_bin] = min(argmaxr_fracallsmooth);
 argminangle_maxfracallsmooth = centers_theta(min_maxr_angle_bin);
 maxdiff_maxfracallsmooth = (max_maxfracallsmooth - min_maxfracallsmooth) / trx.landmark_params.arena_radius_mm;
 diffargextremaangle_maxfracallsmooth = abs(modrange(argmaxangle_maxfracallsmooth - argminangle_maxfracallsmooth,-pi,pi));
@@ -154,7 +155,7 @@ bias_diagnostics.argmaxangle_maxfracallsmooth = argmaxangle_maxfracallsmooth;
 bias_diagnostics.argminangle_minfracallsmooth = argminangle_maxfracallsmooth;
 bias_diagnostics.maxdiff_maxfracallsmooth = maxdiff_maxfracallsmooth;
 bias_diagnostics.diffargextremaangle_maxfracallsmooth = diffargextremaangle_maxfracallsmooth;
-
+bias_diagnostics.argmaxr_fracallsmooth = argmaxr_fracallsmooth;
 
 %% set up figure
 
