@@ -24,7 +24,8 @@ function registration = detectRegistrationMarks(varargin)
   DEBUG,...
   registration,...
   nr,nc,...
-  imsavename] = ...
+  imsavename,...
+  hfig,figpos] = ...
   myparse(varargin,...
   'saveName','',...
   'bkgdImage',[],...
@@ -64,7 +65,8 @@ function registration = detectRegistrationMarks(varargin)
   'debug',false,...
   'registrationData',[],...
   'nr',[],'nc',[],...
-  'imsavename','');
+  'imsavename','',...
+  'hfig',1,'figpos',[10,10,1600,800]);
 
 iscircle = ismember(method,{'circle','circle_manual'});
 
@@ -261,7 +263,7 @@ if nBowlMarkers > 0,
       methodcurr = 'template';
   end
 
-  bowlMarkerIm = filI4;
+  bowlMarkerIm = filI4; %#ok<NASGU>
 
   maxDistCorner_BowlLabel = maxDistCornerFrac_BowlLabel * r;
   filI4(distCorner > maxDistCorner_BowlLabel) = 0;
@@ -447,93 +449,95 @@ registration.registerfn = registerfn;
 %% create images illustrating fitting
 
 if ~isempty(imsavename),
-  nimsplot = 2 + double(nBowlMarkers > 0);
-  nskip = 10;
-  imsave_sz = [nr,nc*nimsplot+nskip*(nimsplot-1)];
-  imsave_r = zeros(imsave_sz);
-  imsave_g = zeros(imsave_sz);
-  imsave_b = zeros(imsave_sz);
   
-  % background image
-  offc = 0;
-  imsave_r(:,offc+(1:nc)) = bkgdImage;
-  imsave_g(:,offc+(1:nc)) = bkgdImage;
-  imsave_b(:,offc+(1:nc)) = bkgdImage;
+  figure(hfig);
+  clf(hfig);
+  set(hfig,'Position',figpos);
+  nimsplot = 2;
+  hax = createsubplots(1,nimsplot,.025,hfig);
   
-  % circle or registration point features
-  offc = offc + nc + nskip;
+  % plot background image in jet colormap
+  imagesc(bkgdImage,'parent',hax(1),[0,255]);
+  colormap(hax(1),'jet');
+  axis(hax(1),'image');
+  axis(hax(1),'xy');
+  hold(hax(1),'on');
+  
+  % plot detected registration points if not circle mode
+  if ~iscircle,
+    plot(hax(1),registrationPoints(1,:),registrationPoints(2,:),'ks');
+    plot(hax(1),registrationPoints(1,:),registrationPoints(2,:),'wd');
+  end
+
+  % plot detected/labeled circle if is circle mode
   if iscircle,
-    Irgb = 255*colormap_image(circleim,jet(256));
-  else
-    Irgb = 255*colormap_image(filI2,jet(256));
+    tmp = linspace(0,2*pi,ceil(2*pi*circleRadius));
+    plot(hax(1),circleCenterX + circleRadius*cos(tmp),...
+      circleCenterY + circleRadius*sin(tmp),...
+      'w-','linewidth',2);
+    plot(hax(1),circleCenterX + circleRadius*cos(tmp),...
+      circleCenterY + circleRadius*sin(tmp),...
+      'k--','linewidth',2);
+    plot(hax(1),circleCenterX,circleCenterY,'ks','markerfacecolor','k');
+    plot(hax(1),circleCenterX,circleCenterY,'wd');
   end
-  imsave_r(:,offc+(1:nc)) = Irgb(:,:,1);
-  imsave_g(:,offc+(1:nc)) = Irgb(:,:,2);
-  imsave_b(:,offc+(1:nc)) = Irgb(:,:,3);
   
-  offc = offc + nc + nskip;
+  % plot bowl marker(s)
   if nBowlMarkers > 0,
-    Irgb = 255*colormap_image(bowlMarkerIm,jet(256));
-    imsave_r(:,offc+(1:nc)) = Irgb(:,:,1);
-    imsave_g(:,offc+(1:nc)) = Irgb(:,:,2);
-    imsave_b(:,offc+(1:nc)) = Irgb(:,:,3);
+    plot(hax(1),bowlMarkerPoints(1,:),bowlMarkerPoints(2,:),'ks','markersize',12);
+    plot(hax(1),bowlMarkerPoints(1,:),bowlMarkerPoints(2,:),'kx','markersize',12);
   end
   
-  offc = 0;
-  iscolor = 1;
-  for offi = 1:nimsplot,
-    % origin
-    r = min(nr,max(1,floor(originY)-5:ceil(originY)+5));
-    c = min(nc,max(1,floor(originX)-5:ceil(originX)+5));
-    imsave_r(r,offc+c) = 255*iscolor;
-    imsave_g(r,offc+c) = 0;
-    imsave_b(r,offc+c) = 0;
-    
-    if iscircle,
-      
-      % circle
-      
-      x = circleCenterX + circleRadius*cos(linspace(0,2*pi,round(2*pi*circleRadius)));
-      y = circleCenterY + circleRadius*sin(linspace(0,2*pi,round(2*pi*circleRadius)));
-      [d1,d2] = meshgrid(x,-2:2);
-      x = d1(:)+d2(:);
-      [d1,d2] = meshgrid(y,-2:2);
-      y = d1(:)+d2(:);
-      r = min(nr,max(1,round(y)));
-      c = min(nc,max(1,round(x)));
-      idx = sub2ind(imsave_sz,r,offc+c);
-      imsave_r(idx) = 255*iscolor;
-      imsave_g(idx) = 0;
-      imsave_b(idx) = 0;
-      
-    else
-      
-      c = min(nc,max(1,round(registrationPoints(1,:))));
-      r = min(nr,max(1,round(registrationPoints(2,:))));
-      idx = sub2ind(imsave_sz,r,offc+c);
-      imsave_r(idx) = 255*iscolor;
-      imsave_g(idx) = 0;
-      imsave_b(idx) = 0;
-      
-      
-    end
-    
-    % bowl marker points
-    for i = 1:nBowlMarkers,
-      c = min(nc,max(1,round(bowlMarkerPoints(1,i))+(-5:5)));
-      r = min(nr,max(1,round(bowlMarkerPoints(2,i))+(-5:5)));
-      imsave_r(r,offc+c) = 0;
-      imsave_g(r,offc+c) = 255*iscolor;
-      imsave_b(r,offc+c) = 0;
-    end
-    
-    offc = offc + nc + nskip;
-    iscolor = 0;
-    
+  % plot axes
+  xangle = 0;
+  yangle = pi/2;
+  if iscircle,
+    l = circleRadius_mm/2 / scale;
+  else
+    l = pairDist_mm/4 / scale;
   end
+  quiver(hax(1),originX,originY,cos(xangle-offTheta)*l,sin(xangle-offTheta)*l,0,'k-');
+  quiver(hax(1),originX,originY,cos(xangle-offTheta)*l,sin(xangle-offTheta)*l,0,'w--');
+  text(originX+cos(xangle-offTheta)*l,originY+sin(xangle-offTheta)*l,'x','parent',hax(1));
+  quiver(hax(1),originX,originY,cos(yangle-offTheta)*l,sin(yangle-offTheta)*l,0,'w-');
+  quiver(hax(1),originX,originY,cos(yangle-offTheta)*l,sin(yangle-offTheta)*l,0,'k--');
+  text(originX+cos(yangle-offTheta)*l,originY+sin(yangle-offTheta)*l,'y','parent',hax(1));
   
-  imsave = uint8(cat(3,imsave_r,imsave_g,imsave_b));
-  imwrite(imsave,imsavename);
+  title(hax(1),'Input background image');
+
+  % transform image
+  A = affineTransform(offX,offY,offTheta,scale);
+  T = maketform('affine',A);
+  % transformations of corners
+  udata = [1;nc]; vdata = [1;nr];
+  outbounds = findbounds(T,[udata,vdata]);
+  xdata = outbounds(:,1);
+  ydata = outbounds(:,2);
+  [imreg,xdata,ydata] = imtransform(bkgdImage,T,'XYScale',scale,'FillValues',nan);
+  
+  % draw registered image
+  imagesc(xdata,ydata,imreg,'parent',hax(2),[0,255]);
+  hold(hax(2),'on');
+  
+  % draw axes
+  if iscircle,
+    l = circleRadius_mm/2;
+  else
+    l = pairDist_mm/4;
+  end
+  quiver(hax(2),0,0,cos(xangle)*l,sin(xangle)*l,0,'k-');
+  quiver(hax(2),0,0,cos(xangle)*l,sin(xangle)*l,0,'w--');
+  text(cos(xangle)*l,sin(xangle)*l,'x','parent',hax(2));
+  quiver(hax(2),0,0,cos(yangle)*l,sin(yangle)*l,0,'w-');
+  quiver(hax(2),0,0,cos(yangle)*l,sin(yangle)*l,0,'k--');
+  text(cos(yangle)*l,sin(yangle)*l,'y','parent',hax(2));
+
+  axis(hax(2),'image');
+  axis(hax(2),'xy');
+  title(hax(2),'Registered bkgd image');
+  
+  save2png(imsavename,hfig);
+  
 end
 
 %%

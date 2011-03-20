@@ -1,4 +1,21 @@
-expdir = '/groups/branson/bransonlab/tracking_data/olympiad/FlyBowl/CtraxTest20110111/pBDPGAL4U_TrpA_Rig1Plate01BowlA_20101220T142940';
-analysis_protocol = '20110111';
+if ispc,
+  addpath E:\Code\JCtrax\misc;
+  addpath E:\Code\JCtrax\filehandling;
+  settingsdir = 'E:\Code\FlyBowlAnalysis\settings';
+  rootdir = 'E:\Data\FlyBowl\bowl_data';
+  expdir = 'E:\Data\FlyBowl\bowl_data\GMR_14B02_AE_01_TrpA_Rig2Plate14BowlD_20110204T094327';
+else
+  addpath /groups/branson/home/bransonk/tracking/code/JCtrax/filehandling;
+  addpath /groups/branson/home/bransonk/tracking/code/JCtrax/misc;
+  settingsdir = '/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/settings';
+  rootdir = '/groups/sciserv/flyolympiad/Olympiad_Screen/fly_bowl/bowl_data';
+  expdir = fullfile(rootdir,'GMR_12E07_AE_01_TrpA_Rig2Plate14BowlA_20110209T134320');
+end
 
-FlyBowlRegisterTrx(expdir,analysis_protocol);
+%% parameters
+
+analysis_protocol = '20110222';
+params = {'settingsdir',settingsdir,...
+  'analysis_protocol',analysis_protocol};
+
+FlyBowlRegisterTrx(expdir,params{:});
