@@ -29,6 +29,11 @@ annfile = fullfile(expdir,dataloc_params.annfilestr);
 % name of movie file
 moviefile = fullfile(expdir,dataloc_params.moviefilestr);
 
+% template filename should be relative to settings directory
+if isfield(registration_params,'bowlMarkerType') && ...
+    ~ismember(registration_params.bowlMarkerType,{'gradient'}),
+  registration_params.bowlMarkerType = fullfile(settingsdir,analysis_protocol,registration_params.bowlMarkerType);
+end
 
 registration_params = struct2paramscell(registration_params);
 % file to save image to
