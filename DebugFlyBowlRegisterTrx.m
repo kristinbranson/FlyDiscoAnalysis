@@ -18,4 +18,15 @@ analysis_protocol = '20110222';
 params = {'settingsdir',settingsdir,...
   'analysis_protocol',analysis_protocol};
 
+%% run once
+
 FlyBowlRegisterTrx(expdir,params{:});
+
+%% run a bunch of times
+
+expdirs = dir(fullfile(rootdir,'*_*'));
+expdirs = {expdirs.name};
+for i = 1:numel(expdirs),
+  FlyBowlRegisterTrx(fullfile(rootdir,expdirs{i}),params{:});
+  drawnow;
+end

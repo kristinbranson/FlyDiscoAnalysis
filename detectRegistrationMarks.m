@@ -518,6 +518,21 @@ if ~isempty(imsavename),
   % draw registered image
   imagesc(xdata,ydata,imreg,'parent',hax(2),[0,255]);
   hold(hax(2),'on');
+    
+  % draw angle to bowl marker
+  if iscircle,
+    l = circleRadius_mm;
+  else
+    l = pairDist_mm;
+  end  
+  plot(hax(2),[0,cos(bowlMarkerPairTheta_true)]*l,...
+    [0,sin(bowlMarkerPairTheta_true)]*l,'k-o','markerfacecolor','k');
+  plot(hax(2),[0,cos(bowlMarkerPairTheta_true)]*l,...
+    [0,sin(bowlMarkerPairTheta_true)]*l,'w:');
+  text(cos(bowlMarkerPairTheta_true)*l/2,...
+    sin(bowlMarkerPairTheta_true)*l/2,sprintf('%.2fmm',l));
+  text(cos(bowlMarkerPairTheta_true)*l/5,...
+    sin(bowlMarkerPairTheta_true)*l/5,sprintf('%ddeg',round(bowlMarkerPairTheta_true*180/pi)));
   
   % draw axes
   if iscircle,
@@ -537,6 +552,10 @@ if ~isempty(imsavename),
   title(hax(2),'Registered bkgd image');
   
   save2png(imsavename,hfig);
+  
+  if isdeployed && ishandle(hfig),
+    close(hfig);
+  end
   
 end
 
