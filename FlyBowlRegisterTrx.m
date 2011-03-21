@@ -1,5 +1,8 @@
 function trx = FlyBowlRegisterTrx(expdir,varargin)
 
+fns_notperframe = {'id','moviename','annname','firstframe','arena','off',...
+  'nframes','endframe','matname','fps','pxpermm'};
+
 [analysis_protocol,settingsdir,registrationparamsfilestr,datalocparamsfilestr] = ...
   myparse(varargin,...
   'analysis_protocol','current',...
@@ -35,20 +38,23 @@ if isfield(registration_params,'bowlMarkerType') && ...
   registration_params.bowlMarkerType = fullfile(settingsdir,analysis_protocol,registration_params.bowlMarkerType);
 end
 
-registration_params = struct2paramscell(registration_params);
+fnsignore = intersect(fieldnames(registration_params),...
+  {'minFliesLoadedTime','maxFliesLoadedTime','extraBufferFliesLoadedTime'});
+  
+registration_params_cell = struct2paramscell(rmfield(registration_params,fnsignore));
 % file to save image to
 if isfield(dataloc_params,'registrationimagefilestr'),
-  registration_params(end+1:end+2) = {'imsavename',fullfile(expdir,dataloc_params.registrationimagefilestr)};
+  registration_params_cell(end+1:end+2) = {'imsavename',fullfile(expdir,dataloc_params.registrationimagefilestr)};
 end
 % detect
 try
-  registration_data = detectRegistrationMarks(registration_params{:},'annName',annfile,'movieName',moviefile);
+  registration_data = detectRegistrationMarks(registration_params_cell{:},'annName',annfile,'movieName',moviefile);
 catch ME,
   error(['Error detecting registration marks:\n',getReport(ME)]);
 end
 
 
-%% apply registration
+%% apply spatial registration
 
 % name of input trx mat file
 ctraxfile = fullfile(expdir,dataloc_params.ctraxfilestr);
@@ -57,7 +63,7 @@ ctraxfile = fullfile(expdir,dataloc_params.ctraxfilestr);
 moviefile = fullfile(expdir,dataloc_params.moviefilestr);
 
 % load trajectories
-[trx,~,succeeded,timestamps] = load_tracks(ctraxfile,moviefile,'annname',annfile); %#ok<NASGU>
+[trx,~,succeeded,timestamps] = load_tracks(ctraxfile,moviefile,'annname',annfile);
 if ~succeeded,
   error('Could not load trajectories from file %s',ctraxfile);
 end
@@ -107,6 +113,153 @@ for fly = 1:length(trx),
   
 end
 
+%% crop start and end of trajectories
+
+% how long did we actually record for?
+timestamps = timestamps - timestamps(1);
+
+% how long did we want to record for? read from config file
+configfile = dir(fullfile(expdir,dataloc_params.configfilepattern));
+if isempty(configfile),
+  error('Could not find config file for experiment %s',expdir);
+end
+configfile = fullfile(expdir,configfile(1).name);
+config_params = ReadParams(configfile);
+
+% read flies loaded time -- could use metadata tree loader, but this is
+% pretty simple
+metadatafile = fullfile(expdir,dataloc_params.metadatafilestr);
+if ~exist(metadatafile,'file'),
+  error('Could not find metadata file %s',metadatafile);
+end
+fid = fopen(metadatafile,'r');
+if fid < 0,
+  error('Could not open metadata file %s for reading',metadatafile);
+end
+while true,
+  s = fgetl(fid);
+  if ~ischar(s),
+    fclose(fid);
+    error('Could not find "seconds_fliesloaded" in metadata file %s',metadatafile);
+  end
+  m = regexp(s,'seconds_fliesloaded\s*=\s*"([^"]*)"','tokens','once');
+  if ~isempty(m),
+    seconds_fliesloaded = str2double(m{1});
+    break;
+  end
+end
+fclose(fid);
+
+% how much time should we crop from the beginning?
+timeCropStart = registration_params.maxFliesLoadedTime - seconds_fliesloaded;
+if timeCropStart < 0,
+  warning('Load time = %f seconds, greater than max allowed load time = %f seconds.',...
+    seconds_fliesloaded,registration_params.maxFliesLoadedTime);
+  timeCropStart = 0;
+end
+
+% find closest timestamp to timeCropStart
+i0 = find(timestamps >= timeCropStart,1);
+if isempty(i0),
+  error('No timestamps occur after timeCropStart = %f. Cannot crop start.',timeCropStart);
+end
+if i0 > 1 && (timeCropStart-timestamps(i0-1)) < (timestamps(i0)-timeCropStart),
+  i0 = i0 - 1;
+end
+
+% how long is the video currently?
+recordLengthCurr = timestamps(end)-timestamps(i0);
+
+% how long should the video be?
+recordLengthIdeal = config_params.RecordTime - registration_params.extraBufferFliesLoadedTime - ...
+  (registration_params.maxFliesLoadedTime - registration_params.minFliesLoadedTime);
+
+% how much time should we crop from the end?
+if recordLengthCurr < recordLengthIdeal,
+  warning('Cropped video is %f seconds long, shorter than ideal length %f seconds.',recordLengthCurr,recordLengthIdeal);
+else
+  i1 = find(timestamps - timestamps(i0) >= recordLengthIdeal,1);
+  if isempty(i1),
+    error('No timestamps occur after timeCropEnd = %f. Cannot crop end.',timestamps(i0)+recordLengthIdeal);
+  end
+  if i1 > 1 && ...
+      (recordLengthIdeal - (timestamps(i1-1)-timestamps(i0))) < ...
+      ((timestamps(i1)-timestamps(i0)) - recordLengthIdeal),
+    i1 = i1 - 1;
+  end
+end
+seconds_crop_start = timestamps(i0); %#ok<NASGU>
+seconds_crop_end = timestamps(end)-timestamps(i1); %#ok<NASGU>
+
+fns = setdiff(fieldnames(trx),fns_notperframe);
+isperframe = true(1,numel(fns));
+nperfn = nan(1,numel(fns));
+for j = 1:numel(fns),
+  fn = fns{j};
+  for i = 1:numel(trx),
+    if ~isnumeric(trx(i).(fn)),
+      isperframe(j) = false;
+      break;
+    end
+    if i == 1,
+      ncurr = trx(i).nframes - numel(trx(i).(fn));
+    else
+      if trx(i).nframes - numel(trx(i).(fn)) ~= ncurr,
+        isperframe(j) = false;
+        break;
+      end
+    end
+  end
+  if all([trx.nframes]) == trx(1).nframes && ...
+      trx(1).nframes > 1 && numel(trx(1).(fn)) == 1,
+    isperframe(j) = false;
+  end
+  if isperframe(j),
+    nperfn(j) = ncurr;
+  end
+end
+
+nperfn = nperfn(isperframe);
+fns = fns(isperframe);
+ncropright = ceil(nperfn/2);
+ncropleft = nperfn - ncropright;
+
+trxdelete = false(1,numel(trx));
+for i = 1:numel(trx),
+  if trx(i).firstframe > i1,
+    trxdelete(i) = true;
+    continue;
+  end
+  
+  if trx(i).endframe < i0,
+    trxdelete(i) = true;
+    continue;
+  end
+
+  if trx(i).firstframe < i0,
+    off = i0 - trx(i).firstframe;
+    for j = 1:numel(fns),
+      fn = fns{j};
+      trx(i).(fn) = trx(i).(fn)(off+1+ncropleft(j):end);
+    end
+    trx(i).firstframe = i0;
+  end
+  
+  if trx(i).endframe > i1,
+    off = trx(i).endframe - i1;
+    for j = 1:numel(fns),
+      fn = fns{j};
+      trx(i).(fn) = trx(i).(fn)(1:end-off-ncropright(j));
+    end
+    trx(i).endframe = i1;
+  end
+  
+  trx(i).nframes = trx(i).endframe - trx(i).firstframe + 1;
+  trx(i).off = -trx(i).firstframe + 1;
+  
+end
+trx(trxdelete) = [];
+
 %% save registered trx to file
 
 % name of output trx mat file
@@ -124,7 +277,7 @@ save(registrationmatfile,'-struct','tmp');
 registrationtxtfile = fullfile(expdir,dataloc_params.registrationtxtfilestr);
 fid = fopen(registrationtxtfile,'w');
 fnssave = {'offX','offY','offTheta','scale','bowlMarkerTheta','featureStrengths',...
-  'circleCenterX','circleCenterY','circleRadius'};
+  'circleCenterX','circleCenterY','circleRadius','seconds_crop_start','seconds_crop_end'};
 for i = 1:numel(fnssave),
   fn = fnssave{i};
   fprintf(fid,'%s,%f\n',fn,registration_data.(fn));
