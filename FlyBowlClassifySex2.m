@@ -1,4 +1,4 @@
-function [trx,summary_diagnostics] = FlyBowlClassifySex2(expdir,varargin)
+function [trx,summary_diagnostics,X] = FlyBowlClassifySex2(expdir,varargin)
 
 %% parse parameters
 [analysis_protocol,settingsdir,datalocparamsfilestr,dosave] = ...
