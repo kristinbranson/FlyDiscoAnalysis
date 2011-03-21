@@ -8,8 +8,8 @@ else
   addpath /groups/branson/home/bransonk/tracking/code/JCtrax/filehandling;
   addpath /groups/branson/home/bransonk/tracking/code/JCtrax/misc;
   settingsdir = '/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/settings';
-  rootdir = '/groups/sciserv/flyolympiad/Olympiad_Screen/fly_bowl/bowl_data';
-  expdir = fullfile(rootdir,'GMR_12E07_AE_01_TrpA_Rig2Plate14BowlA_20110209T134320');
+  rootdir = '/groups/branson/bransonlab/tracking_data/olympiad/FlyBowl/CtraxTest20110315';
+  expdir = fullfile(rootdir,'GMR_71C10_AE_01_TrpA_Rig1Plate10BowlA_20110311T152418');
 end
 
 %% parameters
