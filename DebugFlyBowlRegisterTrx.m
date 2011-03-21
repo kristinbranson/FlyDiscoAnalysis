@@ -3,13 +3,13 @@ if ispc,
   addpath E:\Code\JCtrax\filehandling;
   settingsdir = 'E:\Code\FlyBowlAnalysis\settings';
   rootdir = 'E:\Data\FlyBowl\bowl_data';
-  expdir = 'E:\Data\FlyBowl\bowl_data\GMR_14B02_AE_01_TrpA_Rig2Plate14BowlD_20110204T094327';
+  expdir = fullfile(rootdir,'GMR_14B02_AE_01_TrpA_Rig2Plate14BowlD_20110204T094327');
 else
   addpath /groups/branson/home/bransonk/tracking/code/JCtrax/filehandling;
   addpath /groups/branson/home/bransonk/tracking/code/JCtrax/misc;
   settingsdir = '/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/settings';
   rootdir = '/groups/branson/bransonlab/tracking_data/olympiad/FlyBowl/CtraxTest20110315';
-  expdir = fullfile(rootdir,'GMR_71C10_AE_01_TrpA_Rig1Plate10BowlA_20110311T152418');
+  expdir = fullfile(rootdir,'GMR_14B02_AE_01_TrpA_Rig2Plate14BowlD_20110204T094327');
 end
 
 %% parameters
