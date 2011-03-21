@@ -33,15 +33,18 @@ expdirs = cellfun(@(s) fullfile(rootdir,s),{expdirs([expdirs.isdir]).name},'Unif
 
 clear summary_diagnostics;
 pfemale = cell(1,numel(expdirs));
-meanarea = cell(1,numel(expdirs));
+medianarea = cell(1,numel(expdirs));
+sex = cell(1,numel(expdirs));
+areasmooth = cell(1,numel(expdirs));
 for i = 1:numel(expdirs),
   try
-    [trx,summary_diagnostics(i),areasmooth] = FlyBowlClassifySex2(expdirs{i},params{:},'dosave',true); %#ok<SAGROW>
+    [trx,summary_diagnostics(i),areasmooth{i}] = FlyBowlClassifySex2(expdirs{i},params{:},'dosave',true); %#ok<SAGROW>
+    sex{i} = {trx.sex};
     pfemale{i} = nan(1,numel(trx));
-    meanarea{i} = nan(1,numel(trx));
+    medianarea{i} = nan(1,numel(trx));
     for fly = 1:numel(trx),
       pfemale{i}(fly) = nnz(strcmpi(trx(fly).sex,'F')) / trx(fly).nframes;
-      meanarea{i}(fly) = nanmean(areasmooth{fly});
+      medianarea{i}(fly) = nanmedian(areasmooth{i}{fly});
     end
   catch ME,
     getReport(ME)
@@ -59,9 +62,9 @@ hold on;
 h(2) = plot(1:numel(expdirs),[summary_diagnostics.classifier_mu_area_male],'b.-');
 x = cell(1,numel(expdirs));
 for i = 1:numel(expdirs),
-  x{i} = 1:numel(meanarea{i});
+  x{i} = zeros(1,numel(medianarea{i}))+i;
 end
-scatter(cell2mat(x),cell2mat(meanarea),[],cell2mat(pfemale),'filled');
+scatter(cell2mat(x),cell2mat(medianarea),[],cell2mat(pfemale),'.');
 set(gca,'XTick',1:numel(expdirs),'XTickLabel',{});
 legend(h,{'classifier_mu_area_female','classifier_mu_area_male'},...
   'interpreter','none','Location','best');
