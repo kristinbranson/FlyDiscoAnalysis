@@ -532,7 +532,7 @@ if ~isempty(imsavename),
   text(cos(bowlMarkerPairTheta_true)*l/2,...
     sin(bowlMarkerPairTheta_true)*l/2,sprintf('%.2fmm',l));
   text(cos(bowlMarkerPairTheta_true)*l/5,...
-    sin(bowlMarkerPairTheta_true)*l/5,sprintf('%ddeg',round(bowlMarkerPairTheta_true*180/pi)));
+    sin(bowlMarkerPairTheta_true)*l/5,sprintf('%.1fdeg',bowlMarkerPairTheta_true*180/pi));
   
   % draw axes
   if iscircle,
