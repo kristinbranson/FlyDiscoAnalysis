@@ -3,8 +3,8 @@ female,sex,F
 walking,min_velmag,6,max_velmag,37
 stopped,max_velmag_ctr,1.39999999
 moving,min_velmag_ctr,1.4
-firsthalf,max_timestamps,499.999999
-secondhalf,min_timestamps,500
+firsthalf,max_timestamps,394.999999
+secondhalf,min_timestamps,395
 walking_male,min_velmag,6,max_velmag,37,sex,M
 walking_female,min_velmag,6,max_velmag,37,sex,F
 walking_firsthalf,min_velmag,6,max_velmag,37,max_timestamps,499.999999

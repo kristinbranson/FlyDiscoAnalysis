@@ -155,6 +155,8 @@ velmag_ctr,female,any,500
 velmag_ctr,moving,any,500
 velmag_ctr,moving_male,any,500
 velmag_ctr,moving_female,any,500
+velmag_ctr,firsthalf,any,500
+velmag_ctr,secondhalf,any,500
 
 yaw,moving,any,500
 yaw,moving_male,any,500
