@@ -26,58 +26,70 @@ params = {'settingsdir',settingsdir,...
 
 FlyBowlClassifySex2(expdir,params{:});
 
-% %% 
-% 
-% nexpdirs_gmr_analyze = 10;
-% nexpdirs_control_analyze = 8;
-% rootwritedir = '/groups/branson/bransonlab/tracking_data/olympiad/FlyBowl/CtraxTest20110315';
-% 
-% %%
-% 
-% [~,expdirs_gmr] = getExperimentDirs('daterange',{'20110311T000000',''},...
-%   'protocol',analysis_protocol,'linename','GMR*');
-% [~,expdirs_control] = getExperimentDirs('daterange',{'20110311T000000',''},...
-%   'protocol',analysis_protocol,'linename','pBD*');
-% if numel(expdirs_gmr) > nexpdirs_gmr_analyze,
-%   expdirs_gmr = expdirs(randperm(numel(expdirs_gmr)));
-%   expdirs_gmr = expdirs_gmr(1:nexpdirs_gmr_analyze);
-% end
-% if numel(expdirs_control) > nexpdirs_control_analyze,
-%   expdirs_control = expdirs_gmr(randperm(numel(expdirs_control)));
-%   expdirs_control = expdirs_control(1:nexpdirs_control_analyze);
-% end
-% expdirs = [expdirs_gmr,expdirs_control];
-% 
-% %%
-% 
-% if false,
-% 
-% expdirs_write = cell(size(expdirs));
-% for i = 1:numel(expdirs),
-%   [~,expdir_base] = fileparts(expdirs{i});
-%   expdirs_write{i} = fullfile(rootwritedir,expdir_base);
-%   fprintf('Copying %s to %s\n',expdirs{i},expdirs_write{i});
-%   if ~exist(expdirs_write{i},'file'),
-%     copyfile(expdirs{i},expdirs_write{i});
-%   end
-% end
-% expdirs = expdirs_write;
-% else
-  expdirs = dir(fullfile(rootwritedir,'*_*'));
-  expdirs = cellfun(@(s) fullfile(rootwritedir,s),{expdirs([expdirs.isdir]).name},'UniformOutput',false);
-% end
-% 
-% %%
-% 
-% for i = 1:numel(expdirs),
-%   FlyBowlClassifySex2(expdirs{i},params{:},'dosave',true);
-% end
+%% 
+
+expdirs = dir(fullfile(rootdir,'*_*'));
+expdirs = cellfun(@(s) fullfile(rootdir,s),{expdirs([expdirs.isdir]).name},'UniformOutput',false);
+
+clear summary_diagnostics;
+pfemale = cell(1,numel(expdirs));
+meanarea = cell(1,numel(expdirs));
+for i = 1:numel(expdirs),
+  try
+    [trx,summary_diagnostics(i),areasmooth] = FlyBowlClassifySex2(expdirs{i},params{:},'dosave',true); %#ok<SAGROW>
+    pfemale{i} = nan(1,numel(trx));
+    meanarea{i} = nan(1,numel(trx));
+    for fly = 1:numel(trx),
+      pfemale{i}(fly) = nnz(strcmpi(trx(fly).sex,'F')) / trx(fly).nframes;
+      meanarea{i}(fly) = nanmean(areasmooth{fly});
+    end
+  catch ME,
+    getReport(ME)
+  end
+end
 
 %%
 
+clf;
+hax = createsubplots(3,1,.05);
+axes(hax(1));
+h = nan(1,2);
+h(1) = plot(1:numel(expdirs),[summary_diagnostics.classifier_mu_area_female],'r.-');
+hold on;
+h(2) = plot(1:numel(expdirs),[summary_diagnostics.classifier_mu_area_male],'b.-');
+x = cell(1,numel(expdirs));
 for i = 1:numel(expdirs),
-  FlyBowlComputePerFrameFeatures(expdirs{i},params{:});
-  FlyBowlComputePerFrameStats(expdirs{i},params{:});
-  FlyBowlPlotPerFrameStats(expdirs{i},params{:});
+  x{i} = 1:numel(meanarea{i});
 end
+scatter(cell2mat(x),cell2mat(meanarea),[],cell2mat(pfemale),'filled');
+set(gca,'XTick',1:numel(expdirs),'XTickLabel',{});
+legend(h,{'classifier_mu_area_female','classifier_mu_area_male'},...
+  'interpreter','none','Location','best');
+ylabel('Area (mm^2)');
 
+axes(hax(2));
+plot(1:numel(expdirs),[summary_diagnostics.mean_nfemales],'r.-');
+hold on;
+plot(1:numel(expdirs),[summary_diagnostics.mean_nmales],'b.-');
+set(gca,'XTick',1:numel(expdirs),'XTickLabel',{});
+ylabel('N. flies');
+legend({'mean_nfemales','mean_nmales'},...
+  'interpreter','none','Location','best');
+
+axes(hax(3));
+plot(1:numel(expdirs),[summary_diagnostics.mean_nswaps],'k.-');
+ylabel('Mean n. swaps');
+
+xticklabels = cell(1,numel(expdirs));
+for i = 1:numel(expdirs),
+  expinfo = parseExpDir(expdirs{i});
+  if expinfo.line(1) == 'G',
+    m = regexp(expinfo.line,'GMR_([^_]+)_.*','tokens','once');
+    lineabbr = m{1};
+  else
+    lineabbr = 'pB';
+  end
+  xticklabels{i} = sprintf('%s %s%s',lineabbr,expinfo.rig,expinfo.bowl);
+end
+set(gca,'XTick',1:numel(expdirs),'XTickLabel',xticklabels);
+xlabel('Experiment');
