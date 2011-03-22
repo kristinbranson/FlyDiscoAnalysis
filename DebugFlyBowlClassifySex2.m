@@ -55,16 +55,18 @@ end
 
 clf;
 hax = createsubplots(3,1,.05);
-axes(hax(1));
+axes(hax(1)); %#ok<*MAXES>
 h = nan(1,2);
 h(1) = plot(1:numel(expdirs),[summary_diagnostics.classifier_mu_area_female],'r.-');
 hold on;
 h(2) = plot(1:numel(expdirs),[summary_diagnostics.classifier_mu_area_male],'b.-');
 x = cell(1,numel(expdirs));
+s = cell(1,numel(expdirs));
 for i = 1:numel(expdirs),
   x{i} = zeros(1,numel(medianarea{i}))+i;
+  s{i} = cellfun(@numel,areasmooth{i});
 end
-scatter(cell2mat(x),cell2mat(medianarea),[],cell2mat(pfemale),'.');
+scatter(cell2mat(x),cell2mat(medianarea),cell2mat(s)*50/max(cell2mat(s)),cell2mat(pfemale),'.');
 set(gca,'XTick',1:numel(expdirs),'XTickLabel',{});
 legend(h,{'classifier_mu_area_female','classifier_mu_area_male'},...
   'interpreter','none','Location','best');
