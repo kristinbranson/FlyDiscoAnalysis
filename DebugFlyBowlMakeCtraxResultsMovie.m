@@ -15,12 +15,14 @@ if ispc,
   rootdir = 'E:\Data\FlyBowl\bowl_data';
 else
   settingsdir = '/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/settings';
-  rootdir = '/groups/sciserv/flyolympiad/Olympiad_Screen/fly_bowl/bowl_data';  
+  %rootdir = '/groups/sciserv/flyolympiad/Olympiad_Screen/fly_bowl/bowl_data';  
+  rootdir = '/groups/branson/bransonlab/tracking_data/olympiad/FlyBowl/CtraxTest20110315';
 end
 analysis_protocol = '20110222';
-expdir = fullfile(rootdir,'GMR_14B02_AE_01_TrpA_Rig2Plate14BowlD_20110204T094327');
+expdir = fullfile(rootdir,'GMR_71C10_AE_01_TrpA_Rig1Plate10BowlA_20110311T152418');
+
+params = {'analysis_protocol',analysis_protocol,'settingsdir',settingsdir};
 
 %% run
 
-FlyBowlMakeCtraxResultsMovie(expdir,...
-  'analysis_protocol',analysis_protocol,'settingsdir',settingsdir);
+FlyBowlMakeCtraxResultsMovie(expdir,params{:});

@@ -188,8 +188,10 @@ else
     i1 = i1 - 1;
   end
 end
-seconds_crop_start = timestamps(i0); %#ok<NASGU>
-seconds_crop_end = timestamps(end)-timestamps(i1); %#ok<NASGU>
+registration_data.seconds_crop_start = timestamps(i0);
+registration_data.start_frame = i0;
+registration_data.seconds_crop_end = timestamps(end)-timestamps(i1);
+registration_data.end_frame = i1;
 
 fns = setdiff(fieldnames(trx),fns_notperframe);
 isperframe = true(1,numel(fns));
@@ -277,7 +279,8 @@ save(registrationmatfile,'-struct','tmp');
 registrationtxtfile = fullfile(expdir,dataloc_params.registrationtxtfilestr);
 fid = fopen(registrationtxtfile,'w');
 fnssave = {'offX','offY','offTheta','scale','bowlMarkerTheta','featureStrengths',...
-  'circleCenterX','circleCenterY','circleRadius','seconds_crop_start','seconds_crop_end'};
+  'circleCenterX','circleCenterY','circleRadius',...
+  'seconds_crop_start','seconds_crop_end','start_frame','end_frame'};
 for i = 1:numel(fnssave),
   fn = fnssave{i};
   fprintf(fid,'%s,%f\n',fn,registration_data.(fn));
