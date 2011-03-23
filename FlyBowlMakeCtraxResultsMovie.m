@@ -93,7 +93,7 @@ fclose(fid);
 tmpfile = [xvidfile,'.tmp'];
 newheight = 4*ceil(height/4);
 newwidth = 4*ceil(width/4);
-cmd = sprintf('mencoder %s -o %s -ovc xvid -xvidencopts bitrate=3000000 -vf mirror,scale=%d:%d',...
+cmd = sprintf('mencoder %s -o %s -ovc xvid -xvidencopts bitrate=3000000 -vf scale=%d:%d',...
   avifile,tmpfile,newwidth,newheight);
 status = system(cmd);
 if status ~= 0,
