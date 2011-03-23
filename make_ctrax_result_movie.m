@@ -34,12 +34,13 @@ mencoder_maxnframes = inf;
 [moviename,trxname,aviname,colors,zoomflies,nzoomr,nzoomc,boxradius,...
   taillength,fps,maxnframes,firstframes,compression,figpos,movietitle,...
   useVideoWriter,mencoderoptions,mencoder_maxnframes,...
-  avifileTempDataFile] = ...
+  avifileTempDataFile,titletext] = ...
   myparse(varargin,'moviename','','trxname','','aviname','','colors',[],'zoomflies',[],'nzoomr',nan,'nzoomc',nan,...
   'boxradius',nan,'taillength',nan,'fps',nan,'maxnframes',nan,'firstframes',[],'compression','',...
   'figpos',[],'movietitle','','useVideoWriter',useVideoWriter,...
   'mencoderoptions',mencoderoptions,'mencoder_maxnframes',mencoder_maxnframes,...
-  'avifileTempDataFile','');
+  'avifileTempDataFile','',...
+  'titletext',true);
 
 if ~ischar(compression),
   compression = '';
@@ -319,6 +320,7 @@ hold on;
 hax = gca;
 set(hax,'position',[0,0,1,1]);
 axis off;
+isdisplay = ~strcmpi(get(1,'XDisplay'),'nodisplay');
 
 % corners of zoom boxes in plotted image coords
 x0 = nc+(0:nzoomc-1)*rowszoom+1;
@@ -372,10 +374,13 @@ for segi = 1:numel(firstframes),
     if ~isempty(movietitle),
       framestr = {framestr,movietitle}; %#ok<AGROW>
     end
-    if frame == firstframes(1),
-      htext = text(.5,.5,framestr,'Parent',hax,'BackgroundColor','k','Color','g','VerticalAlignment','bottom','interpreter','none');
-    else
-      set(htext,'String',framestr);
+    % text doesn't show up in no display mode
+    if titletext && isdisplay,
+      if frame == firstframes(1),
+        htext = text(.5,.5,framestr,'Parent',hax,'BackgroundColor','k','Color','g','VerticalAlignment','bottom','interpreter','none');
+      else
+        set(htext,'String',framestr);
+      end
     end
     
     % draw the zoomed image
