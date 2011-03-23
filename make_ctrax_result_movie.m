@@ -17,7 +17,7 @@
 % 'none' for linux). 
 % 'figpos': position of figure
 % if any parameters are not given, the user will be prompted for these
-function [succeeded,aviname,figpos] = make_ctrax_result_movie(varargin)
+function [succeeded,aviname,figpos,height,width] = make_ctrax_result_movie(varargin)
 
 succeeded = false;
 defaults.boxradius = 1.5;
@@ -516,6 +516,9 @@ for segi = 1:numel(firstframes),
     if frame == firstframes(1),
       fr = getframe_invisible(hax);
       [height,width,~] = size(fr);
+%       height = ceil(height/4)*4;
+%       width = ceil(width/4)*4;
+%       fr = getframe_invisible(hax,[height,width]);
     else
       fr = getframe_invisible(hax,[height,width]);
     end
