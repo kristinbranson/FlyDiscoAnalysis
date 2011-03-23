@@ -281,7 +281,7 @@ res.him_isinterpolated = image(repmat(uint8(ann.background_center),[1,1,3]),'Par
 hold(hax(3,3),'on');
 res.hli_isinterpolated = nan(size(b));
 for i = 1:numel(b),
-  res.hli_isinterpolated(i) = plot(hax(3,3),b{i}(:,1),b{i}(:,2),'r-');
+  res.hli_isinterpolated(i) = plot(hax(3,3),b{i}(:,2),b{i}(:,1),'r-');
 end
 
 res.hti_isinterpolated = title(hax(3,3),'Bkgd Interpolated');
@@ -442,6 +442,9 @@ for i = 1:params.nframessample,
 
   %% Average, min, max log-likelihood ratio for some flies
   for j = 1:nfliescurr,
+    if ~any(cc(:)==j),
+      continue;
+    end
     llrcurr = llr(cc==j)';
     minllrperfly(end+1) = min(llrcurr); %#ok<AGROW>
     maxllrperfly(end+1) = max(llrcurr); %#ok<AGROW>
