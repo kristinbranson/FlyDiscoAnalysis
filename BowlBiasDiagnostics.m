@@ -347,23 +347,35 @@ linkaxes(hax([7,8]),'x');
 %% save image
 
 savename = fullfile(expdir,trx.dataloc_params.biasdiagnosticsimagefilestr);
-if exist(savename,'file'),
-  delete(savename);
+try
+  if exist(savename,'file'),
+    delete(savename);
+  end
+  save2png(savename,hfig);
+catch ME,
+  warning('Could not write bias diagnostics image to file %s:\n%s',savename,getReport(ME));
 end
-save2png(savename,hfig);
   
 %% save to mat file
 biasdiagnosticsmatfilename = fullfile(expdir,trx.dataloc_params.biasdiagnosticsmatfilestr);
-save(biasdiagnosticsmatfilename,'-struct','bias_diagnostics');
+try
+  save(biasdiagnosticsmatfilename,'-struct','bias_diagnostics');
+catch ME,
+  warning('Could not save bias diagnostics to mat file %s:\n%s',biasdiagnosticsmatfilename,getReport(ME));
+end
 
 %% write to text file
 
 biasdiagnosticsfilename = fullfile(expdir,trx.dataloc_params.biasdiagnosticsfilestr);
 fid = fopen(biasdiagnosticsfilename,'w');
-fns = fieldnames(bias_diagnostics);
-for i = 1:numel(fns),
-  fprintf(fid,'%s',fns{i});
-  fprintf(fid,',%f',bias_diagnostics.(fns{i}));
-  fprintf(fid,'\n');
+if fid < 0,
+  warning('Could not open bias diagnostics file %s for writing',biasdiagnosticsfilename);
+else
+  fns = fieldnames(bias_diagnostics);
+  for i = 1:numel(fns),
+    fprintf(fid,'%s',fns{i});
+    fprintf(fid,',%f',bias_diagnostics.(fns{i}));
+    fprintf(fid,'\n');
+  end
+  fclose(fid);
 end
-fclose(fid);

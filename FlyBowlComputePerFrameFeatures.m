@@ -1,11 +1,13 @@
-function FlyBowlComputePerFrameFeatures(expdir,varargin)
+function trx = FlyBowlComputePerFrameFeatures(expdir,varargin)
 
-[analysis_protocol,settingsdir,datalocparamsfilestr,forcecompute] = ...
+[analysis_protocol,settingsdir,datalocparamsfilestr,forcecompute,perframefns] = ...
   myparse(varargin,...
   'analysis_protocol','current',...
   'settingsdir','/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/settings',...
   'datalocparamsfilestr','dataloc_params.txt',...
-  'forcecompute',true);
+  'forcecompute',true,...
+  'perframefns', {} ... % added CSC 20110321: optionally specify to-be-computed frames as parameter, reads from perframefnsfile (as before) otherwise
+	);
 
 %% load the trx
 
@@ -20,8 +22,10 @@ trx.AddExpDir(expdir);
 
 %% compute per-frame features
 
+if isempty(perframefns) % added CSC 20110321: optionally specify to-be-computed frames as parameter, reads from perframefnsfile (as before) otherwise
 perframefnsfile = fullfile(trx.settingsdir,trx.analysis_protocol,trx.dataloc_params.perframefnsfilestr);
 perframefns = importdata(perframefnsfile);
+end
 nfns = numel(perframefns);
 
 % clean this data to force computation
