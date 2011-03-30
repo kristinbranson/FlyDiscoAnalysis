@@ -27,16 +27,26 @@ obj.fly2exp(obj.exp2flies{n}) = [];
 obj.exp2flies(n) = [];
 
 % clear conversion from pixels to mm
-obj.pxpermm(n) = [];
+if numel(obj.pxpermm) >= n,
+  obj.pxpermm(n) = [];
+end
 
 % clear movie size in mm
-obj.width_mms(n) = [];
-obj.height_mms(n) = [];
+if numel(obj.width_mms) >= n,
+  obj.width_mms(n) = [];
+end
+if numel(obj.height_mms) >= n,
+  obj.height_mms(n) = [];
+end
 
 % clear cache
-obj.datacached(n) = [];
-obj.ndatacached = obj.ndatacached - obj.ndatacachedperexp(n);
-obj.ndatacachedperexp(n) = [];
+if numel(obj.datacached) >= n,
+  obj.datacached(n) = [];
+end
+if numel(obj.ndatacachedperexp) >= n,
+  obj.ndatacached = obj.ndatacached - obj.ndatacachedperexp(n);
+  obj.ndatacachedperexp(n) = [];
+end
 
 % update number of experiments
 obj.nexpdirs = obj.nexpdirs - 1;
