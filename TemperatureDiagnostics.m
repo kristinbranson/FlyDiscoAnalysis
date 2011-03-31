@@ -40,9 +40,13 @@ diagnostics.std = nanstd(stream,1);
 %% write to file
 temperaturediagnosticsfile = fullfile(expdir,dataloc_params.temperaturediagnosticsfilestr);
 fid = fopen(temperaturediagnosticsfile,'w');
-fns = fieldnames(diagnostics);
-for i = 1:numel(fns),
-  fn = fns{i};
-  fprintf(fid,'%s,%s\n',fn,num2str(diagnostics.(fn)));
+if fid < 0,
+  warning('Could not open temperature diagnostics file %s for writing',temperaturediagnosticsfile);
+else
+  fns = fieldnames(diagnostics);
+  for i = 1:numel(fns),
+    fn = fns{i};
+    fprintf(fid,'%s,%s\n',fn,num2str(diagnostics.(fn)));
+  end
+  fclose(fid);
 end
-fclose(fid);

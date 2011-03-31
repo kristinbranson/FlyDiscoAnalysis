@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <deployment-project>
-  <configuration target="target.standalone" target-name="Standalone Application" name="FlyBowlExtraDiagnostics" location="/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis" file="/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/FlyBowlExtraDiagnostics.prj" build-checksum="3171601094">
+  <configuration target="target.standalone" target-name="Standalone Application" name="FlyBowlExtraDiagnostics" location="/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis" file="/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/FlyBowlExtraDiagnostics.prj" build-checksum="3941015755">
     <param.project.name>/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/FlyBowlExtraDiagnostics.prj</param.project.name>
     <param.target.type>Standalone Application</param.target.type>
     <param.appname>FlyBowlExtraDiagnostics</param.appname>
@@ -71,6 +71,7 @@
       <file>${PROJECT_ROOT}/ReadParams.m</file>
       <file>${PROJECT_ROOT}/TemperatureDiagnostics.m</file>
       <file>${PROJECT_ROOT}/save2png.m</file>
+      <file>/groups/branson/home/bransonk/tracking/code/Ctrax/matlab/netlab</file>
       <file>/groups/branson/home/bransonk/tracking/code/JCtrax/filehandling</file>
       <file>/groups/branson/home/bransonk/tracking/code/JCtrax/misc</file>
       <file>/groups/branson/home/bransonk/tracking/code/JCtrax/misc/createsubplots.m</file>
@@ -87,7 +88,6 @@
         <directory>/groups/branson/home/bransonk/tracking/code/Ctrax/matlab/netlab</directory>
         <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/filehandling</directory>
         <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/misc</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/SAGE/MATLABInterface/Trunk</directory>
         <directory>/groups/branson/home/bransonk/Documents/MATLAB</directory>
         <directory>${MATLAB_ROOT}/toolbox/matlab/general</directory>
         <directory>${MATLAB_ROOT}/toolbox/matlab/ops</directory>

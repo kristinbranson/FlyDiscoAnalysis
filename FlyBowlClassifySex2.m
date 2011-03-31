@@ -1,11 +1,12 @@
-function trx = FlyBowlClassifySex2(expdir,varargin)
+function [trx,summary_diagnostics,X] = FlyBowlClassifySex2(expdir,varargin)
 
 %% parse parameters
-[analysis_protocol,settingsdir,datalocparamsfilestr] = ...
+[analysis_protocol,settingsdir,datalocparamsfilestr,dosave] = ...
   myparse(varargin,...
   'analysis_protocol','current',...
   'settingsdir','/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/settings',...
-  'datalocparamsfilestr','dataloc_params.txt');
+  'datalocparamsfilestr','dataloc_params.txt',...
+  'dosave',true);
 
 %% read in the data locations
 datalocparamsfile = fullfile(settingsdir,analysis_protocol,datalocparamsfilestr);
@@ -41,6 +42,11 @@ X = cell(1,nflies);
 for fly = 1:nflies,
   % compute area
   area = (2*trx(fly).a_mm).*(2*trx(fly).b_mm)*pi;
+  badidx = isinf(area) | isnan(area);
+  if any(isnan(area)),
+    warning('NaNs found in area for fly %d of experiment %s',fly,expdir);
+    area(badidx) = inf;
+  end
   areacurr = SmoothAreaOutliers(area,...
     sexclassifierin.areasmooth_filterorder,...
     sexclassifierin.areasmooth_maxfreq,...
@@ -64,8 +70,10 @@ filterorder = sexclassifierin.areasmooth_filterorder; %#ok<NASGU>
 maxfreq = sexclassifierin.areasmooth_maxfreq; %#ok<NASGU>
 maxerrx = sexclassifierin.areasmooth_maxerrx; %#ok<NASGU>
 
-save(sexclassifieroutmatfile,'mu_area','var_area','ptrans','prior','ll',...
-  'nstates','state2sex','maxerrx','maxfreq','filterorder');
+if dosave,
+  save(sexclassifieroutmatfile,'mu_area','var_area','ptrans','prior','ll',...
+    'nstates','state2sex','maxerrx','maxfreq','filterorder');
+end
 
 %% classify sex
 
@@ -91,40 +99,59 @@ for fly = 1:numel(trx),
 end
 counts.nflies = counts.nfemales + counts.nmales;
 
-%% write diagnostics
-sexclassifierdiagnosticsfile = fullfile(expdir,dataloc_params.sexclassifierdiagnosticsfilestr);
-fid = fopen(sexclassifierdiagnosticsfile,'w');
+%% summary diagnostics
 
+summary_diagnostics = struct;
 ifemale = find(strcmp(state2sex,'F'));
 imale = find(strcmp(state2sex,'M'));
-fprintf(fid,'classifier_mu_area_female,%f\n',mu_area(ifemale)); %#ok<FNDSB>
-fprintf(fid,'classifier_mu_area_male,%f\n',mu_area(imale)); %#ok<FNDSB>
-fprintf(fid,'classifier_var_area,%f\n',var_area);
-fprintf(fid,'classifier_loglik,%f\n',ll(end));
-fprintf(fid,'classifier_niters,%f\n',numel(ll));
+summary_diagnostics.classifier_mu_area_female = mu_area(ifemale);
+summary_diagnostics.classifier_mu_area_male = mu_area(imale);
+summary_diagnostics.classifier_mu_area_female = mu_area(ifemale);
+summary_diagnostics.classifier_mu_area_male = mu_area(imale);
+summary_diagnostics.classifier_var_area_female = var_area(ifemale);
+summary_diagnostics.classifier_var_area_male = var_area(imale);
+summary_diagnostics.classifier_loglik = ll(end);
+summary_diagnostics.classifier_niters = numel(ll);
 
 fns = fieldnames(diagnostics);
 for i = 1:numel(fns),
   fn = fns{i};
-  fprintf(fid,'mean_%s,%f\n',fn,nanmean([diagnostics.(fn)]));
-  fprintf(fid,'median_%s,%f\n',fn,nanmedian([diagnostics.(fn)]));
-  fprintf(fid,'std_%s,%f\n',fn,nanstd([diagnostics.(fn)],1));
-  fprintf(fid,'min_%s,%f\n',fn,min([diagnostics.(fn)]));
-  fprintf(fid,'max_%s,%f\n',fn,max([diagnostics.(fn)]));
+  summary_diagnostics.(sprintf('mean_%s',fn)) = nanmean([diagnostics.(fn)]);
+  summary_diagnostics.(sprintf('median_%s',fn)) = nanmedian([diagnostics.(fn)]);
+  summary_diagnostics.(sprintf('std_%s',fn)) = nanstd([diagnostics.(fn)],1);
+  summary_diagnostics.(sprintf('min_%s',fn)) = min([diagnostics.(fn)]);
+  summary_diagnostics.(sprintf('max_%s',fn)) = max([diagnostics.(fn)]);
 end
 
 fns = fieldnames(counts);
 for i = 1:numel(fns),
   fn = fns{i};
-  fprintf(fid,'mean_%s,%f\n',fn,nanmean([counts.(fn)]));
-  fprintf(fid,'median_%s,%f\n',fn,nanmedian([counts.(fn)]));
-  fprintf(fid,'std_%s,%f\n',fn,nanstd([counts.(fn)],1));
-  fprintf(fid,'min_%s,%f\n',fn,min([counts.(fn)]));
-  fprintf(fid,'max_%s,%f\n',fn,max([counts.(fn)]));
+  summary_diagnostics.(sprintf('mean_%s',fn)) = nanmean([counts.(fn)]);
+  summary_diagnostics.(sprintf('median_%s',fn)) = nanmedian([counts.(fn)]);
+  summary_diagnostics.(sprintf('std_%s',fn)) = nanstd([counts.(fn)],1);
+  summary_diagnostics.(sprintf('min_%s',fn)) = min([counts.(fn)]);
+  summary_diagnostics.(sprintf('max_%s',fn)) = max([counts.(fn)]);
 end
 
-fclose(fid);
+%% write diagnostics
+
+sexclassifierdiagnosticsfile = fullfile(expdir,dataloc_params.sexclassifierdiagnosticsfilestr);
+if dosave,
+  fid = fopen(sexclassifierdiagnosticsfile,'w');
+else
+  fid = 1;
+end
+fns = fieldnames(summary_diagnostics);
+for i = 1:numel(fns),
+  fprintf(fid,'%s,%f\n',fns{i},summary_diagnostics.(fns{i}));
+end
+
+if dosave,
+  fclose(fid);
+end
 
 %% resave
 
-save('-append',trxfile,'trx');
+if dosave,
+  save('-append',trxfile,'trx');
+end

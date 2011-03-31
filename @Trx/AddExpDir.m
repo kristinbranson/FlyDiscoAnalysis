@@ -1,6 +1,8 @@
 % obj.AddExpDir(expdir)
 % Adds data associated with experiment expdir to the data represented by obj.
-function AddExpDir(obj,expdir)
+function AddExpDir(obj,expdir,varargin)
+
+[dooverwrite] = myparse(varargin,'dooverwrite',true);
 
 if ismember(expdir,obj.expdirs),
   obj.RemoveExpDir(expdir);
@@ -42,7 +44,7 @@ obj.ndatacachedperexp(n) = 0;
 obj.datacached{n} = struct;
 
 % store trajectories
-obj.StoreTrajectories(n,traj);
+obj.StoreTrajectories(n,traj,dooverwrite);
 
 % movie size in mm
 if isfield(obj,'pxpermm'),

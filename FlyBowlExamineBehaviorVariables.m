@@ -33,7 +33,8 @@ if isempty(maxdatenum),
   maxdatenum = floor(maxdatenum)+daywant-daycurr-7;
 
 end
-format = 'yyyy-mm-ddTHH:MM:SS';
+%format = 'yyyy-mm-ddTHH:MM:SS';
+format = 'yyyymmddTHHMMSS';
 mindatenum = maxdatenum - period;
 mindatestr = datestr(mindatenum,format);
 maxdatestr = datestr(maxdatenum,format);

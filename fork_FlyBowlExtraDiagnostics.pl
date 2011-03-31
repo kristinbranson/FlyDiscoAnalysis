@@ -9,7 +9,10 @@ if($nargs < 1){
     exit(1);
 }
 
-my $SCRIPT = "/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/settings/20110211/run_FlyBowlExtraDiagnostics.sh";
+my $analysis_protocol = "20110222";
+
+
+my $SCRIPT = "/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/settings/$analysis_protocol/run_FlyBowlExtraDiagnostics.sh";
 
 my $PERFRAMEDIR = "perframe";
 
@@ -117,7 +120,7 @@ sub write_qsub_sh {
 # this script will be qsubed
 export MCR_CACHE_ROOT=$MCR_CACHE_ROOT.$jobid
 
-$SCRIPT $MCR $expdir visible on
+$SCRIPT $MCR $expdir analysis_protocol $analysis_protocol
 
 ~;
 	

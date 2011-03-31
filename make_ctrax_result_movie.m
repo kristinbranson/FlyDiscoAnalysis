@@ -17,7 +17,7 @@
 % 'none' for linux). 
 % 'figpos': position of figure
 % if any parameters are not given, the user will be prompted for these
-function [succeeded,aviname,figpos] = make_ctrax_result_movie(varargin)
+function [succeeded,aviname,figpos,height,width] = make_ctrax_result_movie(varargin)
 
 succeeded = false;
 defaults.boxradius = 1.5;
@@ -34,12 +34,13 @@ mencoder_maxnframes = inf;
 [moviename,trxname,aviname,colors,zoomflies,nzoomr,nzoomc,boxradius,...
   taillength,fps,maxnframes,firstframes,compression,figpos,movietitle,...
   useVideoWriter,mencoderoptions,mencoder_maxnframes,...
-  avifileTempDataFile] = ...
+  avifileTempDataFile,titletext] = ...
   myparse(varargin,'moviename','','trxname','','aviname','','colors',[],'zoomflies',[],'nzoomr',nan,'nzoomc',nan,...
   'boxradius',nan,'taillength',nan,'fps',nan,'maxnframes',nan,'firstframes',[],'compression','',...
   'figpos',[],'movietitle','','useVideoWriter',useVideoWriter,...
   'mencoderoptions',mencoderoptions,'mencoder_maxnframes',mencoder_maxnframes,...
-  'avifileTempDataFile','');
+  'avifileTempDataFile','',...
+  'titletext',true);
 
 if ~ischar(compression),
   compression = '';
@@ -319,6 +320,7 @@ hold on;
 hax = gca;
 set(hax,'position',[0,0,1,1]);
 axis off;
+isdisplay = ~strcmpi(get(1,'XDisplay'),'nodisplay');
 
 % corners of zoom boxes in plotted image coords
 x0 = nc+(0:nzoomc-1)*rowszoom+1;
@@ -372,10 +374,13 @@ for segi = 1:numel(firstframes),
     if ~isempty(movietitle),
       framestr = {framestr,movietitle}; %#ok<AGROW>
     end
-    if frame == firstframes(1),
-      htext = text(.5,.5,framestr,'Parent',hax,'BackgroundColor','k','Color','g','VerticalAlignment','bottom','interpreter','none');
-    else
-      set(htext,'String',framestr);
+    % text doesn't show up in no display mode
+    if titletext && isdisplay,
+      if frame == firstframes(1),
+        htext = text(.5,.5,framestr,'Parent',hax,'BackgroundColor','k','Color','g','VerticalAlignment','bottom','interpreter','none');
+      else
+        set(htext,'String',framestr);
+      end
     end
     
     % draw the zoomed image
@@ -511,6 +516,9 @@ for segi = 1:numel(firstframes),
     if frame == firstframes(1),
       fr = getframe_invisible(hax);
       [height,width,~] = size(fr);
+%       height = ceil(height/4)*4;
+%       width = ceil(width/4)*4;
+%       fr = getframe_invisible(hax,[height,width]);
     else
       fr = getframe_invisible(hax,[height,width]);
     end
