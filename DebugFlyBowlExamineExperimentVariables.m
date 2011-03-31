@@ -22,8 +22,7 @@ analysis_protocol = '20110222';
 %% which experiments
 
 % d = now;
-% %format = 'yyyymmddTHHMMSS';
-% format = 'yyyy-mm-ddTHH:MM:SS';
+% format = 'yyyymmddTHHMMSS';
 % maxdatenum = d - min_days_prev;
 % mindatenum = d - max_days_prev;
 % mindatestr = datestr(mindatenum,format);

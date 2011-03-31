@@ -121,10 +121,10 @@ bias_diagnostics.diffargextremaangle_sumfracallsmooth = diffargextremeangle_sumf
 
 %% maximum difference in mode in radius
 [maxfracsmooth,maxr_bin] = max(fracsmooth,[],1);
-maxr = centers_r(maxr_bin);
-[max_maxfracsmooth,max_maxr_angle_bin] = max(maxr);
+argmaxr_fracsmooth = centers_r(maxr_bin);
+[max_maxfracsmooth,max_maxr_angle_bin] = max(argmaxr_fracsmooth);
 argmaxangle_maxfracsmooth = centers_theta(max_maxr_angle_bin);
-[min_maxfracsmooth,min_maxr_angle_bin] = min(maxr);
+[min_maxfracsmooth,min_maxr_angle_bin] = min(argmaxr_fracsmooth);
 argminangle_maxfracsmooth = centers_theta(min_maxr_angle_bin);
 maxdiff_maxfracsmooth = (max_maxfracsmooth - min_maxfracsmooth) / trx.landmark_params.arena_radius_mm;
 diffargextremaangle_maxfracsmooth = abs(modrange(argmaxangle_maxfracsmooth - argminangle_maxfracsmooth,-pi,pi));
@@ -136,13 +136,14 @@ bias_diagnostics.argmaxangle_maxfracsmooth = argmaxangle_maxfracsmooth;
 bias_diagnostics.argminangle_minfracsmooth = argminangle_maxfracsmooth;
 bias_diagnostics.maxdiff_maxfracsmooth = maxdiff_maxfracsmooth;
 bias_diagnostics.diffargextremaangle_maxfracsmooth = diffargextremaangle_maxfracsmooth;
+bias_diagnostics.argmaxr_fracsmooth = argmaxr_fracsmooth;
 
 % all frames
 [maxfracallsmooth,maxr_bin] = max(fracallsmooth,[],1);
-maxr = centers_r(maxr_bin);
-[max_maxfracallsmooth,max_maxr_angle_bin] = max(maxr);
+argmaxr_fracallsmooth = centers_r(maxr_bin);
+[max_maxfracallsmooth,max_maxr_angle_bin] = max(argmaxr_fracallsmooth);
 argmaxangle_maxfracallsmooth = centers_theta(max_maxr_angle_bin);
-[min_maxfracallsmooth,min_maxr_angle_bin] = min(maxr);
+[min_maxfracallsmooth,min_maxr_angle_bin] = min(argmaxr_fracallsmooth);
 argminangle_maxfracallsmooth = centers_theta(min_maxr_angle_bin);
 maxdiff_maxfracallsmooth = (max_maxfracallsmooth - min_maxfracallsmooth) / trx.landmark_params.arena_radius_mm;
 diffargextremaangle_maxfracallsmooth = abs(modrange(argmaxangle_maxfracallsmooth - argminangle_maxfracallsmooth,-pi,pi));
@@ -154,7 +155,7 @@ bias_diagnostics.argmaxangle_maxfracallsmooth = argmaxangle_maxfracallsmooth;
 bias_diagnostics.argminangle_minfracallsmooth = argminangle_maxfracallsmooth;
 bias_diagnostics.maxdiff_maxfracallsmooth = maxdiff_maxfracallsmooth;
 bias_diagnostics.diffargextremaangle_maxfracallsmooth = diffargextremaangle_maxfracallsmooth;
-
+bias_diagnostics.argmaxr_fracallsmooth = argmaxr_fracallsmooth;
 
 %% set up figure
 
@@ -234,8 +235,8 @@ ylabel(hax(axi),'Fraction of time | angle');
 axi = 4;
 imagesc([centers_theta(1),centers_theta(end)],[centers_r(1),centers_r(end)],fracsmooth,'parent',hax(axi));
 hold(hax(axi),'on');
-plot(hax(axi),centers_theta,maxr,'w-','linewidth',2);
-plot(hax(axi),centers_theta,maxr,'--','color',gray,'linewidth',2);
+plot(hax(axi),centers_theta,argmaxr_fracsmooth,'w-','linewidth',2);
+plot(hax(axi),centers_theta,argmaxr_fracsmooth,'--','color',gray,'linewidth',2);
 plot(hax(axi),argmaxangle_sumfracsmooth+[0,0],[edges_r(1),edges_r(end)],'w-','linewidth',2);
 plot(hax(axi),argmaxangle_sumfracsmooth+[0,0],[edges_r(1),edges_r(end)],'--','color',gray,'linewidth',2);
 plot(hax(axi),argminangle_sumfracsmooth+[0,0],[edges_r(1),edges_r(end)],'w-','linewidth',2);
@@ -317,8 +318,8 @@ ylabel(hax(axi),'Fraction of time | angle');
 axi = 8;
 imagesc([centers_theta(1),centers_theta(end)],[centers_r(1),centers_r(end)],fracallsmooth,'parent',hax(axi));
 hold(hax(axi),'on');
-plot(hax(axi),centers_theta,maxr,'w-','linewidth',2);
-plot(hax(axi),centers_theta,maxr,'--','color',gray,'linewidth',2);
+plot(hax(axi),centers_theta,argmaxr_fracallsmooth,'w-','linewidth',2);
+plot(hax(axi),centers_theta,argmaxr_fracallsmooth,'--','color',gray,'linewidth',2);
 plot(hax(axi),argmaxangle_sumfracallsmooth+[0,0],[edges_r(1),edges_r(end)],'w-','linewidth',2);
 plot(hax(axi),argmaxangle_sumfracallsmooth+[0,0],[edges_r(1),edges_r(end)],'--','color',gray,'linewidth',2);
 plot(hax(axi),argminangle_sumfracallsmooth+[0,0],[edges_r(1),edges_r(end)],'w-','linewidth',2);
@@ -346,23 +347,35 @@ linkaxes(hax([7,8]),'x');
 %% save image
 
 savename = fullfile(expdir,trx.dataloc_params.biasdiagnosticsimagefilestr);
-if exist(savename,'file'),
-  delete(savename);
+try
+  if exist(savename,'file'),
+    delete(savename);
+  end
+  save2png(savename,hfig);
+catch ME,
+  warning('Could not write bias diagnostics image to file %s:\n%s',savename,getReport(ME));
 end
-save2png(savename,hfig);
   
 %% save to mat file
 biasdiagnosticsmatfilename = fullfile(expdir,trx.dataloc_params.biasdiagnosticsmatfilestr);
-save(biasdiagnosticsmatfilename,'-struct','bias_diagnostics');
+try
+  save(biasdiagnosticsmatfilename,'-struct','bias_diagnostics');
+catch ME,
+  warning('Could not save bias diagnostics to mat file %s:\n%s',biasdiagnosticsmatfilename,getReport(ME));
+end
 
 %% write to text file
 
 biasdiagnosticsfilename = fullfile(expdir,trx.dataloc_params.biasdiagnosticsfilestr);
 fid = fopen(biasdiagnosticsfilename,'w');
-fns = fieldnames(bias_diagnostics);
-for i = 1:numel(fns),
-  fprintf(fid,'%s',fns{i});
-  fprintf(fid,',%f',bias_diagnostics.(fns{i}));
-  fprintf(fid,'\n');
+if fid < 0,
+  warning('Could not open bias diagnostics file %s for writing',biasdiagnosticsfilename);
+else
+  fns = fieldnames(bias_diagnostics);
+  for i = 1:numel(fns),
+    fprintf(fid,'%s',fns{i});
+    fprintf(fid,',%f',bias_diagnostics.(fns{i}));
+    fprintf(fid,'\n');
+  end
+  fclose(fid);
 end
-fclose(fid);

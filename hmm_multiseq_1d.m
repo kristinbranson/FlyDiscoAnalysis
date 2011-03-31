@@ -17,7 +17,7 @@
 % Iterates until a proportional change < tol in the log likelihood 
 % or cyc steps of Baum-Welch
 
-function [Mu,Cov,LL]=hmm_multiseq_1d(X,K,Psame,cyc,tol)
+function [Mu,Cov,LL]=hmm_multiseq_1d(X,K,Psame,cyc,tol,minCov)
 
 if ~iscell(X),
   X = {X};
@@ -41,6 +41,7 @@ P = ones(K)-Psame;
 P(eye(K)==1)=Psame;
 Pi = ones(1,K)/K;
 
+if nargin<6, minCov=max(1e-9,var(cat(1,X{:}),1)*1e-2); end
 if nargin<5, tol=0.0001; end;
 if nargin<4, cyc=100; end;
 
@@ -51,6 +52,7 @@ Cov = nan(K,1);
 for i = 1:K,
   Cov(i) = cov(Xmat(idx==i));
 end
+Cov(Cov < minCov) = minCov;
 %Cov=diag(diag(cov(Xmat)));
 %Mu=randn(K,p)*sqrtm(Cov)+ones(K,1)*mean(Xmat);
 
@@ -149,15 +151,19 @@ for cycle=1:cyc
   for n = 1:N,
     for l=1:K
       d=(X{n}-ones(Ts(n),1)*Mu(l,:));
-      Cov=Cov+rprod(d,Gamma{n}(:,l))'*d;
+      Cov(l)=Cov(l)+rprod(d,Gamma{n}(:,l))'*d;
     end
   end;
-  Cov=Cov/(sum(Gammasum));
+  Cov=Cov./Gammasum';
+  Cov(Cov<minCov) = minCov;
   
   oldlik=lik;
   lik = 0;
   for n = 1:N,
     lik=lik+sum(Scale{n});
+  end
+  if isnan(lik),
+    error('lik is NaN');
   end
   LL(cycle) = lik; %#ok<AGROW>
   fprintf('cycle %i log likelihood = %f ',cycle,lik);  

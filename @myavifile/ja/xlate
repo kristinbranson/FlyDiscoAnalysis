@@ -1,0 +1,115 @@
+%%matlab/toolbox/matlab/audiovideo/@avifile/addframe.m
+<(addframe)FRAME must be of either double or uint8 precision
+>(addframe)FRAME は、double か uint8 のいずれかの精度でなければなりません。
+<(addframe)First input must be an avifile object.
+>(addframe)1 番目の入力は avifile オブジェクトでなければなりません。
+<(addframe)Frame must be %d by %d.
+>(addframe)フレームは %d x %d でなければなりません。
+<(addframe)Frame must be a truecolor image.
+>(addframe)フレームはトゥルーカラー イメージでなければなりません。
+<(addframe)Frame must be an indexed image.
+>(addframe)フレームはインデックス付きイメージでなければなりません。
+<(addframe)Invalid input argument.  Each frame must be a numeric matrix, a MATLAB movie structure, or a handle to a figure or axis.
+>(addframe)入力引数が無効です。各フレームは数値行列、MATLAB のムービー構造体、あるいは Figure か軸のハンドルのいずれかでなければなりません。
+<(addframe)The Intel Indeo compressor can not compress frame sizes that exceed a maximum frame size of 4,194,304 pixels.
+>(addframe)Intel Indeo 圧縮方式は、4,194,304 ピクセルの最大フレームサイズを超えるフレーム サイズを圧縮できません。
+<(addframe)The colormap can not exceed 236 colors, as specified by the Intel Indeo compressor.
+>(addframe)Intel Indeo 圧縮方式では、236 色を超えるカラーマップを指定できません。
+<(addframe)The frame height has been padded to be a multiple of four as required by the specified codec.
+>(addframe)フレームの高さは、指定した符号化で必要な 4 の倍数になるよう付加されました。
+<(addframe)The frame width has been padded to be a multiple of four as required by the specified codec.
+>(addframe)フレームの幅は、指定した符号化で必要な 4 の倍数になるよう付加されました。
+<(addframe)The minimum frame size for the Indeo compressor is 32x32.
+>(addframe)Indeo 圧縮方式の最小フレーム サイズは 32x32 です。
+
+%%matlab/toolbox/matlab/audiovideo/@avifile/avifile.m
+<(avifile)Error creating AVI file. Check directory permissions.
+>(avifile)AVI ファイルの作成中にエラーが発生しました。ディレクトリの権限を確認してください。
+<(avifile)The first input argument must be a filename.
+>(avifile)1 番目の入力引数はファイル名でなければなりません。
+<(avifile)You must provide a filename as the input.
+>(avifile)入力としてファイル名を与えなければなりません。
+
+%%matlab/toolbox/matlab/audiovideo/@avifile/close.m
+<(close)First input must be an AVIFILE object.
+>(close)1 番目の入力は AVIFILE オブジェクトでなければなりません。
+<(close)There are no frames associated with this AVI. File may be invalid.
+>(close)この AVI に関するフレームがありません。ファイルが無効である可能性があります。
+<(close)Unable to write %s list.
+>(close)%s のリストに書き込めません。
+
+%%matlab/toolbox/matlab/audiovideo/@avifile/display.m
+<(display)Adjustable parameters:
+>(display)調整可能なパラメーター:
+<(display)Automatically updated parameters:
+>(display)自動的に更新されたパラメーター:
+
+%%matlab/toolbox/matlab/audiovideo/@avifile/get.m
+<(get)Unrecognized parameter name '%s'.
+>(get)認識されないパラメーター名 '%s' です。
+
+%%matlab/toolbox/matlab/audiovideo/@avifile/horzcat.m
+<(horzcat)AVIFILE objects can't be concatenated.
+>(horzcat)AVIFILE オブジェクトは連結できません。
+
+%%matlab/toolbox/matlab/audiovideo/@avifile/set.m
+<(set)Ambiguous parameter name '%s'.
+>(set)パラメーター名 '%s' があいまいです。
+<(set)Colormap must have three columns.
+>(set)Colormap は 3 列でなければなりません。
+<(set)Colormap must no more than 256 entries.
+>(set)Colormap は 256 要素以下でなければなりません。
+<(set)Compression must be set before any frames are added.
+>(set)Compression は、任意のフレームを追加する前に設定しなければなりません。
+<(set)FPS must be 1 or greater for compression with Indeo3.
+>(set)FPS は、Indeo3 の圧縮に対して 1 以上でなければなりません。
+<(set)FPS must be 1 or greater with Indeo3.
+>(set)FPS は、Indeo3 で 1 以上でなければなりません。
+<(set)Fps must be set before calling ADDFRAME.
+>(set)Fps は、ADDFRAME を呼び出す前に設定しなければなりません。
+<(set)Not a supported compression method.  An attempt will be made to use this compressor.
+>(set)圧縮方式がサポートされていません。この圧縮方式の使用を試します。
+<(set)Only uncompressed AVI files can be written on UNIX.
+>(set)圧縮されていない AVI ファイルのみ UNIX で書き込み可能です。
+<(set)Quality must be a number.
+>(set)Quality は数値でなければなりません。
+<(set)Quality must be in the range of 1 to 100
+>(set)Quality は 1 から 100 の範囲でなければなりません。
+<(set)Quality must be set before any frames are added.
+>(set)Quality は、任意のフレームを追加する前に設定しなければなりません。
+<(set)The Colormap must be set before any frames are added.
+>(set)Colormap は、任意のフレームを追加する前に設定しなければなりません。
+<(set)The key frame rate must be set before calling ADDFRAME.
+>(set)キー フレーム レートは、ADDFRAME を呼び出す前に設定しなければなりません。
+<(set)The name must be set before calling ADDFRAME.
+>(set)名前は、ADDFRAME を呼び出す前に設定しなければなりません。
+<(set)The number of frames per second must be greater than zero.
+>(set)1 秒あたりのフレーム数は、0 より大きくなければなりません。
+<(set)The number of key frames per second must be greater than zero.
+>(set)1 秒あたりのキー フレーム数は、0 より大きくなければなりません。
+<(set)The property/value inputs must always occur as pairs.
+>(set)プロパティ/値は、常にペアで入力しなければなりません。
+<(set)The stream name must be a string.
+>(set)ストリーム名は文字列でなければなりません。
+<(set)The video stream name must be no more than 64 characters long
+>(set)ビデオ ストリーム名は、64 文字長以下でなければなりません。
+<(set)Unable to set colormap for a TrueColor image.
+>(set)TrueColor イメージのカラーマップを設定できません。
+<(set)You must use the syntax obj=set(obj,....).
+>(set)構文 obj=set(obj,....) を使用しなければなりません。
+
+%%matlab/toolbox/matlab/audiovideo/@avifile/subsasgn.m
+<(subsasgn)AVIFILE objects only support one level of subscripting.
+>(subsasgn)AVIFILE オブジェクトは、1 レベルの添字付けのみサポートします。
+<(subsasgn)AVIFILE objects only support structure subscripting.
+>(subsasgn)AVIFILE オブジェクトは、構造体の添字付けのみサポートします。
+
+%%matlab/toolbox/matlab/audiovideo/@avifile/private/avi.m
+<(avi)Missing MEX-file %s.
+>(avi)MEX ファイル %s が見つかりません。
+<()Compressor must be 'Cinepak', 'Indeo3', 'Indeo5', 'MSVC', 'RLE', 'None', or a four charater compression code (fourcc).
+>()圧縮方式は、'Cinepak'、'Indeo3'、'Indeo5'、'MSVC'、'RLE'、'None' または 4 文字の圧縮コード (fourcc) のいずれかでなければなりません。
+
+%%matlab/toolbox/matlab/audiovideo/@avifile/avifile.m
+<(avifile)Cannot locate Indeo5 compressor, using 'None' as the compression type.\nSee %s for more information.
+>(avifile)圧縮タイプとして 'None' を使用すると、Indeo5 圧縮方式を使えません。\n詳細は、%s を参照してください。

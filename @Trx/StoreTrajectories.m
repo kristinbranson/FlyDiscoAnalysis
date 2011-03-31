@@ -1,4 +1,8 @@
-function StoreTrajectories(obj,n,traj)
+function StoreTrajectories(obj,n,traj,dooverwrite)
+
+if ~exist('dooverwrite','var'),
+  dooverwrite = true;
+end
 
 traj_fns = {'x','y','theta','a','b','timestamps',...
   'x_mm','y_mm','a_mm','b_mm','theta_mm','dt','sex'};
@@ -25,7 +29,9 @@ for i = 1:numel(traj_fns),
       units = parseunits('unit');
   end
   try
-    save(filename,'data','units');
+    if dooverwrite || ~exist(filename,'file'),
+      save(filename,'data','units');
+    end
   catch %#ok<CTCH>
     if ~exist(filename,'file'),
       error('Could not save to file %s',filename);

@@ -16,7 +16,8 @@ max_days_prev = 7;
 %% queries
 
 d = now;
-format = 'yyyy-mm-ddTHH:MM:SS';
+format = 'yyyymmddTHHMMSS';
+%format = 'yyyy-mm-ddTHH:MM:SS';
 maxdatenum = d - min_days_prev;
 mindatenum = d - max_days_prev;
 mindatestr = datestr(mindatenum,format);

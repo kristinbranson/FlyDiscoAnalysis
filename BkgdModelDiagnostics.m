@@ -42,8 +42,17 @@ annfile_images = {'background_median','background_mean',...
   'fracframesisback',...
   'background_center','background_dev',...
   'isarena'};
-nr = ann.movie_width;
-nc = ann.movie_height;
+
+moviefile = fullfile(expdir,dataloc_params.moviefilestr);
+[readframe,nframes,fid,headerinfo] = get_readframe_fcn(moviefile);
+
+if ~all(isfield(ann,{'movie_width','movie_height'})),
+  nr = headerinfo.nr;
+  nc = headerinfo.nc;
+else
+  nr = ann.movie_width;
+  nc = ann.movie_height;
+end
 
 % resize images read from annotation
 for i = 1:numel(annfile_images),
@@ -55,7 +64,7 @@ end
 
 %% image of background center
 bkgd_diagnostics.background_center = ann.background_center;
-res.him_bkgdcenter = image(repmat(uint8(ann.background_center),[1,1,3]),'Parent',hax(1,1));
+res.him_bkgdcenter = imagesc(ann.background_center,'Parent',hax(1,1),[0,255]);
 res.hti_bkgdcenter = title(hax(1,1),'Background Center');
 axis(hax(1,1),'image','off');
 imax(end+1) = hax(1,1);
@@ -281,7 +290,7 @@ res.him_isinterpolated = image(repmat(uint8(ann.background_center),[1,1,3]),'Par
 hold(hax(3,3),'on');
 res.hli_isinterpolated = nan(size(b));
 for i = 1:numel(b),
-  res.hli_isinterpolated(i) = plot(hax(3,3),b{i}(:,1),b{i}(:,2),'r-');
+  res.hli_isinterpolated(i) = plot(hax(3,3),b{i}(:,2),b{i}(:,1),'r-');
 end
 
 res.hti_isinterpolated = title(hax(3,3),'Bkgd Interpolated');
@@ -363,8 +372,6 @@ drawnow;
 
 %% the following diagnostics involve sampling some frames from the video
 
-moviefile = fullfile(expdir,dataloc_params.moviefilestr);
-[readframe,nframes,fid] = get_readframe_fcn(moviefile);
 trxfile = fullfile(expdir,dataloc_params.trxfilestr);
 load(trxfile,'trx');
 
@@ -442,6 +449,9 @@ for i = 1:params.nframessample,
 
   %% Average, min, max log-likelihood ratio for some flies
   for j = 1:nfliescurr,
+    if ~any(cc(:)==j),
+      continue;
+    end
     llrcurr = llr(cc==j)';
     minllrperfly(end+1) = min(llrcurr); %#ok<AGROW>
     maxllrperfly(end+1) = max(llrcurr); %#ok<AGROW>
@@ -602,24 +612,28 @@ save(bkgddiagnosticsmatfilename,'-struct','bkgd_diagnostics');
 
 bkgddiagnosticsfilename = fullfile(expdir,dataloc_params.bkgddiagnosticsfilestr);
 fid1 = fopen(bkgddiagnosticsfilename,'w');
-fns = {'bkgdcenter','bkgddev','alwaysbkgd','bkgdcenter_llr',...
-  'imfore','diffim','llrfore','minllrperfly','meanllrperfly','maxllrperfly'};
-statfns = {'histmode','mean','std','prctiles','frac'};
-for i = 1:numel(fns),
-  for j = 1:numel(statfns),
-    fn = fns{i};
-    statfn = statfns{j};
-    fn1 = sprintf('%s_%s',statfn,fn);
-    if ~isfield(bkgd_diagnostics,fn1),
-      %fprintf('No field %s\n',fn1);
-      continue;
+if fid1 < 0,
+  warning('Could not open bkgddiagnostics file %s for writing',bkgddiagnosticsfilename);
+else
+  fns = {'bkgdcenter','bkgddev','alwaysbkgd','bkgdcenter_llr',...
+    'imfore','diffim','llrfore','minllrperfly','meanllrperfly','maxllrperfly'};
+  statfns = {'histmode','mean','std','prctiles','frac'};
+  for i = 1:numel(fns),
+    for j = 1:numel(statfns),
+      fn = fns{i};
+      statfn = statfns{j};
+      fn1 = sprintf('%s_%s',statfn,fn);
+      if ~isfield(bkgd_diagnostics,fn1),
+        %fprintf('No field %s\n',fn1);
+        continue;
+      end
+      fprintf(fid1,'%s',fn1);
+      fprintf(fid1,',%f',bkgd_diagnostics.(fn1));
+      fprintf(fid1,'\n');
     end
-    fprintf(fid1,'%s',fn1);
-    fprintf(fid1,',%f',bkgd_diagnostics.(fn1));
-    fprintf(fid1,'\n');
   end
+  fclose(fid1);
 end
-fclose(fid1);
 
 function [edges,centers] = get_bins(nbins,lim,catchless,catchmore)
 

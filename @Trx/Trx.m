@@ -252,7 +252,7 @@ classdef Trx < handle
         
     % AddExpDir(obj,expdir)
     % add a new experiment directory
-    AddExpDir(obj,expdir)
+    AddExpDir(obj,expdir,varargin)
     
     % RemoveExpDir(obj,expdir)
     % remove an experiment directory
@@ -260,7 +260,7 @@ classdef Trx < handle
         
     % StoreTrajectories(obj,n,traj)
     % store trajectories traj for experiment n
-    StoreTrajectories(obj,n,traj)
+    StoreTrajectories(obj,n,traj,varargin)
     
     FreeDataCache(obj,ndataadd)
     
