@@ -1,4 +1,4 @@
-% [edges,nbins,centers] = SelectHistEdges(nbins,lim,binmode)
+% [edges,centers] = SelectHistEdges(nbins,lim,binmode)
 % It selects edges between bounds set by LIM according to BINMODE, 
 % which is either 'linear', 'log' (log binning), or 'logabs' 
 % (log binning in both directions from zero).
