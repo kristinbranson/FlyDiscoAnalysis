@@ -2,6 +2,7 @@ flag_redo
 flag_review
 notes_behavioral
 notes_technical
+line_name
 ufmf_diagnostics_summary_nFrames
 sexclassifier_diagnostics_mean_nflies
 sexclassifier_diagnostics_mean_nfemales
