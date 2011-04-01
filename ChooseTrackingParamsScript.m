@@ -20,6 +20,11 @@ params = {'analysis_protocol',analysis_protocol,...
 datalocparamsfile = fullfile(settingsdir,analysis_protocol,datalocparamsfilestr);
 dataloc_params = ReadParams(datalocparamsfile);
 
+%% parameters
+nstd_unfixed = 4;
+min_counts_unfixed = 100;
+dampen_usefixed = false;
+
 %% experiments to analyze
 
 moviefilestr = 'movie.ufmf';
@@ -58,10 +63,11 @@ isfixed = ~isempty(expdirs_fixed);
 %% histogramming parameters
 
 nbins = 100;
-prctiles = [.01,.02,.05,.1,.5,1,2,5];
+prctiles = [0,.001,.0025,.005,.01,.02,.05,.1,.5,1,2,5];
 prctiles_bound = [.005,100-.005];
 prctiles_bound_jump = [95,100];
 prctiles_jump = [95,99,99.5,99.9,99.95,99.99];
+prctile_bound_walk = 99.975;
 
 %% load data
 
@@ -100,18 +106,11 @@ a = [trx.a]*2;
 b = [trx.b]*2;
 area = a.*b*pi;
 ecc = b ./ a;
-n = numel(a);
-expdiri = [trx.expdiri];
-
-% cluster area to get normalization for areas per experiment
-area_mu = nan(2,nexpdirs);
-area_sigma = nan(2,nexpdirs);
-for i = 1:nexpdirs,
-  areacurr = area(expdiri==i);
-  [area_mu(:,i),~,idx] = onedimkmeans(areacurr,2);
-  for j = 1:2,
-    area_sigma(j,i) = std(areacurr(idx==1),1);
-  end
+expdiri = nan(size(area));
+off = 0;
+for i = 1:numel(trx),
+  expdiri(off+1:off+numel(trx(i).a)) = trx(i).expdiri;
+  off = off + numel(trx(i).a);
 end
 
 % choose bins
@@ -129,54 +128,6 @@ lims_ecc = prctile(ecc,prctiles_bound);
 edges_ecc = linspace(lims_ecc(1),lims_ecc(2),nbins+1);
 centers_ecc = (edges_ecc(1:end-1)+edges_ecc(2:end))/2;
 
-% histogram data
-
-[counts_a,~,bin_a] = myhist(a,centers_a);
-%counts_a = counts_a(1:end-1);
-frac_a = counts_a / n;
-[counts_b,~,bin_b] = myhist(b,centers_b);
-%counts_b = counts_b(1:end-1);
-frac_b = counts_b / n;
-[counts_area,~,bin_area] = myhist(area,centers_area);
-%counts_area = counts_area(1:end-1);
-frac_area = counts_area / n;
-[counts_ecc,~,bin_ecc] = myhist(ecc,centers_ecc);
-%counts_ecc = counts_ecc(1:end-1);
-frac_ecc = counts_ecc / n;
-
-expdiri = [trx.expdiri];
-frac_a_perexp = nan(nexpdirs,nbins);
-frac_b_perexp = nan(nexpdirs,nbins);
-frac_area_perexp = nan(nexpdirs,nbins);
-frac_ecc_perexp = nan(nexpdirs,nbins);
-mean_area_perexp = nan(1,nexpdirs);
-
-for i = 1:nexpdirs,
-  idx = expdiri==i;
-  
-  a_perexp = [trx(idx).a]*2;
-  b_perexp = [trx(idx).b]*2;
-  area_perexp = a_perexp.*b_perexp*pi;
-  ecc_perexp = b_perexp ./ a_perexp;
-  n_perexp = numel(a_perexp);
-  mean_area_perexp(i) = nanmean(area_perexp);
-  
-  counts_a_perexp = hist(a_perexp,centers_a);
-  %counts_a_perexp = counts_a_perexp(1:end-1);
-  frac_a_perexp(i,:) = counts_a_perexp / n_perexp;
-  counts_b_perexp = hist(b_perexp,centers_b);
-  %counts_b_perexp = counts_b_perexp(1:end-1);
-  frac_b_perexp(i,:) = counts_b_perexp / n_perexp;
-  counts_area_perexp = hist(area_perexp,centers_area);
-  %counts_area_perexp = counts_area_perexp(1:end-1);
-  frac_area_perexp(i,:) = counts_area_perexp / n_perexp;
-  counts_ecc_perexp = hist(ecc_perexp,centers_ecc);
-  %counts_ecc_perexp = counts_ecc_perexp(1:end-1);
-  frac_ecc_perexp(i,:) = counts_ecc_perexp / n_perexp;
-  
-end
-[~,exporderplot] = sort(abs(mean_area_perexp-median(mean_area_perexp)));
-
 if isfixed,
   
   a_fixed = [trx_fixed.a]*2;
@@ -184,8 +135,196 @@ if isfixed,
   area_fixed = a_fixed.*b_fixed*pi;
   ecc_fixed = b_fixed ./ a_fixed;
   n_fixed = numel(a_fixed);
-  expdiri_fixed = [trx_fixed.expdiri];
+  expdiri_fixed = nan(size(area_fixed));
+  off = 0;
+  for i = 1:numel(trx_fixed),
+    expdiri_fixed(off+1:off+numel(trx_fixed(i).a)) = trx_fixed(i).expdiri;
+    off = off + numel(trx_fixed(i).a);
+  end
   
+  a_unfixed = [trx_unfixed.a]*2;
+  b_unfixed = [trx_unfixed.b]*2;
+  area_unfixed = a_unfixed.*b_unfixed*pi;
+  ecc_unfixed = b_unfixed ./ a_unfixed;
+  n_unfixed = numel(a_unfixed);
+  expdiri_unfixed = nan(size(area_unfixed));
+  off = 0;
+  for i = 1:numel(trx_unfixed),
+    expdiri_unfixed(off+1:off+numel(trx_unfixed(i).a)) = trx_unfixed(i).expdiri;
+    off = off + numel(trx_unfixed(i).a);
+  end  
+  
+  
+  % what fraction of counts per-bin are removed by fixing? do histogramming
+  % relative to sizes for the current movie
+  counts_area_unfixed = zeros(1,nbins);
+  counts_area_fixed = zeros(1,nbins);
+  counts_a_unfixed = zeros(1,nbins);
+  counts_a_fixed = zeros(1,nbins);
+  counts_b_unfixed = zeros(1,nbins);
+  counts_b_fixed = zeros(1,nbins);
+  counts_ecc_unfixed = zeros(1,nbins);
+  counts_ecc_fixed = zeros(1,nbins);
+  
+  frac_area_unfixed_perexp = nan(nexpdirs_fixed,nbins);
+  frac_area_fixed_perexp = nan(nexpdirs_fixed,nbins);
+  frac_a_unfixed_perexp = nan(nexpdirs_fixed,nbins);
+  frac_a_fixed_perexp = nan(nexpdirs_fixed,nbins);
+  frac_b_unfixed_perexp = nan(nexpdirs_fixed,nbins);
+  frac_b_fixed_perexp = nan(nexpdirs_fixed,nbins);
+  frac_ecc_unfixed_perexp = nan(nexpdirs_fixed,nbins);
+  frac_ecc_fixed_perexp = nan(nexpdirs_fixed,nbins);
+  
+  for i = 1:nexpdirs_fixed,
+
+    % area
+    areacurr = area_unfixed(expdiri_unfixed==i);
+    [mu,~,idx] = onedimkmeans(areacurr,2);
+    sigma = nan(1,2);
+    for j = 1:2,
+      sigma(j) = std(areacurr(idx==j),1);
+    end
+    minv = min(mu'-sigma*nstd_unfixed);
+    maxv = max(mu'+sigma*nstd_unfixed);
+    [~,centers] = SelectHistEdges(nbins,[minv,maxv],'linear');
+    counts_area_unfixed = counts_area_unfixed + hist(areacurr,centers);
+    counts = hist(areacurr,centers_area);
+    frac_area_unfixed_perexp(i,:) = counts / sum(counts);    
+    areacurr = area_fixed(expdiri_fixed==i);
+    counts_area_fixed = counts_area_fixed + hist(areacurr,centers);
+    counts = hist(areacurr,centers_area);
+    frac_area_fixed_perexp(i,:) = counts / sum(counts);
+    
+    % a
+    acurr = a_unfixed(expdiri_unfixed==i);
+    [mu,~,idx] = onedimkmeans(acurr,2);
+    sigma = nan(1,2);
+    for j = 1:2,
+      sigma(j) = std(acurr(idx==j),1);
+    end
+    minv = min(mu'-sigma*nstd_unfixed);
+    maxv = max(mu'+sigma*nstd_unfixed);
+    [~,centers] = SelectHistEdges(nbins,[minv,maxv],'linear');
+    counts_a_unfixed = counts_a_unfixed + hist(acurr,centers);
+    counts = hist(acurr,centers_a);
+    frac_a_unfixed_perexp(i,:) = counts / sum(counts);    
+    acurr = a_fixed(expdiri_fixed==i);
+    counts_a_fixed = counts_a_fixed + hist(acurr,centers);
+    counts = hist(acurr,centers_a);
+    frac_a_fixed_perexp(i,:) = counts / sum(counts);
+    
+    % b
+    bcurr = b_unfixed(expdiri_unfixed==i);
+    [mu,~,idx] = onedimkmeans(bcurr,2);
+    sigma = nan(1,2);
+    for j = 1:2,
+      sigma(j) = std(bcurr(idx==j),1);
+    end
+    minv = min(mu'-sigma*nstd_unfixed);
+    maxv = max(mu'+sigma*nstd_unfixed);
+    [~,centers] = SelectHistEdges(nbins,[minv,maxv],'linear');
+    counts_b_unfixed = counts_b_unfixed + hist(bcurr,centers);
+    counts = hist(bcurr,centers_b);
+    frac_b_unfixed_perexp(i,:) = counts / sum(counts);    
+    bcurr = b_fixed(expdiri_fixed==i);
+    counts_b_fixed = counts_b_fixed + hist(bcurr,centers);
+    counts = hist(bcurr,centers_b);
+    frac_b_fixed_perexp(i,:) = counts / sum(counts);
+
+    % ecc
+    ecccurr = ecc_unfixed(expdiri_unfixed==i);
+    [mu,~,idx] = onedimkmeans(ecccurr,2);
+    sigma = nan(1,2);
+    for j = 1:2,
+      sigma(j) = std(ecccurr(idx==j),1);
+    end
+    minv = min(mu'-sigma*nstd_unfixed);
+    maxv = max(mu'+sigma*nstd_unfixed);
+    [~,centers] = SelectHistEdges(nbins,[minv,maxv],'linear');
+    counts_ecc_unfixed = counts_ecc_unfixed + hist(ecccurr,centers);
+    counts = hist(ecccurr,centers_ecc);
+    frac_ecc_unfixed_perexp(i,:) = counts / sum(counts);    
+    ecccurr = ecc_fixed(expdiri_fixed==i);
+    counts_ecc_fixed = counts_ecc_fixed + hist(ecccurr,centers);
+    counts = hist(ecccurr,centers_ecc);
+    frac_ecc_fixed_perexp(i,:) = counts / sum(counts);
+    
+  end
+  
+  fix_correction_area = counts_area_fixed ./ counts_area_unfixed;
+  fix_correction_area(counts_area_unfixed < min_counts_unfixed) = 1;
+  fix_correction_a = counts_a_fixed ./ counts_a_unfixed;
+  fix_correction_a(counts_a_unfixed < min_counts_unfixed) = 1;
+  fix_correction_b = counts_b_fixed ./ counts_b_unfixed;
+  fix_correction_b(counts_b_unfixed < min_counts_unfixed) = 1;
+  fix_correction_ecc = counts_ecc_fixed ./ counts_ecc_unfixed;
+  fix_correction_ecc(counts_ecc_unfixed < min_counts_unfixed) = 1;
+  
+  % correct by this fraction
+  weight_area = nan(size(area));
+  for i = 1:nexpdirs,
+    expidx = expdiri==i;
+    areacurr = area(expidx);
+    [mu,~,idx] = onedimkmeans(areacurr,2);
+    sigma = nan(1,2);
+    for j = 1:2,
+      sigma(j) = std(areacurr(idx==j),1);
+    end
+    minv = min(mu'-sigma*nstd_unfixed);
+    maxv = max(mu'+sigma*nstd_unfixed);
+    [~,centers] = SelectHistEdges(nbins,[minv,maxv],'linear');
+    [~,~,bin] = myhist(areacurr,centers);
+    weight_area(expidx) = fix_correction_area(bin);
+  end
+
+  weight_a = nan(size(a));
+  for i = 1:nexpdirs,
+    expidx = expdiri==i;
+    acurr = a(expidx);
+    [mu,~,idx] = onedimkmeans(acurr,2);
+    sigma = nan(1,2);
+    for j = 1:2,
+      sigma(j) = std(acurr(idx==j),1);
+    end
+    minv = min(mu'-sigma*nstd_unfixed);
+    maxv = max(mu'+sigma*nstd_unfixed);
+    [~,centers] = SelectHistEdges(nbins,[minv,maxv],'linear');
+    [~,~,bin] = myhist(acurr,centers);
+    weight_a(expidx) = fix_correction_a(bin);
+  end
+
+  weight_b = nan(size(b));
+  for i = 1:nexpdirs,
+    expidx = expdiri==i;
+    bcurr = b(expidx);
+    [mu,~,idx] = onedimkmeans(bcurr,2);
+    sigma = nan(1,2);
+    for j = 1:2,
+      sigma(j) = std(bcurr(idx==j),1);
+    end
+    minv = min(mu'-sigma*nstd_unfixed);
+    maxv = max(mu'+sigma*nstd_unfixed);
+    [~,centers] = SelectHistEdges(nbins,[minv,maxv],'linear');
+    [~,~,bin] = myhist(bcurr,centers);
+    weight_b(expidx) = fix_correction_b(bin);
+  end
+
+  weight_ecc = nan(size(ecc));
+  for i = 1:nexpdirs,
+    expidx = expdiri==i;
+    ecccurr = ecc(expidx);
+    [mu,~,idx] = onedimkmeans(ecccurr,2);
+    sigma = nan(1,2);
+    for j = 1:2,
+      sigma(j) = std(ecccurr(idx==j),1);
+    end
+    minv = min(mu'-sigma*nstd_unfixed);
+    maxv = max(mu'+sigma*nstd_unfixed);
+    [~,centers] = SelectHistEdges(nbins,[minv,maxv],'linear');
+    [~,~,bin] = myhist(ecccurr,centers);
+    weight_ecc(expidx) = fix_correction_ecc(bin);
+  end
+
   counts_a_fixed = hist(a_fixed,centers_a);
   %counts_a_fixed = counts_a_fixed(1:end-1);
   frac_a_fixed = counts_a_fixed / n_fixed;
@@ -199,13 +338,6 @@ if isfixed,
   %counts_ecc_fixed = counts_ecc_fixed(1:end-1);
   frac_ecc_fixed = counts_ecc_fixed / n_fixed;
   
-  a_unfixed = [trx_unfixed.a]*2;
-  b_unfixed = [trx_unfixed.b]*2;
-  area_unfixed = a_unfixed.*b_unfixed*pi;
-  ecc_unfixed = b_unfixed ./ a_unfixed;
-  n_unfixed = numel(a_unfixed);
-  expdiri_unfixed = [trx_unfixed.expdiri];
-  
   counts_a_unfixed = hist(a_unfixed,centers_a);
   %counts_a_unfixed = counts_a_unfixed(1:end-1);
   frac_a_unfixed = counts_a_unfixed / n_unfixed;
@@ -218,57 +350,79 @@ if isfixed,
   counts_ecc_unfixed = hist(ecc_unfixed,centers_ecc);
   %counts_ecc_unfixed = counts_ecc_unfixed(1:end-1);
   frac_ecc_unfixed = counts_ecc_unfixed / n_unfixed;
-  
-  % what fraction of counts per-bin are removed by fixing?
-  fix_correction_area = min(1,frac_area_fixed./frac_area_unfixed);
-  fix_correction_a = min(1,frac_a_fixed./frac_a_unfixed);
-  fix_correction_b = min(1,frac_b_fixed./frac_b_unfixed);
-  fix_correction_ecc = min(1,frac_ecc_fixed./frac_ecc_unfixed);
-  
-  
-  % correct by this fraction
-  weight_area = ones(1,numel(area));
-  idx = bin_area>=1 & bin_area <= nbins;
-  weight_area(idx) = fix_correction_area(bin_area(idx));
-  
-  weight_a = ones(1,numel(a));
-  idx = bin_a>=1 & bin_a <= nbins;
-  weight_a(idx) = fix_correction_a(bin_a(idx));
-  
-  weight_b = ones(1,numel(b));
-  idx = bin_b>=1 & bin_b <= nbins;
-  weight_b(idx) = fix_correction_b(bin_b(idx));
-  
-  weight_ecc = ones(1,numel(ecc));
-  idx = bin_ecc>=1 & bin_ecc <= nbins;
-  weight_ecc(idx) = fix_correction_ecc(bin_ecc(idx));
-  
-  % use corrected data
-  prctiles_a = weighted_prctile(a,prctiles_sym,weight_a);
-  prctiles_b = weighted_prctile(b,prctiles_sym,weight_b);
-  prctiles_area = weighted_prctile(area,prctiles_sym,weight_area);
-  prctiles_ecc = weighted_prctile(ecc,prctiles_sym,weight_ecc);
-  
-  % correct histograms
-  frac_area = frac_area .* fix_correction_area;
-  frac_a = frac_a .* fix_correction_a;
-  frac_b = frac_b .* fix_correction_b;
-  frac_ecc = frac_ecc .* fix_correction_ecc;
-  
-  frac_area_perexp = bsxfun(@times,frac_area_perexp,fix_correction_area);
-  frac_a_perexp = bsxfun(@times,frac_a_perexp,fix_correction_a);
-  frac_b_perexp = bsxfun(@times,frac_b_perexp,fix_correction_b);
-  frac_ecc_perexp = bsxfun(@times,frac_ecc_perexp,fix_correction_ecc);
-  
-else
 
-  prctiles_a = prctile(a,prctiles_sym);
-  prctiles_b = prctile(b,prctiles_sym);
-  prctiles_area = prctile(area,prctiles_sym);
-  prctiles_ecc = prctile(ecc,prctiles_sym);
+else
+  
+  weight_area = ones(size(area));
+  weight_a = ones(size(a));
+  weight_b = ones(size(b));
+  weight_ecc = ones(size(ecc));
 
 end
 
+
+% histogram data
+[counts_a,~,bin_a] = myhist(a,centers_a,'weights',weight_a);
+%counts_a = counts_a(1:end-1);
+frac_a = counts_a / sum(counts_a);
+[counts_b,~,bin_b] = myhist(b,centers_b,'weights',weight_b);
+%counts_b = counts_b(1:end-1);
+frac_b = counts_b / sum(counts_b);
+[counts_area,~,bin_area] = myhist(area,centers_area,'weights',weight_area);
+%counts_area = counts_area(1:end-1);
+frac_area = counts_area / sum(counts_area);
+[counts_ecc,~,bin_ecc] = myhist(ecc,centers_ecc,'weights',weight_ecc);
+%counts_ecc = counts_ecc(1:end-1);
+frac_ecc = counts_ecc / sum(counts_ecc);
+
+frac_a_perexp = nan(nexpdirs,nbins);
+frac_b_perexp = nan(nexpdirs,nbins);
+frac_area_perexp = nan(nexpdirs,nbins);
+frac_ecc_perexp = nan(nexpdirs,nbins);
+mean_area_perexp = nan(1,nexpdirs);
+
+for i = 1:nexpdirs,
+  idx = [trx.expdiri]==i;
+  
+  a_perexp = [trx(idx).a]*2;
+  b_perexp = [trx(idx).b]*2;
+  area_perexp = a_perexp.*b_perexp*pi;
+  ecc_perexp = b_perexp ./ a_perexp;
+  n_perexp = numel(a_perexp);
+  mean_area_perexp(i) = nansum(area_perexp.*weight_area(expdiri==i))/nansum(weight_area(expdiri==i));
+  
+  counts_area_perexp = myhist(area_perexp,centers_area,'weights',weight_area(expdiri==i));
+  frac_area_perexp(i,:) = counts_area_perexp / sum(counts_area_perexp);
+  counts_a_perexp = myhist(a_perexp,centers_a,'weights',weight_a(expdiri==i));
+  frac_a_perexp(i,:) = counts_a_perexp / sum(counts_a_perexp);
+  counts_b_perexp = myhist(b_perexp,centers_b,'weights',weight_b(expdiri==i));
+  frac_b_perexp(i,:) = counts_b_perexp / sum(counts_b_perexp);
+  counts_ecc_perexp = myhist(ecc_perexp,centers_ecc,'weights',weight_ecc(expdiri==i));
+  frac_ecc_perexp(i,:) = counts_ecc_perexp / sum(counts_ecc_perexp);
+  
+  tmp = hist(area_perexp,centers_area);
+  tmp = tmp / sum(tmp);
+  clf;
+  maxv = max(max(tmp),max(frac_area_perexp(i,:)));
+  plot(centers_area,tmp/maxv,'ko-','markerfacecolor','k');
+  hold on;
+  plot(centers_area,frac_area_perexp(i,:)/maxv,'rd-','markerfacecolor','r');
+  plot(centers_area,frac_area_perexp(i,:)./tmp,'b.-');
+  fprintf('experiment %d:\n',i)
+  pause(.1);
+  
+  counts_ecc_perexp = hist(ecc_perexp,centers_ecc,'weights',weight_ecc(expdiri==i));
+  %counts_ecc_perexp = counts_ecc_perexp(1:end-1);
+  frac_ecc_perexp(i,:) = counts_ecc_perexp / sum(counts_ecc_perexp);
+  
+end
+[~,exporderplot] = sort(abs(mean_area_perexp-median(mean_area_perexp)));
+
+% compute percentiles of data
+prctiles_a = weighted_prctile(a,prctiles_sym,weight_a);
+prctiles_b = weighted_prctile(b,prctiles_sym,weight_b);
+prctiles_area = weighted_prctile(area,prctiles_sym,weight_area);
+prctiles_ecc = weighted_prctile(ecc,prctiles_sym,weight_ecc);
 
 %% plot histograms
 
@@ -284,8 +438,10 @@ for i = exporderplot,
   plot(centers_area,frac_area_perexp(i,:),'-','color',colors(i,:));
 end
 if isfixed,
-  hfixed = plot(centers_area,frac_area_fixed,'s-','color',[.5,0,0],'linewidth',3,'markerfacecolor',[.5,0,0]);
-  hunfixed = plot(centers_area,frac_area_unfixed,'d-','color',[0,.5,.5],'linewidth',3,'markerfacecolor',[0,.5,.5]);
+  for i = 1:nexpdirs_fixed,
+    hfixed = plot(centers_area,frac_area_fixed_perexp(i,:),'s-','color',[.5,0,0],'markerfacecolor',[.5,0,0]);
+    hunfixed = plot(centers_area,frac_area_unfixed_perexp(i,:),'d-','color',[0,.5,.5],'markerfacecolor',[0,.5,.5]);
+  end
 end
 hall = plot(centers_area,frac_area,'ko-','linewidth',3,'markerfacecolor','k');
 axisalmosttight;
@@ -304,8 +460,10 @@ for i = exporderplot,
   plot(centers_a,frac_a_perexp(i,:),'-','color',colors(i,:));
 end
 if isfixed,
-  plot(centers_a,frac_a_fixed,'s-','color',[.5,0,0],'linewidth',3,'markerfacecolor',[.5,0,0]);
-  plot(centers_a,frac_a_unfixed,'d-','color',[0,.5,.5],'linewidth',3,'markerfacecolor',[0,.5,.5]);
+  for i = 1:nexpdirs_fixed,
+    hfixed = plot(centers_a,frac_a_fixed_perexp(i,:),'s-','color',[.5,0,0],'markerfacecolor',[.5,0,0]);
+    hunfixed = plot(centers_a,frac_a_unfixed_perexp(i,:),'d-','color',[0,.5,.5],'markerfacecolor',[0,.5,.5]);
+  end
 end
 plot(centers_a,frac_a,'ko-','linewidth',3,'markerfacecolor','k');
 axisalmosttight;
@@ -323,8 +481,10 @@ for i = exporderplot,
   plot(centers_b,frac_b_perexp(i,:),'-','color',colors(i,:));
 end
 if isfixed,
-  plot(centers_b,frac_b_fixed,'s-','color',[.5,0,0],'linewidth',3,'markerfacecolor',[.5,0,0]);
-  plot(centers_b,frac_b_unfixed,'d-','color',[0,.5,.5],'linewidth',3,'markerfacecolor',[0,.5,.5]);
+  for i = 1:nexpdirs_fixed,
+    hfixed = plot(centers_b,frac_b_fixed_perexp(i,:),'s-','color',[.5,0,0],'markerfacecolor',[.5,0,0]);
+    hunfixed = plot(centers_b,frac_b_unfixed_perexp(i,:),'d-','color',[0,.5,.5],'markerfacecolor',[0,.5,.5]);
+  end
 end
 plot(centers_b,frac_b,'ko-','linewidth',3,'markerfacecolor','k');
 axisalmosttight;
@@ -342,8 +502,10 @@ for i = exporderplot,
   plot(centers_ecc,frac_ecc_perexp(i,:),'-','color',colors(i,:));
 end
 if isfixed,
-  plot(centers_ecc,frac_ecc_fixed,'s-','color',[.5,0,0],'linewidth',3,'markerfacecolor',[.5,0,0]);
-  plot(centers_ecc,frac_ecc_unfixed,'d-','color',[0,.5,.5],'linewidth',3,'markerfacecolor',[0,.5,.5]);
+  for i = 1:nexpdirs_fixed,
+    hfixed = plot(centers_ecc,frac_ecc_fixed_perexp(i,:),'s-','color',[.5,0,0],'markerfacecolor',[.5,0,0]);
+    hunfixed = plot(centers_ecc,frac_ecc_unfixed_perexp(i,:),'d-','color',[0,.5,.5],'markerfacecolor',[0,.5,.5]);
+  end
 end
 plot(centers_ecc,frac_ecc,'ko-','linewidth',3,'markerfacecolor','k');
 axisalmosttight;
@@ -359,19 +521,19 @@ if isfixed,
   hfig = 3;
   figure(hfig);
   clf;
-  hax = subplot(2,2,1);
+  subplot(2,2,1);
   plot(centers_area,fix_correction_area,'k.-');
   axisalmosttight;
   title('Area correction');
-  hax = subplot(2,2,2);
+  subplot(2,2,2);
   plot(centers_a,fix_correction_a,'k.-');
   axisalmosttight;
   title('Semi-major correction');
-  hax = subplot(2,2,3);
+  subplot(2,2,3);
   plot(centers_b,fix_correction_b,'k.-');
   axisalmosttight;
   title('Semi-minor correction');
-  hax = subplot(2,2,4);
+  subplot(2,2,4);
   plot(centers_ecc,fix_correction_ecc,'k.-');
   axisalmosttight;
   title('Ecc correction');
@@ -379,10 +541,10 @@ end
 
 %% choose percentiles for size
 
-thresh_prctiles_area = [.02,100-.01];
-thresh_prctiles_a = [.05,100-.01];
-thresh_prctiles_b = [.01,100-.05];
-thresh_prctiles_ecc = [.01,100-.05];
+thresh_prctiles_area = [.0025,100-.005];
+thresh_prctiles_a = [.02,100-.01];
+thresh_prctiles_b = [.001,100-.1];
+thresh_prctiles_ecc = [.01,100-1];
 
 if isfixed,
   min_area = weighted_prctile(area,thresh_prctiles_area(1),weight_area);
@@ -433,6 +595,12 @@ fprintf('min_a = %.1f, mean_a = %.1f, max_a = %.1f\n',min_a/2,mean_a/2,max_a/2);
 fprintf('min_b = %.1f, mean_b = %.1f, max_b = %.1f\n',min_b/2,mean_b/2,max_b/2);
 fprintf('min_ecc = %.3f, mean_ecc = %.3f, max_ecc = %.3f\n',min_ecc,mean_ecc,max_ecc);
 
+% 20110401
+% min_area = 58.1, mean_area = 108.1, max_area = 155.9
+% min_a = 3.5, mean_a = 5.0, max_a = 6.3
+% min_b = 1.2, mean_b = 1.7, max_b = 2.1
+% min_ecc = 0.265, mean_ecc = 0.350, max_ecc = 0.413
+
 % 20110326
 % min_area = 61.7, mean_area = 107.9, max_area = 151.9
 % min_a = 3.5, mean_a = 4.9, max_a = 6.1
@@ -463,14 +631,21 @@ fprintf('min_ecc = %.3f, mean_ecc = %.3f, max_ecc = %.3f\n',min_ecc,mean_ecc,max
 % d/dw = 0 
 % -> (dtheta_curr_i - w*dtheta_prev_i) * dtheta_prev_i = 0
 % -> w = (dtheta_curr_i*dtheta_prev_i)/dtheta_prev_i^2 
+
+if dampen_usefixed,
+  trx_dampen = trx_fixed;
+else
+  trx_dampen = trx;
+end
+
 numpos = 0;
 denpos = 0;
 numangle = 0;
 denangle = 0;
-for flyidx = 1:trx.nflies,
-  x = trx(flyidx).x;
-  y = trx(flyidx).y;
-  theta = trx(flyidx).theta;
+for flyidx = 1:numel(trx_dampen),
+  x = trx_dampen(flyidx).x;
+  y = trx_dampen(flyidx).y;
+  theta = trx_dampen(flyidx).theta;
   dx = diff(x);
   dy = diff(y);
   dtheta = modrange(diff(theta),-pi/2,pi/2);
@@ -486,6 +661,10 @@ center_dampen = numpos ./ denpos;
 fprintf('Constant velocity center position dampening: %f\n',1-center_dampen);
 fprintf('Constant velocity angle dampening: %f\n',1-angle_dampen);
 
+% 20110401
+%Constant velocity center position dampening: 0.138161
+%Constant velocity angle dampening: 0.516704
+
 %Constant velocity center position dampening: 0.142983
 %Constant velocity angle dampening: 0.529604
 
@@ -493,9 +672,12 @@ fprintf('Constant velocity angle dampening: %f\n',1-angle_dampen);
 
 mean_err_pos = 0;
 mean_err_angle = 0;
-for flyidx = 1:trx.nflies,
+for flyidx = 1:numel(trx),
   x = trx(flyidx).x;
   y = trx(flyidx).y;
+  if numel(x) <= 1,
+    continue;
+  end
   theta = trx(flyidx).theta;
   dx = diff(x);
   dy = diff(y);
@@ -509,26 +691,40 @@ end
 
 ang_dist_wt = mean_err_pos / mean_err_angle;
 fprintf('Weight of angle in matching criterion: %f\n',ang_dist_wt);
+
+% 20110401
+% Weight of angle in matching criterion: 116.924857
+
 % Weight of angle in matching criterion: 128.595462
 
 %% choose max jump distance
 
+
+if isfixed,
+  trx_jump = trx_fixed;
+else
+  trx_jump = trx;
+end
+
 err = [];
 distjump = [];
-for flyidx = 1:trx.nflies,
-  x = trx(flyidx).x;
-  y = trx(flyidx).y;
-  theta = trx(flyidx).theta;
+expdiri_jump = [];
+for flyidx = 1:numel(trx_jump),
+  x = trx_jump(flyidx).x;
+  y = trx_jump(flyidx).y;
+  theta = trx_jump(flyidx).theta;
   dx = diff(x);
   dy = diff(y);
   dtheta = modrange(diff(theta),-pi/2,pi/2);
   distjump_curr = sqrt(dx.^2+dy.^2);
-  distjump = [distjump,distjump_curr];
+  distjump = [distjump,distjump_curr]; %#ok<AGROW>
+  expdiri_jump = [expdiri_jump,zeros(size(distjump_curr))+trx_jump(flyidx).expdiri]; %#ok<AGROW>
+
   err_pos_curr = (x(1:end-1)+dx*center_dampen - x(2:end)).^2 + ...
     (y(1:end-1)+dy*center_dampen - y(2:end)).^2;
   err_angle_curr = modrange( theta(1:end-1)+dtheta*angle_dampen - theta(2:end), -pi/2, pi/2).^2;
   err_curr = sqrt(err_pos_curr + ang_dist_wt*err_angle_curr);
-  err = [err,err_curr];
+  err = [err,err_curr]; %#ok<AGROW>
 end
 
 n = numel(err);
@@ -579,7 +775,7 @@ title('distjump (px/frame)');
 %% choose jump thresholds
 
 prctile_thresh_maxjump = 120;
-prctile_thresh_minjump = 99.925;
+prctile_thresh_minjump = 99.95;
 
 if prctile_thresh_maxjump >= 100,
   max_jump = max(max(err),max(distjump))*prctile_thresh_maxjump/100;
@@ -591,7 +787,78 @@ min_jump = prctile(distjump,prctile_thresh_minjump);
 fprintf('Max jump = %f\n',max_jump);
 fprintf('Min jump = %f\n',min_jump);
 
+% 20110401
+% Max jump = 133.212798
+% Min jump = 14.222188
+
 % Max jump = 143.152546
 % Min jump = 17.006804
 
 %% choose chooseorientations parameters
+
+% cost: 
+% dcenter = sqrt(dx^2 + dy^2)
+% if dcenter >= min_jump, w = 0; 
+% else w = min(max_velocity_angle_weight,velocity_angle_weight*dcenter
+% cost = (1-w)*dist(thetacurr,thetaprev) + w*dist(thetacurr,phicurr)
+
+% histogram error in speed as a function 
+dcenter = [];
+errphi = [];
+errprev = [];
+expdiri_jump = [];
+for flyidx = 1:numel(trx_jump),
+  x = trx_jump(flyidx).x;
+  y = trx_jump(flyidx).y;
+  if numel(x) <= 1,
+    continue;
+  end
+  theta = trx_jump(flyidx).theta;
+  dx = diff(x);
+  dy = diff(y);
+  phi = atan2(dy,dx);
+  dcenter_curr = sqrt(dx.^2+dy.^2);
+  errphi_curr = abs(modrange(phi-theta(2:end),-pi,pi));
+  errprev_curr = abs(modrange(theta(2:end)-theta(1:end-1),-pi,pi));
+  dcenter = [dcenter,dcenter_curr]; %#ok<AGROW>
+  errphi = [errphi,errphi_curr]; %#ok<AGROW>
+  errprev = [errprev,errprev_curr]; %#ok<AGROW>
+  expdiri_jump = [expdiri_jump,zeros(size(distjump_curr))+trx_jump(flyidx).expdiri]; %#ok<AGROW>
+end
+
+nexpdirs_jump = max(expdiri_jump);
+
+hfig = 3;
+figure(hfig);
+clf;
+idx_notjump = dcenter < min_jump;
+[~,centers_dcenter] = SelectHistEdges(nbins,[0,min_jump],'linear');
+[~,centers_errphi] = SelectHistEdges(nbins/2,[0,pi],'linear');
+counts = hist3([dcenter(idx_notjump);errphi(idx_notjump)]',{centers_dcenter,centers_errphi});
+frac = counts / sum(counts(:));
+frac = bsxfun(@rdivide,frac,max(frac,[],1));
+imagesc(centers_dcenter([1,nbins]),centers_errphi([1,nbins/2]),frac);
+axis xy;
+xlabel('dcenter');
+ylabel('err phi');
+
+plot(dcenter(idx_notjump),errphi(idx_notjump),'k.');
+
+lims_walk = [0,min_jump];
+[~,centers_dcenter] = SelectHistEdges(nbins,lims_walk,'log');
+frac_dcenter_perexp = nan(nexpdirs_jump,nbins);
+for i = 1:nexpdirs_jump,
+  counts = hist(dcenter(expdiri_jump==i),centers_dcenter);
+  frac_dcenter_perexp(i,:) = counts / sum(counts);
+end
+counts = hist(dcenter,centers_dcenter);
+frac_dcenter = counts / sum(counts);
+hfig = 3;
+figure(hfig);
+clf;
+plot(centers_dcenter,frac_dcenter_perexp,'.-');
+hold on;
+plot(centers_dcenter,frac_dcenter,'ko-','markerfacecolor','k','linewidth',3);
+xlabel('Speed');
+ylabel('Fraction of frames');
+
