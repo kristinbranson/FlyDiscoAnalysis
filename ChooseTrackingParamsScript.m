@@ -43,8 +43,8 @@ experiment_params.rootdir = rootdir;
 %experiment_params.daterange = cell(1,2);
 % what lines
 %experiment_params.linename = '';
-ngal4 = 20;
-ncontrols = 20;
+ngal4 = 25;
+ncontrols = 25;
 tmpparams = struct2paramscell(experiment_params);
 
 experiments_all = SAGEListBowlExperiments(tmpparams{:});
@@ -590,10 +590,16 @@ else
   mean_ecc = nanmean(ecc);
 end
 
-fprintf('min_area = %.1f, mean_area = %.1f, max_area = %.1f\n',min_area,mean_area,max_area);
-fprintf('min_a = %.1f, mean_a = %.1f, max_a = %.1f\n',min_a/2,mean_a/2,max_a/2);
-fprintf('min_b = %.1f, mean_b = %.1f, max_b = %.1f\n',min_b/2,mean_b/2,max_b/2);
+fprintf('min_area = %.3f, mean_area = %.3f, max_area = %.3f\n',min_area,mean_area,max_area);
+fprintf('min_a = %.3f, mean_a = %.3f, max_a = %.3f\n',min_a/2,mean_a/2,max_a/2);
+fprintf('min_b = %.3f, mean_b = %.3f, max_b = %.3f\n',min_b/2,mean_b/2,max_b/2);
 fprintf('min_ecc = %.3f, mean_ecc = %.3f, max_ecc = %.3f\n',min_ecc,mean_ecc,max_ecc);
+
+% 20110402
+% min_area = 59.261, mean_area = 108.602, max_area = 158.895
+% min_a = 3.534, mean_a = 4.964, max_a = 6.260
+% min_b = 1.240, mean_b = 1.732, max_b = 2.152
+% min_ecc = 0.265, mean_ecc = 0.350, max_ecc = 0.413
 
 % 20110401
 % min_area = 58.1, mean_area = 108.1, max_area = 155.9
@@ -646,6 +652,10 @@ for flyidx = 1:numel(trx_dampen),
   x = trx_dampen(flyidx).x;
   y = trx_dampen(flyidx).y;
   theta = trx_dampen(flyidx).theta;
+  idx = ~isinf(x) & ~isinf(y) & ~isinf(theta);
+  x = x(idx);
+  y = y(idx);
+  theta = theta(idx);
   dx = diff(x);
   dy = diff(y);
   dtheta = modrange(diff(theta),-pi/2,pi/2);
@@ -653,6 +663,7 @@ for flyidx = 1:numel(trx_dampen),
   denpos = denpos + sum(dx(1:end-1).^2 + dy(1:end-1).^2);
   numangle = numangle + sum(dtheta(1:end-1).*dtheta(2:end));
   denangle = denangle + sum(dtheta(1:end-1).^2);
+
 end
 
 angle_dampen = numangle ./ denangle;
@@ -660,6 +671,10 @@ center_dampen = numpos ./ denpos;
 
 fprintf('Constant velocity center position dampening: %f\n',1-center_dampen);
 fprintf('Constant velocity angle dampening: %f\n',1-angle_dampen);
+
+% 20110402
+%Constant velocity center position dampening: 0.143002
+%Constant velocity angle dampening: 0.498991
 
 % 20110401
 %Constant velocity center position dampening: 0.138161
@@ -679,6 +694,10 @@ for flyidx = 1:numel(trx),
     continue;
   end
   theta = trx(flyidx).theta;
+  idx = ~isinf(x) & ~isinf(y) & ~isinf(theta);
+  x = x(idx);
+  y = y(idx);
+  theta = theta(idx);
   dx = diff(x);
   dy = diff(y);
   dtheta = modrange(diff(theta),-pi/2,pi/2);
@@ -691,6 +710,9 @@ end
 
 ang_dist_wt = mean_err_pos / mean_err_angle;
 fprintf('Weight of angle in matching criterion: %f\n',ang_dist_wt);
+
+% 20110402
+% Weight of angle in matching criterion: 133.116340
 
 % 20110401
 % Weight of angle in matching criterion: 116.924857
@@ -787,6 +809,10 @@ min_jump = prctile(distjump,prctile_thresh_minjump);
 fprintf('Max jump = %f\n',max_jump);
 fprintf('Min jump = %f\n',min_jump);
 
+% 20110402
+% Max jump = 133.212798
+% Min jump = 14.222188
+
 % 20110401
 % Max jump = 133.212798
 % Min jump = 14.222188
@@ -828,37 +854,49 @@ end
 
 nexpdirs_jump = max(expdiri_jump);
 
-hfig = 3;
+hfig = 4;
 figure(hfig);
 clf;
 idx_notjump = dcenter < min_jump;
 [~,centers_dcenter] = SelectHistEdges(nbins,[0,min_jump],'linear');
-[~,centers_errphi] = SelectHistEdges(nbins/2,[0,pi],'linear');
+[~,centers_errphi] = SelectHistEdges(nbins,[0,pi],'linear');
 counts = hist3([dcenter(idx_notjump);errphi(idx_notjump)]',{centers_dcenter,centers_errphi});
 frac = counts / sum(counts(:));
 frac = bsxfun(@rdivide,frac,max(frac,[],1));
-imagesc(centers_dcenter([1,nbins]),centers_errphi([1,nbins/2]),frac);
+imagesc(centers_dcenter([1,nbins]),centers_errphi([1,nbins]),frac);
 axis xy;
 xlabel('dcenter');
 ylabel('err phi');
+colormap(logscale_colormap(jet(1000),[.00001,pi]));
+fprintf('Click to choose dcenter threshold\n');
+[dcenter_thresh,~] = ginput(1);
+fprintf('Chose dcenter_thresh = %f\n',dcenter_thresh);
 
-plot(dcenter(idx_notjump),errphi(idx_notjump),'k.');
-
-lims_walk = [0,min_jump];
-[~,centers_dcenter] = SelectHistEdges(nbins,lims_walk,'log');
-frac_dcenter_perexp = nan(nexpdirs_jump,nbins);
-for i = 1:nexpdirs_jump,
-  counts = hist(dcenter(expdiri_jump==i),centers_dcenter);
-  frac_dcenter_perexp(i,:) = counts / sum(counts);
+% which frames is each predictor more accurate
+idx0 = errphi > errprev;
+n1 = nnz(errphi < errprev);
+d = min(dcenter,dcenter_thresh);
+% score = sum_i [ I(s(i) == 1) log(w*d) + 
+%                 I(s(i) == 0) log(1-w*d)
+% -> n1 * log(w) + sum_i I(s(i)==0) log(1-w*d)
+ntry = 1000;
+weights_try = linspace(0,1/dcenter_thresh,ntry);
+score = nan(1,ntry);
+for i = 1:ntry,
+  weight_try = weights_try(i);
+  score(i) = n1*log(weight_try) + sum(log(1-weight_try*d(idx0)));
 end
-counts = hist(dcenter,centers_dcenter);
-frac_dcenter = counts / sum(counts);
-hfig = 3;
-figure(hfig);
-clf;
-plot(centers_dcenter,frac_dcenter_perexp,'.-');
-hold on;
-plot(centers_dcenter,frac_dcenter,'ko-','markerfacecolor','k','linewidth',3);
-xlabel('Speed');
-ylabel('Fraction of frames');
+[maxscore,i] = max(score);
+velocity_angle_weight = weights_try(i);
+max_velocity_angle_weight = velocity_angle_weight * dcenter_thresh;
 
+fprintf('velocity_angle_weight = %f\n',velocity_angle_weight);
+fprintf('max_velocity_angle_weight = %f\n',max_velocity_angle_weight);
+
+% 20110402
+%velocity_angle_weight = 0.030749
+%max_velocity_angle_weight = 0.184184
+
+% 20110401
+%velocity_angle_weight = 0.030407
+%max_velocity_angle_weight = 0.199199
