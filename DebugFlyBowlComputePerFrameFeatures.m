@@ -11,19 +11,25 @@ end
 %% data locations
 
 if ispc,
-  
   settingsdir = 'E:\Code\FlyBowlAnalysis\settings';
-  analysis_protocol = '20110202_pc';
-  dataloc_params = ReadParams(fullfile(settingsdir,analysis_protocol,'dataloc_params.txt'));
-  expdir = 'pBDPGAL4U_TrpA_Rig1Plate10BowlA_20110202T105734';
-  expdir_read = fullfile(dataloc_params.rootreaddir,expdir);
-  
+  rootdir = 'E:\Data\FlyBowl\bowl_data';
 else
   settingsdir = '/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/settings';
-  protocol = 'CtraxTest20110202';
-  analysis_protocol = '20110202_debug';
-  [expdirs,expdir_reads,expdir_writes,experiments,rootreaddir,rootwritedir] = ...
-    getExperimentDirs('protocol',protocol,'subreadfiles',{'ctrax_results.mat'});
-  expdir = expdirs{1};
-  expdir_read = expdir_reads{1};
+  %rootdir = '/groups/sciserv/flyolympiad/Olympiad_Screen/fly_bowl/bowl_data';
+  rootdir = '/groups/branson/bransonlab/tracking_data/olympiad/FlyBowl/CtraxTest20110407';
+end
+
+%% parameters
+
+analysis_protocol = '20110407';
+params = {'settingsdir',settingsdir,...
+  'analysis_protocol',analysis_protocol};
+
+%%
+
+expdirs = dir(fullfile(rootdir,'*_*'));
+expdirs = cellfun(@(s) fullfile(rootdir,s),{expdirs([expdirs.isdir]).name},'UniformOutput',false);
+
+for i = 1:numel(expdirs),
+  FlyBowlComputePerFrameFeatures(expdirs{i},params{:});
 end

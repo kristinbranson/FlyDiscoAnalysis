@@ -286,6 +286,8 @@ classdef Trx < handle
     
     fns = PerFrameFieldNames()
     
+    fns = TrajectoryFieldNames()
+    
   end
   
 end
