@@ -849,7 +849,7 @@ for flyidx = 1:numel(trx_jump),
   dcenter = [dcenter,dcenter_curr]; %#ok<AGROW>
   errphi = [errphi,errphi_curr]; %#ok<AGROW>
   errprev = [errprev,errprev_curr]; %#ok<AGROW>
-  expdiri_jump = [expdiri_jump,zeros(size(distjump_curr))+trx_jump(flyidx).expdiri]; %#ok<AGROW>
+  expdiri_jump = [expdiri_jump,zeros(size(errphi_curr))+trx_jump(flyidx).expdiri]; %#ok<AGROW>
 end
 
 nexpdirs_jump = max(expdiri_jump);

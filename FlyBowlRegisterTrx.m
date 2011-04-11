@@ -241,6 +241,8 @@ if dotemporalreg,
       continue;
     end
     
+    trx(i).nframes = min(i1,trx(i).endframe)-max(i0,trx(i).firstframe)+1;
+    
     if trx(i).firstframe < i0,
       off = i0 - trx(i).firstframe;
       for j = 1:numel(fns),
@@ -251,15 +253,14 @@ if dotemporalreg,
     end
     
     if trx(i).endframe > i1,
-      off = trx(i).endframe - i1;
       for j = 1:numel(fns),
         fn = fns{j};
-        trx(i).(fn) = trx(i).(fn)(1:end-off-ncropright(j));
+        trx(i).(fn) = trx(i).(fn)(1:trx(i).nframes-nperfn(j));
       end
       trx(i).endframe = i1;
     end
     
-    trx(i).nframes = trx(i).endframe - trx(i).firstframe + 1;
+    
     trx(i).off = -trx(i).firstframe + 1;
     
   end

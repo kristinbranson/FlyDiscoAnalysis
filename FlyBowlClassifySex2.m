@@ -16,6 +16,9 @@ dataloc_params = ReadParams(datalocparamsfile);
 
 trxfile = fullfile(expdir,dataloc_params.trxfilestr);
 load(trxfile,'trx');
+% first and end frame
+firstframe = min([trx.firstframe]);
+endframe = max([trx.endframe]);
 
 %% data locations
 
@@ -37,7 +40,7 @@ prior = ones(1,nstates)/nstates; %#ok<NASGU>
 state2sex = cell(1,nstates);
 
 % break into smaller sequences where we're sure of area estimate
-nflies = numel(trx); %#ok<NODEF>
+nflies = numel(trx); 
 X = cell(1,nflies);
 for fly = 1:nflies,
   % compute area
@@ -88,8 +91,8 @@ end
 
 %% count number of flies, females, males
 counts = struct;
-counts.nfemales = zeros(1,max([trx.endframe]));
-counts.nmales = zeros(1,max([trx.endframe]));
+counts.nfemales = zeros(1,endframe);
+counts.nmales = zeros(1,endframe);
 for fly = 1:numel(trx),
   isfemale = strcmp(trx(fly).sex,'F');
   counts.nfemales(trx(fly).firstframe:trx(fly).endframe) = ...
@@ -98,6 +101,14 @@ for fly = 1:numel(trx),
     counts.nmales(trx(fly).firstframe:trx(fly).endframe) + double(~isfemale);
 end
 counts.nflies = counts.nfemales + counts.nmales;
+
+% ignore part of video with no flies
+fns = fieldnames(counts);
+for i = 1:numel(fns),
+  fn = fns{i};
+  counts.(fn)(1:firstframe-1) = nan;
+  counts.(fn)(endframe+1:end) = nan;
+end
 
 %% summary diagnostics
 

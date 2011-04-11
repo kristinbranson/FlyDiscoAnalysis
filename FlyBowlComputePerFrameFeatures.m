@@ -23,15 +23,16 @@ trx.AddExpDir(expdir);
 %% compute per-frame features
 
 if isempty(perframefns) % added CSC 20110321: optionally specify to-be-computed frames as parameter, reads from perframefnsfile (as before) otherwise
-perframefnsfile = fullfile(trx.settingsdir,trx.analysis_protocol,trx.dataloc_params.perframefnsfilestr);
-perframefns = importdata(perframefnsfile);
+  perframefnsfile = fullfile(trx.settingsdir,trx.analysis_protocol,trx.dataloc_params.perframefnsfilestr);
+  perframefns = importdata(perframefnsfile);
 end
 nfns = numel(perframefns);
 
 % clean this data to force computation
 if forcecompute,
-  for i = 1:nfns,
-    fn = perframefns{i};
+  fnsremove = setdiff(perframefns,Trx.TrajectoryFieldNames());
+  for i = 1:numel(fnsremove),
+    fn = fnsremove{i};
     trx.CleanPerFrameData(fn);
   end
 end

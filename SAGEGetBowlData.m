@@ -4,13 +4,14 @@ currdir = which('SAGEGetBowlData');
 [currdir,~] = fileparts(currdir);
 
 %% parse inputs
-[docheckflags,daterange,SAGEpath,removemissingdata,dataset,leftovers] = ...
+[docheckflags,daterange,SAGEpath,removemissingdata,dataset,rootdir,leftovers] = ...
   myparse_nocheck(varargin,...
   'checkflags',true,...
   'daterange',[],...
   'SAGEpath',fullfile(currdir,'..','SAGE','MATLABInterface','Trunk'),...
   'removemissingdata',true,...
-  'dataset','data');
+  'dataset','data',...
+  'rootdir',0);
 
 %% add SAGE to path
 if ~exist('SAGE.Lab','class'),
@@ -89,7 +90,9 @@ end
 
 %% grab data: put everything into as few queries as possible for speed
 
-bowlAssay_data = SAGE.Lab('olympiad').assay('bowl').dataSet(dataset);
+tmp = SAGE.Lab('olympiad');
+tmp = tmp.assay('bowl');
+bowlAssay_data = tmp.dataSet(dataset);
 
 if isempty(allqueries),
   data = bowlAssay_data.findData();
@@ -119,6 +122,20 @@ for i = 1:numel(data),
   fn = regexprep(fn,'^stats_perframe','stats');
   datamerge(j).(fn) = data(i).data;
 end
+
+% convert file system path
+if ischar(rootdir),
+  isfilesystempath = isfield(datamerge,'file_system_path');
+  for i = 1:numel(datamerge),
+    if isfilesystempath,
+      [~,basename] = fileparts(datamerge(i).file_system_path);
+    else
+      basename = regexprep(datamerge(i).experiment_name,'^FlyBowl_','');
+    end
+    datamerge(i).file_system_path = fullfile(rootdir,basename);
+  end
+end
+
 
 %% format stats, hist into substructs
 
@@ -228,7 +245,7 @@ for i = 1:numel(perframefns),
         if isempty(datamerge(j).(fn)),
           missingdata(j) = true;
         else
-          error('For %s, nconditions = 0 but non-empty data',fn);
+          error('For %s, nconditions = 0 but non-empty data',fn); %#ok<SPERR>
         end
       else
         allconditions = union(allconditions,conditions);

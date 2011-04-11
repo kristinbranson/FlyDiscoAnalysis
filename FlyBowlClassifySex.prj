@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <deployment-project>
-  <configuration target="target.standalone" target-name="Standalone Application" name="FlyBowlClassifySex" location="/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis" file="/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/FlyBowlClassifySex.prj" build-checksum="2718946955">
+  <configuration target="target.standalone" target-name="Standalone Application" name="FlyBowlClassifySex" location="/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis" file="/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/FlyBowlClassifySex.prj" build-checksum="2625037134">
     <param.project.name>/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/FlyBowlClassifySex.prj</param.project.name>
     <param.target.type>Standalone Application</param.target.type>
     <param.appname>FlyBowlClassifySex</param.appname>
@@ -56,7 +56,7 @@
       <param.user.defined.mcr.options />
     </unset>
     <fileset.main>
-      <file>${PROJECT_ROOT}/FlyBowlClassifySex.m</file>
+      <file>${PROJECT_ROOT}/FlyBowlClassifySex2.m</file>
     </fileset.main>
     <fileset.resources>
       <file>${PROJECT_ROOT}/ClassifySex.m</file>
@@ -65,6 +65,7 @@
       <file>${PROJECT_ROOT}/SmoothAreaOutliers.m</file>
       <file>${PROJECT_ROOT}/first_order_viterbi.m</file>
       <file>/groups/branson/home/bransonk/tracking/code/JCtrax/misc/myparse.m</file>
+      <file>/groups/branson/home/bransonk/tracking/code/lds/hmm</file>
     </fileset.resources>
     <fileset.package />
     <build-deliverables>
@@ -75,8 +76,11 @@
     <matlab>
       <root>/localhome/bransonk/software/matlab/R2010b</root>
       <path>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/filehandling</directory>
+        <directory>/groups/branson/home/bransonk/tracking/code/lds/hmm</directory>
         <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/misc</directory>
+        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/filehandling</directory>
+        <directory>/groups/branson/home/bransonk/tracking/code/Ctrax/matlab/netlab</directory>
+        <directory>${PROJECT_ROOT}/../SAGE/MATLABInterface/Trunk</directory>
         <directory>/groups/branson/home/bransonk/Documents/MATLAB</directory>
         <directory>${MATLAB_ROOT}/toolbox/matlab/general</directory>
         <directory>${MATLAB_ROOT}/toolbox/matlab/ops</directory>
