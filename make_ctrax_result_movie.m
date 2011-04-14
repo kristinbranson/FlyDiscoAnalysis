@@ -297,33 +297,32 @@ if isempty(zoomflies),
       for i = 1:numel(firstframes),
         for f = firstframes(i):endframes(i),
           
-          isalive = false(1,nids);
           % flies that are currently alive
+          isalive = false(1,nids);
           for fly = 1:nids,
             isalive(fly) = trx(fly).firstframe <= f && trx(fly).endframe >= f;
           end
-          
-          openzoomboxes = isnan(fliesplotcurr) | ...
-            ~isalive(fliesplotcurr
+          fliesalive = find(isalive);
           
           % remove newly dead flies
-          fliesplotcurr(~isalive(fliesplotcurr)) = []; %#ok<AGROW>
+          openzoomboxes = isnan(fliesplotcurr) | ~ismember(fliesplotcurr,fliesalive);
+          fliesplotcurr(openzoomboxes) = nan;
           
           % how many flies do we need to choose
-          nflieschoose = nzoom - numel(fliesplotcurr);
+          nflieschoose = nzoom - nnz(openzoomboxes);
           
           % flies we can choose to add
-          fliesleft = setdiff(find(isalive),fliesplotcurr);
+          fliesleft = setdiff(fliesalive,fliesplotcurr);
           
-          if numel(fliesleft) < nflieschoose,
+          nfliesshort = max(0,nflieschoose-numel(fliesleft));
+          if nfliesshort > 0,
             newfliesplot = fliesleft;
           else
             [~,order] = sort(-[trx(fliesleft).endframe]);
             newfliesplot = fliesleft(order(1:nflieschoose));
           end
           allfliesplotted = [allfliesplotted,newfliesplot]; %#ok<AGROW>
-          
-          fliesplotcurr = union(fliesplotcurr,newfliesplot);
+          fliesplotcurr(openzoomboxes) = [newfliesplot,nan(1,nfliesshort)];
           fliesplotperframe(1:numel(fliesplotcurr),f) = fliesplotcurr;
           
         end
@@ -440,6 +439,9 @@ for segi = 1:numel(firstframes),
     end
     
     % draw the zoomed image
+    if dynamicflyselection,
+      zoomflies = reshape(fliesplotperframe(:,frame),[nzoomr,nzoomc]);
+    end
     for i = 1:nzoomr,
       for j = 1:nzoomc,
         fly = zoomflies(i,j);
@@ -520,10 +522,10 @@ for segi = 1:numel(firstframes),
           theta = trx(fly).theta(idx(fly));
           if frame == firstframes(1),
             hzoom(i,j) = drawflyo(x,y,theta,a,b);
-            set(hzoom(i,j),'color',colors(fly,:));
           else
             updatefly(hzoom(i,j),x,y,theta,a,b);
           end
+          set(hzoom(i,j),'color',colors(fly,:));
         else
           if frame == firstframes(1),
             if ~isnan(fly),
@@ -531,7 +533,7 @@ for segi = 1:numel(firstframes),
             end
           else
             if ~isnan(fly),
-              set(hzoom(i,j),'xdata',[],'ydata',[]);
+              set(hzoom(i,j),'xdata',[],'ydata',[],'color',colors(fly,:));
             end
           end
         end
