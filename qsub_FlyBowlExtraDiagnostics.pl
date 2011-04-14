@@ -82,6 +82,8 @@ while(my $expdir = <FILE>){
 
 print "$njobs jobs started.";
 
+close(FILE);
+
 sub write_qsub_sh {
 	my ($shfilename,$expdir,$jobid) = @_;
 	

@@ -56,6 +56,19 @@ for i = 1:numel(stats_perframefeatures),
     frameconditionparams = {};
   end
   
+  % is this a multi-frame feature? 
+  % TODO: this only works on features that depend on at most pairs of frames
+  [~,fly] = max(trx.nframes);
+  if numel(trx(fly).(field)) < trx.nframes(fly),
+    % add in bounds on time between frames
+    if isfield(stats_params,'min_dt'),
+      frameconditionparams(end+1:end+2) = {'min_dt',num2str(stats_params.min_dt,10)};
+    end
+    if isfield(stats_params,'max_dt'),
+      frameconditionparams(end+1:end+2) = {'max_dt',num2str(stats_params.max_dt,10)};
+    end
+  end
+  
   % which flies to analyze
   flyconditionname = stats_perframefeatures(i).flycondition;
   if ~strcmpi(flyconditionname,'any'),
