@@ -309,7 +309,7 @@ if isempty(zoomflies),
           fliesplotcurr(openzoomboxes) = nan;
           
           % how many flies do we need to choose
-          nflieschoose = nzoom - nnz(openzoomboxes);
+          nflieschoose = nnz(openzoomboxes);
           
           % flies we can choose to add
           fliesleft = setdiff(fliesalive,fliesplotcurr);
@@ -323,7 +323,7 @@ if isempty(zoomflies),
           end
           allfliesplotted = [allfliesplotted,newfliesplot]; %#ok<AGROW>
           fliesplotcurr(openzoomboxes) = [newfliesplot,nan(1,nfliesshort)];
-          fliesplotperframe(1:numel(fliesplotcurr),f) = fliesplotcurr;
+          fliesplotperframe(:,f) = fliesplotcurr;
           
         end
       end
@@ -345,7 +345,7 @@ rowszoom = floor(nr/nzoomr);
 
 % colors of the flies
 if isempty(colors),
-  if dynamicflyselection,
+  if dynamicflyselection && exist('allfliesplotted','var'),
     zoomfliesreal = allfliesplotted;
   else
     zoomfliesreal = zoomflies(~isnan(zoomflies));
@@ -375,7 +375,7 @@ hold on;
 hax = gca;
 set(hax,'position',[0,0,1,1]);
 axis off;
-isdisplay = ~strcmpi(get(1,'XDisplay'),'nodisplay');
+isdisplay = ispc || ~strcmpi(get(1,'XDisplay'),'nodisplay');
 
 % corners of zoom boxes in plotted image coords
 x0 = nc+(0:nzoomc-1)*rowszoom+1;
@@ -439,7 +439,7 @@ for segi = 1:numel(firstframes),
     end
     
     % draw the zoomed image
-    if dynamicflyselection,
+    if dynamicflyselection && exist('fliesplotperframe','var'),
       zoomflies = reshape(fliesplotperframe(:,frame),[nzoomr,nzoomc]);
     end
     for i = 1:nzoomr,

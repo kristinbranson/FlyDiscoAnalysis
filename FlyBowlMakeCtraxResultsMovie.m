@@ -29,6 +29,16 @@ xvidfile = [avifilestr,'.avi'];
 
 registrationtxtfile = fullfile(expdir,dataloc_params.registrationtxtfilestr);
 registration_params = ReadParams(registrationtxtfile);
+if ~isfield(registration_params,'end_frame'),
+  load(trxfile,'trx');
+  registration_params.end_frame = max([trx.endframe]);
+end
+if ~isfield(registration_params,'start_frame'),
+  if ~exist('trx','var'),
+    load(trxfile,'trx');
+  end
+  registration_params.start_frame = min([trx.firstframe]);
+end
 nframes = registration_params.end_frame-registration_params.start_frame + 1;
 firstframes_off = min(max(0,round(ctraxresultsmovie_params.firstframes*nframes)),nframes-1);
 firstframes_off(ctraxresultsmovie_params.firstframes < 0) = nan;
