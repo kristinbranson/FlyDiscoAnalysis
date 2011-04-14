@@ -34,13 +34,14 @@ mencoder_maxnframes = inf;
 [moviename,trxname,aviname,colors,zoomflies,nzoomr,nzoomc,boxradius,...
   taillength,fps,maxnframes,firstframes,compression,figpos,movietitle,...
   useVideoWriter,mencoderoptions,mencoder_maxnframes,...
-  avifileTempDataFile,titletext] = ...
+  avifileTempDataFile,titletext,dynamicflyselection] = ...
   myparse(varargin,'moviename','','trxname','','aviname','','colors',[],'zoomflies',[],'nzoomr',nan,'nzoomc',nan,...
   'boxradius',nan,'taillength',nan,'fps',nan,'maxnframes',nan,'firstframes',[],'compression','',...
   'figpos',[],'movietitle','','useVideoWriter',useVideoWriter,...
   'mencoderoptions',mencoderoptions,'mencoder_maxnframes',mencoder_maxnframes,...
   'avifileTempDataFile','',...
-  'titletext',true);
+  'titletext',true,...
+  'dynamicflyselection',true);
 
 if ~ischar(compression),
   compression = '';
@@ -281,9 +282,60 @@ if isempty(zoomflies),
     zoomflies = [fliesmaybeplot,nan(1,nzoom-length(fliesmaybeplot))];
     fprintf('Not enough flies to plot\n');
   else
-    fliesmaybeplot = fliesmaybeplot(randperm(length(fliesmaybeplot)));
-    [~,flieswithmostframes] = sort(-nframesoverlap(fliesmaybeplot));
-    zoomflies = sort(fliesmaybeplot(flieswithmostframes(1:nzoom)));
+    
+    if dynamicflyselection,
+      
+      % choose flies to plot in each frame
+      fliesplotperframe = nan(nzoom,nframes);
+      
+      % flies currently chosen
+      fliesplotcurr = nan(nzoom,1);
+      allfliesplotted = [];
+      
+      % loop through all frames
+      
+      for i = 1:numel(firstframes),
+        for f = firstframes(i):endframes(i),
+          
+          isalive = false(1,nids);
+          % flies that are currently alive
+          for fly = 1:nids,
+            isalive(fly) = trx(fly).firstframe <= f && trx(fly).endframe >= f;
+          end
+          
+          openzoomboxes = isnan(fliesplotcurr) | ...
+            ~isalive(fliesplotcurr
+          
+          % remove newly dead flies
+          fliesplotcurr(~isalive(fliesplotcurr)) = []; %#ok<AGROW>
+          
+          % how many flies do we need to choose
+          nflieschoose = nzoom - numel(fliesplotcurr);
+          
+          % flies we can choose to add
+          fliesleft = setdiff(find(isalive),fliesplotcurr);
+          
+          if numel(fliesleft) < nflieschoose,
+            newfliesplot = fliesleft;
+          else
+            [~,order] = sort(-[trx(fliesleft).endframe]);
+            newfliesplot = fliesleft(order(1:nflieschoose));
+          end
+          allfliesplotted = [allfliesplotted,newfliesplot]; %#ok<AGROW>
+          
+          fliesplotcurr = union(fliesplotcurr,newfliesplot);
+          fliesplotperframe(1:numel(fliesplotcurr),f) = fliesplotcurr;
+          
+        end
+      end
+
+      zoomflies = fliesplotperframe(:,firstframes(1));
+      
+    else
+      fliesmaybeplot = fliesmaybeplot(randperm(length(fliesmaybeplot)));
+      [~,flieswithmostframes] = sort(-nframesoverlap(fliesmaybeplot));
+      zoomflies = sort(fliesmaybeplot(flieswithmostframes(1:nzoom)));
+    end
   end
 elseif nzoom > length(zoomflies),
   zoomflies = [zoomflies,nan(1,nzoom-length(zoomflies))];
@@ -294,7 +346,11 @@ rowszoom = floor(nr/nzoomr);
 
 % colors of the flies
 if isempty(colors),
-  zoomfliesreal = zoomflies(~isnan(zoomflies));
+  if dynamicflyselection,
+    zoomfliesreal = allfliesplotted;
+  else
+    zoomfliesreal = zoomflies(~isnan(zoomflies));
+  end
   colors0 = jet(nids);
   fliesnotplot = setdiff(1:nids,fliesmaybeplot);
   fliesnotzoom = setdiff(fliesmaybeplot,zoomfliesreal(:)');

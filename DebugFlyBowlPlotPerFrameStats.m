@@ -1,5 +1,3 @@
-%% set up paths
-
 if ispc,
   addpath E:\Code\JCtrax\misc;
   addpath E:\Code\JCtrax\filehandling;
@@ -11,25 +9,27 @@ end
 %% data locations
 
 if ispc,
-  
   settingsdir = 'E:\Code\FlyBowlAnalysis\settings';
-  analysis_protocol = '20110202_pc';
-  dataloc_params = ReadParams(fullfile(settingsdir,analysis_protocol,'dataloc_params.txt'));
-  expdir = 'pBDPGAL4U_TrpA_Rig1Plate10BowlA_20110202T105734';
-  expdir_read = fullfile(dataloc_params.rootreaddir,expdir);
-  
+  rootdir = 'E:\Data\FlyBowl\bowl_data';
 else
   settingsdir = '/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/settings';
-  protocol = '';
-  analysis_protocol = '20110211';
-  [~,expdirs_ready] = ...
-    getExperimentDirs('protocol',analysis_protocol,'subreadfiles',{'hist_perframe.mat'});
-  [~,expdirs_done] = ...
-    getExperimentDirs('protocol',analysis_protocol,'subreadfiles',{'analysis_plots/hist_velmag.png'});
-  expdirs = setdiff(expdirs_ready,expdirs_done);
-  expdir = expdirs{1};
+  %rootdir = '/groups/sciserv/flyolympiad/Olympiad_Screen/fly_bowl/bowl_data';
+  rootdir = '/groups/branson/bransonlab/tracking_data/olympiad/FlyBowl/CtraxTest20110407';
 end
 
-%% run
+%% parameters
 
-FlyBowlPlotPerFrameStats(expdir,'visible','on');
+analysis_protocol = '20110407';
+params = {'settingsdir',settingsdir,...
+  'analysis_protocol',analysis_protocol,...
+  'visible','on'};
+
+%%
+
+expdirs = dir(fullfile(rootdir,'*_*'));
+expdirs = cellfun(@(s) fullfile(rootdir,s),{expdirs([expdirs.isdir]).name},'UniformOutput',false);
+
+for i = 1:numel(expdirs),
+  expdir = expdirs{i};
+  FlyBowlPlotPerFrameStats(expdir,params{:});
+end

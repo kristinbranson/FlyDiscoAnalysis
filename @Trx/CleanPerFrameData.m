@@ -3,6 +3,9 @@ function CleanPerFrameData(obj,fns,ns)
 if ~exist('ns','var'),
   ns = 1:obj.nexpdirs;
 end
+if ~exist('fns','var') || isempty(fns),
+  fns = setdiff(Trx.PerFrameFieldNames(),Trx.TrajectoryFieldNames());
+end
 if ~iscell(fns),
   fns = {fns};
 end

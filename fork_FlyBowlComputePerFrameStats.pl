@@ -9,9 +9,11 @@ if($nargs < 1){
     exit(1);
 }
 
-my $SCRIPT = "/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/settings/20110211/run_FlyBowlComputePerFrameStats.sh";
+my $ANALYSIS_PROTOCOL = "20110407";
 
-my $PERFRAMEDIR = "perframe";
+my $SCRIPT = "/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/settings/$ANALYSIS_PROTOCOL/run_FlyBowlComputePerFrameStats.sh";
+
+my $PARAMS = "analysis_protocol $ANALYSIS_PROTOCOL";
 
 my $temporary_dir = "/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/temp_compute_stats";
 `mkdir -p $temporary_dir`;
@@ -40,11 +42,6 @@ while(my $expdir = <FILE>){
 
     if(! -d $expdir){
 	print "Directory $expdir does not exist\n";
-	next;
-    }
-
-    if(! -d "$expdir/$PERFRAMEDIR"){
-	print "Per-frame data for $expdir not yet computed, skipping.\n";
 	next;
     }
 
@@ -117,7 +114,7 @@ sub write_qsub_sh {
 # this script will be qsubed
 export MCR_CACHE_ROOT=$MCR_CACHE_ROOT.$jobid
 
-$SCRIPT $MCR $expdir
+$SCRIPT $MCR $expdir $PARAMS
 
 ~;
 	

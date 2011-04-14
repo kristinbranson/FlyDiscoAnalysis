@@ -30,11 +30,7 @@ nfns = numel(perframefns);
 
 % clean this data to force computation
 if forcecompute,
-  fnsremove = setdiff(perframefns,Trx.TrajectoryFieldNames());
-  for i = 1:numel(fnsremove),
-    fn = fnsremove{i};
-    trx.CleanPerFrameData(fn);
-  end
+  trx.CleanPerFrameData();
 end
 
 % compute each

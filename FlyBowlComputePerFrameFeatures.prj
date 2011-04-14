@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <deployment-project>
-  <configuration target="target.standalone" target-name="Standalone Application" name="FlyBowlComputePerFrameFeatures" location="/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis" file="/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/FlyBowlComputePerFrameFeatures.prj" build-checksum="877313785">
+  <configuration target="target.standalone" target-name="Standalone Application" name="FlyBowlComputePerFrameFeatures" location="/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis" file="/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/FlyBowlComputePerFrameFeatures.prj" build-checksum="1905131077">
     <param.project.name>/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/FlyBowlComputePerFrameFeatures.prj</param.project.name>
     <param.target.type>Standalone Application</param.target.type>
     <param.appname>FlyBowlComputePerFrameFeatures</param.appname>
@@ -155,6 +155,9 @@
       <path>
         <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/filehandling</directory>
         <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/misc</directory>
+        <directory>/groups/branson/home/bransonk/tracking/code/lds/hmm</directory>
+        <directory>/groups/branson/home/bransonk/tracking/code/Ctrax/matlab/netlab</directory>
+        <directory>${PROJECT_ROOT}/../SAGE/MATLABInterface/Trunk</directory>
         <directory>/groups/branson/home/bransonk/Documents/MATLAB</directory>
         <directory>${MATLAB_ROOT}/toolbox/matlab/general</directory>
         <directory>${MATLAB_ROOT}/toolbox/matlab/ops</directory>
