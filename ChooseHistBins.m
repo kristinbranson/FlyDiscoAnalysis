@@ -1,3 +1,4 @@
+
 if ispc,
   addpath E:\Code\JCtrax\misc;
   addpath E:\Code\JCtrax\filehandling;
@@ -9,91 +10,28 @@ end
 %% data locations
 
 if ispc,
-  
   settingsdir = 'E:\Code\FlyBowlAnalysis\settings';
-  analysis_protocol = '20110202_pc';
-  dataloc_params = ReadParams(fullfile(settingsdir,analysis_protocol,'dataloc_params.txt'));
-  expdir = 'pBDPGAL4U_TrpA_Rig1Plate10BowlA_20110202T105734';
-  expdir_read = fullfile(dataloc_params.rootreaddir,expdir);
-  
+  rootdir = 'E:\Data\FlyBowl\CtraxTest20110407';
 else
   settingsdir = '/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/settings';
-  protocol = '20110208';
-  analysis_protocol = '20110208';
-  [expdirs,expdir_reads,expdir_writes,experiments,rootreaddir,rootwritedir] = ...
-    getExperimentDirs('protocol',protocol,'subreadfiles',{'perframe'});
+  %rootdir = '/groups/sciserv/flyolympiad/Olympiad_Screen/fly_bowl/bowl_data';
+  rootdir = '/groups/branson/bransonlab/tracking_data/olympiad/FlyBowl/CtraxTest20110407';
 end
 
-%% number of experiments to analyze
-maxnexpdirs_control = 10;
-maxnexpdirs_gal4 = 10;
-idx = cellfun(@isempty,regexp(expdirs,'^pBD.*$','once'));
-ngal4 = nnz(idx);
-ncontrol = nnz(~idx);
-if ngal4 < maxnexpdirs_gal4,
-  ncontrol = min(ncontrol,maxnexpdirs_control+maxnexpdirs_gal4-ngal4);
-else
-  ncontrol = maxnexpdirs_control;
-end
-if ncontrol < maxnexpdirs_control,
-  ngal4 = min(ngal4,maxnexpdirs_gal4+maxnexpdirs_control-ncontrol);
-else
-  ngal4 = maxnexpdirs_gal4;
-end
+expdirs = dir(fullfile(rootdir,'*_*'));
+expdirs = cellfun(@(s) fullfile(rootdir,s),{expdirs([expdirs.isdir]).name},'UniformOutput',false);
 
-%% choose different experiments
+%% parameters
 
-% distance between experiments
-D = zeros(numel(expdirs));
-for i = 1:numel(expdirs)-1,
-  exp1 = parseExpDir(expdirs{i});
-  for j = i+1:numel(expdirs),
-    exp2 = parseExpDir(expdirs{j});
-    D(i,j) = double(~strcmp(expdirs{i},expdirs{j}))*100000 + ...
-      double(~strcmp(exp1.line,exp2.line))*10000 + ...
-      double(~strcmp(exp1.rig,exp2.rig))*1000 + ...
-      double(~strcmp(exp1.bowl,exp2.bowl))*100 + ...
-      double(~strcmp(exp1.date(1:8),exp2.date(1:8)))*10 + ...
-      abs(str2double(exp1.date(10:11))-str2double(exp2.date(10:11)))*1;
-    D(j,i) = D(i,j);
-  end
-end
-
-
-% choose experiments with large average distance to experiments already
-% chosen
-Dgal4 = D(idx,idx);
-idxgal4 = [1,nan(1,ngal4-1)];
-sumd = Dgal4(idxgal4(1),:);
-for i = 2:ngal4,
-  [~,idxgal4(i)] = max(sumd);
-  sumd = sumd+Dgal4(idxgal4(i),:);
-end
-idxgal41 = find(idx);
-idxgal4 = sort(idxgal41(idxgal4));
-
-Dcontrol = D(~idx,~idx);
-idxcontrol = [1,nan(1,ncontrol-1)];
-sumd = Dcontrol(idxcontrol(1),:);
-for i = 2:ncontrol,
-  [~,idxcontrol(i)] = max(sumd);
-  sumd = sumd+Dcontrol(idxcontrol(i),:);
-end
-idxcontrol1 = find(~idx);
-idxcontrol = sort(idxcontrol1(idxcontrol));
-
-expdirs_gal4 = expdirs(idxgal4);
-expdirs_control = expdirs(idxcontrol);
-expdir_reads_gal4 = expdir_reads(idxgal4);
-expdir_reads_control = expdir_reads(idxcontrol);
-expdirs = [expdirs_control,expdirs_gal4];
-expdir_reads = [expdir_reads_control,expdir_reads_gal4];
+analysis_protocol = '20110407';
+params = {'settingsdir',settingsdir,...
+  'analysis_protocol',analysis_protocol};
 
 %% load data
 
 obj = Trx('settingsdir',settingsdir,'analysis_protocol',analysis_protocol);
-for i = 1:numel(expdir_reads),
-  obj.AddExpDir(expdir_reads{i});
+for i = 1:numel(expdirs),
+  obj.AddExpDir(expdirs{i});
 end
 
 %% read parameters

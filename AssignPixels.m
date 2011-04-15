@@ -15,6 +15,10 @@ for fly = 1:numel(trx),
 end
 nflies = size(mu,1);
 
+if nflies == 0,
+  cc = zeros(size(isfore));
+  return;
+end
 mix = gmm(2,nflies,'full');
 mix.centres = mu;
 mix.covars = S;

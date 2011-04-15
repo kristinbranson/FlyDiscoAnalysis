@@ -16,8 +16,17 @@ dataloc_params = ReadParams(datalocparamsfile);
 
 % read temperature file
 temperaturefile = fullfile(expdir,dataloc_params.temperaturefilestr);
-tempdata = importdata(temperaturefile,',');
-stream = tempdata(:,2);
+if ~exist(temperaturefile,'file'),
+  warning('Temperature stream file %s does not exist.',temperaturefile);
+  stream = [];
+else
+  tempdata = importdata(temperaturefile,',');
+  if isempty(tempdata),
+    stream = [];
+  else
+    stream = tempdata(:,2);
+  end
+end
 
 % diagnostics
 diagnostics = struct;

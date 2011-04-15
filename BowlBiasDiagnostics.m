@@ -122,9 +122,9 @@ bias_diagnostics.diffargextremaangle_sumfracallsmooth = diffargextremeangle_sumf
 %% maximum difference in mode in radius
 [maxfracsmooth,maxr_bin] = max(fracsmooth,[],1);
 argmaxr_fracsmooth = centers_r(maxr_bin);
-[max_maxfracsmooth,max_maxr_angle_bin] = max(argmaxr_fracsmooth);
+[max_maxfracsmooth,max_maxr_angle_bin] = max(maxfracsmooth);
 argmaxangle_maxfracsmooth = centers_theta(max_maxr_angle_bin);
-[min_maxfracsmooth,min_maxr_angle_bin] = min(argmaxr_fracsmooth);
+[min_maxfracsmooth,min_maxr_angle_bin] = min(maxfracsmooth);
 argminangle_maxfracsmooth = centers_theta(min_maxr_angle_bin);
 maxdiff_maxfracsmooth = (max_maxfracsmooth - min_maxfracsmooth) / trx.landmark_params.arena_radius_mm;
 diffargextremaangle_maxfracsmooth = abs(modrange(argmaxangle_maxfracsmooth - argminangle_maxfracsmooth,-pi,pi));
@@ -141,9 +141,9 @@ bias_diagnostics.argmaxr_fracsmooth = argmaxr_fracsmooth;
 % all frames
 [maxfracallsmooth,maxr_bin] = max(fracallsmooth,[],1);
 argmaxr_fracallsmooth = centers_r(maxr_bin);
-[max_maxfracallsmooth,max_maxr_angle_bin] = max(argmaxr_fracallsmooth);
+[max_maxfracallsmooth,max_maxr_angle_bin] = max(maxfracallsmooth);
 argmaxangle_maxfracallsmooth = centers_theta(max_maxr_angle_bin);
-[min_maxfracallsmooth,min_maxr_angle_bin] = min(argmaxr_fracallsmooth);
+[min_maxfracallsmooth,min_maxr_angle_bin] = min(maxfracallsmooth);
 argminangle_maxfracallsmooth = centers_theta(min_maxr_angle_bin);
 maxdiff_maxfracallsmooth = (max_maxfracallsmooth - min_maxfracallsmooth) / trx.landmark_params.arena_radius_mm;
 diffargextremaangle_maxfracallsmooth = abs(modrange(argmaxangle_maxfracallsmooth - argminangle_maxfracallsmooth,-pi,pi));
