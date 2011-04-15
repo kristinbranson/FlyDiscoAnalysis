@@ -198,14 +198,16 @@ end
 
 %% plot means, stds
 
-stathandles = PlotPerFrameStats(stats_perframefeatures,statsperfly,statsperexp,controlstats,plottitle,'visible',visible);
-drawnow;  
-savename = sprintf('stats.png');
-savename = fullfile(figdir,savename);
-if exist(savename,'file'),
-  delete(savename);
+if isstruct(controlstats) && isstruct(controlhist),
+  stathandles = PlotPerFrameStats(stats_perframefeatures,statsperfly,statsperexp,controlstats,plottitle,'visible',visible);
+  drawnow;
+  savename = sprintf('stats.png');
+  savename = fullfile(figdir,savename);
+  if exist(savename,'file'),
+    delete(savename);
+  end
+  save2png(savename,stathandles.hfig);
 end
-save2png(savename,stathandles.hfig);
 
 %% plot histograms
 

@@ -22,7 +22,8 @@ end
 analysis_protocol = '20110407';
 params = {'settingsdir',settingsdir,...
   'analysis_protocol',analysis_protocol,...
-  'visible','on'};
+  'visible','on',...
+  'controldatadirstr','20110414T165637'};
 
 %%
 

@@ -30,6 +30,7 @@ params = {'settingsdir',settingsdir,...
 expdirs = dir(fullfile(rootdir,'*_*'));
 expdirs = cellfun(@(s) fullfile(rootdir,s),{expdirs([expdirs.isdir]).name},'UniformOutput',false);
 
+i = 11;
 for i = 1:numel(expdirs),
   expdir = expdirs{i};
   FlyBowlMakeCtraxResultsMovie(expdir,params{:});

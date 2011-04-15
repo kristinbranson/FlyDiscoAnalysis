@@ -1,16 +1,19 @@
 #!/usr/bin/perl
 
 use strict;
+my $MAXNJOBS = 12;
 
 my $nargs = $#ARGV + 1;
 if($nargs < 1){
-    print "Usage: qsub_FlyBowlPlotPerFrameStats.pl <expdirlist.txt>\n";
+    print "Usage: fork_FlyBowlPlotPerFrameStats.pl <expdirlist.txt>\n";
     exit(1);
 }
 
-my $SCRIPT = "/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/settings/20110211/run_FlyBowlPlotPerFrameStats.sh";
+my $ANALYSIS_PROTOCOL = "20110407";
 
-my $PERFRAMEDIR = "perframe";
+my $SCRIPT = "/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/settings/$ANALYSIS_PROTOCOL/run_FlyBowlPlotPerFrameStats.sh";
+
+my $PARAMS = "analysis_protocol $ANALYSIS_PROTOCOL controldatadirstr 20110414T165637";
 
 my $temporary_dir = "/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/temp_compute_stats";
 `mkdir -p $temporary_dir`;
@@ -41,15 +44,6 @@ while(my $expdir = <FILE>){
 	next;
     }
 
-    if(! -e "$expdir/hist_perframe.mat"){
-	print "Per-frame histograms not yet computed, skipping.\n";
-	next;
-    }
-    if(! -e "$expdir/stats_perframe.mat"){
-	print "Per-frame histograms not yet computed, skipping.\n";
-	next;
-    }
-
     $expdir =~ /^(.*)\/([^\/]+)$/;
     my $rootdir = $1;
     my $basename = $2;
@@ -70,17 +64,16 @@ while(my $expdir = <FILE>){
     write_qsub_sh($shfilename,$expdir,$sgeid);
 
     # submit command
-    my $cmd = qq~qsub -N $sgeid -j y -o $outfilename -cwd $shfilename~;
+    my $cmd = qq~qsub -N $sgeid -j y -b y -o $outfilename -cwd $shfilename~;
     print "submitting to cluster: $cmd\n";
-    #system($cmd);
+    system($cmd);
     #system($shfilename);
     $njobs++;
-
-    exit(1);
 
 }
 
 print "$njobs jobs started.";
+close(FILE);
 
 sub write_qsub_sh {
 	my ($shfilename,$expdir,$jobid) = @_;
@@ -92,7 +85,9 @@ sub write_qsub_sh {
 # this script will be qsubed
 export MCR_CACHE_ROOT=$MCR_CACHE_ROOT.$jobid
 
-$SCRIPT $MCR $expdir visible on
+echo \$MCR_CACHE_ROOT
+
+$SCRIPT $MCR $expdir $PARAMS
 
 ~;
 	

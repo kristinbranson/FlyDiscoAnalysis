@@ -383,7 +383,9 @@ imfore_counts = zeros(1,params.nbins_imfore);
 llrfore_counts = zeros(1,params.nbins_llrfore);
 diffim_counts = zeros(1,params.nbins_diffim);
 
-sampleframes = round(linspace(1,nframes,params.nframessample));
+firstframe = min([trx.firstframe]);
+endframe = max([trx.endframe]);
+sampleframes = unique(round(linspace(firstframe,endframe,params.nframessample)));
 frac_fg = 0;
 nfliessample = 0;
 minllrperfly = [];

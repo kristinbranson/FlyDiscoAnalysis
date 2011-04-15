@@ -72,7 +72,8 @@ firstframes = registration_params.start_frame + firstframes_off;
   'useVideoWriter',false,...
   'titletext',false,...
   'avifileTempDataFile',[avifile,'-temp'],...
-  'dynamicflyselection',true);
+  'dynamicflyselection',true,...
+  'doshowsex',true);
 
 if ishandle(1),
   close(1);
@@ -104,14 +105,16 @@ fclose(fid);
 tmpfile = [xvidfile,'.tmp'];
 newheight = 4*ceil(height/4);
 newwidth = 4*ceil(width/4);
-cmd = sprintf('mencoder %s -o %s -ovc xvid -xvidencopts bitrate=3000000 -vf scale=%d:%d',...
-  avifile,tmpfile,newwidth,newheight);
+% subtitles are upside down, so encode with subtitles and flip, then flip
+% again
+cmd = sprintf('mencoder %s -o %s -ovc xvid -xvidencopts fixed_quant=4 -vf scale=%d:%d,flip -sub %s -subfont-text-scale 2 -msglevel all=2',...
+  avifile,tmpfile,newwidth,newheight,subtitlefile);
 status = system(cmd);
 if status ~= 0,
   error('Failed to compress avi to %s',xvidfile);
 end
-cmd = sprintf('mencoder %s -o %s -ovc xvid -xvidencopts bitrate=3000000 -sub %s -subfont-text-scale 2',...
-  tmpfile,xvidfile,subtitlefile);
+cmd = sprintf('mencoder %s -o %s -ovc xvid -xvidencopts fixed_quant=4 -vf flip -msglevel all=2',...
+  tmpfile,xvidfile);
 status = system(cmd);
 if status ~= 0,
   error('Failed to add subtitles to %s',xvidfile);

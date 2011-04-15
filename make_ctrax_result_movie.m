@@ -34,14 +34,16 @@ mencoder_maxnframes = inf;
 [moviename,trxname,aviname,colors,zoomflies,nzoomr,nzoomc,boxradius,...
   taillength,fps,maxnframes,firstframes,compression,figpos,movietitle,...
   useVideoWriter,mencoderoptions,mencoder_maxnframes,...
-  avifileTempDataFile,titletext,dynamicflyselection] = ...
+  avifileTempDataFile,titletext,dynamicflyselection,...
+  doshowsex] = ...
   myparse(varargin,'moviename','','trxname','','aviname','','colors',[],'zoomflies',[],'nzoomr',nan,'nzoomc',nan,...
   'boxradius',nan,'taillength',nan,'fps',nan,'maxnframes',nan,'firstframes',[],'compression','',...
   'figpos',[],'movietitle','','useVideoWriter',useVideoWriter,...
   'mencoderoptions',mencoderoptions,'mencoder_maxnframes',mencoder_maxnframes,...
   'avifileTempDataFile','',...
   'titletext',true,...
-  'dynamicflyselection',true);
+  'dynamicflyselection',true,...
+  'doshowsex',true);
 
 if ~ischar(compression),
   compression = '';
@@ -113,6 +115,22 @@ end
 
 % set undefined parameters
 nids = length(trx);
+
+% make sure sex is set
+doshowsex = doshowsex && isfield(trx,'sex') && ~any(cellfun(@isempty,{trx.sex}));
+if doshowsex,
+  sexes = {};
+  for i = 1:numel(trx),
+    sexes = union(sexes,unique(trx(i).sex));
+  end
+  sexes = upper(sexes);
+  sexes = sort(sexes);
+  sexmarkers = {'none','*','x','o','+','d','s','p','h'};
+  if numel(sexes) > numel(sexmarkers),
+    sexmarkers = repmat(sexmarkers,[1,ceil(numel(sexes)/numel(sexmarkers))]);
+  end
+  sexmarkers = sexmarkers(1:numel(sexes));
+end
 
 nzoom = length(zoomflies);
 if nzoom > 0,
@@ -390,8 +408,10 @@ nframesoff = getstructarrayfield(trx,'firstframe') - 1;
 himzoom = zeros(nzoomr,nzoomc);
 htail = zeros(1,nids);
 htri = zeros(1,nids);
+hsexmarker = zeros(1,nids);
 scalefactor = rowszoom / (2*boxradius+1);
 hzoom = zeros(nzoomr,nzoomc);
+htextzoom = zeros(nzoomr,nzoomc);
 
 mencoder_nframes = 0;
 
@@ -483,10 +503,17 @@ for segi = 1:numel(firstframes),
           i0 = max(1,idx(fly)-taillength);
           htail(fly) = plot(trx(fly).x(i0:idx(fly)),trx(fly).y(i0:idx(fly)),...
             '-','color',colors(fly,:));
+          if doshowsex,
+            sexi = find(strcmpi(trx(fly).sex{idx(fly)},sexes),1);
+            sexmarker = sexmarkers{sexi};
+            hsexmarker(fly) = plot(trx(fly).x(idx(fly)),trx(fly).y(idx(fly)),'.',...
+              'color',colors(fly,:),'marker',sexmarker,'markerfacecolor',colors(fly,:));
+          end
           htri(fly) = drawflyo(trx(fly),idx(fly));
           set(htri(fly),'color',colors(fly,:));
         else
           htail(fly) = plot(nan,nan,'-','color',colors(fly,:));
+          hsexmarker(fly) = plot(nan,nan,'.','color',colors(fly,:),'markerfacecolor',colors(fly,:));
           htri(fly) = plot(nan,nan,'-','color',colors(fly,:));
         end
       end
@@ -496,10 +523,20 @@ for segi = 1:numel(firstframes),
           i0 = max(1,idx(fly)-taillength);
           set(htail(fly),'xdata',trx(fly).x(i0:idx(fly)),...
             'ydata',trx(fly).y(i0:idx(fly)));
+          if doshowsex,
+            sexi = find(strcmpi(trx(fly).sex{idx(fly)},sexes),1);
+            sexmarker = sexmarkers{sexi};
+            set(hsexmarker(fly),'xdata',trx(fly).x(idx(fly)),...
+              'ydata',trx(fly).y(idx(fly)),...
+              'color',colors(fly,:),...
+              'marker',sexmarker,...
+              'markerfacecolor',colors(fly,:));
+          end
           updatefly(htri(fly),trx(fly),idx(fly));
         else
           set(htail(fly),'xdata',[],'ydata',[]);
           set(htri(fly),'xdata',[],'ydata',[]);
+          set(hsexmarker(fly),'xdata',[],'ydata',[]);
         end
       end
     end
@@ -520,20 +557,62 @@ for segi = 1:numel(firstframes),
           a = trx(fly).a(idx(fly))*scalefactor;
           b = trx(fly).b(idx(fly))*scalefactor;
           theta = trx(fly).theta(idx(fly));
+          if doshowsex,
+            s = sprintf('%d, %s',fly,trx(fly).sex{idx(fly)});
+          else
+            s = sprintf('%d',fly);
+          end
           if frame == firstframes(1),
             hzoom(i,j) = drawflyo(x,y,theta,a,b);
+            if isdisplay,
+              htextzoom(i,j) = text((x0(j)+x1(j))/2,.95*y0(i)+.05*y1(i),s,...
+                'color',colors(fly,:),'horizontalalignment','center',...
+                'verticalalignment','bottom','fontweight','bold');
+            else
+              if doshowsex,
+                sexi = find(strcmpi(trx(fly).sex{idx(fly)},sexes),1);
+                sexmarker = sexmarkers{sexi};
+                htextzoom(i,j) = plot(x,y,'.',...
+                  'color',colors(fly,:),'marker',sexmarker,'markerfacecolor',colors(fly,:));
+              end
+            end
           else
             updatefly(hzoom(i,j),x,y,theta,a,b);
+            if isdisplay,
+              set(htextzoom(i,j),'string',s,'color',colors(fly,:));
+            else
+              if doshowsex,
+                sexi = find(strcmpi(trx(fly).sex{idx(fly)},sexes),1);
+                sexmarker = sexmarkers{sexi};
+                set(htextzoom(i,j),'xdata',x,...
+                  'ydata',y,...
+                  'color',colors(fly,:),...
+                  'marker',sexmarker,...
+                  'markerfacecolor',colors(fly,:));
+              end
+            end
           end
           set(hzoom(i,j),'color',colors(fly,:));
         else
           if frame == firstframes(1),
-            if ~isnan(fly),
-              hzoom(i,j) = plot(nan,nan,'-','color',colors(fly,:));
+            hzoom(i,j) = plot(nan,nan,'-');
+            if isdisplay,
+              htextzoom(i,j) = text((x0(j)+x1(j))/2,.95*y0(i)+.05*y1(i),'',...
+                'horizontalalignment','center',...
+                'verticalalignment','bottom','fontweight','bold');
+            else
+              if doshowsex,
+                htextzoom(i,j) = plot(nan,nan,'.','marker','none');
+              end
             end
           else
-            if ~isnan(fly),
-              set(hzoom(i,j),'xdata',[],'ydata',[],'color',colors(fly,:));
+            set(hzoom(i,j),'xdata',[],'ydata',[]);
+            if isdisplay,
+              set(htextzoom(i,j),'string','');
+            else
+              if doshowsex,
+                set(htextzoom(i,j),'xdata',[],'ydata',[]);
+              end
             end
           end
         end

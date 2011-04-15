@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <deployment-project>
-  <configuration target="target.standalone" target-name="Standalone Application" name="FlyBowlMakeCtraxResultsMovie" location="/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis" file="/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/FlyBowlMakeCtraxResultsMovie.prj" build-checksum="3867169313">
+  <configuration target="target.standalone" target-name="Standalone Application" name="FlyBowlMakeCtraxResultsMovie" location="/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis" file="/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/FlyBowlMakeCtraxResultsMovie.prj" build-checksum="1391191119">
     <param.project.name>/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/FlyBowlMakeCtraxResultsMovie.prj</param.project.name>
     <param.target.type>Standalone Application</param.target.type>
     <param.appname>FlyBowlMakeCtraxResultsMovie</param.appname>
@@ -77,6 +77,78 @@
       <path>
         <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/filehandling</directory>
         <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/misc</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/.hg</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/.hg/store</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/.hg/store/data</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/.hg/store/data/_property_grid</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/.hg/store/data/_s_a_g_e</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/.hg/store/data/_s_a_g_e/_____m_a_c_o_s_x</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/.hg/store/data/_validators</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/.hg/store/data/_x_m_l_nodes</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/.hg/store/data/data</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/.hg/store/data/doc</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/.hg/store/data/doc/build</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/.hg/store/data/doc/build/doctrees</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/.hg/store/data/doc/build/html</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/.hg/store/data/doc/build/html/__sources</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/.hg/store/data/doc/build/html/__static</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/.hg/store/data/doc/source</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/.hg/store/data/examples</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/.hg/store/data/jdbc</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/.hg/store/data/precon__hs2000_d</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/.hg/store/data/property__grid</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/.hg/store/data/sample__xml</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/.hg/store/data/sample__xml/kristin__defaults</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/.hg/store/data/sample__xml/old</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/.hg/store/data/sample__xml/test</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/.hg/store/data/src</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/.hg/store/data/src/_s_a_g_e</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/.hg/store/data/src/_s_a_g_e/_____m_a_c_o_s_x</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/.hg/store/data/src/_t_h_sensor</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/.hg/store/data/src/_t_h_sensor/_sampler</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/.hg/store/data/src/data__cachers</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/.hg/store/data/src/dialog</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/.hg/store/data/src/findjobj</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/.hg/store/data/src/interface</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/.hg/store/data/src/property__grid</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/.hg/store/data/src/validators</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/.hg/store/data/src/xml__io__tools</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/.hg/store/data/src/xml__io__tools/html</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/.hg/store/data/src/xml__nodes</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/.hg/store/data/validators</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/.hg/store/data/validators/_validators</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/.hg/store/data/xml__io__tools</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/.hg/store/data/xml__io__tools/html</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/.hg/store/data/xml__nodes</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/data</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/doc</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/doc/build</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/doc/build/doctrees</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/doc/build/html</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/doc/build/html/_sources</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/doc/build/html/_static</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/doc/source</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/examples</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/jdbc</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/sample_xml</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/sample_xml/kristin_defaults</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/sample_xml/old</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/sample_xml/test</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/src</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/src/SAGE</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/src/SAGE/__MACOSX</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/src/THSensor</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/src/THSensor/Sampler</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/src/data_cachers</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/src/dialog</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/src/findjobj</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/src/interface</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/src/property_grid</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/src/validators</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/src/xml_io_tools</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/src/xml_io_tools/html</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/src/xml_nodes</directory>
         <directory>/groups/branson/home/bransonk/Documents/MATLAB</directory>
         <directory>${MATLAB_ROOT}/toolbox/matlab/general</directory>
         <directory>${MATLAB_ROOT}/toolbox/matlab/ops</directory>
