@@ -26,21 +26,23 @@ expdirs = cellfun(@(s) fullfile(rootdir,s),{expdirs([expdirs.isdir]).name},'Unif
 analysis_protocol = '20110407';
 params = {'settingsdir',settingsdir,...
   'analysis_protocol',analysis_protocol};
+datalocparamsfile = fullfile(settingsdir,analysis_protocol,'dataloc_params.txt');
+dataloc_params = ReadParams(datalocparamsfile);
 
 %% load data
 
-obj = Trx('settingsdir',settingsdir,'analysis_protocol',analysis_protocol);
-for i = 1:numel(expdirs),
-  obj.AddExpDir(expdirs{i});
-end
+% obj = Trx('settingsdir',settingsdir,'analysis_protocol',analysis_protocol);
+% for i = 1:numel(expdirs),
+%   obj.AddExpDir(expdirs{i});
+% end
 
 %% read parameters
 
-perframefnsfile = fullfile(obj.settingsdir,obj.analysis_protocol,obj.dataloc_params.perframefnsfilestr);
+perframefnsfile = fullfile(settingsdir,analysis_protocol,dataloc_params.perframefnsfilestr);
 perframefns = importdata(perframefnsfile);
 prctile_store = 10;
 
-histparamsfile = fullfile(obj.settingsdir,obj.analysis_protocol,obj.dataloc_params.histparamsfilestr);
+histparamsfile = fullfile(settingsdir,analysis_protocol,dataloc_params.histparamsfilestr);
 hist_params = ReadParams(histparamsfile);
 
 %% loop over per-frame parameters
@@ -66,14 +68,16 @@ for fni = 1:numel(perframefns),
 
   fprintf('Choosing lims...\n');
   % loop through experiments
-  for expi = 1:obj.nexpdirs,
+  for expi = 1:numel(expdirs),
     
-    fprintf('exp(%d) = %s\n',expi,obj.expdirs{expi});
-    
-    flies = obj.exp2flies{expi};
+    expdir = expdirs{expi};
+    fprintf('exp(%d) = %s\n',expi,expdir);
+
+    filename = fullfile(expdir,dataloc_params.perframedir,[fn,'.mat']);
     
     % get per-frame data for these flies
-    datacurr = cell2mat(obj(flies).(fn));
+    tmp = load(filename,'data');
+    datacurr = cell2mat(tmp.data);
     thresh = prctile(datacurr,[prctile_store,100-prctile_store]);
     datasmall = [datasmall,datacurr(datacurr <= thresh(1))]; %#ok<AGROW>
     datalarge = [datalarge,datacurr(datacurr >= thresh(2))]; %#ok<AGROW>
@@ -140,5 +144,5 @@ end
 
 %% save results
 
-savename = fullfile(obj.settingsdir,obj.analysis_protocol,obj.dataloc_params.histperframebinsfilestr);
+savename = fullfile(settingsdir,analysis_protocol,dataloc_params.histperframebinsfilestr);
 save(savename,'bins');

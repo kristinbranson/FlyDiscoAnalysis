@@ -31,3 +31,5 @@ for j = 1:nprctiles,
   [statsperexp.meanprctiles(j),s] = weighted_mean_cov(statsperfly.prctiles(j,goodidx)',statsperfly.fracframesanalyzed(goodidx)');
   statsperexp.stdprctiles(j) = sqrt(s);
 end
+
+statsperexp.n = numel(goodidx);

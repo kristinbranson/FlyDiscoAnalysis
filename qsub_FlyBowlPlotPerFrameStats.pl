@@ -13,7 +13,7 @@ my $ANALYSIS_PROTOCOL = "20110407";
 
 my $SCRIPT = "/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/settings/$ANALYSIS_PROTOCOL/run_FlyBowlPlotPerFrameStats.sh";
 
-my $PARAMS = "analysis_protocol $ANALYSIS_PROTOCOL controldatadirstr 20110414T165637";
+my $PARAMS = "analysis_protocol $ANALYSIS_PROTOCOL";
 
 my $temporary_dir = "/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/temp_compute_stats";
 `mkdir -p $temporary_dir`;

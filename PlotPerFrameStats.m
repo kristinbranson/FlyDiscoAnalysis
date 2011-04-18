@@ -72,8 +72,8 @@ for fni = 1:nfns,
   fn = fns{fni};
   
   % control data mean and standard deviation
-  mu = controlstats.statsperexp.(fn).meanmean;
-  sig = controlstats.statsperexp.(fn).stdmean;
+  mu = controlstats.meanstatsperfly.(fn).meanmean;
+  sig = controlstats.meanstatsperfly.(fn).stdmean;
   goodidx = ~isnan(controlstats.statsperfly.(fn).Z);
   nfliescontrol = sum(controlstats.statsperfly.(fn).fracframesanalyzed(goodidx));
   stderrmean_control(fni) = 1/sqrt(nfliescontrol);

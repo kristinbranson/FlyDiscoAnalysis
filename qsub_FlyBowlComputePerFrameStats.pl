@@ -64,7 +64,7 @@ while(my $expdir = <FILE>){
     write_qsub_sh($shfilename,$expdir,$sgeid);
 
     # submit command
-    my $cmd = qq~qsub -N $sgeid -j y -o $outfilename -cwd $shfilename~;
+    my $cmd = qq~qsub -N $sgeid -j y -b y -o $outfilename -cwd $shfilename~;
     print "submitting to cluster: $cmd\n";
     system($cmd);
     #system($shfilename);
