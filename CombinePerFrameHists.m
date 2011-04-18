@@ -43,4 +43,4 @@ histperexp.stdfracless_log = sqrt(s);
   weighted_mean_cov(histperfly.fracmore_log(goodidx)',...
   histperfly.fracframesanalyzed(goodidx)');
 histperexp.stdfracmore_log = sqrt(s);
-histperexp.nflies = nnz(goodidx);
+histperexp.n = nnz(goodidx);

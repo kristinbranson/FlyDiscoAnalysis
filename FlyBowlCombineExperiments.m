@@ -40,6 +40,8 @@ end
 
 statsperfly = [];
 histperfly = [];
+statsperexp = [];
+histperexp = [];
 
 for i = 1:nexpdirs,
   
@@ -50,25 +52,46 @@ for i = 1:nexpdirs,
   statsdata = load(statsmatfile);
   histmatfile = fullfile(expdir,dataloc_params.histperframematfilestr);
   histdata = load(histmatfile);
-
+  
   % merge with data read in so far
   statsperfly = MergeStatsPerFly(statsperfly,statsdata.statsperfly,expdir);
+  statsperexp = MergeStatsPerExp(statsperexp,statsdata.statsperexp,expdir);
   %numel(statsperfly.a_mm_flyany_frameany.Z)
   histperfly = MergeHistPerFly(histperfly,histdata.histperfly,expdir);
+  histperexp = MergeHistPerExp(histperexp,histdata.histperexp,expdir);
 
+end
+
+%% Combine per-exp data
+
+meanstatsperexp = struct;
+meanhistperexp = struct;
+fns = fieldnames(statsperexp);
+for i = 1:numel(fns),
+  fn = fns{i};  
+  meanstatsperexp.(fn) = CombinePerExpStats(statsperexp.(fn));
+end
+
+fns = fieldnames(histperexp);
+for i = 1:numel(fns),
+  fn = fns{i};
+
+  % compute per-experiment hist
+  meanhistperexp.(fn) = CombinePerExpHists(histperexp.(fn));
+  
 end
 
 %% Combine per-fly data as in one experiment
 
-statsperexp = struct;
-histperexp = struct;
+meanstatsperfly = struct;
+meanhistperfly = struct;
 
 fns = fieldnames(statsperfly);
 for i = 1:numel(fns),
   fn = fns{i};
 
   % compute per-experiment hist
-  statsperexp.(fn) = CombinePerFrameStats(statsperfly.(fn));
+  meanstatsperfly.(fn) = CombinePerFrameStats(statsperfly.(fn));
   
 end
 
@@ -77,7 +100,7 @@ for i = 1:numel(fns),
   fn = fns{i};
 
   % compute per-experiment hist
-  histperexp.(fn) = CombinePerFrameHists(histperfly.(fn));
+  meanhistperfly.(fn) = CombinePerFrameHists(histperfly.(fn));
   
 end
 
@@ -98,6 +121,8 @@ statsmatsavename = fullfile(outdir,dataloc_params.statsperframematfilestr);
 
 statsdata.statsperfly = statsperfly;
 statsdata.statsperexp = statsperexp;
+statsdata.meanstatsperfly = meanstatsperfly;
+statsdata.meanstatsperexp = meanstatsperexp;
 statsdata.exp_params = exp_params;
 statsdata.expdirs = expdir_reads;
 statsdata.experiments = experiments;
@@ -107,7 +132,7 @@ save(statsmatsavename,'-struct','statsdata');
 fns = fieldnames(statsperfly);
 for i = 1:numel(fns),
   fn = fns{i};
-  SavePerFrameStatsTxtFile(statstxtsavename,fn,statsperfly.(fn),statsperexp.(fn));
+  SavePerFrameStatsTxtFile(statstxtsavename,fn,statsperfly.(fn),meanstatsperfly.(fn));
 end
 
 histtxtsavename = fullfile(outdir,dataloc_params.histperframetxtfilestr);
@@ -115,6 +140,8 @@ histmatsavename = fullfile(outdir,dataloc_params.histperframematfilestr);
 
 histdata.histperfly = histperfly;
 histdata.histperexp = histperexp;
+histdata.meanhistperfly = meanhistperfly;
+histdata.meanhistperexp = meanhistperfly;
 histdata.exp_params = exp_params;
 histdata.expdirs = expdir_reads;
 histdata.experiments = experiments;
@@ -124,7 +151,7 @@ save(histmatsavename,'-struct','histdata');
 fns = fieldnames(histperfly);
 for i = 1:numel(fns),
   fn = fns{i};
-  SavePerFrameHistTxtFile(histtxtsavename,fn,histperfly.(fn),histperexp.(fn));
+  SavePerFrameHistTxtFile(histtxtsavename,fn,histperfly.(fn),meanhistperfly.(fn));
 end
 
 %% write experiment info to a file
@@ -199,7 +226,7 @@ end
 %% plot means, stds
 
 if isstruct(controlstats) && isstruct(controlhist),
-  stathandles = PlotPerFrameStats(stats_perframefeatures,statsperfly,statsperexp,controlstats,plottitle,'visible',visible);
+  stathandles = PlotPerFrameStats(stats_perframefeatures,statsperfly,meanstatsperfly,controlstats,plottitle,'visible',visible);
   drawnow;
   savename = sprintf('stats.png');
   savename = fullfile(figdir,savename);
@@ -218,7 +245,7 @@ for i = 1:numel(hist_fields),
 
   if ~isempty(controlhist),
     handles_control = PlotPerFrameHists(field,hist_perframefeatures,...
-      controlhist.histperexp,controlhist.histperfly,...
+      controlhist.meanhistperfly,controlhist.histperfly,...
       bins.(field),hist_plot_params,plottitle,...
       'visible',visible,'linestyle',':','stdstyle','errorbar');
     hax = handles_control.hax;
@@ -227,7 +254,7 @@ for i = 1:numel(hist_fields),
   end
   
   handles = PlotPerFrameHists(field,hist_perframefeatures,...
-    histperexp,histperfly,...
+    meanhistperfly,histperfly,...
     bins.(field),hist_plot_params,plottitle,...
     'visible',visible,...
     'hax',hax);
