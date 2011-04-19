@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <deployment-project>
-  <configuration target="target.standalone" target-name="Standalone Application" name="FlyBowlRegisterTrx" location="/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis" file="/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/FlyBowlRegisterTrx.prj" build-checksum="1589391643">
+  <configuration target="target.standalone" target-name="Standalone Application" name="FlyBowlRegisterTrx" location="/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis" file="/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/FlyBowlRegisterTrx.prj" build-checksum="970991774">
     <param.project.name>/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/FlyBowlRegisterTrx.prj</param.project.name>
     <param.target.type>Standalone Application</param.target.type>
     <param.appname>FlyBowlRegisterTrx</param.appname>
@@ -73,11 +73,8 @@
     <matlab>
       <root>/localhome/bransonk/software/matlab/R2010b</root>
       <path>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/filehandling</directory>
         <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/misc</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/lds/hmm</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/Ctrax/matlab/netlab</directory>
-        <directory>${PROJECT_ROOT}/../SAGE/MATLABInterface/Trunk</directory>
+        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/filehandling</directory>
         <directory>/groups/branson/home/bransonk/Documents/MATLAB</directory>
         <directory>${MATLAB_ROOT}/toolbox/matlab/general</directory>
         <directory>${MATLAB_ROOT}/toolbox/matlab/ops</directory>
@@ -211,6 +208,7 @@
         <directory>${MATLAB_ROOT}/toolbox/bioinfo/biodemos</directory>
         <directory>${MATLAB_ROOT}/toolbox/bioinfo/graphtheory</directory>
         <directory>${MATLAB_ROOT}/toolbox/shared/testmeaslib/simulink</directory>
+        <directory>${MATLAB_ROOT}/toolbox/connector/connector</directory>
       </path>
     </matlab>
     <platform>

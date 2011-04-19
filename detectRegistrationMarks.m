@@ -550,8 +550,12 @@ if ~isempty(imsavename),
   axis(hax(2),'image');
   axis(hax(2),'xy');
   title(hax(2),'Registered bkgd image');
-  
-  save2png(imsavename,hfig);
+
+  try
+    save2png(imsavename,hfig);
+  catch ME,
+    warning('Could not save to %s:\n%s',imsavename,getReport(ME));
+  end
   
   if isdeployed && ishandle(hfig),
     close(hfig);
