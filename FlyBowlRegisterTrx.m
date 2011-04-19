@@ -69,6 +69,10 @@ if ~succeeded,
   error('Could not load trajectories from file %s',ctraxfile);
 end
 
+if isempty(trx),
+  error('No flies tracked.');
+end
+
 % apply to trajectories
 for fly = 1:length(trx),
   
@@ -180,15 +184,18 @@ if dotemporalreg,
   % how much time should we crop from the end?
   if recordLengthCurr < recordLengthIdeal,
     warning('Cropped video is %f seconds long, shorter than ideal length %f seconds.',recordLengthCurr,recordLengthIdeal);
+    i1 = numel(timestamps);
   else
     i1 = find(timestamps - timestamps(i0) >= recordLengthIdeal,1);
     if isempty(i1),
-      error('No timestamps occur after timeCropEnd = %f. Cannot crop end.',timestamps(i0)+recordLengthIdeal);
-    end
-    if i1 > 1 && ...
-        (recordLengthIdeal - (timestamps(i1-1)-timestamps(i0))) < ...
-        ((timestamps(i1)-timestamps(i0)) - recordLengthIdeal),
-      i1 = i1 - 1;
+      warning('No timestamps occur after timeCropEnd = %f. Cannot crop end.',timestamps(i0)+recordLengthIdeal);
+      i1 = numel(timestamps);
+    else
+      if i1 > 1 && ...
+          (recordLengthIdeal - (timestamps(i1-1)-timestamps(i0))) < ...
+          ((timestamps(i1)-timestamps(i0)) - recordLengthIdeal),
+        i1 = i1 - 1;
+      end
     end
   end
   registration_data.seconds_crop_start = timestamps(i0);
@@ -199,72 +206,76 @@ if dotemporalreg,
   fns = setdiff(fieldnames(trx),fns_notperframe);
   isperframe = true(1,numel(fns));
   nperfn = nan(1,numel(fns));
-  for j = 1:numel(fns),
-    fn = fns{j};
-    for i = 1:numel(trx),
-      if ~isnumeric(trx(i).(fn)),
-        isperframe(j) = false;
-        break;
-      end
-      if i == 1,
-        ncurr = trx(i).nframes - numel(trx(i).(fn));
-      else
-        if trx(i).nframes - numel(trx(i).(fn)) ~= ncurr,
+  if ~isempty(trx),
+    
+    for j = 1:numel(fns),
+      fn = fns{j};
+      for i = 1:numel(trx),
+        if ~isnumeric(trx(i).(fn)),
           isperframe(j) = false;
           break;
         end
+        if i == 1,
+          ncurr = trx(i).nframes - numel(trx(i).(fn));
+        else
+          if trx(i).nframes - numel(trx(i).(fn)) ~= ncurr,
+            isperframe(j) = false;
+            break;
+          end
+        end
+      end
+      if all([trx.nframes]) == trx(1).nframes && ...
+          trx(1).nframes > 1 && numel(trx(1).(fn)) == 1,
+        isperframe(j) = false;
+      end
+      if isperframe(j),
+        nperfn(j) = ncurr;
       end
     end
-    if all([trx.nframes]) == trx(1).nframes && ...
-        trx(1).nframes > 1 && numel(trx(1).(fn)) == 1,
-      isperframe(j) = false;
+    
+    nperfn = nperfn(isperframe);
+    fns = fns(isperframe);
+    ncropright = ceil(nperfn/2);
+    ncropleft = nperfn - ncropright;
+    
+    trxdelete = false(1,numel(trx));
+    for i = 1:numel(trx),
+      if trx(i).firstframe > i1,
+        trxdelete(i) = true;
+        continue;
+      end
+      
+      if trx(i).endframe < i0,
+        trxdelete(i) = true;
+        continue;
+      end
+      
+      trx(i).nframes = min(i1,trx(i).endframe)-max(i0,trx(i).firstframe)+1;
+      
+      if trx(i).firstframe < i0,
+        off = i0 - trx(i).firstframe;
+        for j = 1:numel(fns),
+          fn = fns{j};
+          trx(i).(fn) = trx(i).(fn)(off+1+ncropleft(j):end);
+        end
+        trx(i).firstframe = i0;
+      end
+      
+      if trx(i).endframe > i1,
+        for j = 1:numel(fns),
+          fn = fns{j};
+          trx(i).(fn) = trx(i).(fn)(1:trx(i).nframes-nperfn(j));
+        end
+        trx(i).endframe = i1;
+      end
+      
+      
+      trx(i).off = -trx(i).firstframe + 1;
+      
     end
-    if isperframe(j),
-      nperfn(j) = ncurr;
-    end
+    trx(trxdelete) = [];
+    
   end
-  
-  nperfn = nperfn(isperframe);
-  fns = fns(isperframe);
-  ncropright = ceil(nperfn/2);
-  ncropleft = nperfn - ncropright;
-  
-  trxdelete = false(1,numel(trx));
-  for i = 1:numel(trx),
-    if trx(i).firstframe > i1,
-      trxdelete(i) = true;
-      continue;
-    end
-    
-    if trx(i).endframe < i0,
-      trxdelete(i) = true;
-      continue;
-    end
-    
-    trx(i).nframes = min(i1,trx(i).endframe)-max(i0,trx(i).firstframe)+1;
-    
-    if trx(i).firstframe < i0,
-      off = i0 - trx(i).firstframe;
-      for j = 1:numel(fns),
-        fn = fns{j};
-        trx(i).(fn) = trx(i).(fn)(off+1+ncropleft(j):end);
-      end
-      trx(i).firstframe = i0;
-    end
-    
-    if trx(i).endframe > i1,
-      for j = 1:numel(fns),
-        fn = fns{j};
-        trx(i).(fn) = trx(i).(fn)(1:trx(i).nframes-nperfn(j));
-      end
-      trx(i).endframe = i1;
-    end
-    
-    
-    trx(i).off = -trx(i).firstframe + 1;
-    
-  end
-  trx(trxdelete) = [];
   
 end
 
