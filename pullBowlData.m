@@ -23,10 +23,11 @@ function data = pullBowlData(qObjs,varargin)
 assert(all(cellfun(@(x)isa(x,'SAGE.Query.Clause'),qObjs)));
 
 % allow dataset to be specified
-[dataset,rootdir,removemissingdata] = myparse(varargin,...
+[dataset,rootdir,removemissingdata,ignore_missingdata_fns] = myparse(varargin,...
   'dataset','data',...
   'rootdir',0,...
-  'removemissingdata',true);
+  'removemissingdata',true,...
+  'ignore_missingdata_fns',{'temperature_stream'});
 
 %% grab data
 dDS = SAGE.Lab('olympiad').assay('bowl').dataSet(dataset);
@@ -49,7 +50,7 @@ end
 
 %% group, clean, merge
 
-dData = datagroupclean(dData,rootdir,removemissingdata);
+dData = datagroupclean(dData,rootdir,removemissingdata,ignore_missingdata_fns);
 % no data to merge
 data = dData;
 
@@ -115,7 +116,7 @@ end
 fieldNames = unique(fieldNames);
 end
 
-function datamerge = datagroupclean(data,rootdir,removemissingdata)
+function datamerge = datagroupclean(data,rootdir,removemissingdata,ignore_missingdata_fns)
 
 data = convert2numeric(data);
 if isempty(data),
@@ -177,6 +178,24 @@ statfns = {'nflies_analyzed'
   'Z_perexp'
   'meanZ_perexp'};
 datamerge = format2substructs(datamerge,'hist',statfns,'hist',removemissingdata);
+
+% check for missing data
+ismissingdata = false(size(datamerge));
+if removemissingdata,
+  fns = setdiff(fieldnames(datamerge),ignore_missingdata_fns);
+  for i = 1:numel(fns),
+    fn = fns{i};
+    ismissingdatacurr = cellfun(@isempty,{datamerge.(fn)});
+    if ~all(ismissingdatacurr),
+      ismissingdata = ismissingdata | ismissingdatacurr;
+    end
+    if any(ismissingdatacurr),
+      warning(['The following experiments are missing data for %s:',sprintf('\n%s',datamerge(ismissingdatacurr).experiment_name)],fn);
+    end
+  end
+  datamerge(ismissingdata) = [];  
+end
+
 
 end
 
