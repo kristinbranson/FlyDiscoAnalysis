@@ -7,6 +7,7 @@ if ispc,
   addpath(genpath('E:\Code\box\PostAnalysis'));
   addpath E:\Code\JCtrax\misc;
   rmSvnPath;
+  rootdir = 'E:\Data\FlyBowl\bowl_data';
   
 else
   
@@ -16,11 +17,19 @@ else
   rmSvnPath;
   addpath /groups/branson/home/bransonk/tracking/code/JCtrax/misc;
   addpath /groups/branson/home/bransonk/tracking/code/JCtrax/filehandling;
-
+  rootdir = '/groups/sciserv/flyolympiad/Olympiad_Screen/fly_bowl/bowl_data';
+  
 end
 
 %% try the data selector
 
 dsf = SAGE.Lab('olympiad').assay('bowl');
-dataPull = @(x) pullBowlData(x,'dataset','score','rootdir','E:\Data\FlyBowl\bowl_data');
+dataPull = @(x) pullBowlData(x,'dataset','data','rootdir',rootdir);
 selector = OlyDat.DataSelector(dsf,dataPull);
+
+%% load in data chosen with data selector
+
+load('datacache20110420.mat');
+
+%% try the browser
+browser = startBowlBrowser(data);
