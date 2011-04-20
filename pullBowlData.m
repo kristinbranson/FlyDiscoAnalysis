@@ -55,7 +55,10 @@ data = dData;
 
 %% compute addn'l statistics
 
-% no additional statistics currently
+% add in exp_datenum
+for i = 1:numel(data),
+  data(i).edt = datenum(data(i).exp_datetime,'yyyymmddTHHMMSS');
+end
 
 end
 
@@ -160,7 +163,7 @@ statfns = {'nflies_analyzed'
   'meanZ_perexp'
   'meanprctiles_perexp'
   'stdprctiles_perexp'};
-datamerge = format2substructs(datamerge,'stats',statfns,'stats_perframe',removemissingdata);
+datamerge = format2substructs(datamerge,'stats',statfns,'stats',removemissingdata);
 statfns = {'nflies_analyzed'
   'flies_analyzed'
   'frac_linear_perfly'
@@ -173,7 +176,8 @@ statfns = {'nflies_analyzed'
   'std_frac_log_perexp'
   'Z_perexp'
   'meanZ_perexp'};
-datamerge = format2substructs(datamerge,'hist',statfns,'hist_perframe',removemissingdata);
+datamerge = format2substructs(datamerge,'hist',statfns,'hist',removemissingdata);
+
 end
 
 function in = convert2numeric(in)
@@ -266,7 +270,7 @@ for i = 1:numel(perframefns),
           datamerge(j).(fn) = mat2cell(reshape(datamerge(j).(fn),[n,nfliesanalyzedtotal]),n,nfliesanalyzed);
           for l = 1:nconditions,
             conditionfn1 = strrep(conditions{l},'flyany_frame','');
-            newfn = sprintf('%s_%s_%s',perframefn,statfn,conditionfn1);
+            newfn = sprintf('%s_%s_%s_%s',newprefix,perframefn,statfn,conditionfn1);
             datamerge(j).(newfn) = datamerge(j).(fn){l};
           end
         else
@@ -277,7 +281,7 @@ for i = 1:numel(perframefns),
           datamerge(j).(fn) = reshape(datamerge(j).(fn),[n,nconditions]);
           for l = 1:nconditions,
             conditionfn1 = strrep(conditions{l},'flyany_frame','');
-            newfn = sprintf('%s_%s_%s',perframefn,statfn,conditionfn1);
+            newfn = sprintf('%s_%s_%s_%s',newprefix,perframefn,statfn,conditionfn1);
             datamerge(j).(newfn) = datamerge(j).(fn)(:,l)';
           end
         end
@@ -296,7 +300,7 @@ for i = 1:numel(perframefns),
         warning('Missing data for %s, %s for experiment %s',newfn,statfn,datamerge(j).experiment_name);
         for l = 1:nconditions,
           conditionfn1 = strrep(conditions{l},'flyany_frame','');
-          newfn = sprintf('%s_%s_%s',perframefn,statfn,conditionfn1);
+          newfn = sprintf('%s_%s_%s_%s',newprefix,perframefn,statfn,conditionfn1);
           datamerge(j).(newfn) = [];
         end
       end
