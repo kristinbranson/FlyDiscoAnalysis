@@ -35,7 +35,7 @@ for i = 1:numel(behaviorvariables),
     continue;
   end
   % name, prettyname, validvalues, isscore, sequence, temperatureidx
-  bst = structappend(bst,OlyDat.BrowserStat(behaviorvariables{i},behaviorvariables{i},{},true,1,1),1);
+  bst = structappend(bst,OlyDat.BrowserStat(behaviorvariables{i},behaviorvariables{i},{}),1);
 end
 
 %% Grouping quantities
@@ -71,7 +71,7 @@ for i = 1:numel(experimentdetailvariables),
     ~isempty(regexp(fn,'^hours_','once'));
   if isscore,
     % name, prettyname, validvalues, isscore, sequence, temperatureidx
-    est = structappend(est,OlyDat.BrowserStat(experimentdetailvariables{i},experimentdetailvariables{i},{},true,1,1),1);
+    est = structappend(est,OlyDat.BrowserStat(experimentdetailvariables{i},experimentdetailvariables{i},{}),1);
   else
     tmp = {data.(fn)};
     if any(cellfun(@ischar,tmp)),
@@ -90,6 +90,6 @@ plots = {TornadoPlot;HistogramPlot;CorrelationPlot;MultiStatPlot};
 %% DetailHandler
 expdetailhandler = BowlExperimentDetailHandler;
 
-browser = OlyDat.Browser(data,plots,bst,gst,ast,est,expdetailhandler);
+browser = OlyDat.Browser(data(:),plots,bst,gst,ast,est,expdetailhandler);
 
 end
