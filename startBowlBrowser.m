@@ -57,7 +57,7 @@ for i = 1:numel(groupingvariables),
 end
 
 %% Auxiliary quantities
-edt          = OlyDat.BrowserStat('exp_datetime','exp_datetime');
+edt          = OlyDat.BrowserStat('edt','exp_datenum');
 ast          = [edt;bst];
 
 %% Experiment Detail Quantities
