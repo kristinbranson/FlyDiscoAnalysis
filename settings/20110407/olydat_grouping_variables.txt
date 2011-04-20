@@ -1,0 +1,13 @@
+apparatus_id
+bowl
+rig
+experimenter
+day_of_week
+camera
+computer
+harddrive
+handler_sorting
+handler_starvation
+handling_protocol
+plate
+top_plate
