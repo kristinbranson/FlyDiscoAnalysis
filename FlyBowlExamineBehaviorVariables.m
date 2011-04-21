@@ -139,8 +139,8 @@ queries(end+1:end+2) = {'data_type','stats_perframe_*'};
 queries(end+1:end+2) = {'flag_aborted',0};
 queries(end+1:end+2) = {'automated_pf','P'};
 queries(end+1:end+2) = {'experiment_name','FlyBowl_*'};
-%data = SAGEGetBowlData(queries{:},'removemissingdata',true);
-load('datacache_beh.mat','data');
+data = SAGEGetBowlData(queries{:},'removemissingdata',true);
+%load('datacache20110420.mat','data');
 if isempty(data),
   uiwait(warndlg(sprintf('No data for date range %s to %s',daterange{:}),'No data found'));
   if didinputweek,
@@ -194,19 +194,20 @@ stat = nan(nexpdirs,nstats);
 
 for i = 1:nstats,
 
-  % special case: flags
-  if ismember(examinestats{i}{1},flag_metadata_fns),
-    
-    % which set of flags
-    v = zeros(1,nexpdirs);
-    for j = 1:numel(flag_options),
-      v(ismember({data.(examinestats{i}{1})},flag_options{j})) = j;
-    end
-    v = (v/numel(flag_options)*2-1)*3;
-    stat(:,i) = v;
+  % flags are now binary
+%   % special case: flags
+%   if ismember(examinestats{i}{1},flag_metadata_fns),
+%     
+%     % which set of flags
+%     v = zeros(1,nexpdirs);
+%     for j = 1:numel(flag_options),
+%       v(ismember({data.(examinestats{i}{1})},flag_options{j})) = j;
+%     end
+%     v = (v/numel(flag_options)*2-1)*3;
+%     stat(:,i) = v;
     
   % special case: notes
-  elseif ismember(examinestats{i}{1},note_metadata_fns),
+  if ismember(examinestats{i}{1},note_metadata_fns),
     
     v = cellfun(@(s) ~isempty(s) && ~strcmpi(s,'None'),{data.(examinestats{i}{1})});
     v = double(v)*2*3-3; % make -3, 3
@@ -243,8 +244,8 @@ if isempty(examine_params.examinebehaviorvariablesstatsfilestr),
 else
   examinebehaviorvariablesstatsfile = fullfile(settingsdir,analysis_protocol,...
     examine_params.examinebehaviorvariablesstatsfilestr);
-  normstats = load(examinebehaviorvariablesstatsfile,'statsperexp');
-  normstats = normstats.statsperexp;
+  normstats = load(examinebehaviorvariablesstatsfile,'meanstatsperfly');
+  normstats = normstats.meanstatsperfly;
   mu = nan(1,nstats);
   sig = nan(1,nstats);
   for i = 1:nstats,
@@ -531,8 +532,7 @@ handles.hdate = hdate;
     s = cell(1,2);
     s{1} = expdir_bases{expdiri};
     % special case: flags
-    if ismember(examinestats{stati}{1},flag_metadata_fns) || ...
-        ismember(examinestats{stati}{1},note_metadata_fns) || ...
+    if ismember(examinestats{stati}{1},note_metadata_fns) || ...
         ismember(examinestats{stati}{1},string_metadata_fns),
       if iscell(data(expdiri).(examinestats{stati}{1})),
         s1 = sprintf('%s ',data(expdiri).(examinestats{stati}{1}){:});

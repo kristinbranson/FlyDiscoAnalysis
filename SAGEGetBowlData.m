@@ -192,12 +192,22 @@ numeric_fields = {...
   'flag_review'...
   };
 
+% flags were once strings but are now numeric
+flag_fields = {...
+  'flag_redo'...
+  'flag_review'...
+};
+
 for j = 1:numel(numeric_fields),
   fn = numeric_fields{j};
   if isfield(in,fn),
     for i = 1:numel(in),
       if ischar(in(i).(fn)),
-        in(i).(fn) = str2double(in(i).(fn));
+        v = str2double(in(i).(fn));
+        if isnan(v) && ismember(fn,flag_fields),
+          v = ~(isempty(in(i).(fn)) || strcmpi(in(i).(fn),'None'));
+        end          
+        in(i).(fn) = v;
       end
     end
   end
@@ -233,6 +243,7 @@ for i = 1:numel(perframefns),
   missingdata = false(size(datamerge));
   allconditions = {};
   for j = 1:numel(datamerge),
+    try
     datamerge(j).(newfn) = struct;
     conditions = datamerge(j).(conditionfn);
     nconditions = numel(conditions);
@@ -273,6 +284,10 @@ for i = 1:numel(perframefns),
           end
         end
       end
+    end
+    catch ME,
+      warning('Error splitting stats for experiment %s:\n%s',datamerge(j).experiment_name,getReport(ME));
+      missingdata(j) = true;
     end
   end
   % create empty structs for missing data

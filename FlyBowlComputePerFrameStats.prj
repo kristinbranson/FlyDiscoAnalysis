@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <deployment-project>
-  <configuration target="target.standalone" target-name="Standalone Application" name="FlyBowlComputePerFrameStats" location="/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis" file="/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/FlyBowlComputePerFrameStats.prj" build-checksum="3042357268">
+  <configuration target="target.standalone" target-name="Standalone Application" name="FlyBowlComputePerFrameStats" location="/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis" file="/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/FlyBowlComputePerFrameStats.prj" build-checksum="3844059944">
     <param.project.name>/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/FlyBowlComputePerFrameStats.prj</param.project.name>
     <param.target.type>Standalone Application</param.target.type>
     <param.appname>FlyBowlComputePerFrameStats</param.appname>
@@ -83,9 +83,106 @@
       <path>
         <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/filehandling</directory>
         <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/misc</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/lds/hmm</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/Ctrax/matlab/netlab</directory>
-        <directory>${PROJECT_ROOT}/../SAGE/MATLABInterface/Trunk</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/box/PostAnalysis</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/box/PostAnalysis/.svn</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/box/PostAnalysis/.svn/prop-base</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/box/PostAnalysis/.svn/props</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/box/PostAnalysis/.svn/text-base</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/box/PostAnalysis/.svn/tmp</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/box/PostAnalysis/.svn/tmp/prop-base</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/box/PostAnalysis/.svn/tmp/props</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/box/PostAnalysis/.svn/tmp/text-base</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/box/PostAnalysis/data</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/box/PostAnalysis/data/.svn</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/box/PostAnalysis/data/.svn/prop-base</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/box/PostAnalysis/data/.svn/props</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/box/PostAnalysis/data/.svn/text-base</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/box/PostAnalysis/data/.svn/tmp</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/box/PostAnalysis/data/.svn/tmp/prop-base</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/box/PostAnalysis/data/.svn/tmp/props</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/box/PostAnalysis/data/.svn/tmp/text-base</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/box/PostAnalysis/olydat analyzer</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/box/PostAnalysis/olydat analyzer/.svn</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/box/PostAnalysis/olydat analyzer/.svn/prop-base</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/box/PostAnalysis/olydat analyzer/.svn/props</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/box/PostAnalysis/olydat analyzer/.svn/text-base</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/box/PostAnalysis/olydat analyzer/.svn/tmp</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/box/PostAnalysis/olydat analyzer/.svn/tmp/prop-base</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/box/PostAnalysis/olydat analyzer/.svn/tmp/props</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/box/PostAnalysis/olydat analyzer/.svn/tmp/text-base</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/box/PostAnalysis/olydat browser</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/box/PostAnalysis/olydat browser/.svn</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/box/PostAnalysis/olydat browser/.svn/prop-base</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/box/PostAnalysis/olydat browser/.svn/props</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/box/PostAnalysis/olydat browser/.svn/text-base</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/box/PostAnalysis/olydat browser/.svn/tmp</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/box/PostAnalysis/olydat browser/.svn/tmp/prop-base</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/box/PostAnalysis/olydat browser/.svn/tmp/props</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/box/PostAnalysis/olydat browser/.svn/tmp/text-base</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/box/PostAnalysis/peak analyzer</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/box/PostAnalysis/peak analyzer/.svn</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/box/PostAnalysis/peak analyzer/.svn/prop-base</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/box/PostAnalysis/peak analyzer/.svn/props</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/box/PostAnalysis/peak analyzer/.svn/text-base</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/box/PostAnalysis/peak analyzer/.svn/tmp</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/box/PostAnalysis/peak analyzer/.svn/tmp/prop-base</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/box/PostAnalysis/peak analyzer/.svn/tmp/props</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/box/PostAnalysis/peak analyzer/.svn/tmp/text-base</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/cross_assay/matlab</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/cross_assay/matlab/.svn</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/cross_assay/matlab/.svn/prop-base</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/cross_assay/matlab/.svn/props</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/cross_assay/matlab/.svn/text-base</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/cross_assay/matlab/.svn/tmp</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/cross_assay/matlab/.svn/tmp/prop-base</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/cross_assay/matlab/.svn/tmp/props</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/cross_assay/matlab/.svn/tmp/text-base</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/cross_assay/matlab/data</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/cross_assay/matlab/data/.svn</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/cross_assay/matlab/data/.svn/prop-base</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/cross_assay/matlab/data/.svn/props</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/cross_assay/matlab/data/.svn/text-base</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/cross_assay/matlab/data/.svn/tmp</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/cross_assay/matlab/data/.svn/tmp/prop-base</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/cross_assay/matlab/data/.svn/tmp/props</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/cross_assay/matlab/data/.svn/tmp/text-base</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/cross_assay/matlab/graphics</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/cross_assay/matlab/graphics/.svn</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/cross_assay/matlab/graphics/.svn/prop-base</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/cross_assay/matlab/graphics/.svn/props</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/cross_assay/matlab/graphics/.svn/text-base</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/cross_assay/matlab/graphics/.svn/tmp</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/cross_assay/matlab/graphics/.svn/tmp/prop-base</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/cross_assay/matlab/graphics/.svn/tmp/props</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/cross_assay/matlab/graphics/.svn/tmp/text-base</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/cross_assay/matlab/graphics/distributionPlot</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/cross_assay/matlab/graphics/distributionPlot/.svn</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/cross_assay/matlab/graphics/distributionPlot/.svn/prop-base</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/cross_assay/matlab/graphics/distributionPlot/.svn/props</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/cross_assay/matlab/graphics/distributionPlot/.svn/text-base</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/cross_assay/matlab/graphics/distributionPlot/.svn/tmp</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/cross_assay/matlab/graphics/distributionPlot/.svn/tmp/prop-base</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/cross_assay/matlab/graphics/distributionPlot/.svn/tmp/props</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/cross_assay/matlab/graphics/distributionPlot/.svn/tmp/text-base</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/cross_assay/matlab/gui</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/cross_assay/matlab/gui/.svn</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/cross_assay/matlab/gui/.svn/prop-base</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/cross_assay/matlab/gui/.svn/props</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/cross_assay/matlab/gui/.svn/text-base</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/cross_assay/matlab/gui/.svn/tmp</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/cross_assay/matlab/gui/.svn/tmp/prop-base</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/cross_assay/matlab/gui/.svn/tmp/props</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/cross_assay/matlab/gui/.svn/tmp/text-base</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/cross_assay/matlab/math</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/cross_assay/matlab/math/.svn</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/cross_assay/matlab/math/.svn/prop-base</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/cross_assay/matlab/math/.svn/props</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/cross_assay/matlab/math/.svn/text-base</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/cross_assay/matlab/math/.svn/tmp</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/cross_assay/matlab/math/.svn/tmp/prop-base</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/cross_assay/matlab/math/.svn/tmp/props</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/cross_assay/matlab/math/.svn/tmp/text-base</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/SAGE/MATLABInterface/Trunk</directory>
         <directory>/groups/branson/home/bransonk/Documents/MATLAB</directory>
         <directory>${MATLAB_ROOT}/toolbox/matlab/general</directory>
         <directory>${MATLAB_ROOT}/toolbox/matlab/ops</directory>
@@ -219,6 +316,7 @@
         <directory>${MATLAB_ROOT}/toolbox/bioinfo/biodemos</directory>
         <directory>${MATLAB_ROOT}/toolbox/bioinfo/graphtheory</directory>
         <directory>${MATLAB_ROOT}/toolbox/shared/testmeaslib/simulink</directory>
+        <directory>${MATLAB_ROOT}/toolbox/connector/connector</directory>
       </path>
     </matlab>
     <platform>
