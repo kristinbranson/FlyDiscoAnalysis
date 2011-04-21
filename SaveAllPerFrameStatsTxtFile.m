@@ -40,6 +40,7 @@ for i = 1:nfields,
     fn = fns{j};
     isdata{jj} = ~isnan(statsperfly.(fn).Z);
   end
+  badconditions = ~cellfun(@any,isdata);
   
   % conditions concatenated together for this field
   fprintf(fid,'%s_conditions',field);
@@ -57,7 +58,9 @@ for i = 1:nfields,
   % flies analyzed per condition
   fprintf(fid,'\n%s_flies_analyzed',field);
   for jj = 1:nidx,
-    fprintf(fid,',%d',find(isdata{jj}));
+    if ~badconditions(jj),
+      fprintf(fid,',%d',find(isdata{jj}));
+    end
   end
   
   % mean per fly
@@ -65,7 +68,9 @@ for i = 1:nfields,
   for jj = 1:nidx,
     j = idx(jj);
     fn = fns{j};
-    fprintf(fid,',%f',statsperfly.(fn).mean(isdata{jj}));
+    if ~badconditions(jj),
+      fprintf(fid,',%f',statsperfly.(fn).mean(isdata{jj}));
+    end
   end
   
   % std per fly
@@ -73,7 +78,9 @@ for i = 1:nfields,
   for jj = 1:nidx,
     j = idx(jj);
     fn = fns{j};
-    fprintf(fid,',%f',statsperfly.(fn).std(isdata{jj}));
+    if ~badconditions(jj),
+      fprintf(fid,',%f',statsperfly.(fn).std(isdata{jj}));
+    end
   end
   
   % number of frames per fly
@@ -81,7 +88,9 @@ for i = 1:nfields,
   for jj = 1:nidx,
     j = idx(jj);
     fn = fns{j};
-    fprintf(fid,',%d',statsperfly.(fn).Z(isdata{jj}));
+    if ~badconditions(jj),
+      fprintf(fid,',%d',statsperfly.(fn).Z(isdata{jj}));
+    end
   end
 
   % fraction of trajectory per fly
@@ -89,7 +98,9 @@ for i = 1:nfields,
   for jj = 1:nidx,
     j = idx(jj);
     fn = fns{j};
-    fprintf(fid,',%f',statsperfly.(fn).fracframesanalyzed(isdata{jj}));
+    if ~badconditions(jj),
+      fprintf(fid,',%f',statsperfly.(fn).fracframesanalyzed(isdata{jj}));
+    end
   end
   
   % percentiles per fly
@@ -97,7 +108,9 @@ for i = 1:nfields,
   for jj = 1:nidx,
     j = idx(jj);
     fn = fns{j};
-    fprintf(fid,',%f',statsperfly.(fn).prctiles(:,isdata{jj}));
+    if ~badconditions(jj),
+      fprintf(fid,',%f',statsperfly.(fn).prctiles(:,isdata{jj}));
+    end
   end
   fprintf(fid,'\n');
   

@@ -24,7 +24,7 @@ end
 %% try the data selector
 
 dsf = SAGE.Lab('olympiad').assay('bowl');
-dataPull = @(x) pullBowlData(x,'dataset','score','rootdir',rootdir);
+dataPull = @(x) pullBowlData(x,'dataset','data','rootdir',rootdir);
 selector = OlyDat.DataSelector(dsf,dataPull);
 
 %% load in data chosen with data selector

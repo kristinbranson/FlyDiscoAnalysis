@@ -17,7 +17,7 @@ end
 
 %% parameters
 
-analysis_protocol = '20110222';
+analysis_protocol = '20110407';
 
 %% which experiments
 
