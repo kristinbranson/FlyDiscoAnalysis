@@ -20,6 +20,7 @@ handles = struct;
 
 maxnundo = 5;
 maxperiodsprev = 10;
+tempfilescreated = {};
 
 didinputweek = ~isempty(maxdatenum) && ~isempty(datenumnow);
 if ~didinputweek,
@@ -111,7 +112,10 @@ needsave = false;
 
 flag_metadata_fns = {'flag_redo','flag_review'};
 note_metadata_fns = {'notes_behavioral','notes_technical'};
-string_metadata_fns = {'line_name'};
+string_metadata_fns = {'line_name','manual_pf','automated_pf','experiment_name','experiment_protocol',...
+  'experimenter','exp_datetime','bowl','camera','computer','harddrive','apparatus_id','cross_date','effector',...
+  'environmental_chamber','gender','genotype','handler_sorting','handler_starvation','plate','rearing_protocol',...
+  'rig','top_plate','file_system_path','manual_behavior'};
 flag_options = {{'None',''},{'Rearing problem','Flies look sick',...
   'See behavioral notes','See technical notes'}};
 
@@ -139,8 +143,8 @@ queries(end+1:end+2) = {'data_type','stats_perframe_*'};
 queries(end+1:end+2) = {'flag_aborted',0};
 queries(end+1:end+2) = {'automated_pf','P'};
 queries(end+1:end+2) = {'experiment_name','FlyBowl_*'};
-data = SAGEGetBowlData(queries{:},'removemissingdata',true);
-%load('datacache20110420.mat','data');
+%data = SAGEGetBowlData(queries{:},'removemissingdata',true,'rootdir',rootdatadir);
+load('datacache20110420.mat','data');
 if isempty(data),
   uiwait(warndlg(sprintf('No data for date range %s to %s',daterange{:}),'No data found'));
   if didinputweek,
@@ -182,20 +186,34 @@ expdir_bases = cellfun(@(s) regexprep(s,'^FlyBowl_',''),expdir_bases,'UniformOut
 
 %% for now, add on extra diagnostics here. we will store these later
 for i = 1:nexpdirs,
-  data(i).file_system_path = fullfile(rootdatadir,expdir_bases{i});
-  data(i).manual_behavior = 'U';
+  if ~isfield(data,'file_system_path'),
+    data(i).file_system_path = fullfile(rootdatadir,expdir_bases{i});
+  end
+  if ~isfield(data,'manual_behavior'),
+    data(i).manual_behavior = 'U';
+  end
 end
 expdirs = {data.file_system_path};
+
 
 %% get behavior variables
 
 nstats = numel(examinestats);
-stat = nan(nexpdirs,nstats);
+% average over lines
+
+[linenames,~,lineidx] = unique({data.line_name});
+nlines = numel(linenames);
+stat = nan(nlines,nstats);
+expstat = nan(nexpdirs,nstats);
 
 for i = 1:nstats,
 
   % flags are now binary
-%   % special case: flags
+  % special case: flags
+  if ismember(examinestats{i}{1},flag_metadata_fns),
+    % make -3, 3
+    v = double([data.(examinestats{i}{1})])*2*3-3;
+  end
 %   if ismember(examinestats{i}{1},flag_metadata_fns),
 %     
 %     % which set of flags
@@ -205,20 +223,28 @@ for i = 1:nstats,
 %     end
 %     v = (v/numel(flag_options)*2-1)*3;
 %     stat(:,i) = v;
+
     
   % special case: notes
   if ismember(examinestats{i}{1},note_metadata_fns),
     
     v = cellfun(@(s) ~isempty(s) && ~strcmpi(s,'None'),{data.(examinestats{i}{1})});
     v = double(v)*2*3-3; % make -3, 3
-    stat(:,i) = v;
+    % take average over lines
+    for j = 1:nlines,
+      stat(j,i) = nanmean(v(lineidx==j));
+    end
+    %stat(:,i) = v;
 
   % special case: strings
   elseif ismember(examinestats{i}{1},string_metadata_fns),
     [~,~,v] = unique({data.(examinestats{i}{1})});
     v = v - 1;
     v = (v/max(v)*2-1)*3;
-    stat(:,i) = v;
+    for j = 1:nlines,
+      stat(j,i) = nanmean(v(lineidx==j));
+    end
+    %stat(:,i) = v;
 
   % numbers
   else
@@ -229,9 +255,14 @@ for i = 1:nstats,
     end
     badidx = cellfun(@isempty,datacurr);
     for j = find(badidx),
+      datacurr{j} = nan;
       warning('No data for stat %s experiment %s',sprintf('%s,',examinestats{i}{:}),strtrim(data(j).experiment_name));
     end
-    stat(~badidx,i) = cell2mat(datacurr);
+    datacurr = cell2mat(datacurr);
+    for j = 1:nlines,
+      stat(j,i) = nanmean(datacurr(lineidx==j));
+    end
+    expstat(:,i) = datacurr;
     
   end
 end
@@ -311,23 +342,23 @@ hax = axes('Parent',hfig,'Units','Normalized','Position',examine_params.axespos)
 % plot 0
 plot(hax,[0,nstats+1],[0,0],'k-','HitTest','off');
 hold(hax,'on');
-colors = jet(nexpdirs)*.7;
+colors = jet(nlines)*.7;
 drawnow;
 
 %% plot diagnostics
 
-if nexpdirs == 1,
+if nlines == 1,
   off = 0;
 else
-  off = (2*((1:nexpdirs)-(nexpdirs+1)/2)/(nexpdirs-1))*examine_params.offx;
+  off = (2*((1:nlines)-(nlines+1)/2)/(nlines-1))*examine_params.offx;
 end
 
-h = nan(1,nexpdirs);
-x = nan(nexpdirs,nstats);
-for expdiri = 1:nexpdirs,
-  x(expdiri,:) = (1:nstats)+off(expdiri);
-  h(expdiri) = plot(hax,x(expdiri,:),normstat(expdiri,:),'o',...
-    'color',colors(expdiri,:),'markerfacecolor',colors(expdiri,:),...
+h = nan(1,nlines);
+x = nan(nlines,nstats);
+for linei = 1:nlines,
+  x(linei,:) = (1:nstats)+off(linei);
+  h(linei) = plot(hax,x(linei,:),normstat(linei,:),'o',...
+    'color',colors(linei,:),'markerfacecolor',colors(linei,:),...
     'markersize',6,'HitTest','off');
 end
 
@@ -353,11 +384,24 @@ badidx = cellfun(@isempty,{data.manual_behavior});
 for j = find(badidx),
   warning('No data for manual_behavior, experiment %s',strtrim(data(j).experiment_name));
 end
-manual_behavior = repmat('U',[1,nexpdirs]);
-manual_behavior(~badidx) = [data.manual_behavior];
+manual_behavior = repmat('U',[1,nlines]);
+for i = 1:nlines,
+  s1 = lower([data(lineidx==i).manual_behavior]);
+  if ismember('n',s1) && ismember('d',s1),
+    warning('Experiments for line %s are marked as both normal (%d/%d) and different (%d/%d). Using unknown.',...
+      linenames(i),nnz(s1=='n'),numel(s1),nnz(s1=='d'),numel(s1));
+    manual_behavior(i) = 'U';
+  elseif ismember('n',s1),
+    manual_behavior(i) = 'N';
+  elseif ismember('d',s1'),
+    manual_behavior(i) = 'D';
+  else
+    manual_behavior(i) = 'U';
+  end
+end
 idx_manual_n = lower(manual_behavior) == 'n';
 idx_manual_d = lower(manual_behavior) == 'd';
-idx_visible = true(1,nexpdirs);
+idx_visible = true(1,nlines);
 set(h(idx_manual_d),'Marker','+');
 set(h(idx_manual_n),'Marker','x');
 
@@ -365,7 +409,7 @@ set(h(idx_manual_n),'Marker','x');
 
 hselected = plot(0,0,'o','color','k','Visible','off','HitTest','off','MarkerSize',10,'MarkerFaceColor','k');
 hselected1 = plot(0,0,'o','color','r','Visible','off','HitTest','off','MarkerSize',10,'MarkerFaceColor','r');
-expdiri_selected = [];
+linei_selected = [];
 stati_selected = [];
 
 
@@ -446,7 +490,7 @@ set([hmanual_behavior.text,hmanual_behavior.popup,hmanual_behavior.pushbutton,hm
 
 hnotes = struct;
 hinfo = struct;
-info = false(nexpdirs,nstats);
+info = false(nlines,nstats);
 
 
 %% date
@@ -527,22 +571,31 @@ handles.hdate = hdate;
 
 %% print function
 
-  function s = printfun(expdiri,stati)
+  function s = printfun(linei,stati)
     
-    s = cell(1,2);
-    s{1} = expdir_bases{expdiri};
-    % special case: flags
+    expdiris = find(lineidx == linei);
+    s = cell(1,2+numel(expdiris));
+    s{1} = linenames{linei};
+    % special case: notes, strings
     if ismember(examinestats{stati}{1},note_metadata_fns) || ...
         ismember(examinestats{stati}{1},string_metadata_fns),
-      if iscell(data(expdiri).(examinestats{stati}{1})),
-        s1 = sprintf('%s ',data(expdiri).(examinestats{stati}{1}){:});
-      else
-        s1 = data(expdiri).(examinestats{stati}{1});
+      s{2} = sprintf('%s =',statnames{stati});
+      for expdirii = 1:numel(expdiris),
+        expdiri = expdiris(expdirii);
+        if iscell(data(expdiri).(examinestats{stati}{1})),
+          s{2+expdirii} = [expdir_bases{expdiri},': ',sprintf('%s ',data(expdiri).(examinestats{stati}{1}){:})];
+        else
+          s{2+expdirii} = [expdir_bases{expdiri},': ',data(expdiri).(examinestats{stati}{1})];
+        end
       end
-      s{2} = sprintf('%s = %s',statnames{stati},s1);
     else
-      s{2} = sprintf('%s = %s = %s std',statnames{stati},...
-        num2str(stat(expdiri,stati)),num2str(normstat(expdiri,stati)));
+      s{2} = sprintf('mean(%s) = %s = %s std',statnames{stati},...
+        num2str(stat(linei,stati)),num2str(normstat(linei,stati)));
+      for expdirii = 1:numel(expdiris),
+        expdiri = expdiris(expdirii);
+        s{2+expdirii} = [expdir_bases{expdiri},': ',num2str(expstat(expdiri,stati))];
+      end
+
     end
     
   end
@@ -573,7 +626,7 @@ handles.hdate = hdate;
         set(hselected1,'Visible','off');
         set(hmenu.open,'Enable','off');
         stati_selected = [];
-        expdiri_selected = [];
+        linei_selected = [];
         set(htext,'String','');
         set([hmanual_behavior.text,hmanual_behavior.popup,hmanual_behavior.pushbutton,hmanual_behavior.pushbutton_info],'Visible','off');
         return;
@@ -582,15 +635,16 @@ handles.hdate = hdate;
       SelectionType = get(hfig,'SelectionType');
       set([hmanual_behavior.text,hmanual_behavior.popup,hmanual_behavior.pushbutton,hmanual_behavior.pushbutton_info],'Visible','on');
 
-      [expdiri_selected,stati_selected] = ind2sub([tmpn,nstats],closest);
-      expdiri_selected = tmpidx(expdiri_selected);
+      [linei_selected,stati_selected] = ind2sub([tmpn,nstats],closest);
+      linei_selected = tmpidx(linei_selected);
 
       UpdateStatSelected();
       
-      set(hselected,'XData',x(expdiri_selected,:),'YData',normstat(expdiri_selected,:),'Visible','on');
+      set(hselected,'XData',x(linei_selected,:),'YData',normstat(linei_selected,:),'Visible','on');
       set(hmenu.open,'Enable','on');
       
-      manual_behavior_curr = data(expdiri_selected).manual_behavior;
+      % TODO!
+      manual_behavior_curr = manual_behavior(linei_selected);
       s = get(hmanual_behavior.popup,'String');
       vcurr = find(strncmpi(manual_behavior_curr,s,1),1);
       if isempty(vcurr),
@@ -600,12 +654,22 @@ handles.hdate = hdate;
       
       if strcmp(SelectionType,'open'),
         
-        % open experiment
-        if ispc,
-          winopen(expdirs{expdiri_selected});
-        else
-          web(expdirs{expdiri_selected},'-browser');
+        % create an html page with links to all experiments
+        filenamecurr = fullfile(tempdir,[linenames{linei_selected},'.html']);
+        fid = fopen(filenamecurr,'w');
+        fprintf(fid,'<html>\n<title>%s</title>\n<body>\n',linenames{linei_selected});
+        fprintf(fid,'<h1>Line %s</h1>\n',linenames{linei_selected});
+        fprintf(fid,'<ul>\n');
+        expdiris = find(lineidx == linei_selected);
+        for expdiri = expdiris(:)',
+          fprintf(fid,'  <li><a href="%s">%s</a></li>\n',expdirs{expdiri},expdir_bases{expdiri});
         end
+        fprintf(fid,'</ul>\n');
+        fprintf(fid,'</body>\n</html>\n');
+        fclose(fid);
+        tempfilescreated{end+1} = filenamecurr;
+        % open this page
+        web(filenamecurr,'-browser');
       end
       
     catch ME,
@@ -622,10 +686,10 @@ handles.hdate = hdate;
   function UpdateStatSelected()
     
     %set(hfig,'Interruptible','off');
-    s = printfun(expdiri_selected,stati_selected);
+    s = printfun(linei_selected,stati_selected);
     set(htext,'String',s);
-    set(hselected1,'XData',x(expdiri_selected,stati_selected),...
-      'YData',normstat(expdiri_selected,stati_selected),'visible','on');
+    set(hselected1,'XData',x(linei_selected,stati_selected),...
+      'YData',normstat(linei_selected,stati_selected),'visible','on');
     set(hmenu.open,'Enable','on');
     set(hx,'Color','k','FontWeight','normal');
     set(hx(stati_selected),'Color','r','FontWeight','bold');
@@ -684,7 +748,7 @@ handles.hdate = hdate;
     end
     
     maxdatenum = maxdatenum + period;
-    handles = FlyBowlExamineExperimentVariables(...
+    handles = FlyBowlExamineBehaviorVariables(...
       'analysis_protocol',analysis_protocol,...
       'settingsdir',settingsdir,...
       'datalocparamsfilestr',datalocparamsfilestr,...
@@ -733,8 +797,8 @@ handles.hdate = hdate;
   
   function manual_behavior_popup_Callback(hObject,event) %#ok<INUSD>
     
-    if isempty(expdiri_selected),
-      warning('No experiment selected');
+    if isempty(linei_selected),
+      warning('No line selected');
       return;
     end
 
@@ -744,48 +808,50 @@ handles.hdate = hdate;
     vcurr = get(hObject,'Value');
     manual_behavior_full = s{vcurr};
     manual_behavior_new = manual_behavior_full(1);
-    data(expdiri_selected).manual_behavior = manual_behavior_new;
+    for expdiri = find(lineidx==linei_selected),
+      data(expdiri).manual_behavior = manual_behavior_new;
+    end
     %SetManualPF(data(expdiri_selected),sage_db);
-    manual_behavior(expdiri_selected) = manual_behavior_new;
+    manual_behavior(linei_selected) = manual_behavior_new;
 
     switch lower(manual_behavior_new),
       
       case 'n',
         
         % update indices
-        idx_manual_n(expdiri_selected) = true;
-        idx_manual_d(expdiri_selected) = false;
+        idx_manual_n(linei_selected) = true;
+        idx_manual_d(linei_selected) = false;
 
         % update marker
-        set(h(expdiri_selected),'Marker','+');
+        set(h(linei_selected),'Marker','+');
 
         % update visible
-        set(h(expdiri_selected),'Visible',get(hmenu.plot_manual_n,'Checked'));
+        set(h(linei_selected),'Visible',get(hmenu.plot_manual_n,'Checked'));
 
       case 'd',
 
         % update indices
-        idx_manual_n(expdiri_selected) = false;
-        idx_manual_d(expdiri_selected) = true;
+        idx_manual_n(linei_selected) = false;
+        idx_manual_d(linei_selected) = true;
 
         % update marker
-        set(h(expdiri_selected),'Marker','x');
+        set(h(linei_selected),'Marker','x');
         
         % update visible
-        set(h(expdiri_selected),'Visible',get(hmenu.plot_manual_d,'Checked'));
+        set(h(linei_selected),'Visible',get(hmenu.plot_manual_d,'Checked'));
         
       case 'u',
         
         % update indices
-        idx_manual_n(expdiri_selected) = false;
-        idx_manual_d(expdiri_selected) = false;
+        idx_manual_n(linei_selected) = false;
+        idx_manual_d(linei_selected) = false;
         
         % update marker
-        set(h(expdiri_selected),'Marker','o');
+        set(h(linei_selected),'Marker','o');
 
         % update visible
-        idx_visible(expdiri_selected) = true;
-        set(h(expdiri_selected),'Visible','on');
+        idx_visible(linei_selected) = true;
+        set(h(linei_selected),'Visible','on');
         
       otherwise
         
@@ -808,6 +874,7 @@ handles.hdate = hdate;
    notes_technical_pos = [.02,.57,.96,.35];
    text_technical_pos = [.02,.92,.96,.06];
    
+   % TODO
    if iscell(data(expdiri_selected).notes_technical),
      notes_technical = data(expdiri_selected).notes_technical;
    else
@@ -863,22 +930,22 @@ handles.hdate = hdate;
       v = ~isempty(s) && ~strcmpi(s,'None');
       stat(expdiri_selected,tmpi) = double(v);
       normstat(expdiri_selected,tmpi) = ...
-        (stat(expdiri_selected,tmpi) - mu(tmpi))/z(tmpi);
-      set(h(expdiri_selected),'YData',normstat(expdiri_selected,:));
-      set(hselected,'YData',normstat(expdiri_selected,:));
-      set(hselected1,'YData',normstat(expdiri_selected,stati_selected));
+        (stat(linei_selected,tmpi) - mu(tmpi))/z(tmpi);
+      set(h(linei_selected),'YData',normstat(linei_selected,:));
+      set(hselected,'YData',normstat(linei_selected,:));
+      set(hselected1,'YData',normstat(linei_selected,stati_selected));
     end
 
     tmpi = find(strcmpi(examinestats,'notes_technical'),1);
     if ~isempty(tmpi),
       s = data(expdiri_selected).notes_technical;
       v = ~isempty(s) && ~strcmpi(s,'None');
-      stat(expdiri_selected,tmpi) = double(v);
-      normstat(expdiri_selected,tmpi) = ...
-        (stat(expdiri_selected,tmpi) - mu(tmpi))/z(tmpi);
-      set(h(expdiri_selected),'YData',normstat(expdiri_selected,:));
-      set(hselected,'YData',normstat(expdiri_selected,:));
-      set(hselected1,'YData',normstat(expdiri_selected,stati_selected));
+      stat(linei_selected,tmpi) = double(v);
+      normstat(linei_selected,tmpi) = ...
+        (stat(linei_selected,tmpi) - mu(tmpi))/z(tmpi);
+      set(h(linei_selected),'YData',normstat(linei_selected,:));
+      set(hselected,'YData',normstat(linei_selected,:));
+      set(hselected1,'YData',normstat(linei_selected,stati_selected));
     end
     needsave = true;
     
@@ -965,6 +1032,7 @@ handles.hdate = hdate;
 
     fid = fopen(savefilename,'w');
     fprintf(fid,'#experiment_name\tmanual_behavior\tnotes_behavioral\tnotes_technical\n');
+    % TODO
     for tmpi = 1:nexpdirs,
       if iscell(data(tmpi).notes_behavioral),
         notes_behavioral = sprintf('%s\\n',data(tmpi).notes_behavioral{:});
