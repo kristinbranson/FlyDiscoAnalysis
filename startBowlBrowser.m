@@ -67,9 +67,9 @@ for i = 1:numel(experimentdetailvariables),
   if ~isfield(data,fn),
     continue;
   end
-  isscore = ~isempty(regexp(fn,'^seconds_','once')) || ...
+  isnumber = ~isempty(regexp(fn,'^seconds_','once')) || ...
     ~isempty(regexp(fn,'^hours_','once'));
-  if isscore,
+  if isnumber,
     % name, prettyname, validvalues, isscore, sequence, temperatureidx
     est = structappend(est,OlyDat.BrowserStat(experimentdetailvariables{i},experimentdetailvariables{i},{}),1);
   else

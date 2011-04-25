@@ -35,4 +35,4 @@ params = {'settingsdir',settingsdir,...
 
 %% 
 
-FlyBowlExamineExperimentVariables(params{:});
+FlyBowlExamineExperimentVariables(params{:},'loadcacheddata','datacache_experimentvariables.mat');
