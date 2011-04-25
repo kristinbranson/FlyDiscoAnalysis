@@ -1005,16 +1005,23 @@ handles.hdate = hdate;
 
   function save_Callback(hObject,event) %#ok<INUSD>
     
-    [savefilename1,savepath1] = uiputfile(savefilename,'Save manual_behavior tsv');
-    if ~ischar(savefilename1),
-      return;
+    while true
+      [savefilename1,savepath1] = uiputfile(savefilename,'Save manual_behavior tsv');
+      if ~ischar(savefilename1),
+        return;
+      end
+      savefilename = fullfile(savepath1,savefilename1);
+      rc.savepath = savepath1;
+      [savepath2,savefilename2] = fileparts(savefilename);
+      savefilename2 = fullfile(savepath2,[savefilename2,'_diagnosticinfo.mat']);
+      
+      fid = fopen(savefilename,'w');
+      if fid < 0,
+        warndlg(sprintf('Could not open file %s for writing. Make sure it is not open in another program.',savefilename),'Could not save');
+        continue;
+      end
+      break;
     end
-    savefilename = fullfile(savepath1,savefilename1);
-    rc.savepath = savepath1;
-    [savepath2,savefilename2] = fileparts(savefilename);
-    savefilename2 = fullfile(savepath2,[savefilename2,'_diagnosticinfo.mat']);
-
-    fid = fopen(savefilename,'w');
     fprintf(fid,'#line_name\texperiment_name\tmanual_behavior\tnotes_curation\n');
     % TODO
     for tmpi = 1:nlines,
@@ -1032,7 +1039,7 @@ handles.hdate = hdate;
       end
     end
     fclose(fid);
-    save(savefilename2,'info','data','examinestats');
+    save(savefilename2,'info','data','examinestats','linenames');
     needsave = false;
     
   end
@@ -1275,7 +1282,7 @@ handles.hdate = hdate;
 
     state = undolist(end);
 
-    experiment_names = {data.experiment_names};
+    experiment_names = {data.experiment_name};
     fid = fopen(loadfilename,'r');
     while true,
       
