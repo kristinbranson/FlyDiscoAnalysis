@@ -119,7 +119,7 @@ note_metadata_fns = {'notes_behavioral','notes_technical','notes_curation'};
 string_metadata_fns = {'line_name','manual_pf','automated_pf','experiment_name','experiment_protocol',...
   'experimenter','exp_datetime','bowl','camera','computer','harddrive','apparatus_id','cross_date','effector',...
   'environmental_chamber','gender','genotype','handler_sorting','handler_starvation','plate','rearing_protocol',...
-  'rig','top_plate','file_system_path','manual_behavior'};
+  'rig','top_plate','file_system_path','manual_behavior','cross_date','cross_handler','handler_sorting','handler_starvation'};
 flag_options = {{'None',''},{'Rearing problem','Flies look sick',...
   'See behavioral notes','See technical notes'}};
 
@@ -258,11 +258,19 @@ for i = 1:nstats,
     v = double(v)*2*3-3; % make -3, 3
     stat(:,i) = v;
 
-  % special case: strings
+
+% special case: strings
   elseif ismember(examinestats{i}{1},string_metadata_fns),
     [~,~,v] = unique({data.(examinestats{i}{1})});
     v = v - 1;
     v = (v/max(v)*2-1)*3;
+    stat(:,i) = v;
+    [~,~,v] = unique({data.(examinestats{i}{1})});
+    for tmpi = 1:length(v)
+        if isnan(v(tmpi))
+            v(tmpi) = 0;
+        end
+    end
     stat(:,i) = v;
     
   % numbers
