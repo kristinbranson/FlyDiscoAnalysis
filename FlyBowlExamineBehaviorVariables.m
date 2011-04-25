@@ -156,8 +156,7 @@ if ~didloaddata,
   queries(end+1:end+2) = {'flag_aborted',0};
   queries(end+1:end+2) = {'automated_pf','P'};
   queries(end+1:end+2) = {'experiment_name','FlyBowl_*'};
-  %data = SAGEGetBowlData(queries{:},'removemissingdata',true,'rootdir',rootdatadir);
-  load('datacache20110420.mat','data');
+  data = SAGEGetBowlData(queries{:},'removemissingdata',true,'rootdir',rootdatadir);
   if isempty(data),
     uiwait(warndlg(sprintf('No data for date range %s to %s',daterange{:}),'No data found'));
     if didinputweek,
@@ -229,12 +228,11 @@ expstat = nan(nexpdirs,nstats);
 
 for i = 1:nstats,
 
-  % flags are now binary
   % special case: flags
   if ismember(examinestats{i}{1},flag_metadata_fns),
+    % flags are now binary
     % make -3, 3
     v = double([data.(examinestats{i}{1})])*2*3-3;
-  end
 %   if ismember(examinestats{i}{1},flag_metadata_fns),
 %     
 %     % which set of flags
@@ -247,7 +245,7 @@ for i = 1:nstats,
 
     
   % special case: notes
-  if ismember(examinestats{i}{1},note_metadata_fns),
+  elseif ismember(examinestats{i}{1},note_metadata_fns),
     
     v = cellfun(@(s) ~isempty(s) && ~strcmpi(s,'None'),{data.(examinestats{i}{1})});
     v = double(v)*2*3-3; % make -3, 3
@@ -358,7 +356,7 @@ clf(hfig,'reset');
 if isempty(figpos),
   figpos = examine_params.figpos;
 end
-set(hfig,'Units','Pixels','Position',figpos,'MenuBar','none','ToolBar','figure','CloseRequestFcn',@close_Callback);
+set(hfig,'Units','Pixels','Position',figpos,'MenuBar','none','ToolBar','figure');
 hax = axes('Parent',hfig,'Units','Normalized','Position',examine_params.axespos);
 % plot 0
 plot(hax,[0,nstats+1],[0,0],'k-','HitTest','off');
