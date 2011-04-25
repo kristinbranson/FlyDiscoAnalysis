@@ -263,6 +263,7 @@ for i = 1:numel(perframefns),
   missingdata = false(size(datamerge));
   allconditions = {};
   for j = 1:numel(datamerge),
+    try
     conditions = datamerge(j).(conditionfn);
     nconditions = numel(conditions);
     nfliesanalyzed = datamerge(j).(nfliesanalyzedfn);
@@ -305,6 +306,10 @@ for i = 1:numel(perframefns),
           end
         end
       end
+    end
+    catch ME,
+      warning('Error splitting stats for experiment %s:\n%s',datamerge(j).experiment_name,getReport(ME));
+      missingdata(j) = true;
     end
   end
   % create empty structs for missing data

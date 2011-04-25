@@ -3,7 +3,8 @@ function handles = FlyBowlExamineExperimentVariables(varargin)
 handles = struct;
 
 [analysis_protocol,settingsdir,datalocparamsfilestr,hfig,period,maxdatenum,...
-  figpos,datenumnow,sage_params_path,sage_db,username,rootdatadir,dataset,leftovers] = ...
+  figpos,datenumnow,sage_params_path,sage_db,username,rootdatadir,dataset,...
+  loadcacheddata,leftovers] = ...
   myparse_nocheck(varargin,...
   'analysis_protocol','current',...
   'settingsdir','/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/settings',...
@@ -17,7 +18,8 @@ handles = struct;
   'sage_db',[],...
   'username','',...
   'rootdatadir','/groups/sciserv/flyolympiad/Olympiad_Screen/fly_bowl/bowl_data',...
-  'dataset','data');
+  'dataset','data',...
+  'loadcacheddata','');
 
 maxnundo = 5;
 maxperiodsprev = 10;
@@ -88,7 +90,7 @@ if havequestions,
   if ~success,
     return;
   end
-  if ~isempty(username),
+  if ~isempty(newusername),
     rc.username = newusername;
   end
   if ~didinputweek,
@@ -103,6 +105,9 @@ if havequestions,
   
 end
 
+if ~isfield(rc,'savepath'),
+  rc.savepath = '';
+end
 savefilename = fullfile(rc.savepath,sprintf('DataCuration_FlyBowl_%s_%sto%s.tsv',...
   rc.username,datestr(mindatenum,'yyyymmdd'),datestr(maxdatenum,'yyyymmdd')));
 needsave = false;
@@ -110,8 +115,11 @@ needsave = false;
 %% string metadata
 
 flag_metadata_fns = {'flag_redo','flag_review'};
-note_metadata_fns = {'notes_behavioral','notes_technical'};
-string_metadata_fns = {'line_name'};
+note_metadata_fns = {'notes_behavioral','notes_technical','notes_curation'};
+string_metadata_fns = {'line_name','manual_pf','automated_pf','experiment_name','experiment_protocol',...
+  'experimenter','exp_datetime','bowl','camera','computer','harddrive','apparatus_id','cross_date','effector',...
+  'environmental_chamber','gender','genotype','handler_sorting','handler_starvation','plate','rearing_protocol',...
+  'rig','top_plate','file_system_path','manual_behavior'};
 flag_options = {{'None',''},{'Rearing problem','Flies look sick',...
   'See behavioral notes','See technical notes'}};
 
@@ -135,44 +143,56 @@ data_types = {'ufmf_diagnostics_summary_*',...
   'bias_diagnostics_*','temperature_diagnostics_*','bkgd_diagnostics_*'};
 %data_types = examinestats;
 
-queries = leftovers;
-queries(end+1:end+2) = {'daterange',daterange};
-queries(end+1:end+2) = {'data_type',data_types};
-queries(end+1:end+2) = {'flag_aborted',0};
-queries(end+1:end+2) = {'automated_pf','P'};
-queries(end+1:end+2) = {'experiment_name','FlyBowl_*'};
-data = SAGEGetBowlData(queries{:},'removemissingdata',true,'dataset',dataset);
-if isempty(data),
-  uiwait(warndlg(sprintf('No data for date range %s to %s',daterange{:}),'No data found'));
-  if didinputweek,
-    fprintf('Trying previous week...\n');
-    maxdatenum = maxdatenum - period;
-    handles = FlyBowlExamineExperimentVariables(...
-      'analysis_protocol',analysis_protocol,...
-      'settingsdir',settingsdir,...
-      'datalocparamsfilestr',datalocparamsfilestr,...
-      'period',period,...
-      'maxdatenum',maxdatenum,...
-      'datenumnow',datenumnow,...
-      'sage_params_path',sage_params_path,...
-      'sage_db',sage_db,...
-      'username',rc.username,...
-      'dataset',dataset);
-    return;
-  else
-    fprintf('Choose a different week.\n');
-    handles = FlyBowlExamineExperimentVariables(...
-      'analysis_protocol',analysis_protocol,...
-      'settingsdir',settingsdir,...
-      'datalocparamsfilestr',datalocparamsfilestr,...
-      'period',period,...
-      'maxdatenum',[],...
-      'datenumnow',datenumnow,...
-      'sage_params_path',sage_params_path,...
-      'sage_db',sage_db,...
-      'username',rc.username,...
-      'dataset',dataset);
-    return;
+didloaddata = false;
+if ~isempty(loadcacheddata),
+  try
+    load(loadcacheddata,'data');
+    didloaddata = true;
+  catch ME
+    warning('Could not load data from %s:\n%s',loadcacheddata,getReport(ME));
+  end
+end
+
+if ~didloaddata,
+  queries = leftovers;
+  queries(end+1:end+2) = {'daterange',daterange};
+  queries(end+1:end+2) = {'data_type',data_types};
+  queries(end+1:end+2) = {'flag_aborted',0};
+  queries(end+1:end+2) = {'automated_pf','P'};
+  queries(end+1:end+2) = {'experiment_name','FlyBowl_*'};
+  data = SAGEGetBowlData(queries{:},'removemissingdata',true,'dataset',dataset);
+  if isempty(data),
+    uiwait(warndlg(sprintf('No data for date range %s to %s',daterange{:}),'No data found'));
+    if didinputweek,
+      fprintf('Trying previous week...\n');
+      maxdatenum = maxdatenum - period;
+      handles = FlyBowlExamineExperimentVariables(...
+        'analysis_protocol',analysis_protocol,...
+        'settingsdir',settingsdir,...
+        'datalocparamsfilestr',datalocparamsfilestr,...
+        'period',period,...
+        'maxdatenum',maxdatenum,...
+        'datenumnow',datenumnow,...
+        'sage_params_path',sage_params_path,...
+        'sage_db',sage_db,...
+        'username',rc.username,...
+        'dataset',dataset);
+      return;
+    else
+      fprintf('Choose a different week.\n');
+      handles = FlyBowlExamineExperimentVariables(...
+        'analysis_protocol',analysis_protocol,...
+        'settingsdir',settingsdir,...
+        'datalocparamsfilestr',datalocparamsfilestr,...
+        'period',period,...
+        'maxdatenum',[],...
+        'datenumnow',datenumnow,...
+        'sage_params_path',sage_params_path,...
+        'sage_db',sage_db,...
+        'username',rc.username,...
+        'dataset',dataset);
+      return;
+    end
   end
 end
 % sort by date
@@ -184,6 +204,9 @@ expdir_bases = {data.experiment_name};
 expdir_bases = cellfun(@(s) regexprep(s,'^FlyBowl_',''),expdir_bases,'UniformOutput',false);
 
 %% for now, add on extra diagnostics here. we will store these later
+need_file_system_path = ~isfield(data,'file_system_path');
+need_manual_behavior = ~isfield(data,'manual_behavior');
+need_notes_curation = ~isfield(data,'notes_curation');
 for i = 1:nexpdirs,
   % add in mean_nsplit
   data(i).ctrax_diagnostics_mean_nsplit = ...
@@ -196,8 +219,13 @@ for i = 1:nexpdirs,
 %   data(i).temperature_max = max(data(i).temperature_stream);
 %   data(i).temperature_maxdiff = data(i).temperature_max - min(data(i).temperature_stream);
 %   data(i).temperature_nreadings = numel(data(i).temperature_stream);
-  data(i).file_system_path = fullfile(rootdatadir,expdir_bases{i});
   data(i).registrationdata_pxpermm = data(i).registrationdata_circleRadius / registration_params.circleRadius_mm;
+  if need_file_system_path,
+    data(i).file_system_path = fullfile(rootdatadir,expdir_bases{i});
+  end
+  if need_notes_curation,
+    data(i).notes_curation = '';
+  end  
 end
 expdirs = {data.file_system_path};
 
@@ -208,7 +236,11 @@ stat = nan(nexpdirs,nstats);
 
 for i = 1:nstats,
 
-%   % special case: flags
+  % special case: flags
+  if ismember(examinestats{i}{1},flag_metadata_fns),
+    % flags are now binary
+    % make -3, 3
+    v = double([data.(examinestats{i}{1})])*2*3-3;
 %   if ismember(examinestats{i}{1},flag_metadata_fns),
 %     
 %     % which set of flags
@@ -218,9 +250,9 @@ for i = 1:nstats,
 %     end
 %     v = (v/numel(flag_options)*2-1)*3;
 %     stat(:,i) = v;
-    
+
   % special case: notes
-  if ismember(examinestats{i}{1},note_metadata_fns),
+  elseif ismember(examinestats{i}{1},note_metadata_fns),
     
     v = cellfun(@(s) ~isempty(s) && ~strcmpi(s,'None'),{data.(examinestats{i}{1})});
     v = double(v)*2*3-3; % make -3, 3
@@ -306,7 +338,7 @@ normstat = bsxfun(@rdivide,bsxfun(@minus,stat,mu),z);
 %% create figure
 
 if ishandle(hfig),
-  delete(hfig);
+  close(hfig);
 end
 figure(hfig);
 clf(hfig,'reset');
@@ -607,12 +639,8 @@ handles.hdate = hdate;
       
       if strcmp(SelectionType,'open'),
         
-        % open experiment
-        if ispc,
-          winopen(expdirs{expdiri_selected});
-        else
-          web(expdirs{expdiri_selected},'-browser');
-        end
+        open_Callback();
+
       end
       
     catch ME,
@@ -812,20 +840,12 @@ handles.hdate = hdate;
    hnotes.dialog = dialog('Name','Add notes','WindowStyle','Normal','Resize','on');
    done_pos = [.29,.02,.2,.1];
    cancel_pos = [.51,.02,.2,.1];
-   notes_behavioral_pos = [.02,.14,.96,.35];
-   text_behavioral_pos = [.02,.49,.96,.06];
-   notes_technical_pos = [.02,.57,.96,.35];
-   text_technical_pos = [.02,.92,.96,.06];
+   notes_pos = [.02,.14,.96,.84];
 
-   if iscell(data(expdiri_selected).notes_technical),
-     notes_technical = data(expdiri_selected).notes_technical;
+   if iscell(data(expdiri_selected).notes_curation),
+     notes_curation_curr = data(expdiri_selected).notes_curation;
    else
-     notes_technical = regexp(data(expdiri_selected).notes_technical,'\\n','split');
-   end
-   if iscell(data(expdiri_selected).notes_behavioral),
-     notes_behavioral = data(expdiri_selected).notes_behavioral;
-   else
-     notes_behavioral = regexp(data(expdiri_selected).notes_behavioral,'\\n','split');
+     notes_curation_curr = regexp(data(expdiri_selected).notes_curation,'\\n','split');
    end
 
    hnotes.pushbutton_done = uicontrol(hnotes.dialog,'Style','pushbutton',...
@@ -834,26 +854,12 @@ handles.hdate = hdate;
    hnotes.pushbutton_cancel = uicontrol(hnotes.dialog,'Style','pushbutton',...
      'Units','normalized','Position',cancel_pos,...
      'String','Cancel','Callback',@notes_cancel_Callback);
-   hnotes.edit_behavioral = uicontrol(hnotes.dialog,'Style','edit',...
-     'Units','normalized','Position',notes_behavioral_pos,...
-     'Min',0,'Max',10,...
-     'String',notes_behavioral,...
+   hnotes.edit_notes = uicontrol(hnotes.dialog,'Style','edit',...
+     'Units','normalized','Position',notes_pos,...
+     'Min',0,'Max',25,...
+     'String',notes_curation_curr,...
      'HorizontalAlignment','left',...
      'BackgroundColor','w');
-   hnotes.text_behavioral = uicontrol(hnotes.dialog,'Style','text',...
-     'Units','normalized','Position',text_behavioral_pos,...
-     'String','Behavior notes:',...
-     'HorizontalAlignment','left');
-   hnotes.edit_technical = uicontrol(hnotes.dialog,'Style','edit',...
-     'Units','normalized','Position',notes_technical_pos,...
-     'Min',0,'Max',10,...
-     'String',notes_technical,...
-     'HorizontalAlignment','left',...
-     'BackgroundColor','w');
-   hnotes.text_technical = uicontrol(hnotes.dialog,'Style','text',...
-     'Units','normalized','Position',text_technical_pos,...
-     'String','Technical notes:',...
-     'HorizontalAlignment','left');
    uiwait(hnotes.dialog);
    
  end
@@ -862,27 +868,15 @@ handles.hdate = hdate;
     
     addToUndoList();
     
-    data(expdiri_selected).notes_technical = get(hnotes.edit_technical,'String');
-    data(expdiri_selected).notes_behavioral = get(hnotes.edit_behavioral,'String');
+    data(expdiri_selected).notes_curation = get(hnotes.edit_notes,'String');
     %SetNotes(data(expdiri_selected),sage_db);
     
-    tmpi = find(strcmpi(examinestats,'notes_behavioral'),1);
+    tmpi = find(strcmpi(examinestats,'notes_curation'),1);
     if ~isempty(tmpi),
-      s = data(expdiri_selected).notes_behavioral;
+      s = data(expdiri_selected).notes_curation;
       v = ~isempty(s) && ~strcmpi(s,'None');
-      stat(expdiri_selected,tmpi) = double(v);
-      normstat(expdiri_selected,tmpi) = ...
-        (stat(expdiri_selected,tmpi) - mu(tmpi))/z(tmpi);
-      set(h(expdiri_selected),'YData',normstat(expdiri_selected,:));
-      set(hselected,'YData',normstat(expdiri_selected,:));
-      set(hselected1,'YData',normstat(expdiri_selected,stati_selected));
-    end
-
-    tmpi = find(strcmpi(examinestats,'notes_technical'),1);
-    if ~isempty(tmpi),
-      s = data(expdiri_selected).notes_technical;
-      v = ~isempty(s) && ~strcmpi(s,'None');
-      stat(expdiri_selected,tmpi) = double(v);
+      v = double(v)*2*3-3; % make -3, 3
+      stat(expdiri_selected,tmpi) = v;
       normstat(expdiri_selected,tmpi) = ...
         (stat(expdiri_selected,tmpi) - mu(tmpi))/z(tmpi);
       set(h(expdiri_selected),'YData',normstat(expdiri_selected,:));
@@ -963,33 +957,35 @@ handles.hdate = hdate;
 
   function save_Callback(hObject,event) %#ok<INUSD>
     
-    [savefilename1,savepath1] = uiputfile(savefilename,'Save manual_pf tsv');
-    if ~ischar(savefilename1),
-      return;
-    end
-    savefilename = fullfile(savepath1,savefilename1);
-    rc.savepath = savepath1;
-    [savepath2,savefilename2] = fileparts(savefilename);
-    savefilename2 = fullfile(savepath2,[savefilename2,'_diagnosticinfo.mat']);
-
-    fid = fopen(savefilename,'w');
-    fprintf(fid,'#experiment_name\tmanual_pf\tnotes_behavioral\tnotes_technical\n');
-    for tmpi = 1:nexpdirs,
-      if iscell(data(tmpi).notes_behavioral),
-        notes_behavioral = sprintf('%s\\n',data(tmpi).notes_behavioral{:});
-      else
-        notes_behavioral = data(tmpi).notes_behavioral;
+    while true
+      [savefilename1,savepath1] = uiputfile(savefilename,'Save manual_pf tsv');
+      if ~ischar(savefilename1),
+        return;
       end
-       if iscell(data(tmpi).notes_technical),
-        notes_technical = sprintf('%s\\n',data(tmpi).notes_technical{:});
+      savefilename = fullfile(savepath1,savefilename1);
+      rc.savepath = savepath1;
+      [savepath2,savefilename2] = fileparts(savefilename);
+      savefilename2 = fullfile(savepath2,[savefilename2,'_diagnosticinfo.mat']);
+      
+      fid = fopen(savefilename,'w');
+      if fid < 0,
+        warndlg(sprintf('Could not open file %s for writing. Make sure it is not open in another program.',savefilename),'Could not save');
+        continue;
+      end
+      break;
+    end
+    fprintf(fid,'#line_name\texperiment_name\tmanual_pf\tnotes_curation\n');
+    for tmpj = 1:nexpdirs,
+      if iscell(data(tmpj).notes_curation),
+        notes_curation_curr = sprintf('%s\\n',data(tmpj).notes_curation{:});
       else
-        notes_technical = data(tmpi).notes_technical;
+        notes_curation_curr = data(tmpj).notes_curation;
       end
       fprintf(fid,'%s\t%s\t%s\t%s\n',...
-        data(tmpi).experiment_name,...
-        data(tmpi).manual_pf,...
-        notes_behavioral,...
-        notes_technical);
+        data(tmpj).line_name,...
+        data(tmpj).experiment_name,...
+        data(tmpj).manual_pf,...
+        notes_curation_curr);
     end
     fclose(fid);
     save(savefilename2,'info','data','examinestats');
@@ -1009,7 +1005,11 @@ handles.hdate = hdate;
       end
     end
     
-    save(examine_params.rcfile,'-struct','rc');
+    try
+      save(examine_params.rcfile,'-struct','rc');
+    catch ME,
+      warning('Error saving rc file:\n %s',getReport(ME));
+    end
     
     if ishandle(hObject),
       delete(hObject);
@@ -1026,8 +1026,7 @@ handles.hdate = hdate;
     end
     undolist = structappend(undolist,...
       struct('manual_pf',{[data.manual_pf]},...
-      'notes_behavioral',{{data.notes_behavioral}},...
-      'notes_technical',{{data.notes_technical}}));
+      'notes_curation',{{data.notes_curation}}));
     set(hmenu.undo,'Enable','on');
   end
 
@@ -1039,8 +1038,7 @@ handles.hdate = hdate;
     manual_pf = s.manual_pf;
     for tmpi = 1:nexpdirs,
       data(tmpi).manual_pf = s.manual_pf(tmpi);
-      data(tmpi).notes_behavioral = s.notes_behavioral{tmpi};
-      data(tmpi).notes_technical = s.notes_technical{tmpi};
+      data(tmpi).notes_curation = s.notes_curation{tmpi};
     end
     idx_manual_p = lower(manual_pf) == 'p';
     idx_manual_f = lower(manual_pf) == 'f';
@@ -1222,12 +1220,10 @@ handles.hdate = hdate;
         warning('Skipping line %s: wrong number of fields',s);
       end
       
-      experiment_name = m{1};
-      manual_pf_curr = m{2};
-      notes_behavioral = m{3};
-      notes_technical = m{4};
-      notes_behavioral = regexp(notes_behavioral,'\\n','split');
-      notes_technical = regexp(notes_technical,'\\n','split');
+      experiment_name = m{2};
+      manual_pf_curr = m{3};
+      notes_curation_curr = m{4};
+      notes_curation_curr = regexp(notes_curation_curr,'\\n','split');
       
       tmpi = find(strcmp(experiment_names,experiment_name),1);
       if isempty(tmpi),
@@ -1236,8 +1232,7 @@ handles.hdate = hdate;
       end
       
       state.manual_pf(tmpi) = manual_pf_curr(1);
-      state.notes_behavioral{tmpi} = notes_behavioral;
-      state.notes_technical{tmpi} = notes_technical;
+      state.notes_curation{tmpi} = notes_curation_curr;
     
     end
     fclose(fid);

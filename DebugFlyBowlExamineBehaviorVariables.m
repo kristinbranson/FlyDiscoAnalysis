@@ -34,4 +34,4 @@ params = {'settingsdir',settingsdir,...
 
 %% 
 
-FlyBowlExamineBehaviorVariables(params{:});
+FlyBowlExamineBehaviorVariables(params{:},'loadcacheddata','datacache20110420.mat');
