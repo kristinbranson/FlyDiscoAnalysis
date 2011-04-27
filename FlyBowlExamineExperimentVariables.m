@@ -1,6 +1,7 @@
-function handles = FlyBowlExamineExperimentVariables(varargin)
+function [handles,data] = FlyBowlExamineExperimentVariables(varargin)
 
 handles = struct;
+data = [];
 
 [analysis_protocol,settingsdir,datalocparamsfilestr,hfig,period,maxdatenum,...
   figpos,datenumnow,sage_params_path,sage_db,username,rootdatadir,dataset,...
@@ -269,6 +270,7 @@ for i = 1:nstats,
       v = v - 1;
       v = (v/max(v)*2-1)*3;
     end
+    stat(:,i) = v;
     
   % numbers
   else
