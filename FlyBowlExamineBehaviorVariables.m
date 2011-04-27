@@ -1,6 +1,7 @@
-function handles = FlyBowlExamineBehaviorVariables(varargin)
+function [handles,data] = FlyBowlExamineBehaviorVariables(varargin)
 
 handles = struct;
+data = [];
 
 [analysis_protocol,settingsdir,datalocparamsfilestr,hfig,period,maxdatenum,...
   figpos,datenumnow,sage_params_path,sage_db,username,rootdatadir,loadcacheddata,leftovers] = ...
@@ -259,9 +260,13 @@ for i = 1:nstats,
 
   % special case: strings
   elseif ismember(examinestats{i}{1},string_metadata_fns),
-    [~,~,v] = unique({data.(examinestats{i}{1})});
-    v = v - 1;
-    v = (v/max(v)*2-1)*3;
+    [uniquevals,~,v] = unique({data.(examinestats{i}{1})});
+    if numel(uniquevals) == 1,
+      v(:) = 0;
+    else
+      v = v - 1;
+      v = (v/max(v)*2-1)*3;
+    end
     for j = 1:nlines,
       stat(j,i) = nanmean(v(lineidx==j));
     end
