@@ -241,6 +241,7 @@ for i = 1:nstats,
     % flags are now binary
     % make -3, 3
     v = double([data.(examinestats{i}{1})])*2*3-3;
+    stat(:,i) = v;
 %   if ismember(examinestats{i}{1},flag_metadata_fns),
 %     
 %     % which set of flags
