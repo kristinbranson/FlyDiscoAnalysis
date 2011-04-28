@@ -18,23 +18,40 @@ function FlyBowlCombineExperiments(rootdir,outdir,varargin)
 % directory structure
 datalocparamsfile = fullfile(settingsdir,analysis_protocol,datalocparamsfilestr);
 dataloc_params = ReadParams(datalocparamsfile);
-for i = 1:numel(requiredfiles),
-  subreadfiles{end+1} = dataloc_params.(requiredfiles{i}); %#ok<AGROW>
-end
-subreadfiles = unique(subreadfiles);
+%for i = 1:numel(requiredfiles),
+%  subreadfiles{end+1} = dataloc_params.(requiredfiles{i}); %#ok<AGROW>
+%end
+%subreadfiles = unique(subreadfiles);
 
-exp_params = [{'rootdir',rootdir,'subreadfiles',subreadfiles},leftovers];
+exp_params = [{'rootdir',rootdir},leftovers];
 
-[expdirs,expdir_reads,~,experiments,~,~] = ...
-  getExperimentDirs('settingsdir',settingsdir,...
-  'datalocparamsfilestr',datalocparamsfilestr,...
-  'protocol',analysis_protocol,...
-  exp_params{:});
+experiments = SAGEListBowlExperiments(exp_params{:});
+expdirs = {experiments.file_system_path};
 nexpdirs = numel(expdirs);
 
 if nexpdirs == 0,
   error('No experiments selected');
 end
+
+%% remove bad experiments
+
+isdata = true(1,nexpdirs);
+for i = 1:nexpdirs,
+  expdir = expdirs{i};
+  statsmatfile = fullfile(expdir,dataloc_params.statsperframematfilestr);
+  if ~exist(statsmatfile,'file'),
+    warning('Stats file %s does not exist',statsmatfile);
+    isdata(i) = false;
+  end
+  histmatfile = fullfile(expdir,dataloc_params.histperframematfilestr);
+  if ~exist(histmatfile,'file'),
+    warning('Hist file %s does not exist',histmatfile);
+    isdata(i) = false;
+  end
+end
+experiments(~isdata) = [];
+expdirs(~isdata) = [];
+nexpdirs = numel(experiments);
 
 %% load per-fly data
 
@@ -47,7 +64,8 @@ for i = 1:nexpdirs,
   
   % load the data for the current experiment
   %i=i+1
-  expdir = expdir_reads{i};
+  fprintf('Loading data for experiment %s\n',expdir);
+  expdir = expdirs{i};
   statsmatfile = fullfile(expdir,dataloc_params.statsperframematfilestr);
   statsdata = load(statsmatfile);
   histmatfile = fullfile(expdir,dataloc_params.histperframematfilestr);
@@ -124,7 +142,7 @@ statsdata.statsperexp = statsperexp;
 statsdata.meanstatsperfly = meanstatsperfly;
 statsdata.meanstatsperexp = meanstatsperexp;
 statsdata.exp_params = exp_params;
-statsdata.expdirs = expdir_reads;
+statsdata.expdirs = expdirs;
 statsdata.experiments = experiments;
 
 save(statsmatsavename,'-struct','statsdata');
@@ -143,7 +161,7 @@ histdata.histperexp = histperexp;
 histdata.meanhistperfly = meanhistperfly;
 histdata.meanhistperexp = meanhistperfly;
 histdata.exp_params = exp_params;
-histdata.expdirs = expdir_reads;
+histdata.expdirs = expdirs;
 histdata.experiments = experiments;
 
 save(histmatsavename,'-struct','histdata');
@@ -177,7 +195,7 @@ for i = 1:2:numel(exp_params)-1,
 end
 
 fprintf(fid,'expdirs');
-fprintf(fid,',%s',expdir_reads{:});
+fprintf(fid,',%s',expdirs{:});
 fprintf(fid,'\n');
 
 fclose(fid);

@@ -27,7 +27,11 @@ for i = 1:numel(fns),
   fns2 = fieldnames(statsperexpnew.(fn));
   for j = 1:numel(fns2),
     fn2 = fns2{j};
-    statsperexp.(fn).(fn2) = cat(1,statsperexp.(fn).(fn2),statsperexpnew.(fn).(fn2));
+    if ~isfield(statsperexp.(fn),fn2),
+      statsperexp.(fn).(fn2) = statsperexpnew.(fn).(fn2);
+    else
+      statsperexp.(fn).(fn2) = cat(1,statsperexp.(fn).(fn2),statsperexpnew.(fn).(fn2));
+    end
   end
   
 end

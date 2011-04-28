@@ -13,8 +13,8 @@ if ispc,
   rootdir = 'E:\Data\FlyBowl\bowl_data';
 else
   settingsdir = '/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/settings';
-  %rootdir = '/groups/sciserv/flyolympiad/Olympiad_Screen/fly_bowl/bowl_data';
-  rootdir = '/groups/branson/bransonlab/tracking_data/olympiad/FlyBowl/CtraxTest20110407';
+  rootdir = '/groups/sciserv/flyolympiad/Olympiad_Screen/fly_bowl/bowl_data';
+  %rootdir = '/groups/branson/bransonlab/tracking_data/olympiad/FlyBowl/CtraxTest20110407';
 end
 
 %% parameters
@@ -22,7 +22,9 @@ end
 analysis_protocol = '20110407';
 params = {'settingsdir',settingsdir,...
   'analysis_protocol',analysis_protocol,...
-  'min_days_prev',0,'max_days_prev',100};
+  'daterange',{},...
+  'experiment_protocol',{'*8*','*7*'},...
+  'rearing_protocol','*8*'};
 
 %%
 

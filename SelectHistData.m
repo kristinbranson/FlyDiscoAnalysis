@@ -91,6 +91,6 @@ for typei = 1:ntypes,
   goodidx = ~isnan(histperfly.(fn).Z);
   nflies = sum(histperfly.(fn).fracframesanalyzed(goodidx));
   stderrfrac{typei} = stdfrac{typei} / sqrt(nflies);
-  nfliesanalyzed(typei) = histperexp.(fn).nflies;
+  nfliesanalyzed(typei) = histperexp.(fn).n;
   Zpertype(typei) = histperexp.(fn).Z;
 end
