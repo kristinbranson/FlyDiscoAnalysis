@@ -27,7 +27,11 @@ for i = 1:numel(fns),
   fns2 = fieldnames(histperexpnew.(fn));
   for j = 1:numel(fns2),
     fn2 = fns2{j};
-    histperexp.(fn).(fn2) = cat(1,histperexp.(fn).(fn2),histperexpnew.(fn).(fn2));
+    if ~isfield(histperexp.(fn),fn2),
+      histperexp.(fn).(fn2) = histperexpnew.(fn).(fn2);
+    else
+      histperexp.(fn).(fn2) = cat(1,histperexp.(fn).(fn2),histperexpnew.(fn).(fn2));
+    end
   end
   
 end

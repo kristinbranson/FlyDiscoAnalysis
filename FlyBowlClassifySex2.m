@@ -17,7 +17,7 @@ dataloc_params = ReadParams(datalocparamsfile);
 trxfile = fullfile(expdir,dataloc_params.trxfilestr);
 load(trxfile,'trx');
 % first and end frame
-firstframe = min([trx.firstframe]);
+firstframe = min([trx.firstframe]); %#ok<NODEF>
 endframe = max([trx.endframe]);
 
 %% data locations
@@ -29,17 +29,7 @@ sexclassifieroutmatfile = fullfile(expdir,dataloc_params.sexclassifiermatfilestr
 sexclassifier_params = ReadParams(sexclassifierparamsfile);
 sexclassifierin = ReadParams(sexclassifierintxtfile);
 
-%% learn a 2-state HMM for area in an unsupervised manner
-
-% initialize parameters
-nstates = 2;
-Psame = sexclassifierin.psame;
-ptrans = ones(nstates)-Psame;
-ptrans(eye(nstates)==1) = Psame;
-prior = ones(1,nstates)/nstates; %#ok<NASGU>
-state2sex = cell(1,nstates);
-
-% break into smaller sequences where we're sure of area estimate
+%% compute areas
 nflies = numel(trx); 
 X = cell(1,nflies);
 for fly = 1:nflies,
@@ -56,6 +46,53 @@ for fly = 1:nflies,
     sexclassifierin.areasmooth_maxerrx);
   X{fly} = areacurr(:);
 end
+
+%% fix sex if gender is not 'b'
+
+% read gender
+metadatafile = fullfile(expdir,dataloc_params.metadatafilestr);
+metadata = ReadMetadataFile(metadatafile);
+
+if isfield(metadata,'gender') && ~strcmpi(metadata.gender,'b'),
+  warning('gender is not "b", not doing sex classification, just setting sex to %s for all flies',upper(metadata.gender));
+
+  % set sex to metadata.gender for all flies
+  % also set diagnostics that we can
+  clear diagnostics
+  mean_area_all = nanmean(cat(1,X{:}));
+  var_area_all = nanstd(cat(1,X{:}),1);
+  for fly = 1:numel(trx),
+    trx(fly).sex = repmat({upper(metadata.gender)},[1,trx(fly).nframes]); %#ok<AGROW>
+    diagnostics_curr = struct;
+    diagnostics_curr.normhmmscore = nan;
+    diagnostics_curr.nswaps = 0;
+    diagnostics_curr.meanabsdev = nanmean(abs(X{fly}-mean_area_all));
+    diagnostics(fly) = diagnostics_curr; %#ok<AGROW>
+  end
+  
+  mu_area = nan(1,2);
+  var_area = nan(1,2);
+  if strcmpi(metadata.gender,'f'),
+    mu_area(2) = mean_area_all;
+    var_area(2) = var_area_all;
+  elseif strcmpi(metadata.gender,'m'),
+    mu_area(1) = mean_area_all;
+    var_area(1) = var_area_all;
+  end
+  state2sex = {'M','F'};
+  ll = [];
+  
+else
+
+%% learn a 2-state HMM for area in an unsupervised manner
+
+% initialize parameters
+nstates = 2;
+Psame = sexclassifierin.psame;
+ptrans = ones(nstates)-Psame;
+ptrans(eye(nstates)==1) = Psame;
+prior = ones(1,nstates)/nstates; %#ok<NASGU>
+state2sex = cell(1,nstates);
 
 % em for hmm
 [mu_area,var_area,ll]=hmm_multiseq_1d(X,nstates,Psame,...
@@ -89,18 +126,23 @@ for fly = 1:numel(trx),
   
 end
 
+end
+
 %% count number of flies, females, males
 counts = struct;
 counts.nfemales = zeros(1,endframe);
 counts.nmales = zeros(1,endframe);
+counts.nflies = zeros(1,endframe);
 for fly = 1:numel(trx),
   isfemale = strcmp(trx(fly).sex,'F');
+  ismale = strcmp(trx(fly).sex,'M');
   counts.nfemales(trx(fly).firstframe:trx(fly).endframe) = ...
     counts.nfemales(trx(fly).firstframe:trx(fly).endframe) + double(isfemale);
   counts.nmales(trx(fly).firstframe:trx(fly).endframe) = ...
-    counts.nmales(trx(fly).firstframe:trx(fly).endframe) + double(~isfemale);
+    counts.nmales(trx(fly).firstframe:trx(fly).endframe) + double(ismale);
+  counts.nflies(trx(fly).firstframe:trx(fly).endframe) = ...
+    counts.nflies(trx(fly).firstframe:trx(fly).endframe) + 1;
 end
-counts.nflies = counts.nfemales + counts.nmales;
 
 % ignore part of video with no flies
 fns = fieldnames(counts);
@@ -121,7 +163,11 @@ summary_diagnostics.classifier_mu_area_female = mu_area(ifemale);
 summary_diagnostics.classifier_mu_area_male = mu_area(imale);
 summary_diagnostics.classifier_var_area_female = var_area(ifemale);
 summary_diagnostics.classifier_var_area_male = var_area(imale);
-summary_diagnostics.classifier_loglik = ll(end);
+if isempty(ll),
+  summary_diagnostics.classifier_loglik = nan;
+else
+  summary_diagnostics.classifier_loglik = ll(end);
+end
 summary_diagnostics.classifier_niters = numel(ll);
 
 fns = fieldnames(diagnostics);
