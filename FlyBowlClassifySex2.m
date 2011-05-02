@@ -8,11 +8,15 @@ function [trx,summary_diagnostics,X] = FlyBowlClassifySex2(expdir,varargin)
   'datalocparamsfilestr','dataloc_params.txt',...
   'dosave',true);
 
+fprintf('Classifying sex for %s\n',expdir);
+
 %% read in the data locations
 datalocparamsfile = fullfile(settingsdir,analysis_protocol,datalocparamsfilestr);
 dataloc_params = ReadParams(datalocparamsfile);
 
 %% load the data
+
+fprintf('Loading data...\n');
 
 trxfile = fullfile(expdir,dataloc_params.trxfilestr);
 load(trxfile,'trx');
@@ -30,6 +34,8 @@ sexclassifier_params = ReadParams(sexclassifierparamsfile);
 sexclassifierin = ReadParams(sexclassifierintxtfile);
 
 %% compute areas
+fprintf('Computing area...\n');
+
 nflies = numel(trx); 
 X = cell(1,nflies);
 for fly = 1:nflies,
@@ -85,6 +91,8 @@ if isfield(metadata,'gender') && ~strcmpi(metadata.gender,'b'),
 else
 
 %% learn a 2-state HMM for area in an unsupervised manner
+
+fprintf('gender = "b", learning 2-state HMM...\n');
 
 % initialize parameters
 nstates = 2;

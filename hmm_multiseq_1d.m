@@ -61,7 +61,11 @@ lik=0;
 
 k1=(2*pi)^(-p/2);
 
-hwait = waitbar(0,'Learning HMM params');
+if isdeployed,
+  fprintf('Learning HMM params...\n');
+else
+  hwait = waitbar(0,'Learning HMM params');
+end
 
 for cycle=1:cyc
   
@@ -74,10 +78,14 @@ for cycle=1:cyc
   Scale = cell(1,N);
   Xi = cell(1,N);
   swait = sprintf('E-Step, iteration %d',cycle);
-  if ishandle(hwait),
-    waitbar(0,hwait,swait);
+  if isdeployed,
+    fprintf('%s...\n',swait);
   else
-    hwait = waitbar(0,swait);
+    if ishandle(hwait),
+      waitbar(0,hwait,swait);
+    else
+      hwait = waitbar(0,swait);
+    end
   end
   
   iCov = 1./Cov;
@@ -85,7 +93,7 @@ for cycle=1:cyc
   
   for n=1:N
     
-    if ishandle(hwait),
+    if exist('hwait','var') && ishandle(hwait),
       waitbar(n/(N+1),hwait);
     end
     
@@ -135,7 +143,9 @@ for cycle=1:cyc
   
   %%%% M STEP 
   
-  if ishandle(hwait),
+  if isdeployed,
+    fprintf('\nM-step, iteration %d\n',cycle);
+  elseif ishandle(hwait),
     waitbar(1,hwait,sprintf('\nM-step, iteration %d\n',cycle));
   end
 
@@ -180,6 +190,6 @@ for cycle=1:cyc
   fprintf('\n');
 end
 
-if ishandle(hwait),
+if exist('hwait','var') && ishandle(hwait),
   delete(hwait);
 end

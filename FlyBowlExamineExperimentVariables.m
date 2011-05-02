@@ -141,7 +141,8 @@ flag_options = {{'None',''},{'Rearing problem','Flies look sick',...
 %% get data
 data_types = {'ufmf_diagnostics_summary_*',...
   'ctrax_diagnostics_*','registrationdata_*','sexclassifier_diagnostics_*',...
-  'bias_diagnostics_*','temperature_diagnostics_*','bkgd_diagnostics_*'};
+  'bias_diagnostics_*','temperature_diagnostics_*','bkgd_diagnostics_*',...
+  'stats_perframe_x_mm_*','stats_perframe_y_mm_*'};
 %data_types = examinestats;
 
 didloaddata = false;
@@ -161,6 +162,7 @@ if ~didloaddata,
   queries(end+1:end+2) = {'flag_aborted',0};
   queries(end+1:end+2) = {'automated_pf','P'};
   queries(end+1:end+2) = {'experiment_name','FlyBowl_*'};
+  queries(end+1:end+2) = {'line_name','pBDPGAL4U'};
   data = SAGEGetBowlData(queries{:},'removemissingdata',true,'dataset',dataset);
   if isempty(data),
     uiwait(warndlg(sprintf('No data for date range %s to %s',daterange{:}),'No data found'));
@@ -206,20 +208,30 @@ expdir_bases = cellfun(@(s) regexprep(s,'^FlyBowl_',''),expdir_bases,'UniformOut
 
 %% for now, add on extra diagnostics here. we will store these later
 need_file_system_path = ~isfield(data,'file_system_path');
-need_manual_behavior = ~isfield(data,'manual_behavior');
 need_notes_curation = ~isfield(data,'notes_curation');
 for i = 1:nexpdirs,
   % add in mean_nsplit
-  data(i).ctrax_diagnostics_mean_nsplit = ...
-    data(i).ctrax_diagnostics_sum_nsplit / data(i).ctrax_diagnostics_nlarge_split;
+  if isfield(data,'ctrax_diagnostics_sum_nsplit') && isfield(data,'ctrax_diagnostics_nlarge_split'),
+    data(i).ctrax_diagnostics_mean_nsplit = ...
+      data(i).ctrax_diagnostics_sum_nsplit / data(i).ctrax_diagnostics_nlarge_split;
+  end
   % add in nframes_not_tracked
-  data(i).ctrax_diagnostics_nframes_not_tracked = ...
-    data(i).ufmf_diagnostics_summary_nFrames - data(i).ctrax_diagnostics_nframes_analyzed;
+  if isfield(data,'ufmf_diagnostics_summary_nFrames') && isfield(data,'ctrax_diagnostics_nframes_analyzed'),
+    data(i).ctrax_diagnostics_nframes_not_tracked = ...
+      data(i).ufmf_diagnostics_summary_nFrames - data(i).ctrax_diagnostics_nframes_analyzed;
+  end
   % add in mean, max, std, maxdiff, nreadings
 %   data(i).temperature_mean = nanmean(data(i).temperature_stream);
 %   data(i).temperature_max = max(data(i).temperature_stream);
 %   data(i).temperature_maxdiff = data(i).temperature_max - min(data(i).temperature_stream);
 %   data(i).temperature_nreadings = numel(data(i).temperature_stream);
+
+  if isfield(data,'stats_perframe_x_mm'),
+    data(i).mean_x_mm = data(i).stats_perframe_x_mm.meanmean_perexp.flyany_frameany;
+  end
+  if isfield(data,'stats_perframe_y_mm'),
+    data(i).mean_y_mm = data(i).stats_perframe_y_mm.meanmean_perexp.flyany_frameany;
+  end
   data(i).registrationdata_pxpermm = data(i).registrationdata_circleRadius / registration_params.circleRadius_mm;
   if need_file_system_path,
     data(i).file_system_path = fullfile(rootdatadir,expdir_bases{i});
@@ -236,6 +248,10 @@ nstats = numel(examinestats);
 stat = nan(nexpdirs,nstats);
 
 for i = 1:nstats,
+  
+  if ~isfield(data,examinestats{i}{1}),
+    continue;
+  end
 
   % special case: flags
   if ismember(examinestats{i}{1},flag_metadata_fns),
@@ -316,25 +332,7 @@ end
 
 %% abbr names of stats
 
-statnames = cell(1,nstats);
-for i = 1:nstats,
-  
-  statnames{i} = sprintf('%s_',examinestats{i}{:});
-  statnames{i} = statnames{i}(1:end-1);
-  statnames{i} = strrep(statnames{i},'ufmf_diagnostics_summary','ufmf');
-  statnames{i} = strrep(statnames{i},'ufmf_diagnostics_stream','ufmf');
-  statnames{i} = strrep(statnames{i},'temperature_diagnostics','temp');
-  statnames{i} = strrep(statnames{i},'bias_diagnostics','bias');
-  statnames{i} = strrep(statnames{i},'bkgd_diagnostics','bkgd');
-  statnames{i} = strrep(statnames{i},'ctrax_diagnostics','ctrax');
-  statnames{i} = strrep(statnames{i},'registrationdata','reg');
-  statnames{i} = strrep(statnames{i},'sexclassifier_diagnostics','sex');
-  statnames{i} = strrep(statnames{i},'stats_perframe_','');
-  statnames{i} = strrep(statnames{i},'flyany_frame','');
-  statnames{i} = strrep(statnames{i},'_perexp','');
-  
-end
-
+statnames = SetStatNames(examinestats);
 
 %% z-score stats
 
@@ -570,6 +568,31 @@ handles.htext = htext;
 handles.hdate = hdate;
 % handles.hcmenu_manualpf = hcmenu_manualpf;
 % handles.hcmenu = hcmenu;
+
+%% set stat names
+
+  function statnames = SetStatNames(examinestats)
+
+    statnames = cell(1,nstats);
+    for tmpi = 1:nstats,
+      
+      statnames{tmpi} = sprintf('%s_',examinestats{tmpi}{:});
+      statnames{tmpi} = statnames{tmpi}(1:end-1);
+      statnames{tmpi} = strrep(statnames{tmpi},'ufmf_diagnostics_summary','ufmf');
+      statnames{tmpi} = strrep(statnames{tmpi},'ufmf_diagnostics_stream','ufmf');
+      statnames{tmpi} = strrep(statnames{tmpi},'temperature_diagnostics','temp');
+      statnames{tmpi} = strrep(statnames{tmpi},'bias_diagnostics','bias');
+      statnames{tmpi} = strrep(statnames{tmpi},'bkgd_diagnostics','bkgd');
+      statnames{tmpi} = strrep(statnames{tmpi},'ctrax_diagnostics','ctrax');
+      statnames{tmpi} = strrep(statnames{tmpi},'registrationdata','reg');
+      statnames{tmpi} = strrep(statnames{tmpi},'sexclassifier_diagnostics','sex');
+      statnames{tmpi} = strrep(statnames{tmpi},'stats_perframe_','');
+      statnames{tmpi} = strrep(statnames{tmpi},'flyany_frame','');
+      statnames{tmpi} = strrep(statnames{tmpi},'_perexp','');
+      
+    end
+    
+  end
 
 %% print function
 
@@ -971,8 +994,8 @@ handles.hdate = hdate;
       end
       savefilename = fullfile(savepath1,savefilename1);
       rc.savepath = savepath1;
-      [savepath2,savefilename2] = fileparts(savefilename);
-      savefilename2 = fullfile(savepath2,[savefilename2,'_diagnosticinfo.mat']);
+      %[savepath2,savefilename2] = fileparts(savefilename);
+      %savefilename2 = fullfile(savepath2,[savefilename2,'_diagnosticinfo.mat']);
       
       fid = fopen(savefilename,'w');
       if fid < 0,
@@ -981,21 +1004,30 @@ handles.hdate = hdate;
       end
       break;
     end
-    fprintf(fid,'#line_name\texperiment_name\tmanual_pf\tnotes_curation\n');
+    fprintf(fid,'#line_name\texperiment_name\tmanual_pf\tnotes_curation\tdiagnostic_fields\n');
     for tmpj = 1:nexpdirs,
       if iscell(data(tmpj).notes_curation),
         notes_curation_curr = sprintf('%s\\n',data(tmpj).notes_curation{:});
       else
         notes_curation_curr = data(tmpj).notes_curation;
       end
-      fprintf(fid,'%s\t%s\t%s\t%s\n',...
+      fprintf(fid,'%s\t%s\t%s\t%s\t',...
         data(tmpj).line_name,...
         data(tmpj).experiment_name,...
         data(tmpj).manual_pf,...
         notes_curation_curr);
+      % also print info
+      idx = info(tmpj,:);
+      if ~any(idx),
+        tmps = '';
+      else
+        tmps = sprintf('%s,',statnames{idx});
+        tmps = tmps(1:end-1);
+      end
+      fprintf(fid,'%s\n',tmps);
     end
     fclose(fid);
-    save(savefilename2,'info','data','examinestats');
+    %save(savefilename2,'info','data','examinestats');
     needsave = false;
     
   end
@@ -1033,7 +1065,8 @@ handles.hdate = hdate;
     end
     undolist = structappend(undolist,...
       struct('manual_pf',{[data.manual_pf]},...
-      'notes_curation',{{data.notes_curation}}));
+      'notes_curation',{{data.notes_curation}},...
+      'info',{info}));
     set(hmenu.undo,'Enable','on');
   end
 
@@ -1071,6 +1104,7 @@ handles.hdate = hdate;
       end
       set(hmanualpf.popup,'Value',vcurr);
     end
+    info = s.info;
     
   end
 
@@ -1173,42 +1207,46 @@ handles.hdate = hdate;
 %% load curation spreadsheet callback
 
   function load_Callback(hObject,event) %#ok<INUSD>
+
+    numel_info = 5;
+    numel_noinfo = numel_info-1;
     
     if needsave,
-      res = questdlg('Load state from %s? All changes will be lost.');
+      res = questdlg('Load state from file? All changes will be lost.');
       if ~strcmpi(res,'yes'),
         return;
       end
     end
     addToUndoList();
-    
     [loadfilename,loadpath] = uigetfile(savefilename,'Load data curation tsv');
     if ~ischar(loadfilename),
       return;
     end
     loadfilename = fullfile(loadpath,loadfilename);
+    
+    state = undolist(end);
+    experiment_names = {data.experiment_name};
+
+    
     [loadpath2,loadfilename2] = fileparts(loadfilename);
     loadfilename2 = fullfile(loadpath2,[loadfilename2,'_diagnosticinfo.mat']);
-    loadedinfo = false;
-    if ~exist(loadfilename2,'file'),
-      warndlg(sprintf('diagnostic info file %s does not exist',loadfilename2));
-    else
+    if exist(loadfilename2,'file'),
       try
         tmpinfo = load(loadfilename2,'info','data','examinestats');
         tmpinfo.experiment_names = {tmpinfo.data.experiment_name};
-        loadedinfo = true;
-        if numel(examinestats) ~= numel(tmpinfo.examinestats),
-          warning('examined stats different, not loading diagnostic info');
+        newstatnames = SetStatNames(tmpinfo.examinestats);
+        if ~isempty(setdiff(statnames,newstatnames)) || ...
+            ~isempty(setdiff(newstatnames,statnames)),
+          error('examined stats different, not loading diagnostic info');
         end
-      catch ME,
+        [isintersect,idxcurr] = ismember(tmpinfo.experiment_names,experiment_names);
+        state.info(idxcurr(isintersect),:) = tmpinfo.info(isintersect,:);
+       catch ME,
         warning('Could not load info from %s:\n%s',loadfilename2,getReport(ME));
       end
     end
-
-    state = undolist(end);
     
     fid = fopen(loadfilename,'r');
-    experiment_names = {data.experiment_name};
     while true,
       
       ss = fgetl(fid);
@@ -1223,14 +1261,24 @@ handles.hdate = hdate;
       
       % split at tabs
       m = regexp(ss,'\t','split');
-      if numel(m) ~= 4,
+      if numel(m) < numel_noinfo || numel(m) > numel_info,
         warning('Skipping line %s: wrong number of fields',s);
       end
-      
+
+      isinfo = numel(m) == numel_info;
       experiment_name = m{2};
       manual_pf_curr = m{3};
       notes_curation_curr = m{4};
       notes_curation_curr = regexp(notes_curation_curr,'\\n','split');
+      if isinfo,
+        info_s = regexp(m{5},',','split');
+        info_s = setdiff(info_s,{''});
+        info_curr = ismember(statnames,info_s);
+        unknown_stats = ~ismember(info_s,statnames);
+        if any(unknown_stats),
+          warning(['Unknown info stats: ',sprintf('%s ',info_s{unknown_stats})]);
+        end
+      end
       
       tmpi = find(strcmp(experiment_names,experiment_name),1);
       if isempty(tmpi),
@@ -1240,14 +1288,12 @@ handles.hdate = hdate;
       
       state.manual_pf(tmpi) = manual_pf_curr(1);
       state.notes_curation{tmpi} = notes_curation_curr;
+      if isinfo,
+        state.info(tmpi,:) = info_curr;
+      end
     
     end
     fclose(fid);
-    
-    if loadedinfo,
-      [isintersect,idxcurr] = ismember(tmpinfo.experiment_names,experiment_names);
-      info(idxcurr(isintersect),:) = tmpinfo.info(isintersect,:);
-    end
     
     needsave = true;
     setManualPFState(state);

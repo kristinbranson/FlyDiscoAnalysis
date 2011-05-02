@@ -2,19 +2,18 @@ function quickstats_stats = AnalyzeQuickStats(varargin)
 
 %% parameters
 
-[experiment_params,UFMFDiagnosticsFileStr,...
-  ufmfstream_nbins,savename] = myparse(varargin,...
+[exp_params,UFMFDiagnosticsFileStr,...
+  ufmfstream_nbins,savename,rootdir] = myparse(varargin,...
   'experiment_params',{},...
   'UFMFDiagnosticsFileStr','ufmf_diagnostics.txt',...
   'ufmfstream_nbins',100,...
-  'savename',['QuickStats_Stats_',datestr(now,30),'.mat']);
+  'savename',['QuickStats_Stats_',datestr(now,30),'.mat'],...
+  'rootdir','/groups/sciserv/flyolympiad/Olympiad_Screen/fly_bowl/bowl_data');
 
 %% experiment directories
 
-
-[expdirs,expdir_reads,expdir_writes,experiments] = ...
-  getExperimentDirs(experiment_params{:});
-
+experiments = SAGEListBowlExperiments(exp_params{:},'rootdir',rootdir);
+expdirs = {experiments.file_system_path};
 nexpdirs = numel(expdirs);
 
 %% compute stats of quick stats and ufmf diagnostics
@@ -30,10 +29,10 @@ streamstats = struct;
 for i = 1:nexpdirs,
   
   % load the quick stats
-  quickstats = loadQuickStats(expdir_reads{i});
+  quickstats = loadQuickStats(expdirs{i});
   
   % read ufmf diagnostics
-  UFMFDiagnosticsFileName = fullfile(expdir_reads{i},UFMFDiagnosticsFileStr);
+  UFMFDiagnosticsFileName = fullfile(expdirs{i},UFMFDiagnosticsFileStr);
   [UFMFStats,success1,errmsg] = readUFMFDiagnostics(UFMFDiagnosticsFileName);
   if ~success1,
     error('Could not read ufmf diagnostics file %s: %s',UFMFDiagnosticsFileName,errmsg);
