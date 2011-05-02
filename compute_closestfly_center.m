@@ -22,6 +22,7 @@ for i1 = 1:nflies,
   end
   [mind{i1},closesti] = min(dcenter,[],1);
   closestfly{i1} = flies(closesti);
+  closestfly{i1}(isnan(mind{i1})) = nan;
 end
 
 % so that we don't compute dcenter twice

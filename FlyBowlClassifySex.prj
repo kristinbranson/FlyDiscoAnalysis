@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <deployment-project>
-  <configuration target="target.standalone" target-name="Standalone Application" name="FlyBowlClassifySex" location="/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis" file="/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/FlyBowlClassifySex.prj" build-checksum="376008879">
+  <configuration target="target.standalone" target-name="Standalone Application" name="FlyBowlClassifySex" location="/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis" file="/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/FlyBowlClassifySex.prj" build-checksum="1025878016">
     <param.project.name>/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/FlyBowlClassifySex.prj</param.project.name>
     <param.target.type>Standalone Application</param.target.type>
     <param.appname>FlyBowlClassifySex</param.appname>
@@ -61,6 +61,7 @@
     <fileset.resources>
       <file>${PROJECT_ROOT}/ClassifySex.m</file>
       <file>${PROJECT_ROOT}/LowPassFilterArea.m</file>
+      <file>${PROJECT_ROOT}/ReadMetadataFile.m</file>
       <file>${PROJECT_ROOT}/ReadParams.m</file>
       <file>${PROJECT_ROOT}/SmoothAreaOutliers.m</file>
       <file>${PROJECT_ROOT}/first_order_viterbi.m</file>
@@ -76,9 +77,9 @@
     <matlab>
       <root>/localhome/bransonk/software/matlab/R2010b</root>
       <path>
-        <directory>/groups/branson/home/bransonk/tracking/code/lds/hmm</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/misc</directory>
         <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/filehandling</directory>
+        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/misc</directory>
+        <directory>/groups/branson/home/bransonk/tracking/code/lds/hmm</directory>
         <directory>/groups/branson/bransonlab/projects/olympiad/SAGE/MATLABInterface/Trunk</directory>
         <directory>/groups/branson/home/bransonk/Documents/MATLAB</directory>
         <directory>/groups/branson/bransonlab/projects/olympiad/box/PostAnalysis</directory>

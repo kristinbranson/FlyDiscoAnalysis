@@ -74,7 +74,9 @@ end
 if docheckflags,
   allqueries{end+1} = SAGE.Query.Compare('flag_aborted','=','0');
   allqueries{end+1} = SAGE.Query.Compare('automated_pf','=','P');
-  allqueries{end+1} = SAGE.Query.Compare('flag_redo','=','None');
+  allqueries{end+1} = SAGE.Query.Any(SAGE.Query.Compare('flag_redo','=','None'),...
+    SAGE.Query.Compare('flag_redo','=','0'),...
+    SAGE.Query.Compare('flag_redo','=',''));
   % TODO: this should be = 'P' someday
   allqueries{end+1} = SAGE.Query.Any(SAGE.Query.Compare('manual_pf','=','P'),...
     SAGE.Query.Compare('manual_pf','=','U'));

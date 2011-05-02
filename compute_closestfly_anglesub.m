@@ -23,6 +23,7 @@ for i1 = 1:nflies,
   end
   [maxanglesub{i1},closesti] = max(anglesub,[],1);
   closestfly{i1} = flies(closesti);
+  closestfly{i1}(isnan(maxanglesub{i1})) = nan;
 end
 
 % so that we don't compute dcenter twice
