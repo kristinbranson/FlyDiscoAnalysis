@@ -867,7 +867,7 @@ handles.hdate = hdate;
     
   end
 
-%% add note callback
+%% notes callbacks
  function manualpf_pushbutton_Callback(hObject,event) %#ok<INUSD>
     
    hnotes.dialog = dialog('Name','Add notes','WindowStyle','Normal','Resize','on');
@@ -927,6 +927,8 @@ handles.hdate = hdate;
     close(hnotes.dialog);
     
   end
+
+%% set rest callbacks
 
   function set_rest_manual_p_Callback(hObject,event) %#ok<INUSD>
     set_rest_manual_Callback('P');
@@ -988,6 +990,8 @@ handles.hdate = hdate;
     
   end
 
+%% save callback
+
   function save_Callback(hObject,event) %#ok<INUSD>
     
     while true
@@ -1034,6 +1038,8 @@ handles.hdate = hdate;
     needsave = false;
     
   end
+
+%% close callback
 
   function close_fig_Callback(hObject,event)
     
@@ -1100,8 +1106,8 @@ handles.hdate = hdate;
     
     if ~isempty(expdiri_selected),
       manual_pf_curr = data(expdiri_selected).manual_pf;
-      s = get(hmanualpf.popup,'String');
-      vcurr = find(strncmpi(manual_pf_curr,s,1),1);
+      ss = get(hmanualpf.popup,'String');
+      vcurr = find(strncmpi(manual_pf_curr,ss,1),1);
       if isempty(vcurr),
         error('Unknown manual_pf %s',manual_pf_curr);
       end
@@ -1110,6 +1116,8 @@ handles.hdate = hdate;
     info = s.info;
     
   end
+
+%% undo callback
 
   function undo_Callback(hObject,event) %#ok<INUSD>
     
@@ -1122,7 +1130,7 @@ handles.hdate = hdate;
     
   end
 
-%% add info callback
+%% info callback
  function manualpf_pushbutton_info_Callback(hObject,event) %#ok<INUSD>
 
    ncstats = 4;
@@ -1170,6 +1178,8 @@ handles.hdate = hdate;
     delete(hinfo.dialog);
     
   end
+
+%% mouse motion callback
 
   function MotionFcn(hObject,event) %#ok<INUSD>
     
