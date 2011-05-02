@@ -238,7 +238,7 @@ for i = 1:nexpdirs,
   end
   if need_notes_curation,
     data(i).notes_curation = '';
-  end  
+  end
 end
 expdirs = {data.file_system_path};
 
@@ -578,6 +578,9 @@ handles.hdate = hdate;
       
       statnames{tmpi} = sprintf('%s_',examinestats{tmpi}{:});
       statnames{tmpi} = statnames{tmpi}(1:end-1);
+      statnames{tmpi} = strrep(statnames{tmpi},'stats_perframe_','');
+      statnames{tmpi} = strrep(statnames{tmpi},'meanmean_perexp_','');
+      statnames{tmpi} = strrep(statnames{tmpi},'flyany_frame','');
       statnames{tmpi} = strrep(statnames{tmpi},'ufmf_diagnostics_summary','ufmf');
       statnames{tmpi} = strrep(statnames{tmpi},'ufmf_diagnostics_stream','ufmf');
       statnames{tmpi} = strrep(statnames{tmpi},'temperature_diagnostics','temp');
@@ -1226,7 +1229,6 @@ handles.hdate = hdate;
     
     state = undolist(end);
     experiment_names = {data.experiment_name};
-
     
     [loadpath2,loadfilename2] = fileparts(loadfilename);
     loadfilename2 = fullfile(loadpath2,[loadfilename2,'_diagnosticinfo.mat']);
