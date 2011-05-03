@@ -6,4 +6,4 @@ offx,.3
 examineexperimentvariablesstatsfile,
 maxdistclick,50
 rcfile,.FlyBowlExamineBehaviorVariables.mat
-examinebehaviorvariablesstatsfilestr,../pBDPGAL4U_stats/20110418T190258/stats_perframe.mat
+examinebehaviorvariablesstatsfilestr,../pBDPGAL4U_stats/20110428T104352/stats_perframe.mat
