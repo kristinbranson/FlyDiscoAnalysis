@@ -162,7 +162,6 @@ if ~didloaddata,
   queries(end+1:end+2) = {'flag_aborted',0};
   queries(end+1:end+2) = {'automated_pf','P'};
   queries(end+1:end+2) = {'experiment_name','FlyBowl_*'};
-  queries(end+1:end+2) = {'line_name','pBDPGAL4U'};
   data = SAGEGetBowlData(queries{:},'removemissingdata',true,'dataset',dataset);
   if isempty(data),
     uiwait(warndlg(sprintf('No data for date range %s to %s',daterange{:}),'No data found'));
