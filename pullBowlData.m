@@ -58,7 +58,13 @@ data = dData;
 
 % add in exp_datenum
 for i = 1:numel(data),
+  % numeric date
   data(i).edt = datenum(data(i).exp_datetime,'yyyymmddTHHMMSS');
+  
+  % rig x bowl
+  if isfield(data,'rig') && isfield(data,'bowl'),
+    data(i).rig_bowl = sprintf('%d%s',data(i).rig,data(i).bowl);
+  end
 end
 
 end

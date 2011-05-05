@@ -136,6 +136,12 @@ if ischar(rootdir),
   end
 end
 
+%% add rig x bowl
+if isfield(datamerge,'rig') && isfield(datamerge,'bowl'),
+  for i = 1:numel(datamerge),
+    datamerge(i).rig_bowl = sprintf('%d%s',datamerge(i).rig,datamerge(i).bowl);
+  end
+end
 
 %% format stats, hist into substructs
 
