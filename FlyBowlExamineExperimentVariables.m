@@ -2,10 +2,18 @@ function [handles,data] = FlyBowlExamineExperimentVariables(varargin)
 
 handles = struct;
 data = [];
+groupnames = {
+  'flag_redo','flag_review',...
+  'notes_behavioral','notes_technical','notes_curation',...
+  'line_name','manual_pf','automated_pf','experiment_name','experiment_protocol',...
+  'experimenter','exp_datetime','bowl','camera','computer','harddrive','apparatus_id','cross_date','effector',...
+  'environmental_chamber','gender','genotype','handler_sorting','handler_starvation','plate','rearing_protocol',...
+  'rig','top_plate','file_system_path','manual_behavior','cross_handler'
+  };
 
 [analysis_protocol,settingsdir,datalocparamsfilestr,hfig,period,maxdatenum,...
   figpos,datenumnow,sage_params_path,sage_db,username,rootdatadir,dataset,...
-  loadcacheddata,leftovers] = ...
+  loadcacheddata,groupnames,leftovers] = ...
   myparse_nocheck(varargin,...
   'analysis_protocol','current',...
   'settingsdir','/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/settings',...
@@ -20,7 +28,8 @@ data = [];
   'username','',...
   'rootdatadir','/groups/sciserv/flyolympiad/Olympiad_Screen/fly_bowl/bowl_data',...
   'dataset','data',...
-  'loadcacheddata','');
+  'loadcacheddata','',...
+  'groupnames',groupnames);
 
 maxnundo = 5;
 maxperiodsprev = 10;
@@ -241,6 +250,21 @@ for i = 1:nexpdirs,
 end
 expdirs = {data.file_system_path};
 
+%% groups of variables for searching
+
+groupnames = intersect(groupnames,fieldnames(data));
+groupvalues = cell(size(groupnames));
+for i = 1:numel(groupnames),
+  fn = groupnames{i};
+  values = {data.(fn)};
+  if all(cellfun(@ischar,values)),
+    values = unique(values);
+  else
+    values = unique([values{:}]);
+  end
+  groupvalues{i} = values;
+end
+
 %% get experiment variables
 
 nstats = numel(examinestats);
@@ -276,7 +300,7 @@ for i = 1:nstats,
     stat(:,i) = v;
 
 
-% special case: strings
+  % special case: strings
   elseif ismember(examinestats{i}{1},string_metadata_fns),
     [uniquevals,~,v] = unique({data.(examinestats{i}{1})});
     if numel(uniquevals) == 1,
@@ -420,21 +444,24 @@ hmenu.options = uimenu('Label','Options','Parent',hfig);
 hmenu.set = uimenu('Label','Set','Parent',hfig);
 hmenu.info = uimenu('Label','Info','Parent',hfig);
 hmenu.plot_manual_p = uimenu(hmenu.options,'Label','Plot manual_pf = p',...
-  'Checked','on','Callback',@plot_manual_p_Callback);
+  'Checked','on','Callback',@plot_manual_p_Callback,'Accelerator','p');
 hmenu.plot_manual_f = uimenu(hmenu.options,'Label','Plot manual_pf = f',...
-  'Checked','on','Callback',@plot_manual_f_Callback);
+  'Checked','on','Callback',@plot_manual_f_Callback,'Accelerator','f');
 hmenu.set_rest_manual_p = uimenu(hmenu.set,'Label','Set manual_pf == u -> p',...
   'Callback',@set_rest_manual_p_Callback);
 hmenu.set_rest_manual_f = uimenu(hmenu.set,'Label','Set manual_pf == u -> f',...
   'Callback',@set_rest_manual_f_Callback);
 hmenu.undo = uimenu(hmenu.set,'Label','Undo',...
-  'Callback',@undo_Callback,'Enable','off');
+  'Callback',@undo_Callback,'Enable','off','Accelerator','z');
 hmenu.save = uimenu(hmenu.file,'Label','Save...',...
-  'Callback',@save_Callback);
+  'Callback',@save_Callback,'Accelerator','s');
 hmenu.load = uimenu(hmenu.file,'Label','Load Spreadsheet...',...
-  'Callback',@load_Callback);
+  'Callback',@load_Callback,'Accelerator','l');
 hmenu.open = uimenu(hmenu.file,'Label','View Experiment',...
-  'Callback',@open_Callback,'Enable','off');
+  'Callback',@open_Callback,'Enable','off','Accelerator','o');
+hmenu.search = uimenu(hmenu.info,'Label','Search...',...
+  'Callback',@search_Callback,'Accelerator','f');
+hsearch = struct;
 
 daterangeprint = {datestr(mindatenum,'yyyy-mm-dd'),datestr(maxdatenum,'yyyy-mm-dd')};
 hmenu.daterange = uimenu(hmenu.info,'Label',...
@@ -656,18 +683,7 @@ handles.hdate = hdate;
       [expdiri_selected,stati_selected] = ind2sub([tmpn,nstats],closest);
       expdiri_selected = tmpidx(expdiri_selected);
 
-      UpdateStatSelected();
-      
-      set(hselected,'XData',x(expdiri_selected,:),'YData',normstat(expdiri_selected,:),'Visible','on');
-      set(hmenu.open,'Enable','on');
-
-      manual_pf_curr = data(expdiri_selected).manual_pf;
-      s = get(hmanualpf.popup,'String');
-      vcurr = find(strncmpi(manual_pf_curr,s,1),1);
-      if isempty(vcurr),
-        error('Unknown manual_pf %s',manual_pf_curr);
-      end
-      set(hmanualpf.popup,'Value',vcurr);
+      UpdateSelected();
       
       if strcmp(SelectionType,'open'),
         
@@ -698,6 +714,25 @@ handles.hdate = hdate;
     set(hx(stati_selected),'Color','r','FontWeight','bold');
     %set(hfig,'Interruptible','on');
 
+  end
+
+%% update all info dependent on stat, experiment selected
+
+  function UpdateSelected()
+      
+    UpdateStatSelected();
+    
+    set(hselected,'XData',x(expdiri_selected,:),'YData',normstat(expdiri_selected,:),'Visible','on');
+    set(hmenu.open,'Enable','on');
+    
+    manual_pf_curr = data(expdiri_selected).manual_pf;
+    s = get(hmanualpf.popup,'String');
+    vcurr = find(strncmpi(manual_pf_curr,s,1),1);
+    if isempty(vcurr),
+      error('Unknown manual_pf %s',manual_pf_curr);
+    end
+    set(hmanualpf.popup,'Value',vcurr);
+    
   end
 
 %% manual_pf = p callback
@@ -750,6 +785,11 @@ handles.hdate = hdate;
       end
     end
     
+    if exist('hsearch','var') && isfield(hsearch,'dialog') && ...
+        ishandle(hsearch.dialog),...
+        delete(hsearch.dialog);
+    end
+    
     maxdatenum = maxdatenum + period;
     handles = FlyBowlExamineExperimentVariables(...
       'analysis_protocol',analysis_protocol,...
@@ -781,6 +821,12 @@ handles.hdate = hdate;
       end
     end
    
+        
+    if exist('hsearch','var') && isfield(hsearch,'dialog') && ...
+        ishandle(hsearch.dialog),...
+        delete(hsearch.dialog);
+    end
+    
     maxdatenum = maxdatenum - period;
     handles = FlyBowlExamineExperimentVariables(...
       'analysis_protocol',analysis_protocol,...
@@ -1144,12 +1190,7 @@ handles.hdate = hdate;
    
    hinfo.dialog = dialog('Name','Add information','WindowStyle','Normal',...
      'Resize','on','Units','pixels','CloseRequestFcn',@info_done_Callback);
-   dialog_pos = get(hinfo.dialog,'Position');
-   dialog_pos(1) = dialog_pos(1) - (dialog_w-dialog_pos(3))/2;
-   dialog_pos(2) = dialog_pos(2) - (dialog_h-dialog_pos(4))/2;
-   dialog_pos(3) = dialog_w;
-   dialog_pos(4) = dialog_h;
-   set(hinfo.dialog,'Position',dialog_pos);
+   SetFigureSize(hinfo.dialog,dialog_w,dialog_h);
    hinfo.checkboxes = nan(1,nstats);
    
    for tmpi = 1:nstats,
@@ -1308,6 +1349,117 @@ handles.hdate = hdate;
     
     needsave = true;
     setManualPFState(state);
+    
+  end
+
+%% search callback
+
+  function search_Callback(hObject,event) %#ok<INUSD>
+    
+    if ~isfield(hsearch,'dialog') || ~ishandle(hsearch.dialog),
+      line_height = 20;
+      prompt_width = 50;
+      answer_width = 200;
+      button_width = 75;
+      button_height = 30;
+      gap_width = 5;
+      gap_height = 10;
+      nlines = 3;
+      dlg_height = (nlines-1)*line_height + button_height + (nlines+1)*gap_height;
+      dlg_width = prompt_width + answer_width + 3*gap_width;
+      hsearch.dialog = dialog('Name','Find experiments','WindowStyle','normal',...
+        'Units','pixels');
+      SetFigureSize(hsearch.dialog,dlg_width,dlg_height);
+      hsearch.field_text = uicontrol(hsearch.dialog,'Style','text',...
+        'Units','pixels',...
+        'Position',[gap_width,dlg_height-(line_height+gap_height),prompt_width,line_height],...
+        'String','Field: ',...
+        'HorizontalAlignment','right');
+      groupi = find(strcmp(groupnames,'line_name'),1);
+      if isempty(groupi),
+        groupi = 1;
+      end
+      hsearch.field_popupmenu = uicontrol(hsearch.dialog,'Style','popupmenu',...
+        'Units','pixels',...
+        'Position',[prompt_width+2*gap_width,dlg_height-(line_height+gap_height),answer_width,line_height],...
+        'String',groupnames,...
+        'Value',groupi,...
+        'HorizontalAlignment','right',...
+        'Callback',@search_field_Callback);
+      hsearch.value_text = uicontrol(hsearch.dialog,'Style','text',...
+        'Units','pixels',...
+        'Position',[gap_width,dlg_height-2*(line_height+gap_height),prompt_width,line_height],...
+        'String','Value: ',...
+        'HorizontalAlignment','right');
+      if iscell(groupvalues{groupi}),
+        group_s = groupvalues{groupi};
+      else
+        group_s = num2str(groupvalues{groupi}(:));
+      end
+      hsearch.value_popupmenu = uicontrol(hsearch.dialog,'Style','popupmenu',...
+        'Units','pixels',...
+        'Position',[prompt_width+2*gap_width,dlg_height-2*(line_height+gap_height),answer_width,line_height],...
+        'String',group_s,...
+        'Value',1,...
+        'HorizontalAlignment','right',...
+        'Callback',@search_value_Callback);
+      hsearch.findnext_pushbutton = uicontrol(hsearch.dialog,'Style','pushbutton',...
+        'Units','pixels',...
+        'Position',[dlg_width/2-button_width/2,dlg_height-(2*line_height+button_height+3*gap_height),button_width,button_height],...
+        'String','Find next',...
+        'HorizontalAlignment','center',...
+        'Callback',@search_findnext_Callback);
+      
+    else
+      figure(hsearch.dialog);
+    end
+    
+    hsearch.resulti = 0;
+    
+  end
+
+  function search_field_Callback(varargin)
+    
+    groupi = get(hsearch.field_popupmenu,'Value');
+    if iscell(groupvalues{groupi}),
+      group_s = groupvalues{groupi};
+    else
+      group_s = num2str(groupvalues{groupi}(:));
+    end
+    set(hsearch.value_popupmenu,'String',group_s,'Value',1);
+    hsearch.resulti = 0;
+    
+  end
+
+  function search_value_Callback(varargin)
+    
+    hsearch.resulti = 0;
+    
+  end
+
+  function search_findnext_Callback(varargin)
+    
+    groupi = get(hsearch.field_popupmenu,'Value');
+    groupname = groupnames{groupi};
+    groupvaluei = get(hsearch.value_popupmenu,'Value');
+    % need to do the search
+    if hsearch.resulti == 0,
+      if iscell(groupvalues{groupi}),
+        hsearch.results = find(strcmp({data.(groupname)},groupvalues{groupi}{groupvaluei}));
+      else
+        hsearch.results = find([data.(groupname)] == groupvalues{groupi}(groupvaluei));
+      end
+    end
+    
+    hsearch.resulti = hsearch.resulti + 1;
+    if hsearch.resulti > numel(hsearch.results),
+      hsearch.resulti = 1;
+    end
+    
+    expdiri_selected = hsearch.results(hsearch.resulti);    
+    fprintf('Selecting experiment %s\n',data(expdiri_selected).experiment_name);
+    
+    UpdateSelected();
     
   end
 
