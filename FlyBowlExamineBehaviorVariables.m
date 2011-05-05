@@ -2,6 +2,7 @@ function [handles,data] = FlyBowlExamineBehaviorVariables(varargin)
 
 handles = struct;
 data = [];
+groupnames = SetDefaultGroupNames();
 
 [analysis_protocol,settingsdir,datalocparamsfilestr,hfig,period,maxdatenum,...
   figpos,datenumnow,sage_params_path,sage_db,username,rootdatadir,loadcacheddata,leftovers] = ...
@@ -18,7 +19,8 @@ data = [];
   'sage_db',[],...
   'username','',...
   'rootdatadir','/groups/sciserv/flyolympiad/Olympiad_Screen/fly_bowl/bowl_data',...
-  'loadcacheddata','');
+  'loadcacheddata','',...
+  'groupnames',groupnames);
 
 maxnundo = 5;
 maxperiodsprev = 10;
@@ -167,12 +169,17 @@ if ~didloaddata,
         'analysis_protocol',analysis_protocol,...
         'settingsdir',settingsdir,...
         'datalocparamsfilestr',datalocparamsfilestr,...
+        'hfig',hfig,...
+        'figpos',figpos,...
         'period',period,...
         'maxdatenum',maxdatenum,...
         'datenumnow',datenumnow,...
         'sage_params_path',sage_params_path,...
         'sage_db',sage_db,...
-        'username',rc.username);
+        'username',rc.username,...
+        'rootdatadir',rootdatadir,...
+        'loadcacheddata',loadcacheddata,...
+        'groupnames',groupnames);      
       return;
     else
       fprintf('Choose a different week.\n');
@@ -180,12 +187,17 @@ if ~didloaddata,
         'analysis_protocol',analysis_protocol,...
         'settingsdir',settingsdir,...
         'datalocparamsfilestr',datalocparamsfilestr,...
+        'hfig',hfig,...
+        'figpos',figpos,...
         'period',period,...
         'maxdatenum',[],...
         'datenumnow',datenumnow,...
         'sage_params_path',sage_params_path,...
         'sage_db',sage_db,...
-        'username',rc.username);
+        'username',rc.username,...
+        'rootdatadir',rootdatadir,...
+        'loadcacheddata',loadcacheddata,...
+        'groupnames',groupnames);
       return;
     end
   end
@@ -216,6 +228,20 @@ for i = 1:nexpdirs,
 end
 expdirs = {data.file_system_path};
 
+%% groups of variables for searching
+
+groupnames = intersect(groupnames,fieldnames(data));
+groupvalues = cell(size(groupnames));
+for i = 1:numel(groupnames),
+  fn = groupnames{i};
+  values = {data.(fn)};
+  if all(cellfun(@ischar,values)),
+    values = unique(values);
+  else
+    values = unique([values{:}]);
+  end
+  groupvalues{i} = values;
+end
 
 %% get behavior variables
 
@@ -457,13 +483,16 @@ hmenu.set_rest_manual_n = uimenu(hmenu.set,'Label','Set manual_behavior == unkno
 hmenu.set_rest_manual_d = uimenu(hmenu.set,'Label','Set manual_behavior == unknown -> different',...
   'Callback',@set_rest_manual_d_Callback);
 hmenu.undo = uimenu(hmenu.set,'Label','Undo',...
-  'Callback',@undo_Callback,'Enable','off');
+  'Callback',@undo_Callback,'Enable','off','Accelerator','z');
 hmenu.save = uimenu(hmenu.file,'Label','Save...',...
-  'Callback',@save_Callback);
+  'Callback',@save_Callback,'Accelerator','s');
 hmenu.load = uimenu(hmenu.file,'Label','Load Spreadsheet...',...
-  'Callback',@load_Callback);
+  'Callback',@load_Callback,'Accelerator','l');
 hmenu.open = uimenu(hmenu.file,'Label','View Experiment',...
-  'Callback',@open_Callback,'Enable','off');
+  'Callback',@open_Callback,'Enable','off','Accelerator','o');
+hmenu.search = uimenu(hmenu.info,'Label','Search...',...
+  'Callback',@search_Callback,'Accelerator','f');
+hsearch = struct;
 
 daterangeprint = {datestr(mindatenum,'yyyy-mm-dd'),datestr(maxdatenum,'yyyy-mm-dd')};
 hmenu.daterange = uimenu(hmenu.info,'Label',...
@@ -634,25 +663,29 @@ handles.hdate = hdate;
     s = cell(1,2+numel(expdiris));
     s{1} = linenames{linei};
     % special case: notes, strings
-    if ismember(examinestats{stati}{1},note_metadata_fns) || ...
-        ismember(examinestats{stati}{1},string_metadata_fns),
-      s{2} = sprintf('%s =',statnames{stati});
-      for expdirii = 1:numel(expdiris),
-        expdiri = expdiris(expdirii);
-        if iscell(data(expdiri).(examinestats{stati}{1})),
-          s{2+expdirii} = [expdir_bases{expdiri},': ',sprintf('%s ',data(expdiri).(examinestats{stati}{1}){:})];
-        else
-          s{2+expdirii} = [expdir_bases{expdiri},': ',data(expdiri).(examinestats{stati}{1})];
-        end
-      end
+    if isempty(stati),
+      s = s(1);
     else
-      s{2} = sprintf('mean(%s) = %s = %s std',statnames{stati},...
-        num2str(stat(linei,stati)),num2str(normstat(linei,stati)));
-      for expdirii = 1:numel(expdiris),
-        expdiri = expdiris(expdirii);
-        s{2+expdirii} = [expdir_bases{expdiri},': ',num2str(expstat(expdiri,stati))];
+      if ismember(examinestats{stati}{1},note_metadata_fns) || ...
+          ismember(examinestats{stati}{1},string_metadata_fns),
+        s{2} = sprintf('%s =',statnames{stati});
+        for expdirii = 1:numel(expdiris),
+          expdiri = expdiris(expdirii);
+          if iscell(data(expdiri).(examinestats{stati}{1})),
+            s{2+expdirii} = [expdir_bases{expdiri},': ',sprintf('%s ',data(expdiri).(examinestats{stati}{1}){:})];
+          else
+            s{2+expdirii} = [expdir_bases{expdiri},': ',data(expdiri).(examinestats{stati}{1})];
+          end
+        end
+      else
+        s{2} = sprintf('mean(%s) = %s = %s std',statnames{stati},...
+          num2str(stat(linei,stati)),num2str(normstat(linei,stati)));
+        for expdirii = 1:numel(expdiris),
+          expdiri = expdiris(expdirii);
+          s{2+expdirii} = [expdir_bases{expdiri},': ',num2str(expstat(expdiri,stati))];
+        end
+        
       end
-
     end
     
   end
@@ -695,19 +728,7 @@ handles.hdate = hdate;
       [linei_selected,stati_selected] = ind2sub([tmpn,nstats],closest);
       linei_selected = tmpidx(linei_selected);
 
-      UpdateStatSelected();
-      
-      set(hselected,'XData',x(linei_selected,:),'YData',normstat(linei_selected,:),'Visible','on');
-      set(hmenu.open,'Enable','on');
-      
-      % TODO!
-      manual_behavior_curr = manual_behavior(linei_selected);
-      s = get(hmanual_behavior.popup,'String');
-      vcurr = find(strncmpi(manual_behavior_curr,s,1),1);
-      if isempty(vcurr),
-        error('Unknown manual_behavior %s',manual_behavior_curr);
-      end
-      set(hmanual_behavior.popup,'Value',vcurr);
+      UpdateSelected();
       
       if strcmp(SelectionType,'open'),
 
@@ -724,6 +745,26 @@ handles.hdate = hdate;
     
   end
 
+%% update selected line stuff
+
+  function UpdateSelected()
+    
+    UpdateStatSelected();
+    
+    set(hselected,'XData',x(linei_selected,:),'YData',normstat(linei_selected,:),'Visible','on');
+    set(hmenu.open,'Enable','on');
+    
+    % TODO!
+    manual_behavior_curr = manual_behavior(linei_selected);
+    s = get(hmanual_behavior.popup,'String');
+    vcurr = find(strncmpi(manual_behavior_curr,s,1),1);
+    if isempty(vcurr),
+      error('Unknown manual_behavior %s',manual_behavior_curr);
+    end
+    set(hmanual_behavior.popup,'Value',vcurr);
+    
+  end
+      
 %% update stat selected-based stuff
 
   function UpdateStatSelected()
@@ -802,7 +843,10 @@ handles.hdate = hdate;
       'datenumnow',datenumnow,...
       'sage_params_path',sage_params_path,...
       'sage_db',sage_db,...
-      'username',rc.username);
+      'username',rc.username,...
+      'rootdatadir',rootdatadir,...
+      'loadcacheddata',loadcacheddata,...
+      'groupnames',groupnames);
 
   end
 
@@ -832,7 +876,10 @@ handles.hdate = hdate;
       'datenumnow',datenumnow,...
       'sage_params_path',sage_params_path,...
       'sage_db',sage_db,...
-      'username',rc.username);
+      'username',rc.username,...
+      'rootdatadir',rootdatadir,...
+      'loadcacheddata',loadcacheddata,...
+      'groupnames',groupnames);
 
   end
 
@@ -1387,5 +1434,118 @@ handles.hdate = hdate;
     setManualPFState(state);
     
   end
+
+%% search callback
+
+  function search_Callback(hObject,event) %#ok<INUSD>
+    
+    if ~isfield(hsearch,'dialog') || ~ishandle(hsearch.dialog),
+      line_height = 20;
+      prompt_width = 50;
+      answer_width = 200;
+      button_width = 75;
+      button_height = 30;
+      gap_width = 5;
+      gap_height = 10;
+      nl = 3;
+      dlg_height = (nl-1)*line_height + button_height + (nl+1)*gap_height;
+      dlg_width = prompt_width + answer_width + 3*gap_width;
+      hsearch.dialog = dialog('Name','Find experiments','WindowStyle','normal',...
+        'Units','pixels');
+      SetFigureSize(hsearch.dialog,dlg_width,dlg_height);
+      hsearch.field_text = uicontrol(hsearch.dialog,'Style','text',...
+        'Units','pixels',...
+        'Position',[gap_width,dlg_height-(line_height+gap_height),prompt_width,line_height],...
+        'String','Field: ',...
+        'HorizontalAlignment','right');
+      groupi = find(strcmp(groupnames,'line_name'),1);
+      if isempty(groupi),
+        groupi = 1;
+      end
+      hsearch.field_popupmenu = uicontrol(hsearch.dialog,'Style','popupmenu',...
+        'Units','pixels',...
+        'Position',[prompt_width+2*gap_width,dlg_height-(line_height+gap_height),answer_width,line_height],...
+        'String',groupnames,...
+        'Value',groupi,...
+        'HorizontalAlignment','right',...
+        'Callback',@search_field_Callback);
+      hsearch.value_text = uicontrol(hsearch.dialog,'Style','text',...
+        'Units','pixels',...
+        'Position',[gap_width,dlg_height-2*(line_height+gap_height),prompt_width,line_height],...
+        'String','Value: ',...
+        'HorizontalAlignment','right');
+      if iscell(groupvalues{groupi}),
+        group_s = groupvalues{groupi};
+      else
+        group_s = num2str(groupvalues{groupi}(:));
+      end
+      hsearch.value_popupmenu = uicontrol(hsearch.dialog,'Style','popupmenu',...
+        'Units','pixels',...
+        'Position',[prompt_width+2*gap_width,dlg_height-2*(line_height+gap_height),answer_width,line_height],...
+        'String',group_s,...
+        'Value',1,...
+        'HorizontalAlignment','right',...
+        'Callback',@search_value_Callback);
+      hsearch.findnext_pushbutton = uicontrol(hsearch.dialog,'Style','pushbutton',...
+        'Units','pixels',...
+        'Position',[dlg_width/2-button_width/2,dlg_height-(2*line_height+button_height+3*gap_height),button_width,button_height],...
+        'String','Find next',...
+        'HorizontalAlignment','center',...
+        'Callback',@search_findnext_Callback);
+      
+    else
+      figure(hsearch.dialog);
+    end
+    
+    hsearch.resulti = 0;
+    
+  end
+
+  function search_field_Callback(varargin)
+    
+    groupi = get(hsearch.field_popupmenu,'Value');
+    if iscell(groupvalues{groupi}),
+      group_s = groupvalues{groupi};
+    else
+      group_s = num2str(groupvalues{groupi}(:));
+    end
+    set(hsearch.value_popupmenu,'String',group_s,'Value',1);
+    hsearch.resulti = 0;
+    
+  end
+
+  function search_value_Callback(varargin)
+    
+    hsearch.resulti = 0;
+    
+  end
+
+  function search_findnext_Callback(varargin)
+    
+    groupi = get(hsearch.field_popupmenu,'Value');
+    groupname = groupnames{groupi};
+    groupvaluei = get(hsearch.value_popupmenu,'Value');
+    % need to do the search
+    if hsearch.resulti == 0,
+      if iscell(groupvalues{groupi}),
+        results_exp = strcmp({data.(groupname)},groupvalues{groupi}{groupvaluei});
+      else
+        results_exp = find([data.(groupname)] == groupvalues{groupi}(groupvaluei));
+      end
+      hsearch.results = unique(lineidx(results_exp));
+    end
+    
+    hsearch.resulti = hsearch.resulti + 1;
+    if hsearch.resulti > numel(hsearch.results),
+      hsearch.resulti = 1;
+    end
+    
+    linei_selected = hsearch.results(hsearch.resulti);
+    fprintf('Selecting line %s\n',linenames{linei_selected});
+    
+    UpdateSelected();
+    
+  end
+
 
 end
