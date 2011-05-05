@@ -1201,12 +1201,7 @@ handles.hdate = hdate;
    
    hinfo.dialog = dialog('Name','Add information','WindowStyle','Normal',...
      'Resize','on','Units','pixels','CloseRequestFcn',@info_done_Callback);
-   dialog_pos = get(hinfo.dialog,'Position');
-   dialog_pos(1) = dialog_pos(1) - (dialog_w-dialog_pos(3))/2;
-   dialog_pos(2) = dialog_pos(2) - (dialog_h-dialog_pos(4))/2;
-   dialog_pos(3) = dialog_w;
-   dialog_pos(4) = dialog_h;
-   set(hinfo.dialog,'Position',dialog_pos);
+   SetFigureSize(hinfo.dialog,dialog_w,dialog_h);
    hinfo.checkboxes = nan(1,nstats);
    
    for tmpi = 1:nstats,
