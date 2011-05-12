@@ -1106,9 +1106,17 @@ handles.hdate = hdate;
       for tmpj = find(lineidx == tmpi),
         if iscell(data(tmpj).notes_curation),
           notes_curation_curr = sprintf('%s\\n',data(tmpj).notes_curation{:});
+          notes_curation_curr = notes_curation_curr(1:end-2);
         else
           notes_curation_curr = data(tmpj).notes_curation;
         end
+        if numel(notes_curation_curr) >= 2 && strcmp(notes_curation_curr(end-1:end),'\n'),
+          notes_curation_curr = notes_curation_curr(1:end-2);
+        end
+        if numel(notes_curation_curr) >= 3 && strcmp(notes_curation_curr(end-2:end),'\n"'),
+          notes_curation_curr = [notes_curation_curr(1:end-3),'"'];
+        end
+
         fprintf(fid,'%s\t%s\t%s\t%s\t',...
           data(tmpj).line_name,...
           data(tmpj).experiment_name,...
@@ -1375,6 +1383,7 @@ handles.hdate = hdate;
     end
     
     fid = fopen(loadfilename,'r');
+    lineisset = false(1,nlines);
     while true,
       
       ss = fgetl(fid);
@@ -1389,9 +1398,18 @@ handles.hdate = hdate;
       
       % split at tabs
       m = regexp(ss,'\t','split');
-      if numel(m) < numel_noinfo || numel(m) > numel_info,
+      if numel(m) < 3 || numel(m) > numel_info,
         warning('Skipping line %s: wrong number of fields',ss);
         continue;
+      end
+      if numel(m) < numel_noinfo,
+        m = [m,repmat({''},[1,numel_noinfo-numel(m)])];
+      end
+
+      for tmpi = 1:numel(m),
+        if regexp(m{tmpi},'^".*"$','once'),
+          m{tmpi} = m{tmpi}(2:end-1);
+        end
       end
       
       isinfo = numel(m) == numel_info;
@@ -1399,6 +1417,7 @@ handles.hdate = hdate;
       experiment_name = m{2};
       manual_behavior_curr = m{3};
       notes_curation_curr = m{4};
+        
       notes_curation_curr = regexp(notes_curation_curr,'\\n','split');
       if isinfo,
         info_s = regexp(m{5},',','split');
@@ -1410,12 +1429,12 @@ handles.hdate = hdate;
         end
       end
       
-      tmpi = find(strcmp(linenames,linename),1);
+      tmpi = find(strcmp(experiment_names,experiment_name),1);
       if isempty(tmpi),
         fprintf('line %s not currently examined, skipping\n',linename);
         continue;
       end
-      
+            
       state.manual_behavior(tmpi) = manual_behavior_curr(1);
       state.notes_curation{tmpi} = notes_curation_curr;
       tmpi = find(strcmp(linename,linenames),1);
@@ -1423,6 +1442,17 @@ handles.hdate = hdate;
         % this should never happen
         fprintf('line %s not currently examined, skipping\n',linename);
       end
+      
+      if lineisset(tmpi) && state.manual_behavior(tmpi) ~= 'U',
+        if manual_behavior_curr(1) == 'U',
+          continue;
+        elseif manual_behavior_curr(1) ~= state.manual_behavior(tmpi),
+          warning('Conflicting labels for line %s, using %s',linename,state.manual_behavior(tmpi));
+          continue;
+        end
+      end
+      lineisset(tmpi) = true;
+      
       state.line_manual_behavior(tmpi) = manual_behavior_curr(1);
       state.line_notes_curation{tmpi} = notes_curation_curr;
       if isinfo,
