@@ -31,8 +31,8 @@ analysis_protocol = '20110407';
 params = {'settingsdir',settingsdir,...
   'analysis_protocol',analysis_protocol,...
   'rootdatadir',rootdatadir,...
-  'dataset','data'};
+  'dataset','score'};
 
 %% 
 
-[~,data] = FlyBowlExamineExperimentVariables(params{:},'loadcacheddata','datacache_exp_20110429.mat');
+[~,data] = FlyBowlExamineExperimentVariables(params{:});%,'loadcacheddata','datacache_exp_20110429.mat');
