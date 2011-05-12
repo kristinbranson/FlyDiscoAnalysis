@@ -1390,7 +1390,8 @@ handles.hdate = hdate;
       % split at tabs
       m = regexp(ss,'\t','split');
       if numel(m) < numel_noinfo || numel(m) > numel_info,
-        warning('Skipping line %s: wrong number of fields',s);
+        warning('Skipping line %s: wrong number of fields',ss);
+        continue;
       end
       
       isinfo = numel(m) == numel_info;
