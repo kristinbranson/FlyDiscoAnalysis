@@ -20,10 +20,10 @@ end
 analysis_protocol = '20110407';
 vartype = 'experiment';
 dataset = 'score';
-period = 2;
-loadcacheddata = true;
-datafilename = 'DataCurationSheets/ExperimentData_20110409to20110416.mat';
-username = 'bransonk';
+% period = 2;
+% loadcacheddata = true;
+% datafilename = 'DataCurationSheets/ExperimentData_20110409to20110416.mat';
+% username = 'bransonk';
 
 %% which experiments
 
@@ -37,12 +37,12 @@ username = 'bransonk';
 params = {'settingsdir',settingsdir,...
   'analysis_protocol',analysis_protocol,...
   'rootdatadir',rootdatadir,...
-  'dataset',dataset,...
-  'period',period,...
-  'loadcacheddata',loadcacheddata,...
-  'datafilename',datafilename,...
-  'username',username};
+  'dataset',dataset};
+%   'period',period,...
+%   'loadcacheddata',loadcacheddata,...
+%   'datafilename',datafilename,...
+%   'username',username};
 
 %% 
 
-[~,data] = FlyBowlExamineVariables(vartype,params{:});
+[handles,data] = FlyBowlExamineVariables(vartype,params{:});
