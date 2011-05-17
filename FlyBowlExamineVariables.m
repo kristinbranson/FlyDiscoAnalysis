@@ -375,10 +375,10 @@ SetCallbacks();
       data.queries(end+1:end+2) = {'daterange',data.daterange};
       data.queries(end+1:end+2) = {'data_type',data.data_types};
       data.queries(end+1:end+2) = {'flag_aborted',0};
-      data.queries(end+1:end+2) = {'automated_pf','P'};
+      data.queries(end+1:end+2) = {'automated_pf',{'P','U'}};
       data.queries(end+1:end+2) = {'experiment_name','FlyBowl_*'};
       data.pull_data_datetime = now;
-      rawdata = SAGEGetBowlData(data.queries{:},'removemissingdata',true,'dataset',data.dataset);
+      rawdata = SAGEGetBowlData(data.queries{:},'checkflags',false,'removemissingdata',true,'dataset',data.dataset);
       if isempty(rawdata),
         uiwait(warndlg(sprintf('No data for date range %s to %s',data.daterange{:}),'No data found'));
         return;
@@ -685,8 +685,6 @@ SetCallbacks();
     end
     state.idx_manual_p = lower(annot.manual_pf) == lower(params.pvalue);
     state.idx_manual_f = lower(annot.manual_pf) == lower(params.fvalue);
-    set(handles.data(state.idx_manual_p),'Marker','+');
-    set(handles.data(state.idx_manual_f),'Marker','x');
     
     if ~strcmp(params.plotgroup,'none'),
       annot.notes_curation = cell(1,data.ngroups);
@@ -719,6 +717,10 @@ SetCallbacks();
         'markersize',6,'HitTest','off');
     end
     state.idx_visible = true(1,data.ngroups);
+
+    % set markers
+    set(handles.data(state.idx_manual_p),'Marker','+');
+    set(handles.data(state.idx_manual_f),'Marker','x');
 
     
     plotdata.xlim = [0,data.nstats+1];
