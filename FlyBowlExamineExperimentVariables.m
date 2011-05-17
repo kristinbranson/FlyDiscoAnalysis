@@ -111,8 +111,14 @@ end
 if ~isfield(rc,'savepath'),
   rc.savepath = '';
 end
+if ~isfield(rc,'savedatapath'),
+  rc.savedatapath = '';
+end
 savefilename = fullfile(rc.savepath,sprintf('DataCuration_FlyBowl_%s_%sto%s.tsv',...
   rc.username,datestr(mindatenum,'yyyymmdd'),datestr(maxdatenum,'yyyymmdd')));
+savedatafilename = fullfile(rc.savedatapath,sprintf('ExperimentData_FlyBowl_%sto%s.mat',...
+  datestr(mindatenum,'yyyymmdd'),datestr(maxdatenum,'yyyymmdd')));
+
 needsave = false;
 
 %% string metadata
@@ -148,13 +154,18 @@ data_types = {'ufmf_diagnostics_summary_*',...
 %data_types = examinestats;
 
 didloaddata = false;
-if ~isempty(loadcacheddata),
-  try
-    load(loadcacheddata,'data');
-    didloaddata = true;
-  catch ME
-    warning('Could not load data from %s:\n%s',loadcacheddata,getReport(ME));
+if isempty(loadcacheddata),
+  b = questdlg('Load cached data from file?','Load data?','Yes','No','Cancel','No');
+  if strcmpi(b,'no'),
+    return;
   end
+  if strcmpi(b,'yes'),
+    [didloaddata,data,queries,pull_data_datetime,rc,savedatafilename] = ...
+    LoadExamineData(savedatafilename,mindatenum,maxdatenum,rc,true);
+  end    
+else
+  [didloaddata,data,queries,pull_data_datetime,rc,savedatafilename] = ...
+    LoadExamineData(loadcacheddata,mindatenum,maxdatenum,rc,false);
 end
 
 if ~didloaddata,
@@ -164,6 +175,7 @@ if ~didloaddata,
   queries(end+1:end+2) = {'flag_aborted',0};
   queries(end+1:end+2) = {'automated_pf','P'};
   queries(end+1:end+2) = {'experiment_name','FlyBowl_*'};
+  pull_data_datetime = now;
   data = SAGEGetBowlData(queries{:},'removemissingdata',true,'dataset',dataset);
   if isempty(data),
     uiwait(warndlg(sprintf('No data for date range %s to %s',daterange{:}),'No data found'));
@@ -456,10 +468,14 @@ hmenu.set_rest_manual_f = uimenu(hmenu.set,'Label','Set manual_pf == u -> f',...
   'Callback',@set_rest_manual_f_Callback);
 hmenu.undo = uimenu(hmenu.set,'Label','Undo',...
   'Callback',@undo_Callback,'Enable','off','Accelerator','z');
-hmenu.save = uimenu(hmenu.file,'Label','Save...',...
+hmenu.save = uimenu(hmenu.file,'Label','Save Spreadsheet...',...
   'Callback',@save_Callback,'Accelerator','s');
 hmenu.load = uimenu(hmenu.file,'Label','Load Spreadsheet...',...
   'Callback',@load_Callback,'Accelerator','l');
+hmenu.save_data = uimenu(hmenu.file,'Label','Save Data...',...
+  'Callback',@savedata_Callback);
+hmenu.load_data = uimenu(hmenu.file,'Label','Load Data...',...
+  'Callback',@loaddata_Callback);
 hmenu.open = uimenu(hmenu.file,'Label','View Experiment',...
   'Callback',@open_Callback,'Enable','off','Accelerator','o');
 hmenu.search = uimenu(hmenu.info,'Label','Search...',...
@@ -1073,8 +1089,15 @@ handles.hdate = hdate;
     for tmpj = 1:nexpdirs,
       if iscell(data(tmpj).notes_curation),
         notes_curation_curr = sprintf('%s\\n',data(tmpj).notes_curation{:});
+        notes_curation_curr = notes_curation_curr(1:end-2);
       else
         notes_curation_curr = data(tmpj).notes_curation;
+      end
+      if numel(notes_curation_curr) >= 2 && strcmp(notes_curation_curr(end-1:end),'\n'),
+        notes_curation_curr = notes_curation_curr(1:end-2);
+      end
+      if numel(notes_curation_curr) >= 3 && strcmp(notes_curation_curr(end-2:end),'\n"'),
+        notes_curation_curr = [notes_curation_curr(1:end-3),'"'];
       end
       fprintf(fid,'%s\t%s\t%s\t%s\t',...
         data(tmpj).line_name,...
@@ -1096,6 +1119,24 @@ handles.hdate = hdate;
     needsave = false;
     
   end
+
+%% save data callback
+
+  function savedata_Callback(hObject,event) %#ok<INUSD>
+
+    SaveExamineData;
+ 
+  end
+
+%% load data callback
+
+  function loaddata_Callback(hObject,event) %#ok<INUSD>
+
+    [didloaddata,newdata,newqueries,newpull_data_datetime,rc,savedatafilename] = ...
+      LoadExamineData(savedatafilename,mindatenum,maxdatenum,rc,true)
+ 
+  end
+
 
 %% close callback
 
@@ -1326,14 +1367,26 @@ handles.hdate = hdate;
       
       % split at tabs
       m = regexp(ss,'\t','split');
-      if numel(m) < numel_noinfo || numel(m) > numel_info,
+      if numel(m) < 3 || numel(m) > numel_info,
         warning('Skipping line %s: wrong number of fields',s);
+        continue;
       end
 
+      if numel(m) < numel_noinfo,
+        m = [m,repmat({''},[1,numel_noinfo-numel(m)])];
+      end
+
+      for tmpi = 1:numel(m),
+        if regexp(m{tmpi},'^".*"$','once'),
+          m{tmpi} = m{tmpi}(2:end-1);
+        end
+      end
+      
       isinfo = numel(m) == numel_info;
       experiment_name = m{2};
       manual_pf_curr = m{3};
       notes_curation_curr = m{4};
+      
       notes_curation_curr = regexp(notes_curation_curr,'\\n','split');
       if isinfo,
         info_s = regexp(m{5},',','split');
