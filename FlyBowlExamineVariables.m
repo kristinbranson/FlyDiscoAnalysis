@@ -290,15 +290,6 @@ while true,
     return;
   end
 
-  %% default file names
-  
-  state.savefilename = fullfile(rc.savepath,sprintf('DataCuration_FlyBowl_%s_%sto%s.tsv',...
-    rc.username,datestr(params.date.mindatenum,constants.filename_date_format),datestr(params.date.maxdatenum,constants.filename_date_format)));
-  if isempty(state.datafilename),
-    state.datafilename = fullfile(rc.savedatapath,sprintf('ExperimentData_FlyBowl_%sto%s.mat',...
-      datestr(params.date.mindatenum,constants.filename_date_format),datestr(params.date.maxdatenum,constants.filename_date_format)));
-  end
-
   %% load data from SAGE or cached mat file
 
   didgetdata = GetData();
@@ -311,6 +302,16 @@ while true,
   end
   
 end
+
+%% default file names
+  
+state.savefilename = fullfile(rc.savepath,sprintf('DataCuration_FlyBowl_%s_%sto%s.tsv',...
+  rc.username,datestr(params.date.mindatenum,constants.filename_date_format),datestr(params.date.maxdatenum,constants.filename_date_format)));
+if isempty(state.datafilename),
+  state.datafilename = fullfile(rc.savedatapath,sprintf('ExperimentData_FlyBowl_%sto%s.mat',...
+    datestr(params.date.mindatenum,constants.filename_date_format),datestr(params.date.maxdatenum,constants.filename_date_format)));
+end
+
 
 %% add extra stuff
 
@@ -1288,11 +1289,11 @@ SetCallbacks();
 
   function open_Callback(hObject,event) %#ok<INUSD>
     % open experiment
-    if isempty(handles.datai_selected),
+    if isempty(state.datai_selected),
       return;
     end
 
-    expdiris = find(data.groupidx == handles.datai_selected);
+    expdiris = find(data.groupidx == state.datai_selected);
     if isempty(expdiris),
       return;
     end
@@ -1308,11 +1309,11 @@ SetCallbacks();
     end
     
     % create an html page with links to all experiments
-    filenamecurr = fullfile(tempdir,[data.groups{handles.datai_selected},'.html']);
+    filenamecurr = fullfile(tempdir,[data.groups{state.datai_selected},'.html']);
     fid = fopen(filenamecurr,'w');
     if fid >= 0,
-      fprintf(fid,'<html>\n<title>%s %s</title>\n<body>\n',params.plotgroup,data.groups{handles.datai_selected});
-      fprintf(fid,'<h1>%s</h1>\n',data.groups{handles.datai_selected});
+      fprintf(fid,'<html>\n<title>%s %s</title>\n<body>\n',params.plotgroup,data.groups{state.datai_selected});
+      fprintf(fid,'<h1>%s</h1>\n',data.groups{state.datai_selected});
       fprintf(fid,'<ul>\n');
       for expdiri = expdiris(:)',
         fprintf(fid,'  <li><a href="file://%s">%s</a></li>\n',data.expdirs{expdiri},data.expdir_bases{expdiri});
@@ -1385,6 +1386,7 @@ SetCallbacks();
         delete(handles.search.dialog);
     end
     
+    params.loadcacheddata = false;
     params.date.maxdatenum = params.date.maxdatenum + params.date.period;
     
     RecursiveCall();
@@ -1410,6 +1412,7 @@ SetCallbacks();
         delete(handles.search.dialog);
     end
     
+    params.loadcacheddata = false;
     params.date.maxdatenum = params.date.maxdatenum - params.date.period;
     
     RecursiveCall();
@@ -1716,7 +1719,7 @@ SetCallbacks();
       break;
     end
     if strcmpi(params.plotgroup,'none'),
-      fprintf(fid,'#experiment_name\t%s\tnotes_curation\tdiagnostic_fields\n',params.manual_fn);
+      fprintf(fid,'#line_name\texperiment_name\t%s\tnotes_curation\tdiagnostic_fields\n',params.manual_fn);
     else
       fprintf(fid,'#%s\texperiment_name\t%s\tnotes_curation\tdiagnostic_fields\n',params.plotgroup,params.manual_fn);
     end
@@ -1737,7 +1740,9 @@ SetCallbacks();
         if numel(notes_curation_curr) >= 3 && strcmp(notes_curation_curr(end-2:end),'\n"'),
           notes_curation_curr = [notes_curation_curr(1:end-3),'"'];
         end
-        if ~strcmpi(params.plotgroup,'none'),
+        if strcmpi(params.plotgroup,'none'),
+          fprintf(fid,'%s\t',rawdata(tmpj).line_name);
+        else
           fprintf(fid,'%s\t',data.groups{tmpi});
         end          
         fprintf(fid,'%s\t%s\t%s\t',...
@@ -1797,10 +1802,10 @@ SetCallbacks();
       
       % split at tabs
       m = regexp(ss,'\t','split');
-      % no group name
-      if strcmpi(params.plotgroup,'none'),
-        m = [{''},m];
-      end
+%       % no group name
+%       if strcmpi(params.plotgroup,'none'),
+%         m = [{''},m];
+%       end
       if numel(m) < 3 || numel(m) > 5,
         warning('Skipping line %s: wrong number of fields',ss);
         continue;
@@ -1835,9 +1840,7 @@ SetCallbacks();
         continue;
       end
       
-      if strcmpi(params.plotgroup,'none'),
-        tmpi = 1;
-      else
+      if ~strcmpi(params.plotgroup,'none'),
         tmpi = data.groupidx(tmpi);
       end
       groupname = data.groups{tmpi};
@@ -1988,7 +1991,7 @@ SetCallbacks();
     annot.notes_curation = s.notes_curation;
     for expdiri = 1:data.nexpdirs,
       rawdata(expdiri).(params.manual_fn) = annot.manual_pf(data.groupidx(expdiri));
-      rawdata(expdiri).notes_curation = annot.notes_curation(data.groupidx(expdiri));
+      rawdata(expdiri).notes_curation = annot.notes_curation{data.groupidx(expdiri)};
     end
     state.idx_manual_p = lower(annot.manual_pf) == lower(params.pvalue);
     state.idx_manual_f = lower(annot.manual_pf) == lower(params.fvalue);
