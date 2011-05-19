@@ -143,6 +143,14 @@ if isfield(datamerge,'rig') && isfield(datamerge,'bowl'),
   end
 end
 
+%% add line__effector
+if isfield(datamerge,'line_name') && isfield(datamerge,'effector'),
+  for i = 1:numel(datamerge),
+    datamerge(i).line__effector = sprintf('%s__%s',datamerge(i).line_name,datamerge(i).effector);
+  end
+end
+
+
 %% format stats, hist into substructs
 
 statfns = {'nflies_analyzed'
