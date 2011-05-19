@@ -213,7 +213,7 @@ if ~iscell(data.data_types),
         'ctrax_diagnostics_*','registrationdata_*','sexclassifier_diagnostics_*',...
         'bias_diagnostics_*','temperature_diagnostics_*','bkgd_diagnostics_*'};
     case 'behavior',
-      data.data_types = {'stats_perframe_*_meanmean_perexp','stats_perframe_*conditions'};
+      data.data_types = {'stats_perframe_*_meanmean_perexp','stats_perframe_*conditions','stats_perframe_*_nflies_analyzed'};
   end
 end
 
@@ -796,7 +796,7 @@ SetCallbacks();
 
 %% get mean and standard deviation for z-scoring
   function NormalizeStats()
-    statsfileptr = sprintf('examine%svariablesstatsfile',params.vartype);
+    statsfileptr = sprintf('examine%svariablesstatsfilestr',params.vartype);
     if isempty(params.examine_params.(statsfileptr)),
       data.mu = nanmean(data.stat,1);
       data.sig = nanstd(data.stat,1,1);
