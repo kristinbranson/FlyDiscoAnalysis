@@ -136,11 +136,16 @@ switch lower(params.vartype),
     params.fvalue = 'F';
     params.uvalue = 'U';
     params.manual_fn = 'manual_pf';
+    params.manual_string = 'Manual P/F';
+    params.manual_choices = {'Pass','Fail','Unknown'};
+
   case 'behavior',
     params.pvalue = 'N';
     params.fvalue = 'D';
     params.uvalue = 'U';
     params.manual_fn = 'manual_behavior';
+    params.manual_string = 'Behavior';
+    params.manual_choices = {'Normal','Different','Unknown'};
 end
 
 
@@ -304,12 +309,19 @@ while true,
 end
 
 %% default file names
-  
-state.savefilename = fullfile(rc.savepath,sprintf('DataCuration_FlyBowl_%s_%sto%s.tsv',...
-  rc.username,datestr(params.date.mindatenum,constants.filename_date_format),datestr(params.date.maxdatenum,constants.filename_date_format)));
+
+if strcmpi(vartype,'behavior'),
+  prefix = 'ManualBehaviorAnnotation_FlyBowl';
+  dataprefix = 'BehaviorData_FlyBowl';
+else
+  prefix = 'DataCuration_FlyBowl';
+  dataprefix = 'ExperimentData_FlyBowl';
+end
+state.savefilename = fullfile(rc.savepath,sprintf('%s_%s_%sto%s.tsv',...
+  prefix,rc.username,datestr(params.date.mindatenum,constants.filename_date_format),datestr(params.date.maxdatenum,constants.filename_date_format)));
 if isempty(state.datafilename),
-  state.datafilename = fullfile(rc.savedatapath,sprintf('ExperimentData_FlyBowl_%sto%s.mat',...
-    datestr(params.date.mindatenum,constants.filename_date_format),datestr(params.date.maxdatenum,constants.filename_date_format)));
+  state.datafilename = fullfile(rc.savedatapath,sprintf('%s_%sto%s.mat',...
+    dataprefix,datestr(params.date.mindatenum,constants.filename_date_format),datestr(params.date.maxdatenum,constants.filename_date_format)));
 end
 
 
@@ -564,12 +576,12 @@ SetCallbacks();
     manualpf_textpos = [textpos_px(1)+textpos_px(3)+margin,c1-h1/2,w1,h1];
     handles.manualpf = struct;
     handles.manualpf.text = uicontrol(handles.fig,'Style','text','Units','Pixels',...
-      'Position',manualpf_textpos,'String','Manual PF:',...
+      'Position',manualpf_textpos,'String',[params.manual_string,':'],...
       'BackgroundColor',get(handles.fig,'Color'),'Visible','off');
     manualpf_popuppos = [manualpf_textpos(1)+manualpf_textpos(3)+margin,...
       c1-h2/2,w2,h2];
     handles.manualpf.popup = uicontrol(handles.fig,'Style','popupmenu','Units','Pixels',...
-      'Position',manualpf_popuppos,'String',{'Pass','Fail','Unknown'},...
+      'Position',manualpf_popuppos,'String',params.manual_choices,...
       'Value',3,'Visible','off','Callback',@manualpf_popup_Callback);
     manualpf_pushbuttonpos = [manualpf_popuppos(1)+manualpf_popuppos(3)+margin,...
       c1-h2/2,w3,h2];
@@ -1464,7 +1476,7 @@ SetCallbacks();
     manual_pf_new = manual_pf_full(1);
     expdiris = find(data.groupidx == state.datai_selected);
     for expdiri = expdiris,
-      rawdata(expdiri).manual_pf = manual_pf_new;
+      rawdata(expdiri).(params.manual_fn) = manual_pf_new;
     end
     annot.manual_pf(state.datai_selected) = manual_pf_new;
 
