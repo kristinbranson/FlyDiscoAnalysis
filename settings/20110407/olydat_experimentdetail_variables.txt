@@ -7,7 +7,11 @@ flag_review
 notes_behavioral
 notes_technical
 manual_pf
+manual_curator
+notes_curation
+manual_curation_date
 line_name
+rig_bowl
 bowl
 camera
 computer
@@ -21,6 +25,7 @@ hours_sorted
 hours_starved
 num_flies
 num_flies_dead
+num_flies_damaged
 plate
 rearing_incubator
 rearing_protocol
@@ -28,3 +33,9 @@ rig
 seconds_fliesloaded
 seconds_shiftflytemp
 top_plate
+temperature_diagnostics_mean
+temperature_diagnostics_max
+temperature_diagnostics_maxdiff
+temperature_diagnostics_nreadings
+temperature
+humidity

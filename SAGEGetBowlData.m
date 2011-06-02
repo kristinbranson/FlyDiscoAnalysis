@@ -150,6 +150,33 @@ if isfield(datamerge,'line_name') && isfield(datamerge,'effector'),
   end
 end
 
+%% add ctrax_diagnostics_nframes_not_tracked
+if isfield(datamerge,'ctrax_diagnostics_nframes_analyzed') && ...
+    isfield(datamerge,'ufmf_diagnostics_summary_nFrames'),
+  for i = 1:numel(datamerge),
+    datamerge(i).ctrax_diagnostics_nframes_not_tracked = ...
+      datamerge(i).ufmf_diagnostics_summary_nFrames - ...
+      datamerge(i).ctrax_diagnostics_nframes_analyzed;
+  end
+end
+
+%% add ctrax_diagnostics_mean_nsplit
+
+if isfield(datamerge,'ctrax_diagnostics_sum_nsplit') && ...
+    isfield(datamerge,'ctrax_diagnostics_nlarge_split'),
+  for i = 1:numel(datamerge),
+    datamerge(i).ctrax_diagnostics_mean_nsplit = ...
+      datamerge(i).ctrax_diagnostics_sum_nsplit ./ ...
+      datamerge(i).ctrax_diagnostics_nlarge_split;
+  end
+end
+
+%% add reg_pxpermm
+if isfield(datamerge,'registrationdata_scale'),
+  for i = 1:numel(datamerge),
+    datamerge(i).registrationdata_pxpermm = 1./datamerge(i).registrationdata_scale;
+  end
+end
 
 %% format stats, hist into substructs
 

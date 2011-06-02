@@ -85,7 +85,7 @@ for i = 1:numel(experimentdetailvariables),
 end
 
 %% Plots
-plots = {TornadoPlot;HistogramPlot;CorrelationPlot;MultiStatPlot};
+plots = {TornadoPlot_FlyBowl;HistogramPlot_FlyBowl;CorrelationPlot;MultiStatPlot};
 
 %% DetailHandler
 expdetailhandler = BowlExperimentDetailHandler;

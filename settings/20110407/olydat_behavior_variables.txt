@@ -246,6 +246,7 @@ sexclassifier_diagnostics_mean_nflies
 sexclassifier_diagnostics_mean_nfemales
 sexclassifier_diagnostics_mean_nmales
 num_flies_dead
+num_flies_damaged
 seconds_fliesloaded
 seconds_shiftflytemp
 temperature_diagnostics_mean
@@ -273,8 +274,6 @@ bias_diagnostics_max_maxfracsmooth
 bias_diagnostics_min_maxfracsmooth
 bias_diagnostics_argmaxangle_maxfracsmooth
 bias_diagnostics_diffargextremaangle_maxfracsmooth
-bias_diagnostics_argmaxr_fracsmooth
-bias_diagnostics_argmaxr_fracallsmooth
 bkgd_diagnostics_histmode_alwaysbkgd
 bkgd_diagnostics_mean_alwaysbkgd
 bkgd_diagnostics_std_alwaysbkgd
@@ -337,3 +336,8 @@ ufmf_diagnostics_summary_maxMeanPixelError
 ufmf_diagnostics_summary_meanMaxFilterError
 ufmf_diagnostics_summary_maxMaxFilterError
 
+flag_aborted
+flag_redo
+flag_review
+hours_sorted
+hours_starved
