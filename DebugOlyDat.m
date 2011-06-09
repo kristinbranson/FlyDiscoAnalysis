@@ -63,7 +63,7 @@ selector = OlyDat.DataSelector(dsf,dataPull);
 
 %% load in data chosen with data selector
 
-load('ControlData20110415to20110530.mat');
+load('ControlData20110315to20110530.mat');
 
 %% try the browser
 browser = startBowlBrowser(data,'settingsdir',settingsdir,'analysis_protocol',analysis_protocol);
