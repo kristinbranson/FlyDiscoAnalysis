@@ -184,9 +184,6 @@ constants = struct;
 % max number of changes that can be undone
 constants.maxnundo = 5;
 
-% number of date range options
-constants.maxperiodsprev = 10;
-
 % format for date options
 constants.dateoptions_format = 'yyyy-mm-dd';
 
@@ -235,7 +232,7 @@ end
   params.figpos,params.date.datenumnow,params.username,params.rootdatadir,...
   data.dataset,params.loadcacheddata,state.datafilename,...
   params.groupnames,params.plotgroup,data.data_types,...
-  params.docheckflags,params.query_leftovers] = ...
+  params.docheckflags,params.flybowl_startdate,params.query_leftovers] = ...
   myparse_nocheck(varargin,...
   'analysis_protocol',params.analysis_protocol,...
   'settingsdir',params.settingsdir,...
@@ -253,7 +250,11 @@ end
   'groupnames',params.groupnames,...
   'plotgroup',params.plotgroup,...
   'data_types',data.data_types,...
-  'checkflags',params.docheckflags);
+  'checkflags',params.docheckflags,...
+  'flybowl_startdate','20110201');
+
+% number of date range options
+constants.maxperiodsprev = 100;
 
 %% read parameters
 
@@ -979,9 +980,18 @@ SetCallbacks();
           datacurr = cellfun(@(s) s.(data.examinestats{tmpi}{k}),datacurr,'UniformOutput',false);
         end
         badidx = cellfun(@isempty,datacurr);
-        for tmpj = find(badidx),
-          datacurr{tmpj} = nan;
-          warning('No data for stat %s experiment %s',sprintf('%s,',data.examinestats{tmpi}{:}),strtrim(rawdata(tmpj).experiment_name));
+        if any(badidx),
+          for tmpj = find(badidx),
+            datacurr{tmpj} = nan;
+            warning('No data for stat %s experiment %s',sprintf('%s,',data.examinestats{tmpi}{:}),strtrim(rawdata(tmpj).experiment_name));
+          end
+        end
+        badidx = ~cellfun(@isnumeric,datacurr);
+        if any(badidx),
+          for tmpj = find(badidx),
+            datacurr{tmpj} = nan;
+            warning('Non-numeric data for stat %s experiment %s',sprintf('%s,',data.examinestats{tmpi}{:}),strtrim(rawdata(tmpj).experiment_name));
+          end
         end
         v = cell2mat(datacurr);
         data.expstat(:,tmpi) = v;
