@@ -395,6 +395,7 @@ SetCallbacks();
       data.queries(end+1:end+2) = {'experiment_name','FlyBowl_*'};
       data.pull_data_datetime = now;
       rawdata = SAGEGetBowlData(data.queries{:},'checkflags',params.docheckflags,'removemissingdata',true,'dataset',data.dataset);
+      save('TMP_FlyBowlExamineVariables_rawdata.mat','rawdata');
       if isempty(rawdata),
         uiwait(warndlg(sprintf('No data for date range %s to %s',data.daterange{:}),'No data found'));
         return;
