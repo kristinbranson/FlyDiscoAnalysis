@@ -254,7 +254,7 @@ end
   'flybowl_startdate','20110201');
 
 % number of date range options
-constants.maxperiodsprev = 100;
+params.date.maxperiodsprev = ceil((now-datenum(params.flybowl_startdate,'yyyymmdd'))/params.date.period);
 
 %% read parameters
 
@@ -397,6 +397,8 @@ SetCallbacks();
       data.pull_data_datetime = now;
       rawdata = SAGEGetBowlData(data.queries{:},'checkflags',params.docheckflags,'removemissingdata',true,'dataset',data.dataset);
       save('TMP_FlyBowlExamineVariables_rawdata.mat','rawdata');
+      %tmp = load('TMP_FlyBowlExamineVariables_rawdata.mat','rawdata');
+      %rawdata = tmp.rawdata;
       if isempty(rawdata),
         uiwait(warndlg(sprintf('No data for date range %s to %s',data.daterange{:}),'No data found'));
         return;
@@ -977,7 +979,14 @@ SetCallbacks();
     
         datacurr = {rawdata.(data.examinestats{tmpi}{1})};
         for k = 2:numel(data.examinestats{tmpi}),
-          datacurr = cellfun(@(s) s.(data.examinestats{tmpi}{k}),datacurr,'UniformOutput',false);
+          fn = data.examinestats{tmpi}{k};
+          for tmpj = 1:numel(datacurr),
+            if isstruct(datacurr{tmpj}) && isfield(datacurr{tmpj},fn),
+              datacurr{tmpj} = datacurr{tmpj}.(fn);
+            else
+              datacurr{tmpj} = [];
+            end
+          end
         end
         badidx = cellfun(@isempty,datacurr);
         if any(badidx),
@@ -1049,7 +1058,7 @@ SetCallbacks();
         maxdatenum_choices = datenum(params.date.maxdatestr,constants.dateoptions_format);
       else
         % first day of week choices
-        mindatenum_choices = fliplr([params.date.mindatenum-params.date.period*constants.maxperiodsprev:params.date.period:params.date.mindatenum-params.date.period,params.date.mindatenum:params.date.period:params.date.datenumnow]);
+        mindatenum_choices = fliplr([params.date.mindatenum-params.date.period*params.date.maxperiodsprev:params.date.period:params.date.mindatenum-params.date.period,params.date.mindatenum:params.date.period:params.date.datenumnow]);
         maxdatenum_choices = mindatenum_choices + params.date.period;
         mindatestr_choices = datestr(mindatenum_choices,constants.dateoptions_format);
         maxdatestr_choices = datestr(maxdatenum_choices,constants.dateoptions_format);
