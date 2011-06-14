@@ -33,6 +33,8 @@ data = SAGEGetBowlData('data_type',data_type,leftovers{:});
 [~,order] = sort({data.exp_datetime});
 data = data(order);
 
+fprintf('Data pulled ... checking ...\n');
+
 %% within-set checks
 
 [sets,~,setidx] = unique({data.set});
@@ -263,5 +265,6 @@ else
     fprintf(fid,'  %s\n',msgs{seti}{:});
   end
 end
-
-fclose(fid);
+if fid > 1,
+  fclose(fid);
+end
