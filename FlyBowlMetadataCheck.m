@@ -1,9 +1,10 @@
-function FlyBowlMetadataCheck(varargin)
+function [data,iserror,msgs] = FlyBowlMetadataCheck(varargin)
 
 [outfilename,...
   data_type,max_maxdiff_sorting_time_minutes,max_maxdiff_starvation_time_minutes,...
   max_maxdiff_exp_datetime_minutes,...
   min_mindt_exp_datetime_diff_sets,...
+  first_barcode_datetime,...
   leftovers] = ...
   myparse_nocheck(varargin,...
   'outfilename','',...
@@ -11,18 +12,26 @@ function FlyBowlMetadataCheck(varargin)
   'max_maxdiff_sorting_time_minutes',5,...
   'max_maxdiff_exp_datetime_minutes',10,...
   'max_maxdiff_starvation_time_minutes',5,...
-  'min_mindt_exp_datetime_diff_sets',10);
+  'min_mindt_exp_datetime_diff_sets',10,...
+  'first_barcode_datetime','20110413T000000');
 
 %% constants
 
+datetime_format = 'yyyymmddTHHMMSS';
 allowed_bowls = {'A','B','C','D'};
 nallowed_bowls = numel(allowed_bowls);
 allowed_rigs = [1,2];
 allowed_plates = [10,14];
 allowed_top_plates = [1,2];
+first_barcode_datenum = datenum(first_barcode_datetime,datetime_format);
+
 
 %% get metadata
 data = SAGEGetBowlData('data_type',data_type,leftovers{:});
+
+% sort by date
+[~,order] = sort({data.exp_datetime});
+data = data(order);
 
 %% within-set checks
 
@@ -153,7 +162,7 @@ for seti = 1:nsets,
   
   % sorting_time should be about the same
   hours_sorted = [data(idxcurr).hours_sorted];
-  sorting_datenum = datenum({data(idxcurr).exp_datetime},'yyyymmddTHHMMSS')' - hours_sorted/24;
+  sorting_datenum = datenum({data(idxcurr).exp_datetime},datetime_format)' - hours_sorted/24;
   maxdiff_sorting_time_minutes = (max(sorting_datenum) - min(sorting_datenum))*24*60;
   if maxdiff_sorting_time_minutes > maxdiff_sorting_time_minutes,
     msgs{seti}{end+1} = sprintf('Difference between first and last sorting time = %f > %f minutes',...
@@ -163,7 +172,7 @@ for seti = 1:nsets,
   
   % starvation_time should be about the same
   hours_starved = [data(idxcurr).hours_starved];
-  starvation_datenum = datenum({data(idxcurr).exp_datetime},'yyyymmddTHHMMSS')' - hours_starved/24;
+  starvation_datenum = datenum({data(idxcurr).exp_datetime},datetime_format)' - hours_starved/24;
   maxdiff_starvation_time_minutes = (max(starvation_datenum) - min(starvation_datenum))*24*60;
   if maxdiff_starvation_time_minutes > maxdiff_starvation_time_minutes,
     msgs{seti}{end+1} = sprintf('Difference between first and last starvation time = %f > %f minutes',...
@@ -172,7 +181,7 @@ for seti = 1:nsets,
   end
   
   % exp_datetime should be about the same
-  exp_datenum = datenum({data(idxcurr).exp_datetime},'yyyymmddTHHMMSS')';
+  exp_datenum = datenum({data(idxcurr).exp_datetime},datetime_format)';
   maxdiff_exp_datetime_minutes = (max(exp_datenum) - min(exp_datenum))*24*60;
   if maxdiff_exp_datetime_minutes > maxdiff_exp_datetime_minutes,
     msgs{seti}{end+1} = sprintf('Difference between first and last experiment starts = %f > %f minutes',...
@@ -182,7 +191,10 @@ for seti = 1:nsets,
   
   % wish list should be the same
   wish_lists = str2double({data(idxcurr).wish_list});
-  if numel(unique(wish_lists)) ~= 1,
+  if any(isnan(wish_lists)),
+    msgs{seti}{end+1} = 'Wish list is nan';
+    iserror(seti) = true;
+  elseif numel(unique(wish_lists)) ~= 1,
     msgs{seti}{end+1} = ['Multiple wish_lists recorded:',sprintf(' %d',unique(wish_lists))];
     iserror(seti) = true;
   end
@@ -192,7 +204,10 @@ for seti = 1:nsets,
   barcodes = str2double({data(idxcurr).cross_barcode});
   isolympiad = ~strcmp({data(idxcurr).screen_type},'non-olympiad');
   iscontrol = strcmp({data(idxcurr).screen_reason},'control');
-  bad_barcode = barcodes(isolympiad & ~iscontrol) <= 0;
+  islateenough = isempty(first_barcode_datetime) | ...
+    datenum({data(idxcurr).exp_datetime},datetime_format)' >= ...
+    first_barcode_datenum;
+  bad_barcode = barcodes(isolympiad & ~iscontrol & islateenough) <= 0;
   if any(bad_barcode),
     msgs{seti}{end+1} = sprintf('Barcode is not set for %d experiments.',nnz(bad_barcode));
     iserror(seti) = true;
@@ -207,11 +222,11 @@ for seti = 1:nsets-1,
   idxi = setidx==seti;
   same_rig_time = [];
   rigsi = unique([data(idxi).rig]);
-  exp_datenumi = datenum({data(idxi).exp_datetime},'yyyymmddTHHMMSS')';
+  exp_datenumi = datenum({data(idxi).exp_datetime},datetime_format)';
   for setj = seti+1:nsets,
     idxj = setidx==setj;
     rigsj = unique([data(idxj).rig]);
-    exp_datenumj = datenum({data(idxj).exp_datetime},'yyyymmddTHHMMSS')';
+    exp_datenumj = datenum({data(idxj).exp_datetime},datetime_format)';
     mindt = min(pdist2(exp_datenumi',exp_datenumj','euclidean','smallest',1));
     mindt_minutes = mindt*24*60;
     if mindt_minutes < min_mindt_exp_datetime_diff_sets && ~isempty(intersect(rigsi,rigsj)),
@@ -239,7 +254,7 @@ fprintf(fid,'Metadata check for the following %d experiments collected between %
 fprintf(fid,'%s\n',data.experiment_name);
 fprintf(fid,'\n');
 
-fprintf(fid,'%d within-set errors:\n',nnz(iserror));
+fprintf(fid,'%d set errors:\n',nnz(iserror));
 if ~any(iserror),
   fprintf(fid,'**NONE**\n');
 else
