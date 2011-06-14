@@ -54,4 +54,4 @@ params = {
 
 %% 
 
-FlyBowlMetadataCheck(params{:});
+[data,iserror,msgs] = FlyBowlMetadataCheck(params{:});
