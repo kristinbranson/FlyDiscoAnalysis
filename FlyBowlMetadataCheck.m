@@ -251,10 +251,10 @@ else
 end
 
 sorted_exp_datetimes = sort({data.exp_datetime});
-fprintf(fid,'Metadata check for the following %d experiments collected between %s and %s:\n',...
+fprintf(fid,'Metadata check for %d experiments collected between %s and %s:\n\n',...
   numel(data),sorted_exp_datetimes{1},sorted_exp_datetimes{end});
-fprintf(fid,'%s\n',data.experiment_name);
-fprintf(fid,'\n');
+%fprintf(fid,'%s\n',data.experiment_name);
+%fprintf(fid,'\n');
 
 fprintf(fid,'%d set errors:\n',nnz(iserror));
 if ~any(iserror),
