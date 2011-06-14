@@ -263,3 +263,5 @@ else
     fprintf(fid,'  %s\n',msgs{seti}{:});
   end
 end
+
+fclose(fid);
