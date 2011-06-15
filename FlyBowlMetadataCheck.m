@@ -5,6 +5,7 @@ function [data,iserror,msgs] = FlyBowlMetadataCheck(varargin)
   max_maxdiff_exp_datetime_minutes,...
   min_mindt_exp_datetime_diff_sets,...
   first_barcode_datetime,...
+  max_maxdiff_sorting_time_perday_days,...
   leftovers] = ...
   myparse_nocheck(varargin,...
   'outfilename','',...
@@ -13,7 +14,8 @@ function [data,iserror,msgs] = FlyBowlMetadataCheck(varargin)
   'max_maxdiff_exp_datetime_minutes',10,...
   'max_maxdiff_starvation_time_minutes',5,...
   'min_mindt_exp_datetime_diff_sets',10,...
-  'first_barcode_datetime','20110413T000000');
+  'first_barcode_datetime','20110413T000000',...
+  'max_maxdiff_sorting_time_perday_days',4.5);
 
 %% constants
 
@@ -24,6 +26,8 @@ allowed_rigs = [1,2];
 allowed_plates = [10,14];
 allowed_top_plates = [1,2];
 first_barcode_datenum = datenum(first_barcode_datetime,datetime_format);
+start_of_day = 7/24; % 7am
+end_of_day = 20/24; % 8pm
 
 
 %% get metadata
@@ -34,6 +38,24 @@ data = SAGEGetBowlData('data_type',data_type,leftovers{:});
 data = data(order);
 
 fprintf('Data pulled ... checking ...\n');
+
+exp_datenums = datenum({data.exp_datetime},datetime_format)';
+cross_datenums = datenum({data.cross_date},datetime_format)';
+% flip date seems to not be set all the time -- set to nan here
+flip_datenums = nan(1,numel(data));
+for i = 1:numel(data),
+  try
+    flip_datenums(i) = datenum(data(i).flip_date,datetime_format);
+  catch %#ok<CTCH>
+  end
+end
+
+hours_sorted = [data.hours_sorted];
+sorting_datenums = exp_datenums - hours_sorted/24;
+
+hours_starved = [data.hours_starved];
+starvation_datenums = exp_datenums - hours_starved/24;
+
 
 %% within-set checks
 
@@ -47,6 +69,7 @@ for seti = 1:nsets,
   msgs{seti} = {};
   
   idxcurr = setidx==seti;
+  idxcurr1 = find(idxcurr);  
   
   % check if bowls are unique
   bowls = {data(idxcurr).bowl};
@@ -154,18 +177,21 @@ for seti = 1:nsets,
     msgs{seti}{end+1} = ['Multiple cross_dates recorded:',sprintf(' %s',cross_dates{:})];
     iserror(seti) = true;
   end
-  
+    
   % check if flip_date is the same
   flip_dates = unique({data(idxcurr).flip_date});
   if numel(flip_dates) ~= 1,
     msgs{seti}{end+1} = ['Multiple flip_dates recorded:',sprintf(' %s',flip_dates{:})];
     iserror(seti) = true;
   end
-  
+  % make sure flip dates are valid
+  if any(isnan(flip_datenums(idxcurr))),
+    msgs{seti}{end+1} = 'Flip dates could not be parsed.';
+    iserror(seti) = true;
+  end
+
   % sorting_time should be about the same
-  hours_sorted = [data(idxcurr).hours_sorted];
-  sorting_datenum = datenum({data(idxcurr).exp_datetime},datetime_format)' - hours_sorted/24;
-  maxdiff_sorting_time_minutes = (max(sorting_datenum) - min(sorting_datenum))*24*60;
+  maxdiff_sorting_time_minutes = (max(sorting_datenums(idxcurr)) - min(sorting_datenums(idxcurr)))*24*60;
   if maxdiff_sorting_time_minutes > maxdiff_sorting_time_minutes,
     msgs{seti}{end+1} = sprintf('Difference between first and last sorting time = %f > %f minutes',...
       maxdiff_sorting_time_minutes,max_maxdiff_sorting_time_minutes);
@@ -173,17 +199,37 @@ for seti = 1:nsets,
   end
   
   % starvation_time should be about the same
-  hours_starved = [data(idxcurr).hours_starved];
-  starvation_datenum = datenum({data(idxcurr).exp_datetime},datetime_format)' - hours_starved/24;
-  maxdiff_starvation_time_minutes = (max(starvation_datenum) - min(starvation_datenum))*24*60;
-  if maxdiff_starvation_time_minutes > maxdiff_starvation_time_minutes,
+  maxdiff_starvation_time_minutes = (max(starvation_datenums(idxcurr)) - min(starvation_datenums(idxcurr)))*24*60;
+  if maxdiff_starvation_time_minutes > max_maxdiff_starvation_time_minutes,
     msgs{seti}{end+1} = sprintf('Difference between first and last starvation time = %f > %f minutes',...
       maxdiff_starvation_time_minutes,max_maxdiff_starvation_time_minutes);
     iserror(seti) = true;
   end
   
+  % time of day sorted should be reasonable
+  sorting_tods = mod(sorting_datenums(idxcurr),1);
+  badidx = sorting_tods < start_of_day | sorting_tods > end_of_day;
+  if any(badidx),
+    msgs{seti}{end+1} = 'The following experiments have sorting times not during the work day:';
+    for j = find(badidx),
+      msgs{seti}{end} = [msgs{seti}{end},sprintf('\n%s: %s',data(idxcurr1(j)).experiment_name,datestr(sorting_tods(j),'HH:MM:SS AM'))];
+    end
+    iserror(seti) = true;
+  end
+  
+  % time of day starved should be reasonable
+  starvation_tods = mod(starvation_datenums(idxcurr),1);
+  badidx = starvation_tods < start_of_day | starvation_tods > end_of_day;
+  if any(badidx),
+    msgs{seti}{end+1} = 'The following experiments have starvation times not during the work day:';
+    for j = find(badidx),
+      msgs{seti}{end} = [msgs{seti}{end},sprintf('\n%s: %s',data(idxcurr1(j)).experiment_name,datestr(starvation_tods(j),'HH:MM:SS AM'))];
+    end
+    iserror(seti) = true;
+  end
+  
   % exp_datetime should be about the same
-  exp_datenum = datenum({data(idxcurr).exp_datetime},datetime_format)';
+  exp_datenum = exp_datenums(idxcurr);
   maxdiff_exp_datetime_minutes = (max(exp_datenum) - min(exp_datenum))*24*60;
   if maxdiff_exp_datetime_minutes > maxdiff_exp_datetime_minutes,
     msgs{seti}{end+1} = sprintf('Difference between first and last experiment starts = %f > %f minutes',...
@@ -207,8 +253,7 @@ for seti = 1:nsets,
   isolympiad = ~strcmp({data(idxcurr).screen_type},'non-olympiad');
   iscontrol = strcmp({data(idxcurr).screen_reason},'control');
   islateenough = isempty(first_barcode_datetime) | ...
-    datenum({data(idxcurr).exp_datetime},datetime_format)' >= ...
-    first_barcode_datenum;
+    exp_datenums(idxcurr) >= first_barcode_datenum;
   bad_barcode = barcodes(isolympiad & ~iscontrol & islateenough) <= 0;
   if any(bad_barcode),
     msgs{seti}{end+1} = sprintf('Barcode is not set for %d experiments.',nnz(bad_barcode));
@@ -224,11 +269,11 @@ for seti = 1:nsets-1,
   idxi = setidx==seti;
   same_rig_time = [];
   rigsi = unique([data(idxi).rig]);
-  exp_datenumi = datenum({data(idxi).exp_datetime},datetime_format)';
+  exp_datenumi = exp_datenums(idxi);
   for setj = seti+1:nsets,
     idxj = setidx==setj;
     rigsj = unique([data(idxj).rig]);
-    exp_datenumj = datenum({data(idxj).exp_datetime},datetime_format)';
+    exp_datenumj = exp_datenums(idxj);
     mindt = min(pdist2(exp_datenumi',exp_datenumj','euclidean','smallest',1));
     mindt_minutes = mindt*24*60;
     if mindt_minutes < min_mindt_exp_datetime_diff_sets && ~isempty(intersect(rigsi,rigsj)),
@@ -240,6 +285,68 @@ for seti = 1:nsets-1,
       sprintf(' %s',sets{same_rig_time})];
     iserror(seti) = true;
   end
+end
+
+%% experiments on the same day should have some similar metadata
+
+exp_dates = floor(exp_datenums);
+[unique_exp_dates,~,exp_date_idx] = unique(exp_dates);
+ndates = numel(unique_exp_dates);
+iserror_date = false(1,ndates);
+msgs_date = cell(1,ndates);
+
+for datei = 1:numel(unique_exp_dates),
+  msgs_date{datei} = {};
+  idxcurr = find(exp_date_idx == datei);
+  
+  % cross dates should be the same on the same experiment day
+  cross_dates_curr = floor(cross_datenums(idxcurr));
+  [unique_cross_dates,~,cross_date_idx] = unique(cross_dates_curr);
+  if numel(unique_cross_dates) > 1,
+    iserror_date(datei) = true;
+    mode_cross_date = unique_cross_dates(mode(cross_date_idx));
+    msgs_date{datei}{end+1} = sprintf('%d / %d experiments on %s have cross date %s. The following experiments have different cross dates:',...
+      nnz(cross_dates_curr == mode_cross_date),...
+      numel(idxcurr),...
+      datestr(exp_dates(datei),'yyyy-mm-dd'),...
+      datestr(mode_cross_date,'yyyy-mm-dd'));
+    for j = find(cross_dates_curr ~= mode_cross_date),
+      msgs_date{datei}{end} = [msgs_date{datei}{end},sprintf('\n%s: %s',data(idxcurr(j)).experiment_name,data(idxcurr(j)).cross_date)];
+    end
+  end
+  
+  % flip dates should be the same on the same experiment day
+  flip_dates_curr = floor(flip_datenums(idxcurr));
+  goodidx = find(~isnan(flip_dates_curr));
+  flip_dates_curr = flip_dates_curr(goodidx);
+  [unique_flip_dates,~,flip_date_idx] = unique(flip_dates_curr);
+  if numel(unique_flip_dates) > 1,
+    iserror_date(datei) = true;
+    mode_flip_date = unique_flip_dates(mode(flip_date_idx));
+    msgs_date{datei}{end+1} = sprintf('%d / %d experiments on %s have flip date %s. The following experiments have different flip dates:',...
+      nnz(flip_dates_curr == mode_flip_date),...
+      numel(idxcurr),...
+      datestr(exp_dates(datei),'yyyy-mm-dd'),...
+      datestr(mode_flip_date,'yyyy-mm-dd'));
+    for j = goodidx(flip_dates_curr ~= mode_flip_date),
+      msgs_date{datei}{end} = [msgs_date{datei}{end},sprintf('\n%s: %s',data(idxcurr(j)).experiment_name,data(idxcurr(j)).flip_date)];
+    end
+  end
+  
+  % sorting should take place within a span of 2 days
+  maxdiff_sorting = max(sorting_datenums(idxcurr)) - min(sorting_datenums(idxcurr));
+  if maxdiff_sorting > max_maxdiff_sorting_time_perday_days,
+    msgs_date{datei}{end+1} = sprintf('Sorting for experiments on this day took place over a span of %f days.',maxdiff_sorting);
+    iserror_date(datei) = true;
+  end
+  
+  % starvation should take place on the same day
+  maxdiff_starvation = max(starvation_datenums(idxcurr)) - min(starvation_datenums(idxcurr));
+  if maxdiff_starvation > 1,
+    msgs_date{datei}{end+1} = sprintf('Starvation for experiments on this day took place over a span of %f days.',maxdiff_starvation);
+    iserror_date(datei) = true;
+  end
+  
 end
 
 %% print results
@@ -256,7 +363,7 @@ fprintf(fid,'Metadata check for %d experiments collected between %s and %s:\n\n'
 %fprintf(fid,'%s\n',data.experiment_name);
 %fprintf(fid,'\n');
 
-fprintf(fid,'%d set errors:\n',nnz(iserror));
+fprintf(fid,'\n%d/%d set errors:\n',nnz(iserror),numel(iserror));
 if ~any(iserror),
   fprintf(fid,'**NONE**\n');
 else
@@ -265,6 +372,13 @@ else
     fprintf(fid,'  %s\n',msgs{seti}{:});
   end
 end
+
+fprintf(fid,'\n%d/%d day errors:\n',nnz(iserror_date),numel(iserror_date));
+for datei = find(iserror_date),
+  fprintf(fid,'Experiment date %s:\n',datestr(unique_exp_dates(datei),'yyyy-mm-dd'));
+  fprintf(fid,'  %s\n',msgs_date{datei}{:});
+end
+  
 if fid > 1,
   fclose(fid);
 end
