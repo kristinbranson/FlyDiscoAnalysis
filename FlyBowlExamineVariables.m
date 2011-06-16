@@ -76,7 +76,8 @@ state.tempfilescreated = {};
 % which groups are manual p, manual f, for quick ref
 state.idx_manual_p = [];
 state.idx_manual_f = [];
-
+% which groups are automated f, for quick reg
+state.idx_automated_f = [];
 
 % parameters to gui
 params = struct;
@@ -136,11 +137,17 @@ switch lower(params.vartype),
     params.fvalue = 'F';
     params.uvalue = 'U';
     params.manual_fn = 'manual_pf';
+    params.manual_string = 'Manual P/F';
+    params.manual_choices = {'Pass','Fail','Unknown'};
+    params.docheckflags = false;
   case 'behavior',
     params.pvalue = 'N';
     params.fvalue = 'D';
     params.uvalue = 'U';
     params.manual_fn = 'manual_behavior';
+    params.manual_string = 'Behavior';
+    params.manual_choices = {'Normal','Different','Unknown'};
+    params.docheckflags = true;
 end
 
 
@@ -176,9 +183,6 @@ constants = struct;
 
 % max number of changes that can be undone
 constants.maxnundo = 5;
-
-% number of date range options
-constants.maxperiodsprev = 10;
 
 % format for date options
 constants.dateoptions_format = 'yyyy-mm-dd';
@@ -227,7 +231,8 @@ end
   handles.fig,params.date.period,params.date.maxdatenum,...
   params.figpos,params.date.datenumnow,params.username,params.rootdatadir,...
   data.dataset,params.loadcacheddata,state.datafilename,...
-  params.groupnames,params.plotgroup,data.data_types,params.query_leftovers] = ...
+  params.groupnames,params.plotgroup,data.data_types,...
+  params.docheckflags,params.flybowl_startdate,params.query_leftovers] = ...
   myparse_nocheck(varargin,...
   'analysis_protocol',params.analysis_protocol,...
   'settingsdir',params.settingsdir,...
@@ -244,7 +249,12 @@ end
   'datafilename',state.datafilename,...
   'groupnames',params.groupnames,...
   'plotgroup',params.plotgroup,...
-  'data_types',data.data_types);
+  'data_types',data.data_types,...
+  'checkflags',params.docheckflags,...
+  'flybowl_startdate','20110201');
+
+% number of date range options
+params.date.maxperiodsprev = ceil((now-datenum(params.flybowl_startdate,'yyyymmdd'))/params.date.period);
 
 %% read parameters
 
@@ -304,12 +314,19 @@ while true,
 end
 
 %% default file names
-  
-state.savefilename = fullfile(rc.savepath,sprintf('DataCuration_FlyBowl_%s_%sto%s.tsv',...
-  rc.username,datestr(params.date.mindatenum,constants.filename_date_format),datestr(params.date.maxdatenum,constants.filename_date_format)));
+
+if strcmpi(vartype,'behavior'),
+  prefix = 'ManualBehaviorAnnotation_FlyBowl';
+  dataprefix = 'BehaviorData_FlyBowl';
+else
+  prefix = 'DataCuration_FlyBowl';
+  dataprefix = 'ExperimentData_FlyBowl';
+end
+state.savefilename = fullfile(rc.savepath,sprintf('%s_%s_%sto%s.tsv',...
+  prefix,rc.username,datestr(params.date.mindatenum,constants.filename_date_format),datestr(params.date.maxdatenum,constants.filename_date_format)));
 if isempty(state.datafilename),
-  state.datafilename = fullfile(rc.savedatapath,sprintf('ExperimentData_FlyBowl_%sto%s.mat',...
-    datestr(params.date.mindatenum,constants.filename_date_format),datestr(params.date.maxdatenum,constants.filename_date_format)));
+  state.datafilename = fullfile(rc.savedatapath,sprintf('%s_%sto%s.mat',...
+    dataprefix,datestr(params.date.mindatenum,constants.filename_date_format),datestr(params.date.maxdatenum,constants.filename_date_format)));
 end
 
 
@@ -378,7 +395,10 @@ SetCallbacks();
       data.queries(end+1:end+2) = {'automated_pf',{'P','U'}};
       data.queries(end+1:end+2) = {'experiment_name','FlyBowl_*'};
       data.pull_data_datetime = now;
-      rawdata = SAGEGetBowlData(data.queries{:},'checkflags',false,'removemissingdata',true,'dataset',data.dataset);
+      rawdata = SAGEGetBowlData(data.queries{:},'checkflags',params.docheckflags,'removemissingdata',true,'dataset',data.dataset);
+      save('TMP_FlyBowlExamineVariables_rawdata.mat','rawdata');
+      %tmp = load('TMP_FlyBowlExamineVariables_rawdata.mat','rawdata');
+      %rawdata = tmp.rawdata;
       if isempty(rawdata),
         uiwait(warndlg(sprintf('No data for date range %s to %s',data.daterange{:}),'No data found'));
         return;
@@ -426,6 +446,35 @@ SetCallbacks();
       end
     end
 
+    % manual_curator
+    if ~isfield(rawdata,'manual_curator'),
+      for tmpi = 1:data.nexpdirs,
+        rawdata(tmpi).manual_curator = '';
+      end
+    else
+      % this seems to be NULL
+      for tmpi = 1:data.nexpdirs,
+        if strcmpi(rawdata(tmpi).manual_curator,'NULL'),
+          rawdata(tmpi).manual_curator = '';
+        end
+      end
+      
+    end
+    
+    % manual_curation_date
+    if ~isfield(rawdata,'manual_curation_date'),
+      for tmpi = 1:data.nexpdirs,
+        rawdata(tmpi).manual_curation_date = '';
+      end
+    else
+      % this seems to be NULL
+      for tmpi = 1:data.nexpdirs,
+        if strcmpi(rawdata(tmpi).manual_curation_date,'NULL'),
+          rawdata(tmpi).manual_curation_date = '';
+        end
+      end
+    end
+    
     % get line name info
     [data.linenames,~,data.lineidx] = unique({rawdata.line_name});
     data.nlines = numel(data.linenames);
@@ -564,12 +613,12 @@ SetCallbacks();
     manualpf_textpos = [textpos_px(1)+textpos_px(3)+margin,c1-h1/2,w1,h1];
     handles.manualpf = struct;
     handles.manualpf.text = uicontrol(handles.fig,'Style','text','Units','Pixels',...
-      'Position',manualpf_textpos,'String','Manual PF:',...
+      'Position',manualpf_textpos,'String',[params.manual_string,':'],...
       'BackgroundColor',get(handles.fig,'Color'),'Visible','off');
     manualpf_popuppos = [manualpf_textpos(1)+manualpf_textpos(3)+margin,...
       c1-h2/2,w2,h2];
     handles.manualpf.popup = uicontrol(handles.fig,'Style','popupmenu','Units','Pixels',...
-      'Position',manualpf_popuppos,'String',{'Pass','Fail','Unknown'},...
+      'Position',manualpf_popuppos,'String',params.manual_choices,...
       'Value',3,'Visible','off','Callback',@manualpf_popup_Callback);
     manualpf_pushbuttonpos = [manualpf_popuppos(1)+manualpf_popuppos(3)+margin,...
       c1-h2/2,w3,h2];
@@ -665,6 +714,7 @@ SetCallbacks();
       warning('No data for %s, experiment %s',params.manual_fn,strtrim(rawdata(tmpj).experiment_name));
     end
     annot.manual_pf = repmat(params.uvalue,[1,data.ngroups]);
+    state.idx_automated_pf = false([1,data.ngroups]);
     if ~strcmpi(params.plotgroup,'none'),    
       for tmpi = 1:data.ngroups,
         s1 = lower([rawdata(data.groupidx==tmpi).(params.manual_fn)]);
@@ -679,9 +729,18 @@ SetCallbacks();
         else
           annot.manual_pf(tmpi) = params.uvalue;
         end
+        
+        % same for automated_pf
+        if isfield(rawdata,'automated_pf'),
+          s1 = lower([rawdata(data.groupidx==tmpi).automated_pf]);
+          state.idx_automated_f(tmpi) = all(s1 == 'f');
+        end
+
+        
       end
     else
       annot.manual_pf(~badidx) = [rawdata.(params.manual_fn)];
+      state.idx_automated_f = lower([rawdata.automated_pf]) == 'f';
     end
     state.idx_manual_p = lower(annot.manual_pf) == lower(params.pvalue);
     state.idx_manual_f = lower(annot.manual_pf) == lower(params.fvalue);
@@ -720,7 +779,7 @@ SetCallbacks();
 
     % set markers
     set(handles.data(state.idx_manual_p),'Marker','+');
-    set(handles.data(state.idx_manual_f),'Marker','x');
+    set(handles.data(state.idx_manual_f|(state.idx_automated_f&~state.idx_manual_p)),'Marker','x');
 
     
     plotdata.xlim = [0,data.nstats+1];
@@ -920,12 +979,28 @@ SetCallbacks();
     
         datacurr = {rawdata.(data.examinestats{tmpi}{1})};
         for k = 2:numel(data.examinestats{tmpi}),
-          datacurr = cellfun(@(s) s.(data.examinestats{tmpi}{k}),datacurr,'UniformOutput',false);
+          fn = data.examinestats{tmpi}{k};
+          for tmpj = 1:numel(datacurr),
+            if isstruct(datacurr{tmpj}) && isfield(datacurr{tmpj},fn),
+              datacurr{tmpj} = datacurr{tmpj}.(fn);
+            else
+              datacurr{tmpj} = [];
+            end
+          end
         end
         badidx = cellfun(@isempty,datacurr);
-        for tmpj = find(badidx),
-          datacurr{tmpj} = nan;
-          warning('No data for stat %s experiment %s',sprintf('%s,',data.examinestats{tmpi}{:}),strtrim(rawdata(tmpj).experiment_name));
+        if any(badidx),
+          for tmpj = find(badidx),
+            datacurr{tmpj} = nan;
+            warning('No data for stat %s experiment %s',sprintf('%s,',data.examinestats{tmpi}{:}),strtrim(rawdata(tmpj).experiment_name));
+          end
+        end
+        badidx = ~cellfun(@isnumeric,datacurr);
+        if any(badidx),
+          for tmpj = find(badidx),
+            datacurr{tmpj} = nan;
+            warning('Non-numeric data for stat %s experiment %s',sprintf('%s,',data.examinestats{tmpi}{:}),strtrim(rawdata(tmpj).experiment_name));
+          end
         end
         v = cell2mat(datacurr);
         data.expstat(:,tmpi) = v;
@@ -979,9 +1054,11 @@ SetCallbacks();
       % date ranges allowed
       if state.didinputdaterange,
         daterange_strings = {sprintf('%s to %s',params.date.mindatestr,params.date.maxdatestr)};
+        mindatenum_choices = datenum(params.date.mindatestr,constants.dateoptions_format);
+        maxdatenum_choices = datenum(params.date.maxdatestr,constants.dateoptions_format);
       else
         % first day of week choices
-        mindatenum_choices = fliplr([params.date.mindatenum-params.date.period*constants.maxperiodsprev:params.date.period:params.date.mindatenum-params.date.period,params.date.mindatenum:params.date.period:params.date.datenumnow]);
+        mindatenum_choices = fliplr([params.date.mindatenum-params.date.period*params.date.maxperiodsprev:params.date.period:params.date.mindatenum-params.date.period,params.date.mindatenum:params.date.period:params.date.datenumnow]);
         maxdatenum_choices = mindatenum_choices + params.date.period;
         mindatestr_choices = datestr(mindatenum_choices,constants.dateoptions_format);
         maxdatestr_choices = datestr(maxdatenum_choices,constants.dateoptions_format);
@@ -999,6 +1076,7 @@ SetCallbacks();
       end
       if ~isempty(newusername),
         rc.username = newusername;
+        params.username = newusername;
       end
       params.loadcacheddata = ~isempty(newdatafilename);
       if params.loadcacheddata,
@@ -1356,14 +1434,14 @@ SetCallbacks();
   function plot_manual_f_Callback(hObject,event) %#ok<INUSD>
     
     v = get(hObject,'Checked');
-    set(handles.data(state.idx_manual_f),'Visible',v);
+    set(handles.data(state.idx_manual_f|(state.idx_automated_f&~state.idx_manual_p)),'Visible',v);
     if strcmpi(v,'on'),
       set(hObject,'Checked','off');
-      state.idx_visible(state.idx_manual_f) = false;
+      state.idx_visible(state.idx_manual_f|(state.idx_automated_f&~state.idx_manual_p)) = false;
       set(handles.data(~state.idx_visible),'Visible','off');
     else
       set(hObject,'Checked','on');
-      state.idx_visible(state.idx_manual_f) = true;
+      state.idx_visible(state.idx_manual_f|(state.idx_automated_f&~state.idx_manual_p)) = true;
       set(handles.data(state.idx_visible),'Visible','on');
     end
     
@@ -1426,7 +1504,7 @@ SetCallbacks();
   function RecursiveCall()
 
     SaveConfigFile();
-    [handles,rawdata] = FlyBowlExamineVariables(vartype,...
+    [handles,rawdata] = FlyBowlExamineVariables(params.vartype,...
       'analysis_protocol',params.analysis_protocol,...
       'settingsdir',params.settingsdir,...
       'datalocparamsfilestr',params.datalocparamsfilestr,...
@@ -1464,7 +1542,12 @@ SetCallbacks();
     manual_pf_new = manual_pf_full(1);
     expdiris = find(data.groupidx == state.datai_selected);
     for expdiri = expdiris,
-      rawdata(expdiri).manual_pf = manual_pf_new;
+      rawdata(expdiri).(params.manual_fn) = manual_pf_new;
+      % also store curator, curation time if experiment variables
+      if strcmpi(params.vartype,'experiment'),
+        rawdata(expdiri).manual_curator = params.username;
+        rawdata(expdiri).manual_curation_date = datestr(now,constants.datetime_format);
+      end
     end
     annot.manual_pf(state.datai_selected) = manual_pf_new;
 
@@ -1664,6 +1747,10 @@ SetCallbacks();
     
     for expdiri = find(ismember(data.groupidx,idx)),
       rawdata(expdiri).(params.manual_fn) = s;
+      if strcmpi(params.vartype,'experiment'),
+        rawdata(expdiri).manual_curator = params.username;
+        rawdata(expdiri).manual_curation_date = datestr(now,constants.datetime_format);
+      end
     end
     annot.manual_pf(idx) = s;
     
@@ -1721,9 +1808,14 @@ SetCallbacks();
       break;
     end
     if strcmpi(params.plotgroup,'none'),
-      fprintf(fid,'#line_name\texperiment_name\t%s\tnotes_curation\tdiagnostic_fields\n',params.manual_fn);
+      fprintf(fid,'#line\t');
     else
-      fprintf(fid,'#%s\texperiment_name\t%s\tnotes_curation\tdiagnostic_fields\n',params.plotgroup,params.manual_fn);
+      fprintf(fid,'#%s\t',params.plotgroup);
+    end
+    if strcmpi(params.vartype,'experiment'),
+      fprintf(fid,'experiment\t%s\tmanual_curator\tmanual_curation_date\tnotes_curation\tdiagnostic_fields\n',params.manual_fn);
+    else
+      fprintf(fid,'experiment\t%s\tnotes_curation\tdiagnostic_fields\n',params.manual_fn);
     end
     for tmpi = 1:data.ngroups,
       for tmpj = find(data.groupidx == tmpi),
@@ -1747,10 +1839,15 @@ SetCallbacks();
         else
           fprintf(fid,'%s\t',data.groups{tmpi});
         end          
-        fprintf(fid,'%s\t%s\t%s\t',...
+        fprintf(fid,'%s\t%s\t',...
           rawdata(tmpj).experiment_name,...
-          rawdata(tmpj).(params.manual_fn),...
-          notes_curation_curr);
+          rawdata(tmpj).(params.manual_fn));
+        % print curation time, curator if experiment variables
+        if strcmpi(params.vartype,'experiment'),
+          fprintf(fid,'%s\t%s\t',...
+            rawdata(tmpj).manual_curator,...
+            rawdata(tmpj).manual_curation_date);
+        end
         % also print info
         idx = annot.info(tmpi,:);
         if ~any(idx),
@@ -1759,7 +1856,7 @@ SetCallbacks();
           tmps = sprintf('%s,',data.statnames{idx});
           tmps = tmps(1:end-1);
         end
-        fprintf(fid,'%s\n',tmps);
+        fprintf(fid,'%s\t%s\n',notes_curation_curr,tmps);
       end
     end
     fclose(fid);
@@ -1808,12 +1905,12 @@ SetCallbacks();
 %       if strcmpi(params.plotgroup,'none'),
 %         m = [{''},m];
 %       end
-      if numel(m) < 3 || numel(m) > 5,
+      if numel(m) < 5 || numel(m) > 7,
         warning('Skipping line %s: wrong number of fields',ss);
         continue;
       end
-      if numel(m) < 5,
-        m = [m,repmat({''},[1,5-numel(m)])];
+      if numel(m) < 7,
+        m = [m,repmat({''},[1,7-numel(m)])]; %#ok<AGROW>
       end
 
       % remove ""s
@@ -1826,9 +1923,11 @@ SetCallbacks();
       %groupname = m{1};
       experiment_name = m{2};
       manual_pf_curr = m{3};
-      notes_curation_curr = m{4};
+      manual_curator = m{4};
+      manual_curation_date = m{5};
+      notes_curation_curr = m{6};
       notes_curation_curr = regexp(notes_curation_curr,'\\n','split');
-      info_s = regexp(m{5},',','split');
+      info_s = regexp(m{7},',','split');
       info_s = setdiff(info_s,{''});
       info_curr = ismember(data.statnames,info_s);
       unknown_stats = ~ismember(info_s,data.statnames);
@@ -1837,6 +1936,7 @@ SetCallbacks();
       end
       
       tmpi = find(strcmp(experiment_names,experiment_name),1);
+      expi = tmpi;
       if isempty(tmpi),
         fprintf('experiment %s not currently examined, skipping\n',experiment_name);
         continue;
@@ -1851,8 +1951,7 @@ SetCallbacks();
         if lower(manual_pf_curr(1)) == lower(params.uvalue),
           continue;
         elseif manual_pf_curr(1) ~= annotcurr.manual_pf(tmpi),
-          warning('Conflicting labels for %s %s, using %s',params.plotgroup,groupname,annotcurr.manual_pf(tmpi));
-          continue;
+          warning('Conflicting labels for %s %s, using loaded value %s by %s at %s',params.plotgroup,groupname,annotcurr.manual_pf(tmpi),manual_curator,manual_curation_date);
         end
       end
       groupisset(tmpi) = true;
@@ -1860,6 +1959,10 @@ SetCallbacks();
       annotcurr.manual_pf(tmpi) = manual_pf_curr(1);
       annotcurr.notes_curation{tmpi} = notes_curation_curr;
       annotcurr.info(tmpi,:) = info_curr;
+      rawdata(expi).manual_curator = manual_curator;
+      rawdata(expi).manual_curation_date = manual_curation_date;
+      rawdata(expi).(params.manual_fn) = manual_pf_curr(1);
+      rawdata(expi).notes_curation = notes_curation_curr;
     end
     fclose(fid);
 
@@ -2002,11 +2105,11 @@ SetCallbacks();
       state.idx_visible(state.idx_manual_p) = false;
     end
     if strcmpi(get(handles.menu.plot_manual_f,'Checked'),'off'),
-      state.idx_visible(state.idx_manual_f) = false;
+      state.idx_visible(state.idx_manual_f|(state.idx_automated_f&~state.idx_manual_p)) = false;
     end
     set(handles.data,'Marker','o');
     set(handles.data(state.idx_manual_p),'Marker','+');
-    set(handles.data(state.idx_manual_f),'Marker','x');
+    set(handles.data(state.idx_manual_f|(state.idx_automated_f&~state.idx_manual_p)),'Marker','x');
     set(handles.data(state.idx_visible),'Visible','on');
     set(handles.data(~state.idx_visible),'Visible','off');
     
