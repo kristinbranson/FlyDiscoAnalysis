@@ -1,5 +1,7 @@
-function [datamerge,experiment_ids] = SAGEGetBowlData(varargin)
+function [datamerge,experiment_ids,iswarning] = SAGEGetBowlData(varargin)
 
+iswarning = false;
+experiment_ids = [];
 currdir = which('SAGEGetBowlData');
 [currdir,~] = fileparts(currdir);
 
@@ -167,7 +169,8 @@ statfns = {'nflies_analyzed'
   'meanZ_perexp'
   'meanprctiles_perexp'
   'stdprctiles_perexp'};
-datamerge = format2substructs(datamerge,'stats',statfns,'stats_perframe',removemissingdata);
+[datamerge,iswarning1] = format2substructs(datamerge,'stats',statfns,'stats_perframe',removemissingdata);
+iswarning = iswarning || iswarning1;
 statfns = {'nflies_analyzed'
   'flies_analyzed'
   'frac_linear_perfly'
@@ -180,7 +183,8 @@ statfns = {'nflies_analyzed'
   'std_frac_log_perexp'
   'Z_perexp'
   'meanZ_perexp'};
-datamerge = format2substructs(datamerge,'hist',statfns,'hist_perframe',removemissingdata);
+[datamerge,iswarning1] = format2substructs(datamerge,'hist',statfns,'hist_perframe',removemissingdata);
+iswarning = iswarning || iswarning1;
 
 function in = convert2numeric(in)
 
@@ -226,7 +230,9 @@ for j = 1:numel(numeric_fields),
   end
 end
 
-function datamerge = format2substructs(datamerge,prefix,statfns,newprefix,removemissingdata)
+function [datamerge,iswarning] = format2substructs(datamerge,prefix,statfns,newprefix,removemissingdata)
+
+iswarning = false;
 
 % get all perframe fns
 expr = ['^',prefix,'_(?<perframefn>.+)_(?<statfn>',...
@@ -301,6 +307,7 @@ for i = 1:numel(perframefns),
     catch ME,
       warning('Error splitting stats for experiment %s:\n%s',datamerge(j).experiment_name,getReport(ME));
       missingdata(j) = true;
+      iswarning = true;
     end
   end
   % create empty structs for missing data
@@ -313,6 +320,7 @@ for i = 1:numel(perframefns),
         k = idxcurr(kk);
         statfn = statfns{k};
         warning('Missing data for %s, %s for experiment %s',newfn,statfn,datamerge(j).experiment_name);
+        iswarning = true;
         for l = 1:nconditions,
           datamerge(j).(newfn).(statfn).(conditions{l}) = [];
         end
