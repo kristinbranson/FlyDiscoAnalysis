@@ -6,14 +6,16 @@ currdir = which('SAGEGetBowlData');
 [currdir,~] = fileparts(currdir);
 
 %% parse inputs
-[docheckflags,daterange,SAGEpath,removemissingdata,dataset,rootdir,leftovers] = ...
+[docheckflags,daterange,SAGEpath,removemissingdata,dataset,rootdir,MAX_SET_TIMERANGE,MAX_EXPS_PER_SET,leftovers] = ...
   myparse_nocheck(varargin,...
   'checkflags',true,...
   'daterange',[],...
   'SAGEpath',fullfile(currdir,'..','SAGE','MATLABInterface','Trunk'),...
   'removemissingdata',true,...
   'dataset','data',...
-  'rootdir',0);
+  'rootdir',0,...
+  'MAX_SET_TIMERANGE',10/(24*60),...
+  'MAX_EXPS_PER_SET',4);
 
 %% add SAGE to path
 if ~exist('SAGE.Lab','class'),
@@ -152,6 +154,80 @@ if isfield(datamerge,'line_name') && isfield(datamerge,'effector'),
   end
 end
 
+%% add ctrax_diagnostics_nframes_not_tracked
+if isfield(datamerge,'ctrax_diagnostics_nframes_analyzed') && ...
+    isfield(datamerge,'ufmf_diagnostics_summary_nFrames'),
+  for i = 1:numel(datamerge),
+    datamerge(i).ctrax_diagnostics_nframes_not_tracked = ...
+      datamerge(i).ufmf_diagnostics_summary_nFrames - ...
+      datamerge(i).ctrax_diagnostics_nframes_analyzed;
+  end
+end
+
+%% add ctrax_diagnostics_mean_nsplit
+
+if isfield(datamerge,'ctrax_diagnostics_sum_nsplit') && ...
+    isfield(datamerge,'ctrax_diagnostics_nlarge_split'),
+  for i = 1:numel(datamerge),
+    datamerge(i).ctrax_diagnostics_mean_nsplit = ...
+      datamerge(i).ctrax_diagnostics_sum_nsplit ./ ...
+      datamerge(i).ctrax_diagnostics_nlarge_split;
+  end
+end
+
+%% add reg_pxpermm
+if isfield(datamerge,'registrationdata_scale'),
+  for i = 1:numel(datamerge),
+    datamerge(i).registrationdata_pxpermm = 1./datamerge(i).registrationdata_scale;
+  end
+end
+
+%% add "set" -- super-experiment
+
+[line_names,~,lineidx] = unique({datamerge.line_name});
+sets = nan(1,numel(datamerge));
+seti = 0;
+for linei = 1:numel(line_names),
+  expidx1 = find(lineidx==linei);
+  [rigs,~,rigidx] = unique([datamerge(expidx1).rig]);
+  for rigi = 1:numel(rigs),
+    expidx2 = expidx1(rigidx==rigi);
+
+    % sort by datetime
+    [exp_datenum,order] = sort(datenum({datamerge(expidx2).exp_datetime},'yyyymmddTHHMMSS'));
+    expidx2 = expidx2(order);
+    min_set_time = 0;
+    nperset = 0;
+  
+    for i = 1:numel(expidx2),
+      
+      % start a new set?
+      if exp_datenum(i)-min_set_time > MAX_SET_TIMERANGE || nperset >= MAX_EXPS_PER_SET,
+        min_set_time = inf;
+        seti = seti+1;
+        nperset = 0;
+      end
+      sets(expidx2(i)) = seti;
+      nperset = nperset+1;
+      min_set_time = min(min_set_time,exp_datenum(i));
+      
+    end
+  end
+end
+
+for seti = 1:max(sets),
+  expidx = find(sets==seti);
+  %fprintf('Experiments in set %d:\n',seti);
+  %fprintf('%s\n',datamerge(expidx).experiment_name);
+  [~,order] = sort({datamerge(expidx).exp_datetime});
+  min_datetime = datamerge(expidx(order(1))).exp_datetime;
+  set_name = sprintf('%s__Rig%d__%s',datamerge(expidx(1)).line_name,...
+    datamerge(expidx(1)).rig,...
+    min_datetime);
+  for i = expidx(:)',
+    datamerge(i).set = set_name;
+  end
+end
 
 %% format stats, hist into substructs
 

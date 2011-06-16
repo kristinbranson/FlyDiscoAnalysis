@@ -58,6 +58,7 @@ data = dData;
 
 % add in exp_datenum
 for i = 1:numel(data),
+  
   % numeric date
   data(i).edt = datenum(data(i).exp_datetime,'yyyymmddTHHMMSS');
   
@@ -65,6 +66,23 @@ for i = 1:numel(data),
   if isfield(data,'rig') && isfield(data,'bowl'),
     data(i).rig_bowl = sprintf('%d%s',data(i).rig,data(i).bowl);
   end
+  
+  % numerical date, rounded to day
+  data(i).edt_day = floor(data(i).edt);
+  
+  % numerical date, rounded to week
+  data(i).edt_week = floor((data(i).edt-2)/7)*7+2;
+  
+  % numerical date, rounded to month
+  data(i).edt_month = datenum(datestr(data(i).edt,'yyyymm'),'yyyymm');
+  
+  % part of day
+  hrofday = data(i).edt - floor(data(i).edt);
+  data(i).part_of_day = double(hrofday>=.5);
+  
+  % hour of day
+  data(i).hour_of_day = floor(hrofday*24);
+  
 end
 
 end
@@ -210,6 +228,8 @@ function in = convert2numeric(in)
 numeric_fields = {...
   'experiment_id'...
   'flag_aborted'...
+  'flag_review'...
+  'flag_redo'...
   'hours_sorted'...
   'hours_starved'...
   'humidity'...

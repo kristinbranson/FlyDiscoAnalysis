@@ -11,3 +11,12 @@ handler_starvation
 handling_protocol
 plate
 top_plate
+rig_bowl
+edt_day
+edt_week
+edt_month
+manual_curator
+notes_curation
+manual_curation_date
+part_of_day
+hour_of_day
