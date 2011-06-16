@@ -19,7 +19,7 @@ parse(n,'');
         prefix = [prefix,'__'];
       end
       prefix = [prefix,char(n.getNodeName())];
-      value = n.getNodeValue();
+      value = convert2numeric(name,char(n.getTextContent()));
       if isempty(a) || ~isempty(value),
         metadata.(prefix) = value;
       end
@@ -30,9 +30,9 @@ parse(n,'');
       if ~isempty(prefix),
         name = [prefix,'__',name]; %#ok<AGROW>
       end
-      value = char(a.item(i).getValue());
+      value = convert2numeric(name,char(a.item(i).getValue()));
       if isfield(metadata,name),
-        warning('Overwriting file %s\n',name);
+        warning('Overwriting field %s\n',name);
       end
       metadata.(name) = value;
     end
@@ -43,6 +43,20 @@ parse(n,'');
       if c.getNodeType() == 1,
         parse(c,prefix);
       end
+    end
+    
+  end
+
+  function n = convert2numeric(fn,s)
+
+    if ~isempty(regexp(fn,'^notes_','once')),    
+      n = s;
+      return;
+    end
+    
+    n = str2double(s);
+    if isnan(n),
+      n = s;
     end
     
   end
