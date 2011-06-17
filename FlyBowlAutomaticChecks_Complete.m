@@ -143,7 +143,6 @@ else
 end
 
 fid = fopen(outfile,'w');
-fid = 1;
 if fid < 0,
   error('Could not open automatic checks results file %s for writing.',outfile);
 end

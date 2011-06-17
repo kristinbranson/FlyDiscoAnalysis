@@ -1054,8 +1054,8 @@ SetCallbacks();
       % date ranges allowed
       if state.didinputdaterange,
         daterange_strings = {sprintf('%s to %s',params.date.mindatestr,params.date.maxdatestr)};
-        mindatenum_choices = datenum(params.date.mindatestr,constants.dateoptions_format);
-        maxdatenum_choices = datenum(params.date.maxdatestr,constants.dateoptions_format);
+        mindatenum_choices = datenum(params.date.mindatestr,constants.datetime_format);
+        maxdatenum_choices = datenum(params.date.maxdatestr,constants.datetime_format);
       else
         % first day of week choices
         mindatenum_choices = fliplr([params.date.mindatenum-params.date.period*params.date.maxperiodsprev:params.date.period:params.date.mindatenum-params.date.period,params.date.mindatenum:params.date.period:params.date.datenumnow]);

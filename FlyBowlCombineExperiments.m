@@ -164,7 +164,7 @@ histdata.exp_params = exp_params;
 histdata.expdirs = expdirs;
 histdata.experiments = experiments;
 
-save(histmatsavename,'-struct','histdata');
+save(histmatsavename,'-v7.3','-struct','histdata');
 % save to text file
 fns = fieldnames(histperfly);
 for i = 1:numel(fns),
