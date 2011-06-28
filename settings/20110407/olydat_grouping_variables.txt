@@ -20,3 +20,5 @@ notes_curation
 manual_curation_date
 part_of_day
 hour_of_day
+incubator
+rearing_incubator
