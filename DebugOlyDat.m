@@ -27,6 +27,7 @@ switch computername,
     settingsdir = 'C:\Code\FlyBowlAnalysis\settings';
 
   case 'bransonk-desktop',
+<<<<<<< HEAD:DebugOlyDat.m
   
   addpath /groups/branson/bransonlab/projects/olympiad/SAGE/MATLABInterface/Trunk;
   addpath(genpath('/groups/branson/bransonlab/projects/olympiad/cross_assay/matlab'));
@@ -38,6 +39,40 @@ switch computername,
   rootdir = '/groups/sciserv/flyolympiad/Olympiad_Screen/fly_bowl/bowl_data';
   settingsdir = '/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/settings';
   
+=======
+    
+    addpath /groups/branson/bransonlab/projects/olympiad/SAGE/MATLABInterface/Trunk;
+    addpath(genpath('/groups/branson/bransonlab/projects/olympiad/cross_assay/matlab'));
+    addpath(genpath('/groups/branson/bransonlab/projects/olympiad/box/PostAnalysis'));
+    rmSvnPath;
+    addpath /groups/branson/home/bransonk/tracking/code/JCtrax/misc;
+    addpath /groups/branson/home/bransonk/tracking/code/JCtrax/filehandling;
+    addpath olydat_browser;
+    rootdir = '/groups/sciserv/flyolympiad/Olympiad_Screen/fly_bowl/bowl_data';
+    settingsdir = '/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/settings';
+    
+  case 'robiea-ww1'
+    
+    addpath C:\Users\robiea\Documents\Code_versioned\SAGE\MATLABInterface\Trunk;
+    addpath(genpath('C:\Users\robiea\Documents\Code_versioned\cross_assay'));
+    addpath(genpath('C:\Users\robiea\Documents\Code_versioned\PostAnalysis'));
+    addpath C:\Users\robiea\Documents\Code_versioned\JCtrax\misc;
+    addpath C:\Users\robiea\Documents\Code_versioned\FlyBowlAnalysis\olydat_browser;
+    rmSvnPath;
+    rootdir = 'O:\Olympiad_Screen\fly_bowl\bowl_data';
+    settingsdir = 'C:\Users\robiea\Documents\Code_versioned\FlyBowlAnalysis\settings';
+    
+  case 'robiea-ws'
+    addpath '/groups/branson/home/robiea/Code_versioned/SAGE/MATLABInterface/Trunk';
+    addpath(genpath('/groups/branson/home/robiea/Code_versioned/OlyDat/matlab'));
+    addpath(genpath('/groups/branson/home/robiea/Code_versioned/OlyDat/postanalysis'));
+    rmSvnPath
+    addpath '/groups/branson/home/robiea/Code_versioned/JCtrax/misc';
+    addpath '/groups/branson/home/robiea/Code_versioned/JCtrax/filehandling';
+    addpath '/groups/branson/home/robiea/Code_versioned/FlyBowlAnalysis/olydat_browser';
+    rootdir = '/groups/sciserv/flyolympiad/Olympiad_Screen/fly_bowl/bowl_data';
+    settingsdir = '/groups/branson/home/robiea/Code_versioned/FlyBowlAnalysis/settings';
+    
   otherwise
     
     warning('Unknown computer %s. Paths may not be setup correctly',computername);
