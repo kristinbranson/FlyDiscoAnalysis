@@ -1,0 +1,7 @@
+min_seconds_fliesloaded,25
+max_seconds_fliesloaded,225
+max_seconds_shiftflytemp,300
+min_ufmf_diagnostics_summary_nframes,30000
+max_tempdiff,.5
+max_temp,30.5
+control_line_names,pBDPGAL4U
