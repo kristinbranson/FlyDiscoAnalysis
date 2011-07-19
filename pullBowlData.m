@@ -23,11 +23,14 @@ function data = pullBowlData(qObjs,varargin)
 assert(all(cellfun(@(x)isa(x,'SAGE.Query.Clause'),qObjs)));
 
 % allow dataset to be specified
-[dataset,rootdir,removemissingdata,ignore_missingdata_fns] = myparse(varargin,...
+[dataset,rootdir,removemissingdata,ignore_missingdata_fns,...
+  MAX_SET_TIMERANGE,MAX_EXPS_PER_SET] = myparse(varargin,...
   'dataset','data',...
   'rootdir',0,...
   'removemissingdata',true,...
-  'ignore_missingdata_fns',{'temperature_stream'});
+  'ignore_missingdata_fns',{'temperature_stream'},...
+  'MAX_SET_TIMERANGE',10/(24*60),...
+  'MAX_EXPS_PER_SET',4);
 
 %% grab data
 dDS = SAGE.Lab('olympiad').assay('bowl').dataSet(dataset);
@@ -84,6 +87,90 @@ for i = 1:numel(data),
   data(i).hour_of_day = floor(hrofday*24);
   
 end
+
+
+%% add line__effector
+if isfield(data,'line_name') && isfield(data,'effector'),
+  for i = 1:numel(data),
+    data(i).line__effector = sprintf('%s__%s',data(i).line_name,data(i).effector);
+  end
+end
+
+%% add ctrax_diagnostics_nframes_not_tracked
+if isfield(data,'ctrax_diagnostics_nframes_analyzed') && ...
+    isfield(data,'ufmf_diagnostics_summary_nFrames'),
+  for i = 1:numel(data),
+    data(i).ctrax_diagnostics_nframes_not_tracked = ...
+      data(i).ufmf_diagnostics_summary_nFrames - ...
+      data(i).ctrax_diagnostics_nframes_analyzed;
+  end
+end
+
+%% add ctrax_diagnostics_mean_nsplit
+
+if isfield(data,'ctrax_diagnostics_sum_nsplit') && ...
+    isfield(data,'ctrax_diagnostics_nlarge_split'),
+  for i = 1:numel(data),
+    data(i).ctrax_diagnostics_mean_nsplit = ...
+      data(i).ctrax_diagnostics_sum_nsplit ./ ...
+      data(i).ctrax_diagnostics_nlarge_split;
+  end
+end
+
+%% add reg_pxpermm
+if isfield(data,'registrationdata_scale'),
+  for i = 1:numel(data),
+    data(i).registrationdata_pxpermm = 1./data(i).registrationdata_scale;
+  end
+end
+
+%% add "set" -- super-experiment
+
+[line_names,~,lineidx] = unique({data.line_name});
+sets = nan(1,numel(data));
+seti = 0;
+for linei = 1:numel(line_names),
+  expidx1 = find(lineidx==linei);
+  [rigs,~,rigidx] = unique([data(expidx1).rig]);
+  for rigi = 1:numel(rigs),
+    expidx2 = expidx1(rigidx==rigi);
+
+    % sort by datetime
+    [exp_datenum,order] = sort(datenum({data(expidx2).exp_datetime},'yyyymmddTHHMMSS'));
+    expidx2 = expidx2(order);
+    min_set_time = 0;
+    nperset = 0;
+  
+    for i = 1:numel(expidx2),
+      
+      % start a new set?
+      if exp_datenum(i)-min_set_time > MAX_SET_TIMERANGE || nperset >= MAX_EXPS_PER_SET,
+        min_set_time = inf;
+        seti = seti+1;
+        nperset = 0;
+      end
+      sets(expidx2(i)) = seti;
+      nperset = nperset+1;
+      min_set_time = min(min_set_time,exp_datenum(i));
+      
+    end
+  end
+end
+
+for seti = 1:max(sets),
+  expidx = find(sets==seti);
+  %fprintf('Experiments in set %d:\n',seti);
+  %fprintf('%s\n',data(expidx).experiment_name);
+  [~,order] = sort({data(expidx).exp_datetime});
+  min_datetime = data(expidx(order(1))).exp_datetime;
+  set_name = sprintf('%s__Rig%d__%s',data(expidx(1)).line_name,...
+    data(expidx(1)).rig,...
+    min_datetime);
+  for i = expidx(:)',
+    data(i).set = set_name;
+  end
+end
+
 
 end
 

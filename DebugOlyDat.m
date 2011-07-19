@@ -27,19 +27,6 @@ switch computername,
     settingsdir = 'C:\Code\FlyBowlAnalysis\settings';
 
   case 'bransonk-desktop',
-<<<<<<< HEAD:DebugOlyDat.m
-  
-  addpath /groups/branson/bransonlab/projects/olympiad/SAGE/MATLABInterface/Trunk;
-  addpath(genpath('/groups/branson/bransonlab/projects/olympiad/cross_assay/matlab'));
-  addpath(genpath('/groups/branson/bransonlab/projects/olympiad/box/PostAnalysis'));
-  rmSvnPath;
-  addpath /groups/branson/home/bransonk/tracking/code/JCtrax/misc;
-  addpath /groups/branson/home/bransonk/tracking/code/JCtrax/filehandling;
-  addpath olydat_browser;
-  rootdir = '/groups/sciserv/flyolympiad/Olympiad_Screen/fly_bowl/bowl_data';
-  settingsdir = '/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/settings';
-  
-=======
     
     addpath /groups/branson/bransonlab/projects/olympiad/SAGE/MATLABInterface/Trunk;
     addpath(genpath('/groups/branson/bransonlab/projects/olympiad/cross_assay/matlab'));
