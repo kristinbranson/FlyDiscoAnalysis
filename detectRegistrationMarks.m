@@ -248,15 +248,15 @@ if nBowlMarkers > 0,
       bowlMarkerTemplate = bowlMarkerTemplate - min(bowlMarkerTemplate(:));
       bowlMarkerTemplate = bowlMarkerTemplate / max(bowlMarkerTemplate(:));
       bowlMarkerTemplate = 2*bowlMarkerTemplate-1;
-      bowlfils = cell(1,nRotations);
-      thetas = linspace(0,90,nRotations+1);
+      bowlfils = cell(1,2*nRotations);
+      thetas = linspace(0,180,2*nRotations+1);
       thetas = thetas(1:end-1);
-      for i = 1:nRotations,
+      for i = 1:2*nRotations,
         bowlfils{i} = imrotate(bowlMarkerTemplate,thetas(i),'bilinear','loose');
       end
       % compute normalized maximum correlation
       filI4 = -inf(nr,nc);
-      for i = 1:nRotations,
+      for i = 1:2*nRotations,
         filI4 = max(filI4,imfilter(bkgdImage,bowlfils{i},'replicate') ./ ...
           imfilter(bkgdImage,ones(size(bowlfils{i})),'replicate'));
       end
@@ -266,12 +266,12 @@ if nBowlMarkers > 0,
   bowlMarkerIm = filI4; %#ok<NASGU>
 
   maxDistCorner_BowlLabel = maxDistCornerFrac_BowlLabel * r;
-  filI4(distCorner > maxDistCorner_BowlLabel) = 0;
+  filI4(distCorner > maxDistCorner_BowlLabel) = -inf;
   
   bowlMarkerPoints = nan(2,nBowlMarkers);
   for i = 1:nBowlMarkers,
     % find maximum
-    [success,x,y] = getNextFeaturePoint(filI4,methodcurr);
+    [success,x,y,featureStrength] = getNextFeaturePoint(filI4,methodcurr);
     if success,
       bowlMarkerPoints(:,i) = [x;y];
       filI4 = zeroOutDetection(bowlMarkerPoints(1,i),bowlMarkerPoints(2,i),filI4);
@@ -509,10 +509,10 @@ if ~isempty(imsavename),
   A = affineTransform(offX,offY,offTheta,scale);
   T = maketform('affine',A);
   % transformations of corners
-  udata = [1;nc]; vdata = [1;nr];
-  outbounds = findbounds(T,[udata,vdata]);
-  xdata = outbounds(:,1);
-  ydata = outbounds(:,2);
+  %udata = [1;nc]; vdata = [1;nr];
+  %outbounds = findbounds(T,[udata,vdata]);
+  %xdata = outbounds(:,1);
+  %ydata = outbounds(:,2);
   [imreg,xdata,ydata] = imtransform(bkgdImage,T,'XYScale',scale,'FillValues',nan);
   
   % draw registered image
