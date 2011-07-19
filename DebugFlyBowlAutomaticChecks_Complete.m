@@ -41,56 +41,12 @@ switch computername,
     
 end
 
-%% get all experiments
+%% parameters
 
-data = SAGEListBowlExperiments('checkflags',false,'rootdir',rootdatadir,'daterange',{'20110201T000000'});
+analysis_protocol = '20110407';
+
+%% choose experiments
+
+expdir = fullfile(rootdatadir,'pBDPGAL4U_TrpA_Rig1Plate10BowlA_20110714T110950');
 
 
-%%
-
-successes = false(1,numel(data));
-msgs = cell(1,numel(data));
-
-%%
-
-matlabpool(8)
-
-%%
-
-% disable waitbar
-global DISABLESAGEWAITBAR;
-DISABLESAGEWAITBAR = true; %#ok<NASGU>
-
-%fid = fopen('AutomaticChecksSageResults20110719.txt','w');
-parfor i = 104:numel(data),
-  %fprintf('%d: %s...\n',i,data(i).experiment_name);
-  expdir = data(i).file_system_path;
-  [successes(i),msgs{i}] = FlyBowlAutomaticChecks_Sage(expdir,'dosave',false);
-  %s = sprintf('%s\\n',msgs{i}{:});
-  %s = s(1:end-2);
-  %s = regexprep(s,',','.');
-  %successletter = 'F';
-  %if successes(i),
-  %  successletter = 'P';
-  %end
-  %fprintf(fid,'%s,%s,%s\n',data(i).experiment_name,successletter,s);
-  
-end
-
-%fclose(fid);
-clear global DISABLESAGEWAITBAR;
-
-%% print to file
-
-fid = fopen('AutomaticChecksSageResults20110719.txt','w');
-for i = 1:numel(data),
-  s = sprintf('%s\\n',msgs{i}{:});
-  s = s(1:end-2);
-  s = regexprep(s,',','.');
-  successletter = 'F';
-  if successes(i),
-    successletter = 'P';
-  end
-  fprintf(fid,'%s,%s,%s\n',data(i).experiment_name,successletter,s);
-end
-fclose(fid);

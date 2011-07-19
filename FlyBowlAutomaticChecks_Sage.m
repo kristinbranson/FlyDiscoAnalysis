@@ -42,6 +42,11 @@ end
 experiment_name = ['FlyBowl_',experiment_name];
 metadata = SAGEGetBowlData('dataset','score','experiment_name',experiment_name,'checkflags',false);
 
+%% get notes_curations
+if ~isempty(metadata.notes_curation),
+  msgs{end+1} = metadata.notes_curation;
+end
+
 %% check for metadata fields
 
 required_fns = {'flag_aborted','flag_redo','seconds_fliesloaded','seconds_shiftflytemp',...
@@ -152,6 +157,21 @@ end
 %   end
 % end
 
+end
+
+%% check for missing files
+
+for i = 1:numel(check_params.required_files),
+  fn = check_params.required_files{i};
+  if any(fn == '*'),
+    isfile = ~isempty(dir(fullfile(expdir,fn)));
+  else
+    isfile = exist(fullfile(expdir,fn),'file');
+  end
+  if ~isfile,
+    msgs{end+1} = sprintf('Missing file %s',fn); %#ok<AGROW>
+    success = false;
+  end
 end
 
 %% output results to file
@@ -277,6 +297,24 @@ else
       end
       
     end
+  end
+end
+
+%% check for missing files
+
+
+check_params.required_files = setdiff(check_params.required_files,...
+  {'automatic_checks_incoming_results.txt'});
+for i = 1:numel(check_params.required_files),
+  fn = check_params.required_files{i};
+  if any(fn == '*'),
+    isfile = ~isempty(dir(fullfile(expdir,fn)));
+  else
+    isfile = exist(fullfile(expdir,fn),'file');
+  end
+  if ~isfile,
+    msgs{end+1} = sprintf('Missing file %s',fn); %#ok<AGROW>
+    success = false;
   end
 end
 
