@@ -169,7 +169,7 @@ end
 if fid < 0,
   error('Could not open automatic checks results file %s for writing.',outfile);
 end
-if success && strcmpi(automatedchecks_incoming.automated_pf,'P'),
+if success && ~strcmpi(automatedchecks_incoming.automated_pf,'F'),
   fprintf(fid,'automated_pf,P\n');
 else
   fprintf(fid,'automated_pf,F\n');

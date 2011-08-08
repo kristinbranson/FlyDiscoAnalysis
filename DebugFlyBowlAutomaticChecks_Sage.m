@@ -84,6 +84,11 @@ clear global DISABLESAGEWAITBAR;
 
 fid = fopen('AutomaticChecksSageResults20110719.txt','w');
 for i = 1:numel(data),
+  if datenum(data(i).exp_datetime,'yyyymmddTHHMMSS') > 734695,
+    continue;
+  end
+  msgs{i} = unique(msgs{i});
+  msgs{i}(strcmp(msgs{i},'NULL')) = [];
   s = sprintf('%s\\n',msgs{i}{:});
   s = s(1:end-2);
   s = regexprep(s,',','.');
@@ -94,3 +99,47 @@ for i = 1:numel(data),
   fprintf(fid,'%s,%s,%s\n',data(i).experiment_name,successletter,s);
 end
 fclose(fid);
+
+
+%% compare to old stuff
+
+oldfilename = 'AutomaticChecksSageResults20110616.txt';
+fid = fopen(oldfilename,'r');
+old_experiment_names = {};
+old_successes = false(1,0);
+while true,
+  s0 = fgetl(fid);
+  if ~ischar(s0),
+    break;
+  end
+  s1 = regexp(s0,',','split');
+  if numel(s1) ~= 2,
+    error('Error parsing line %s',s0);
+  end
+  old_experiment_names{end+1} = s1{1}; %#ok<SAGROW>
+  old_successes(end+1) = s1{2} == 'P'; %#ok<SAGROW>
+end
+fclose(fid);
+
+nmatches = 0;
+nmismatches = 0;
+ismismatch = [];
+for i = 1:numel(data),
+  j = find(strcmp(data(i).experiment_name,old_experiment_names),1);
+  if isempty(j), continue; end
+  if old_successes(j) == successes(i),
+    nmatches = nmatches + 1;
+  else
+    nmismatches = nmismatches + 1;
+    
+    s = sprintf('%s\\n',msgs{i}{:});
+    s = s(1:end-2);
+    s = regexprep(s,',','.');
+    successletter = 'F';
+    if successes(i),
+      successletter = 'P';
+    end
+    
+    fprintf('%d: %s,%s,%s\n',i,data(i).experiment_name,successletter,s);
+  end
+end

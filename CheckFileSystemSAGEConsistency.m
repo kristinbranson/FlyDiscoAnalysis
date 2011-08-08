@@ -56,9 +56,9 @@ dirs = dir(fullfile(rootdir,'*_*'));
 dirnames = {dirs([dirs.isdir]).name};
 issuccess = false(1,numel(dirnames));
 for i = 1:numel(dirnames),
-  issuccess(i) = exist(fullfile(rootdir,dirnames{i},'SUCCESS'),'file');
+  issuccess(i) = exist(fullfile(rootdir,dirnames{i},'movie.ufmf'),'file') && exist(fullfile(rootdir,dirnames{i},'Metadata.xml'),'file');
 end
-fprintf('%d experiment directories found, %d contain file SUCCESS\n',numel(dirnames),nnz(issuccess));
+fprintf('%d experiment directories found, %d contain file Metadata.xml and movie.ufmf\n',numel(dirnames),nnz(issuccess));
 dirnames = dirnames(issuccess);
 
 %% get all experiments in SAGE
@@ -72,11 +72,66 @@ dir_experiment_names = cellfun(@(s) ['FlyBowl_',s],dirnames,'UniformOutput',fals
 dir_but_not_SAGE = setdiff(dir_experiment_names,experiment_names);
 SAGE_but_not_dir = setdiff(experiment_names,dir_experiment_names);
 
+%% sort
+
+datetime = cell(1,numel(dir_but_not_SAGE));
+for i = 1:numel(dir_but_not_SAGE),
+  res = parseExpDir(dir_but_not_SAGE{i});
+  datetime{i} = res.date;
+end
+  
+[~,order] = sort(datetime);
+dir_but_not_SAGE = dir_but_not_SAGE(order);
+
+datetime = cell(1,numel(SAGE_but_not_dir));
+for i = 1:numel(SAGE_but_not_dir),
+  res = parseExpDir(SAGE_but_not_dir{i});
+  datetime{i} = res.date;
+end
+  
+[~,order] = sort(datetime);
+SAGE_but_not_dir = SAGE_but_not_dir(order);
+
+%% look for aborted
+
+isaborted = false(1,numel(dir_but_not_SAGE));
+for i = 1:numel(dir_but_not_SAGE),
+  isaborted(i) = exist(fullfile(rootdir,dir_but_not_SAGE{i}(9:end),'ABORTED'),'file');
+end
+
+
+
+%% explain
+
+reasons = cell(1,numel(dir_but_not_SAGE));
+for i = 1:numel(dir_but_not_SAGE),
+  if isaborted(i),
+    reasons{i} = 'aborted';
+    continue;
+  end
+  res = parseExpDir(dir_but_not_SAGE{i});
+  if numel(res.date) >= 4 && strcmp(res.date(1:4),'2010'),
+    reasons{i} = 'old';
+    continue;
+  end
+  if isempty(dir(fullfile(rootdir,dir_but_not_SAGE{i}(9:end),'ctrax_results_movie*.avi'))),
+    reasons{i} = 'analysis pipeline failed';
+    continue;
+  end
+  
+  %disp(dir_but_not_SAGE{i});
+  %dir(fullfile(rootdir,dir_but_not_SAGE{i}(9:end)))
+  %reasons{i} = input('\nReason: ','s');
+  
+end
+
 %% print results
 
 fid = fopen(sprintf('CheckFileSystemSAGEConsistency_%s.txt',datestr(now,'yyyymmddTHHMMSS')),'w');
 fprintf(fid,'%d experiments found in directory structure but not in SAGE flattened view:\n',numel(dir_but_not_SAGE));
-fprintf(fid,'  %s\n',dir_but_not_SAGE{:});
+for i = 1:numel(dir_but_not_SAGE),
+  fprintf(fid,'  %s,%s\n',dir_but_not_SAGE{i},reasons{i});
+end
 fprintf(fid,'\n\n\n%d experiments found in SAGE flattened view but not in directory structure:\n',numel(SAGE_but_not_dir));
 fprintf(fid,'  %s\n',SAGE_but_not_dir{:});
 fclose(fid);

@@ -83,6 +83,7 @@ for i = 1:numel(expdirs),
   if ~success,
     continue;
   else
+    parsedcurr.file_system_path = expdir_reads{i};
     experiments = structarrayset(experiments,i,parsedcurr);
   end
   
@@ -158,3 +159,12 @@ expdirs = expdirs(idx);
 expdir_reads = expdir_reads(idx);
 expdir_writes = expdir_writes(idx);
 experiments = experiments(idx);
+
+% add exp_datetime
+[experiments.exp_datetime] = deal(experiments.date);
+% add line_name
+[experiments.line_name] = deal(experiments.line);
+% convert to numeric
+for i = 1:numel(experiments),
+  experiments(i).rig = str2double(experiments(i).rig);
+end

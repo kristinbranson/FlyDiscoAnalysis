@@ -43,8 +43,8 @@ end
 %% parameters
 
 analysis_protocol = '20110407';
-vartype = 'behavior';
-dataset = 'data';
+vartype = 'experiment';
+dataset = 'score';
 % period = 2;
 % loadcacheddata = true;
 % datafilename = 'DataCurationSheets/ExperimentData_20110409to20110416.mat';

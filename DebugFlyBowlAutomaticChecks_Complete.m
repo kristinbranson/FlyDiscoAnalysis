@@ -50,3 +50,6 @@ analysis_protocol = '20110407';
 expdir = fullfile(rootdatadir,'pBDPGAL4U_TrpA_Rig1Plate10BowlA_20110714T110950');
 
 
+%%
+
+FlyBowlAutomaticChecks_Complete(expdir,'settingsdir',settingsdir,'analysis_protocol',analysis_protocol,'debug',true);
