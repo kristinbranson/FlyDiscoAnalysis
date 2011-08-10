@@ -16,12 +16,12 @@ if ispc,
 else
   settingsdir = '/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/settings';
   %rootdir = '/groups/sciserv/flyolympiad/Olympiad_Screen/fly_bowl/bowl_data';
-  rootdir = '/groups/branson/bransonlab/tracking_data/olympiad/FlyBowl/CtraxTest20110407';
+  rootdir = '/groups/branson/bransonlab/projects/olympiad/FlyBowlCtrax/20110804/LearnCtraxParams/expdirs';
 end
 
 %% parameters
 
-analysis_protocol = '20110407';
+analysis_protocol = '20110804';
 params = {'settingsdir',settingsdir,...
   'analysis_protocol',analysis_protocol};
 
@@ -30,8 +30,11 @@ params = {'settingsdir',settingsdir,...
 expdirs = dir(fullfile(rootdir,'*_*'));
 expdirs = cellfun(@(s) fullfile(rootdir,s),{expdirs([expdirs.isdir]).name},'UniformOutput',false);
 
-i = 11;
-for i = 1:numel(expdirs),
+for i = 3:numel(expdirs),
   expdir = expdirs{i};
-  FlyBowlMakeCtraxResultsMovie(expdir,params{:});
+  try
+    FlyBowlMakeCtraxResultsMovie(expdir,params{:});
+  catch ME,
+    getReport(ME)
+  end
 end
