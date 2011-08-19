@@ -50,8 +50,11 @@ params = {
   'min_mindt_exp_datetime_diff_sets',15,... % minimum difference in minutes between experiment start times on the same rig in different sets
   'max_maxdiff_sorting_time_perday_days',4.5,... % maximum difference in days between sorting times for first and last experiments on the same day
   'flag_aborted','0',...
-  'screen_type','primary'};
-%  'daterange',{'20110315T000000','20110615T000000'},... % date range of experiments to pull
+  'screen_type','primary',...
+  'checkflags',false,...
+  'removemissingdata',false};
+  %'daterange',{'20110701T000000','20110820T000000'}};
+
 
 %% 
 
