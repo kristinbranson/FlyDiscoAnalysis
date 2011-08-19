@@ -23,15 +23,15 @@ datetime_format = 'yyyymmddTHHMMSS';
 allowed_bowls = {'A','B','C','D'};
 nallowed_bowls = numel(allowed_bowls);
 allowed_rigs = [1,2];
-allowed_plates = [10,14];
-allowed_top_plates = [1,2];
+allowed_plates = [10,14,15,16,17,18];
+allowed_top_plates = [1,2,3,4,5,6];
 first_barcode_datenum = datenum(first_barcode_datetime,datetime_format);
 start_of_day = 7/24; % 7am
 end_of_day = 20/24; % 8pm
 
 
 %% get metadata
-data = SAGEGetBowlData('data_type',data_type,leftovers{:});
+data = SAGEGetBowlData('data_type',data_type,'dataset','score',leftovers{:});
 
 % sort by date
 [~,order] = sort({data.exp_datetime});
@@ -112,7 +112,7 @@ for seti = 1:nsets,
   % check if illegal plate values
   [isallowedplate,idx_plate] = ismember(plates,allowed_plates);
   if ~all(isallowedplate),
-    msgs{seti}{end+1} = ['The following plate values are not allowed:',sprintf(' %s',plates{~isallowedplate})];
+    msgs{seti}{end+1} = ['The following plate values are not allowed:',sprintf(' %d',plates(~isallowedplate))];
     iserror(seti) = true;
   end
   
@@ -125,7 +125,7 @@ for seti = 1:nsets,
   % check if illegal top_plate values
   [isallowedtop_plate,idx_top_plate] = ismember(top_plates,allowed_top_plates);
   if ~all(isallowedtop_plate),
-    msgs{seti}{end+1} = ['The following top_plate values are not allowed:',sprintf(' %s',top_plates{~isallowedtop_plate})];
+    msgs{seti}{end+1} = ['The following top_plate values are not allowed:',sprintf(' %d',top_plates(~isallowedtop_plate))];
     iserror(seti) = true;
   end
   
