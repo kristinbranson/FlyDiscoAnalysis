@@ -12,14 +12,15 @@ else
   addpath /groups/branson/home/bransonk/tracking/code/JCtrax/misc;
   addpath /groups/branson/home/bransonk/tracking/code/lds/hmm;
   settingsdir = '/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/settings';
-  rootdir = '/groups/sciserv/flyolympiad/Olympiad_Screen/fly_bowl/bowl_data';
+  %rootdir = '/groups/sciserv/flyolympiad/Olympiad_Screen/fly_bowl/bowl_data';
+  rootdir = '/groups/branson/bransonlab/projects/olympiad/FlyBowlCtrax/20110804/LearnCtraxParams/expdirs';
   %rootdir = '/groups/branson/bransonlab/tracking_data/olympiad/FlyBowl/CtraxTest20110407';
   expdir = fullfile(rootdir,'GMR_12E07_AE_01_TrpA_Rig2Plate14BowlA_20110209T134320');
 end
 
 %% parameters
 
-analysis_protocol = '20110407';
+analysis_protocol = '20110804';
 params = {'settingsdir',settingsdir,...
   'analysis_protocol',analysis_protocol};
 

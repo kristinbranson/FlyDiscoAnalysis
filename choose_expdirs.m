@@ -1,9 +1,16 @@
-function [experiments_chosen,ngal4,ncontrol] = choose_expdirs(experiments,ngal4,ncontrol)
+function [experiments_chosen,ngal4,ncontrol] = choose_expdirs(experiments,ngal4,ncontrol,varargin)
+
+[doseparatecontrols] = myparse(varargin,'doseparatecontrols',true);
 
 control_line = 'pBDPGAL4U';
 
-% split into control and gal4 lines
-iscontrol = strcmp(control_line,{experiments.line});
+if doseparatecontrols,
+
+  % split into control and gal4 lines
+  iscontrol = strcmp(control_line,{experiments.line});
+else
+  iscontrol = false(1,numel(experiments));
+end
 ngal4 = min(nnz(~iscontrol),ngal4);
 ncontrol = min(nnz(iscontrol),ncontrol);
 idxcontrol = find(iscontrol);
@@ -29,7 +36,10 @@ dates = datenum({experiments.exp_datetime},format)';
 nexpdirs = length(experiments);
 rigs = [experiments.rig];
 bowls = {experiments.bowl};
-genotypes = {experiments.line};
+genotypes = cell(1,numel(experiments));
+for i = 1:numel(experiments),
+  genotypes{i} = sprintf('%s__%s',experiments(i).line,experiments(i).effector);
+end
 maxdate = max(dates) - min(dates) + 1;
 
 isselected = false(1,nexpdirs);

@@ -3,11 +3,15 @@ function [success,msgs] = FlyBowlAutomaticChecks_Complete(expdir,varargin)
 success = true;
 msgs = {};
 
-[analysis_protocol,settingsdir,datalocparamsfilestr] = ...
+[analysis_protocol,settingsdir,datalocparamsfilestr,DEBUG] = ...
   myparse(varargin,...
   'analysis_protocol','current',...
   'settingsdir','/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/settings',...
-  'datalocparamsfilestr','dataloc_params.txt');
+  'datalocparamsfilestr','dataloc_params.txt','debug',false);
+
+if ischar(DEBUG),
+  DEBUG = str2double(DEBUG) ~= 0;
+end
 
 %% parameters
 
@@ -114,7 +118,7 @@ else
         [starts,ends] = get_interval_ends(badidx);
         starts = starts - trx(fly).off;
         ends = ends - trx(fly).off;
-        msgs{end+1} = [sprintf('Trajectory %d has NaNs in frames',fly),sprintf(' %d-%d',[starts,ends]')];
+        msgs{end+1} = [sprintf('Trajectory %d has NaNs in frames',fly),sprintf(' %d-%d',[starts,ends]')]; %#ok<AGROW>
         success = false;
       end
       badidx = isinf(trx(fly).x) | ...
@@ -126,11 +130,26 @@ else
         [starts,ends] = get_interval_ends(badidx);
         starts = starts - trx(fly).off;
         ends = ends - trx(fly).off;
-        msgs{end+1} = [sprintf('Trajectory %d has Infs in frames',fly),sprintf(' %d-%d',[starts,ends]')];
+        msgs{end+1} = [sprintf('Trajectory %d has Infs in frames',fly),sprintf(' %d-%d',[starts,ends]')]; %#ok<AGROW>
         success = false;
       end
       
     end
+  end
+end
+
+%% check for missing files
+
+for i = 1:numel(check_params.required_files),
+  fn = check_params.required_files{i};
+  if any(fn == '*'),
+    isfile = ~isempty(dir(fullfile(expdir,fn)));
+  else
+    isfile = exist(fullfile(expdir,fn),'file');
+  end
+  if ~isfile,
+    msgs{end+1} = sprintf('Missing file %s',fn); %#ok<AGROW>
+    success = false;
   end
 end
 
@@ -142,11 +161,15 @@ else
   automatedchecks_incoming = struct('automated_pf','P','notes_curation','');
 end
 
-fid = fopen(outfile,'w');
+if DEBUG,
+  fid = 1;
+else
+  fid = fopen(outfile,'w');
+end
 if fid < 0,
   error('Could not open automatic checks results file %s for writing.',outfile);
 end
-if success && strcmpi(automatedchecks_incoming.automated_pf,'P'),
+if success && ~strcmpi(automatedchecks_incoming.automated_pf,'F'),
   fprintf(fid,'automated_pf,P\n');
 else
   fprintf(fid,'automated_pf,F\n');
@@ -164,4 +187,6 @@ else
   fprintf(fid,'%s\n',s);
 end
 
-%fclose(fid);
+if ~DEBUG,
+  fclose(fid);
+end

@@ -1,4 +1,5 @@
-%% set up paths
+%% set up path
+
 
 [~,computername] = system('hostname');
 computername = strtrim(computername);
@@ -43,37 +44,12 @@ end
 %% parameters
 
 analysis_protocol = '20110407';
-vartype = 'experiment';
-dataset = 'score';
-% period = 2;
-% loadcacheddata = true;
-% datafilename = 'DataCurationSheets/ExperimentData_20110409to20110416.mat';
-% username = 'bransonk';
 
-%% which experiments
+%% choose experiments
 
-% d = now;
-% format = 'yyyymmddTHHMMSS';
-% maxdatenum = d - min_days_prev;
-% mindatenum = d - max_days_prev;
-% mindatestr = datestr(mindatenum,format);
-% maxdatestr = datestr(maxdatenum,format);
+expdir = fullfile(rootdatadir,'pBDPGAL4U_TrpA_Rig1Plate10BowlA_20110714T110950');
 
-params = {'settingsdir',settingsdir,...
-  'analysis_protocol',analysis_protocol,...
-  'rootdatadir',rootdatadir,...
-  'dataset',dataset,...
-  'rearing_protocol','*8*',...
-  'handling_protocol','*4*',...
-  'experiment_protocol',{'*7*','*8*'},...
-  'checkflags',false,...
-  'screen_type','primary'};
-%   'period',period,...
-%   'loadcacheddata',loadcacheddata,...
-%   'datafilename',datafilename,...
-%   'username',username};
-%   'plotgroup','set',...
 
-%% 
+%%
 
-[handles,data] = FlyBowlExamineVariables(vartype,params{:});
+FlyBowlAutomaticChecks_Complete(expdir,'settingsdir',settingsdir,'analysis_protocol',analysis_protocol,'debug',true);
