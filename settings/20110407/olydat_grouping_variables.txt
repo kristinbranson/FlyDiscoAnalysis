@@ -21,3 +21,4 @@ manual_curation_date
 part_of_day
 hour_of_day
 rearing_incubator
+cross_date
