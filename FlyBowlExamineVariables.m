@@ -2171,6 +2171,7 @@ SetCallbacks();
       try
         save(state.datafilename,'-struct','data');
         save('-append',state.datafilename,'rawdata');
+        save('-append',state.datafilename,'params');
       catch ME
         warndlg(sprintf('Could not save to file %s: %s',state.datafilename,getReport(ME)),'Could not save');
         continue;
