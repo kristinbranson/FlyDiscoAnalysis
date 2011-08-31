@@ -23,6 +23,31 @@ metadatafile = fullfile(expdir,dataloc_params.metadatafilestr);
 automatedchecksincomingfile = fullfile(expdir,dataloc_params.automaticchecksincomingresultsfilestr);
 outfile = fullfile(expdir,dataloc_params.automaticcheckscompleteresultsfilestr);
 
+% types of automated errors: order matters in this list
+categories = {...
+  'missing_automated_checks_incoming_files',...
+  'missing_tracking_files',...
+  'ctrax_infinity_bug',...
+  'missing_registration_files',...
+  'missing_sexclassification_files',...
+  'missing_perframestats_files',...
+  'missing_extra_diagnostics_files',...
+  'missing_results_movie_files',...
+  'missing_other_analysis_files',...
+  'bad_number_of_flies',...
+  'bad_number_of_flies_per_sex',...
+  'completed_checks_other'};
+category2idx = struct;
+for i = 1:numel(categories),
+  category2idx.(categories{i}) = i;
+end
+iserror = false(1,numel(categories));
+
+% make sure there is a category for each file
+if numel(check_params.required_files) ~= numel(check_params.file_categories),
+  error('required_files and file_categories parameters do not match');
+end
+
 %% read metadata
 
 metadata = ReadMetadataFile(metadatafile);
@@ -46,41 +71,48 @@ if isscreen,
   if ~exist(sexclassifierfile,'file'),
     msgs{end+1} = sprintf('sex classifier diagnostics file %s does not exist',sexclassifierfile);
     success = false;
+    iserror(category2idx.missing_sexclassification_files) = true;
   else
     sexclassifier_diagnostics = ReadParams(sexclassifierfile);
     if ~isfield(sexclassifier_diagnostics,'mean_nflies'),
       msgs{end+1} = sprintf('sex classifier diagnostics file %s missing field mean_nflies',sexclassifierfile);
       success = false;
+      iserror(category2idx.completed_checks_other) = true;
     else
       num_flies = round(sexclassifier_diagnostics.mean_nflies);
       if num_flies < check_params.min_num_flies,
         msgs{end+1} = sprintf('num_flies = round(%f) = %d < %d',...
           sexclassifier_diagnostics.mean_nflies,num_flies,check_params.min_num_flies);
         success = false;
+        iserror(category2idx.bad_number_of_flies) = true;
       end
     end
     
     if ~isfield(sexclassifier_diagnostics,'mean_nfemales'),
       msgs{end+1} = sprintf('sex classifier diagnostics file %s missing field mean_nfemales',sexclassifierfile);
       success = false;
+      iserror(category2idx.completed_checks_other) = true;
     else
       num_females = round(sexclassifier_diagnostics.mean_nfemales);
       if num_females < check_params.min_num_females,
         msgs{end+1} = sprintf('num_females = round(%f) = %d < %d',...
           sexclassifier_diagnostics.mean_nfemales,num_females,check_params.min_num_females);
         success = false;
+        iserror(category2idx.bad_number_of_flies_per_sex) = true;
       end
     end
     
     if ~isfield(sexclassifier_diagnostics,'mean_nmales'),
       msgs{end+1} = sprintf('sex classifier diagnostics file %s missing field mean_nmales',sexclassifierfile);
       success = false;
+      iserror(category2idx.completed_checks_other) = true;
     else
       num_males = round(sexclassifier_diagnostics.mean_nmales);
       if num_males < check_params.min_num_males,
         msgs{end+1} = sprintf('num_males = round(%f) = %d < %d',...
           sexclassifier_diagnostics.mean_nmales,num_males,check_params.min_num_males);
         success = false;
+        iserror(category2idx.bad_number_of_flies_per_sex) = true;
       end
     end
     
@@ -94,6 +126,7 @@ ctraxfile = fullfile(expdir,dataloc_params.ctraxfilestr);
 if ~exist(ctraxfile,'file'),
   msgs{end+1} = sprintf('Ctrax output mat file %s does not exist',ctraxfile);
   success = false;
+  iserror(category2idx.missing_tracking_files) = true;
 else
   % name of annotation file
   annfile = fullfile(expdir,dataloc_params.annfilestr);
@@ -106,6 +139,7 @@ else
   if ~succeeded,
     msgs{end+1} = sprintf('Could not load trajectories from file %s',ctraxfile);
     success = false;
+    iserror(category2idx.completed_checks_other) = true;
   else
     
     for fly = 1:numel(trx),
@@ -120,6 +154,7 @@ else
         ends = ends - trx(fly).off;
         msgs{end+1} = [sprintf('Trajectory %d has NaNs in frames',fly),sprintf(' %d-%d',[starts,ends]')]; %#ok<AGROW>
         success = false;
+        iserror(category2idx.ctrax_infinity_bug) = true;
       end
       badidx = isinf(trx(fly).x) | ...
         isinf(trx(fly).y) | ...
@@ -132,6 +167,7 @@ else
         ends = ends - trx(fly).off;
         msgs{end+1} = [sprintf('Trajectory %d has Infs in frames',fly),sprintf(' %d-%d',[starts,ends]')]; %#ok<AGROW>
         success = false;
+        iserror(category2idx.ctrax_infinity_bug) = true;
       end
       
     end
@@ -150,6 +186,8 @@ for i = 1:numel(check_params.required_files),
   if ~isfile,
     msgs{end+1} = sprintf('Missing file %s',fn); %#ok<AGROW>
     success = false;
+    category = sprintf('missing_%s_files',check_params.file_categories{i});
+    iserror(category2idx.(category)) = true;
   end
 end
 
@@ -185,6 +223,24 @@ else
     end
   end
   fprintf(fid,'%s\n',s);
+  if strcmpi(automatedchecks_incoming.automated_pf,'F') && ...
+      isfield(automatedchecks_incoming,'automated_pf_category') && ...
+      ~isempty(automatedchecks_incoming.automated_pf_category),
+    s = automatedchecks_incoming.automated_pf_category;
+  else
+    i = find(iserror,1);
+    if isempty(i),
+      s = 'completed_checks_other';
+    else
+      s = categories{i};
+    end
+  end
+  fprintf(fid,'automated_pf_category,%s\n',s);      
+  if DEBUG,
+    fprintf('automated_pf_categories:');
+    fprintf(' %s',categories{iserror});
+    fprintf('\n');
+  end
 end
 
 if ~DEBUG,
