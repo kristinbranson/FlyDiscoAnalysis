@@ -272,6 +272,7 @@ if nBowlMarkers > 0,
   for i = 1:nBowlMarkers,
     % find maximum
     [success,x,y,featureStrength] = getNextFeaturePoint(filI4,methodcurr);
+    disp(featureStrength)
     if success,
       bowlMarkerPoints(:,i) = [x;y];
       filI4 = zeroOutDetection(bowlMarkerPoints(1,i),bowlMarkerPoints(2,i),filI4);
