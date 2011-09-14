@@ -1,3 +1,5 @@
+%% get bkgd stats per bowl from a lot of data
+
 %% set up paths
 [~,computername] = system('hostname');
 computername = strtrim(computername);
@@ -77,16 +79,60 @@ end
 
 analysis_protocol = '20110804';
 
-%% try the data selector
+fns = {'bkgd_diagnostics_mean_bkgdcenter','bkgd_diagnostics_mean_bkgdcenter_llr',...
+  'registrationdata_circleCenterX','registrationdata_circleCenterY','registrationdata_bowlMarkerTheta',...
+  'temperature_diagnostics_mean','temperature_diagnostics_max'};
 
-dsf = SAGE.Lab('olympiad').assay('bowl');
-dataPull = @(x) pullBowlData(x,'dataset','score','rootdir',rootdir,'removemissingdata',false,...
-  'settingsdir',settingsdir,'analysis_protocol',analysis_protocol);
-selector = OlyDat.DataSelector(dsf,dataPull);
+%% pull data
 
-%% load in data chosen with data selector
+data = SAGEGetBowlData('dataset','score','checkflags',true,'removemissingdata',false,...
+  'screen_type','primary','data_type',fns);
 
-load('ControlData20110315to20110530.mat');
+%% find and store median for each plate-bowl
 
-%% try the browser
-browser = startBowlBrowser(data,'settingsdir',settingsdir,'analysis_protocol',analysis_protocol);
+[platebowls_bkgd,~,platebowlidx_bkgd] = unique({data.plate_bowl});
+nbins = 50;
+MINNCOUNTS = 20;
+colors_bkgd = jet(numel(platebowls_bkgd))*.8;
+for j = 1:numel(fns),
+  fn = fns{j};
+  y_bkgd = nan(1,numel(data));
+  goodidx = ~cellfun(@isempty,{data.(fn)});
+  y_bkgd(goodidx) = [data(goodidx).(fn)];
+  edges = linspace(min(y_bkgd),max(y_bkgd),nbins+1);
+  centers = (edges(1:end-1)+edges(2:end))/2;
+  median_platebowl_bkgd.(fn) = nan(1,numel(platebowls_bkgd));
+  figure(j + 10);
+  clf;
+  hold on;
+  didplot = false(1,numel(platebowls_bkgd));
+  centers1 = unique(y_bkgd);
+  if numel(centers1) > nbins,
+    centers1 = centers;
+  end
+  for i = 1:numel(platebowls_bkgd),
+    y_curr = y_bkgd(platebowlidx_bkgd == i & goodidx);
+    median_platebowl_bkgd.(fn)(i) = median(y_curr);
+    counts = hist(y_curr,centers1);
+    Z = sum(counts);
+    if Z < MINNCOUNTS,
+      disp(Z);
+      continue;
+    end
+    counts = counts / Z;
+    plot(centers1,counts,'.-','color',colors_bkgd(i,:));
+    didplot(i) = true;
+  end
+  title(fn,'interpreter','none');
+  legend(platebowls_bkgd(didplot),'interpreter','none');
+end
+fid = fopen(fullfile(settingsdir,analysis_protocol,'StatsPerPlateBowl.txt'),'w');
+fprintf(fid,'platebowls');
+fprintf(fid,',%s',platebowls_bkgd{:});
+for i = 1:numel(fns),
+  fn = fns{i};
+  fprintf(fid,'\n%s',fn);
+  fprintf(fid,',%f',median_platebowl_bkgd.(fn));
+end
+fprintf(fid,'\n');
+fclose(fid);

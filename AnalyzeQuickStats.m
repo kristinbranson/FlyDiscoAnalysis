@@ -27,6 +27,8 @@ stdufmfstats = struct;
 streamstats = struct;
 
 for i = 1:nexpdirs,
+
+  fprintf('%d / %d: %s\n',i,nexpdirs,expdirs{i});
   
   % load the quick stats
   quickstats = loadQuickStats(expdirs{i});

@@ -1,12 +1,13 @@
 function FlyBowlPlotPerFrameStats(expdir,varargin)
 
-[analysis_protocol,settingsdir,datalocparamsfilestr,visible,controldatadirstr] = ...
+[analysis_protocol,settingsdir,datalocparamsfilestr,visible,controldatadirstr,DEBUG] = ...
   myparse(varargin,...
   'analysis_protocol','current',...
   'settingsdir','/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/settings',...
   'datalocparamsfilestr','dataloc_params.txt',...
   'visible','off',...
-  'controldatadirstr','current');
+  'controldatadirstr','current',...
+  'debug',false);
 
 %% data locations
 
@@ -22,7 +23,7 @@ load(histmatsavename,'histperfly','histperexp');
 
 %% create the plot directory if it does not exist
 figdir = fullfile(expdir,dataloc_params.figdir);
-if ~exist(figdir,'file'),
+if ~DEBUG && ~exist(figdir,'file'),
   [status,msg] = mkdir(figdir);
   if ~status,
     error('Could not create the figure directory %s:\n%s',figdir,msg);
@@ -69,12 +70,14 @@ end
 [tmp,basename] = fileparts(expdir);
 stathandles = PlotPerFrameStats(stats_perframefeatures,statsperfly,statsperexp,controlstats,basename,'visible',visible);
 drawnow;  
-savename = sprintf('stats.png');
-savename = fullfile(figdir,savename);
-if exist(savename,'file'),
-  delete(savename);
+if ~DEBUG,
+  savename = sprintf('stats.png');
+  savename = fullfile(figdir,savename);
+  if exist(savename,'file'),
+    delete(savename);
+  end
+  save2png(savename,stathandles.hfig);
 end
-save2png(savename,stathandles.hfig);
 
 %% plot histograms
 
@@ -113,12 +116,14 @@ for i = 1:numel(hist_fields),
   end
   
   drawnow;
-  savename = sprintf('hist_%s.png',hist_fields{i});
-  savename = fullfile(figdir,savename);
-  if exist(savename,'file'),
-    delete(savename);
+  if ~DEBUG,
+    savename = sprintf('hist_%s.png',hist_fields{i});
+    savename = fullfile(figdir,savename);
+    if exist(savename,'file'),
+      delete(savename);
+    end
+    save2png(savename,handles.hfig);
   end
-  save2png(savename,handles.hfig);
   
 end
 

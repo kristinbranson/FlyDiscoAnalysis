@@ -21,11 +21,11 @@ classdef HistogramPlot_FlyBowl < SingleStatTubeAveragedPlot_FlyBowl
                 assert(isnumeric(grp))
                 leg = arrayfun(@num2str,(1:max(grp))','UniformOutput',false);
             end
-            nbin = max(round(numel(data)/7),4);
+            nbin = max(round(numel(data)/20),4);
             tfFail = obj.detectFailure(data);
             bstat1 = bstat(~tfFail);
             grp1 = grp(~tfFail); 
-            barhist_grouped(ax,bstat1,grp1,nbin,leg);
+            barhist(ax,bstat1,grp1,nbin,leg,'histc','normalize');
             descStr = '';
             xlabel(plotCfg.stat.PrettyName,'interpreter','none');
             ylabel('Count');

@@ -11,6 +11,9 @@ classdef BowlExperimentDetailHandler < OlyDat.ExperimentDetailHandler
       fDetailHasOpened
     end
     
+    properties (Public)
+    end
+    
     methods
         function tf = get.fDetailHasOpened(obj)
             tf = false;
@@ -26,17 +29,29 @@ classdef BowlExperimentDetailHandler < OlyDat.ExperimentDetailHandler
         end
                 
         function refresh(obj,data)
-          if ~isempty(data) && isfield(data,'file_system_path'),
-            if ispc,
-              winopen(data.file_system_path);
-            else
-              web(data.file_system_path,'-browser');
-            end
+          if isempty(data),
+            return;
+          end
+          fprintf('Experiment: %s\n',data.experiment_name(numel('FlyBowl_')+1:end));
+          if ~isfield(data,'file_system_path'),
+            return;
+          end
+          fprintf('Path: %s\n',data.file_system_path);
+          if ~exist(fullfile(data.file_system_path,'video_diagnostics.png'),'file'),
+            VideoDiagnostics(data.file_system_path,'debug',true);
+          end
+          moviename = fullfile(data.file_system_path,'movie.ufmf');
+          if exist(moviename,'file'),
+            showufmf('UFMFName',moviename);
+          end
+          if ispc,
+            winopen(data.file_system_path);
+          else
+            web(data.file_system_path,'-browser');
           end
         end
         
         function close(obj)
-
         end
         
     end

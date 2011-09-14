@@ -12,6 +12,7 @@ handling_protocol
 plate
 top_plate
 rig_bowl
+plate_bowl
 edt_day
 edt_week
 edt_month

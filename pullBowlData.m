@@ -24,13 +24,19 @@ assert(all(cellfun(@(x)isa(x,'SAGE.Query.Clause'),qObjs)));
 
 % allow dataset to be specified
 [dataset,rootdir,removemissingdata,ignore_missingdata_fns,...
-  MAX_SET_TIMERANGE,MAX_EXPS_PER_SET] = myparse(varargin,...
+  MAX_SET_TIMERANGE,MAX_EXPS_PER_SET,...
+  analysis_protocol,settingsdir,datalocparamsfilestr,...
+  CIRCLECENTERX,CIRCLECENTERY] = myparse(varargin,...
   'dataset','data',...
   'rootdir',0,...
   'removemissingdata',true,...
   'ignore_missingdata_fns',{'temperature_stream'},...
   'MAX_SET_TIMERANGE',10/(24*60),...
-  'MAX_EXPS_PER_SET',4);
+  'MAX_EXPS_PER_SET',4,...
+  'analysis_protocol','current',...
+  'settingsdir','/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/settings',...
+  'datalocparamsfilestr','dataloc_params.txt',...
+  'CIRCLECENTERX',1025/2,'CIRCLECENTERY',1025/2);
 
 %% grab data
 dDS = SAGE.Lab('olympiad').assay('bowl').dataSet(dataset);
@@ -68,6 +74,11 @@ for i = 1:numel(data),
   % rig x bowl
   if isfield(data,'rig') && isfield(data,'bowl'),
     data(i).rig_bowl = sprintf('%d%s',data(i).rig,data(i).bowl);
+  end
+
+  % plate x bowl
+  if isfield(data,'plate') && isfield(data,'bowl'),
+    data(i).plate_bowl = sprintf('%d%s',data(i).plate,data(i).bowl);
   end
   
   % numerical date, rounded to day
@@ -171,6 +182,69 @@ for seti = 1:max(sets),
   end
 end
 
+%% add in normalized bkgd stats
+
+fns_bkgd = {'bkgd_diagnostics_mean_bkgdcenter','bkgd_diagnostics_mean_bkgdcenter_llr',...
+  'registrationdata_circleCenterX','registrationdata_circleCenterY','registrationdata_bowlMarkerTheta',...
+  'temperature_diagnostics_mean','temperature_diagnostics_max'};
+
+if any(isfield(data,fns_bkgd)) && isfield(data,'plate_bowl'),
+  
+  % read bkgd stats from file
+  datalocparamsfile = fullfile(settingsdir,analysis_protocol,datalocparamsfilestr);
+  dataloc_params = ReadParams(datalocparamsfile);
+  platebowlstatsfile = fullfile(settingsdir,analysis_protocol,dataloc_params.statsperplatebowlfilestr);
+  try
+    platebowlstats = ReadParams(platebowlstatsfile);
+  catch ME,
+    getReport(ME)
+    % if reading from file fails, just set to be empty
+    platebowlstats = struct;
+    platebowlstats.platebowls = {};
+    for i = 1:numel(fns_bkgd),
+      platebowlstats.(fns_bkgd{i}) = [];
+    end
+  end
+  % find platebowls not in the file
+  [ism,platebowlidx] = ismember({data.plate_bowl},platebowlstats.platebowls);
+  if any(~ism),
+    % compute stats from this data if no stat in file
+    new_plate_bowls = setdiff({data.plate_bowl},platebowlstats.platebowls);
+    n0 = numel(platebowlstats.platebowls);
+    for i = 1:numel(fns_bkgd),
+      fn = fns_bkgd{i};
+      if ~isfield(data,fn);
+        continue;
+      end
+      y_bkgd = nan(1,numel(data));
+      goodidx = ~cellfun(@isempty,{data.(fn)});
+      y_bkgd(goodidx) = [data(goodidx).(fn)];
+      for j = 1:numel(new_plate_bowls),
+        idx = strcmp({data.plate_bowl},new_plate_bowls{j}) & goodidx;
+        platebowlstats.platebowls{n0+j} = new_plate_bowls{j};
+        platebowlidx(idx) = n0+j;
+        platebowlstats.(fn)(n0+j) = median(y_bkgd(idx));
+      end
+    end
+  end
+  for i = 1:numel(fns_bkgd),
+    fn = fns_bkgd{i};
+    if isfield(data,fn) && isfield(platebowlstats,fn);
+      fnz = [fn,'_norm_platebowl'];
+      for j = 1:numel(data),
+        data(j).(fnz) = data(j).(fn) - platebowlstats.(fn)(platebowlidx(j));
+      end
+    end
+  end
+end
+
+if all(isfield(data,{'registrationdata_circleCenterX','registrationdata_circleCenterY'})),
+  for i = 1:numel(data),
+    data(i).registrationdata_circleCenterMaxXY = ...   
+      max(abs(data(i).registrationdata_circleCenterX - CIRCLECENTERX),...
+      abs(data(i).registrationdata_circleCenterY - CIRCLECENTERY));
+  end
+end
 
 end
 
@@ -251,7 +325,7 @@ end
 if ischar(rootdir),
   isfilesystempath = isfield(datamerge,'file_system_path');
   for i = 1:numel(datamerge),
-    if isfilesystempath,
+    if isfilesystempath && ~strcmpi(datamerge(i).file_system_path,'NULL'),
       [~,basename] = fileparts(datamerge(i).file_system_path);
     else
       basename = regexprep(datamerge(i).experiment_name,'^FlyBowl_','');
@@ -291,8 +365,8 @@ statfns = {'nflies_analyzed'
 datamerge = format2substructs(datamerge,'hist',statfns,'hist',removemissingdata);
 
 % check for missing data
-ismissingdata = false(size(datamerge));
 if removemissingdata,
+  ismissingdata = false(size(datamerge));
   fns = setdiff(fieldnames(datamerge),ignore_missingdata_fns);
   for i = 1:numel(fns),
     fn = fns{i};
@@ -305,6 +379,24 @@ if removemissingdata,
     end
   end
   datamerge(ismissingdata) = [];  
+else
+  % replace missing fields
+  fns = setdiff(fieldnames(datamerge),ignore_missingdata_fns);
+  for i = 1:numel(fns),
+    fn = fns{i};
+    ismissingdatacurr = cellfun(@isempty,{datamerge.(fn)});
+    if ~any(ismissingdatacurr), continue; end
+    isnumericdatacurr = cellfun(@isnumeric,{datamerge.(fn)});
+    isscalardatacurr = cellfun(@numel,{datamerge.(fn)}) <= 1;
+    if all( (isnumericdatacurr&isscalardatacurr) | ismissingdatacurr),
+      missingidx = find(ismissingdatacurr);
+      for j = missingidx(:)',
+        datamerge(j).(fn) = nan;
+      end
+      warning(['The following experiments are missing data for %s:',sprintf('\n%s',datamerge(ismissingdatacurr).experiment_name)],fn);
+    end
+  end
+  
 end
 
 
