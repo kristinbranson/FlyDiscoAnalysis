@@ -98,7 +98,7 @@ end
 % put stds on the bottom
 if strcmpi(stdstyle,'patch'),
   hchil = get(hax,'children');
-  set(hax,'Children',[setdiff(hchil,hstd),fliplr(hstd)]);
+  set(hax,'Children',[setdiff(hchil(:),hstd(:));flipud(hstd(:))]);
 end
 
 % plot the type means

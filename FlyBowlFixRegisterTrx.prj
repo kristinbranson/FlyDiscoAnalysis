@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <deployment-project>
-  <configuration target="target.standalone" target-name="Standalone Application" name="FlyBowlComputePerFrameFeatures" location="/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis" file="/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/FlyBowlComputePerFrameFeatures.prj" build-checksum="498960568">
-    <param.project.name>/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/FlyBowlComputePerFrameFeatures.prj</param.project.name>
+  <configuration target="target.standalone" target-name="Standalone Application" name="FlyBowlFixRegisterTrx" location="/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis" file="/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/FlyBowlFixRegisterTrx.prj" build-checksum="716049456">
+    <param.project.name>/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/FlyBowlFixRegisterTrx.prj</param.project.name>
     <param.target.type>Standalone Application</param.target.type>
-    <param.appname>FlyBowlComputePerFrameFeatures</param.appname>
-    <param.intermediate>${PROJECT_ROOT}/FlyBowlComputePerFrameFeatures/src</param.intermediate>
-    <param.output>${PROJECT_ROOT}/FlyBowlComputePerFrameFeatures/distrib</param.output>
+    <param.appname>FlyBowlFixRegisterTrx</param.appname>
+    <param.intermediate>${PROJECT_ROOT}/FlyBowlFixRegisterTrx/src</param.intermediate>
+    <param.output>${PROJECT_ROOT}/FlyBowlFixRegisterTrx/distrib</param.output>
     <param.embed.ctf>true</param.embed.ctf>
     <param.tbx_on_path>
       <item>all</item>
@@ -56,19 +56,11 @@
       <param.user.defined.mcr.options />
     </unset>
     <fileset.main>
-      <file>${PROJECT_ROOT}/FlyBowlComputePerFrameFeatures.m</file>
+      <file>${PROJECT_ROOT}/FlyBowlFixRegisterTrx.m</file>
     </fileset.main>
     <fileset.resources>
-      <file>${PROJECT_ROOT}/DebugTrx.m</file>
-      <file>${PROJECT_ROOT}/FlyBowlComputePerFrameFeatures.m</file>
-      <file>${PROJECT_ROOT}/IllustratePerFrameProps.m</file>
-      <file>${PROJECT_ROOT}/LowPassFilterArea.m</file>
-      <file>${PROJECT_ROOT}/ReadParams.m</file>
-      <file>${PROJECT_ROOT}/SmoothAreaOutliers.m</file>
-      <file>${PROJECT_ROOT}/anglesub_pair.m</file>
-      <file>${PROJECT_ROOT}/anglesubtended.m</file>
-      <file>${PROJECT_ROOT}/center_of_rotation.m</file>
-      <file>${PROJECT_ROOT}/center_of_rotation2.m</file>
+      <file>${PROJECT_ROOT}/@Trx</file>
+      <file>${PROJECT_ROOT}/compute_abs__template.m</file>
       <file>${PROJECT_ROOT}/compute_absangle2wall.m</file>
       <file>${PROJECT_ROOT}/compute_absanglefrom1to2.m</file>
       <file>${PROJECT_ROOT}/compute_abscorfrac_min.m</file>
@@ -77,8 +69,11 @@
       <file>${PROJECT_ROOT}/compute_absdarena_angle.m</file>
       <file>${PROJECT_ROOT}/compute_absdtheta.m</file>
       <file>${PROJECT_ROOT}/compute_absdtheta_tail.m</file>
+      <file>${PROJECT_ROOT}/compute_absdu_tail.m</file>
       <file>${PROJECT_ROOT}/compute_absdv_cor.m</file>
+      <file>${PROJECT_ROOT}/compute_absdv_tail.m</file>
       <file>${PROJECT_ROOT}/compute_absphidiff.m</file>
+      <file>${PROJECT_ROOT}/compute_absphisideways.m</file>
       <file>${PROJECT_ROOT}/compute_abssmoothd2theta.m</file>
       <file>${PROJECT_ROOT}/compute_abssmoothdtheta.m</file>
       <file>${PROJECT_ROOT}/compute_absthetadiff.m</file>
@@ -132,23 +127,15 @@
       <file>${PROJECT_ROOT}/compute_xnose_mm.m</file>
       <file>${PROJECT_ROOT}/compute_yaw.m</file>
       <file>${PROJECT_ROOT}/compute_ynose_mm.m</file>
-      <file>${PROJECT_ROOT}/dcenter_pair.m</file>
-      <file>${PROJECT_ROOT}/dell2nose_pair.m</file>
-      <file>${PROJECT_ROOT}/dnose2ell_pair.m</file>
-      <file>${PROJECT_ROOT}/first_order_viterbi.m</file>
-      <file>${PROJECT_ROOT}/getExperimentDirs.m</file>
-      <file>${PROJECT_ROOT}/parseExpDir.m</file>
-      <file>${PROJECT_ROOT}/parseunits.m</file>
-      <file>${PROJECT_ROOT}/printunits.m</file>
-      <file>${PROJECT_ROOT}/rfrac2center.m</file>
+      <file>${PROJECT_ROOT}/detectRegistrationMarks.m</file>
       <file>/groups/branson/home/bransonk/tracking/code/JCtrax/filehandling</file>
       <file>/groups/branson/home/bransonk/tracking/code/JCtrax/misc</file>
     </fileset.resources>
     <fileset.package />
     <build-deliverables>
-      <file name="readme.txt" location="${PROJECT_ROOT}/FlyBowlComputePerFrameFeatures/distrib">/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/FlyBowlComputePerFrameFeatures/distrib/readme.txt</file>
-      <file name="run_FlyBowlComputePerFrameFeatures.sh" location="${PROJECT_ROOT}/FlyBowlComputePerFrameFeatures/distrib">/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/FlyBowlComputePerFrameFeatures/distrib/run_FlyBowlComputePerFrameFeatures.sh</file>
-      <file name="FlyBowlComputePerFrameFeatures" location="${PROJECT_ROOT}/FlyBowlComputePerFrameFeatures/distrib">/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/FlyBowlComputePerFrameFeatures/distrib/FlyBowlComputePerFrameFeatures</file>
+      <file name="readme.txt" location="${PROJECT_ROOT}/FlyBowlFixRegisterTrx/distrib">/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/FlyBowlFixRegisterTrx/distrib/readme.txt</file>
+      <file name="run_FlyBowlFixRegisterTrx.sh" location="${PROJECT_ROOT}/FlyBowlFixRegisterTrx/distrib">/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/FlyBowlFixRegisterTrx/distrib/run_FlyBowlFixRegisterTrx.sh</file>
+      <file name="FlyBowlFixRegisterTrx" location="${PROJECT_ROOT}/FlyBowlFixRegisterTrx/distrib">/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/FlyBowlFixRegisterTrx/distrib/FlyBowlFixRegisterTrx</file>
     </build-deliverables>
     <matlab>
       <root>/localhome/bransonk/software/matlab/R2010b</root>

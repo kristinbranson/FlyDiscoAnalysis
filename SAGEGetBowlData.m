@@ -6,7 +6,8 @@ currdir = which('SAGEGetBowlData');
 [currdir,~] = fileparts(currdir);
 
 %% parse inputs
-[docheckflags,daterange,SAGEpath,removemissingdata,dataset,rootdir,MAX_SET_TIMERANGE,MAX_EXPS_PER_SET,leftovers] = ...
+[docheckflags,daterange,SAGEpath,removemissingdata,dataset,rootdir,MAX_SET_TIMERANGE,MAX_EXPS_PER_SET,unflatten,...
+  analysis_protocol,settingsdir,datalocparamsfilestr, CIRCLECENTERX,CIRCLECENTERY,leftovers] = ...
   myparse_nocheck(varargin,...
   'checkflags',true,...
   'daterange',[],...
@@ -15,7 +16,12 @@ currdir = which('SAGEGetBowlData');
   'dataset','data',...
   'rootdir',0,...
   'MAX_SET_TIMERANGE',10/(24*60),...
-  'MAX_EXPS_PER_SET',4);
+  'MAX_EXPS_PER_SET',4,...
+  'unflatten',true,...
+  'analysis_protocol','current',...
+  'settingsdir','/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/settings',...
+  'datalocparamsfilestr','dataloc_params.txt',...
+  'CIRCLECENTERX',1025/2,'CIRCLECENTERY',1025/2);
 
 %% add SAGE to path
 if ~exist('SAGE.Lab','class'),
@@ -131,7 +137,7 @@ end
 if ischar(rootdir),
   isfilesystempath = isfield(datamerge,'file_system_path');
   for i = 1:numel(datamerge),
-    if isfilesystempath,
+    if isfilesystempath && ~strcmpi(datamerge(i).file_system_path,'NULL'),
       [~,basename] = fileparts(datamerge(i).file_system_path);
     else
       basename = regexprep(datamerge(i).experiment_name,'^FlyBowl_','');
@@ -146,6 +152,14 @@ if isfield(datamerge,'rig') && isfield(datamerge,'bowl'),
     datamerge(i).rig_bowl = sprintf('%d%s',datamerge(i).rig,datamerge(i).bowl);
   end
 end
+
+%% add plate x bowl
+if isfield(datamerge,'plate') && isfield(datamerge,'bowl'),
+  for i = 1:numel(datamerge),
+    datamerge(i).plate_bowl = sprintf('%d%s',datamerge(i).plate,datamerge(i).bowl);
+  end
+end
+
 
 %% add line__effector
 if isfield(datamerge,'line_name') && isfield(datamerge,'effector'),
@@ -229,38 +243,106 @@ for seti = 1:max(sets),
   end
 end
 
+%% add in normalized bkgd stats
+
+fns_bkgd = {'bkgd_diagnostics_mean_bkgdcenter','bkgd_diagnostics_mean_bkgdcenter_llr',...
+  'registrationdata_circleCenterX','registrationdata_circleCenterY','registrationdata_bowlMarkerTheta',...
+  'temperature_diagnostics_mean','temperature_diagnostics_max'};
+
+if any(isfield(datamerge,fns_bkgd)) && isfield(datamerge,'plate_bowl'),
+  
+  % read bkgd stats from file
+  datalocparamsfile = fullfile(settingsdir,analysis_protocol,datalocparamsfilestr);
+  dataloc_params = ReadParams(datalocparamsfile);
+  platebowlstatsfile = fullfile(settingsdir,analysis_protocol,dataloc_params.statsperplatebowlfilestr);
+  try
+    platebowlstats = ReadParams(platebowlstatsfile);
+  catch ME,
+    getReport(ME)
+    % if reading from file fails, just set to be empty
+    platebowlstats = struct;
+    platebowlstats.platebowls = {};
+    for i = 1:numel(fns_bkgd),
+      platebowlstats.(fns_bkgd{i}) = [];
+    end
+  end
+  % find platebowls not in the file
+  [ism,platebowlidx] = ismember({datamerge.plate_bowl},platebowlstats.platebowls);
+  if any(~ism),
+    % compute stats from this data if no stat in file
+    new_plate_bowls = setdiff({datamerge.plate_bowl},platebowlstats.platebowls);
+    n0 = numel(platebowlstats.platebowls);
+    for i = 1:numel(fns_bkgd),
+      fn = fns_bkgd{i};
+      if ~isfield(datamerge,fn);
+        continue;
+      end
+      y_bkgd = nan(1,numel(datamerge));
+      goodidx = ~cellfun(@isempty,{datamerge.(fn)});
+      y_bkgd(goodidx) = [datamerge(goodidx).(fn)];
+      for j = 1:numel(new_plate_bowls),
+        idx = strcmp({datamerge.plate_bowl},new_plate_bowls{j}) & goodidx;
+        platebowlstats.platebowls{n0+j} = new_plate_bowls{j};
+        platebowlidx(idx) = n0+j;
+        platebowlstats.(fn)(n0+j) = median(y_bkgd(idx));
+      end
+    end
+  end
+  for i = 1:numel(fns_bkgd),
+    fn = fns_bkgd{i};
+    if isfield(datamerge,fn) && isfield(platebowlstats,fn),
+      fnz = [fn,'_norm_platebowl'];
+      for j = 1:numel(datamerge),
+        datamerge(j).(fnz) = datamerge(j).(fn) - platebowlstats.(fn)(platebowlidx(j));
+      end
+    end
+  end
+end
+
+if all(isfield(datamerge,{'registrationdata_circleCenterX','registrationdata_circleCenterY'})),
+  for i = 1:numel(datamerge),
+    datamerge(i).registrationdata_circleCenterMaxXY = ...   
+      max(abs(datamerge(i).registrationdata_circleCenterX - CIRCLECENTERX),...
+      abs(datamerge(i).registrationdata_circleCenterY - CIRCLECENTERY));
+  end
+end
+
 %% format stats, hist into substructs
 
-statfns = {'nflies_analyzed'
-  'flies_analyzed'
-  'mean_perfly'
-  'std_perfly'
-  'Z_perfly'
-  'fracframesanalyzed_perfly'
-  'prctiles_perfly'
-  'meanmean_perexp'
-  'stdmean_perexp'
-  'meanstd_perexp'
-  'Z_perexp'
-  'meanZ_perexp'
-  'meanprctiles_perexp'
-  'stdprctiles_perexp'};
-[datamerge,iswarning1] = format2substructs(datamerge,'stats',statfns,'stats_perframe',removemissingdata);
-iswarning = iswarning || iswarning1;
-statfns = {'nflies_analyzed'
-  'flies_analyzed'
-  'frac_linear_perfly'
-  'frac_log_perfly'
-  'Z_perfly'
-  'fracframesanalyzed_perfly'
-  'mean_frac_linear_perexp'
-  'std_frac_linear_perexp'
-  'mean_frac_log_perexp'
-  'std_frac_log_perexp'
-  'Z_perexp'
-  'meanZ_perexp'};
-[datamerge,iswarning1] = format2substructs(datamerge,'hist',statfns,'hist_perframe',removemissingdata);
-iswarning = iswarning || iswarning1;
+if unflatten,
+  
+  statfns = {'nflies_analyzed'
+    'flies_analyzed'
+    'mean_perfly'
+    'std_perfly'
+    'Z_perfly'
+    'fracframesanalyzed_perfly'
+    'prctiles_perfly'
+    'meanmean_perexp'
+    'stdmean_perexp'
+    'meanstd_perexp'
+    'Z_perexp'
+    'meanZ_perexp'
+    'meanprctiles_perexp'
+    'stdprctiles_perexp'};
+  [datamerge,iswarning1] = format2substructs(datamerge,'stats',statfns,'stats_perframe',removemissingdata);
+  iswarning = iswarning || iswarning1;
+  statfns = {'nflies_analyzed'
+    'flies_analyzed'
+    'frac_linear_perfly'
+    'frac_log_perfly'
+    'Z_perfly'
+    'fracframesanalyzed_perfly'
+    'mean_frac_linear_perexp'
+    'std_frac_linear_perexp'
+    'mean_frac_log_perexp'
+    'std_frac_log_perexp'
+    'Z_perexp'
+    'meanZ_perexp'};
+  [datamerge,iswarning1] = format2substructs(datamerge,'hist',statfns,'hist_perframe',removemissingdata);
+  iswarning = iswarning || iswarning1;
+  
+end
 
 function in = convert2numeric(in)
 

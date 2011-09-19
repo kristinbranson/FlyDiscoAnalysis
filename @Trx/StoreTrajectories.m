@@ -13,7 +13,7 @@ for i = 1:numel(traj_fns),
   obj.SetPerFrameData(fn,{traj.(fn)},n);
   
   filename = obj.GetPerFrameFile(fn,n);
-  data = traj.(fn); %#ok<*NASGU>
+  data = {traj.(fn)}; %#ok<*NASGU>
   switch fn,
     case {'x','y','a','b'},
       units = parseunits('px');

@@ -86,6 +86,12 @@ if isscreen,
         success = false;
         iserror(category2idx.bad_number_of_flies) = true;
       end
+      if num_flies > check_params.max_num_flies,
+        msgs{end+1} = sprintf('num_flies = round(%f) = %d > %d',...
+          sexclassifier_diagnostics.mean_nflies,num_flies,check_params.max_num_flies);
+        success = false;
+        iserror(category2idx.bad_number_of_flies) = true;
+      end
     end
     
     if ~isfield(sexclassifier_diagnostics,'mean_nfemales'),

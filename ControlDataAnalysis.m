@@ -77,16 +77,52 @@ end
 
 analysis_protocol = '20110804';
 
-%% try the data selector
+%% pull lots of control data
 
-dsf = SAGE.Lab('olympiad').assay('bowl');
-dataPull = @(x) pullBowlData(x,'dataset','score','rootdir',rootdir,'removemissingdata',false,...
-  'settingsdir',settingsdir,'analysis_protocol',analysis_protocol);
-selector = OlyDat.DataSelector(dsf,dataPull);
+params = struct;
+% data set: data -- we want behavior data
+params.dataset = 'data';
+% only pull data marked as primary screen data
+params.screen_type = 'primary';
+% only pull control data
+params.line_name = 'pBDPGAL4U';
+% don't use the automatic flag checking implemented in SAGEGetBowlData,
+% we'll do that here if we want to
+params.checkflags = false;
+% don't remove experiments with missing data, we'll do that manually if we
+% decide to. 
+params.removemissingdata = false;
+% don't pull aborted experiments
+params.flag_aborted = 0;
+% don't pull experiments with flag_redo set to 1
+params.flag_redo = 0;
+% restrict to experiments with automated_pf = P
+% params.automated_pf = 'P';
+% restrict to experiments with manual_pf ~= F
+% params.manual_pf = {'P','U'};
 
-%% load in data chosen with data selector
+paramscell = struct2paramscell(params);
 
-load('ControlData20110315to20110530.mat');
-
-%% try the browser
-browser = startBowlBrowser(data,'settingsdir',settingsdir,'analysis_protocol',analysis_protocol);
+data = {};
+day0 = now;
+dateformat = 'yyyymmddTHHMMSS';
+period = 2;
+for daysago = 0:period:200,
+  tryn = 1;
+  while true,
+    success = false;
+    try
+      fprintf('daysago = %d, try = %d\n',daysago,tryn);
+      data{end+1} = SAGEGetBowlData(paramscell{:},'daterange',{datestr(day0-daysago-period,dateformat),datestr(day0-daysago,dateformat)});
+      success = true;
+    catch ME,
+      delete(waitbar(0));
+      getReport(ME)
+      tryn = tryn + 1;
+    end
+    if success,
+      break;
+    end
+  end
+  save ControlData20110902.mat;
+end
