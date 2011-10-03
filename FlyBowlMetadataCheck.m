@@ -74,6 +74,59 @@ sorting_datenums = exp_datenums - hours_sorted/24;
 hours_starved = [data.hours_starved];
 starvation_datenums = exp_datenums - hours_starved/24;
 
+%% within-experiment checks
+
+expmsgs = cell(1,numel(data));
+expiserror = false(1,numel(data));
+
+for i = 1:numel(data),
+
+  expmsgs{i} = {};
+  % apparatus name matches individual fields
+  
+  % parse apparatus name
+  m = regexp(data(i).apparatus_id,...
+    '^Rig(?<rig>\d+)__Plate(?<plate>\d+)__Lid(?<lid>\d+)__Bowl(?<bowl>.+)__Camera(?<camera>.+)__Computer(?<computer>.+)__HardDrive(?<harddrive>.+)$','names');
+  if isempty(m),
+    expmsgs{i}{end+1} = sprintf('Could not parse apparatus %s',data(i).apparatus_id);
+    expiserror(i) = true;
+  end
+  if data(i).rig ~= str2double(m.rig),
+    expmsgs{i}{end+1} = sprintf('Rig %d does not match apparatus %s',data(i).rig,data(i).apparatus_id);
+    expiserror(i) = true;
+  end
+  if data(i).plate ~= str2double(m.plate),
+    expmsgs{i}{end+1} = sprintf('plate %d does not match apparatus %s',data(i).plate,data(i).apparatus_id);
+    expiserror(i) = true;
+  end
+  if data(i).top_plate ~= str2double(m.lid),
+    expmsgs{i}{end+1} = sprintf('lid %d does not match apparatus %s',data(i).lid,data(i).apparatus_id);
+    expiserror(i) = true;
+  end
+  if ~strcmp(data(i).bowl,m.bowl),
+    expmsgs{i}{end+1} = sprintf('bowl %s does not match apparatus %s',data(i).bowl,data(i).apparatus_id);
+    expiserror(i) = true;
+  end
+  if ~strcmp(data(i).camera,m.camera),
+    expmsgs{i}{end+1} = sprintf('camera %s does not match apparatus %s',data(i).camera,data(i).apparatus_id);
+    expiserror(i) = true;
+  end
+  if ~strcmp(data(i).computer,m.computer),
+    expmsgs{i}{end+1} = sprintf('computer %s does not match apparatus %s',data(i).computer,data(i).apparatus_id);
+    expiserror(i) = true;
+  end
+  if ~strcmp(data(i).harddrive,m.harddrive),
+    expmsgs{i}{end+1} = sprintf('harddrive %s does not match apparatus %s',data(i).harddrive,data(i).apparatus_id);
+    expiserror(i) = true;
+  end
+end
+% Rig2__Plate14__Lid02__BowlD__Camera0053300063A94001__Computerbransonlab-ww4__HardDriveInternal_D
+
+
+% experiment name matches individual fields
+% file system path matches individual fields
+
+
 
 %% within-set checks
 

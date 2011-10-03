@@ -15,4 +15,8 @@ mu = mean(data);
 sig = std(data,1);
 
 % prctiles
-prctiles = prctile(data,prctiles_compute);
+if isempty(prctiles_compute),
+  prctiles = nan(0,1);
+else
+  prctiles = prctile(data,prctiles_compute);
+end
