@@ -1,13 +1,17 @@
-function [success,msgs] = FlyBowlAutomaticChecks_Incoming(expdir,varargin)
+function [success,msgs,iserror] = FlyBowlAutomaticChecks_Incoming(expdir,varargin)
 
 success = true;
 msgs = {};
 
-[analysis_protocol,settingsdir,datalocparamsfilestr,DEBUG] = ...
+datetime_format = 'yyyymmddTHHMMSS';
+
+[analysis_protocol,settingsdir,datalocparamsfilestr,DEBUG,min_barcode_expdatestr] = ...
   myparse(varargin,...
   'analysis_protocol','current',...
   'settingsdir','/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/settings',...
-  'datalocparamsfilestr','dataloc_params.txt','debug',false);
+  'datalocparamsfilestr','dataloc_params.txt','debug',false,...
+  'min_barcode_expdatestr','20110301T000000');
+min_barcode_expdatenum = datenum(min_barcode_expdatestr,datetime_format);
 
 %% parameters
 
@@ -105,7 +109,10 @@ end
 
 if isscreen,
 
-if ~ismember(metadata.line,check_params.control_line_names) && ...
+exp_datenum = datenum(metadata.exp_datetime,datetime_format);
+  
+if (~ismember(metadata.line,check_params.control_line_names) || ...
+    (exp_datenum >= min_barcode_expdatenum)) && ...
     metadata.cross_barcode < 0,
   success = false;
   msgs{end+1} = 'Barcode = -1 and line_name indicates not control';

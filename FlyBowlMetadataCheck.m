@@ -1,4 +1,5 @@
-function [data,iserror,msgs] = FlyBowlMetadataCheck(varargin)
+function [data,iserror,msgs,iserror_exp,msgs_exp,iserror_date,msgs_date] = ...
+  FlyBowlMetadataCheck(varargin)
 
 [outfilename,...
   data_type,max_maxdiff_sorting_time_minutes,max_maxdiff_starvation_time_minutes,...
@@ -6,6 +7,7 @@ function [data,iserror,msgs] = FlyBowlMetadataCheck(varargin)
   min_mindt_exp_datetime_diff_sets,...
   first_barcode_datetime,...
   max_maxdiff_sorting_time_perday_days,...
+  dosetchecks,doexpchecks,dodatechecks,...
   leftovers] = ...
   myparse_nocheck(varargin,...
   'outfilename','',...
@@ -15,7 +17,10 @@ function [data,iserror,msgs] = FlyBowlMetadataCheck(varargin)
   'max_maxdiff_starvation_time_minutes',5,...
   'min_mindt_exp_datetime_diff_sets',10,...
   'first_barcode_datetime','20110413T000000',...
-  'max_maxdiff_sorting_time_perday_days',4.5);
+  'max_maxdiff_sorting_time_perday_days',4.5,...
+  'dosetchecks',true,...
+  'doexpchecks',true,...
+  'dodatechecks',true);
 
 %% constants
 
@@ -76,56 +81,114 @@ starvation_datenums = exp_datenums - hours_starved/24;
 
 %% within-experiment checks
 
-expmsgs = cell(1,numel(data));
-expiserror = false(1,numel(data));
+msgs_exp = cell(1,numel(data));
+iserror_exp = false(1,numel(data));
+
+if doexpchecks,
 
 for i = 1:numel(data),
 
-  expmsgs{i} = {};
+  msgs_exp{i} = {};
   % apparatus name matches individual fields
   
   % parse apparatus name
+  % Rig2__Plate14__Lid02__BowlD__Camera0053300063A94001__Computerbransonlab-ww4__HardDriveInternal_D
   m = regexp(data(i).apparatus_id,...
-    '^Rig(?<rig>\d+)__Plate(?<plate>\d+)__Lid(?<lid>\d+)__Bowl(?<bowl>.+)__Camera(?<camera>.+)__Computer(?<computer>.+)__HardDrive(?<harddrive>.+)$','names');
+    '^Rig(?<rig>\s*\d+\s*)__Plate(?<plate>\s*\d+\s*)__Lid(?<lid>\s*\d+\s*)__Bowl(?<bowl>.+)__Camera(?<camera>.+)__Computer(?<computer>.+)__HardDrive(?<harddrive>.+)$','names');
   if isempty(m),
-    expmsgs{i}{end+1} = sprintf('Could not parse apparatus %s',data(i).apparatus_id);
-    expiserror(i) = true;
+    msgs_exp{i}{end+1} = sprintf('Could not parse apparatus %s',data(i).apparatus_id);
+    iserror_exp(i) = true;
+  else
+    if ~strcmp(sprintf('%d',data(i).rig),m.rig),
+      msgs_exp{i}{end+1} = sprintf('Rig %d does not match apparatus %s',data(i).rig,data(i).apparatus_id);
+      iserror_exp(i) = true;
+    end
+    if ~strcmp(sprintf('%02d',data(i).plate),m.plate),
+      msgs_exp{i}{end+1} = sprintf('plate %d does not match apparatus %s',data(i).plate,data(i).apparatus_id);
+      iserror_exp(i) = true;
+    end
+    if ~strcmp(sprintf('%02d',data(i).top_plate),m.lid),
+      msgs_exp{i}{end+1} = sprintf('lid %d does not match apparatus %s',data(i).top_plate,data(i).apparatus_id);
+      iserror_exp(i) = true;
+    end
+    if ~strcmp(data(i).bowl,m.bowl),
+      msgs_exp{i}{end+1} = sprintf('bowl %s does not match apparatus %s',data(i).bowl,data(i).apparatus_id);
+      iserror_exp(i) = true;
+    end
+    if ~strcmp(data(i).camera,m.camera),
+      msgs_exp{i}{end+1} = sprintf('camera %s does not match apparatus %s',data(i).camera,data(i).apparatus_id);
+      iserror_exp(i) = true;
+    end
+    if ~strcmp(data(i).computer,m.computer),
+      msgs_exp{i}{end+1} = sprintf('computer %s does not match apparatus %s',data(i).computer,data(i).apparatus_id);
+      iserror_exp(i) = true;
+    end
+    if ~strcmp(data(i).harddrive,m.harddrive),
+      msgs_exp{i}{end+1} = sprintf('harddrive %s does not match apparatus %s',data(i).harddrive,data(i).apparatus_id);
+      iserror_exp(i) = true;
+    end
   end
-  if data(i).rig ~= str2double(m.rig),
-    expmsgs{i}{end+1} = sprintf('Rig %d does not match apparatus %s',data(i).rig,data(i).apparatus_id);
-    expiserror(i) = true;
+
+  % file system path matches individual fields
+
+  % parse file system path
+  [m,success1] = parseExpDir(data(i).file_system_path);
+  if ~success1,
+    msgs_exp{i}{end+1} = sprintf('Error parsing file system path %s',data(i).file_system_path);
+    iserror_exp(i) = true;
+  else
+    if ~strcmp(sprintf('%d',data(i).rig),m.rig),
+      msgs_exp{i}{end+1} = sprintf('Rig %d does not match file_system_path %s',data(i).rig,data(i).file_system_path);
+      iserror_exp(i) = true;
+    end
+    if ~strcmp(sprintf('%02d',data(i).plate),m.plate),
+      msgs_exp{i}{end+1} = sprintf('plate %d does not match file_system_path %s',data(i).plate,data(i).file_system_path);
+      iserror_exp(i) = true;
+    end
+    if ~strcmp(data(i).bowl,m.bowl),
+      msgs_exp{i}{end+1} = sprintf('bowl %s does not match file_system_path %s',data(i).bowl,data(i).file_system_path);
+      iserror_exp(i) = true;
+    end
+    if ~strcmp(data(i).line_name,m.line),
+      msgs_exp{i}{end+1} = sprintf('line %s does not match file_system_path %s',data(i).line_name,data(i).file_system_path);
+      iserror_exp(i) = true;
+    end
   end
-  if data(i).plate ~= str2double(m.plate),
-    expmsgs{i}{end+1} = sprintf('plate %d does not match apparatus %s',data(i).plate,data(i).apparatus_id);
-    expiserror(i) = true;
+
+  % experiment name matches file_system_path
+  if ~strcmp(data(i).experiment_name(1:numel('FlyBowl_')),'FlyBowl_'),
+    msgs_exp{i}{end+1} = sprintf('experiment name %s does not begin with FlyBowl_',data(i).experiment_name);
+    iserror_exp(i) = true;
+  else
+    [m,success1] = parseExpDir(data(i).experiment_name(numel('FlyBowl_')+1:end));
+    
+    if ~success1,
+      msgs_exp{i}{end+1} = sprintf('Error parsing experiment_name %s',data(i).experiment_name);
+      iserror_exp(i) = true;
+    else
+      if ~strcmp(sprintf('%d',data(i).rig),m.rig),
+        msgs_exp{i}{end+1} = sprintf('Rig %d does not match experiment_name %s',data(i).rig,data(i).experiment_name);
+        iserror_exp(i) = true;
+      end
+      if ~strcmp(sprintf('%02d',data(i).plate),m.plate),
+        msgs_exp{i}{end+1} = sprintf('plate %d does not match experiment_name %s',data(i).plate,data(i).experiment_name);
+        iserror_exp(i) = true;
+      end
+      if ~strcmp(data(i).bowl,m.bowl),
+        msgs_exp{i}{end+1} = sprintf('bowl %s does not match experiment_name %s',data(i).bowl,data(i).experiment_name);
+        iserror_exp(i) = true;
+      end
+      if ~strcmp(data(i).line_name,m.line),
+        msgs_exp{i}{end+1} = sprintf('line %s does not match experiment_name %s',data(i).line_name,data(i).experiment_name);
+        iserror_exp(i) = true;
+      end
+    end
   end
-  if data(i).top_plate ~= str2double(m.lid),
-    expmsgs{i}{end+1} = sprintf('lid %d does not match apparatus %s',data(i).lid,data(i).apparatus_id);
-    expiserror(i) = true;
-  end
-  if ~strcmp(data(i).bowl,m.bowl),
-    expmsgs{i}{end+1} = sprintf('bowl %s does not match apparatus %s',data(i).bowl,data(i).apparatus_id);
-    expiserror(i) = true;
-  end
-  if ~strcmp(data(i).camera,m.camera),
-    expmsgs{i}{end+1} = sprintf('camera %s does not match apparatus %s',data(i).camera,data(i).apparatus_id);
-    expiserror(i) = true;
-  end
-  if ~strcmp(data(i).computer,m.computer),
-    expmsgs{i}{end+1} = sprintf('computer %s does not match apparatus %s',data(i).computer,data(i).apparatus_id);
-    expiserror(i) = true;
-  end
-  if ~strcmp(data(i).harddrive,m.harddrive),
-    expmsgs{i}{end+1} = sprintf('harddrive %s does not match apparatus %s',data(i).harddrive,data(i).apparatus_id);
-    expiserror(i) = true;
-  end
+  
 end
-% Rig2__Plate14__Lid02__BowlD__Camera0053300063A94001__Computerbransonlab-ww4__HardDriveInternal_D
 
 
-% experiment name matches individual fields
-% file system path matches individual fields
-
+end
 
 
 %% within-set checks
@@ -135,6 +198,8 @@ nsets = numel(sets);
 msgs = cell(1,nsets);
 iserror = false(1,nsets);
 
+if dosetchecks,
+  
 for seti = 1:nsets,
 
   msgs{seti} = {};
@@ -334,6 +399,7 @@ for seti = 1:nsets,
   
 end
 
+
 %% across-set checks
 
 % look for different sets on the same rig at about the same time
@@ -359,6 +425,8 @@ for seti = 1:nsets-1,
   end
 end
 
+end
+
 %% experiments on the same day should have some similar metadata
 
 exp_dates = floor(exp_datenums);
@@ -366,6 +434,8 @@ exp_dates = floor(exp_datenums);
 ndates = numel(unique_exp_dates);
 iserror_date = false(1,ndates);
 msgs_date = cell(1,ndates);
+
+if dodatechecks,
 
 for datei = 1:numel(unique_exp_dates),
   msgs_date{datei} = {};
@@ -421,6 +491,8 @@ for datei = 1:numel(unique_exp_dates),
   
 end
 
+end
+
 %% print results
 
 if isempty(outfilename),
@@ -435,6 +507,22 @@ fprintf(fid,'Metadata check for %d experiments collected between %s and %s:\n\n'
 %fprintf(fid,'%s\n',data.experiment_name);
 %fprintf(fid,'\n');
 
+if doexpchecks,
+
+fprintf(fid,'\n%d/%d experiment consistency errors:\n',nnz(iserror_exp),numel(iserror_exp));
+if ~any(iserror_exp),
+  fprintf(fid,'**NONE**\n');
+else
+  for expi = find(iserror_exp),
+    fprintf(fid,'Experiment %s:\n',data(expi).experiment_name);
+    fprintf(fid,'  %s\n',msgs_exp{expi}{:});
+  end
+end
+
+end
+
+if dosetchecks,
+
 fprintf(fid,'\n%d/%d set errors:\n',nnz(iserror),numel(iserror));
 if ~any(iserror),
   fprintf(fid,'**NONE**\n');
@@ -445,12 +533,18 @@ else
   end
 end
 
+end
+
+if dodatechecks,
+  
 fprintf(fid,'\n%d/%d day errors:\n',nnz(iserror_date),numel(iserror_date));
 for datei = find(iserror_date),
   fprintf(fid,'Experiment date %s:\n',datestr(unique_exp_dates(datei),'yyyy-mm-dd'));
   fprintf(fid,'  %s\n',msgs_date{datei}{:});
 end
   
+end
+
 if fid > 1,
   fclose(fid);
 end

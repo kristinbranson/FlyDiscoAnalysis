@@ -1,4 +1,4 @@
-function [success,msgs] = FlyBowlAutomaticChecks_Complete(expdir,varargin)
+function [success,msgs,iserror] = FlyBowlAutomaticChecks_Complete(expdir,varargin)
 
 success = true;
 msgs = {};
@@ -229,10 +229,13 @@ else
     end
   end
   fprintf(fid,'%s\n',s);
-  if strcmpi(automatedchecks_incoming.automated_pf,'F') && ...
-      isfield(automatedchecks_incoming,'automated_pf_category') && ...
-      ~isempty(automatedchecks_incoming.automated_pf_category),
-    s = automatedchecks_incoming.automated_pf_category;
+  if strcmpi(automatedchecks_incoming.automated_pf,'F'),
+    if isfield(automatedchecks_incoming,'automated_pf_category') && ...
+        ~isempty(automatedchecks_incoming.automated_pf_category),
+      s = automatedchecks_incoming.automated_pf_category;
+    else
+      s = 'incoming_checks_unknown';
+    end
   else
     i = find(iserror,1);
     if isempty(i),
@@ -243,9 +246,9 @@ else
   end
   fprintf(fid,'automated_pf_category,%s\n',s);      
   if DEBUG,
-    fprintf('automated_pf_categories:');
+    fprintf('[[automated_pf_categories:');
     fprintf(' %s',categories{iserror});
-    fprintf('\n');
+    fprintf(']]\n');
   end
 end
 
