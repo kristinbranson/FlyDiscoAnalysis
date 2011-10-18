@@ -43,13 +43,30 @@ end
 
 %% parameters
 
-analysis_protocol = '20110407';
+analysis_protocol = '20110804';
 
 %% choose experiments
 
 expdir = fullfile(rootdatadir,'pBDPGAL4U_TrpA_Rig1Plate10BowlA_20110714T110950');
+data = SAGEListBowlExperiments('daterange',{'20110601T000000'},'automated_pf','F','checkflags',false,'removemissingdata',false,'rootdir',rootdatadir);
 
+expdirs = {data.file_system_path};
 
 %%
 
-FlyBowlAutomaticChecks_Complete(expdir,'settingsdir',settingsdir,'analysis_protocol',analysis_protocol,'debug',true);
+success = [];
+msg = {};
+iserror = {};
+
+errors_seen = [];
+for i = i:numel(expdirs),
+  expdir = expdirs{i};
+  disp(data(i).experiment_name);
+  [success(i),msg{i},iserror{i}] = FlyBowlAutomaticChecks_Complete(expdir,'settingsdir',settingsdir,'analysis_protocol',analysis_protocol,'debug',true);
+  if ~success(i),
+    if any(~ismember(find(iserror{i},1),errors_seen)),
+      input('');
+      errors_seen = union(errors_seen,find(iserror{i},1));
+    end
+  end
+end

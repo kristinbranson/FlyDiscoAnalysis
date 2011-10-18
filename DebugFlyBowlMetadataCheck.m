@@ -43,7 +43,7 @@ end
 %% parameters
 
 params = {
-  'outfilename','',... % set to empty to output to stdout
+  'outfilename','MetaDataCheck_20110201to20111004.txt',... % set to empty to output to stdout
   'max_maxdiff_sorting_time_minutes',5,... % maximum difference in minutes between first amd last sorting time in a set
   'max_maxdiff_starvation_time_minutes',5,... % maximum difference in minutes between first amd last starvation time in a set
   'max_maxdiff_exp_datetime_minutes',5,... % maximum difference in minutes between first and last experiment start time in a set
@@ -52,10 +52,12 @@ params = {
   'flag_aborted','0',...
   'screen_type','primary',...
   'checkflags',false,...
-  'removemissingdata',false};
-  %'daterange',{'20110701T000000','20110820T000000'}};
+  'removemissingdata',false,...%};
+  'daterange',{'20110201T000000'},...
+  'doexpchecks',true,'dosetchecks',true,'dodatechecks',true};
 
 
 %% 
 
-[data,iserror,msgs] = FlyBowlMetadataCheck(params{:});
+[data,iserror,msgs,iserror_exp,msgs_exp,iserror_date,msgs_date] = ...
+  FlyBowlMetadataCheck(params{:});
