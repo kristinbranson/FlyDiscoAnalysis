@@ -54,7 +54,7 @@ params = {
   'checkflags',false,...
   'removemissingdata',false,...%};
   'daterange',{'20110201T000000'},...
-  'doexpchecks',true,'dosetchecks',true,'dodatechecks',true};
+  'doexpchecks',true,'dosetchecks',false,'dodatechecks',false};
 
 
 %% 
