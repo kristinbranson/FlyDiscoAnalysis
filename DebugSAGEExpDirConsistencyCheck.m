@@ -56,7 +56,7 @@ DISABLESAGEWAITBAR = true;
 
 [expdirs,~,~,experiments] = getExperimentDirs('rootdir',rootdatadir,...
   'settingsdir',settingsdir,'protocol',analysis_protocol,...
-  'daterange',{'20110301T000000'});
+  'daterange',{'20111008T000000','20111015T000000'});
 
 [~,order] = sort({experiments.exp_datetime});
 

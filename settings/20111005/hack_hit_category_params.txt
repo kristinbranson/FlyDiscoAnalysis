@@ -1,0 +1,5 @@
+min_velmag_jump,15
+min_nframes_jump,500
+min_velmag_moving,2
+max_velmag_moving,15
+min_nframes_meanspeedmoving,500
