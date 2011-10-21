@@ -47,7 +47,7 @@ switch computername,
 end
 
 analysis_protocol = '20111005';
-outfilename = 'SAGEExpDirConsistencyCheckResults20110907.txt';
+outfilename = 'SAGEExpDirConsistencyCheckResults20111021.txt';
 
 global DISABLESAGEWAITBAR;
 DISABLESAGEWAITBAR = true;

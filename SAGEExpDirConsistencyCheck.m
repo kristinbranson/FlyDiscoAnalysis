@@ -33,12 +33,16 @@ fprintf(outfid,'\n%s\n',expdir);
 
 data = SAGEGetBowlData('checkflags',false,'removemissingdata',false,...
   'dataset',dataset,'unflatten',false,...
-  'experiment_name',expname);
+  'experiment_name',expname,...
+  'settingsdir',settingsdir,...
+  'analysis_protocol',analysis_protocol);
 
 if docheckhist,
   data_hist = SAGEGetBowlData('checkflags',false,'removemissingdata',false,...
     'dataset','histogram','unflatten',false,...
-    'experiment_name',expname);
+    'experiment_name',expname,...
+    'settingsdir',settingsdir,...
+    'analysis_protocol',analysis_protocol);
 end
 
 if isempty(data),
@@ -150,9 +154,12 @@ if success,
     if ~isfield(data,'notes_curation'),
       fprintf(outfid,'notes_curation missing from SAGE\n');
       isconsistent = false;
-    elseif isempty(strfind(data.notes_curation,incoming_results.notes_curation)),
-      fprintf(outfid,'notes_curation string %s in %s, but missing from SAGE''s notes_curation = %s\n',incoming_results.notes_curation,incomingfile,data.notes_curation);
-      isconsistent = false;
+    else
+      expr = ['.*',strrep(incoming_results.notes_curation,'\n','(\n)*\s*'),'.*'];
+      if isempty(regexp(data.notes_curation,expr,'once')),
+        fprintf(outfid,'notes_curation string %s in %s, but missing from SAGE''s notes_curation = %s\n',incoming_results.notes_curation,incomingfile,data.notes_curation);
+        isconsistent = false;
+      end
     end    
   end
 end
