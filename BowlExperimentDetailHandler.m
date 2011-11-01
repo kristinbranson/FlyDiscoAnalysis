@@ -5,13 +5,11 @@ classdef BowlExperimentDetailHandler < OlyDat.ExperimentDetailHandler
 %   trace.
 
     properties (Hidden)
+      videodiagnostics_params = {}; 
     end
     
     properties (Dependent)
       fDetailHasOpened
-    end
-    
-    properties (Public)
     end
     
     methods
@@ -21,34 +19,56 @@ classdef BowlExperimentDetailHandler < OlyDat.ExperimentDetailHandler
     end
     
     methods
+      
+      function SetVideoDiagnosticsParams(obj,varargin)
+        obj.videodiagnostics_params = varargin;
+      end
         
-        function open(obj,data)
-          if ~isempty(data)
-            obj.refresh(data);
-          end
-        end
-                
-        function refresh(obj,data)
-          if isempty(data),
+        function open(obj,data,varargin)
+          
+          if isempty(data)
             return;
           end
-          fprintf('Experiment: %s\n',data.experiment_name(numel('FlyBowl_')+1:end));
+          
           if ~isfield(data,'file_system_path'),
             return;
           end
           fprintf('Path: %s\n',data.file_system_path);
+          hwait = nan;
+          if exist(data.file_system_path,'dir'),
+            hwait = mywaitbar(0,hwait,'Opening experiment directory...');
+            if ispc,
+              winopen(data.file_system_path);
+            else
+              web(data.file_system_path,'-browser');
+            end
+            drawnow;
+          else
+            uiwait(warndlg(sprintf('Experiment %s does not exist',data.file_system_path)));
+          end
+
           if ~exist(fullfile(data.file_system_path,'video_diagnostics.png'),'file'),
-            VideoDiagnostics(data.file_system_path,'debug',true);
+            hwait = mywaitbar(.1,hwait,'Computing video diagnostics...');
+            VideoDiagnostics(data.file_system_path,'debug',true,obj.videodiagnostics_params{:});
+            drawnow;
           end
           moviename = fullfile(data.file_system_path,'movie.ufmf');
           if exist(moviename,'file'),
+            hwait = mywaitbar(.9,hwait,'Showing UFMF...');
             showufmf('UFMFName',moviename);
+            drawnow;
           end
-          if ispc,
-            winopen(data.file_system_path);
-          else
-            web(data.file_system_path,'-browser');
+          if ishandle(hwait), delete(hwait); end
+          
+        end
+                
+        function refresh(obj,data)
+
+          if isempty(data)
+            return;
           end
+          fprintf('Experiment: %s\n',data.experiment_name(numel('FlyBowl_')+1:end));
+
         end
         
         function close(obj)

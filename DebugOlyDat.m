@@ -22,7 +22,7 @@ switch computername,
     addpath(genpath('C:\Code\box\PostAnalysis\trunk\matlab'));
     addpath C:\Code\JCtrax\misc;
     addpath olydat_browser;
-    rmSvnPath;
+    rmSvnPath(false,false);
     rootdir = 'O:\Olympiad_Screen\fly_bowl\bowl_data';
     settingsdir = 'C:\Code\FlyBowlAnalysis\settings';
 
@@ -88,5 +88,14 @@ selector = OlyDat.DataSelector(dsf,dataPull);
 
 load('ControlData20110315to20110530.mat');
 
+%% or use SAGEGetBowlData
+
+params = {'dataset','data','daterange',{'20111016T000000','20111023T000000'},...
+  'line_name','pBDPGAL4U','checkflags',true,'removemissingdata',true,...
+  'rootdir',rootdir,'analysis_protocol',analysis_protocol,'settingsdir',settingsdir};
+data = SAGEGetBowlData(params{:});
+data = PrepareOlyDatData(data);
+
 %% try the browser
+
 browser = startBowlBrowser(data,'settingsdir',settingsdir,'analysis_protocol',analysis_protocol);

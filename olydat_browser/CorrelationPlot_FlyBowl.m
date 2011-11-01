@@ -1,8 +1,8 @@
 classdef CorrelationPlot_FlyBowl < OlyDat.Plot
 %CorrelationPlot Plot correlation between a single stat and an aux stat
-%   Color using a single grouping var. Clicking on the plot highlights the 
-%   nearest point/experiment. A correlation coefficient/p-value is
-%   computed.
+%   Color using a single grouping var. Experiment selection using
+%   XYPlotClickHandler (single-click, or bounding-box selection, with or
+%   without shift-click). A correlation coefficient/p-value is computed.
 
     properties
         Name = 'Correlation';
@@ -11,7 +11,7 @@ classdef CorrelationPlot_FlyBowl < OlyDat.Plot
     end
     
     methods
-        function str = doPlot(obj,ax,data,bstat,grp,pltCfg,expHiliter) %#ok<MANU>
+        function str = doPlot(obj,ax,data,bstat,grp,pltCfg,expCoordinator) %#ok<MANU>
             assert(isscalar(pltCfg.aux));
             aux = [data.(pltCfg.aux.DataFieldName)]';
             eid = [data.experiment_id]';
@@ -29,10 +29,9 @@ classdef CorrelationPlot_FlyBowl < OlyDat.Plot
             
             reset(ax);
             zlclCorrPlot(ax,aux,bstat,grp,pltCfg.aux.PrettyName,pltCfg.stat.PrettyName,grpleg);
-            userdata.hHilite = expHiliter.addHighlightPoint(ax);
-            userdata.eid = eid;
-            userdata.eid2Idx = containers.Map(eid,1:numel(eid));
-            expHiliter.Add(aux,bstat,ax,@(idx,data,userdata)userdata.eid(idx),@zlclRespondFcn,userdata);
+
+            assert(isequal(size(aux),size(bstat),size(eid)));
+            OlyDat.XYPlotClickHandler(ax,aux,bstat,eid,expCoordinator,true);
             str = '';
         end
         
@@ -78,20 +77,6 @@ classdef CorrelationPlot_FlyBowl < OlyDat.Plot
         end
         
     end
-end
-
-function zlclRespondFcn(eid,handles,data,userdata)
-if userdata.eid2Idx.isKey(eid)
-    idx = userdata.eid2Idx(eid);
-    xy = data(idx,:);
-    infostr = sprintf('Eid: %d',eid);
-else
-    xy = [nan nan];
-    infostr = sprintf('Exp not plotted');
-end
-
-set(userdata.hHilite,'XData',xy(1),'YData',xy(2));
-set(handles.info,'String',infostr);
 end
 
 function [r p] = zlclCorrPlot(ax,x,y,g,xVar,yVar,grpleg)

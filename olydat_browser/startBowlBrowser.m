@@ -89,7 +89,7 @@ plots = {TornadoPlot_FlyBowl;HistogramPlot_FlyBowl;CorrelationPlot_FlyBowl;Multi
 
 %% DetailHandler
 expdetailhandler = BowlExperimentDetailHandler;
-
-browser = OlyDat.Browser(data(:),plots,bst,gst,ast,est,expdetailhandler);
+expdetailhandler.SetVideoDiagnosticsParams('analysis_protocol',analysis_protocol,'settingsdir',settingsdir,'datalocparamsfilestr',datalocparamsfilestr);
+browser = OlyDat.Browser('bowl',data(:),plots,bst,gst,ast,est,expdetailhandler);
 
 end
