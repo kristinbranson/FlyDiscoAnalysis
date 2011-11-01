@@ -14,7 +14,7 @@ classdef HistogramPlot_FlyBowl < SingleStatTubeAveragedPlot_FlyBowl
         function descStr = doPlot(obj,ax,data,bstat,grp,plotCfg,~) 
             if isempty(plotCfg.grp.Name)
                 % no grouping
-                leg = 'All data';
+                leg = {'All data'};
             elseif iscellstr(grp)
                 [grp leg] = collapsegroup(grp);
             else

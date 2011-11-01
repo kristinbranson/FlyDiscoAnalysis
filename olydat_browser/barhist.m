@@ -11,7 +11,9 @@ function barhist(ax,dat,grp,Nbin,grpleg,varargin)
 assert(numel(dat)==numel(grp));
 
 Ngrp = max(grp);
-bins = linspace(min(dat),max(dat)+eps(max(dat)),Nbin);
+bins = linspace(min(dat),max(dat),Nbin+1);
+ctrs = (bins(1:end-1)+bins(2:end))/2;
+bins(end) = inf;
 [~,bin] = histc(dat,bins);
 assert(numel(bin)==numel(dat));
 Zs = hist(grp,1:Ngrp);
@@ -45,7 +47,6 @@ if donormalize,
   stackdata = bsxfun(@rdivide,stackdata,Zs(:)');
 end
   
-ctrs = [(bins(1:end-1)+bins(2:end))/2 bins(end)];
 if strcmpi(bartype,'lineplot'),
   plot(ax,ctrs,stackdata);
 else
