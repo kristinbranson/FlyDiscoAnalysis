@@ -30,6 +30,7 @@ outfile = fullfile(expdir,dataloc_params.automaticchecksincomingresultsfilestr);
 % order matters here: higher up categories have higher priority
 categories = {'flag_aborted_set_to_1',...
   'missing_video',...
+  'missing_metadata_file',...
   'missing_metadata_fields',...
   'short_video',...
   'missing_capture_files',...
@@ -45,9 +46,26 @@ for i = 1:numel(categories),
 end
 iserror = false(1,numel(categories));
 
+%% check for notstarted
+[~,expname] = fileparts(expdir);
+if ~isempty(regexp(expname,'notstarted','once')),
+  iserror(category2idx.missing_video) = true;
+  success = false;
+  msgs{end+1} = 'Capture not started';
+end
+
 %% read metadata
 
-metadata = ReadMetadataFile(metadatafile);
+ismetadata = exist(metadatafile,'file');
+if ~ismetadata,
+  success = false;
+  msgs{end+1} = 'Missing Metadata.xml file';
+  iserror(category2idx.missing_metadata_file) = true;
+  metadata = struct;
+else
+  metadata = ReadMetadataFile(metadatafile);
+end
+  
 
 %% check for metadata fields
 
@@ -62,13 +80,13 @@ end
 
 %% check for flags
 
-if metadata.flag_aborted ~= 0,
+if isfield(metadata,'flag_aborted') && metadata.flag_aborted ~= 0,
   success = false;
   msgs{end+1} = 'Experiment aborted.';
   iserror(category2idx.flag_aborted_set_to_1) = true;
 end
 
-if metadata.flag_redo ~= 0,
+if isfield(metadata,'flag_redo') && metadata.flag_redo ~= 0,
   success = false;
   msgs{end+1} = 'Redo flag set to 1.';
   iserror(category2idx.flag_redo_set_to_1) = true;
@@ -76,19 +94,22 @@ end
 
 %% check loading time
 
-if metadata.seconds_fliesloaded < check_params.min_seconds_fliesloaded,
-  success = false;
-  msgs{end+1} = sprintf('Load time = %f < %f seconds.',metadata.seconds_fliesloaded,check_params.min_seconds_fliesloaded);
-  iserror(category2idx.fliesloaded_time_too_short) = true;
-end
-if metadata.seconds_fliesloaded > check_params.max_seconds_fliesloaded,
-  success = false;
-  msgs{end+1} = sprintf('Load time = %f > %f seconds.',metadata.seconds_fliesloaded,check_params.max_seconds_fliesloaded);
-  iserror(category2idx.fliesloaded_time_too_long) = true;
+if isfield(metadata,'seconds_fliesloaded'),
+  if metadata.seconds_fliesloaded < check_params.min_seconds_fliesloaded,
+    success = false;
+    msgs{end+1} = sprintf('Load time = %f < %f seconds.',metadata.seconds_fliesloaded,check_params.min_seconds_fliesloaded);
+    iserror(category2idx.fliesloaded_time_too_short) = true;
+  end
+  if metadata.seconds_fliesloaded > check_params.max_seconds_fliesloaded,
+    success = false;
+    msgs{end+1} = sprintf('Load time = %f > %f seconds.',metadata.seconds_fliesloaded,check_params.max_seconds_fliesloaded);
+    iserror(category2idx.fliesloaded_time_too_long) = true;
+  end
 end
 
 %% check shiftflytemp time
-if metadata.seconds_shiftflytemp > check_params.max_seconds_shiftflytemp,
+if isfield(metadata,'seconds_shiftlytemp') && ...
+    metadata.seconds_shiftflytemp > check_params.max_seconds_shiftflytemp,
   success = false;
   msgs{end+1} = sprintf('Shift fly temp time = %f > %f seconds.',metadata.seconds_shiftflytemp,check_params.max_seconds_shiftflytemp);
   iserror(category2idx.shiftflytemp_time_too_long) = true;
@@ -97,8 +118,9 @@ end
 %% check for primary screen: all other checks are only for screen data
 
 if ~isfield(metadata,'screen_type'),
-  success = false;
-  msgs{end+1} = 'screen_type not stored in Metadata file';
+  % should already be captured in missing metadata fields
+%   success = false;
+%   msgs{end+1} = 'screen_type not stored in Metadata file';
   isscreen = false;
 else
   isscreen = ~strcmpi(metadata.screen_type,'non_olympiad') && ...
@@ -107,9 +129,16 @@ end
 
 %% check barcode
 
+if isfield(metadata,'exp_datetime'),
+  exp_datenum = datenum(metadata.exp_datetime,datetime_format);
+else
+  exp_datenum = nan;
+end
+
+
 if isscreen,
 
-exp_datenum = datenum(metadata.exp_datetime,datetime_format);
+%exp_datenum = datenum(metadata.exp_datetime,datetime_format);
   
 if (~ismember(metadata.line,check_params.control_line_names) || ...
     (exp_datenum >= min_barcode_expdatenum)) && ...
@@ -192,8 +221,18 @@ isfile = exist(fullfile(expdir,fn),'file');
 if ~isfile,
   iserror(category2idx.missing_video) = true;
 end
+mindatenum = nan(size(check_params.required_files_mindatestr));
+for i = 1:numel(check_params.required_files_mindatestr),
+  if ~isempty(check_params.required_files_mindatestr{i}),
+    mindatenum(i) = datenum(check_params.required_files_mindatestr{i},datetime_format);
+  end
+end
 
 for i = 1:numel(check_params.required_files),
+  if i <= numel(mindatenum) && ~isnan(mindatenum(i)) && ...
+      (isnan(exp_datenum) || exp_datenum < mindatenum(i)),
+    continue;
+  end
   fn = check_params.required_files{i};
   if any(fn == '*'),
     isfile = ~isempty(dir(fullfile(expdir,fn)));
