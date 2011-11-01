@@ -395,7 +395,8 @@ SetCallbacks();
       data.queries(end+1:end+2) = {'automated_pf',{'P','U'}};
       data.queries(end+1:end+2) = {'experiment_name','FlyBowl_*'};
       data.pull_data_datetime = now;
-      rawdata = SAGEGetBowlData(data.queries{:},'checkflags',params.docheckflags,'removemissingdata',true,'dataset',data.dataset);
+      rawdata = SAGEGetBowlData(data.queries{:},'checkflags',params.docheckflags,'removemissingdata',true,'dataset',data.dataset,'analysis_protocol',params.analysis_protocol,...
+        'settingsdir',params.settingsdir);
       save('TMP_FlyBowlExamineVariables_rawdata.mat','rawdata');
       %tmp = load('TMP_FlyBowlExamineVariables_rawdata.mat','rawdata');
       %rawdata = tmp.rawdata;
