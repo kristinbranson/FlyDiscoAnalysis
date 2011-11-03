@@ -69,7 +69,13 @@ expdir_writes = cell(size(expdirs));
 
 idx = false(size(expdirs));
 experiments = struct;
+hwait = mywaitbar(0,'Looking for experiment directories...');
 for i = 1:numel(expdirs),
+  
+  if mod(i,10) == 0,
+    hwait = mywaitbar(i/numel(expdirs),hwait,'Looking for experiment directories...\n');
+    drawnow;
+  end
   
   % make sure the experiment exists in both read and write dirs
   expdir_reads{i} = fullfile(rootreaddir,expdirs{i});
@@ -155,6 +161,11 @@ for i = 1:numel(expdirs),
   
 end
 
+if ishandle(hwait),
+  delete(hwait);
+  drawnow;
+end
+
 expdirs = expdirs(idx);
 expdir_reads = expdir_reads(idx);
 expdir_writes = expdir_writes(idx);
@@ -168,3 +179,4 @@ experiments = experiments(idx);
 for i = 1:numel(experiments),
   experiments(i).rig = str2double(experiments(i).rig);
 end
+

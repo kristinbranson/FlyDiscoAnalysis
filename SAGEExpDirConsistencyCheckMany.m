@@ -19,6 +19,7 @@ fprintf('Getting all experiment directories...\n');
   'settingsdir',settingsdir,'protocol',analysis_protocol,...
   leftovers{:});
 
+fprintf('Reading cross dates...\n');
 % get cross date
 badidx = false(1,numel(expdirs));
 for i = 1:numel(expdirs),
@@ -47,7 +48,7 @@ for i = 1:numel(expdirs),
   end
   try
     crossdatenum = datenum(cross_date,datetimeformat);
-  catch
+  catch %#ok<*CTCH>
     try
       crossdatenum = datenum(cross_date);
     catch
@@ -69,24 +70,15 @@ experiments = experiments(order(end:-1:1));
 
 %% check each experiment
 
-if isempty(outfilename),
-  fid = 1;
-else
-  fid = fopen(outfilename,'w');
-end
-if fid < 0,
-  error('Could not open file %s for output\n',outfilename);
-end
+fid = myfopen(outfilename,'w');
+myfclose(fid);
 
 lastcrossdatenum = nan;
 
 isconsistent = nan(1,numel(expdirs));
 filesmissing = nan(1,numel(expdirs));
-for i = 1:numel(expdirs),
-  if ~isempty(outfilename),
-    fprintf('Checking %s...\n',expdirs{i});
-  end
-  
+for i = 1:numel(expdirs),  
+
   expdir = experiments(i).file_system_path;
   experiment = experiments(i);
   if isnan(experiment.cross_datenum),
@@ -94,51 +86,32 @@ for i = 1:numel(expdirs),
   else
     cross_date = datestr(experiment.cross_datenum,'yyyy-mm-dd');
   end
-  if isempty(outfilename),
-    fid = 1;
-  else
-    fid = fopen(outfilename,'a');
-    if fid < 0,
-      error('Could not open file %s for output\n',outfilename);
-    end
-  end
   if experiment.cross_datenum ~= lastcrossdatenum,
+    fid = myfopen(outfilename,'a');
     if isempty(experiment.wish_list),
       fprintf(fid,'\n\n  *** CROSS DATE %s *** \n',cross_date);
     else
       fprintf(fid,'\n\n *** WISH LIST %d, CROSS DATE %s *** \n',experiment.wish_list,cross_date);
     end
+    lastcrossdatenum = experiment.cross_datenum;
+    myfclose(fid);
   end
-  fprintf(fid,'%s     (cross date %s) ...    ',expdirs{i},cross_date);
-  if ~isempty(outfilename),
-    fclose(fid);
-  end
+  fprintf('%s (cross date %s) ... \n',expdirs{i},cross_date);
   [isconsistent(i),filesmissing(i)] = SAGEExpDirConsistencyCheck(expdir,...
     'analysis_protocol',analysis_protocol,...
     'settingsdir',settingsdir,...
     'datalocparamsfilestr',datalocparamsfilestr,...
     'docheckhist',false,...
     'outfilename',outfilename);
-  if isempty(outfilename),
-    fid = 1;
-  else
-    fid = fopen(outfilename,'a');
-    if fid < 0,
-      error('Could not open file %s for output\n',outfilename);
-    end
-  end
   if isconsistent(i),
-    fprintf(fid,'consistent ');
+    fprintf('    consistent ');
   else
-    fprintf(fid,'INCONSISTENT ');
+    fprintf('    INCONSISTENT ');
   end
   if filesmissing(i),
-    fprintf(fid,'FILESMISSING\n');
+    fprintf('    FILESMISSING\n');
   else
-    fprintf(fid,'filesexist\n');
-  end
-  if ~isempty(outfilename),
-    fclose(fid);
+    fprintf('    filesexist\n');
   end
 end
 
