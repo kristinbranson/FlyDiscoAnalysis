@@ -52,6 +52,14 @@ first_barcode_datenum = datenum(first_barcode_datetime,datetime_format);
 start_of_day = 7/24; % 7am
 end_of_day = 20/24; % 8pm
 
+am_start = 8/24;% 9am %%%%% added
+am_end = 12/24;% noon %%%%% added
+pm_start = 13/24;% 1pm %%%%%% added
+pm_end = 17/24;% 5pm %%%%%% added
+
+starvation_short = 22;
+starvation_long = 26;
+
 
 %% get metadata
 data = SAGEGetBowlData('data_type',data_type,'dataset','score',leftovers{:});
@@ -63,6 +71,7 @@ data = data(order);
 fprintf('Data pulled ... checking ...\n');
 
 exp_datenums = datenum({data.exp_datetime},datetime_format)';
+[~, ~, ~, exp_hours] = datevec(exp_datenums); %%%%% added
 cross_datenums = datenum({data.cross_date},datetime_format)';
 % flip date seems to not be set all the time -- set to nan here
 flip_datenums = nan(1,numel(data));
@@ -329,7 +338,8 @@ for seti = 1:nsets,
 
   % sorting_time should be about the same
   maxdiff_sorting_time_minutes = (max(sorting_datenums(idxcurr)) - min(sorting_datenums(idxcurr)))*24*60;
-  if maxdiff_sorting_time_minutes > maxdiff_sorting_time_minutes,
+  %%%%% to fix max_ %%%%%%%%
+  if maxdiff_sorting_time_minutes > max_maxdiff_sorting_time_minutes,
     msgs{seti}{end+1} = sprintf('Difference between first and last sorting time = %f > %f minutes',...
       maxdiff_sorting_time_minutes,max_maxdiff_sorting_time_minutes);
     iserror(seti) = true;
@@ -350,6 +360,41 @@ for seti = 1:nsets,
     msgs{seti}{end+1} = 'The following experiments have sorting times not during the work day:';
     for j = find(badidx),
       msgs{seti}{end} = [msgs{seti}{end},sprintf('\n%s: %s',data(idxcurr1(j)).experiment_name,datestr(sorting_tods(j),'HH:MM:SS AM'))];
+    end
+    iserror(seti) = true;
+  end
+  %%%%%%% added  %%%%%%%%%%%%%
+  % time of day sorted should be am for am flies and pm for pm flies
+  ambadidx= [];
+  sorting_tods = mod(sorting_datenums(idxcurr),1);
+  if exp_hours(idxcurr) <= 12
+      ambadidx = sorting_tods < am_start | sorting_tods > am_end;
+      if any(ambadidx),
+          msgs{seti}{end+1} = 'The following morning experiments have starvation times not during the morning:';
+          for j = find(ambadidx),
+              msgs{seti}{end} = [msgs{seti}{end},sprintf('\n%s: %s',data(idxcurr1(j)).experiment_name,datestr(sorting_tods(j),'HH:MM:SS AM'))];
+          end
+          iserror(seti) = true;
+      end
+  end
+  pmbadidx= [];
+  if exp_hours(idxcurr) > 12
+      pmbadidx = sorting_tods < pm_start | sorting_tods > pm_end;      
+      if any(pmbadidx),
+          msgs{seti}{end+1} = 'The following afternoon experiments have starvation times not during the afternoon:';
+          for j = find(pmbadidx),
+              msgs{seti}{end} = [msgs{seti}{end},sprintf('\n%s: %s',data(idxcurr1(j)).experiment_name,datestr(sorting_tods(j),'HH:MM:SS AM'))];
+          end
+          iserror(seti) = true;
+      end
+  end
+  % hours_starved should be between starvation_short and starvation_long
+  hours_starved = [data(idxcurr).hours_starved];
+  badidx = hours_starved < starvation_short | hours_starved > starvation_long;
+  if any(badidx),
+    msgs{seti}{end+1} = 'The following experiments have starvation times not within normal range:';
+    for j = find(badidx),
+      msgs{seti}{end} = [msgs{seti}{end},sprintf('\n%s: %d',data(idxcurr1(j)).experiment_name,data(idxcurr1(j)).hours_starved)];
     end
     iserror(seti) = true;
   end

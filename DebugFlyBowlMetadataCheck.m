@@ -21,15 +21,22 @@ switch computername,
     settingsdir = 'C:\Code\FlyBowlAnalysis\settings';
     rootdatadir = 'O:\Olympiad_Screen\fly_bowl\bowl_data';
     
-  case 'bransonk-desktop',
-    
-    addpath /groups/branson/home/bransonk/tracking/code/JCtrax/misc;
-    addpath /groups/branson/home/bransonk/tracking/code/JCtrax/filehandling;
-    addpath /groups/branson/bransonlab/projects/olympiad/SAGE/MATLABInterface/Trunk;
-    settingsdir = '/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/settings';
-    rootdatadir = '/groups/sciserv/flyolympiad/Olympiad_Screen/fly_bowl/bowl_data';
-
-  otherwise
+    case 'bransonk-desktop',
+        
+        addpath /groups/branson/home/bransonk/tracking/code/JCtrax/misc;
+        addpath /groups/branson/home/bransonk/tracking/code/JCtrax/filehandling;
+        addpath /groups/branson/bransonlab/projects/olympiad/SAGE/MATLABInterface/Trunk;
+        settingsdir = '/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/settings';
+        rootdatadir = '/groups/sciserv/flyolympiad/Olympiad_Screen/fly_bowl/bowl_data';
+    case 'robiea-ws',
+        
+        addpath /groups/branson/home/bransonk/tracking/code/JCtrax/misc;
+        addpath /groups/branson/home/bransonk/tracking/code/JCtrax/filehandling;
+        addpath /groups/branson/bransonlab/projects/olympiad/SAGE/MATLABInterface/Trunk;
+        settingsdir = '/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/settings';
+        rootdatadir = '/groups/sciserv/flyolympiad/Olympiad_Screen/fly_bowl/bowl_data';
+        
+    otherwise
     
     warning('Unknown computer %s. Paths may not be setup correctly',computername);
     addpath C:\Code\JCtrax\misc;
@@ -53,8 +60,8 @@ params = {
   'screen_type','primary',...
   'checkflags',false,...
   'removemissingdata',false,...%};
-  'daterange',{'20110201T000000'},...
-  'doexpchecks',true,'dosetchecks',false,'dodatechecks',false};
+  'daterange',{'20111001T000000'},...
+  'doexpchecks',false,'dosetchecks',true,'dodatechecks',false};
 
 
 %% 
