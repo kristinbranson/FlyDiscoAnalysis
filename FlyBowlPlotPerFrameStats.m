@@ -1,13 +1,16 @@
 function FlyBowlPlotPerFrameStats(expdir,varargin)
 
-[analysis_protocol,settingsdir,datalocparamsfilestr,visible,controldatadirstr,DEBUG] = ...
+[analysis_protocol,settingsdir,datalocparamsfilestr,visible,controldatadirstr,DEBUG,usedaterange] = ...
   myparse(varargin,...
   'analysis_protocol','current',...
   'settingsdir','/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/settings',...
   'datalocparamsfilestr','dataloc_params.txt',...
   'visible','off',...
   'controldatadirstr','current',...
-  'debug',false);
+  'debug',false,...
+  'usedaterange',true);
+
+dateformat = 'yyyymmddTHHMMSS';
 
 %% data locations
 
@@ -52,11 +55,49 @@ hist_plot_params = ReadParams(histplotparamsfile);
 
 if ~isempty(controldatadirstr),
   
-  controldatadir = fullfile(dataloc_params.pBDPGAL4Ustatsdir,controldatadirstr);
+  % try to parse date for this experiment
+  metadata = parseExpDir(expdir);
+  if ~isempty(metadata) && usedaterange,
+    dv = datevec(metadata.date,dateformat);
+    % get the previous month
+    year = dv(1);
+    month = dv(2);
+    dvend = [year,month,1,0,0,0];    
+    if month == 1,
+      month = 12;
+      year = year - 1;
+    else
+      month = month-1;
+    end
+    dvstart = [year,month,1,0,0,0];
+    daterange = {datestr(dvstart,dateformat),datestr(dvend,dateformat)};
+    controldatadir = fullfile(dataloc_params.pBDPGAL4Ustatsdir,sprintf('%sto%s_%s',daterange{:},controldatadirstr));
+    if ~exist(controldatadir,'dir'),
+      controldatadir = fullfile(dataloc_params.pBDPGAL4Ustatsdir,controldatadirstr);
+    end
+  else
+    controldatadir = fullfile(dataloc_params.pBDPGAL4Ustatsdir,controldatadirstr);
+  end
   controlstatsname = fullfile(controldatadir,dataloc_params.statsperframematfilestr);
   controlstats = load(controlstatsname);
   controlhistname = fullfile(controldatadir,dataloc_params.histperframematfilestr);
   controlhist = load(controlhistname);
+  
+  % make a soft-link to the control statistics directory
+  if isunix,
+    [~,link] = unix(sprintf('readlink %s',controldatadir));
+    if ~isempty(link),
+      if link(1) ~= '/',
+        realcontroldatadir = fullfile(dataloc_params.pBDPGAL4Ustatsdir,strtrim(link));
+      else
+        realcontroldatadir = strtrim(link);
+      end
+    else
+      realcontroldatadir = controldatadir;
+    end
+    cmd = sprintf('ln -s %s %s',realcontroldatadir,fullfile(figdir,'pBDPGAL4U_stats'));
+    unix(cmd);
+  end
   
 else
   
@@ -128,3 +169,4 @@ for i = 1:numel(hist_fields),
 end
 
 close all;
+

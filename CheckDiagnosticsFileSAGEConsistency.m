@@ -51,6 +51,9 @@ if success,
     elseif isnumeric(diagnostics.(fn)),
       nsage = numel(data.(sagefn));
       nfile = numel(diagnostics.(fn));
+      if iscell(data.(sagefn)),
+        data.(sagefn) = str2double(data.(sagefn));
+      end
       if nsage ~= nfile,
         msgs{end+1} = sprintf('Sizes of field %s do not match for %s',fn,prefix);
         isconsistent = false;

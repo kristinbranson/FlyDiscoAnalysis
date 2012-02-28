@@ -1,6 +1,7 @@
-function [experiments_chosen,ngal4,ncontrol] = choose_expdirs(experiments,ngal4,ncontrol,varargin)
+function [experiments_chosen,ngal4,ncontrol,idx] = choose_expdirs(experiments,ngal4,ncontrol,varargin)
 
-[doseparatecontrols] = myparse(varargin,'doseparatecontrols',true);
+[doseparatecontrols,weight_order] = myparse(varargin,'doseparatecontrols',true,...
+  'weight_order',{'date','genotype','bowl','rig'});
 
 control_line = 'pBDPGAL4U';
 
@@ -16,13 +17,14 @@ ncontrol = min(nnz(iscontrol),ncontrol);
 idxcontrol = find(iscontrol);
 idxgal4 = find(~iscontrol);
 
-idx = choose_expdirs_helper(experiments(iscontrol),ncontrol);
+idx = choose_expdirs_helper(experiments(iscontrol),ncontrol,weight_order);
 idxcontrol = idxcontrol(idx);
-idx = choose_expdirs_helper(experiments(~iscontrol),ngal4);
+idx = choose_expdirs_helper(experiments(~iscontrol),ngal4,weight_order);
 idxgal4 = idxgal4(idx);
-experiments_chosen = experiments([idxgal4,idxcontrol]);
+idx = [idxgal4,idxcontrol];
+experiments_chosen = experiments(idx);
 
-function idxchosen = choose_expdirs_helper(experiments,nout)
+function idxchosen = choose_expdirs_helper(experiments,nout,weight_order)
 
 idxchosen = [];
 
@@ -79,7 +81,25 @@ while true,
   mind_date = min(mind_date,abs(dates(expdiri)-dates));
 
   % combine
-  dscalar = mind_date + maxdate*(nexpdirs-nmatches_genotype) + maxdate*nexpdirs*(nexpdirs-nmatches_bowl) + maxdate*nexpdirs^2*(nexpdirs-nmatches_rig);
+  factor = 1;
+  dscalar = 0;
+  for i = 1:numel(weight_order),
+    switch weight_order{i},
+      case 'date'
+        dscalar = dscalar + factor*mind_date;
+        factor = factor * maxdate;
+      case 'genotype',
+        dscalar = dscalar + factor*(nexpdirs-nmatches_genotype);
+        factor = factor * nexpdirs;
+      case 'bowl',
+        dscalar = dscalar + factor*(nexpdirs-nmatches_bowl);
+        factor = factor * nexpdirs;
+      case 'rig',
+        dscalar = dscalar + factor*(nexpdirs-nmatches_rig);
+        factor = factor * nexpdirs;
+    end        
+  end
+  %dscalar = mind_date + maxdate*(nexpdirs-nmatches_genotype) + maxdate*nexpdirs*(nexpdirs-nmatches_bowl) + maxdate*nexpdirs^2*(nexpdirs-nmatches_rig);
   dscalar(idxchosen) = -inf;
   
   % choose the farthest

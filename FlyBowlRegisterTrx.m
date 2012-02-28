@@ -34,9 +34,39 @@ annfile = fullfile(expdir,dataloc_params.annfilestr);
 moviefile = fullfile(expdir,dataloc_params.moviefilestr);
 
 % template filename should be relative to settings directory
-if isfield(registration_params,'bowlMarkerType') && ...
-    ~ismember(registration_params.bowlMarkerType,{'gradient'}),
-  registration_params.bowlMarkerType = fullfile(settingsdir,analysis_protocol,registration_params.bowlMarkerType);
+if isfield(registration_params,'bowlMarkerType'),
+  if ischar(registration_params.bowlMarkerType),
+    if ~ismember(registration_params.bowlMarkerType,{'gradient'}),
+      registration_params.bowlMarkerType = fullfile(settingsdir,analysis_protocol,registration_params.bowlMarkerType);
+    end
+  else
+    % plate -> bowlmarkertype
+    plateids = str2double(registration_params.bowlMarkerType(1:2:end-1));
+    bowlmarkertypes = registration_params.bowlMarkerType(2:2:end);
+    metadata = parseExpDir(expdir);
+    plateid = str2double(metadata.plate);
+    i = find(plateid == plateids,1);
+    if isempty(i),
+      error('bowlMarkerType not set for plate %d',plateid);
+    end
+    if ~ismember(bowlmarkertypes{i},{'gradient'}),
+      registration_params.bowlMarkerType = fullfile(settingsdir,analysis_protocol,bowlmarkertypes{i});
+    end
+  end
+end
+
+% maxDistCornerFrac_BowlLabel might depend on bowl
+if isfield(registration_params,'maxDistCornerFrac_BowlLabel') && ...
+    numel(registration_params.maxDistCornerFrac_BowlLabel) > 1,
+  plateids = registration_params.maxDistCornerFrac_BowlLabel(1:2:end-1);
+  cornerfracs = registration_params.maxDistCornerFrac_BowlLabel(2:2:end);
+  metadata = parseExpDir(expdir);
+  plateid = str2double(metadata.plate);
+  i = find(plateid == plateids,1);
+  if isempty(i),
+    error('maxDistCornerFrac_BowlLabel not set for plate %d',plateid);
+  end
+  registration_params.maxDistCornerFrac_BowlLabel = cornerfracs(i);
 end
 
 fnsignore = intersect(fieldnames(registration_params),...
@@ -284,16 +314,25 @@ end
 % name of output trx mat file
 trxfile = fullfile(expdir,dataloc_params.trxfilestr);
 
-save(trxfile,'trx','timestamps');
+try
+  save(trxfile,'trx','timestamps');
+catch ME
+  warning('Could not save registered trx: %s',getReport(ME));
+end
 
 %% save params to mat file
 
 registrationmatfile = fullfile(expdir,dataloc_params.registrationmatfilestr);
 tmp = rmfield(registration_data,'registerfn'); %#ok<NASGU>
-save(registrationmatfile,'-struct','tmp');
+try
+  save(registrationmatfile,'-struct','tmp');
+catch ME
+  warning('Could not save registered data to mat file: %s',getReport(ME));
+end
 
 %% save params to text file
 registrationtxtfile = fullfile(expdir,dataloc_params.registrationtxtfilestr);
+try
 fid = fopen(registrationtxtfile,'w');
 fnssave = {'offX','offY','offTheta','scale','bowlMarkerTheta','featureStrengths',...
   'circleCenterX','circleCenterY','circleRadius',...
@@ -304,3 +343,6 @@ for i = 1:numel(fnssave),
   fprintf(fid,'%s,%f\n',fn,registration_data.(fn));
 end
 fclose(fid);
+catch ME
+  warning('Could not save registered data to trx file: %s',getReport(ME));
+end

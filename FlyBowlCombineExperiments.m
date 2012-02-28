@@ -26,12 +26,13 @@ dataloc_params = ReadParams(datalocparamsfile);
 exp_params = [{'rootdir',rootdir},leftovers];
 
 experiments = SAGEListBowlExperiments(exp_params{:});
-expdirs = {experiments.file_system_path};
-nexpdirs = numel(expdirs);
+nexpdirs = numel(experiments);
 
 if nexpdirs == 0,
-  error('No experiments selected');
+  warning('No experiments selected');
+  return;
 end
+expdirs = {experiments.file_system_path};
 
 %% remove bad experiments
 

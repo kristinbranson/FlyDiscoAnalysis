@@ -1,24 +1,26 @@
 #!/usr/bin/perl
 
 use strict;
-my $MAXNJOBS = 12;
+#my $MAXNJOBS = 12;
+
+my $SCRIPTNAME = "FlyBowlMakeCtraxResultsMovie";
 
 my $nargs = $#ARGV + 1;
 if($nargs < 1){
-    print "Usage: fork_FlyBowlMakeCtraxResultsMovie.pl <expdirlist.txt>\n";
+    print "Usage: fork_$SCRIPTNAME.pl <expdirlist.txt>\n";
     exit(1);
 }
 
-my $ANALYSIS_PROTOCOL = "20110407";
+my $ANALYSIS_PROTOCOL = "20120210";
 
-my $SCRIPT = "/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/settings/$ANALYSIS_PROTOCOL/run_FlyBowlMakeCtraxResultsMovie.sh";
+my $SCRIPT = "/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/settings/$ANALYSIS_PROTOCOL/run_$SCRIPTNAME.sh";
 
 my $PARAMS = "analysis_protocol $ANALYSIS_PROTOCOL";
 
-my $temporary_dir = "/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/temp_compute_stats";
+my $temporary_dir = "/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/temp_$SCRIPTNAME";
 `mkdir -p $temporary_dir`;
 
-my $MCR = "/groups/branson/bransonlab/projects/olympiad/MCR/v714";
+my $MCR = "/groups/branson/bransonlab/projects/olympiad/MCR/v716";
 
 my $MCR_CACHE_ROOT = "/tmp/mcr_cache_root";
 
@@ -51,7 +53,7 @@ while(my $expdir = <FILE>){
     print "*** $basename\n";
     
     # make a name for this job
-    my $sgeid = "kb_flybowlmakectraxresultsmovie_$basename";
+    my $sgeid = "kb_" . $SCRIPTNAME . "_$basename";
     $sgeid =~ s/\//_/g;
     $sgeid =~ s/\./_/g;
     $sgeid =~ s/\;/_/g;
@@ -66,6 +68,7 @@ while(my $expdir = <FILE>){
     # submit command
     my $cmd = qq~qsub -N $sgeid -j y -b y -o $outfilename -cwd $shfilename~;
     print "submitting to cluster: $cmd\n";
+    exit;
     system($cmd);
     #system($shfilename);
     $njobs++;
@@ -81,7 +84,7 @@ sub write_qsub_sh {
 	open(SHFILE,">$shfilename") || die "Cannot write $shfilename";
 
 	print SHFILE qq~#!/bin/bash
-# FlyBowlMakeCtraxResultsMovie test script.
+# $SCRIPTNAME test script.
 # this script will be qsubed
 export MCR_CACHE_ROOT=$MCR_CACHE_ROOT.$jobid
 

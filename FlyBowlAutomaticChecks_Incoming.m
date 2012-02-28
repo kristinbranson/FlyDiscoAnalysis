@@ -123,8 +123,7 @@ if ~isfield(metadata,'screen_type'),
 %   msgs{end+1} = 'screen_type not stored in Metadata file';
   isscreen = false;
 else
-  isscreen = ~strcmpi(metadata.screen_type,'non_olympiad') && ...
-    ~strcmpi(metadata.screen_type,'non_production');
+  isscreen = strcmpi(metadata.screen_type,'primary');
 end
 
 %% check barcode
@@ -221,11 +220,15 @@ isfile = exist(fullfile(expdir,fn),'file');
 if ~isfile,
   iserror(category2idx.missing_video) = true;
 end
-mindatenum = nan(size(check_params.required_files_mindatestr));
-for i = 1:numel(check_params.required_files_mindatestr),
-  if ~isempty(check_params.required_files_mindatestr{i}),
-    mindatenum(i) = datenum(check_params.required_files_mindatestr{i},datetime_format);
+if isfield(check_params,'required_files_mindatestr'),
+  mindatenum = nan(size(check_params.required_files_mindatestr));
+  for i = 1:numel(check_params.required_files_mindatestr),
+    if ~isempty(check_params.required_files_mindatestr{i}),
+      mindatenum(i) = datenum(check_params.required_files_mindatestr{i},datetime_format);
+    end
   end
+else
+  mindatenum = [];
 end
 
 for i = 1:numel(check_params.required_files),

@@ -323,7 +323,31 @@ res.hti_histisinterp = title(hax(4,3),'Bkgd Interpolated Px Intensities');
 bkgd_diagnostics.frac_bkgdinterpolated = frac;
 
 %% Image of background center log-likelihood ratio of foreground to background
+
+% parse plate from experiment directory
 expbgfgmodelfile = fullfile(settingsdir,analysis_protocol,dataloc_params.expbgfgmodelmatfilestr);
+if isfield(params,'expbgfgmodelmatfilestr'),
+  if iscell(params.expbgfgmodelmatfilestr),
+    metadata = parseExpDir(expdir);
+    if isempty(metadata),
+      warning('Unable to parse plate from experiment directory, using %s',expbgfgmodelfile);
+    else
+      plate = str2double(metadata.plate);
+      if isnan(plate),
+        warning('Unable to parse plate from experiment directory, using %s',expbgfgmodelfile);
+      else
+        plates = str2double(params.expbgfgmodelmatfilestr(1:2:end-1));
+        files = params.expbgfgmodelmatfilestr(2:2:end);
+        platei = find(plates == plate,1);
+        if isempty(platei),
+          warning('Unable to find plate %d in params using %s',plate,expbgfgmodelfile);
+        else
+          expbgfgmodelfile = fullfile(settingsdir,analysis_protocol,files{platei});
+        end          
+      end
+    end
+  end
+end
 if isempty(expbgfgmodelfile) || ~exist(expbgfgmodelfile,'file'),
   llr = zeros(nr,nc);
 else

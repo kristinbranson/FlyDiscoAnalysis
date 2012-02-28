@@ -1,21 +1,35 @@
 function FlyBowlComputePerFrameStats(expdir,varargin)
 
-[analysis_protocol,settingsdir,datalocparamsfilestr,visible] = ...
+[analysis_protocol,settingsdir,datalocparamsfilestr,visible,dorecompute] = ...
   myparse(varargin,...
   'analysis_protocol','current',...
   'settingsdir','/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/settings',...
   'datalocparamsfilestr','dataloc_params.txt',...
-  'visible','off'); %#ok<NASGU>
+  'visible','off',...
+  'dorecompute',true); 
 
 %% load this experiment
 fprintf('Initializing trx...\n');
 
 trx = Trx('analysis_protocol',analysis_protocol,'settingsdir',settingsdir,...
-  'datalocparamsfilestr',datalocparamsfilestr);
+  'datalocparamsfilestr',datalocparamsfilestr,...
+  'maxdatacached',2^30);
 
 fprintf('Loading trajectories for %s...\n',expdir);
 
 trx.AddExpDir(expdir);
+
+% % load labels
+% labelfiles = dir(fullfile(trx.expdirs{1},'*_labels.mat'));
+% labelfiles = {labelfiles.name};
+% requiredfns = {'flies','names','off','t0s','t1s'};
+% for i = 1:numel(labelfiles),
+%   tmp = who('-file',fullfile(trx.expdirs{1},labelfiles{i}));
+%   if ~isempty(setdiff(requiredfns,tmp)),
+%     continue;
+%   end
+%   trx.LoadLabelsFromFile(labelfiles{i});
+% end
 
 %% read the stats params
 
@@ -35,6 +49,10 @@ nprctiles = numel(stats_params.prctiles_compute);
 
 statstxtsavename = fullfile(expdir,trx.dataloc_params.statsperframetxtfilestr);
 statsmatsavename = fullfile(expdir,trx.dataloc_params.statsperframematfilestr);
+
+if ~dorecompute && exist(statstxtsavename,'file') && exist(statsmatsavename,'file'),
+  load(statsmatsavename);
+else
 
 % open the text file for writing
 % statstxtfid = fopen(statstxtsavename,'w');
@@ -149,6 +167,8 @@ SaveAllPerFrameStatsTxtFile(statstxtsavename,statsperfly,statsperexp);
 save(statsmatsavename,'statsperfly','statsperexp','frameconditiondict',...
   'flyconditiondict','stats_params');
 
+end
+
 %% read the histogram params
 
 histperframefeaturesfile = fullfile(trx.settingsdir,trx.analysis_protocol,trx.dataloc_params.histperframefeaturesfilestr);
@@ -163,6 +183,10 @@ load(histperframebinsfile,'bins');
 
 histtxtsavename = fullfile(expdir,trx.dataloc_params.histperframetxtfilestr);
 histmatsavename = fullfile(expdir,trx.dataloc_params.histperframematfilestr);
+
+if ~dorecompute && exist(histtxtsavename,'file') && exist(histmatsavename,'file'),
+  load(histmatsavename);
+else
 
 % open the text file for writing
 % histtxtfid = fopen(histtxtsavename,'w');
@@ -267,6 +291,8 @@ end
 save(histmatsavename,'histperfly','histperexp','bins','frameconditiondict',...
   'flyconditiondict');
 SaveAllPerFrameHistTxtFile(histtxtsavename,histperfly,histperexp);
+
+end
 
 % %% create the plot directory if it does not exist
 % figdir = fullfile(expdir,trx.dataloc_params.figdir);

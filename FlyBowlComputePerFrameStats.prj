@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <deployment-project>
-  <configuration target="target.standalone" target-name="Standalone Application" name="FlyBowlComputePerFrameStats" location="/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis" file="/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/FlyBowlComputePerFrameStats.prj" build-checksum="3844059944">
+  <configuration target="target.standalone" target-name="Standalone Application" name="FlyBowlComputePerFrameStats" location="/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis" file="/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/FlyBowlComputePerFrameStats.prj" build-checksum="2978209521">
     <param.project.name>/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/FlyBowlComputePerFrameStats.prj</param.project.name>
     <param.target.type>Standalone Application</param.target.type>
     <param.appname>FlyBowlComputePerFrameStats</param.appname>
@@ -18,6 +18,7 @@
       <warning.demo>on</warning.demo>
     </param.warnings>
     <param.version>1.0</param.version>
+    <param.user.only.registration>false</param.user.only.registration>
     <param.c.cpp.options.file />
     <param.include.dirs />
     <param.lib.dirs />
@@ -41,6 +42,7 @@
       <param.tbx_on_path />
       <param.warnings />
       <param.version />
+      <param.user.only.registration />
       <param.c.cpp.options.file />
       <param.include.dirs />
       <param.lib.dirs />
@@ -74,116 +76,28 @@
     </fileset.resources>
     <fileset.package />
     <build-deliverables>
-      <file name="readme.txt" location="${PROJECT_ROOT}/FlyBowlComputePerFrameStats/distrib">/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/FlyBowlComputePerFrameStats/distrib/readme.txt</file>
-      <file name="run_FlyBowlComputePerFrameStats.sh" location="${PROJECT_ROOT}/FlyBowlComputePerFrameStats/distrib">/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/FlyBowlComputePerFrameStats/distrib/run_FlyBowlComputePerFrameStats.sh</file>
-      <file name="FlyBowlComputePerFrameStats" location="${PROJECT_ROOT}/FlyBowlComputePerFrameStats/distrib">/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/FlyBowlComputePerFrameStats/distrib/FlyBowlComputePerFrameStats</file>
+      <file name="readme.txt" location="${PROJECT_ROOT}/FlyBowlComputePerFrameStats/distrib" optional="true">/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/FlyBowlComputePerFrameStats/distrib/readme.txt</file>
+      <file name="run_FlyBowlComputePerFrameStats.sh" location="${PROJECT_ROOT}/FlyBowlComputePerFrameStats/distrib" optional="false">/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/FlyBowlComputePerFrameStats/distrib/run_FlyBowlComputePerFrameStats.sh</file>
+      <file name="FlyBowlComputePerFrameStats" location="${PROJECT_ROOT}/FlyBowlComputePerFrameStats/distrib" optional="false">/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/FlyBowlComputePerFrameStats/distrib/FlyBowlComputePerFrameStats</file>
     </build-deliverables>
+    <workflow />
     <matlab>
-      <root>/localhome/bransonk/software/matlab/R2010b</root>
+      <root>/localhome/bransonk/software/matlab/R2011b</root>
       <path>
+        <directory>/groups/branson/home/bransonk/tracking/code/lds/hmm</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/SAGE/MATLABInterface/Trunk</directory>
         <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/filehandling</directory>
         <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/misc</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/box/PostAnalysis</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/box/PostAnalysis/.svn</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/box/PostAnalysis/.svn/prop-base</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/box/PostAnalysis/.svn/props</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/box/PostAnalysis/.svn/text-base</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/box/PostAnalysis/.svn/tmp</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/box/PostAnalysis/.svn/tmp/prop-base</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/box/PostAnalysis/.svn/tmp/props</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/box/PostAnalysis/.svn/tmp/text-base</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/box/PostAnalysis/data</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/box/PostAnalysis/data/.svn</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/box/PostAnalysis/data/.svn/prop-base</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/box/PostAnalysis/data/.svn/props</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/box/PostAnalysis/data/.svn/text-base</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/box/PostAnalysis/data/.svn/tmp</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/box/PostAnalysis/data/.svn/tmp/prop-base</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/box/PostAnalysis/data/.svn/tmp/props</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/box/PostAnalysis/data/.svn/tmp/text-base</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/box/PostAnalysis/olydat analyzer</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/box/PostAnalysis/olydat analyzer/.svn</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/box/PostAnalysis/olydat analyzer/.svn/prop-base</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/box/PostAnalysis/olydat analyzer/.svn/props</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/box/PostAnalysis/olydat analyzer/.svn/text-base</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/box/PostAnalysis/olydat analyzer/.svn/tmp</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/box/PostAnalysis/olydat analyzer/.svn/tmp/prop-base</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/box/PostAnalysis/olydat analyzer/.svn/tmp/props</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/box/PostAnalysis/olydat analyzer/.svn/tmp/text-base</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/box/PostAnalysis/olydat browser</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/box/PostAnalysis/olydat browser/.svn</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/box/PostAnalysis/olydat browser/.svn/prop-base</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/box/PostAnalysis/olydat browser/.svn/props</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/box/PostAnalysis/olydat browser/.svn/text-base</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/box/PostAnalysis/olydat browser/.svn/tmp</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/box/PostAnalysis/olydat browser/.svn/tmp/prop-base</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/box/PostAnalysis/olydat browser/.svn/tmp/props</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/box/PostAnalysis/olydat browser/.svn/tmp/text-base</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/box/PostAnalysis/peak analyzer</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/box/PostAnalysis/peak analyzer/.svn</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/box/PostAnalysis/peak analyzer/.svn/prop-base</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/box/PostAnalysis/peak analyzer/.svn/props</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/box/PostAnalysis/peak analyzer/.svn/text-base</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/box/PostAnalysis/peak analyzer/.svn/tmp</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/box/PostAnalysis/peak analyzer/.svn/tmp/prop-base</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/box/PostAnalysis/peak analyzer/.svn/tmp/props</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/box/PostAnalysis/peak analyzer/.svn/tmp/text-base</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/cross_assay/matlab</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/cross_assay/matlab/.svn</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/cross_assay/matlab/.svn/prop-base</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/cross_assay/matlab/.svn/props</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/cross_assay/matlab/.svn/text-base</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/cross_assay/matlab/.svn/tmp</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/cross_assay/matlab/.svn/tmp/prop-base</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/cross_assay/matlab/.svn/tmp/props</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/cross_assay/matlab/.svn/tmp/text-base</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/cross_assay/matlab/data</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/cross_assay/matlab/data/.svn</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/cross_assay/matlab/data/.svn/prop-base</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/cross_assay/matlab/data/.svn/props</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/cross_assay/matlab/data/.svn/text-base</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/cross_assay/matlab/data/.svn/tmp</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/cross_assay/matlab/data/.svn/tmp/prop-base</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/cross_assay/matlab/data/.svn/tmp/props</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/cross_assay/matlab/data/.svn/tmp/text-base</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/cross_assay/matlab/graphics</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/cross_assay/matlab/graphics/.svn</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/cross_assay/matlab/graphics/.svn/prop-base</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/cross_assay/matlab/graphics/.svn/props</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/cross_assay/matlab/graphics/.svn/text-base</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/cross_assay/matlab/graphics/.svn/tmp</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/cross_assay/matlab/graphics/.svn/tmp/prop-base</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/cross_assay/matlab/graphics/.svn/tmp/props</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/cross_assay/matlab/graphics/.svn/tmp/text-base</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/cross_assay/matlab/graphics/distributionPlot</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/cross_assay/matlab/graphics/distributionPlot/.svn</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/cross_assay/matlab/graphics/distributionPlot/.svn/prop-base</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/cross_assay/matlab/graphics/distributionPlot/.svn/props</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/cross_assay/matlab/graphics/distributionPlot/.svn/text-base</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/cross_assay/matlab/graphics/distributionPlot/.svn/tmp</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/cross_assay/matlab/graphics/distributionPlot/.svn/tmp/prop-base</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/cross_assay/matlab/graphics/distributionPlot/.svn/tmp/props</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/cross_assay/matlab/graphics/distributionPlot/.svn/tmp/text-base</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/cross_assay/matlab/gui</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/cross_assay/matlab/gui/.svn</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/cross_assay/matlab/gui/.svn/prop-base</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/cross_assay/matlab/gui/.svn/props</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/cross_assay/matlab/gui/.svn/text-base</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/cross_assay/matlab/gui/.svn/tmp</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/cross_assay/matlab/gui/.svn/tmp/prop-base</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/cross_assay/matlab/gui/.svn/tmp/props</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/cross_assay/matlab/gui/.svn/tmp/text-base</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/cross_assay/matlab/math</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/cross_assay/matlab/math/.svn</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/cross_assay/matlab/math/.svn/prop-base</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/cross_assay/matlab/math/.svn/props</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/cross_assay/matlab/math/.svn/text-base</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/cross_assay/matlab/math/.svn/tmp</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/cross_assay/matlab/math/.svn/tmp/prop-base</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/cross_assay/matlab/math/.svn/tmp/props</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/cross_assay/matlab/math/.svn/tmp/text-base</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/SAGE/MATLABInterface/Trunk</directory>
         <directory>/groups/branson/home/bransonk/Documents/MATLAB</directory>
+        <directory>${MATLAB_ROOT}/toolbox/matlab/demos</directory>
+        <directory>${MATLAB_ROOT}/toolbox/matlab/graph2d</directory>
+        <directory>${MATLAB_ROOT}/toolbox/matlab/graph3d</directory>
+        <directory>${MATLAB_ROOT}/toolbox/matlab/graphics</directory>
+        <directory>${MATLAB_ROOT}/toolbox/matlab/plottools</directory>
+        <directory>${MATLAB_ROOT}/toolbox/matlab/scribe</directory>
+        <directory>${MATLAB_ROOT}/toolbox/matlab/specgraph</directory>
+        <directory>${MATLAB_ROOT}/toolbox/matlab/uitools</directory>
+        <directory>${MATLAB_ROOT}/toolbox/local</directory>
         <directory>${MATLAB_ROOT}/toolbox/matlab/general</directory>
         <directory>${MATLAB_ROOT}/toolbox/matlab/ops</directory>
         <directory>${MATLAB_ROOT}/toolbox/matlab/lang</directory>
@@ -196,86 +110,81 @@
         <directory>${MATLAB_ROOT}/toolbox/matlab/polyfun</directory>
         <directory>${MATLAB_ROOT}/toolbox/matlab/funfun</directory>
         <directory>${MATLAB_ROOT}/toolbox/matlab/sparfun</directory>
-        <directory>${MATLAB_ROOT}/toolbox/matlab/scribe</directory>
-        <directory>${MATLAB_ROOT}/toolbox/matlab/graph2d</directory>
-        <directory>${MATLAB_ROOT}/toolbox/matlab/graph3d</directory>
-        <directory>${MATLAB_ROOT}/toolbox/matlab/specgraph</directory>
-        <directory>${MATLAB_ROOT}/toolbox/matlab/graphics</directory>
-        <directory>${MATLAB_ROOT}/toolbox/matlab/uitools</directory>
         <directory>${MATLAB_ROOT}/toolbox/matlab/strfun</directory>
-        <directory>${MATLAB_ROOT}/toolbox/matlab/imagesci</directory>
         <directory>${MATLAB_ROOT}/toolbox/matlab/iofun</directory>
-        <directory>${MATLAB_ROOT}/toolbox/matlab/audiovideo</directory>
         <directory>${MATLAB_ROOT}/toolbox/matlab/timefun</directory>
         <directory>${MATLAB_ROOT}/toolbox/matlab/datatypes</directory>
         <directory>${MATLAB_ROOT}/toolbox/matlab/verctrl</directory>
         <directory>${MATLAB_ROOT}/toolbox/matlab/codetools</directory>
         <directory>${MATLAB_ROOT}/toolbox/matlab/helptools</directory>
-        <directory>${MATLAB_ROOT}/toolbox/matlab/demos</directory>
-        <directory>${MATLAB_ROOT}/toolbox/matlab/timeseries</directory>
         <directory>${MATLAB_ROOT}/toolbox/matlab/hds</directory>
         <directory>${MATLAB_ROOT}/toolbox/matlab/guide</directory>
-        <directory>${MATLAB_ROOT}/toolbox/matlab/plottools</directory>
-        <directory>${MATLAB_ROOT}/toolbox/local</directory>
         <directory>${MATLAB_ROOT}/toolbox/matlab/datamanager</directory>
         <directory>${MATLAB_ROOT}/toolbox/shared/simulink</directory>
         <directory>${MATLAB_ROOT}/toolbox/shared/instrument</directory>
         <directory>${MATLAB_ROOT}/toolbox/symbolic/symbolic</directory>
         <directory>${MATLAB_ROOT}/toolbox/symbolic/symbolicdemos</directory>
+        <directory>${MATLAB_ROOT}/toolbox/shared/optimlib</directory>
         <directory>${MATLAB_ROOT}/toolbox/shared/eml/eml</directory>
-        <directory>${MATLAB_ROOT}/toolbox/shared/rptgen</directory>
+        <directory>${MATLAB_ROOT}/toolbox/matlab/timeseries</directory>
+        <directory>${MATLAB_ROOT}/toolbox/images/imdemos</directory>
         <directory>${MATLAB_ROOT}/toolbox/signal/signal</directory>
         <directory>${MATLAB_ROOT}/toolbox/signal/sigtools</directory>
         <directory>${MATLAB_ROOT}/toolbox/signal/sptoolgui</directory>
-        <directory>${MATLAB_ROOT}/toolbox/signal/sigdemos</directory>
-        <directory>${MATLAB_ROOT}/toolbox/shared/spcuilib</directory>
-        <directory>${MATLAB_ROOT}/toolbox/shared/dastudio</directory>
-        <directory>${MATLAB_ROOT}/toolbox/shared/siglib</directory>
-        <directory>${MATLAB_ROOT}/toolbox/shared/filterdesignlib</directory>
-        <directory>${MATLAB_ROOT}/toolbox/distcomp</directory>
-        <directory>${MATLAB_ROOT}/toolbox/distcomp/distcomp</directory>
-        <directory>${MATLAB_ROOT}/toolbox/distcomp/user</directory>
-        <directory>${MATLAB_ROOT}/toolbox/distcomp/mpi</directory>
-        <directory>${MATLAB_ROOT}/toolbox/distcomp/pctdemos</directory>
-        <directory>${MATLAB_ROOT}/toolbox/distcomp/parallel</directory>
-        <directory>${MATLAB_ROOT}/toolbox/distcomp/parallel/lapack</directory>
-        <directory>${MATLAB_ROOT}/toolbox/distcomp/parallel/util</directory>
-        <directory>${MATLAB_ROOT}/toolbox/distcomp/lang</directory>
-        <directory>${MATLAB_ROOT}/toolbox/distcomp/cluster</directory>
-        <directory>${MATLAB_ROOT}/toolbox/distcomp/gpu</directory>
-        <directory>${MATLAB_ROOT}/toolbox/stats/stats</directory>
         <directory>${MATLAB_ROOT}/toolbox/stats/statsdemos</directory>
-        <directory>${MATLAB_ROOT}/toolbox/shared/optimlib</directory>
-        <directory>${MATLAB_ROOT}/toolbox/shared/statslib</directory>
-        <directory>${MATLAB_ROOT}/toolbox/compiler</directory>
         <directory>${MATLAB_ROOT}/toolbox/compiler/compilerdemos</directory>
+        <directory>${MATLAB_ROOT}/toolbox/matlab/imagesci</directory>
+        <directory>${MATLAB_ROOT}/toolbox/shared/asynciolib</directory>
+        <directory>${MATLAB_ROOT}/toolbox/shared/imaqlib</directory>
+        <directory>${MATLAB_ROOT}/toolbox/shared/filterdesignlib</directory>
+        <directory>${MATLAB_ROOT}/toolbox/curvefit/curvefitdemos</directory>
+        <directory>${MATLAB_ROOT}/toolbox/stats/stats</directory>
+        <directory>${MATLAB_ROOT}/toolbox/stats/classreg</directory>
+        <directory>${MATLAB_ROOT}/toolbox/compiler</directory>
+        <directory>${MATLAB_ROOT}/toolbox/imaq/imaqdemos</directory>
+        <directory>${MATLAB_ROOT}/toolbox/optim/optimdemos</directory>
         <directory>${MATLAB_ROOT}/toolbox/curvefit/curvefit</directory>
         <directory>${MATLAB_ROOT}/toolbox/curvefit/splines</directory>
         <directory>${MATLAB_ROOT}/toolbox/curvefit/cftoolgui</directory>
         <directory>${MATLAB_ROOT}/toolbox/curvefit/sftoolgui</directory>
-        <directory>${MATLAB_ROOT}/toolbox/curvefit/curvefitdemos</directory>
         <directory>${MATLAB_ROOT}/toolbox/images/colorspaces</directory>
         <directory>${MATLAB_ROOT}/toolbox/images/images</directory>
-        <directory>${MATLAB_ROOT}/toolbox/images/imdemos</directory>
         <directory>${MATLAB_ROOT}/toolbox/images/imuitools</directory>
         <directory>${MATLAB_ROOT}/toolbox/images/iptformats</directory>
         <directory>${MATLAB_ROOT}/toolbox/images/iptutils</directory>
-        <directory>${MATLAB_ROOT}/toolbox/shared/imageslib</directory>
         <directory>${MATLAB_ROOT}/toolbox/optim/optim</directory>
-        <directory>${MATLAB_ROOT}/toolbox/optim/optimdemos</directory>
-        <directory>${MATLAB_ROOT}/toolbox/shared/asynciolib</directory>
-        <directory>${MATLAB_ROOT}/toolbox/shared/testmeaslib/general</directory>
-        <directory>${MATLAB_ROOT}/toolbox/shared/testmeaslib/graphics</directory>
-        <directory>${MATLAB_ROOT}/toolbox/shared/controllib/graphics</directory>
-        <directory>${MATLAB_ROOT}/toolbox/shared/comparisons</directory>
-        <directory>${MATLAB_ROOT}/toolbox/shared/controllib/general</directory>
-        <directory>${MATLAB_ROOT}/toolbox/database/database</directory>
+        <directory>${MATLAB_ROOT}/toolbox/shared/statslib</directory>
         <directory>${MATLAB_ROOT}/toolbox/database/dbdemos</directory>
-        <directory>${MATLAB_ROOT}/toolbox/database/vqb</directory>
-        <directory>${MATLAB_ROOT}/toolbox/imaq/imaq</directory>
-        <directory>${MATLAB_ROOT}/toolbox/shared/imaqlib</directory>
+        <directory>${MATLAB_ROOT}/toolbox/bioinfo/biodemos</directory>
+        <directory>${MATLAB_ROOT}/toolbox/sam/m3i</directory>
         <directory>${MATLAB_ROOT}/toolbox/shared/dspblks/dspblks</directory>
-        <directory>${MATLAB_ROOT}/toolbox/imaq/imaqdemos</directory>
+        <directory>${MATLAB_ROOT}/toolbox/shared/dspblks/dspmex</directory>
+        <directory>${MATLAB_ROOT}/toolbox/distcomp</directory>
+        <directory>${MATLAB_ROOT}/toolbox/distcomp/distcomp</directory>
+        <directory>${MATLAB_ROOT}/toolbox/distcomp/user</directory>
+        <directory>${MATLAB_ROOT}/toolbox/distcomp/mpi</directory>
+        <directory>${MATLAB_ROOT}/toolbox/distcomp/parallel</directory>
+        <directory>${MATLAB_ROOT}/toolbox/distcomp/parallel/util</directory>
+        <directory>${MATLAB_ROOT}/toolbox/distcomp/lang</directory>
+        <directory>${MATLAB_ROOT}/toolbox/distcomp/cluster</directory>
+        <directory>${MATLAB_ROOT}/toolbox/distcomp/gpu</directory>
+        <directory>${MATLAB_ROOT}/toolbox/shared/spcuilib</directory>
+        <directory>${MATLAB_ROOT}/toolbox/shared/controllib/general</directory>
+        <directory>${MATLAB_ROOT}/toolbox/shared/dastudio</directory>
+        <directory>${MATLAB_ROOT}/toolbox/shared/siglib</directory>
+        <directory>${MATLAB_ROOT}/toolbox/shared/testmeaslib/simulink</directory>
+        <directory>${MATLAB_ROOT}/toolbox/shared/testmeaslib/general</directory>
+        <directory>${MATLAB_ROOT}/toolbox/shared/comparisons</directory>
+        <directory>${MATLAB_ROOT}/toolbox/shared/rptgen</directory>
+        <directory>${MATLAB_ROOT}/toolbox/database/database</directory>
+        <directory>${MATLAB_ROOT}/toolbox/database/vqb</directory>
+        <directory>${MATLAB_ROOT}/toolbox/distcomp/pctdemos</directory>
+        <directory>${MATLAB_ROOT}/toolbox/signal/sigdemos</directory>
+        <directory>${MATLAB_ROOT}/toolbox/shared/controllib/graphics</directory>
+        <directory>${MATLAB_ROOT}/toolbox/matlab/audiovideo</directory>
+        <directory>${MATLAB_ROOT}/toolbox/shared/testmeaslib/graphics</directory>
+        <directory>${MATLAB_ROOT}/toolbox/shared/imageslib</directory>
+        <directory>${MATLAB_ROOT}/toolbox/imaq/imaq</directory>
         <directory>${MATLAB_ROOT}/toolbox/imaq/imaqblks/imaqblks</directory>
         <directory>${MATLAB_ROOT}/toolbox/imaq/imaqblks/imaqmasks</directory>
         <directory>${MATLAB_ROOT}/toolbox/imaq/imaqblks/imaqmex</directory>
@@ -313,10 +222,7 @@
         <directory>${MATLAB_ROOT}/toolbox/bioinfo/mass_spec</directory>
         <directory>${MATLAB_ROOT}/toolbox/bioinfo/proteins</directory>
         <directory>${MATLAB_ROOT}/toolbox/bioinfo/biomatrices</directory>
-        <directory>${MATLAB_ROOT}/toolbox/bioinfo/biodemos</directory>
         <directory>${MATLAB_ROOT}/toolbox/bioinfo/graphtheory</directory>
-        <directory>${MATLAB_ROOT}/toolbox/shared/testmeaslib/simulink</directory>
-        <directory>${MATLAB_ROOT}/toolbox/connector/connector</directory>
       </path>
     </matlab>
     <platform>
@@ -328,7 +234,7 @@
       <vista>false</vista>
       <linux>true</linux>
       <solaris>false</solaris>
-      <osver>2.6.31-22-generic</osver>
+      <osver>2.6.32-37-generic</osver>
       <os32>false</os32>
       <os64>true</os64>
       <arch>glnxa64</arch>

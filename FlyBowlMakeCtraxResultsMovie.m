@@ -111,14 +111,30 @@ cmd = sprintf('mencoder %s -o %s -ovc xvid -xvidencopts fixed_quant=4 -vf scale=
   avifile,tmpfile,newwidth,newheight,subtitlefile);
 status = system(cmd);
 if status ~= 0,
-  error('Failed to compress avi to %s',xvidfile);
+  fprintf('*****\n');
+  warning('Failed to compress avi to %s',xvidfile);
+  fprintf('Need to run:\n');
+  fprintf('%s\n',cmd);
+  cmd2 = sprintf('mencoder %s -o %s -ovc xvid -xvidencopts fixed_quant=4 -vf flip -msglevel all=2',...
+    tmpfile,xvidfile);
+  fprintf('then\n');
+  fprintf('%s\n',cmd2);
+  fprintf('then delete %s %s %s\n',tmpfile,avifile,subtitlefile);
+  fprintf('*****\n');
+else
+  cmd = sprintf('mencoder %s -o %s -ovc xvid -xvidencopts fixed_quant=4 -vf flip -msglevel all=2',...
+    tmpfile,xvidfile);
+  status = system(cmd);
+  if status ~= 0,
+    fprintf('*****\n');
+    warning('Failed to add subtitles to %s',xvidfile);
+    fprintf('Need to run:\n');
+    fprintf('%s\n',cmd);
+    fprintf('then delete %s %s %s\n',tmpfile,avifile,subtitlefile);
+    fprintf('*****\n');    
+  else
+    delete(tmpfile);
+    delete(avifile);
+    delete(subtitlefile);
+  end
 end
-cmd = sprintf('mencoder %s -o %s -ovc xvid -xvidencopts fixed_quant=4 -vf flip -msglevel all=2',...
-  tmpfile,xvidfile);
-status = system(cmd);
-if status ~= 0,
-  error('Failed to add subtitles to %s',xvidfile);
-end
-delete(tmpfile);
-delete(avifile);
-delete(subtitlefile);

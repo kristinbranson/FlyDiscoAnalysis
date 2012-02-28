@@ -6,6 +6,7 @@ if ispc,
 else
   addpath /groups/branson/home/bransonk/tracking/code/JCtrax/misc;
   addpath /groups/branson/home/bransonk/tracking/code/JCtrax/filehandling;
+  addpath /groups/branson/home/bransonk/tracking/code/Ctrax/matlab/netlab;
 end
 
 %% data locations

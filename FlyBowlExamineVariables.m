@@ -392,7 +392,7 @@ SetCallbacks();
       data.queries(end+1:end+2) = {'daterange',data.daterange};
       data.queries(end+1:end+2) = {'data_type',data.data_types};
       data.queries(end+1:end+2) = {'flag_aborted',0};
-      data.queries(end+1:end+2) = {'automated_pf',{'P','U'}};
+      %data.queries(end+1:end+2) = {'automated_pf',{'P','U'}};
       data.queries(end+1:end+2) = {'experiment_name','FlyBowl_*'};
       data.pull_data_datetime = now;
       rawdata = SAGEGetBowlData(data.queries{:},'checkflags',params.docheckflags,'removemissingdata',true,'dataset',data.dataset,'analysis_protocol',params.analysis_protocol,...

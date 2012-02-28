@@ -513,7 +513,9 @@ for segi = 1:numel(firstframes),
           set(htri(fly),'color',colors(fly,:));
         else
           htail(fly) = plot(nan,nan,'-','color',colors(fly,:));
-          hsexmarker(fly) = plot(nan,nan,'.','color',colors(fly,:),'markerfacecolor',colors(fly,:));
+          if doshowsex,
+            hsexmarker(fly) = plot(nan,nan,'.','color',colors(fly,:),'markerfacecolor',colors(fly,:));
+          end
           htri(fly) = plot(nan,nan,'-','color',colors(fly,:));
         end
       end
@@ -536,7 +538,9 @@ for segi = 1:numel(firstframes),
         else
           set(htail(fly),'xdata',[],'ydata',[]);
           set(htri(fly),'xdata',[],'ydata',[]);
-          set(hsexmarker(fly),'xdata',[],'ydata',[]);
+          if doshowsex,
+            set(hsexmarker(fly),'xdata',[],'ydata',[]);
+          end
         end
       end
     end

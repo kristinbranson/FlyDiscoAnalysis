@@ -1,18 +1,22 @@
 function [isconsistent,filesmissing] = SAGEExpDirConsistencyCheckMany(varargin)
 
-[analysis_protocol,settingsdir,datalocparamsfilestr,outfilename,rootdatadir,leftovers] = ...
+[analysis_protocol,settingsdir,datalocparamsfilestr,outfilename,rootdatadir,restartexperiment,experiments,leftovers] = ...
   myparse_nocheck(varargin,...
   'analysis_protocol','current',...
   'settingsdir','/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/settings',...
   'datalocparamsfilestr','dataloc_params.txt',...
   'outfilename','',...
-  'rootdatadir','/groups/sciserv/flyolympiad/Olympiad_Screen/fly_bowl/bowl_data');
+  'rootdatadir','/groups/sciserv/flyolympiad/Olympiad_Screen/fly_bowl/bowl_data',...
+  'restartexperiment','',...
+  'experiments',[]);
 
 global DISABLESAGEWAITBAR;
 DISABLESAGEWAITBAR = true;
 datetimeformat = 'yyyymmddTHHMMSS';
 
 %% get all experiment directories
+
+if isempty(experiments),
 
 fprintf('Getting all experiment directories...\n');
 [expdirs,~,~,experiments] = getExperimentDirs('rootdir',rootdatadir,...
@@ -63,6 +67,11 @@ fprintf('Removing %d experiment directories that have no metadata file...\n',nnz
 experiments(badidx) = [];
 expdirs(badidx) = [];
 
+else
+  expdirs = {experiments.file_system_path};
+
+end
+
 fprintf('Sorting by cross date...\n');
 [~,order] = sort([experiments.cross_datenum]);
 expdirs = expdirs(order(end:-1:1));
@@ -70,14 +79,29 @@ experiments = experiments(order(end:-1:1));
 
 %% check each experiment
 
-fid = myfopen(outfilename,'w');
-myfclose(fid);
-
 lastcrossdatenum = nan;
 
 isconsistent = nan(1,numel(expdirs));
 filesmissing = nan(1,numel(expdirs));
-for i = 1:numel(expdirs),  
+
+if ~isempty(restartexperiment),
+  experiment_names = cell(1,numel(experiments));
+  for i = 1:numel(experiments),
+    [~,experiment_names{i}] = fileparts(experiments(i).file_system_path);
+  end
+  starti = find(strcmp(experiment_names,restartexperiment),1);
+  if isempty(starti),
+    error('Could not find experiment %s to restart.',restartexperiment);
+  end
+  %start_cross_datenum = experiments(i).cross_datenum;
+  %starti = find([experiments.cross_datenum] == start_cross_datenum,1);
+else
+  fid = myfopen(outfilename,'w');
+  myfclose(fid);
+  starti = 1;
+end
+  
+for i = starti:numel(expdirs),  
 
   expdir = experiments(i).file_system_path;
   experiment = experiments(i);

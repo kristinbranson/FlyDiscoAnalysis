@@ -29,7 +29,7 @@ switch computername,
   case 'bransonk-desktop',
     
     addpath /groups/branson/bransonlab/projects/olympiad/SAGE/MATLABInterface/Trunk;
-    addpath(genpath('/groups/branson/bransonlab/projects/olympiad/cross_assay/matlab'));
+    addpath(genpath('/groups/branson/bransonlab/projects/olympiad/cross_assay/trunk/matlab'));
     addpath(genpath('/groups/branson/bransonlab/projects/olympiad/box/PostAnalysis'));
     rmSvnPath;
     addpath /groups/branson/home/bransonk/tracking/code/JCtrax/misc;
@@ -75,7 +75,7 @@ switch computername,
     
 end
 
-analysis_protocol = '20110804';
+analysis_protocol = '20111005';
 
 %% try the data selector
 

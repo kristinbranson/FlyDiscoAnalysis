@@ -1,0 +1,8 @@
+min_seconds_fliesloaded,25
+max_seconds_fliesloaded,1000
+max_seconds_shiftflytemp,10000
+min_ufmf_diagnostics_summary_nframes,1
+max_tempdiff,100
+max_temp,100
+control_line_names,pBDPGAL4U
+required_files,Metadata.xml,movie.ufmf

@@ -42,6 +42,7 @@ end
 % clear cache
 if numel(obj.datacached) >= n,
   obj.datacached(n) = [];
+  obj.fnscached(n) = [];
 end
 if numel(obj.ndatacachedperexp) >= n,
   obj.ndatacached = obj.ndatacached - obj.ndatacachedperexp(n);

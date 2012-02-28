@@ -17,7 +17,7 @@
 % Iterates until a proportional change < tol in the log likelihood 
 % or cyc steps of Baum-Welch
 
-function [Mu,Cov,LL]=hmm_multiseq_1d(X,K,Psame,cyc,tol,minCov)
+function [Mu,Cov,LL]=hmm_multiseq_1d(X,K,Psame,cyc,tol,minCov,Pi)
 
 if ~iscell(X),
   X = {X};
@@ -39,11 +39,10 @@ if numel(Psame) ~= 1,
 end
 P = ones(K)-Psame;
 P(eye(K)==1)=Psame;
-Pi = ones(1,K)/K;
 
-if nargin<6, minCov=max(1e-9,var(cat(1,X{:}),1)*1e-2); end
-if nargin<5, tol=0.0001; end;
-if nargin<4, cyc=100; end;
+if nargin<6 || isempty(minCov), minCov=max(1e-9,var(cat(1,X{:}),1)*1e-2); end
+if nargin<5 || isempty(tol), tol=0.0001; end;
+if nargin<4 || isempty(cyc), cyc=100; end;
 
 % cluster ignoring time
 Xmat = cat(1,X{:});
@@ -55,6 +54,15 @@ end
 Cov(Cov < minCov) = minCov;
 %Cov=diag(diag(cov(Xmat)));
 %Mu=randn(K,p)*sqrtm(Cov)+ones(K,1)*mean(Xmat);
+
+if nargin<7,
+  Pi = ones(1,K)/K;
+else
+  [~,order] = sort(Mu);
+  [~,order] = sort(order);
+  Pi = Pi(order);
+end
+
 
 LL=[];
 lik=0;

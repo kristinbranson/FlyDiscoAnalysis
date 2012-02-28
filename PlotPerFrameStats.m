@@ -72,11 +72,17 @@ for fni = 1:nfns,
   fn = fns{fni};
   
   % control data mean and standard deviation
-  mu = controlstats.meanstatsperfly.(fn).meanmean;
-  sig = controlstats.meanstatsperfly.(fn).stdmean;
-  goodidx = ~isnan(controlstats.statsperfly.(fn).Z);
-  nfliescontrol = sum(controlstats.statsperfly.(fn).fracframesanalyzed(goodidx));
-  stderrmean_control(fni) = 1/sqrt(nfliescontrol);
+  if isempty(controlstats),
+    mu = 0;
+    sig = 1;
+    stderrmean_control(fni) = 1;
+  else
+    mu = controlstats.meanstatsperfly.(fn).meanmean;
+    sig = controlstats.meanstatsperfly.(fn).stdmean;
+    goodidx = ~isnan(controlstats.statsperfly.(fn).Z);
+    nfliescontrol = sum(controlstats.statsperfly.(fn).fracframesanalyzed(goodidx));
+    stderrmean_control(fni) = 1/sqrt(nfliescontrol);
+  end
 
   meanmeans(fni) = (statsperexp.(fn).meanmean - mu) / sig;
   stdmeans(fni) = statsperexp.(fn).stdmean / sig;
@@ -100,9 +106,13 @@ colors = colors(order,:);
 
 %% plot stderr of control data
 
-hcontrol(1) = plot(hax,1:nfns,stderrmean_control,':','color',[.5,.5,.5]);
 hold(hax,'on');
-hcontrol(2) = plot(hax,1:nfns,-stderrmean_control,':','color',[.5,.5,.5]);
+if ~isempty(controlstats),
+  hcontrol(1) = plot(hax,1:nfns,stderrmean_control,':','color',[.5,.5,.5]);
+  hcontrol(2) = plot(hax,1:nfns,-stderrmean_control,':','color',[.5,.5,.5]);
+else
+  hcontrol = [];
+end
 
 %% plot stderr, mean of means
 
@@ -147,7 +157,11 @@ set(hax,'XTick',1:nfns,'XTickLabel',typestrs);
 %% legend
 
 %xlabel(hax,'Experiment','Interpreter','none');
-hy = ylabel(hax,'Control stds','Interpreter','None');
+if isempty(controlstats),
+  hy = ylabel(hax,'Behavior statistic','Interpreter','None');
+else
+  hy = ylabel(hax,'Control stds','Interpreter','None');
+end
 hti = title(hax,sprintf('Mean, stderr of mean for %s',basename),'Interpreter','none');
 
 %% rotate ticks

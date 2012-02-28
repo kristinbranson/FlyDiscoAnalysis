@@ -9,6 +9,10 @@ function trx = FlyBowlComputePerFrameFeatures(expdir,varargin)
   'perframefns', {} ... % added CSC 20110321: optionally specify to-be-computed frames as parameter, reads from perframefnsfile (as before) otherwise
 	);
 
+if ischar(forcecompute),
+  forcecompute = str2double(forcecompute) ~= 0;
+end
+
 %% load the trx
 
 fprintf('Initializing trx...\n');

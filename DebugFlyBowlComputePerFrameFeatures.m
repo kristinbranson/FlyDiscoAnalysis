@@ -16,14 +16,22 @@ if ispc,
 else
   settingsdir = '/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/settings';
   %rootdir = '/groups/sciserv/flyolympiad/Olympiad_Screen/fly_bowl/bowl_data';
-  rootdir = '/groups/branson/bransonlab/tracking_data/olympiad/FlyBowl/CtraxTest20110407';
+  rootdir = '/groups/branson/bransonlab/tracking_data/olympiad/HackHitData';
 end
 
 %% parameters
 
-analysis_protocol = '20110407';
+analysis_protocol = 'current';
 params = {'settingsdir',settingsdir,...
   'analysis_protocol',analysis_protocol};
+
+%% 
+rootdatadir = '/groups/sciserv/flyolympiad/Olympiad_Screen/fly_bowl/bowl_data';
+experiment_name = 'EXT_CantonS_1220002_None_Rig1Plate15BowlD_20120204T141439';
+expdir = fullfile(rootdatadir,experiment_name);
+SymbolicCopyExperimentDirectory(expdir,rootdir);
+newexpdir = fullfile(rootdir,experiment_name);
+FlyBowlComputePerFrameFeatures(newexpdir,params{:});
 
 %%
 

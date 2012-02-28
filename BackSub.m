@@ -4,6 +4,12 @@ BG_TYPE_LIGHTONDARK = 0;
 BG_TYPE_DARKONLIGHT = 1;
 BG_TYPE_OTHER = 2;
 
+if ischar(ann.bg_type),
+  BG_TYPE_LIGHTONDARK = 'light_on_dark';
+  BG_TYPE_DARKONLIGHT = 'dark_on_light';
+  BG_TYPE_OTHER = 'other';
+end
+
 switch ann.bg_type
   case BG_TYPE_LIGHTONDARK,
     diffim = max(0,im - ann.background_center);

@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
 use strict;
-my $MAXNJOBS = 12;
+#my $MAXNJOBS = 12;
 
 my $nargs = $#ARGV + 1;
 if($nargs < 1){
@@ -9,16 +9,16 @@ if($nargs < 1){
     exit(1);
 }
 
-my $ANALYSIS_PROTOCOL = "20110407";
+my $ANALYSIS_PROTOCOL = "20120210";
 
 my $SCRIPT = "/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/settings/$ANALYSIS_PROTOCOL/run_FlyBowlComputePerFrameStats.sh";
 
 my $PARAMS = "analysis_protocol $ANALYSIS_PROTOCOL";
 
-my $temporary_dir = "/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/temp_compute_stats";
+my $temporary_dir = "/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/temp_ComputePerFrameStats";
 `mkdir -p $temporary_dir`;
 
-my $MCR = "/groups/branson/bransonlab/projects/olympiad/MCR/v714";
+my $MCR = "/groups/branson/bransonlab/projects/olympiad/MCR/v716";
 
 my $MCR_CACHE_ROOT = "/tmp/mcr_cache_root";
 
@@ -51,7 +51,7 @@ while(my $expdir = <FILE>){
     print "*** $basename\n";
     
     # make a name for this job
-    my $sgeid = "kb_flybowlcomputeperframestats_$basename";
+    my $sgeid = "kb_ComputePerFrameStats_$basename";
     $sgeid =~ s/\//_/g;
     $sgeid =~ s/\./_/g;
     $sgeid =~ s/\;/_/g;
@@ -84,6 +84,8 @@ sub write_qsub_sh {
 # FlyBowlComputePerFrameStats test script.
 # this script will be qsubed
 export MCR_CACHE_ROOT=$MCR_CACHE_ROOT.$jobid
+
+echo \$MCR_CACHE_ROOT
 
 $SCRIPT $MCR $expdir $PARAMS
 

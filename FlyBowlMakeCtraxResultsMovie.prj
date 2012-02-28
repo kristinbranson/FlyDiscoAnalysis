@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <deployment-project>
-  <configuration target="target.standalone" target-name="Standalone Application" name="FlyBowlMakeCtraxResultsMovie" location="/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis" file="/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/FlyBowlMakeCtraxResultsMovie.prj" build-checksum="1391191119">
+  <configuration target="target.standalone" target-name="Standalone Application" name="FlyBowlMakeCtraxResultsMovie" location="/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis" file="/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/FlyBowlMakeCtraxResultsMovie.prj" build-checksum="2682338443">
     <param.project.name>/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/FlyBowlMakeCtraxResultsMovie.prj</param.project.name>
     <param.target.type>Standalone Application</param.target.type>
     <param.appname>FlyBowlMakeCtraxResultsMovie</param.appname>
@@ -18,6 +18,7 @@
       <warning.demo>on</warning.demo>
     </param.warnings>
     <param.version>1.0</param.version>
+    <param.user.only.registration>false</param.user.only.registration>
     <param.c.cpp.options.file />
     <param.include.dirs />
     <param.lib.dirs />
@@ -41,6 +42,7 @@
       <param.tbx_on_path />
       <param.warnings />
       <param.version />
+      <param.user.only.registration />
       <param.c.cpp.options.file />
       <param.include.dirs />
       <param.lib.dirs />
@@ -68,88 +70,29 @@
     </fileset.resources>
     <fileset.package />
     <build-deliverables>
-      <file name="readme.txt" location="${PROJECT_ROOT}/FlyBowlMakeCtraxResultsMovie/distrib">/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/FlyBowlMakeCtraxResultsMovie/distrib/readme.txt</file>
-      <file name="run_FlyBowlMakeCtraxResultsMovie.sh" location="${PROJECT_ROOT}/FlyBowlMakeCtraxResultsMovie/distrib">/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/FlyBowlMakeCtraxResultsMovie/distrib/run_FlyBowlMakeCtraxResultsMovie.sh</file>
-      <file name="FlyBowlMakeCtraxResultsMovie" location="${PROJECT_ROOT}/FlyBowlMakeCtraxResultsMovie/distrib">/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/FlyBowlMakeCtraxResultsMovie/distrib/FlyBowlMakeCtraxResultsMovie</file>
+      <file name="readme.txt" location="${PROJECT_ROOT}/FlyBowlMakeCtraxResultsMovie/distrib" optional="true">/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/FlyBowlMakeCtraxResultsMovie/distrib/readme.txt</file>
+      <file name="run_FlyBowlMakeCtraxResultsMovie.sh" location="${PROJECT_ROOT}/FlyBowlMakeCtraxResultsMovie/distrib" optional="false">/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/FlyBowlMakeCtraxResultsMovie/distrib/run_FlyBowlMakeCtraxResultsMovie.sh</file>
+      <file name="FlyBowlMakeCtraxResultsMovie" location="${PROJECT_ROOT}/FlyBowlMakeCtraxResultsMovie/distrib" optional="false">/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/FlyBowlMakeCtraxResultsMovie/distrib/FlyBowlMakeCtraxResultsMovie</file>
     </build-deliverables>
+    <workflow />
     <matlab>
-      <root>/localhome/bransonk/software/matlab/R2010b</root>
+      <root>/localhome/bransonk/software/matlab/R2011b</root>
       <path>
+        <directory>/groups/branson/home/bransonk/tracking/code/Ctrax/matlab/netlab</directory>
+        <directory>/groups/branson/home/bransonk/tracking/code/lds/hmm</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/SAGE/MATLABInterface/Trunk</directory>
         <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/filehandling</directory>
         <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/misc</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/.hg</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/.hg/store</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/.hg/store/data</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/.hg/store/data/_property_grid</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/.hg/store/data/_s_a_g_e</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/.hg/store/data/_s_a_g_e/_____m_a_c_o_s_x</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/.hg/store/data/_validators</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/.hg/store/data/_x_m_l_nodes</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/.hg/store/data/data</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/.hg/store/data/doc</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/.hg/store/data/doc/build</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/.hg/store/data/doc/build/doctrees</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/.hg/store/data/doc/build/html</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/.hg/store/data/doc/build/html/__sources</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/.hg/store/data/doc/build/html/__static</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/.hg/store/data/doc/source</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/.hg/store/data/examples</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/.hg/store/data/jdbc</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/.hg/store/data/precon__hs2000_d</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/.hg/store/data/property__grid</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/.hg/store/data/sample__xml</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/.hg/store/data/sample__xml/kristin__defaults</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/.hg/store/data/sample__xml/old</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/.hg/store/data/sample__xml/test</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/.hg/store/data/src</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/.hg/store/data/src/_s_a_g_e</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/.hg/store/data/src/_s_a_g_e/_____m_a_c_o_s_x</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/.hg/store/data/src/_t_h_sensor</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/.hg/store/data/src/_t_h_sensor/_sampler</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/.hg/store/data/src/data__cachers</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/.hg/store/data/src/dialog</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/.hg/store/data/src/findjobj</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/.hg/store/data/src/interface</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/.hg/store/data/src/property__grid</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/.hg/store/data/src/validators</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/.hg/store/data/src/xml__io__tools</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/.hg/store/data/src/xml__io__tools/html</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/.hg/store/data/src/xml__nodes</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/.hg/store/data/validators</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/.hg/store/data/validators/_validators</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/.hg/store/data/xml__io__tools</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/.hg/store/data/xml__io__tools/html</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/.hg/store/data/xml__nodes</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/data</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/doc</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/doc/build</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/doc/build/doctrees</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/doc/build/html</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/doc/build/html/_sources</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/doc/build/html/_static</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/doc/source</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/examples</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/jdbc</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/sample_xml</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/sample_xml/kristin_defaults</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/sample_xml/old</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/sample_xml/test</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/src</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/src/SAGE</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/src/SAGE/__MACOSX</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/src/THSensor</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/src/THSensor/Sampler</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/src/data_cachers</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/src/dialog</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/src/findjobj</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/src/interface</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/src/property_grid</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/src/validators</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/src/xml_io_tools</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/src/xml_io_tools/html</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/jfrc_metadata_tools/src/xml_nodes</directory>
         <directory>/groups/branson/home/bransonk/Documents/MATLAB</directory>
+        <directory>${MATLAB_ROOT}/toolbox/matlab/demos</directory>
+        <directory>${MATLAB_ROOT}/toolbox/matlab/graph2d</directory>
+        <directory>${MATLAB_ROOT}/toolbox/matlab/graph3d</directory>
+        <directory>${MATLAB_ROOT}/toolbox/matlab/graphics</directory>
+        <directory>${MATLAB_ROOT}/toolbox/matlab/plottools</directory>
+        <directory>${MATLAB_ROOT}/toolbox/matlab/scribe</directory>
+        <directory>${MATLAB_ROOT}/toolbox/matlab/specgraph</directory>
+        <directory>${MATLAB_ROOT}/toolbox/matlab/uitools</directory>
+        <directory>${MATLAB_ROOT}/toolbox/local</directory>
         <directory>${MATLAB_ROOT}/toolbox/matlab/general</directory>
         <directory>${MATLAB_ROOT}/toolbox/matlab/ops</directory>
         <directory>${MATLAB_ROOT}/toolbox/matlab/lang</directory>
@@ -162,86 +105,81 @@
         <directory>${MATLAB_ROOT}/toolbox/matlab/polyfun</directory>
         <directory>${MATLAB_ROOT}/toolbox/matlab/funfun</directory>
         <directory>${MATLAB_ROOT}/toolbox/matlab/sparfun</directory>
-        <directory>${MATLAB_ROOT}/toolbox/matlab/scribe</directory>
-        <directory>${MATLAB_ROOT}/toolbox/matlab/graph2d</directory>
-        <directory>${MATLAB_ROOT}/toolbox/matlab/graph3d</directory>
-        <directory>${MATLAB_ROOT}/toolbox/matlab/specgraph</directory>
-        <directory>${MATLAB_ROOT}/toolbox/matlab/graphics</directory>
-        <directory>${MATLAB_ROOT}/toolbox/matlab/uitools</directory>
         <directory>${MATLAB_ROOT}/toolbox/matlab/strfun</directory>
-        <directory>${MATLAB_ROOT}/toolbox/matlab/imagesci</directory>
         <directory>${MATLAB_ROOT}/toolbox/matlab/iofun</directory>
-        <directory>${MATLAB_ROOT}/toolbox/matlab/audiovideo</directory>
         <directory>${MATLAB_ROOT}/toolbox/matlab/timefun</directory>
         <directory>${MATLAB_ROOT}/toolbox/matlab/datatypes</directory>
         <directory>${MATLAB_ROOT}/toolbox/matlab/verctrl</directory>
         <directory>${MATLAB_ROOT}/toolbox/matlab/codetools</directory>
         <directory>${MATLAB_ROOT}/toolbox/matlab/helptools</directory>
-        <directory>${MATLAB_ROOT}/toolbox/matlab/demos</directory>
-        <directory>${MATLAB_ROOT}/toolbox/matlab/timeseries</directory>
         <directory>${MATLAB_ROOT}/toolbox/matlab/hds</directory>
         <directory>${MATLAB_ROOT}/toolbox/matlab/guide</directory>
-        <directory>${MATLAB_ROOT}/toolbox/matlab/plottools</directory>
-        <directory>${MATLAB_ROOT}/toolbox/local</directory>
         <directory>${MATLAB_ROOT}/toolbox/matlab/datamanager</directory>
         <directory>${MATLAB_ROOT}/toolbox/shared/simulink</directory>
         <directory>${MATLAB_ROOT}/toolbox/shared/instrument</directory>
         <directory>${MATLAB_ROOT}/toolbox/symbolic/symbolic</directory>
         <directory>${MATLAB_ROOT}/toolbox/symbolic/symbolicdemos</directory>
+        <directory>${MATLAB_ROOT}/toolbox/shared/optimlib</directory>
         <directory>${MATLAB_ROOT}/toolbox/shared/eml/eml</directory>
-        <directory>${MATLAB_ROOT}/toolbox/shared/rptgen</directory>
+        <directory>${MATLAB_ROOT}/toolbox/matlab/timeseries</directory>
+        <directory>${MATLAB_ROOT}/toolbox/images/imdemos</directory>
         <directory>${MATLAB_ROOT}/toolbox/signal/signal</directory>
         <directory>${MATLAB_ROOT}/toolbox/signal/sigtools</directory>
         <directory>${MATLAB_ROOT}/toolbox/signal/sptoolgui</directory>
-        <directory>${MATLAB_ROOT}/toolbox/signal/sigdemos</directory>
-        <directory>${MATLAB_ROOT}/toolbox/shared/spcuilib</directory>
-        <directory>${MATLAB_ROOT}/toolbox/shared/dastudio</directory>
-        <directory>${MATLAB_ROOT}/toolbox/shared/siglib</directory>
-        <directory>${MATLAB_ROOT}/toolbox/shared/filterdesignlib</directory>
-        <directory>${MATLAB_ROOT}/toolbox/distcomp</directory>
-        <directory>${MATLAB_ROOT}/toolbox/distcomp/distcomp</directory>
-        <directory>${MATLAB_ROOT}/toolbox/distcomp/user</directory>
-        <directory>${MATLAB_ROOT}/toolbox/distcomp/mpi</directory>
-        <directory>${MATLAB_ROOT}/toolbox/distcomp/pctdemos</directory>
-        <directory>${MATLAB_ROOT}/toolbox/distcomp/parallel</directory>
-        <directory>${MATLAB_ROOT}/toolbox/distcomp/parallel/lapack</directory>
-        <directory>${MATLAB_ROOT}/toolbox/distcomp/parallel/util</directory>
-        <directory>${MATLAB_ROOT}/toolbox/distcomp/lang</directory>
-        <directory>${MATLAB_ROOT}/toolbox/distcomp/cluster</directory>
-        <directory>${MATLAB_ROOT}/toolbox/distcomp/gpu</directory>
-        <directory>${MATLAB_ROOT}/toolbox/stats/stats</directory>
         <directory>${MATLAB_ROOT}/toolbox/stats/statsdemos</directory>
-        <directory>${MATLAB_ROOT}/toolbox/shared/optimlib</directory>
-        <directory>${MATLAB_ROOT}/toolbox/shared/statslib</directory>
-        <directory>${MATLAB_ROOT}/toolbox/compiler</directory>
         <directory>${MATLAB_ROOT}/toolbox/compiler/compilerdemos</directory>
+        <directory>${MATLAB_ROOT}/toolbox/matlab/imagesci</directory>
+        <directory>${MATLAB_ROOT}/toolbox/shared/asynciolib</directory>
+        <directory>${MATLAB_ROOT}/toolbox/shared/imaqlib</directory>
+        <directory>${MATLAB_ROOT}/toolbox/shared/filterdesignlib</directory>
+        <directory>${MATLAB_ROOT}/toolbox/curvefit/curvefitdemos</directory>
+        <directory>${MATLAB_ROOT}/toolbox/stats/stats</directory>
+        <directory>${MATLAB_ROOT}/toolbox/stats/classreg</directory>
+        <directory>${MATLAB_ROOT}/toolbox/compiler</directory>
+        <directory>${MATLAB_ROOT}/toolbox/imaq/imaqdemos</directory>
+        <directory>${MATLAB_ROOT}/toolbox/optim/optimdemos</directory>
         <directory>${MATLAB_ROOT}/toolbox/curvefit/curvefit</directory>
         <directory>${MATLAB_ROOT}/toolbox/curvefit/splines</directory>
         <directory>${MATLAB_ROOT}/toolbox/curvefit/cftoolgui</directory>
         <directory>${MATLAB_ROOT}/toolbox/curvefit/sftoolgui</directory>
-        <directory>${MATLAB_ROOT}/toolbox/curvefit/curvefitdemos</directory>
         <directory>${MATLAB_ROOT}/toolbox/images/colorspaces</directory>
         <directory>${MATLAB_ROOT}/toolbox/images/images</directory>
-        <directory>${MATLAB_ROOT}/toolbox/images/imdemos</directory>
         <directory>${MATLAB_ROOT}/toolbox/images/imuitools</directory>
         <directory>${MATLAB_ROOT}/toolbox/images/iptformats</directory>
         <directory>${MATLAB_ROOT}/toolbox/images/iptutils</directory>
-        <directory>${MATLAB_ROOT}/toolbox/shared/imageslib</directory>
         <directory>${MATLAB_ROOT}/toolbox/optim/optim</directory>
-        <directory>${MATLAB_ROOT}/toolbox/optim/optimdemos</directory>
-        <directory>${MATLAB_ROOT}/toolbox/shared/asynciolib</directory>
-        <directory>${MATLAB_ROOT}/toolbox/shared/testmeaslib/general</directory>
-        <directory>${MATLAB_ROOT}/toolbox/shared/testmeaslib/graphics</directory>
-        <directory>${MATLAB_ROOT}/toolbox/shared/controllib/graphics</directory>
-        <directory>${MATLAB_ROOT}/toolbox/shared/comparisons</directory>
-        <directory>${MATLAB_ROOT}/toolbox/shared/controllib/general</directory>
-        <directory>${MATLAB_ROOT}/toolbox/database/database</directory>
+        <directory>${MATLAB_ROOT}/toolbox/shared/statslib</directory>
         <directory>${MATLAB_ROOT}/toolbox/database/dbdemos</directory>
-        <directory>${MATLAB_ROOT}/toolbox/database/vqb</directory>
-        <directory>${MATLAB_ROOT}/toolbox/imaq/imaq</directory>
-        <directory>${MATLAB_ROOT}/toolbox/shared/imaqlib</directory>
+        <directory>${MATLAB_ROOT}/toolbox/bioinfo/biodemos</directory>
+        <directory>${MATLAB_ROOT}/toolbox/sam/m3i</directory>
         <directory>${MATLAB_ROOT}/toolbox/shared/dspblks/dspblks</directory>
-        <directory>${MATLAB_ROOT}/toolbox/imaq/imaqdemos</directory>
+        <directory>${MATLAB_ROOT}/toolbox/shared/dspblks/dspmex</directory>
+        <directory>${MATLAB_ROOT}/toolbox/distcomp</directory>
+        <directory>${MATLAB_ROOT}/toolbox/distcomp/distcomp</directory>
+        <directory>${MATLAB_ROOT}/toolbox/distcomp/user</directory>
+        <directory>${MATLAB_ROOT}/toolbox/distcomp/mpi</directory>
+        <directory>${MATLAB_ROOT}/toolbox/distcomp/parallel</directory>
+        <directory>${MATLAB_ROOT}/toolbox/distcomp/parallel/util</directory>
+        <directory>${MATLAB_ROOT}/toolbox/distcomp/lang</directory>
+        <directory>${MATLAB_ROOT}/toolbox/distcomp/cluster</directory>
+        <directory>${MATLAB_ROOT}/toolbox/distcomp/gpu</directory>
+        <directory>${MATLAB_ROOT}/toolbox/shared/spcuilib</directory>
+        <directory>${MATLAB_ROOT}/toolbox/shared/controllib/general</directory>
+        <directory>${MATLAB_ROOT}/toolbox/shared/dastudio</directory>
+        <directory>${MATLAB_ROOT}/toolbox/shared/siglib</directory>
+        <directory>${MATLAB_ROOT}/toolbox/shared/testmeaslib/simulink</directory>
+        <directory>${MATLAB_ROOT}/toolbox/shared/testmeaslib/general</directory>
+        <directory>${MATLAB_ROOT}/toolbox/shared/comparisons</directory>
+        <directory>${MATLAB_ROOT}/toolbox/shared/rptgen</directory>
+        <directory>${MATLAB_ROOT}/toolbox/database/database</directory>
+        <directory>${MATLAB_ROOT}/toolbox/database/vqb</directory>
+        <directory>${MATLAB_ROOT}/toolbox/distcomp/pctdemos</directory>
+        <directory>${MATLAB_ROOT}/toolbox/signal/sigdemos</directory>
+        <directory>${MATLAB_ROOT}/toolbox/shared/controllib/graphics</directory>
+        <directory>${MATLAB_ROOT}/toolbox/matlab/audiovideo</directory>
+        <directory>${MATLAB_ROOT}/toolbox/shared/testmeaslib/graphics</directory>
+        <directory>${MATLAB_ROOT}/toolbox/shared/imageslib</directory>
+        <directory>${MATLAB_ROOT}/toolbox/imaq/imaq</directory>
         <directory>${MATLAB_ROOT}/toolbox/imaq/imaqblks/imaqblks</directory>
         <directory>${MATLAB_ROOT}/toolbox/imaq/imaqblks/imaqmasks</directory>
         <directory>${MATLAB_ROOT}/toolbox/imaq/imaqblks/imaqmex</directory>
@@ -279,9 +217,7 @@
         <directory>${MATLAB_ROOT}/toolbox/bioinfo/mass_spec</directory>
         <directory>${MATLAB_ROOT}/toolbox/bioinfo/proteins</directory>
         <directory>${MATLAB_ROOT}/toolbox/bioinfo/biomatrices</directory>
-        <directory>${MATLAB_ROOT}/toolbox/bioinfo/biodemos</directory>
         <directory>${MATLAB_ROOT}/toolbox/bioinfo/graphtheory</directory>
-        <directory>${MATLAB_ROOT}/toolbox/shared/testmeaslib/simulink</directory>
       </path>
     </matlab>
     <platform>
@@ -293,7 +229,7 @@
       <vista>false</vista>
       <linux>true</linux>
       <solaris>false</solaris>
-      <osver>2.6.31-22-generic</osver>
+      <osver>2.6.32-37-generic</osver>
       <os32>false</os32>
       <os64>true</os64>
       <arch>glnxa64</arch>

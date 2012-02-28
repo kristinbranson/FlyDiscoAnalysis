@@ -99,12 +99,17 @@ nstates = 2;
 Psame = sexclassifierin.psame;
 ptrans = ones(nstates)-Psame;
 ptrans(eye(nstates)==1) = Psame;
-prior = ones(1,nstates)/nstates; %#ok<NASGU>
+if isfield(sexclassifier_params,'frac_female'),
+  prior = [1-sexclassifier_params.frac_female,sexclassifier_params.frac_female];
+else
+  prior = ones(1,nstates)/nstates; %#ok<NASGU>
+end
 state2sex = cell(1,nstates);
 
 % em for hmm
 [mu_area,var_area,ll]=hmm_multiseq_1d(X,nstates,Psame,...
-  sexclassifier_params.niters_em,sexclassifier_params.tol_em);
+  sexclassifier_params.niters_em,sexclassifier_params.tol_em,...
+  [],prior);
 if mu_area(1) > mu_area(2),
   mu_area = mu_area(end:-1:1);
   var_area = var_area(end:-1:1);
