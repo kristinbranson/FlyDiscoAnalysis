@@ -133,4 +133,4 @@ olydata = PrepareOlyDatData(data);
 olydatfilename = sprintf('OlyData_FlyBowl_%sto%s.mat',daterange{1}(1:8),daterange{2}(1:8));
 save(olydatfilename,'olydata');
 
-browser = startBowlBrowser(olydata,'settingsdir',settingsdir,'analysis_protocol',analysis_protocol);
+browser = startBowlBrowser(olydata,'settingsdir',settingsdir,'analysis_protocol',analysis_protocol,'compute_extra_diagnostics',true);
