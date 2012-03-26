@@ -243,7 +243,13 @@ classdef Trx < handle
         v = v*pi/180;
         [data,units] = compute_dnose2ell_anglerange(obj,n,v);
       elseif ~isempty(m_closestfly_nose2ellanglerange),
-        [data,units] = compute_closestfly_nose2ell_anglerange(obj,n,str2double(m_closestfly_nose2ellanglerange));
+        m_closestfly_nose2ellanglerange = strrep(m_closestfly_nose2ellanglerange,'min','-');
+        v = str2double(m_closestfly_nose2ellanglerange);
+        if numel(v) ~= 2 || any(isnan(v)),
+          error('anglerange must be something like min30to30');
+        end
+        v = v*pi/180;        
+        [data,units] = compute_closestfly_nose2ell_anglerange(obj,n,v);
       else
         funname = sprintf('compute_%s',fn);
         [data,units] = feval(funname,obj,n);

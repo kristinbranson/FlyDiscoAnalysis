@@ -40,7 +40,11 @@ end
 fn = sprintf('%s_fly%s_frame%s',field,flycondition,framecondition);
 
 % choose colors for each plot
-datacolors = lines(ndata);
+if ndata > 7,
+  datacolors = jet(ndata)*.7;
+else
+  datacolors = lines(ndata);
+end
 
 %% select out relevant histogram data
 [centers,edges,meanfrac,~,stderrfrac] = ...

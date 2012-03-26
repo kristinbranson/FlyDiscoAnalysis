@@ -47,7 +47,7 @@ switch computername,
 end
 
 analysis_protocol = '20111005';
-outfilename = 'SAGEExpDirConsistencyCheckResults20120215.tsv';
+outfilename = 'SAGEExpDirConsistencyCheckResults20120319.tsv';
 
 %% set parameters
 
@@ -57,4 +57,4 @@ params = {'settingsdir',settingsdir,'rootdatadir',rootdatadir,...
 
 %% 
 
-[isconsistent,filesmissing] = SAGEExpDirConsistencyCheckMany(params{:},'restartexperiment','GMR_38H09_AE_01_TrpA_Rig1Plate15BowlD_20120105T160100');
+[isconsistent,filesmissing] = SAGEExpDirConsistencyCheckMany(params{:});%,'restartexperiment','GMR_38H09_AE_01_TrpA_Rig1Plate15BowlD_20120105T160100');

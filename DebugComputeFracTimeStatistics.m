@@ -42,7 +42,9 @@ end
 
 %% parameters
 
-analysis_protocol = 'current';
+%analysis_protocol = 'current';
+%analysis_protocol = '20120220_non_olympiad_azanchir_housing_CS_20120204';
+analysis_protocol = '20120220_non_olympiad_azanchir_mating_galit_CS_20120211';
 
 tmpinputdir = '/groups/branson/home/kabram/clusterScripts/matlaboutWalk';
 
@@ -52,17 +54,22 @@ params = {'analysis_protocol',analysis_protocol,'settingsdir',settingsdir};
 %   'daterange',{'20110101T000000'},'rootdir',rootdatadir};
 % SAGEParams = {'screen_type','primary','checkflags',true,'removemissingdata',true,...
 %   'rootdir',rootdatadir};
-SAGEParams = {'screen_type','primary','daterange',{'20120101T000000','20120129T000000'},...
-  'checkflags',true,'removemissingdata',true};
+%SAGEParams = {'screen_type','primary','daterange',{'20120101T000000','20120129T000000'},...
+%  'checkflags',true,'removemissingdata',true};
 
-ds = '20120203';
+%ds = '20120203';
+ds = analysis_protocol;
 
-rootoutputdir = '/groups/branson/bransonlab/projects/olympiad/HackHitData';
+%rootoutputdir = '/groups/branson/bransonlab/projects/olympiad/HackHitData';
+rootoutputdir = fullfile('/groups/branson/bransonlab/projects/olympiad/FlyBowlCtrax',analysis_protocol,'results');
 
+SAGEParams = SetSAGEParamsAzanchir(analysis_protocol);
+
+SAGEParams = [SAGEParams,{'rootdir',rootoutputdir}];
 
 %% get a list of experiment directories to process
 
-data = SAGEListBowlExperiments(SAGEParams{:});
+data = SAGEListBowlExperiments(SAGEParams{:},'checkflags',false);
 
 [~,order] = sort({data.exp_datetime});
 order = order(end:-1:1);
@@ -115,7 +122,7 @@ end
 
 %% run in sequence
 
-parfor i = 1:numel(data),
+for i = 1:numel(data),
   [~,experiment_name] = fileparts(data(i).file_system_path);
   expdir = fullfile(rootoutputdir,experiment_name);
   [statsperfly,statsperexp] = ComputeFracTimeStatistics(expdir,params{:});

@@ -15,7 +15,7 @@ end
 
 %% parameters
 
-analysis_protocol = '20110804';
+analysis_protocol = 'current';
 params = {'settingsdir',settingsdir,...
   'analysis_protocol',analysis_protocol};
 

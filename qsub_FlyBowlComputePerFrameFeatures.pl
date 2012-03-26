@@ -5,15 +5,15 @@ use strict;
 
 my $nargs = $#ARGV + 1;
 if($nargs < 1){
-    print "Usage: fork_FlyBowlComputePerFrameFeatures.pl <expdirlist.txt>\n";
+    print "Usage: qsub_FlyBowlComputePerFrameFeatures.pl <expdirlist.txt>\n";
     exit(1);
 }
 
-my $ANALYSIS_PROTOCOL = "20120210";
+my $ANALYSIS_PROTOCOL = "20120322_addperframefeatures";
 
 my $SCRIPT = "/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/settings/$ANALYSIS_PROTOCOL/run_FlyBowlComputePerFrameFeatures.sh";
 
-my $PARAMS = "analysis_protocol $ANALYSIS_PROTOCOL";
+my $PARAMS = "analysis_protocol $ANALYSIS_PROTOCOL forcecompute 0";
 
 my $temporary_dir = "/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/temp_ComputePerFrameFeatures";
 `mkdir -p $temporary_dir`;

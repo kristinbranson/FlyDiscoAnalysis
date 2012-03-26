@@ -1,11 +1,4 @@
 chase,male,any,500
-chase,female,any,500
 walk,any,any,500
-walk,male,any,500
-walk,female,any,500
 stop,any,any,500
-stop,male,any,500
-stop,female,any,500
 jump,any,any,500
-jump,male,any,500
-jump,female,any,500

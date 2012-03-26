@@ -4,42 +4,23 @@ addpath /groups/branson/home/bransonk/tracking/code/JCtrax/misc;
 addpath /groups/branson/home/bransonk/tracking/code/JCtrax/filehandling;
 addpath /groups/branson/bransonlab/projects/olympiad/SAGE/MATLABInterface/Trunk;
 settingsdir = '/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/settings';
+screen_type = 'non_olympiad_azanchir_housing_CS_20120225';
 %screen_type = 'non_olympiad_azanchir_housing_CS_20120204';
 %screen_type = 'non_olympiad_azanchir_mating_galit_CS_20120211';
-screen_type = 'non_olympiad_azanchir_nicotine_mathias_berlin_20120211';
-analysis_protocol = sprintf('20120220_%s',screen_type);
+%screen_type = 'non_olympiad_azanchir_nicotine_mathias_berlin_20120211';
+%analysis_protocol = sprintf('20120220_%s',screen_type);
+analysis_protocol = sprintf('20120228_%s',screen_type);
 rootdatadir = fullfile('/groups/branson/bransonlab/projects/olympiad/FlyBowlCtrax',analysis_protocol,'results');
 
 datalocparamsfilestr = 'dataloc_params.txt';
 datalocparamsfile = fullfile(settingsdir,analysis_protocol,datalocparamsfilestr);
 dataloc_params = ReadParams(datalocparamsfile);
 
+
 %% use SAGE to get experiment list
 
-switch screen_type,
+SAGEParams = SetSAGEParamsAzanchir(screen_type);
 
-  case 'non_olympiad_azanchir_housing_CS_20120204',
-  
-    SAGEParams = {'screen_type','non_olympiad_azanchir',...
-      'line_name','EXT_CantonS_*',...
-      'effector','NoEffector_0_9999',...
-      'handling_protocol',{'HP_flybowl_v006p9.xls','HP_flybowl_v007p0.xls'},...
-      'protocol',{'EP_flybowl_v011p1.xls','EP_flybowl_v011p2.xls'}};
-
-  case 'non_olympiad_azanchir_mating_galit_CS_20120211',
-    SAGEParams = {'screen_type','non_olympiad_azanchir',...
-      'line_name','EXT_CantonS_*',...
-      'effector','NoEffector_0_9999',...
-      'handling_protocol',{'HP_flybowl_v007p1.xls','HP_flybowl_v007p2.xls','HP_flybowl_v007p3.xls','HP_flybowl_v007p6.xls','HP_flybowl_v007p7.xls'},...
-      'protocol','EP_flybowl_v011p3.xls'};
-    
-  case 'non_olympiad_azanchir_nicotine_mathias_berlin_20120211',
-    SAGEParams = {'screen_type','non_olympiad_azanchir',...
-      'line_name',{'EXT_Berlin_1220272','EXT_CantonS_1101243'},...
-      'effector','NoEffector_0_9999',...
-      'handling_protocol',{'HP_flybowl_v007p4.xls','HP_flybowl_v007p5.xls'},...
-      'protocol','EP_flybowl_v011p4.xls'};
-end
 
 exp_metadata = SAGEListBowlExperiments(SAGEParams{:},...
   'checkflags',false,'removemissingdata',false,'rootdir',rootdatadir);
@@ -50,6 +31,16 @@ for i = 1:nexpdirs,
   [~,expnames{i}] = fileparts(expdirs{i});
 end
 
+
+%% copy files from sciserv
+
+if ismember(screen_type,{'non_olympiad_azanchir_housing_CS_20120225'}),
+  for i = 1:numel(exp_metadata),
+    fsp = exp_metadata(i).file_system_path;
+    sspath = fullfile('/groups/sciserv/flyolympiad/Olympiad_Screen/fly_bowl/bowl_data',expnames{i});
+    SymbolicCopyExperimentDirectory(sspath,rootdatadir);    
+  end  
+end
 %% create protocol names
 
 protocolcats = cell(1,nexpdirs);
@@ -129,6 +120,20 @@ FlyBowlCombineExperiments(rootdatadir,outdir,'controldatadirstr','',...
   'analysis_protocol',analysis_protocol);
 controlstats = load(fullfile(outdir,dataloc_params.statsperframematfilestr));
   
+%% conditions to compare
+
+comparisons = ...
+  {{'housing_group_size',{'singlehoused','grouphoused03','grouphoused05','grouphoused10','grouphoused20'}},...
+  {'isolation_length',{'isolated0','isolated1','isolated2','isolated3','isolated4'}},...
+  {'recovery_length',{'recovery0','recovery02','recovery06','recovery12','recovery24'}},...
+  {'all',protocols}};
+  
+for comparisoni = 1:numel(comparisons),
+  
+  comparison_name = comparisons{comparisoni}{1};
+  protocols_curr = comparisons{comparisoni}{2};
+  nprotocols_curr = numel(protocols_curr);
+
 %% plot all stats together
 
 statsperframefeaturesfile = fullfile(settingsdir,analysis_protocol,dataloc_params.statsperframefeaturesfilestr);
@@ -147,20 +152,24 @@ hist_perframefeatures = ReadHistPerFrameFeatures(histperframefeaturesfile);
 histperframebinsfile = fullfile(settingsdir,analysis_protocol,dataloc_params.histperframebinsfilestr);
 load(histperframebinsfile,'bins');
 
-nprotocols = numel(protocols);
-allmeanstatsperfly = cell(1,nprotocols);
-allstatsperfly = cell(1,nprotocols);
-for i = 1:nprotocols,
-  datacurr = load(fullfile(rootdatadir,protocols{i},dataloc_params.statsperframematfilestr));
+%nprotocols = numel(protocols);
+allmeanstatsperfly = cell(1,nprotocols_curr);
+allstatsperfly = cell(1,nprotocols_curr);
+for i = 1:nprotocols_curr,
+  datacurr = load(fullfile(rootdatadir,protocols_curr{i},dataloc_params.statsperframematfilestr));
   allstatsperfly{i} = datacurr.statsperfly;
   allmeanstatsperfly{i} = datacurr.meanstatsperfly;
 end
 
-handles = PlotPerFrameStatsComparison(stats_perframefeatures,allstatsperfly,allmeanstatsperfly,controlstats,protocols);
+handles = PlotPerFrameStatsComparison(stats_perframefeatures,allstatsperfly,allmeanstatsperfly,controlstats,protocols_curr);
 set(handles.hfig,'Visible','on');
 filename = 'stats';
 exts = {'pdf','jpeg'};
-outdir = fullfile(rootdatadir,'analysis_plots');
+if strcmpi(comparison_name,'all'),
+  outdir = fullfile(rootdatadir,'analysis_plots');
+else
+  outdir = fullfile(rootdatadir,comparison_name);
+end
 if ~exist(outdir,'dir'),
   mkdir(outdir);
 end
@@ -171,16 +180,16 @@ end
 
 %% plot all histograms together
 
-allmeanhistperfly = cell(1,nprotocols);
-allhistperfly = cell(1,nprotocols);
-for i = 1:nprotocols,
-  datacurr = load(fullfile(rootdatadir,protocols{i},dataloc_params.histperframematfilestr));
+allmeanhistperfly = cell(1,nprotocols_curr);
+allhistperfly = cell(1,nprotocols_curr);
+for i = 1:nprotocols_curr,
+  datacurr = load(fullfile(rootdatadir,protocols_curr{i},dataloc_params.histperframematfilestr));
   allhistperfly{i} = datacurr.histperfly;
   allmeanhistperfly{i} = datacurr.meanhistperfly;
 end
 
-exts = {'jpeg','pdf'};
-outdir = fullfile(rootdatadir,'analysis_plots');
+%exts = {'jpeg','pdf'};
+%outdir = fullfile(rootdatadir,'analysis_plots');
 
 for typei = 1:numel(hist_perframefeatures),
   handles = PlotPerFrameHistsComparison(hist_perframefeatures(typei).field,...
@@ -189,7 +198,7 @@ for typei = 1:numel(hist_perframefeatures),
     allmeanhistperfly,allhistperfly,...
     bins.(hist_perframefeatures(typei).field),...
     hist_plot_params,...
-    protocols,...
+    protocols_curr,...
     'visible','on');
   drawnow;
   filename = sprintf('hist_%s_fly%s_frame%s',...
@@ -208,3 +217,7 @@ end
 %     bins.(field),hist_plot_params,plottitle,...
 %     'visible',visible,...
 %     'hax',hax);
+
+%% end loop over comparisons
+
+end

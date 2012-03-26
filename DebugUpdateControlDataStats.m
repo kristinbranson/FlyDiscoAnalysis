@@ -53,7 +53,7 @@ params = {'settingsdir',settingsdir,...
   'flag_aborted','0'};
 
 datalocparamsfilestr = 'dataloc_params.txt';
-startyear = 2011;
+startyear = 2012;
 startmonth = 2;
 
 %% loop through months
@@ -87,7 +87,7 @@ end
 %% make current link here
 
 year = startyear;
-month = startmonth+1;
+month = startmonth;
 pwdprev = pwd;
 cd(dataloc_params.pBDPGAL4Ustatsdir);
 while true,

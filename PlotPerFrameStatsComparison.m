@@ -93,7 +93,11 @@ end
 
 %% colors
 
-colors = lines(ndata);
+if ndata > 7,
+  colors = jet(ndata)*.7;
+else
+  colors = lines(ndata);
+end
 
 %colors = jet(nfns)*.7;
 %[tmp,order] = sort(min(abs(meanmeans+stderrmean),abs(meanmeans-stderrmean)));

@@ -43,3 +43,4 @@ while true,
 end
 
 stats_params = struct('field',fields,'framecondition',frameconditions,'flycondition',flyconditions,'minZ',minZ);
+fclose(fid);

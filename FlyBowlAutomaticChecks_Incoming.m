@@ -135,18 +135,6 @@ else
 end
 
 
-if isscreen,
-
-%exp_datenum = datenum(metadata.exp_datetime,datetime_format);
-  
-if (~ismember(metadata.line,check_params.control_line_names) || ...
-    (exp_datenum >= min_barcode_expdatenum)) && ...
-    metadata.cross_barcode < 0,
-  success = false;
-  msgs{end+1} = 'Barcode = -1 and line_name indicates not control';
-  iserror(category2idx.no_barcode) = true;
-end
-
 %% check video length
 
 if ~exist(ufmfdiagnosticsfile,'file'),
@@ -172,6 +160,19 @@ else
       end
     end
   end
+end
+
+
+if isscreen,
+
+%exp_datenum = datenum(metadata.exp_datetime,datetime_format);
+  
+if (~ismember(metadata.line,check_params.control_line_names) || ...
+    (exp_datenum >= min_barcode_expdatenum)) && ...
+    metadata.cross_barcode < 0,
+  success = false;
+  msgs{end+1} = 'Barcode = -1 and line_name indicates not control';
+  iserror(category2idx.no_barcode) = true;
 end
 
 %% check temperature
