@@ -46,6 +46,10 @@ for fieldi = 1:nfields,
   for i = idx,
     fns{end+1} = sprintf('%s_fly%s_frame%s',field,stats_perframefeatures(i).flycondition,...
       stats_perframefeatures(i).framecondition); %#ok<AGROW>
+    % truncate name
+    if numel(fns{end}) > 63,
+      fns{end} = fns{end}(1:63);
+    end
     fields{end+1} = field;
   end
   flyconditions = [flyconditions,{stats_perframefeatures(idx).flycondition}]; %#ok<AGROW>

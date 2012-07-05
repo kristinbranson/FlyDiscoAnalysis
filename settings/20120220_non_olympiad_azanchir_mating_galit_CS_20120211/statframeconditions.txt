@@ -1,0 +1,15 @@
+walking,equal_walk_labels,1
+stopped,equal_stop_labels,1
+moving,equal_stop_labels,0
+jumping,equal_jump_labels,1
+chasing,equal_chase_labels,1
+nearwall,max_dist2wall,15
+nearfly,max_dcenter,6.5
+walkstart,start_walk_labels,1
+stopstart,start_stop_labels,1
+jumpstart,start_jump_labels,1
+chasestart,start_chase_labels,1
+walkend,end_walk_labels,1
+stopend,end_stop_labels,1
+jumpend,end_jump_labels,1
+chaseend,end_chase_labels,1

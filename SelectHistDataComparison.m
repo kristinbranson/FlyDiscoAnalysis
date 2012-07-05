@@ -52,7 +52,7 @@ else
   for datai = 1:ndata,
 
     % which flies we will look at
-    goodidx = ~isnan(histperfly{datai}.(fn).Z);
+    goodidx = ~isnan(histperfly{datai}.(fn).Z) & histperfly{datai}.(fn).Z > 0;
 
     % per-fly hists
     if strcmpi(plottype,'linear'),
@@ -74,9 +74,14 @@ else
     meanfrac{datai} = nan(1,nbins);
     stdfrac{datai} = nan(1,nbins);
     for j = 1:nbins,
-      [meanfrac{datai}(j),s] = ...
-        weighted_mean_cov(fracperfly(j,goodidx)',...
-        histperfly{datai}.(fn).fracframesanalyzed(goodidx)');
+     [meanfrac{datai}(j)] = ...
+        weighted_mean(fracperfly(j,goodidx)',...
+        histperfly{datai}.(fn).Zfly(goodidx)');
+      [s] = weighted_scatter(fracperfly(j,goodidx)',...
+        meanfrac{datai}(j),histperfly{datai}.(fn).fracframesanalyzed(goodidx)');
+%       [meanfrac{datai}(j),s] = ...
+%         weighted_mean_cov(fracperfly(j,goodidx)',...
+%         histperfly{datai}.(fn).fracframesanalyzed(goodidx)');
       stdfrac{datai}(j) = sqrt(s);
     end
   end

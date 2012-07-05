@@ -42,7 +42,7 @@ end
 
 %% parameters
 
-analysis_protocol = '20111005';
+analysis_protocol = 'current';
 vartype = 'experiment';
 dataset = 'score';
 % period = 2;
@@ -53,23 +53,23 @@ dataset = 'score';
 %% which experiments
 
 % d = now;
-% format = 'yyyymmddTHHMMSS';
+format = 'yyyymmddTHHMMSS';
 % maxdatenum = d - min_days_prev;
 % mindatenum = d - max_days_prev;
 % mindatestr = datestr(mindatenum,format);
 % maxdatestr = datestr(maxdatenum,format);
 
-% maxdatestr = '20111021T000000'
-% period = 120
+maxdatestr = '20110810T000000';
+period = 31;
 
 params = {'settingsdir',settingsdir,...
   'analysis_protocol',analysis_protocol,...
   'rootdatadir',rootdatadir,...
   'dataset',dataset,...
   'checkflags',true,...
-  'screen_type','primary'};
-%   'maxdatenum',datenum(maxdatestr,format),...
-%   'period',period,...
+  'screen_type','primary',...
+  'maxdatenum',datenum(maxdatestr,format),...
+  'period',period};
 %   'loadcacheddata',loadcacheddata,...
 %   'datafilename',datafilename,...
 %   'username',username};

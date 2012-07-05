@@ -1,0 +1,1 @@
+../20120109_non_olympiad_azanchir/dataloc_params.txt

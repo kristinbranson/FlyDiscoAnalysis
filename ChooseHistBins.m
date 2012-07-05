@@ -1,33 +1,100 @@
+%% set up path
+addpath /groups/branson/home/bransonk/tracking/code/JCtrax/misc;
+addpath /groups/branson/home/bransonk/tracking/code/JCtrax/filehandling;
+settingsdir = '/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/settings';
+realrootdir = '/groups/sciserv/flyolympiad/Olympiad_Screen/fly_bowl/bowl_data';
+rootdir = '/groups/branson/bransonlab/projects/olympiad/HackHitData';
+rootdir_fixed = '';
 
-if ispc,
-  addpath E:\Code\JCtrax\misc;
-  addpath E:\Code\JCtrax\filehandling;
-else
-  addpath /groups/branson/home/bransonk/tracking/code/JCtrax/misc;
-  addpath /groups/branson/home/bransonk/tracking/code/JCtrax/filehandling;
-end
+analysis_protocol = '20120330';
+datalocparamsfilestr = 'dataloc_params.txt';
+params = {'analysis_protocol',analysis_protocol,...
+  'datalocparamsfilestr',datalocparamsfilestr,...
+  'settingsdir',settingsdir};
 
-%% data locations
+behaviornames = {'chase','walk','stop','jump'};
 
-if ispc,
-  settingsdir = 'E:\Code\FlyBowlAnalysis\settings';
-  rootdir = 'E:\Data\FlyBowl\CtraxTest20110407';
-else
-  settingsdir = '/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/settings';
-  %rootdir = '/groups/sciserv/flyolympiad/Olympiad_Screen/fly_bowl/bowl_data';
-  rootdir = '/groups/branson/bransonlab/tracking_data/olympiad/FlyBowl/CtraxTest20110407';
-end
-
-expdirs = dir(fullfile(rootdir,'*_*'));
-expdirs = cellfun(@(s) fullfile(rootdir,s),{expdirs([expdirs.isdir]).name},'UniformOutput',false);
+fps = 30.3445;
 
 %% parameters
 
-analysis_protocol = '20110407';
-params = {'settingsdir',settingsdir,...
-  'analysis_protocol',analysis_protocol};
 datalocparamsfile = fullfile(settingsdir,analysis_protocol,'dataloc_params.txt');
 dataloc_params = ReadParams(datalocparamsfile);
+
+%% choose experiments to histogram
+
+moviefilestr = 'movie.ufmf';
+trxfilestr = dataloc_params.ctraxfilestr;
+annfilestr = 'movie.ufmf.ann';
+% 
+% expfiles = dir(fullfile(rootoutputdir,'*_*'));
+% experiments_all = [];
+% for i = 1:numel(expfiles),
+%   expdir = fullfile(rootoutputdir,expfiles(i).name);
+%   [res,success] = parseExpDir(expdir);
+%   if success,
+%     res.file_system_path = expdir;
+%     res.exp_datetime = res.date;
+%     if isempty(experiments_all),
+%       experiments_all = res;
+%     else
+%       experiments_all(end+1) = res; %#ok<SAGROW>
+%     end
+%   end
+% end
+
+experiment_params = struct;
+% root data dir
+experiment_params.rootdir = rootdir;
+% what dates should we analyze
+%experiment_params.daterange = {'20110201T000000','20111221T000000'};
+% remove failures
+experiment_params.checkflags = false;
+% remove missing data
+experiment_params.removemissingdata = false;
+% azanchir experiments
+experiment_params.screen_type = 'primary';
+% how to weight various things
+weight_order = {'genotype','date','rig','bowl'};
+% required files
+subreadfiles = {'chase_labels.mat','stop_labels.mat','walk_labels.mat','jump_labels.mat'};
+% what lines
+%experiment_params.linename = '';
+% 
+ngal4 = 100;
+ncontrols = 100;
+tmpparams = struct2paramscell(experiment_params);
+
+%[~,~,~,experiments_all] = getExperimentDirs(tmpparams{:});
+experiments_all = SAGEListBowlExperiments(tmpparams{:});
+
+baddata = false(1,numel(experiments_all));
+for i = 1:numel(experiments_all),
+  if ~exist(experiments_all(i).file_system_path,'dir'),
+    baddata(i) = true;
+    continue;
+  end
+  [~,experiment_name] = myfileparts(experiments_all(i).file_system_path);
+%   annfile = fullfile(rootdir,experiment_name,annfilestr);
+%   if ~exist(annfile,'file'),
+%     baddata(i) = true;
+%   end
+  for j = 1:numel(subreadfiles),
+    if ~exist(fullfile(rootdir,experiment_name,subreadfiles{j}),'file'),
+      baddata(i) = true;
+    end
+  end
+end
+experiments_all(baddata) = [];
+
+%experiments_all = rmfield(experiments_all,'date');
+
+[experiments,ngal4_chosen,ncontrols_chosen] = choose_expdirs(experiments_all,ngal4,ncontrols,'weight_order',weight_order);
+
+expdirs = {experiments.file_system_path};
+nexpdirs = numel(expdirs);
+
+
 
 %% load data
 
@@ -42,15 +109,23 @@ perframefnsfile = fullfile(settingsdir,analysis_protocol,dataloc_params.perframe
 perframefns = importdata(perframefnsfile);
 prctile_store = 10;
 
-histparamsfile = fullfile(settingsdir,analysis_protocol,dataloc_params.histparamsfilestr);
+%histparamsfile = fullfile(settingsdir,analysis_protocol,dataloc_params.histparamsfilestr);
+
+histperframefeaturesfile = fullfile(settingsdir,analysis_protocol,dataloc_params.histperframefeaturesfilestr);
+hist_perframefeatures = ReadHistPerFrameFeatures2(histperframefeaturesfile);
 hist_params = ReadParams(histparamsfile);
 
 %% loop over per-frame parameters
 
 % data structure we will store everything in
 bins = struct;
+perframefns = setdiff({hist_perframefeatures.field},{'duration'});
 
-
+% add in behavior labels
+for i = 1:numel(behaviornames),
+  perframefns{end+1} = ['duration_',behaviornames{i}];
+end
+  
 for fni = 1:numel(perframefns),
   
   fn = perframefns{fni};
@@ -71,13 +146,28 @@ for fni = 1:numel(perframefns),
   for expi = 1:numel(expdirs),
     
     expdir = expdirs{expi};
-    fprintf('exp(%d) = %s\n',expi,expdir);
+    %fprintf('exp(%d) = %s\n',expi,expdir);
 
-    filename = fullfile(expdir,dataloc_params.perframedir,[fn,'.mat']);
-    
-    % get per-frame data for these flies
-    tmp = load(filename,'data');
-    datacurr = cell2mat(tmp.data);
+    m = regexp(fn,'^duration_(.+)$','tokens','once');
+    if ~isempty(m),
+%       trxfilename = fullfile(expdir,dataloc_params.trxfilestr);
+%       trxdata = load(trxfilename);
+%       firstframes = [trxdata.trx.firstframe];
+%       nframes = [trxdata.trx.nframes];
+
+      filename = fullfile(expdir,[m{1},'_labels.mat']);
+      labeldata = load(filename);
+      datacurr = (cell2mat(labeldata.t1s)-cell2mat(labeldata.t0s))/fps;
+    else
+      filename = fullfile(expdir,dataloc_params.perframedir,[fn,'.mat']);
+      if ~exist(filename,'file'), 
+        warning('Could not find file %s, skipping',filename);
+        continue;
+      end
+      % get per-frame data for these flies
+      tmp = load(filename,'data');
+      datacurr = cell2mat(tmp.data);
+    end
     thresh = prctile(datacurr,[prctile_store,100-prctile_store]);
     datasmall = [datasmall,datacurr(datacurr <= thresh(1))]; %#ok<AGROW>
     datalarge = [datalarge,datacurr(datacurr >= thresh(2))]; %#ok<AGROW>

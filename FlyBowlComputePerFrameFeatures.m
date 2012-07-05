@@ -34,6 +34,7 @@ nfns = numel(perframefns);
 
 % clean this data to force computation
 if forcecompute,
+  %deletefns = setdiff(perframefns,Trx.TrajectoryFieldNames());
   trx.CleanPerFrameData();
 end
 

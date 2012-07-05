@@ -1,4 +1,4 @@
-min_seconds_fliesloaded,25
+min_seconds_fliesloaded,0
 max_seconds_fliesloaded,1000
 max_seconds_shiftflytemp,10000
 min_ufmf_diagnostics_summary_nframes,1

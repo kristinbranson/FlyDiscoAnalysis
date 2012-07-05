@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <deployment-project>
-  <configuration target="target.standalone" target-name="Standalone Application" name="FlyBowlComputePerFrameFeatures" location="/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis" file="/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/FlyBowlComputePerFrameFeatures.prj" build-checksum="540909925">
+  <configuration target="target.standalone" target-name="Standalone Application" name="FlyBowlComputePerFrameFeatures" location="/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis" file="/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/FlyBowlComputePerFrameFeatures.prj" build-checksum="2403338163">
     <param.project.name>/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/FlyBowlComputePerFrameFeatures.prj</param.project.name>
     <param.target.type>Standalone Application</param.target.type>
     <param.appname>FlyBowlComputePerFrameFeatures</param.appname>
@@ -83,10 +83,12 @@
       <file>${PROJECT_ROOT}/compute_absdarena_angle.m</file>
       <file>${PROJECT_ROOT}/compute_absdb.m</file>
       <file>${PROJECT_ROOT}/compute_absdecc.m</file>
+      <file>${PROJECT_ROOT}/compute_absdphi.m</file>
       <file>${PROJECT_ROOT}/compute_absdtheta.m</file>
       <file>${PROJECT_ROOT}/compute_absdtheta_tail.m</file>
       <file>${PROJECT_ROOT}/compute_absdu_tail.m</file>
       <file>${PROJECT_ROOT}/compute_absdv_cor.m</file>
+      <file>${PROJECT_ROOT}/compute_absdv_ctr.m</file>
       <file>${PROJECT_ROOT}/compute_absdv_tail.m</file>
       <file>${PROJECT_ROOT}/compute_absphidiff.m</file>
       <file>${PROJECT_ROOT}/compute_absphisideways.m</file>
@@ -141,6 +143,7 @@
       <file>${PROJECT_ROOT}/compute_dv_tail.m</file>
       <file>${PROJECT_ROOT}/compute_ecc.m</file>
       <file>${PROJECT_ROOT}/compute_flipdv_cor.m</file>
+      <file>${PROJECT_ROOT}/compute_ischased.m</file>
       <file>${PROJECT_ROOT}/compute_magveldiff.m</file>
       <file>${PROJECT_ROOT}/compute_nflies_close.m</file>
       <file>${PROJECT_ROOT}/compute_phi.m</file>
@@ -184,189 +187,6 @@
     <matlab>
       <root>/localhome/bransonk/software/matlab/R2011b</root>
       <path>
-        <directory>/groups/branson/home/bransonk/behavioranalysis/code/Jdetect/Jdetect/perframe/compute_perframe_features</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/filehandling</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/misc</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/.svn</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/.svn/prop-base</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/.svn/props</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/.svn/text-base</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/.svn/tmp</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/.svn/tmp/prop-base</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/.svn/tmp/props</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/.svn/tmp/text-base</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/classify</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/classify/.svn</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/classify/.svn/prop-base</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/classify/.svn/props</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/classify/.svn/text-base</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/classify/.svn/tmp</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/classify/.svn/tmp/prop-base</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/classify/.svn/tmp/props</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/classify/.svn/tmp/text-base</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/doc</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/doc/.svn</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/doc/.svn/prop-base</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/doc/.svn/props</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/doc/.svn/text-base</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/doc/.svn/tmp</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/doc/.svn/tmp/prop-base</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/doc/.svn/tmp/props</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/doc/.svn/tmp/text-base</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/doc/classify</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/doc/classify/.svn</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/doc/classify/.svn/prop-base</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/doc/classify/.svn/props</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/doc/classify/.svn/text-base</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/doc/classify/.svn/tmp</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/doc/classify/.svn/tmp/prop-base</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/doc/classify/.svn/tmp/props</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/doc/classify/.svn/tmp/text-base</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/doc/filters</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/doc/filters/.svn</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/doc/filters/.svn/prop-base</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/doc/filters/.svn/props</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/doc/filters/.svn/text-base</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/doc/filters/.svn/tmp</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/doc/filters/.svn/tmp/prop-base</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/doc/filters/.svn/tmp/props</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/doc/filters/.svn/tmp/text-base</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/doc/images</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/doc/images/.svn</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/doc/images/.svn/prop-base</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/doc/images/.svn/props</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/doc/images/.svn/text-base</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/doc/images/.svn/tmp</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/doc/images/.svn/tmp/prop-base</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/doc/images/.svn/tmp/props</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/doc/images/.svn/tmp/text-base</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/doc/matlab</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/doc/matlab/.svn</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/doc/matlab/.svn/prop-base</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/doc/matlab/.svn/props</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/doc/matlab/.svn/text-base</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/doc/matlab/.svn/tmp</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/doc/matlab/.svn/tmp/prop-base</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/doc/matlab/.svn/tmp/props</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/doc/matlab/.svn/tmp/text-base</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/external</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/external/.svn</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/external/.svn/prop-base</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/external/.svn/props</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/external/.svn/text-base</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/external/.svn/tmp</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/external/.svn/tmp/prop-base</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/external/.svn/tmp/props</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/external/.svn/tmp/text-base</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/external/deprecated</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/external/deprecated/.svn</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/external/deprecated/.svn/prop-base</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/external/deprecated/.svn/props</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/external/deprecated/.svn/text-base</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/external/deprecated/.svn/tmp</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/external/deprecated/.svn/tmp/prop-base</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/external/deprecated/.svn/tmp/props</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/external/deprecated/.svn/tmp/text-base</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/external/m2html</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/external/m2html/.svn</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/external/m2html/.svn/prop-base</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/external/m2html/.svn/props</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/external/m2html/.svn/text-base</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/external/m2html/.svn/tmp</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/external/m2html/.svn/tmp/prop-base</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/external/m2html/.svn/tmp/props</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/external/m2html/.svn/tmp/text-base</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/external/m2html/templates</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/external/m2html/templates/.svn</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/external/m2html/templates/.svn/prop-base</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/external/m2html/templates/.svn/props</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/external/m2html/templates/.svn/text-base</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/external/m2html/templates/.svn/tmp</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/external/m2html/templates/.svn/tmp/prop-base</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/external/m2html/templates/.svn/tmp/props</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/external/m2html/templates/.svn/tmp/text-base</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/external/m2html/templates/blue</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/external/m2html/templates/blue/.svn</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/external/m2html/templates/blue/.svn/prop-base</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/external/m2html/templates/blue/.svn/props</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/external/m2html/templates/blue/.svn/text-base</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/external/m2html/templates/blue/.svn/tmp</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/external/m2html/templates/blue/.svn/tmp/prop-base</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/external/m2html/templates/blue/.svn/tmp/props</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/external/m2html/templates/blue/.svn/tmp/text-base</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/external/m2html/templates/brain</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/external/m2html/templates/brain/.svn</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/external/m2html/templates/brain/.svn/prop-base</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/external/m2html/templates/brain/.svn/props</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/external/m2html/templates/brain/.svn/text-base</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/external/m2html/templates/brain/.svn/tmp</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/external/m2html/templates/brain/.svn/tmp/prop-base</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/external/m2html/templates/brain/.svn/tmp/props</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/external/m2html/templates/brain/.svn/tmp/text-base</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/external/m2html/templates/frame</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/external/m2html/templates/frame/.svn</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/external/m2html/templates/frame/.svn/prop-base</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/external/m2html/templates/frame/.svn/props</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/external/m2html/templates/frame/.svn/text-base</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/external/m2html/templates/frame/.svn/tmp</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/external/m2html/templates/frame/.svn/tmp/prop-base</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/external/m2html/templates/frame/.svn/tmp/props</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/external/m2html/templates/frame/.svn/tmp/text-base</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/external/m2html/templates/frame-piotr</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/external/m2html/templates/frame-piotr/.svn</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/external/m2html/templates/frame-piotr/.svn/prop-base</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/external/m2html/templates/frame-piotr/.svn/props</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/external/m2html/templates/frame-piotr/.svn/text-base</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/external/m2html/templates/frame-piotr/.svn/tmp</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/external/m2html/templates/frame-piotr/.svn/tmp/prop-base</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/external/m2html/templates/frame-piotr/.svn/tmp/props</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/external/m2html/templates/frame-piotr/.svn/tmp/text-base</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/external/other</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/external/other/.svn</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/external/other/.svn/prop-base</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/external/other/.svn/props</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/external/other/.svn/text-base</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/external/other/.svn/tmp</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/external/other/.svn/tmp/prop-base</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/external/other/.svn/tmp/props</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/external/other/.svn/tmp/text-base</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/external/svm</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/external/svm/.svn</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/external/svm/.svn/prop-base</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/external/svm/.svn/props</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/external/svm/.svn/text-base</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/external/svm/.svn/tmp</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/external/svm/.svn/tmp/prop-base</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/external/svm/.svn/tmp/props</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/external/svm/.svn/tmp/text-base</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/filters</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/filters/.svn</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/filters/.svn/prop-base</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/filters/.svn/props</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/filters/.svn/text-base</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/filters/.svn/tmp</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/filters/.svn/tmp/prop-base</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/filters/.svn/tmp/props</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/filters/.svn/tmp/text-base</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/images</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/images/.svn</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/images/.svn/prop-base</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/images/.svn/props</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/images/.svn/text-base</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/images/.svn/tmp</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/images/.svn/tmp/prop-base</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/images/.svn/tmp/props</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/images/.svn/tmp/text-base</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/matlab</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/matlab/.svn</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/matlab/.svn/prop-base</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/matlab/.svn/props</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/matlab/.svn/text-base</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/matlab/.svn/tmp</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/matlab/.svn/tmp/prop-base</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/matlab/.svn/tmp/props</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/pdollar_toolbox/matlab/.svn/tmp/text-base</directory>
         <directory>/groups/branson/bransonlab/projects/olympiad/box/PostAnalysis</directory>
         <directory>/groups/branson/bransonlab/projects/olympiad/box/PostAnalysis/branches</directory>
         <directory>/groups/branson/bransonlab/projects/olympiad/box/PostAnalysis/tags</directory>
@@ -511,6 +331,8 @@
         <directory>/groups/branson/bransonlab/projects/olympiad/cross_assay/trunk/matlab/kristin/templateBrain/masks</directory>
         <directory>/groups/branson/bransonlab/projects/olympiad/cross_assay/trunk/matlab/math</directory>
         <directory>/groups/branson/bransonlab/projects/olympiad/SAGE/MATLABInterface/Trunk</directory>
+        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/filehandling</directory>
+        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/misc</directory>
         <directory>${MATLAB_ROOT}/toolbox/matlab/demos</directory>
         <directory>${MATLAB_ROOT}/toolbox/matlab/graph2d</directory>
         <directory>${MATLAB_ROOT}/toolbox/matlab/graph3d</directory>
@@ -656,7 +478,7 @@
       <vista>false</vista>
       <linux>true</linux>
       <solaris>false</solaris>
-      <osver>2.6.32-38-generic</osver>
+      <osver>2.6.32-41-generic</osver>
       <os32>false</os32>
       <os64>true</os64>
       <arch>glnxa64</arch>

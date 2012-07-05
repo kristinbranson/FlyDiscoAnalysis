@@ -36,7 +36,7 @@ end
 
 %% parameters
 
-analysis_protocol = '20120210';
+analysis_protocol = '20120330';
 dateformat = 'yyyymmddTHHMMSS';
 % params = {'settingsdir',settingsdir,...
 %   'analysis_protocol',analysis_protocol,...
@@ -54,7 +54,7 @@ params = {'settingsdir',settingsdir,...
 
 datalocparamsfilestr = 'dataloc_params.txt';
 startyear = 2012;
-startmonth = 2;
+startmonth = 8;
 
 %% loop through months
 

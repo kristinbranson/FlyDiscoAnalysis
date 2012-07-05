@@ -1,0 +1,7 @@
+areasmooth_maxfreq,.005
+areasmooth_filterorder,1
+areasmooth_outlierprctile,.1
+mindur,20
+niters_em,100
+tol_em,.001
+frac_female,.091

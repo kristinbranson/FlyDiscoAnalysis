@@ -55,7 +55,7 @@ else
     fn = fns{typei};
     
     % which flies we will look at
-    goodidx = ~isnan(histperfly.(fn).Z);
+    goodidx = ~isnan(histperfly.(fn).Z) & histperfly.(fn).Z > 0;
 
     % per-fly hists
     if strcmpi(plottype,'linear'),

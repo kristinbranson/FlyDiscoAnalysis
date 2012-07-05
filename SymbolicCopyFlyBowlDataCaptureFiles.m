@@ -4,7 +4,7 @@ filestocopy = {'FlyBowlDataCaptureParams_EP*',...
   'Log.txt','Metadata*','movie.ufmf','QuickStats.png','Quickstats.txt',...
   'SUCCESS','temperature.txt','ufmf_diagnostics.txt','ufmf_log.txt'};
 
-[filestocopy] = myparse(varargin,'filestocopy',filestocopy);
+[filestocopy,dosoftlink] = myparse(varargin,'filestocopy',filestocopy,'dosoftlink',true);
 
 % create the root directory
 if ~exist(rootoutputdir,'dir'),
@@ -48,11 +48,15 @@ for i = 1:numel(filestocopy),
   end
   outfile = fullfile(outexpdir,filestocopy{i});
   if ~exist(outfile,'file'),
-    cmd = sprintf('ln -s %s %s',infile,outfile);
+    if dosoftlink,
+      cmd = sprintf('ln -s %s %s',infile,outfile);
+    else
+      cmd = sprintf('cp %s %s',infile,outfile);
+    end
     fprintf('%s -> %s\n',infile,outfile);
     system(cmd);
     if ~exist(outfile,'file'),
-      error('Soft-linked file %s not created successfully',outfile);
+      error('File %s not created successfully',outfile);
     end
   end
 end

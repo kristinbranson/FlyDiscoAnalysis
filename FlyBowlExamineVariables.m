@@ -232,7 +232,8 @@ end
   params.figpos,params.date.datenumnow,params.username,params.rootdatadir,...
   data.dataset,params.loadcacheddata,state.datafilename,...
   params.groupnames,params.plotgroup,data.data_types,...
-  params.docheckflags,params.flybowl_startdate,params.query_leftovers] = ...
+  params.docheckflags,params.flybowl_startdate,...
+  params.SAGEdata,params.query_leftovers] = ...
   myparse_nocheck(varargin,...
   'analysis_protocol',params.analysis_protocol,...
   'settingsdir',params.settingsdir,...
@@ -251,7 +252,8 @@ end
   'plotgroup',params.plotgroup,...
   'data_types',data.data_types,...
   'checkflags',params.docheckflags,...
-  'flybowl_startdate','20110201');
+  'flybowl_startdate','20110201',...
+  'SAGEdata',[]);
 
 % number of date range options
 params.date.maxperiodsprev = ceil((now-datenum(params.flybowl_startdate,'yyyymmdd'))/params.date.period);
@@ -288,6 +290,8 @@ end
 
 %% select (default) date range
 
+if isempty(params.SAGEdata),
+
 SelectDateRange();
 
 while true,
@@ -311,6 +315,15 @@ while true,
     break;
   end
   
+end
+
+else
+  
+  didgetdata = GetData(params.SAGEdata);
+  if ~didgetdata,
+    return;
+  end
+
 end
 
 %% default file names
@@ -375,7 +388,7 @@ SetCallbacks();
 
 %% load data from SAGE or cached mat file
 
-  function success = GetData()
+  function success = GetData(varargin)
     
     success = false;
     
@@ -385,6 +398,9 @@ SetCallbacks();
       if ~didloaddata,
         return;
       end
+    elseif nargin >= 1,
+      rawdata = varargin{1};
+      save('TMP_FlyBowlExamineVariables_rawdata.mat','rawdata');      
     else
       
       % pull data from Sage

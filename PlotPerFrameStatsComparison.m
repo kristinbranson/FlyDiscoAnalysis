@@ -48,6 +48,9 @@ for fieldi = 1:nfields,
   for i = idx,
     fns{end+1} = sprintf('%s_fly%s_frame%s',field,stats_perframefeatures(i).flycondition,...
       stats_perframefeatures(i).framecondition); %#ok<AGROW>
+    if numel(fns{end}) > 63,
+      fns{end} = fns{end}(1:63);
+    end
     fields{end+1} = field;
   end
   flyconditions = [flyconditions,{stats_perframefeatures(idx).flycondition}]; %#ok<AGROW>
@@ -87,7 +90,7 @@ for fni = 1:nfns,
     goodidx = ~isnan(statsperfly{datai}.(fn).Z);
     nflies = sum(statsperfly{datai}.(fn).fracframesanalyzed(goodidx));
     nfliesanalyzed(datai,fni) = nflies;
-    stderrmean(datai,fni) = stdmeans(fni) / sqrt(nflies);
+    stderrmean(datai,fni) = stdmeans(datai,fni) / sqrt(nflies);
   end
 end
 
@@ -166,7 +169,7 @@ else
 end
 hle = legend(hax,h,basenames);
 set(hle,'Interpreter','none');
-hti = title(hax,sprintf('Mean, stderr of mean'),'Interpreter','none');
+hti = title(hax,sprintf('Mean, stderr of per-fly means'),'Interpreter','none');
 %hti = title(hax,sprintf('Mean, stderr of mean for %s',basename),'Interpreter','none');
 
 %% rotate ticks

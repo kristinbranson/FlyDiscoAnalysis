@@ -9,7 +9,7 @@ if($nargs < 1){
     exit(1);
 }
 
-my $ANALYSIS_PROTOCOL = "20120322_addperframefeatures";
+my $ANALYSIS_PROTOCOL = "20120210";
 
 my $SCRIPT = "/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/settings/$ANALYSIS_PROTOCOL/run_FlyBowlComputePerFrameFeatures.sh";
 

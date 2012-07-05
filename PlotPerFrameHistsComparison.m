@@ -1,4 +1,4 @@
-function handles = PlotPerFrameHistsComparison(field,flycondition,framecondition,...
+function handles = PlotPerFrameHistsComparison(id,field,flycondition,framecondition,...
   histperexp,histperfly,bininfo,hist_plot_params,datanames,varargin)
 
 % parse plotting parameters
@@ -14,8 +14,8 @@ function handles = PlotPerFrameHistsComparison(field,flycondition,framecondition
   'linestyle','-',...
   'stdstyle','patch');
 
-if isfield(hist_plot_params,field),
-  plottype = hist_plot_params.(field);
+if isfield(hist_plot_params,id),
+  plottype = hist_plot_params.(id);
 else
   plottype = 'linear';
 end
@@ -38,6 +38,9 @@ else
 end
 
 fn = sprintf('%s_fly%s_frame%s',field,flycondition,framecondition);
+if numel(fn) > 63,
+  fn = fn(1:63);
+end
 
 % choose colors for each plot
 if ndata > 7,
@@ -97,10 +100,12 @@ set(hax,'XLim',[edges(1),edges(end)]);
 allys = [meanfrac{:}]+[stderrfrac{:}];
 maxy = max(allys);
 mosty = prctile(allys,99.9);
-if mosty / maxy > .9,
-  set(hax,'YLim',[-.01*maxy,maxy*1.01]);
-else
-  set(hax,'YLim',[-.01*mosty,mosty*1.01]);
+if ~all(isnan(allys)),
+  if mosty / maxy > .9,
+    set(hax,'YLim',[-.01*maxy,maxy*1.01]);
+  else
+    set(hax,'YLim',[-.01*mosty,mosty*1.01]);
+  end
 end
 
 xtick = get(hax,'XTick');
@@ -114,7 +119,7 @@ set(hax,'XTick',xtick,'XTickLabel',xticklabel);
 hleg = legend(hdata,datanames,'Location','Best','Parent',hfig,'Interpreter','none');
 hxlabel = xlabel(hax,field,'Interpreter','none');
 hylabel = ylabel(hax,'Fraction of frames');
-hti = title(hax,sprintf('Histogram of %s, %s binning',fn,plottype),'Interpreter','none');
+hti = title(hax,sprintf('Histogram of %s, %s binning, stderr of per-fly means',fn,plottype),'Interpreter','none');
 
 handles = struct;
 handles.hdata = hdata;

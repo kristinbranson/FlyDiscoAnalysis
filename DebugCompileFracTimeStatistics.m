@@ -44,7 +44,7 @@ end
 
 %% parameters
 
-timestamp = '20120227';
+timestamp = '20120312';
 figfiledir = sprintf('fractimefigs_%s',timestamp);
 analysis_protocol = 'current';
 bowlhackhitmatfile = sprintf('BowlHackHitData%s.mat',timestamp);
@@ -88,7 +88,7 @@ DOHISTOGRAMDATA = true;
 
 %SAGEParams = {'checkflags',true,'removemissingdata',true,'screen_type','non_olympiad_mushroombody'};
 %SAGEParams = {'checkflags',true,'removemissingdata',true,'screen_type','primary'};
-SAGEParams = {'screen_type','primary','daterange',{'20120201T000000','20120301T000000'},...
+SAGEParams = {'screen_type','primary','daterange',{'20120222T000000','20120224T000000'},...
   'checkflags',true,'removemissingdata',true};
 % line_names = {'GMR_31B05_AE_01'
 %   'GMR_26B07_AE_01'

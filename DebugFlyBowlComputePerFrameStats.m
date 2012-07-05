@@ -15,16 +15,22 @@ if ispc,
   rootdir = 'E:\Data\FlyBowl\bowl_data';
 else
   settingsdir = '/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/settings';
-  rootdir = '/groups/sciserv/flyolympiad/Olympiad_Screen/fly_bowl/bowl_data';
+  rootdir = '/groups/branson/bransonlab/projects/olympiad/HackHitData/';
+  %rootdir = '/groups/sciserv/flyolympiad/Olympiad_Screen/fly_bowl/bowl_data';
   %rootdir = '/groups/branson/bransonlab/tracking_data/olympiad/FlyBowl/CtraxTest20110407';
 end
 
 %% parameters
 
-analysis_protocol = '20110407';
+analysis_protocol = '20120330';
 params = {'settingsdir',settingsdir,...
-  'analysis_protocol',analysis_protocol,...
-  'visible','on'};
+  'analysis_protocol',analysis_protocol};
+
+%% 
+
+experiment_name = 'GMR_71G01_AE_01_TrpA_Rig1Plate15BowlA_20120316T144027';
+expdir = fullfile(rootdir,experiment_name);
+FlyBowlComputePerFrameStats2(expdir,params{:});
 
 %%
 

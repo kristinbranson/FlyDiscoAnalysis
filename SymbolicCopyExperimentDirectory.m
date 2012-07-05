@@ -1,4 +1,7 @@
-function SymbolicCopyExperimentDirectory(expdir,rootoutputdir)
+function SymbolicCopyExperimentDirectory(expdir,rootoutputdir,varargin)
+
+[copyfiles,ignorefiles,dosoftlink] = myparse(varargin,...
+  'copyfiles',{},'ignorefiles',{},'dosoftlink',true);
 
 % create the root directory
 if ~exist(rootoutputdir,'dir'),
@@ -22,10 +25,23 @@ subfiles = dir(expdir);
 subfiles = setdiff({subfiles.name},{'.','..','perframe'});
 
 for i = 1:numel(subfiles),
+  
+  if ~isempty(copyfiles) && ~ismember(subfiles{i},copyfiles),
+    continue;
+  end
+  
+  if ismember(subfiles{i},ignorefiles),
+    continue;
+  end
+  
   infile = fullfile(expdir,subfiles{i});
   outfile = fullfile(outexpdir,subfiles{i});
   if ~exist(outfile,'file'),
-    cmd = sprintf('ln -s %s %s',infile,outfile);
+    if dosoftlink,
+      cmd = sprintf('ln -s %s %s',infile,outfile);
+    else
+      cmd = sprintf('cp %s %s',infile,outfile);
+    end
     system(cmd);
     if ~exist(outfile,'file'),
       error('Soft-linked file %s not created successfully',outfile);
@@ -35,7 +51,7 @@ end
 
 inperframedir = fullfile(expdir,'perframe');
 outperframedir = fullfile(outexpdir,'perframe');
-if exist(inperframedir,'dir'),
+if exist(inperframedir,'dir') && (isempty(copyfiles) || ismember('perframe',copyfiles)) && ~ismember('perframe',ignorefiles),
   if ~exist(outperframedir,'dir'),
     cmd = sprintf('mkdir %s',outperframedir);
     unix(cmd);
@@ -47,7 +63,11 @@ if exist(inperframedir,'dir'),
     infile = fullfile(inperframedir,subfiles{i});
     outfile = fullfile(outperframedir,subfiles{i});
     if ~exist(outfile,'file'),
-      cmd = sprintf('ln -s %s %s',infile,outfile);
+      if dosoftlink,
+        cmd = sprintf('ln -s %s %s',infile,outfile);
+      else
+        cmd = sprintf('cp %s %s',infile,outfile);
+      end
       system(cmd);
       if ~exist(outfile,'file'),
         error('Soft-linked file %s not created successfully',outfile);

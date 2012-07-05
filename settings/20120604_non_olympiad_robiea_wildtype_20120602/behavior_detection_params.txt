@@ -1,0 +1,4 @@
+chase,male,any,500
+walk,any,any,500
+stop,any,any,500
+jump,any,any,500
