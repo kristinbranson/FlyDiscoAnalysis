@@ -33,6 +33,8 @@ switch computername,
     addpath /groups/branson/bransonlab/projects/olympiad/SAGE/MATLABInterface/Trunk;
     addpath /groups/branson/home/bransonk/tracking/code/Ctrax/matlab/netlab;
     addpath /groups/branson/home/bransonk/tracking/code/lds/hmm;
+    addpath /groups/branson/home/bransonk/behavioranalysis/code/Jdetect/Jdetect/perframe;
+
     settingsdir = '/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/settings';
     rootdatadir = '/groups/sciserv/flyolympiad/Olympiad_Screen/fly_bowl/bowl_data';
 
@@ -50,9 +52,10 @@ end
 %% parameters
 
 % expdir = '/groups/branson/bransonlab/projects/olympiad/FlyBowlCtrax/20120220_non_olympiad_azanchir_housing_pBDPGAL4U_20111216/results/pBDPGAL4U_UAS_IVS_myr_3_0009_Rig1Plate15BowlA_20120113T142907';
-expdir = '/groups/branson/bransonlab/projects/olympiad/FlyBowlCtrax/20120220_non_olympiad_azanchir_mating_galit_CS_20120211/results/EXT_CantonS_1220002_None_Rig1Plate15BowlA_20120211T123840';
-params = {};
+%expdir = '/groups/branson/bransonlab/projects/olympiad/FlyBowlCtrax/20120220_non_olympiad_azanchir_mating_galit_CS_20120211/results/EXT_CantonS_1220002_None_Rig1Plate15BowlA_20120211T123840';
+expdir = '/groups/branson/bransonlab/projects/olympiad/FlyBowlCtrax/20120923_non_olympiad_bilenj/results/CantonS_no_effector_Rig2Plate17BowlD_20120807T133229';
+params = {'analysis_protocol','20120923_non_olympiad_bilenj','doplotperframestats',false};
 
 %% run
 
-[success,msgs,stage] = FlyBowlAnalysisPipeline(expdir,params{:});
+[success,msgs,stage] = FlyBowlAnalysisPipeline2(expdir,params{:});

@@ -36,7 +36,7 @@ end
 
 %% parameters
 
-analysis_protocol = '20120330';
+analysis_protocol = '20120706';
 dateformat = 'yyyymmddTHHMMSS';
 % params = {'settingsdir',settingsdir,...
 %   'analysis_protocol',analysis_protocol,...
@@ -50,11 +50,12 @@ params = {'settingsdir',settingsdir,...
   'manual_pf',{'U','P'},...
   'automated_pf',{'U','P'},...
   'flag_redo','0',...
-  'flag_aborted','0'};
+  'flag_aborted','0',...
+  'checkflags',false};
 
 datalocparamsfilestr = 'dataloc_params.txt';
-startyear = 2012;
-startmonth = 8;
+startyear = 2011;
+startmonth = 2;
 
 %% loop through months
 
@@ -104,7 +105,18 @@ while true,
   end
   daterange = {datestr(dvstart,dateformat),datestr(dvend,dateformat)};
   outdir = sprintf('%sto%s_computed%s',daterange{:},timestamp);
+  if ~exist(outdir,'dir'),
+    warning('%s does not exist',outdir);
+    continue;
+  end
   currentdir = sprintf('%sto%s_current',daterange{:});
+  if exist(currentdir,'dir'),
+    try
+      unix(sprintf('rm %s',currentdir));
+    catch ME,
+      warning('Could not delete old current directory %s: %s',currentdir,getReport(ME));
+    end
+  end
   cmd = sprintf('ln -s %s %s',outdir,currentdir);
   unix(cmd);
 end
@@ -113,7 +125,7 @@ cd(pwdprev);
 %% also do everything into one directory
 
 dvstart = [2011,02,1,0,0,0];
-dvend = [2012,02,1,0,0,0];
+dvend = [2012,09,1,0,0,0];
 daterange = {datestr(dvstart,dateformat),datestr(dvend,dateformat)};
 fprintf('Computing control data statistics for %s to %s...\n',daterange{:});
 outdir = fullfile(dataloc_params.pBDPGAL4Ustatsdir,sprintf('%sto%s_computed%s',daterange{:},timestamp));

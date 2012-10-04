@@ -1,7 +1,8 @@
 % combine data from multiple experiments
-function FlyBowlCombineExperiments2(rootdir,outdir,varargin)
+function success = FlyBowlCombineExperiments2(rootdir,outdir,varargin)
 
 special_cases = {'fractime','duration','boutfreq'};
+success = false;
 
 % parse arguments
 [settingsdir,analysis_protocol,datalocparamsfilestr,...
@@ -182,7 +183,7 @@ statsdata.exp_params = exp_params;
 statsdata.expdirs = expdirs;
 statsdata.experiments = experiments;
 
-save(statsmatsavename,'-struct','statsdata');
+save(statsmatsavename,'-v7.3','-struct','statsdata');
 % save to text file
 fns = fieldnames(statsperfly);
 for i = 1:numel(fns),
@@ -317,10 +318,11 @@ histids = cell(1,numel(hist_perframefeatures));
 for i = 1:numel(hist_perframefeatures),
   histfields{i} = hist_perframefeatures(i).field;
   if ismember(histfields{i},special_cases),
-    frameconditionparams = DecodeConditions(hist_perframefeatures(i).framecondition,frameconditiondict);
-    m = regexp(frameconditionparams(1:2:end),'^[^_]+_(.+)_labels$','once','tokens');
-    tmp = find(~cellfun(@isempty,m),1);
-    histids{i} = [histfields{i},'_',m{tmp}{1}];
+    histids{i} = [histfields{i},'_',hist_perframefeatures(i).framecondition];
+%     frameconditionparams = DecodeConditions(hist_perframefeatures(i).framecondition,frameconditiondict);
+%     m = regexp(frameconditionparams(1:2:end),'^[^_]+_(.+)_labels$','once','tokens');
+%     tmp = find(~cellfun(@isempty,m),1);
+%     histids{i} = [histfields{i},'_',m{tmp}{1}];
   else
     if strcmp(hist_perframefeatures(i).framecondition,'any'),
       histids{i} = histfields{i};
@@ -399,7 +401,7 @@ for i = 1:numel(histfields),
   save2png(savename,handles.hfig);
   
   if ~isempty(controlhist),
-    handles_control = PlotPerFrameHist3(id,field,idxcurr,hist_perframefeatures,...
+    handles_control = PlotPerFrameHists3(id,field,idxcurr,hist_perframefeatures,...
       controlhist.meanhistperexp,controlhist.histperexp,...
       bins.(binfn),hist_plot_params,plottitle,...
       'visible',visible,'linestyle',':','stdstyle','errorbar',...
@@ -442,5 +444,7 @@ for i = 1:numel(histfields),
   
   
 end
+
+success = true;
 
 close all;

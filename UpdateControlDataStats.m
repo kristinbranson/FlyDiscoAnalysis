@@ -23,8 +23,10 @@ if ~exist(dataloc_params.pBDPGAL4Ustatsdir,'file'),
   mkdir(dataloc_params.pBDPGAL4Ustatsdir);
 end
 
+didmakedir = false;
 if ~exist(outdir,'file')
   mkdir(outdir);
+  didmakedir = true;
 end
 
 %% allowed dates
@@ -39,7 +41,7 @@ if ~iscell(daterange) && ~isempty(daterange) && daterange == 0,
   daterange = {mindatestr,maxdatestr};
 end
 
-FlyBowlCombineExperiments(rootdir,outdir,...
+success = FlyBowlCombineExperiments2(rootdir,outdir,...
   'settingsdir',settingsdir,...
   'analysis_protocol',analysis_protocol,...
   'datalocparamsfilestr',datalocparamsfilestr,...
@@ -47,3 +49,10 @@ FlyBowlCombineExperiments(rootdir,outdir,...
   'line_name','pBDPGAL4U',...
   'controldatadirstr','',...
   leftovers{:});
+
+if ~success,
+  fprintf('Could not create control stats for date range %s to %s\n',daterange{:});
+  if didmakedir,
+    rmdir(outdir);
+  end
+end

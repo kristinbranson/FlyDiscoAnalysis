@@ -13,7 +13,7 @@ angle = cell(1,nflies);
 
 for i1 = 1:nflies,
   fly1 = flies(i1);
-  fprintf('fly1 = %d\n',fly1);
+  fprintf('target 1 = %d\n',fly1);
 
   % use dnose2center and major axis length to compute upper and lower bounds on
   % dnose2ell
@@ -40,7 +40,7 @@ for i1 = 1:nflies,
     angle{i1}(idx) = anglecurr(idx);
   end
   closestfly{i1} = flies(closesti);
-  closestfly{i1}(isnan(mind{i1}|isinf(mind{i1}))) = nan;
+  closestfly{i1}(isnan(mind{i1})|isinf(mind{i1})) = nan;
 end
 
 % so that we don't compute dcenter twice
@@ -48,6 +48,11 @@ if dosave_d,
   data = mind; %#ok<NASGU>
   units = parseunits('mm'); %#ok<NASGU>
   filename = trx.GetPerFrameFile('dnose2ell',n);
+  if exist(filename,'file'),
+    try
+      delete(filename);
+    end
+  end
   try
     save(filename,'data','units');
   catch ME,
@@ -56,7 +61,18 @@ if dosave_d,
   data = angle; %#ok<NASGU>
   units = parseunits('rad'); %#ok<NASGU>
   filename = trx.GetPerFrameFile('angleonclosestfly',n);
-  save(filename,'data','units');
+  if exist(filename,'file'),
+    try
+      delete(filename);
+    catch ME
+      warning('Could not delete file %s: %s',filename,getReport(ME));
+    end
+  end
+  try
+    save(filename,'data','units');
+  catch ME
+    warning('Could not save to file %s: %s',filename,getReport(ME));
+  end
 end
 
 data = closestfly;

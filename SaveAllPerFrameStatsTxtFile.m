@@ -1,6 +1,11 @@
 function SaveAllPerFrameStatsTxtFile(statstxtsavename,statsperfly,statsperexp)
   
 % open file
+if exist(statstxtsavename,'file'),
+  try
+    delete(statstxtsavename);
+  end
+end
 fid = fopen(statstxtsavename,'w');
 if fid < 0,
   error('Could not open file %s for writing',statstxtsavename);

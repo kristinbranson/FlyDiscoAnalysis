@@ -452,7 +452,7 @@ if ~isempty(imsavename),
   
   figure(hfig);
   clf(hfig);
-  set(hfig,'Position',figpos);
+  set(hfig,'Units','pixels','Position',figpos);
   nimsplot = 2;
   hax = createsubplots(1,nimsplot,.025,hfig);
   
@@ -552,6 +552,13 @@ if ~isempty(imsavename),
   title(hax(2),'Registered bkgd image');
 
   try
+    if exist(imsavename,'file'),
+      try
+        delete(imsavename);
+      catch ME,
+        warning('Could not delete file %s:\n %s',imsavename,getReport(ME));
+      end
+    end
     save2png(imsavename,hfig);
   catch ME,
     warning('Could not save to %s:\n%s',imsavename,getReport(ME));

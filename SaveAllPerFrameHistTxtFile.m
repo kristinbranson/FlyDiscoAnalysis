@@ -1,5 +1,11 @@
 function SaveAllPerFrameHistTxtFile(histtxtsavename,histperfly,histperexp)
 
+if exist(histtxtsavename,'file'),
+  try
+    delete(histtxtsavename);
+  end
+end
+
 % open file
 fid = fopen(histtxtsavename,'w');
 if fid < 0,

@@ -18,7 +18,6 @@ fractime,stopped,secondhalf,0,250
 # walks
 fractime,walking,any,0,500
 duration,walking,any,2,500
-duration,walking,any,2,500
 boutfreq,walking,any,0,500
 
 fractime,walking_nearwall,any,0,500

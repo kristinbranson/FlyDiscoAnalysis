@@ -11,7 +11,7 @@ if($nargs < 1){
     exit(1);
 }
 
-my $ANALYSIS_PROTOCOL = "20120210";
+my $ANALYSIS_PROTOCOL = "20120830_wings";
 
 my $SCRIPT = "/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/settings/$ANALYSIS_PROTOCOL/run_$SCRIPTNAME.sh";
 
@@ -20,9 +20,9 @@ my $PARAMS = "analysis_protocol $ANALYSIS_PROTOCOL";
 my $temporary_dir = "/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/temp_$SCRIPTNAME";
 `mkdir -p $temporary_dir`;
 
-my $MCR = "/groups/branson/bransonlab/projects/olympiad/MCR/v716";
+my $MCR = "/groups/branson/bransonlab/projects/olympiad/MCR/v717";
 
-my $MCR_CACHE_ROOT = "/tmp/mcr_cache_root";
+my $MCR_CACHE_ROOT = "/scratch/bransonk/mcr_cache_root";
 
 # read in expdirs
 my $expdirfile = $ARGV[0];
@@ -68,8 +68,8 @@ while(my $expdir = <FILE>){
     # submit command
     my $cmd = qq~qsub -N $sgeid -j y -b y -o $outfilename -cwd $shfilename~;
     print "submitting to cluster: $cmd\n";
-    exit;
     system($cmd);
+    #exit;
     #system($shfilename);
     $njobs++;
 

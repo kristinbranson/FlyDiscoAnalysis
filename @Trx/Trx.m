@@ -50,6 +50,9 @@ classdef Trx < handle
     % number of flies per movie
     nfliespermovie = [];
     
+    % whether we are in DEBUG mode and should not write anything
+    DEBUG = false;
+    
     %% parameters of data locations
     
     settingsdir = '/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/settings';
@@ -104,6 +107,7 @@ classdef Trx < handle
     ndatacachedperexp = [];
     
     % data cached for each experiment
+    nfnscached = [];
     datacached = {};
     fnscached = {};
     
@@ -166,7 +170,8 @@ classdef Trx < handle
       obj.perframehistory = cell(0,2);
       obj.ndatacached = 0;
       obj.datacached = {};
-      
+      obj.nfnscached = [];
+
     end
     
     function file = getDataLoc(obj,s)
@@ -214,6 +219,10 @@ classdef Trx < handle
 
     function [data,units] = ComputePerFrameData(obj,fn,n)
       
+      if obj.DEBUG,
+        fprintf('Computing %s for experiment %d\n',fn,n);
+      end
+      
       m_magveldiff = regexp(fn,'^magveldiff_(.*)$','tokens','once');
       m_veltoward = regexp(fn,'^veltoward_(.*)$','tokens','once');
       m_absthetadiff = regexp(fn,'^absthetadiff_(.*)$','tokens','once');
@@ -222,6 +231,8 @@ classdef Trx < handle
       m_absanglefrom1to2 = regexp(fn,'^absanglefrom1to2_(.*)$','tokens','once');
       m_dnose2ellanglerange = regexp(fn,'^dnose2ell_angle_(\w+)to(\w+)$','tokens','once');
       m_closestfly_nose2ellanglerange = regexp(fn,'^closestfly_nose2ell_angle_(\w+)to(\w+)$','tokens','once');
+      m_nflies_close = regexp(fn,'^nflies_close_(.+)$','tokens','once');
+      m_closestfly = regexp(fn,'^closestfly_(.*)$','tokens','once');
       if ~isempty(m_magveldiff),
         [data,units] = compute_magveldiff(obj,n,m_magveldiff{1});
       elseif ~isempty(m_veltoward),
@@ -241,7 +252,7 @@ classdef Trx < handle
           error('anglerange must be something like min30to30');
         end
         v = v*pi/180;
-        [data,units] = compute_dnose2ell_anglerange(obj,n,v);
+        [data,units] = compute_dnose2ell_anglerange(obj,n,v,~obj.DEBUG);
       elseif ~isempty(m_closestfly_nose2ellanglerange),
         m_closestfly_nose2ellanglerange = strrep(m_closestfly_nose2ellanglerange,'min','-');
         v = str2double(m_closestfly_nose2ellanglerange);
@@ -249,14 +260,25 @@ classdef Trx < handle
           error('anglerange must be something like min30to30');
         end
         v = v*pi/180;        
-        [data,units] = compute_closestfly_nose2ell_anglerange(obj,n,v);
+        [data,units] = compute_closestfly_nose2ell_anglerange(obj,n,v,~obj.DEBUG);
+      elseif ~isempty(m_nflies_close),
+        [data,units] = compute_nflies_close(obj,n,str2double(m_nflies_close{1}));
+      elseif ~isempty(m_closestfly),
+        % if debugging, don't save intermediate results
+        funname = sprintf('compute_%s',fn);
+        [data,units] = feval(funname,obj,n,~obj.DEBUG);
       else
         funname = sprintf('compute_%s',fn);
         [data,units] = feval(funname,obj,n);
       end
       filename = obj.GetPerFrameFile(fn,n);
       try
-        save(filename,'data','units');
+        if ~obj.DEBUG,
+          if exist(filename,'file'),
+            delete(filename);
+          end
+          save(filename,'data','units');
+        end
       catch ME
         warning('Could not save %s data to %s: %s',fn,filename,getReport(ME));
       end
@@ -300,6 +322,9 @@ classdef Trx < handle
     x = LoadPerFrameData(obj,fn,n)
     
     labelidx = LoadLabelsFromFile(obj,labelfilestr,varargin)
+    
+    [scores,labelidx] = LoadScoresFromFile(obj,labelfilestr,varargin)
+    
     
     CleanPerFrameData(obj,fns,varargin)
     

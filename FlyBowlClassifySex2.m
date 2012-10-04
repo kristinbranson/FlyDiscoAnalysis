@@ -102,7 +102,7 @@ ptrans(eye(nstates)==1) = Psame;
 if isfield(sexclassifier_params,'frac_female'),
   prior = [1-sexclassifier_params.frac_female,sexclassifier_params.frac_female];
 else
-  prior = ones(1,nstates)/nstates; %#ok<NASGU>
+  prior = ones(1,nstates)/nstates; 
 end
 state2sex = cell(1,nstates);
 
@@ -124,8 +124,12 @@ maxfreq = sexclassifierin.areasmooth_maxfreq; %#ok<NASGU>
 maxerrx = sexclassifierin.areasmooth_maxerrx; %#ok<NASGU>
 
 if dosave,
-  save(sexclassifieroutmatfile,'mu_area','var_area','ptrans','prior','ll',...
-    'nstates','state2sex','maxerrx','maxfreq','filterorder');
+  try
+    save(sexclassifieroutmatfile,'mu_area','var_area','ptrans','prior','ll',...
+      'nstates','state2sex','maxerrx','maxfreq','filterorder');
+  catch ME,
+    warning('Could not save to file %s: %s',sexclassifieroutmatfile,getReport(ME));
+  end
 end
 
 %% classify sex
@@ -207,7 +211,16 @@ end
 
 sexclassifierdiagnosticsfile = fullfile(expdir,dataloc_params.sexclassifierdiagnosticsfilestr);
 if dosave,
+  if exist(sexclassifierdiagnosticsfile,'file'),
+    try %#ok<TRYNC>
+      delete(sexclassifierdiagnosticsfile);
+    end
+  end      
   fid = fopen(sexclassifierdiagnosticsfile,'w');
+  if fid < 0,
+    warning('Could not open file %s for writing, printing diagnostics to stdout instead',sexclassifierdiagnosticsfile);
+    fid = 1;
+  end
 else
   fid = 1;
 end
@@ -216,12 +229,16 @@ for i = 1:numel(fns),
   fprintf(fid,'%s,%f\n',fns{i},summary_diagnostics.(fns{i}));
 end
 
-if dosave,
+if dosave && fid > 1,
   fclose(fid);
 end
 
 %% resave
 
 if dosave,
-  save('-append',trxfile,'trx');
+  try
+    save('-append',trxfile,'trx');
+  catch ME,
+    warning('Could not save to file %s: %s',trxfile,getReport(ME));
+  end
 end

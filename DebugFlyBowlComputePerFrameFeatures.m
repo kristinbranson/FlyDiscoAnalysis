@@ -27,7 +27,7 @@ params = {'settingsdir',settingsdir,...
 
 %% 
 rootdatadir = '/groups/sciserv/flyolympiad/Olympiad_Screen/fly_bowl/bowl_data';
-experiment_name = 'EXT_CantonS_1220002_None_Rig1Plate15BowlA_20120519T124001';
+experiment_name = 'GMR_MB031B_TrpA_Rig2Plate17BowlA_20120610T132136';
 expdir = fullfile(rootdatadir,experiment_name);
 SymbolicCopyExperimentDirectory(expdir,rootdir);
 newexpdir = fullfile(rootdir,experiment_name);

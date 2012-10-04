@@ -4,13 +4,15 @@ addpath /groups/branson/home/bransonk/tracking/code/JCtrax/misc;
 addpath /groups/branson/home/bransonk/tracking/code/JCtrax/filehandling;
 addpath /groups/branson/bransonlab/projects/olympiad/SAGE/MATLABInterface/Trunk;
 settingsdir = '/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/settings';
-screen_type = 'non_olympiad_azanchir_housing_CS_20120225';
+%screen_type = 'non_olympiad_azanchir_housing_CS_20120225';
 %screen_type = 'non_olympiad_azanchir_housing_CS_20120204';
 screen_type = 'non_olympiad_azanchir_mating_galit_CS_20120211';
 %screen_type = 'non_olympiad_azanchir_nicotine_mathias_berlin_20120211';
 analysis_protocol = sprintf('20120220_%s',screen_type);
 %analysis_protocol = sprintf('20120228_%s',screen_type);
 rootdatadir = fullfile('/groups/branson/bransonlab/projects/olympiad/FlyBowlCtrax',analysis_protocol,'results');
+galit_days = {'1',{'20120211','20120519'}
+  '2',{'20120528'}};
 
 %analysis_protocol = '20120330';
 
@@ -31,6 +33,21 @@ nexpdirs = numel(expdirs);
 expnames = cell(size(expdirs));
 for i = 1:nexpdirs,
   [~,expnames{i}] = fileparts(expdirs{i});
+end
+
+%% protocols aren't correct for Galit's data
+
+if strcmpi(screen_type,'non_olympiad_azanchir_mating_galit_CS_20120211'),
+  
+  for i = 1:numel(exp_metadata),
+    day = datestr(floor(datenum(exp_metadata(i).exp_datetime,'yyyymmddTHHMMSS')),'yyyymmdd');
+    dayi = find(cellfun(@(x) ismember(day,x),galit_days(:,2)),1);
+    dayname = galit_days{dayi,1};
+    [~,name,ext] = fileparts(exp_metadata(i).protocol);
+    exp_metadata(i).protocol = [name,'_',dayname,ext];
+    exp_metadata(i).day = dayname;
+  end
+  
 end
 
 
@@ -120,9 +137,23 @@ end
 % Name for protocols EP_flybowl_v011p1.xls__HP_flybowl_v009p1.xls__RP_Olympiad_v010p0.xls: recovery06
 % Name for protocols EP_flybowl_v011p1.xls__HP_flybowl_v009p2.xls__RP_Olympiad_v010p0.xls: recovery02
 
+% Name for protocols EP_flybowl_v011p3_20120211.xls__HP_flybowl_v007p1.xls__RP_Olympiad_v010p0.xls: mated20120211
+% Name for protocols EP_flybowl_v011p3_20120211.xls__HP_flybowl_v007p2.xls__RP_Olympiad_v010p0.xls: rejected20120211
+% Name for protocols EP_flybowl_v011p3_20120211.xls__HP_flybowl_v007p3.xls__RP_Olympiad_v010p0.xls: naive20120211
+% Name for protocols EP_flybowl_v011p3_20120211.xls__HP_flybowl_v007p6.xls__RP_Olympiad_v010p0.xls: 
+% Name for protocols EP_flybowl_v011p3_20120211.xls__HP_flybowl_v007p7.xls__RP_Olympiad_v010p0.xls: 
+% Name for protocols EP_flybowl_v011p3_20120519.xls__HP_flybowl_v007p1.xls__RP_Olympiad_v010p0.xls: mated20120519
+% Name for protocols EP_flybowl_v011p3_20120519.xls__HP_flybowl_v007p2.xls__RP_Olympiad_v010p0.xls: rejected20120519
+% Name for protocols EP_flybowl_v011p3_20120519.xls__HP_flybowl_v007p3.xls__RP_Olympiad_v010p0.xls: naive20120519
+% Name for protocols EP_flybowl_v011p3_20120528.xls__HP_flybowl_v007p1.xls__RP_Olympiad_v010p0.xls: mated20120528
+% Name for protocols EP_flybowl_v011p3_20120528.xls__HP_flybowl_v007p2.xls__RP_Olympiad_v010p0.xls: rejected20120528
+% Name for protocols EP_flybowl_v011p3_20120528.xls__HP_flybowl_v007p3.xls__RP_Olympiad_v010p0.xls: naive20120528
+
 protocolnames = protocols(protocolidx);
 expignore = strcmp(protocolnames,'');
 protocols(strcmp(protocols,'')) = [];
+protocols = unique(protocols);
+[~,protocolidx] = ismember(protocolnames,protocols);
 
 %% use file system to get experiment list
 % 
@@ -158,13 +189,31 @@ protocols(strcmp(protocols,'')) = [];
 
 %% combine experiments to get "control"
 
-outdir = fullfile(rootdatadir,'allconditions');
-exps = cellfun(@(s) ['FlyBowl_',s],expnames(~expignore),'UniformOutput',false);
-FlyBowlCombineExperiments2(rootdatadir,outdir,'controldatadirstr','',...
-  'experiment_name',exps,'checkflags',false,'removemissingdata',false,...
-  'analysis_protocol',analysis_protocol,...
-  'visible','off');
-controlstats = load(fullfile(outdir,dataloc_params.statsperframematfilestr));
+if strcmpi(screen_type,'non_olympiad_azanchir_mating_galit_CS_20120211'),
+  [days,~,dayidx] = unique({exp_metadata.day});
+  protocol2day = cell(1,numel(protocols));
+  for i = 1:numel(days),
+    day = days{i};
+    idx = dayidx == i & ~expignore;
+    tmp = unique(protocolnames(idx));
+    [~,tmp2] = ismember(tmp,protocols);
+    [protocol2day{tmp2}] = deal(day);
+    outdir = fullfile(rootdatadir,['allconditions_',day]);
+    exps = {exp_metadata(idx).experiment_name};
+    FlyBowlCombineExperiments2(rootdatadir,outdir,'controldatadirstr','',...
+      'experiment_name',exps,'checkflags',false,'removemissingdata',false,...
+      'analysis_protocol',analysis_protocol,...
+      'visible','off');
+  end
+else
+  outdir = fullfile(rootdatadir,'allconditions');
+  exps = cellfun(@(s) ['FlyBowl_',s],expnames(~expignore),'UniformOutput',false);
+  FlyBowlCombineExperiments2(rootdatadir,outdir,'controldatadirstr','',...
+    'experiment_name',exps,'checkflags',false,'removemissingdata',false,...
+    'analysis_protocol',analysis_protocol,...
+    'visible','off');
+  controlstats = load(fullfile(outdir,dataloc_params.statsperframematfilestr));
+end
 
 %% combine experiments into protocols
 
@@ -173,6 +222,12 @@ for i = 1:numel(protocols),
   if strcmp(protocols,''),
     continue;
   end
+  if strcmpi(screen_type,'non_olympiad_azanchir_mating_galit_CS_20120211'),
+    day = protocol2day{i};
+    outdir = fullfile(rootdatadir,['allconditions_',day]);
+    controlstats = load(fullfile(outdir,dataloc_params.statsperframematfilestr));
+  end
+  
   idx = strcmp(protocolnames,protocols{i});
   %idx = protocolidx == i;
   exps = cellfun(@(s) ['FlyBowl_',s],expnames(idx),'UniformOutput',false);
@@ -198,14 +253,27 @@ end
 %   {'recovery_length',{'recovery00','recovery02','recovery06','recovery12','recovery24'}},...
 %   {'all',protocols}};
 
+if strcmpi(screen_type,'non_olympiad_azanchir_mating_galit_CS_20120211'),
+  comparisons = cell(1,numel(days));
+  for i = 1:numel(days),
+    comparisons{i} = {['day',days{i}],protocols(strcmp(protocol2day,days{i}))}; % still need to debug this
+  end
+else
+
 comparisons = ...
   {{'all',protocols}};
+
+end
 
 %%
 
 for comparisoni = 1:numel(comparisons),
 
   fprintf('Plotting data for comparison %s...\n',comparisons{comparisoni}{1});
+  
+  outdir = fullfile(rootdatadir,['allconditions_',day]);
+  controlstats = load(fullfile(outdir,dataloc_params.statsperframematfilestr));
+  
   FlyBowlPlotComparisons(rootdatadir,comparisons{comparisoni}{2},comparisons{comparisoni}{1},...
     'analysis_protocol',analysis_protocol,'settingsdir',settingsdir,...
     'controlstats',controlstats,'fly_plotstderr',true,...
@@ -214,3 +282,17 @@ for comparisoni = 1:numel(comparisons),
     'stdweighttype','fracframesfly');
 end
 
+%%
+
+for i = 1:numel(protocols),
+  idx = find(strcmp(protocolnames,protocols{i}));
+  for j = idx(:)',
+    [~,experiment_name] = fileparts(expdirs{j});
+    outfile = fullfile(rootdatadir,protocols{i},experiment_name);
+    if exist(outfile,'dir'),
+      unix(sprintf('rm %s',outfile));
+    end
+    cmd = sprintf('ln -s %s %s',expdirs{j},outfile);
+    unix(cmd);
+  end
+end

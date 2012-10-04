@@ -23,6 +23,7 @@ boutfreq,walking,any,0,500
 fractime,walking_nearwall,any,0,500
 
 fractime,walking_nearfly,any,0,500
+fractime,walking_notchasing_nearfly,any,0,500
 
 fractime,walking,firsthalf,0,250
 
@@ -51,10 +52,45 @@ fractime,chasing,firsthalf,0,250
 
 fractime,chasing,secondhalf,0,250
 
+
+
+# backups
+fractime,backup,any,0,500
+duration,backup,any,2,500
+boutfreq,backup,any,0,500
+
+
+# crabwalk
+fractime,crabwalk,any,0,500
+duration,crabwalk,any,2,500
+boutfreq,crabwalk,any,0,500
+
+
+# pivottail
+fractime,pivottail,any,0,500
+duration,pivottail,any,2,500
+boutfreq,pivottail,any,0,500
+
+
+# touch
+fractime,touch,any,0,500
+duration,touch,any,2,500
+boutfreq,touch,any,0,500
+fractime,touch,firsthalf,0,250
+fractime,touch,secondhalf,0,250
+
+
+# winggrooming
+fractime,winggrooming,any,0,500
+duration,winggrooming,any,2,500
+boutfreq,winggrooming,any,0,500
+
+
 ############################ speed #############################
 
 # speed while walking
 velmag_ctr,walking,any,50,500
+velmag_ctr,walking_notchasing,any,50,500
 # speed while chasing
 velmag_ctr,chasing,any,50,500
 # speed while stopped (debugging only)
@@ -63,8 +99,10 @@ velmag_ctr,stopped,any,50,500
 velmag_ctr,jumping,any,2,500
 # speed while walking near the wall
 velmag_ctr,walking_nearwall,any,50,500
+velmag_ctr,walking_notchasing_nearwall,any,50,500
 # speed while walking near another fly
 velmag_ctr,walking_nearfly,any,50,500
+velmag_ctr,walking_notchasing_nearfly,any,50,500
 # speed while walking, per half of video
 velmag_ctr,walking,firsthalf,25,250
 velmag_ctr,walking,secondhalf,25,250
@@ -74,68 +112,111 @@ velmag_ctr,chasing,secondhalf,25,250
 
 # change in orientation while walking
 absdtheta,walking,any,50,500
+absdtheta,walking_notchasing,any,50,500
 # change in orientation while chasing
 absdtheta,chasing,any,50,500
 # change in orientation while stopped (debugging only)
 absdtheta,stopped,any,50,500
 # change in orientation while jumping
 absdtheta,jumping,any,2,500
+# change in orientation while turning
+absdtheta,pivottail,any,25,500
 # change in orientation while walking near the wall
 absdtheta,walking_nearwall,any,50,500
+absdtheta,walking_notchasing_nearwall,any,50,500
 # change in orientation while walking near another fly
 absdtheta,walking_nearfly,any,50,500
+absdtheta,walking_notchasing_nearfly,any,50,500
 # change in orientation while walking, per half of video
 absdtheta,walking,firsthalf,25,250
 absdtheta,walking,secondhalf,25,250
 
 # change in velocity direction while walking
 absdphi,walking,any,50,500
+absdphi,walking_notchasing,any,50,500
 # change in velocity direction while chasing
 absdphi,chasing,any,50,500
 # change in velocity direction while jumping
 absdphi,jumping,any,2,500
+# change in velocity direction while turning
+absdphi,pivottail,any,25,500
 # change in velocity direction while walking near the wall
 absdphi,walking_nearwall,any,50,500
+absdphi,walking_notchasing_nearwall,any,50,500
 # change in velocity direction while walking near another fly
 absdphi,walking_nearfly,any,50,500
+absdphi,walking_notchasing_nearfly,any,50,500
 
 # forward velocity while walking
 du_ctr,walking,any,50,500
+du_ctr,walking_notchasing,any,50,500
 # forward velocity while chasing
 du_ctr,chasing,any,50,500
 # forward velocity while stopped (debugging only)
 du_ctr,stopped,any,50,500
 # forward velocity while jumping
 du_ctr,jumping,any,2,500
+# forward velocity while backing up
+du_ctr,backup,any,25,500
+# forward velocity while crabwalking
+du_ctr,crabwalk,any,25,500
+# forward velocity while touching
+du_ctr,touch,any,50,500
 # forward velocity while walking near the wall
 du_ctr,walking_nearwall,any,50,500
+du_ctr,walking_notchasing_nearwall,any,50,500
 # forward velocity while walking near another fly
 du_ctr,walking_nearfly,any,50,500
+du_ctr,walking_notchasing_nearfly,any,50,500
 
 # sideways velocity while walking
 absdv_ctr,walking,any,50,500
+absdv_ctr,walking_notchasing,any,50,500
 # sideways velocity while chasing
 absdv_ctr,chasing,any,50,500
 # sideways velocity while stopped (debugging only)
 absdv_ctr,stopped,any,50,500
 # sideways velocity while jumping
 absdv_ctr,jumping,any,2,500
+# sideways velocity while crabwalking
+absdv_ctr,crabwalk,any,25,500
+# sideways velocity while backing up
+absdv_ctr,backup,any,25,500
+# sideways velocity while touching
+absdv_ctr,touch,any,50,500
 # sideways velocity while walking near the wall
 absdv_ctr,walking_nearwall,any,50,500
+absdv_ctr,walking_notchasing_nearwall,any,50,500
 # sideways velocity while walking near another fly
 absdv_ctr,walking_nearfly,any,50,500
+absdv_ctr,walking_notchasing_nearfly,any,50,500
 
 # difference between orientation and velocity direction while walking
 absphisideways,walking,any,50,500
+absphisideways,walking_notchasing,any,50,500
 # difference between orientation and velocity direction while chasing
 absphisideways,chasing,any,50,500
+# difference between orientation and velocity direction while crabwalking
+absphisideways,crabwalk,any,25,500
+# difference between orientation and velocity direction while backing up
+absphisideways,backup,any,25,500
+# difference between orientation and velocity direction while touching
+absphisideways,touch,any,50,500
 # difference between orientation and velocity direction while walking near the wall
 absphisideways,walking_nearwall,any,50,500
+absphisideways,walking_notchasing_nearwall,any,50,500
 # difference between orientation and velocity direction while walking near another fly
 absphisideways,walking_nearfly,any,50,500
+absphisideways,walking_notchasing_nearfly,any,50,500
 
 # center of rotation
 corfrac_maj,moving,any,50,500
+corfrac_maj,chasing,any,50,500
+corfrac_maj,walking,any,50,500
+corfrac_maj,pivottail,any,50,500
+corfrac_maj,crabwalk,any,50,500
+corfrac_maj,backup,any,50,500
+corfrac_maj,moving_notchasing,any,50,500
 
 ############################ social #############################
 
@@ -143,19 +224,33 @@ corfrac_maj,moving,any,50,500
 dnose2ell,stopped,any,50,500
 # distance to closest fly while moving
 dnose2ell,moving,any,50,500
+dnose2ell,moving_notchasing,any,50,500
 # distance to closest fly while walking
 dnose2ell,walking,any,50,500
+dnose2ell,walking_notchasing,any,50,500
 # distance to closest fly while chasing
 dnose2ell,chasing,any,50,500
 # distance to closest fly while jumping
 dnose2ell,jumping,any,2,500
+# distance to closest fly while touching
+dnose2ell,touch,any,50,500
+# distance to closest fly while crabwalking
+dnose2ell,crabwalk,any,25,500
+# distance to closest fly while backing up
+dnose2ell,backup,any,25,500
+# distance to closest fly while wing grooming
+dnose2ell,winggrooming,any,50,500
+# distance to closest fly while pivottailing
+dnose2ell,pivottail,any,25,500
 
 # distance to closest fly while stopped
 dcenter,stopped,any,50,500
 # distance to closest fly while moving
 dcenter,moving,any,50,500
+dcenter,moving_notchasing,any,50,500
 # distance to closest fly while walking
 dcenter,walking,any,50,500
+dcenter,walking_notchasing,any,50,500
 # distance to closest fly while chasing
 dcenter,chasing,any,50,500
 # distance to closest fly while jumping
@@ -165,8 +260,10 @@ dcenter,jumping,any,2,500
 dell2nose,stopped,any,50,500
 # distance to closest fly while moving
 dell2nose,moving,any,50,500
+dell2nose,moving_notchasing,any,50,500
 # distance to closest fly while walking
 dell2nose,walking,any,50,500
+dell2nose,walking_notchasing,any,50,500
 # distance to closest fly while chasing
 dell2nose,chasing,any,50,500
 # distance to closest fly while jumping
@@ -176,8 +273,10 @@ dell2nose,jumping,any,2,500
 anglesub,stopped_nearfly,any,50,500
 # angle subtended by closest fly while moving
 anglesub,moving_nearfly,any,50,500
+anglesub,moving_notchasing_nearfly,any,50,500
 # angle subtended by closest fly while walking
 anglesub,walking_nearfly,any,50,500
+anglesub,walking_notchasing_nearfly,any,50,500
 # angle subtended by closest fly while chasing
 anglesub,chasing_nearfly,any,50,500
 # angle subtended by closest fly while jumping
@@ -185,8 +284,10 @@ anglesub,jumping_nearfly,any,2,500
 
 # change in distance to closest fly while moving
 ddnose2ell,moving_nearfly,any,50,500
+ddnose2ell,moving_notchasing_nearfly,any,50,500
 # change in distance to closest fly while walking
 ddnose2ell,walking_nearfly,any,50,500
+ddnose2ell,walking_notchasing_nearfly,any,50,500
 # change in distance to closest fly while chasing
 ddnose2ell,chasing_nearfly,any,50,500
 # change in distance to closest fly while jumping
@@ -196,8 +297,10 @@ ddnose2ell,jumping_nearfly,any,2,500
 ddell2nose,stopped_nearfly,any,50,500
 # change in distance to closest fly while moving
 ddell2nose,moving_nearfly,any,50,500
+ddell2nose,moving_notchasing_nearfly,any,50,500
 # change in distance to closest fly while walking
 ddell2nose,walking_nearfly,any,50,500
+ddell2nose,walking_notchasing_nearfly,any,50,500
 # change in distance to closest fly while chasing
 ddell2nose,chasing,any,50,500
 # change in distance to closest fly while jumping
@@ -205,15 +308,19 @@ ddell2nose,jumping_nearfly,any,2,500
 
 # magveldiff to closest fly while moving
 magveldiff_nose2ell,moving_nearfly,any,50,500
+magveldiff_nose2ell,moving_notchasing_nearfly,any,50,500
 # magveldiff to closest fly while walking
 magveldiff_nose2ell,walking_nearfly,any,50,500
+magveldiff_nose2ell,walking_notchasing_nearfly,any,50,500
 # magveldiff to closest fly while chasing
 magveldiff_nose2ell,chasing,any,50,500
 
 # veltoward closest fly while moving
 veltoward_nose2ell,moving_nearfly,any,50,500
+veltoward_nose2ell,moving_notchasing_nearfly,any,50,500
 # veltoward closest fly while walking
 veltoward_nose2ell,walking_nearfly,any,50,500
+veltoward_nose2ell,walking_notchasing_nearfly,any,50,500
 # veltoward closest fly while chasing
 veltoward_nose2ell,chasing,any,50,500
 # veltoward closest fly while jumping
@@ -223,13 +330,16 @@ veltoward_nose2ell,jumping_nearfly,any,2,500
 absthetadiff_center,stopped_nearfly,any,50,500
 # absthetadiff closest fly while moving
 absthetadiff_nose2ell,moving_nearfly,any,50,500
+absthetadiff_nose2ell,moving_notchasing_nearfly,any,50,500
 # absthetadiff closest fly while walking
 absthetadiff_nose2ell,walking_nearfly,any,50,500
+absthetadiff_nose2ell,walking_notchasing_nearfly,any,50,500
 # absthetadiff closest fly while chasing
 absthetadiff_nose2ell,chasing,any,50,500
 
 # absphidiff closest fly while walking
 absphidiff_nose2ell,walking_nearfly,any,50,500
+absphidiff_nose2ell,walking_notchasing_nearfly,any,50,500
 # absphidiff closest fly while chasing
 absphidiff_nose2ell,chasing,any,50,500
 
@@ -237,26 +347,36 @@ absphidiff_nose2ell,chasing,any,50,500
 absanglefrom1to2_nose2ell,stopped_nearfly,any,50,500
 # absanglefrom1to2 closest fly while moving
 absanglefrom1to2_nose2ell,moving_nearfly,any,50,500
+absanglefrom1to2_nose2ell,moving_notchasing_nearfly,any,50,500
 # absanglefrom1to2 closest fly while walking
 absanglefrom1to2_nose2ell,walking_nearfly,any,50,500
+absanglefrom1to2_nose2ell,walking_notchasing_nearfly,any,50,500
 # absanglefrom1to2 closest fly while chasing
 absanglefrom1to2_nose2ell,chasing,any,50,500
+# absanglefrom1to2 closest fly while jumping
+absanglefrom1to2_nose2ell,jumping,any,50,500
 
 # angleonclosestfly closest fly while stopped
-angleonclosestfly,stopped_nearfly,any,50,500
+absangleonclosestfly,stopped_nearfly,any,50,500
 # angleonclosestfly closest fly while moving
-angleonclosestfly,moving_nearfly,any,50,500
+absangleonclosestfly,moving_nearfly,any,50,500
+absangleonclosestfly,moving_notchasing_nearfly,any,50,500
 # angleonclosestfly closest fly while walking
-angleonclosestfly,walking_nearfly,any,50,500
+absangleonclosestfly,walking_nearfly,any,50,500
+absangleonclosestfly,walking_notchasing_nearfly,any,50,500
 # angleonclosestfly closest fly while chasing
-angleonclosestfly,chasing,any,50,500
+absangleonclosestfly,chasing,any,50,500
+# angleonclosestfly closest fly while touching
+absangleonclosestfly,touch,any,50,500
 
 # number of flies close while stopped
 nflies_close,stopped,any,50,500
 # number of flies close while moving
 nflies_close,moving,any,50,500
+nflies_close,moving_notchasing,any,50,500
 # number of flies close while walking
 nflies_close,walking,any,50,500
+nflies_close,walking_notchasing,any,50,500
 # number of flies close while chasing
 nflies_close,chasing,any,50,500
 # number of flies close while jumping
@@ -268,29 +388,47 @@ nflies_close,jumping,any,2,500
 absangle2wall,stopped_nearwall,any,50,500
 # angle to wall while walking near the wall
 absangle2wall,walking_nearwall,any,50,500
+absangle2wall,walking_notchasing_nearwall,any,50,500
 # angle to wall at start of jump near the wall
 absangle2wall,jumpstart_nearwall,any,2,500
 
 # change in angle to wall while moving near the wall
 absdangle2wall,moving_nearwall,any,50,500
+absdangle2wall,moving_notchasing_nearwall,any,50,500
 # change in angle to wall while walking near the wall
 absdangle2wall,walking_nearwall,any,50,500
+absdangle2wall,walking_notchasing_nearwall,any,50,500
 
 # distance to wall while stopped
 dist2wall,stopped,any,50,500
 # distance to wall while moving
 dist2wall,moving,any,50,500
+dist2wall,moving_notchasing,any,50,500
 # distance to wall while walking
 dist2wall,walking,any,50,500
+dist2wall,walking_notchasing,any,50,500
 # distance to wall while chasing
 dist2wall,chasing,any,50,500
 # distance to wall while jumping
 dist2wall,jumping,any,2,500
+# distance to wall while backing up
+dist2wall,backup,any,25,500
+
+# distance to wall while crabwalking
+dist2wall,crabwalk,any,25,500
+# distance to wall while pivottail
+dist2wall,pivottail,any,25,500
+# distance to wall while touching
+dist2wall,touch,any,25,500
+# distance to wall while wing grooming
+dist2wall,winggrooming,any,25,500
 
 # change in distance to wall while moving near the wall
 ddist2wall,moving_nearwall,any,50,500
+ddist2wall,moving_notchasing_nearwall,any,50,500
 # change in distance to wall while walking near the wall
 ddist2wall,walking_nearwall,any,50,500
+ddist2wall,walking_notchasing_nearwall,any,50,500
 
 #################### appearance #####################
 

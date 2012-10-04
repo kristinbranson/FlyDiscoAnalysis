@@ -255,10 +255,18 @@ end
 if DEBUG,
   fid = 1;
 else
+  if exist(outfile,'file'),
+    try
+      delete(outfile);
+    catch ME,
+      warning('Could not delete file %s:\n %s',outfile,getReport(ME));
+    end
+  end
   fid = fopen(outfile,'w');
 end
 if fid < 0,
-  error('Could not open automatic checks results file %s for writing.',outfile);
+  warning('Could not open automatic checks results file %s for writing, just printing to stdout.',outfile);
+  fid = 1;
 end
 if success,
   fprintf(fid,'automated_pf,U\n');
@@ -277,6 +285,6 @@ else
   fprintf(fid,'automated_pf_category,%s\n',s);
 end
 
-if ~DEBUG,
+if ~DEBUG && fid > 1,
   fclose(fid);
 end

@@ -13,7 +13,7 @@ for i = 1:numel(fns),
   fn = fns{i};
   for n = ns,
     filename = obj.GetPerFrameFile(fn,n);
-    if exist(filename,'file'),
+    if exist(filename,'file') && ~obj.DEBUG,
       fprintf('Deleting per-frame data file %s\n',filename);
       delete(filename);
     end
@@ -23,6 +23,7 @@ for i = 1:numel(fns),
     if ~isempty(j),
       obj.datacached{n}(j) = [];
       obj.fnscached{n}(j) = [];
+      obj.nfnscached(n) = obj.nfnscached(n)-1;
     end
     
   end

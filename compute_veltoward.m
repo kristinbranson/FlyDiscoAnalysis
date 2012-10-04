@@ -5,6 +5,8 @@ flies = trx.exp2flies{n};
 nflies = numel(flies);
 data = cell(1,nflies);
 
+OLDVERSION = false;
+
 for i1 = 1:nflies,
   fly1 = flies(i1);
   
@@ -45,6 +47,9 @@ for i1 = 1:nflies,
     % project velocity of fly1 onto this vector
     data{i1}(idx) = dx1(idx).*dx2 + dy1(idx).*dy2;
 
+  end
+  if OLDVERSION,
+    data{i1} = data{i1}./trx(fly1).dt;
   end
 end
 

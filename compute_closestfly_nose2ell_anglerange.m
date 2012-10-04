@@ -88,6 +88,9 @@ if dosave_d,
   tmp = sprintf('dnose2ell_angle_%dto%d',anglerange_deg(1),anglerange_deg(2));
   tmp = strrep(tmp,'-','min');
   filename = trx.GetPerFrameFile(tmp,n);
+  if exist(filename,'file'),
+    delete(filename);
+  end
   save(filename,'data','units');
 end
 

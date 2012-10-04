@@ -1,0 +1,6 @@
+min_num_flies,0
+min_num_males,0
+min_num_females,0
+max_num_flies,100
+required_files,analysis_protocol.txt,automatic_checks_incoming_results.txt,bias_diagnostics.mat,bias_diagnostics.png,bias_diagnostics.txt,bkgd_diagnostics.mat,bkgd_diagnostics.png,bkgd_diagnostics.txt,ctrax_diagnostics.txt,ctrax_results.mat,ctrax_results_movie_*.avi,hist_perframe.mat,hist_perframe.txt,movie.ufmf.ann,registered_trx.mat,registrationdata.mat,registrationdata.txt,registrationimage.png,sexclassifier_diagnostics.txt,stats_perframe.mat,stats_perframe.txt,temperature_diagnostics.txt
+file_categories,other_analysis,automated_checks_incoming,extra_diagnostics,extra_diagnostics,extra_diagnostics,extra_diagnostics,extra_diagnostics,extra_diagnostics,tracking,tracking,results_movie,perframestats,perframestats,tracking,registration,registration,registration,registration,sexclassification,perframestats,perframestats,extra_diagnostics

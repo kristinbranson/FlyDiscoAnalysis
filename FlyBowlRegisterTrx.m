@@ -70,7 +70,7 @@ if isfield(registration_params,'maxDistCornerFrac_BowlLabel') && ...
 end
 
 fnsignore = intersect(fieldnames(registration_params),...
-  {'minFliesLoadedTime','maxFliesLoadedTime','extraBufferFliesLoadedTime'});
+  {'minFliesLoadedTime','maxFliesLoadedTime','extraBufferFliesLoadedTime','usemediandt'});
   
 registration_params_cell = struct2paramscell(rmfield(registration_params,fnsignore));
 % file to save image to
@@ -95,8 +95,20 @@ moviefile = fullfile(expdir,dataloc_params.moviefilestr);
 
 % load trajectories
 [trx,~,succeeded,timestamps] = load_tracks(ctraxfile,moviefile,'annname',annfile);
+
 if ~succeeded,
   error('Could not load trajectories from file %s',ctraxfile);
+end
+
+% frame rate
+if registration_params.usemediandt,
+  tmp = diff(timestamps);
+  tmp(isnan(tmp)) = [];
+  if isempty(tmp),
+    meddt = 1/trx(1).fps;
+  else
+    meddt = median(tmp);
+  end
 end
 
 if isempty(trx),
@@ -137,10 +149,14 @@ for fly = 1:length(trx),
   
   % add dt
   % TODO: fix timestamps after fix errors!
-  if isfield(trx,'timestamps'),
-    trx(fly).dt = diff(trx(fly).timestamps);
+  if registration_params.usemediandt,
+    trx(fly).dt = repmat(meddt,[1,trx(fly).nframes-1]);
   else
-    trx(fly).dt = repmat(1/trx(fly).fps,[1,trx(fly).nframes-1]);
+    if isfield(trx,'timestamps'),
+      trx(fly).dt = diff(trx(fly).timestamps);
+    else
+      trx(fly).dt = repmat(1/trx(fly).fps,[1,trx(fly).nframes-1]);
+    end
   end
 
   trx(fly).fps = 1/mean(trx(fly).dt);
@@ -315,6 +331,9 @@ end
 trxfile = fullfile(expdir,dataloc_params.trxfilestr);
 
 try
+  if exist(trxfile,'file'),
+    delete(trxfile);
+  end
   save(trxfile,'trx','timestamps');
 catch ME
   warning('Could not save registered trx: %s',getReport(ME));
@@ -325,6 +344,9 @@ end
 registrationmatfile = fullfile(expdir,dataloc_params.registrationmatfilestr);
 tmp = rmfield(registration_data,'registerfn'); %#ok<NASGU>
 try
+  if exist(registrationmatfile,'file'),
+    delete(registrationmatfile);
+  end
   save(registrationmatfile,'-struct','tmp');
 catch ME
   warning('Could not save registered data to mat file: %s',getReport(ME));
@@ -333,6 +355,9 @@ end
 %% save params to text file
 registrationtxtfile = fullfile(expdir,dataloc_params.registrationtxtfilestr);
 try
+  if exist(registrationtxtfile,'file'),
+    delete(registrationtxtfile);
+  end
 fid = fopen(registrationtxtfile,'w');
 fnssave = {'offX','offY','offTheta','scale','bowlMarkerTheta','featureStrengths',...
   'circleCenterX','circleCenterY','circleRadius',...

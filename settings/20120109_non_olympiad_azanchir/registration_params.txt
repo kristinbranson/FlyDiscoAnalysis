@@ -17,6 +17,7 @@ bowlMarkerPairTheta_true,2.356194490192345
 nBowlMarkers,1
 bowlMarkerType,10,Btemplate.png,11,Btemplate.png,12,Btemplate.png,13,Btemplate.png,14,Btemplate.png,15,CircleTemplate.png,16,CircleTemplate.png,17,CircleTemplate.png
 minTemplateFeatureStrength,-0.5
-minFliesLoadedTime,100
-maxFliesLoadedTime,700
+minFliesLoadedTime,60
+maxFliesLoadedTime,330
 extraBufferFliesLoadedTime,10
+usemediandt,1

@@ -5,11 +5,12 @@ while true,
   if obj.ndatacached + ndataadd <= obj.maxdatacached || obj.ndatacached == 0,
     break;
   end
-  if ~isempty(obj.perframehistory),
-    [~,j] = max(cell2mat(obj.perframehistory(:,2)));
-    fn = obj.perframehistory{j,1};
-    ClearDataCache(obj,fn);
+  if isempty(obj.perframehistory),
+    break;
   end
+  [~,j] = min(cell2mat(obj.perframehistory(:,2)));
+  fn = obj.perframehistory{j,1};
+  ClearDataCache(obj,fn);
 %   for i = 1:obj.nexpdirs,
 %     if isfield(obj.datacached{i},fn),
 %       ndatacurr = 0;

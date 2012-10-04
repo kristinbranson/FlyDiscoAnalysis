@@ -19,6 +19,8 @@
 
 function [Mu,Cov,LL]=hmm_multiseq_1d(X,K,Psame,cyc,tol,minCov,Pi)
 
+EPSILON = 1e-16;
+
 if ~iscell(X),
   X = {X};
 end
@@ -114,6 +116,9 @@ for cycle=1:cyc
       d = Mu(l)-X{n};
       B(:,l) = k2(l)*exp(-.5*d.^2*iCov(l));
     end
+    % find frames with 0 likelihood for both classes
+    badidx = sum(B,2) < EPSILON;
+    B(badidx,:) = 1;
     
     scale=zeros(Ts(n),1);
     alpha(1,:)=Pi.*B(1,:);
@@ -131,7 +136,9 @@ for cycle=1:cyc
     end
     
     gamma=(alpha.*beta); 
-    gamma=rdiv(gamma,rsum(gamma));
+    z = rsum(gamma);
+    z(z<=0) = 1;
+    gamma=rdiv(gamma,z);
     gammasum=sum(gamma);
     
     xi=zeros(Ts(n)-1,K*K);

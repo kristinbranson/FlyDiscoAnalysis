@@ -30,9 +30,19 @@ else
   end  
 end
 
-j = numel(obj.fnscached{n}) + 1;
+if iscell(x),
+  ndataadd = sum(cellfun(@numel,x(1:numel(flies))));
+else
+  ndataadd = numel(x);
+end
+obj.FreeDataCache(ndataadd);
+
+obj.nfnscached(n) = obj.nfnscached(n) + 1;
+j = obj.nfnscached(n);
+%fprintf('Incremented nfnscached(%d) to %d for %s\n',n,obj.nfnscached(n),fn);
 obj.fnscached{n}{j} = fn;
 obj.datacached{n}{j} = cell(1,numel(flies));
+
 for flyidx = 1:numel(flies),
   fly = flies(flyidx);
   % delete data from cache if necessary
@@ -41,17 +51,18 @@ for flyidx = 1:numel(flies),
   else
     xcurr = x;
   end
-  ndataadd = numel(xcurr);
-  obj.FreeDataCache(ndataadd);
+%   ndataadd = numel(xcurr);
+%   obj.FreeDataCache(ndataadd);
 
   % add to cache
+  %fprintf('Adding %s to data cache for fly %d at idx %d\n',fn,fly,j);
   obj.datacached{n}{j}{fly} = xcurr;
   
-  % update cache size
-  obj.ndatacached = obj.ndatacached + ndataadd;
-  obj.ndatacachedperexp(n) = obj.ndatacachedperexp(n) + ndataadd;
-  
 end
+  
+% update cache size
+obj.ndatacached = obj.ndatacached + ndataadd;
+obj.ndatacachedperexp(n) = obj.ndatacachedperexp(n) + ndataadd;
 
 % update access time for this property
 j = find(strcmp(obj.perframehistory(:,1),fn),1);

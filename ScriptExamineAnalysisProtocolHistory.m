@@ -185,8 +185,8 @@ end
 
 %% compare
 
-protocol1 = '20110407';
-protocol2 = '20110426';
+protocol1 = '20110804';
+protocol2 = '20111221';
 ann1 = read_ann(fullfile('../FlyBowlCtrax',protocol1,'settings.ann'));
 ann2 = read_ann(fullfile('../FlyBowlCtrax',protocol2,'settings.ann'));
 fns = union(fieldnames(ann1),fieldnames(ann2));

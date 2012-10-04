@@ -1,0 +1,2 @@
+/groups/branson/home/bransonk/behavioranalysis/code/Jdetect/Jdetect/experiments/wingflick/wingflickAR_v9.mat,/groups/branson/home/bransonk/behavioranalysis/code/Jdetect/Jdetect/perframe/params/WingFlick_params.xml
+/groups/branson/home/bransonk/behavioranalysis/code/Jdetect/Jdetect/experiments/wingextension/WingExtensionClassifier20120831_recomputed.mat,/groups/branson/home/bransonk/behavioranalysis/code/Jdetect/Jdetect/perframe/params/FlyBowl_WingExtension_params.xml

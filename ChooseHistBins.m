@@ -3,16 +3,32 @@ addpath /groups/branson/home/bransonk/tracking/code/JCtrax/misc;
 addpath /groups/branson/home/bransonk/tracking/code/JCtrax/filehandling;
 settingsdir = '/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/settings';
 realrootdir = '/groups/sciserv/flyolympiad/Olympiad_Screen/fly_bowl/bowl_data';
-rootdir = '/groups/branson/bransonlab/projects/olympiad/HackHitData';
+%rootdir = '/groups/branson/bransonlab/projects/olympiad/HackHitData';
+rootdir = '/groups/branson/bransonlab/projects/olympiad/FlyBowlCtrax/20120220_non_olympiad_azanchir_mating_galit_CS_20120211/results';
 rootdir_fixed = '';
 
-analysis_protocol = '20120330';
+analysis_protocol = '20120220_non_olympiad_azanchir_mating_galit_CS_20120211';
 datalocparamsfilestr = 'dataloc_params.txt';
 params = {'analysis_protocol',analysis_protocol,...
   'datalocparamsfilestr',datalocparamsfilestr,...
   'settingsdir',settingsdir};
 
-behaviornames = {'chase','walk','stop','jump'};
+behaviornames = {
+  'walking'
+  'stopped'
+  'jumping'
+  'righting'
+  'chasing'
+  'backup'
+  'crabwalk'
+  'pivottail'
+  'pivothead'
+  'touch'
+  'winggrooming'
+  'copulation'
+  'attemptedcopulation'
+  };
+%behaviornames = {'chase','walk','stop','jump'};
 
 fps = 30.3445;
 
@@ -53,11 +69,21 @@ experiment_params.checkflags = false;
 % remove missing data
 experiment_params.removemissingdata = false;
 % azanchir experiments
-experiment_params.screen_type = 'primary';
+experiment_params.screen_type = 'non_olympiad_azanchir*';
+
+% for specifying galits data
+experiment_params.line_name = 'EXT_CantonS_*';
+experiment_params.effector = 'NoEffector_0_9999';
+experiment_params.handling_protocol = ...
+  {'HP_flybowl_v007p1.xls','HP_flybowl_v007p2.xls','HP_flybowl_v007p3.xls',...
+  'HP_flybowl_v007p6.xls','HP_flybowl_v007p7.xls'};
+experiment_params.protocol = 'EP_flybowl_v011p3.xls';
+
 % how to weight various things
 weight_order = {'genotype','date','rig','bowl'};
 % required files
-subreadfiles = {'chase_labels.mat','stop_labels.mat','walk_labels.mat','jump_labels.mat'};
+%subreadfiles = {'chase_labels.mat','stop_labels.mat','walk_labels.mat','jump_labels.mat'};
+subreadfiles = {'perframe/dnose2ell_angle_min20to20.mat'};
 % what lines
 %experiment_params.linename = '';
 % 
@@ -87,6 +113,25 @@ for i = 1:numel(experiments_all),
 end
 experiments_all(baddata) = [];
 
+% 
+% baddata = false(1,numel(experiments_all));
+% mindatenum = datenum('20120712','yyyymmdd');
+% for i = 1:numel(experiments_all),
+%   fprintf('%d: %s\n',i,experiments_all(i).experiment_name);
+%   tmp = dir(fullfile(experiments_all(i).file_system_path,'registered_trx.mat'));
+%   if tmp.datenum < mindatenum,
+%     baddata(i) = true;
+%     fprintf('dt not fixed for %s\n',experiments_all(i).experiment_name);
+%   end
+%   
+% %   tmp = who('-file',fullfile(experiments_all(i).file_system_path,'registered_trx.mat'));
+% %   if ~ismember('dtfixed',tmp),
+% %     fprintf('dt not fixed for %s\n',experiments_all(i).experiment_name);
+% %     baddata(i) = true;
+% %   end
+% end
+%     
+
 %experiments_all = rmfield(experiments_all,'date');
 
 [experiments,ngal4_chosen,ncontrols_chosen] = choose_expdirs(experiments_all,ngal4,ncontrols,'weight_order',weight_order);
@@ -105,15 +150,22 @@ nexpdirs = numel(expdirs);
 
 %% read parameters
 
-perframefnsfile = fullfile(settingsdir,analysis_protocol,dataloc_params.perframefnsfilestr);
-perframefns = importdata(perframefnsfile);
+% perframefnsfile = fullfile(settingsdir,analysis_protocol,dataloc_params.perframefnsfilestr);
+% perframefns = importdata(perframefnsfile);
 prctile_store = 10;
 
-%histparamsfile = fullfile(settingsdir,analysis_protocol,dataloc_params.histparamsfilestr);
+histparamsfile = fullfile(settingsdir,analysis_protocol,dataloc_params.histparamsfilestr);
 
 histperframefeaturesfile = fullfile(settingsdir,analysis_protocol,dataloc_params.histperframefeaturesfilestr);
 hist_perframefeatures = ReadHistPerFrameFeatures2(histperframefeaturesfile);
 hist_params = ReadParams(histparamsfile);
+
+statframeconditionsfile = fullfile(settingsdir,analysis_protocol,dataloc_params.statframeconditionfilestr);
+frameconditiondict = ReadParams(statframeconditionsfile);
+statflyconditionsfile = fullfile(settingsdir,analysis_protocol,dataloc_params.statflyconditionfilestr);
+flyconditiondict = ReadParams(statflyconditionsfile);
+
+
 
 %% loop over per-frame parameters
 
@@ -150,14 +202,24 @@ for fni = 1:numel(perframefns),
 
     m = regexp(fn,'^duration_(.+)$','tokens','once');
     if ~isempty(m),
-%       trxfilename = fullfile(expdir,dataloc_params.trxfilestr);
-%       trxdata = load(trxfilename);
-%       firstframes = [trxdata.trx.firstframe];
-%       nframes = [trxdata.trx.nframes];
-
-      filename = fullfile(expdir,[m{1},'_labels.mat']);
-      labeldata = load(filename);
-      datacurr = (cell2mat(labeldata.t1s)-cell2mat(labeldata.t0s))/fps;
+      m = m{1};
+      s = regexp(frameconditiondict.(m){1},'^[^_]+_(.+)$','tokens','once');
+      if isempty(s),
+        error('Could not parse %s',m);
+      end
+      filename = fullfile(expdir,[s{1},'.mat']);
+      if exist(filename,'file'),
+        labeldata = load(filename);
+        datacurr = (cell2mat(labeldata.t1s)-cell2mat(labeldata.t0s))/fps;
+      else
+        s{1} = regexprep(s{1},'label','score');
+        filename = fullfile(expdir,[s{1},'.mat']);
+        if ~exist(filename,'file'),
+          error('Could not find score or label file for %s',m);
+        end
+        scoredata = load(filename);
+        datacurr = (cell2mat(scoredata.allScores.t1s)-cell2mat(scoredata.allScores.t0s))/fps;
+      end
     else
       filename = fullfile(expdir,dataloc_params.perframedir,[fn,'.mat']);
       if ~exist(filename,'file'), 

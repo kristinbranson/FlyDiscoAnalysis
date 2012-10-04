@@ -164,6 +164,11 @@ end
 SaveAllPerFrameStatsTxtFile(statstxtsavename,statsperfly,statsperexp);
 
 % save to mat file
+if exist(statsmatsavename,'file'),
+  try
+    delete(statsmatsavename);
+  end
+end
 save(statsmatsavename,'statsperfly','statsperexp','frameconditiondict',...
   'flyconditiondict','stats_params');
 
@@ -288,6 +293,11 @@ for i = 1:numel(hist_perframefeatures),
 
 end
 
+if exist(histmatsavename,'file'),
+  try
+    delete(histmatsavename);
+  end
+end
 save(histmatsavename,'histperfly','histperexp','bins','frameconditiondict',...
   'flyconditiondict');
 SaveAllPerFrameHistTxtFile(histtxtsavename,histperfly,histperexp);

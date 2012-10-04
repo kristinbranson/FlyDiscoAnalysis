@@ -15,15 +15,18 @@ dataloc_params = ReadParams(datalocparamsfile);
 %% ctrax movie parameters
 ctraxresultsmovieparamsfile = fullfile(settingsdir,analysis_protocol,dataloc_params.ctraxresultsmovieparamsfilestr);
 ctraxresultsmovie_params = ReadParams(ctraxresultsmovieparamsfile);
+if ~isfield(ctraxresultsmovie_params,'tempdatadir'),
+  ctraxresultsmovie_params.tempdatadir = '/groups/branson/bransonlab/projects/olympiad/TempData_FlyBowlMakeCtraxResultsMovie';
+end
 
 %% location of data
 
 [~,basename] = fileparts(expdir);
 moviefile = fullfile(expdir,dataloc_params.moviefilestr);
 trxfile = fullfile(expdir,dataloc_params.trxfilestr);
-avifilestr = fullfile(expdir,sprintf('%s_%s',dataloc_params.ctraxresultsavifilestr,basename));
-avifile = [avifilestr,'_temp.avi'];
-xvidfile = [avifilestr,'.avi'];
+avifilestr = sprintf('%s_%s',dataloc_params.ctraxresultsavifilestr,basename);
+avifile = fullfile(ctraxresultsmovie_params.tempdatadir,[avifilestr,'_temp.avi']);
+xvidfile = fullfile(expdir,[avifilestr,'.avi']);
 
 %% read start and end of cropped trajectories
 

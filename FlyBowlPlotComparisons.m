@@ -113,10 +113,11 @@ for typei = 1:numel(hist_perframefeatures),
     hist_perframefeatures(typei).framecondition);
   
   if strcmp(hist_perframefeatures(typei).field,'duration'),
-    frameconditionparams = DecodeConditions(hist_perframefeatures(typei).framecondition,frameconditiondict);
-    m = regexp(frameconditionparams(1:2:end),'^[^_]+_(.+)_labels$','once','tokens');
-    tmp = find(~cellfun(@isempty,m),1);
-    binfn = ['duration','_',m{tmp}{1}];
+    binfn = ['duration_',hist_perframefeatures(typei).framecondition];    
+%     frameconditionparams = DecodeConditions(hist_perframefeatures(typei).framecondition,frameconditiondict);
+%     m = regexp(frameconditionparams(1:2:end),'^[^_]+_(.+)_labels$','once','tokens');
+%     tmp = find(~cellfun(@isempty,m),1);
+%     binfn = ['duration','_',m{tmp}{1}];
   else
     binfn = hist_perframefeatures(typei).field;
   end

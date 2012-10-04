@@ -14,10 +14,10 @@ function handles = PlotPerFrameStats(stats_perframefeatures,statsperfly,statsper
 % set up figure
 if ~ishandle(hfig),
   figure(hfig);
-else
-  clf(hfig);
 end
-set(hfig,'Visible',visible,'Position',position);
+
+clf(hfig);
+set(hfig,'Units','pixels','Visible',visible,'Position',position);
 hax = axes('Position',axposition,'Parent',hfig);
 
 %% fns corresponding to fields

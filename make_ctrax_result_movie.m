@@ -35,7 +35,7 @@ mencoder_maxnframes = inf;
   taillength,fps,maxnframes,firstframes,compression,figpos,movietitle,...
   useVideoWriter,mencoderoptions,mencoder_maxnframes,...
   avifileTempDataFile,titletext,dynamicflyselection,...
-  doshowsex] = ...
+  doshowsex,doplotwings] = ...
   myparse(varargin,'moviename','','trxname','','aviname','','colors',[],'zoomflies',[],'nzoomr',nan,'nzoomc',nan,...
   'boxradius',nan,'taillength',nan,'fps',nan,'maxnframes',nan,'firstframes',[],'compression','',...
   'figpos',[],'movietitle','','useVideoWriter',useVideoWriter,...
@@ -43,7 +43,8 @@ mencoder_maxnframes = inf;
   'avifileTempDataFile','',...
   'titletext',true,...
   'dynamicflyselection',true,...
-  'doshowsex',true);
+  'doshowsex',true,...
+  'doplotwings',true);
 
 if ~ischar(compression),
   compression = '';
@@ -131,6 +132,8 @@ if doshowsex,
   end
   sexmarkers = sexmarkers(1:numel(sexes));
 end
+
+doplotwings = doplotwings && all(isfield(trx,{'xwingl','ywingl','xwingr','ywingr'}));
 
 nzoom = length(zoomflies);
 if nzoom > 0,
@@ -387,6 +390,9 @@ elseif size(colors,1) ~= nids,
   colors = colors(modrange(0:nids-1,size(colors,1))+1,:);
 end
 
+if ishandle(1),
+  close(1);
+end
 figure(1);
 clf;
 hold on;
@@ -408,20 +414,24 @@ nframesoff = getstructarrayfield(trx,'firstframe') - 1;
 himzoom = zeros(nzoomr,nzoomc);
 htail = zeros(1,nids);
 htri = zeros(1,nids);
+hwing = zeros(1,nids);
 hsexmarker = zeros(1,nids);
 scalefactor = rowszoom / (2*boxradius+1);
 hzoom = zeros(nzoomr,nzoomc);
+hzoomwing = zeros(nzoomr,nzoomc);
 htextzoom = zeros(nzoomr,nzoomc);
 
 mencoder_nframes = 0;
+tic;
 
 for segi = 1:numel(firstframes),
   firstframe = firstframes(segi);
   endframe = endframes(segi);
 
   for frame = firstframe:endframe,
-    if mod(frame - firstframe,20) == 0,
-      fprintf('frame %d\n',frame);
+    if mod(frame - firstframe,5) == 0,
+      fprintf('frame %d, write rate = %f s/fr\n',frame,toc/5);
+      tic;
     end
     
     % relative frame
@@ -511,12 +521,20 @@ for segi = 1:numel(firstframes),
           end
           htri(fly) = drawflyo(trx(fly),idx(fly));
           set(htri(fly),'color',colors(fly,:));
+          if doplotwings,
+            xwing = [trx(fly).xwingl(idx(fly)),trx(fly).x(idx(fly)),trx(fly).xwingr(idx(fly))];
+            ywing = [trx(fly).ywingl(idx(fly)),trx(fly).y(idx(fly)),trx(fly).ywingr(idx(fly))];
+            hwing(fly) = plot(xwing,ywing,'.-','color',colors(fly,:));
+          end
         else
           htail(fly) = plot(nan,nan,'-','color',colors(fly,:));
           if doshowsex,
             hsexmarker(fly) = plot(nan,nan,'.','color',colors(fly,:),'markerfacecolor',colors(fly,:));
           end
           htri(fly) = plot(nan,nan,'-','color',colors(fly,:));
+          if doplotwings,
+            hwing(fly) = plot(nan,nan,'.-','color',colors(fly,:));
+          end
         end
       end
     else
@@ -534,12 +552,21 @@ for segi = 1:numel(firstframes),
               'marker',sexmarker,...
               'markerfacecolor',colors(fly,:));
           end
-          updatefly(htri(fly),trx(fly),idx(fly));
+          updatefly(htri(fly),trx(fly).x(idx(fly)),trx(fly).y(idx(fly)),...
+            trx(fly).theta(idx(fly)),trx(fly).a(idx(fly)),trx(fly).b(idx(fly)));
+          if doplotwings,
+            xwing = [trx(fly).xwingl(idx(fly)),trx(fly).x(idx(fly)),trx(fly).xwingr(idx(fly))];
+            ywing = [trx(fly).ywingl(idx(fly)),trx(fly).y(idx(fly)),trx(fly).ywingr(idx(fly))];
+            set(hwing(fly),'XData',xwing,'YData',ywing);
+          end
         else
           set(htail(fly),'xdata',[],'ydata',[]);
           set(htri(fly),'xdata',[],'ydata',[]);
           if doshowsex,
             set(hsexmarker(fly),'xdata',[],'ydata',[]);
+          end
+          if doplotwings,
+            set(hwing(fly),'XData',[],'YData',[]);
           end
         end
       end
@@ -566,8 +593,28 @@ for segi = 1:numel(firstframes),
           else
             s = sprintf('%d',fly);
           end
+          if doplotwings,
+            xwingl = trx(fly).xwingl(idx(fly)) - round(trx(fly).x(idx(fly))) + boxradius + .5;
+            ywingl = trx(fly).ywingl(idx(fly)) - round(trx(fly).y(idx(fly))) + boxradius + .5;
+            xwingl = xwingl * scalefactor;
+            ywingl = ywingl * scalefactor;
+            xwingl = xwingl + x0(j) - 1;
+            ywingl = ywingl + y0(i) - 1;
+            xwingr = trx(fly).xwingr(idx(fly)) - round(trx(fly).x(idx(fly))) + boxradius + .5;
+            ywingr = trx(fly).ywingr(idx(fly)) - round(trx(fly).y(idx(fly))) + boxradius + .5;
+            xwingr = xwingr * scalefactor;
+            ywingr = ywingr * scalefactor;
+            xwingr = xwingr + x0(j) - 1;
+            ywingr = ywingr + y0(i) - 1;
+            xwing = [xwingl,x,xwingr];
+            ywing = [ywingl,y,ywingr];
+          end
+
           if frame == firstframes(1),
             hzoom(i,j) = drawflyo(x,y,theta,a,b);
+            if doplotwings,
+              hzoomwing(i,j) = plot(xwing,ywing,'.-','color',colors(fly,:));
+            end
             if isdisplay,
               htextzoom(i,j) = text((x0(j)+x1(j))/2,.95*y0(i)+.05*y1(i),s,...
                 'color',colors(fly,:),'horizontalalignment','center',...
@@ -582,6 +629,9 @@ for segi = 1:numel(firstframes),
             end
           else
             updatefly(hzoom(i,j),x,y,theta,a,b);
+            if doplotwings,
+              set(hzoomwing(i,j),'XData',xwing,'YData',ywing,'Color',colors(fly,:));
+            end
             if isdisplay,
               set(htextzoom(i,j),'string',s,'color',colors(fly,:));
             else
@@ -600,6 +650,9 @@ for segi = 1:numel(firstframes),
         else
           if frame == firstframes(1),
             hzoom(i,j) = plot(nan,nan,'-');
+            if doplotwings,
+              hzoomwing(i,j) = plot(nan,nan,'.-');
+            end
             if isdisplay,
               htextzoom(i,j) = text((x0(j)+x1(j))/2,.95*y0(i)+.05*y1(i),'',...
                 'horizontalalignment','center',...
@@ -611,6 +664,9 @@ for segi = 1:numel(firstframes),
             end
           else
             set(hzoom(i,j),'xdata',[],'ydata',[]);
+            if doplotwings,
+              set(hzoomwing(i,j),'XData',[],'YData',[]);
+            end
             if isdisplay,
               set(htextzoom(i,j),'string','');
             else
@@ -637,7 +693,7 @@ for segi = 1:numel(firstframes),
         else
           profile = 'Motion JPEG AVI';
         end
-        aviobj = VideoWriter(aviname,profile);
+        aviobj = VideoWriter(aviname,profile); %#ok<TNMLP>
         set(aviobj,'FrameRate',fps);
         if ~strcmpi(profile,'Uncompressed AVI'),
           set(aviobj,'Quality',100);
@@ -645,7 +701,7 @@ for segi = 1:numel(firstframes),
         open(aviobj);
       else
         if isempty(avifileTempDataFile),
-          aviobj = avifile(aviname,'fps',fps,'quality',100,'compression',compression); %#ok<TNMLP>
+          aviobj = avifile(aviname,'fps',fps,'quality',100,'compression',compression);  %#ok<REMFF1>
         else
           aviobj = myavifile(aviname,'fps',fps,'quality',100,'compression',compression,...
             'TempDataFile',avifileTempDataFile); 
@@ -657,11 +713,13 @@ for segi = 1:numel(firstframes),
     if frame == firstframes(1),
       fr = getframe_invisible(hax);
       [height,width,~] = size(fr);
+      gfdata = getframe_initialize(hax);
+
 %       height = ceil(height/4)*4;
 %       width = ceil(width/4)*4;
 %       fr = getframe_invisible(hax,[height,width]);
     else
-      fr = getframe_invisible(hax,[height,width]);
+      fr = getframe_invisible_nocheck(gfdata,[height,width],false);
     end
     if useVideoWriter,
       writeVideo(aviobj,fr);
@@ -674,6 +732,8 @@ for segi = 1:numel(firstframes),
   
 end
   
+fprintf('Finishing AVI...\n');
+
 if useVideoWriter,
   close(aviobj);
 else
@@ -682,5 +742,9 @@ end
 if fid > 0,
   fclose(fid);
 end
+
+fprintf('Cleanup...\n');
+
+getframe_cleanup(gfdata);
 
 succeeded = true;

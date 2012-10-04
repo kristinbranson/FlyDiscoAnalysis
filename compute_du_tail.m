@@ -12,8 +12,8 @@ for i = 1:nflies,
   else
 
     % location of tail
-    tailx = trx(fly).x_mm + 2*cos(-trx(fly).theta).*trx(fly).a_mm;
-    taily = trx(fly).y_mm + 2*sin(-trx(fly).theta).*trx(fly).a_mm;
+    tailx = trx(fly).x_mm + 2*cos(-trx(fly).theta_mm).*trx(fly).a_mm;
+    taily = trx(fly).y_mm + 2*sin(-trx(fly).theta_mm).*trx(fly).a_mm;
 
     % change in tail location
     dx = diff(tailx,1,2);

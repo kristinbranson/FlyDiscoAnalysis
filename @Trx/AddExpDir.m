@@ -2,7 +2,12 @@
 % Adds data associated with experiment expdir to the data represented by obj.
 function AddExpDir(obj,expdir,varargin)
 
-[dooverwrite] = myparse(varargin,'dooverwrite',true);
+[dooverwrite,openmovie,traj] = myparse(varargin,'dooverwrite',true,'openmovie',true,'traj',[]);
+
+% remove trailing /
+if expdir(end) == '/' || (ispc && expdir(end) == '\'),
+  expdir = expdir(1:end-1);
+end
 
 if ismember(expdir,obj.expdirs),
   obj.RemoveExpDir(expdir);
@@ -13,22 +18,36 @@ n = obj.nexpdirs;
 
 obj.expdirs{n} = expdir;
 
-moviename = fullfile(obj.expdirs{n},obj.dataloc_params.moviefilestr);
-[~,nframes,fid,vidinfo] = get_readframe_fcn(moviename);
-fclose(fid);
+if openmovie && ~isempty(obj.dataloc_params.moviefilestr),
+  moviename = fullfile(obj.expdirs{n},obj.dataloc_params.moviefilestr);
+  [~,nframes,fid,vidinfo] = get_readframe_fcn(moviename);
+  if ~isempty(fid) && ~isnan(fid) && fid > 1,
+    fclose(fid);
+  end
 
-% store video info
-obj.nrs(n) = vidinfo.nr;
-obj.ncs(n) = vidinfo.nc;
-obj.ncolors(n) = vidinfo.ncolors;
-obj.movie_nframes(n) = nframes;
+  % store video info
+  obj.nrs(n) = vidinfo.nr;
+  obj.ncs(n) = vidinfo.nc;
+  obj.ncolors(n) = vidinfo.ncolors;
+  obj.movie_nframes(n) = nframes;
+end
 
 % read trajectories
 obj.trxfiles{n} = fullfile(obj.expdirs{n},obj.dataloc_params.trxfilestr);
-if ~exist(obj.trxfiles{n},'file'),
-  error('Trajectory file %s does not exist',obj.trxfiles{n});
+if isempty(traj),
+  if ~exist(obj.trxfiles{n},'file'),
+    error('Trajectory file %s does not exist',obj.trxfiles{n});
+  end
+  traj = load_tracks(obj.trxfiles{n});
 end
-traj = load_tracks(obj.trxfiles{n});
+
+% set movie properties when there is no movie
+if ~openmovie || isempty(obj.dataloc_params.moviefilestr),
+  obj.nrs(n) = max([traj.y]);
+  obj.ncs(n) = max([traj.x]);
+  obj.ncolors(n) = 0;
+  obj.movie_nframes(n) = max([traj.endframe]);
+end
 
 % number of flies
 obj.nfliespermovie(n) = length(traj);
@@ -43,6 +62,7 @@ obj.fly2exp(nfliesold+1:obj.nflies) = n;
 obj.ndatacachedperexp(n) = 0;
 obj.datacached{n} = {};
 obj.fnscached{n} = {};
+obj.nfnscached(n) = 0;
 
 % store trajectories
 obj.StoreTrajectories(n,traj,dooverwrite);

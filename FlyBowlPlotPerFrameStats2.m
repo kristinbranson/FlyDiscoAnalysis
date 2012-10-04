@@ -2,7 +2,8 @@ function FlyBowlPlotPerFrameStats2(expdir,varargin)
 
 special_cases = {'fractime','duration','boutfreq'};
 
-[analysis_protocol,settingsdir,datalocparamsfilestr,visible,controldatadirstr,DEBUG,usedaterange] = ...
+[analysis_protocol,settingsdir,datalocparamsfilestr,visible,controldatadirstr,DEBUG,...
+  usedaterange,usepreviousmonth,plotstatsonly,controlstats,controlhist] = ...
   myparse(varargin,...
   'analysis_protocol','current',...
   'settingsdir','/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/settings',...
@@ -10,7 +11,20 @@ special_cases = {'fractime','duration','boutfreq'};
   'visible','off',...
   'controldatadirstr','current',...
   'debug',false,...
-  'usedaterange',true);
+  'usedaterange',true,...
+  'usepreviousmonth',false,...
+  'plotstatsonly',false,...
+  'controlstats',[],...
+  'controlhist',[]);
+
+if ischar(plotstatsonly),
+  plotstatsonly = str2double(plotstatsonly);
+  if isnan(plotstatsonly),
+    plotstatsonly = false;
+  else
+    plotstatsonly = plotstatsonly ~= 0;
+  end
+end
 
 dateformat = 'yyyymmddTHHMMSS';
 
@@ -23,8 +37,10 @@ dataloc_params = ReadParams(datalocparamsfile);
 
 statsmatsavename = fullfile(expdir,dataloc_params.statsperframematfilestr);
 load(statsmatsavename,'statsperfly','statsperexp');
-histmatsavename = fullfile(expdir,dataloc_params.histperframematfilestr);
-load(histmatsavename,'histperfly','histperexp');
+if ~plotstatsonly,
+  histmatsavename = fullfile(expdir,dataloc_params.histperframematfilestr);
+  load(histmatsavename,'histperfly','histperexp');
+end
 
 %% create the plot directory if it does not exist
 figdir = fullfile(expdir,dataloc_params.figdir);
@@ -57,23 +73,35 @@ hist_plot_params = ReadParams(histplotparamsfile);
 
 %% get control data
 
-if ~isempty(controldatadirstr),
+if ~(~isempty(controlstats) && ~isempty(controlhist)) && ~isempty(controldatadirstr),
   
   % try to parse date for this experiment
   metadata = parseExpDir(expdir);
   if ~isempty(metadata) && usedaterange,
     dv = datevec(metadata.date,dateformat);
-    % get the previous month
     year = dv(1);
     month = dv(2);
-    dvend = [year,month,1,0,0,0];    
-    if month == 1,
-      month = 12;
-      year = year - 1;
+    if usepreviousmonth,
+      % get the previous month
+      dvend = [year,month,1,0,0,0];
+      if month == 1,
+        month = 12;
+        year = year - 1;
+      else
+        month = month-1;
+      end
+      dvstart = [year,month,1,0,0,0];
     else
-      month = month-1;
+      % get the current month
+      dvstart = [year,month,1,0,0,0];
+      if month == 12,
+        month = 1;
+        year = year + 1;
+      else
+        month = month+1;
+      end
+      dvend = [year,month,1,0,0,0];
     end
-    dvstart = [year,month,1,0,0,0];
     daterange = {datestr(dvstart,dateformat),datestr(dvend,dateformat)};
     controldatadir = fullfile(dataloc_params.pBDPGAL4Ustatsdir,sprintf('%sto%s_%s',daterange{:},controldatadirstr));
     if ~exist(controldatadir,'dir'),
@@ -85,10 +113,12 @@ if ~isempty(controldatadirstr),
   controlstatsname = fullfile(controldatadir,dataloc_params.statsperframematfilestr);
   controlstats = load(controlstatsname);
   controlhistname = fullfile(controldatadir,dataloc_params.histperframematfilestr);
-  controlhist = load(controlhistname);
+  if ~plotstatsonly,
+    controlhist = load(controlhistname);
+  end
   
   % make a soft-link to the control statistics directory
-  if isunix,
+  if isunix && ~DEBUG,
     [~,link] = unix(sprintf('readlink %s',controldatadir));
     if ~isempty(link),
       if link(1) ~= '/',
@@ -99,20 +129,21 @@ if ~isempty(controldatadirstr),
     else
       realcontroldatadir = controldatadir;
     end
+    if exist(fullfile(figdir,'pBDPGAL4U_stats'),'file'),
+      unix(sprintf('rm %s',fullfile(figdir,'pBDPGAL4U_stats')));
+    end
     cmd = sprintf('ln -s %s %s',realcontroldatadir,fullfile(figdir,'pBDPGAL4U_stats'));
     unix(cmd);
   end
-  
-else
-  
-  controlstats = [];
-  controlhist = [];
-  
+    
 end
 
 %% plot means, stds
 
 [tmp,basename] = fileparts(expdir);
+stathandles = PlotPerFrameStats(stats_perframefeatures,statsperfly,statsperexp,controlstats,basename,'visible',visible);
+drawnow;  
+% plot a second time to get this to work on the cluster
 stathandles = PlotPerFrameStats(stats_perframefeatures,statsperfly,statsperexp,controlstats,basename,'visible',visible);
 drawnow;  
 if ~DEBUG,
@@ -124,6 +155,12 @@ if ~DEBUG,
   save2png(savename,stathandles.hfig);
 end
 
+if plotstatsonly,
+  close all;
+  return;
+end
+
+
 %% plot histograms
 
 histfields = cell(1,numel(hist_perframefeatures));
@@ -131,10 +168,11 @@ histids = cell(1,numel(hist_perframefeatures));
 for i = 1:numel(hist_perframefeatures),
   histfields{i} = hist_perframefeatures(i).field;
   if ismember(histfields{i},special_cases),
-    frameconditionparams = DecodeConditions(hist_perframefeatures(i).framecondition,frameconditiondict);
-    m = regexp(frameconditionparams(1:2:end),'^[^_]+_(.+)_labels$','once','tokens');
-    tmp = find(~cellfun(@isempty,m),1);
-    histids{i} = [histfields{i},'_',m{tmp}{1}];
+    histids{i} = [histfields{i},'_',hist_perframefeatures(i).framecondition];
+%     frameconditionparams = DecodeConditions(hist_perframefeatures(i).framecondition,frameconditiondict);
+%     m = regexp(frameconditionparams(1:2:end),'^[^_]+_(.+)_labels$','once','tokens');
+%     tmp = find(~cellfun(@isempty,m),1);
+%     histids{i} = [histfields{i},'_',m{tmp}{1}];
   else
     if strcmp(hist_perframefeatures(i).framecondition,'any'),
       histids{i} = histfields{i};
@@ -170,7 +208,7 @@ for i = 1:numel(histids),
   
   if ~isempty(controlhist),
     if isfield(controlhist,'meanhistperexp'),
-      handles_control = PlotPerExpHists2(id,field,idxcurr,hist_perframefeatures,...
+      handles_control = PlotPerFrameHists2Exp(id,field,idxcurr,hist_perframefeatures,...
         controlhist.meanhistperexp,controlhist.histperexp,...
         bins.(binfn),hist_plot_params,expname,...
         'visible',visible,'linestyle',':','stdstyle','errorbar');
@@ -210,6 +248,20 @@ for i = 1:numel(histids),
   end
   
 end
+
+%% plot means, stds
+% 
+% [tmp,basename] = fileparts(expdir);
+% stathandles = PlotPerFrameStats(stats_perframefeatures,statsperfly,statsperexp,controlstats,basename,'visible',visible);
+% drawnow;  
+% if ~DEBUG,
+%   savename = sprintf('stats.png');
+%   savename = fullfile(figdir,savename);
+%   if exist(savename,'file'),
+%     delete(savename);
+%   end
+%   save2png(savename,stathandles.hfig);
+% end
 
 close all;
 

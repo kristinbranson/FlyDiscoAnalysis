@@ -1,0 +1,1 @@
+/groups/branson/home/bransonk/behavioranalysis/code/Jdetect/Jdetect/experiments/righting/righting_AR.mat,/groups/branson/home/bransonk/behavioranalysis/code/Jdetect/Jdetect/perframe/params/JLabelParams_FlyBowl_Righting.xml

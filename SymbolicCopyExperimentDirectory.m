@@ -1,4 +1,4 @@
-function SymbolicCopyExperimentDirectory(expdir,rootoutputdir,varargin)
+function outexpdir = SymbolicCopyExperimentDirectory(expdir,rootoutputdir,varargin)
 
 [copyfiles,ignorefiles,dosoftlink] = myparse(varargin,...
   'copyfiles',{},'ignorefiles',{},'dosoftlink',true);
@@ -38,9 +38,15 @@ for i = 1:numel(subfiles),
   outfile = fullfile(outexpdir,subfiles{i});
   if ~exist(outfile,'file'),
     if dosoftlink,
-      cmd = sprintf('ln -s %s %s',infile,outfile);
+      [~,link] = unix(sprintf('readlink %s',infile));
+      link = strtrim(link);
+      if ~isempty(link),        
+        cmd = sprintf('ln -s %s %s',link,outfile);
+      else
+        cmd = sprintf('ln -s %s %s',infile,outfile);
+      end
     else
-      cmd = sprintf('cp %s %s',infile,outfile);
+      cmd = sprintf('cp -r %s %s',infile,outfile);
     end
     system(cmd);
     if ~exist(outfile,'file'),

@@ -3,24 +3,29 @@ function FlyBowlComputePerFrameStats2(expdir,varargin)
 special_cases = {'fractime','duration','boutfreq'};
 
 [analysis_protocol,settingsdir,datalocparamsfilestr,...
-  dorecompute,debug] = ...
+  dorecompute,debug,verbose] = ...
   myparse(varargin,...
   'analysis_protocol','current',...
   'settingsdir','/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/settings',...
   'datalocparamsfilestr','dataloc_params.txt',...
   'dorecompute',true,...
-  'debug',false); 
+  'debug',false,...
+  'verbose',true); 
 
 %% load this experiment
-fprintf('Initializing trx...\n');
+if verbose,
+  fprintf('Initializing trx...\n');
+end
 
 trx = Trx('analysis_protocol',analysis_protocol,'settingsdir',settingsdir,...
   'datalocparamsfilestr',datalocparamsfilestr,...
   'maxdatacached',2^30);
 
-fprintf('Loading trajectories for %s...\n',expdir);
+if verbose,
+  fprintf('Loading trajectories for %s...\n',expdir);
+end
 
-trx.AddExpDir(expdir);
+trx.AddExpDir(expdir,'dooverwrite',false,'openmovie',false);
 
 % % load labels
 % labelfiles = dir(fullfile(trx.expdirs{1},'*_labels.mat'));
@@ -100,7 +105,9 @@ for i = 1:numel(stats_perframefeatures),
     fn = fn(1:63);
   end
   
-  fprintf('Computing stats for %s...\n',fn);
+  if verbose,
+    fprintf('Computing stats for %s...\n',fn);
+  end
   
   % initialize per-fly stats
   statsperflycurr = struct('Z',zeros(1,nflies),...
@@ -212,10 +219,12 @@ for i = 1:numel(stats_perframefeatures),
   nflies_fly = sum(statsperfly.(fn).fracframesanalyzed(idx));
   nframes_per_fly = sum(statsperfly.(fn).Z(idx)) / sum(nflies_fly);
   fracframes_per_fly = sum(statsperfly.(fn).Z(idx)) / sum(statsperfly.(fn).Zfly(idx));
-  if strcmp(field,'fractime'),
-    fprintf('%.1f flies satisfy conditions %s, on average %.1f frames analyzed per fly\n',nflies_fly,flyconditionname,nframes_per_fly);
-  else
-    fprintf('%.1f flies satisfy conditions %s, on average %.1f frames (%.1f%%) analyzed per fly also satisfy %s\n',nflies_fly,flyconditionname,nframes_per_fly,fracframes_per_fly*100,frameconditionname);
+  if verbose,
+    if strcmp(field,'fractime'),
+      fprintf('%.1f flies satisfy conditions %s, on average %.1f frames analyzed per fly\n',nflies_fly,flyconditionname,nframes_per_fly);
+    else
+      fprintf('%.1f flies satisfy conditions %s, on average %.1f frames (%.1f%%) analyzed per fly also satisfy %s\n',nflies_fly,flyconditionname,nframes_per_fly,fracframes_per_fly*100,frameconditionname);
+    end
   end
   
   % save to text file
@@ -227,6 +236,11 @@ if ~debug,
   SaveAllPerFrameStatsTxtFile(statstxtsavename,statsperfly,statsperexp);
   
   % save to mat file
+  if exist(statsmatsavename,'file'),
+    try
+      delete(statsmatsavename);
+    end
+  end
   save(statsmatsavename,'statsperfly','statsperexp','frameconditiondict',...
     'flyconditiondict','stats_params');
 end
@@ -257,6 +271,9 @@ else
 
 histperfly = struct;
 histperexp = struct;
+
+nbins_linear_default = [];
+nbins_log_default = [];
 
 for i = 1:numel(hist_perframefeatures),
   % which per-frame feature
@@ -292,21 +309,101 @@ for i = 1:numel(hist_perframefeatures),
     fn = fn(1:63);
   end
 
-  fprintf('Computing histograms for %s...\n',fn);
+  if verbose,
+    fprintf('Computing histograms for %s...\n',fn);
+  end
   
   if ismember(field,special_cases),
-    m = regexp(frameconditionparams(1:2:end),'^[^_]+_(.+)_labels$','once','tokens');
-    tmp = find(~cellfun(@isempty,m),1);    
-    binfn = [field,'_',m{tmp}{1}];
+    binfn = [field,'_',frameconditionname];
+%     tmp = frameconditionparams(1:2:end);
+%     m = regexp(tmp,'^[^_]+_(.+)_labels$','once','tokens');
+%     tmp1 = cellfun(@isempty,m);
+%     m(tmp1) = regexp(tmp(tmp1),'^[^_]+_labels_(.+)$','once','tokens');
+%     tmp = find(~cellfun(@isempty,m),1);
+%     binfn = [field,'_',m{tmp}{1}];
   else
     binfn = field;
   end
-  edges_linear = [-inf,bins.(binfn).edges_linear,inf];
-  edges_log = [-inf,bins.(binfn).edges_log,inf];
-  edges_linear(end-1) = edges_linear(end-1)*(1+1e-3);
-  edges_log(end-1) = edges_log(end-1)*(1+1e-3);
-  nbins_linear = numel(bins.(binfn).edges_linear)-1;
-  nbins_log = numel(bins.(binfn).edges_log)-1;
+  if ~isfield(bins,binfn),
+    warning('Field %s missing from histogram bins',binfn);
+    if isempty(nbins_linear_default),
+      tmpfns = fieldnames(bins);
+      nbins_linear_all = nan(1,numel(tmpfns));
+      nbins_log_all = nan(1,numel(tmpfns));
+      for tmpi = 1:numel(tmpfns),
+        tmpfn = tmpfns{tmpi};
+        nbins_linear_all(tmpi) = numel(bins.(tmpfn).centers_linear);
+        nbins_log_all(tmpi) = numel(bins.(tmpfn).centers_log);
+        nbins_linear_default = mode(nbins_linear_all);
+        nbins_log_default = mode(nbins_log_all);
+      end
+    end
+    nbins_linear = nbins_linear_default;
+    nbins_log = nbins_log_default;
+    
+    alldata = [];
+  
+    for fly = 1:nflies,
+      
+      % current field data
+      if ~ismember(field,special_cases),
+        data = trx(fly).(field);
+        n = numel(data);
+      else
+        n = trx(fly).nframes;
+      end
+      
+      % check that the fly matches the conditions in flyconditionparams
+      if strcmpi(flyconditionname,'any'),
+        doanalyze_fly = true(1,n);
+      else
+        doanalyze_fly = FrameConditionCheck(trx,fly,n,flyconditionparams);
+      end
+      
+      % choose frames that match the conditions in frameconditionparams
+      if strcmpi(frameconditionname,'any'),
+        doanalyze_frame = true(1,n);
+      else
+        doanalyze_frame = FrameConditionCheck(trx,fly,n,frameconditionparams);
+      end
+      
+      doanalyze = doanalyze_fly & doanalyze_frame;
+      
+      % skip this trajectory if there aren't enough frames of data
+      if nnz(doanalyze) < minZboth || nnz(doanalyze_fly) < minZfly,
+        %fprintf('Skipping fly %d for condition %s; not enough frames of data\n',fly,frameconditionname);
+        continue;
+      end
+      
+      if strcmp(field,'duration'),
+        [bout_starts,bout_ends] = ComputeBouts(doanalyze,doanalyze_fly);
+        data = trx(fly).timestamps(min(bout_ends+1,n))-trx(fly).timestamps(bout_starts);
+        alldata = [alldata,data]; %#ok<AGROW>
+      else
+        alldata = [alldata,data(doanalyze)]; %#ok<AGROW>
+      end
+    end
+
+    lim = [min(alldata),max(alldata)];
+    edges_linear = SelectHistEdges(nbins_linear,lim,'linear');
+    if lim(1) < 0,
+      edges_log = SelectHistEdges(nbins_log,lim,'logabs');
+    else
+      edges_log = SelectHistEdges(nbins_log,lim,'log');
+    end
+    edges_linear = [-inf,edges_linear,inf];
+    edges_log = [-inf,edges_log,inf];
+    edges_linear(end-1) = edges_linear(end-1)*(1+1e-3);
+    edges_log(end-1) = edges_log(end-1)*(1+1e-3);
+    
+  else
+    edges_linear = [-inf,bins.(binfn).edges_linear,inf];
+    edges_log = [-inf,bins.(binfn).edges_log,inf];
+    edges_linear(end-1) = edges_linear(end-1)*(1+1e-3);
+    edges_log(end-1) = edges_log(end-1)*(1+1e-3);
+    nbins_linear = numel(bins.(binfn).edges_linear)-1;
+    nbins_log = numel(bins.(binfn).edges_log)-1;
+  end
   
   histperflycurr = struct('Z',zeros(1,nflies),...
     'frac_linear',nan(nbins_linear,nflies),...
@@ -318,7 +415,7 @@ for i = 1:numel(hist_perframefeatures),
     'fracframesanalyzed',zeros(1,nflies),...
     'Zfly',zeros(1,nflies));
 
-  alldata = [];
+  %alldata = [];
   
   for fly = 1:nflies,
     
@@ -355,12 +452,15 @@ for i = 1:numel(hist_perframefeatures),
     if strcmp(field,'duration'),
       [bout_starts,bout_ends] = ComputeBouts(doanalyze,doanalyze_fly);
       data = trx(fly).timestamps(min(bout_ends+1,n))-trx(fly).timestamps(bout_starts);
-      alldata = [alldata,data]; %#ok<AGROW>
+      %alldata = [alldata,data]; %#ok<AGROW>
       doanalyze_data = true(1,numel(data));
     else
       doanalyze_data = doanalyze;
-      alldata = [alldata,data(doanalyze)]; %#ok<AGROW>
+      %alldata = [alldata,data(doanalyze)]; %#ok<AGROW>
     end
+    
+
+
     
     % histogram
     [histperflycurr.frac_linear(:,fly),...
@@ -382,14 +482,14 @@ for i = 1:numel(hist_perframefeatures),
 
   histperfly.(fn) = histperflycurr;
   % compute per-experiment hist
-  histperexp.(fn) = CombinePerFrameHists2(histperflycurr);
-    
-
+  histperexp.(fn) = CombinePerFrameHists2(histperflycurr,hist_perframefeatures(i).minZboth,hist_perframefeatures(i).minZfly);
   idx = histperfly.(fn).Z > 0;
   nflies_fly = sum(histperfly.(fn).fracframesanalyzed(idx));
   nframes_per_fly = sum(histperfly.(fn).Z(idx)) / sum(nflies_fly);
   fracframes_per_fly = sum(histperfly.(fn).Z(idx)) / sum(histperfly.(fn).Zfly(idx));
-  fprintf('Histogramming: %.1f flies satisfy conditions %s, on average %.1f frames (%.1f%%) analyzed per fly also satisfy %s\n',nflies_fly,flyconditionname,nframes_per_fly,fracframes_per_fly*100,frameconditionname);
+  if verbose,
+    fprintf('Histogramming: %.1f flies satisfy conditions %s, on average %.1f frames (%.1f%%) analyzed per fly also satisfy %s\n',nflies_fly,flyconditionname,nframes_per_fly,fracframes_per_fly*100,frameconditionname);
+  end
   
   % save to text file
   %SavePerFrameHistTxtFile(histtxtsavename,fn,histperflycurr,histperexp.(fn));
@@ -397,6 +497,11 @@ for i = 1:numel(hist_perframefeatures),
 end
 
 if ~debug,
+  if exist(histmatsavename,'file'),
+    try
+      delete(histmatsavename);
+    end
+  end
   save(histmatsavename,'histperfly','histperexp','bins','frameconditiondict',...
     'flyconditiondict');
   SaveAllPerFrameHistTxtFile(histtxtsavename,histperfly,histperexp);

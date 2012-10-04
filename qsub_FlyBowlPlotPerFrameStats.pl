@@ -3,7 +3,7 @@
 use strict;
 #my $MAXNJOBS = 12;
 
-my $SCRIPTNAME = "FlyBowlPlotPerFrameStats";
+my $SCRIPTNAME = "FlyBowlPlotPerFrameStats2";
 
 my $nargs = $#ARGV + 1;
 if($nargs < 1){
@@ -11,7 +11,7 @@ if($nargs < 1){
     exit(1);
 }
 
-my $ANALYSIS_PROTOCOL = "20120210";
+my $ANALYSIS_PROTOCOL = "current_non_olympiad_albins";
 
 my $SCRIPT = "/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/settings/$ANALYSIS_PROTOCOL/run_$SCRIPTNAME.sh";
 
@@ -20,7 +20,7 @@ my $PARAMS = "analysis_protocol $ANALYSIS_PROTOCOL";
 my $temporary_dir = "/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/temp_$SCRIPTNAME";
 `mkdir -p $temporary_dir`;
 
-my $MCR = "/groups/branson/bransonlab/projects/olympiad/MCR/v716";
+my $MCR = "/groups/branson/bransonlab/projects/olympiad/MCR/v717";
 
 my $MCR_CACHE_ROOT = "/tmp/mcr_cache_root";
 
