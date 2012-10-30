@@ -1,9 +1,10 @@
 function CheckExperiments(expdirs,varargin)
 
-[checkprotocol,checkfix,classifierparamsfiles,npar] = myparse(varargin,...
+[checkprotocol,checkfix,classifierparamsfiles,npar,analysis_protocol] = myparse(varargin,...
   'checkprotocol',true,'checkfix',true,...
   'classifierparamsfiles',{},...
-  'npar',[]);
+  'npar',[],...
+  'analysis_protocol','current');
 
 if isempty(npar),
   npar = max(1,matlabpool('size'));
@@ -81,6 +82,8 @@ if checkprotocol,
     fprintf('%s: %d experiments, %d pass, %d fail\n',allctrax_versions{i},nnz(ctrax_versionidx==i),...
       nnz(~isfailure&ctrax_versionidx==i),nnz(isfailure&ctrax_versionidx==i));
   end
+  
+  input('Hit enter to continue.');
   
 end
 

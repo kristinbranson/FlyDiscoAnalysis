@@ -31,16 +31,22 @@ xvidfile = fullfile(expdir,[avifilestr,'.avi']);
 %% read start and end of cropped trajectories
 
 registrationtxtfile = fullfile(expdir,dataloc_params.registrationtxtfilestr);
-registration_params = ReadParams(registrationtxtfile);
-if ~isfield(registration_params,'end_frame'),
+if ~exist(registrationtxtfile,'file'),
   load(trxfile,'trx');
   registration_params.end_frame = max([trx.endframe]);
-end
-if ~isfield(registration_params,'start_frame'),
-  if ~exist('trx','var'),
-    load(trxfile,'trx');
-  end
   registration_params.start_frame = min([trx.firstframe]);
+else
+  registration_params = ReadParams(registrationtxtfile);
+  if ~isfield(registration_params,'end_frame'),
+    load(trxfile,'trx');
+    registration_params.end_frame = max([trx.endframe]);
+  end
+  if ~isfield(registration_params,'start_frame'),
+    if ~exist('trx','var'),
+      load(trxfile,'trx');
+    end
+    registration_params.start_frame = min([trx.firstframe]);
+  end
 end
 nframes = registration_params.end_frame-registration_params.start_frame + 1;
 firstframes_off = min(max(0,round(ctraxresultsmovie_params.firstframes*nframes)),nframes-1);
