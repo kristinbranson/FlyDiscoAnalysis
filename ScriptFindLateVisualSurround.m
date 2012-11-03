@@ -50,18 +50,6 @@ firsti = find(~isnan(v),1);
 
 [isproblem,notes] = ExamineVideoDiagnostics(data,order(firsti:end),'isproblem',isproblem,'notes',notes);
 
-%% look at all other experiments from sets with problems
-
-[sets,~,setidx] = unique({data.set});
-
-issameset = false(1,numel(data));
-for i = find(isproblem==1),
-  issameset = issameset | (setidx(i) == setidx & isproblem~=1);
-end
-idxsameset = find(issameset);
-
-[isproblem,notes] = ExamineVideoDiagnostics(data,idxsameset,'isproblem',isproblem,'notes',notes);
-
 %% look at experiments sorted by fracFramesWithNBoxes01000
 
 [v,order] = sort([data.video_diagnostics_fracFramesWithNBoxes01000],2,'descend');
@@ -90,6 +78,18 @@ isnotes = ~cellfun(@isempty,regexpi({data.notes_technical},'visual|surround')) &
 idxnotes = find(isnotes);
 
 [isproblem,notes] = ExamineVideoDiagnostics(data,idxnotes,'isproblem',isproblem,'notes',notes);
+
+%% look at all other experiments from sets with problems
+
+[sets,~,setidx] = unique({data.set});
+
+issameset = false(1,numel(data));
+for i = find(isproblem==1),
+  issameset = issameset | (setidx(i) == setidx & isproblem~=1);
+end
+idxsameset = find(issameset);
+
+[isproblem,notes] = ExamineVideoDiagnostics(data,idxsameset,'isproblem',isproblem,'notes',notes);
 
 %% add in visual surround problem for all empty notes for problems
 
