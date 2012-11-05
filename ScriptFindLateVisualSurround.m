@@ -46,7 +46,7 @@ notes = cell(1,numel(data));
 %% look at experiments sorted by fracFramesWithNBoxes07000
 
 v = [data.video_diagnostics_fracFramesWithNBoxes07000];
-v(isproblem==1) = nan;
+v(~isnan(isproblem)) = nan;
 [v,order] = sort(v,2,'descend');
 firsti = find(~isnan(v),1);
 
@@ -55,7 +55,7 @@ firsti = find(~isnan(v),1);
 %% look at experiments sorted by fracFramesWithNBoxes01000
 
 v = [data.video_diagnostics_fracFramesWithNBoxes01000];
-v(isproblem==1) = nan;
+v(~isnan(isproblem)) = nan;
 [v,order] = sort(v,2,'descend');
 firsti = find(~isnan(v),1);
 
@@ -65,7 +65,7 @@ firsti = find(~isnan(v),1);
 %% look at experiments sorted by ufmf_diagnostics_summary_maxBandWidth
 
 v = [data.ufmf_diagnostics_summary_maxBandWidth];
-v(isproblem==1) = nan;
+v(~isnan(isproblem)) = nan;
 [v,order] = sort(v,2,'descend');
 firsti = find(~isnan(v),1);
 
@@ -74,7 +74,7 @@ firsti = find(~isnan(v),1);
 %% look at experiments sorted by ctrax_diagnostics_nlarge_ignored
 
 v = [data.ctrax_diagnostics_nlarge_ignored];
-v(isproblem==1) = nan;
+v(~isnan(isproblem)) = nan;
 [v,order] = sort(v,2,'descend');
 firsti = find(~isnan(v),1);
 
