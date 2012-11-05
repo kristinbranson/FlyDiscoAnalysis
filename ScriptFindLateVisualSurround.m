@@ -45,14 +45,18 @@ notes = cell(1,numel(data));
 
 %% look at experiments sorted by fracFramesWithNBoxes07000
 
-[v,order] = sort([data.video_diagnostics_fracFramesWithNBoxes07000],2,'descend');
+v = [data.video_diagnostics_fracFramesWithNBoxes07000];
+v(isproblem==1) = nan;
+[v,order] = sort(v,2,'descend');
 firsti = find(~isnan(v),1);
 
 [isproblem,notes] = ExamineVideoDiagnostics(data,order(firsti:end),'isproblem',isproblem,'notes',notes);
 
 %% look at experiments sorted by fracFramesWithNBoxes01000
 
-[v,order] = sort([data.video_diagnostics_fracFramesWithNBoxes01000],2,'descend');
+v = [data.video_diagnostics_fracFramesWithNBoxes01000];
+v(isproblem==1) = nan;
+[v,order] = sort(v,2,'descend');
 firsti = find(~isnan(v),1);
 
 [isproblem,notes] = ExamineVideoDiagnostics(data,order(firsti:end),'isproblem',isproblem,'notes',notes);
@@ -60,14 +64,18 @@ firsti = find(~isnan(v),1);
 
 %% look at experiments sorted by ufmf_diagnostics_summary_maxBandWidth
 
-[v,order] = sort([data.ufmf_diagnostics_summary_maxBandWidth],2,'descend');
+v = [data.ufmf_diagnostics_summary_maxBandWidth];
+v(isproblem==1) = nan;
+[v,order] = sort(v,2,'descend');
 firsti = find(~isnan(v),1);
 
 [isproblem,notes] = ExamineVideoDiagnostics(data,order(firsti:end),'isproblem',isproblem,'notes',notes);
 
 %% look at experiments sorted by ctrax_diagnostics_nlarge_ignored
 
-[v,order] = sort([data.ctrax_diagnostics_nlarge_ignored],2,'descend');
+v = [data.ctrax_diagnostics_nlarge_ignored];
+v(isproblem==1) = nan;
+[v,order] = sort(v,2,'descend');
 firsti = find(~isnan(v),1);
 
 [isproblem,notes] = ExamineVideoDiagnostics(data,order(firsti:end),'isproblem',isproblem,'notes',notes);
