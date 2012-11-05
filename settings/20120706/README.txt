@@ -1,3 +1,12 @@
+changes on 20121105:
+
+removed
+nearwall,max_dist2wall,15
+nearfly,max_dcenter,6.5
+from fly conditions. these weren't being used in stats_perframedfeatures.txt, so hopefully it doesn't change anything. 
+
+
+
 protocol 20120706:
 
 changes on 20120819:

@@ -40,8 +40,8 @@ fprintf('%s\n',data(idxmissing).file_system_path);
 
 %% initialize
 
-isproblem = nan(1,numel(v));
-notes = cell(1,numel(v));
+isproblem = nan(1,numel(data));
+notes = cell(1,numel(data));
 
 %% look at experiments sorted by fracFramesWithNBoxes07000
 
