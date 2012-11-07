@@ -112,7 +112,7 @@ fid = fopen(savefilename,'w');
 if fid < 1,
   error('Could not open file %s for writing. Make sure it is not open in another program.',savefilename);
 end
-fprintf(fid,'experiment\tmanual_pf\tmanual_curator\tmanual_curation_date\tnotes_curation\n');
+fprintf(fid,'line\texperiment\tmanual_pf\tmanual_curator\tmanual_curation_date\tnotes_curation\tdiagnostics_fields\n');
 for i = find(isproblem==1),
   if isempty(data(i).notes_curation),
     notes_curation_curr = {};
@@ -140,11 +140,11 @@ for i = find(isproblem==1),
   if numel(notes_curation_curr) >= 3 && strcmp(notes_curation_curr(end-2:end),'\n"'),
     notes_curation_curr = [notes_curation_curr(1:end-3),'"'];
   end
-  fprintf(fid,'%s\t%s\t',data(i).experiment_name,'F');
+  fprintf(fid,'%s\t%s\t%s\t',data(i).line_name,data(i).experiment_name,'F');
   % print curation time, curator if experiment variables
   fprintf(fid,'%s\t%s\t',manual_curator,timestamp);
   % print notes
-  fprintf(fid,'%s\n',notes_curation_curr);
+  fprintf(fid,'%s\t\n',notes_curation_curr);
 end
 fclose(fid);
 

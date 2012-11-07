@@ -79,3 +79,4 @@ hackhitstatsmatfilestr,hackhitstats.mat
 behaviordetectionparamsfilestr,behavior_detection_params.txt
 fractimestatstxtfilestr,fractime_stats.txt
 fractimestatsmatfilestr,fractime_stats.mat
+jaabadetectparamsfilestr,jaaba_detect_params.txt
