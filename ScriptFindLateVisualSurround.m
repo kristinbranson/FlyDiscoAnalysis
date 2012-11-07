@@ -112,7 +112,7 @@ fid = fopen(savefilename,'w');
 if fid < 1,
   error('Could not open file %s for writing. Make sure it is not open in another program.',savefilename);
 end
-fprintf(fid,'line\texperiment\tmanual_pf\tmanual_curator\tmanual_curation_date\tnotes_curation\tdiagnostics_fields\n');
+fprintf(fid,'line\texperiment\tmanual_pf\tmanual_curator\tmanual_curation_date\tnotes_curation\tdiagnostic_fields\n');
 for i = find(isproblem==1),
   if isempty(data(i).notes_curation),
     notes_curation_curr = {};
