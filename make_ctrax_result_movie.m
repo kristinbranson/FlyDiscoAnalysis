@@ -35,7 +35,7 @@ mencoder_maxnframes = inf;
   taillength,fps,maxnframes,firstframes,compression,figpos,movietitle,...
   useVideoWriter,mencoderoptions,mencoder_maxnframes,...
   avifileTempDataFile,titletext,dynamicflyselection,...
-  doshowsex,doplotwings] = ...
+  doshowsex,doplotwings,doflipud,dofliplr] = ...
   myparse(varargin,'moviename','','trxname','','aviname','','colors',[],'zoomflies',[],'nzoomr',nan,'nzoomc',nan,...
   'boxradius',nan,'taillength',nan,'fps',nan,'maxnframes',nan,'firstframes',[],'compression','',...
   'figpos',[],'movietitle','','useVideoWriter',useVideoWriter,...
@@ -44,7 +44,8 @@ mencoder_maxnframes = inf;
   'titletext',true,...
   'dynamicflyselection',true,...
   'doshowsex',true,...
-  'doplotwings',true);
+  'doplotwings',true,...
+  'flipud',false,'fliplr',false);
 
 if ~ischar(compression),
   compression = '';
@@ -65,7 +66,17 @@ if ~ischar(moviename) || isempty(moviename) || ~exist(moviename,'file'),
 else
   [moviepath,movienameonly] = split_path_and_filename(moviename);
 end
-[readframe,nframes,fid] = get_readframe_fcn(moviename);
+[readframe1,nframes,fid] = get_readframe_fcn(moviename);
+if doflipud && dofliplr,
+  readframe = @(x) flipdim(flipdim(readframe1(x),1),2);
+elseif doflipud,
+  readframe = @(x) flipdim(readframe1(x),1);
+elseif dofliplr
+  readframe = @(x) flipdim(readframe1(x),2);
+else
+  readframe = readframe1;
+end
+  
 if fid < 0,
   uiwait(msgbox(sprintf('Could not read in movie %s',moviename)));
   return;
@@ -107,7 +118,7 @@ if ~haveaviname,
   helpmsg{1} = 'Choose avi file to write annotated movie to.';
   helpmsg{2} = sprintf('Raw movie input: %s',moviename);
   helpmsg{3} = sprintf('Trx file name input: %s',trxname);
-  [avinameonly,avipath] = uiputfilehelp('*.mat',sprintf('Choose output avi for %s',movienameonly),aviname,'helpmsg',helpmsg);
+  [avinameonly,avipath] = uiputfilehelp('*.avi',sprintf('Choose output avi for %s',movienameonly),aviname,'helpmsg',helpmsg);
   if ~ischar(avinameonly),
     return;
   end
