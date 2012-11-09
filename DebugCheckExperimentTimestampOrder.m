@@ -47,3 +47,23 @@ parfor i = 1:numel(allexps),
 %     fprintf('\n');
   end
 end
+
+%% save results
+
+save CheckExperimentTimestampOrderResults20121109.mat isbroken filesmissing filetypes rules allexps allperframefns;
+
+%%
+
+fid = fopen('CheckExperimentTimestampOrderResults20121109.tsv','w');
+fprintf(fid,'name\tautomated_pf\tautomated_pf_category\texp_datetime');
+for i = 1:nrules,
+  fprintf(fid,'\t%s < %s',rules{i,:});
+end
+fprintf(fid,'\tfile_system_path\n\n');
+for i = 1:numel(allexps),
+  [~,name] = fileparts(expdirs{i});
+  fprintf(fid,'%s\t%s\t%s\t%s',name,allexps(i).automated_pf,allexps(i).automated_pf_category,allexps(i).exp_datetime);
+  fprintf(fid,'\t%d',isbroken(i,:));
+  fprintf(fid,'\t%s\n',expdirs{i});
+end
+fclose(fid);
