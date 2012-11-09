@@ -4,7 +4,7 @@ addpath /groups/branson/home/bransonk/tracking/code/JCtrax/misc;
 addpath /groups/branson/home/bransonk/tracking/code/JCtrax/filehandling;
 addpath /groups/branson/bransonlab/projects/olympiad/SAGE/MATLABInterface/Trunk;
 
-settinsgdir = '/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/settings';
+settingsdir = '/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/settings';
 datalocparamsfilestr = 'dataloc_params.txt';
 
 %% parameters
@@ -59,11 +59,18 @@ fprintf(fid,'name\tautomated_pf\tautomated_pf_category\texp_datetime');
 for i = 1:nrules,
   fprintf(fid,'\t%s < %s',rules{i,:});
 end
-fprintf(fid,'\tfile_system_path\n\n');
+fprintf(fid,'\tmissing_files\tfile_system_path\n\n');
 for i = 1:numel(allexps),
   [~,name] = fileparts(expdirs{i});
   fprintf(fid,'%s\t%s\t%s\t%s',name,allexps(i).automated_pf,allexps(i).automated_pf_category,allexps(i).exp_datetime);
   fprintf(fid,'\t%d',isbroken(i,:));
+  fprintf(fid,'\t');
+  if ~isempty(filesmissing{i}),
+    fprintf(fid,'%s',filesmissing{i}{1});
+    if numel(filesmissing{i}) > 1,
+      fprintf(fid,',%s',filesmissing{i}{2:end});
+    end
+  end
   fprintf(fid,'\t%s\n',expdirs{i});
 end
 fclose(fid);
