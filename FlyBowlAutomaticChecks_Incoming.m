@@ -1,5 +1,11 @@
 function [success,msgs,iserror] = FlyBowlAutomaticChecks_Incoming(expdir,varargin)
 
+version = '0.1';
+
+fprintf('\n\n***\nRunning FlyBowlAutomaticChecks_Incoming version %s at %s\n',version,datestr(now,'yyyymmddTHHMMSS'));
+
+try
+
 success = true;
 msgs = {};
 
@@ -24,7 +30,7 @@ if ~iscell(check_params.control_line_names),
 end
 metadatafile = fullfile(expdir,dataloc_params.metadatafilestr);
 ufmfdiagnosticsfile = fullfile(expdir,dataloc_params.ufmfdiagnosticsfilestr);
-temperaturefile = fullfile(expdir,dataloc_params.temperaturefilestr);
+temperaturefile = fullfile(expdir,dataloc_params.temperaturefilestr); %#ok<NASGU>
 outfile = fullfile(expdir,dataloc_params.automaticchecksincomingresultsfilestr);
 
 % order matters here: higher up categories have higher priority
@@ -63,7 +69,12 @@ if ~ismetadata,
   iserror(category2idx.missing_metadata_file) = true;
   metadata = struct;
 else
-  metadata = ReadMetadataFile(metadatafile);
+  try
+    metadata = ReadMetadataFile(metadatafile);
+  catch %#ok<CTCH>
+    msgs{end+1} = 'Error reading Metadata file';
+    success = false;
+  end
 end
   
 
@@ -71,6 +82,9 @@ end
 
 required_fns = {'flag_aborted','flag_redo','seconds_fliesloaded','seconds_shiftflytemp',...
   'screen_type','line','cross_barcode'};
+if isfield(check_params,'required_fns'),
+  required_fns = check_params.required_fns;
+end
 ismissingfn = ~ismember(required_fns,fieldnames(metadata));
 if any(ismissingfn),
   success = false;
@@ -250,6 +264,22 @@ for i = 1:numel(check_params.required_files),
   end
 end
 
+%% check for missing desired files
+
+if isfield(check_params,'desired_files'),
+  for i = 1:numel(check_params.desired_files),
+    fn = check_params.desired_files{i};
+    if any(fn == '*'),
+      isfile = ~isempty(dir(fullfile(expdir,fn)));
+    else
+      isfile = exist(fullfile(expdir,fn),'file');
+    end
+    if ~isfile,
+      msgs{end+1} = sprintf('Missing desired file %s',fn); %#ok<AGROW>
+    end
+  end
+end
+
 %% output results to file
 
 if DEBUG,
@@ -287,4 +317,20 @@ end
 
 if ~DEBUG && fid > 1,
   fclose(fid);
+end
+
+catch ME,
+  success = false;
+  msgs = {getReport(ME)};
+end
+  
+%% print results to STDOUT
+
+fprintf('Finished running FlyBowlAutomaticChecks_Incoming.\n');
+fprintf('success = %d\n',success);
+if isempty(msgs),
+  fprintf('No error or warning messages.\n');
+else
+  fprintf('Warning/error messages:\n');
+  fprintf('%s\n',msgs{:});
 end

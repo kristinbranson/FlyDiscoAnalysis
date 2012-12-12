@@ -1,0 +1,10 @@
+min_seconds_fliesloaded,0
+max_seconds_fliesloaded,10000
+max_seconds_shiftflytemp,10000
+min_ufmf_diagnostics_summary_nframes,1000
+max_tempdiff,100
+max_temp,100
+control_line_names,
+required_files,Metadata.xml,movie.ufmf,movie.ufmf.ann,movie.mat
+desired_files,FlyBowlDataCaptureParams_*.txt,Log.txt,QuickStats.png,QuickStats.txt,SUCCESS,temperature.txt,ufmf_diagnostics.txt,ufmf_log.txt
+required_fns,flag_aborted,flag_redo,seconds_fliesloaded,seconds_shiftflytemp,screen_type,screen_reason
