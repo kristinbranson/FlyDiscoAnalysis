@@ -30,7 +30,7 @@ else
   logfid = 1;
 end
 
-fprintf(logfid,'\n\n***\nRunning FlyBowlAutomaticChecks_Incoming version %s at %s\n',version,datestr(now,'yyyymmddTHHMMSS'));
+fprintf(logfid,'\n\n***\nRunning FlyBowlAutomaticChecks_Incoming version %s analysis_protocol %s at %s\n',version,analysis_protocol,datestr(now,'yyyymmddTHHMMSS'));
 
 try
 
@@ -338,7 +338,7 @@ end
   
 %% print results to STDOUT
 
-fprintf(logfid,'Finished running FlyBowlAutomaticChecks_Incoming.\n');
+fprintf(logfid,'Finished running FlyBowlAutomaticChecks_Incoming at %s.\n',datestr(now,'yyyymmddTHHMMSS'));
 fprintf(logfid,'success = %d\n',success);
 if isempty(msgs),
   fprintf(logfid,'No error or warning messages.\n');

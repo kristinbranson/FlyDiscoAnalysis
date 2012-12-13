@@ -32,7 +32,7 @@ else
   logfid = 1;
 end
 
-fprintf(logfid,'\n\n***\nRunning FlyBowlRegisterTrx version %s at %s\n',version,timestamp);
+fprintf(logfid,'\n\n***\nRunning FlyBowlRegisterTrx version %s analysis_protocol %s at %s\n',version,analysis_protocol,timestamp);
 
 %% read in registration params
 
@@ -385,7 +385,7 @@ try
   if exist(trxfile,'file'),
     delete(trxfile);
   end
-  registrationinfo = struct('version',version,'timestamp',timestamp);
+  registrationinfo = struct('version',version,'timestamp',timestamp,'analysis_protocol',analysis_protocol);
   save(trxfile,'trx','timestamps','registrationinfo');
   didsave = true;
 catch ME
@@ -455,6 +455,8 @@ else
 end
 
 %% close log
+
+fprintf(logfid,'Finished running FlyBowlRegisterTrx at %s.\n',datestr(now,'yyyymmddTHHMMSS'));
 
 if logfid > 1,
   fclose(logfid);

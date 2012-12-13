@@ -1,5 +1,7 @@
 function [trx,summary_diagnostics,X] = FlyBowlClassifySex2(expdir,varargin)
 
+version = '0.1';
+
 %% parse parameters
 [analysis_protocol,settingsdir,datalocparamsfilestr,dosave] = ...
   myparse(varargin,...
@@ -14,9 +16,23 @@ fprintf('Classifying sex for %s\n',expdir);
 datalocparamsfile = fullfile(settingsdir,analysis_protocol,datalocparamsfilestr);
 dataloc_params = ReadParams(datalocparamsfile);
 
+if isfield(dataloc_params,'classifysex_logfilestr') && dosave,
+  logfile = fullfile(expdir,dataloc_params.classifysex_logfilestr);
+  logfid = fopen(logfile,'a');
+  if logfid < 1,
+    warning('Could not open log file %s\n',logfile);
+    logfid = 1;
+  end
+else
+  logfid = 1;
+end
+
+timestamp = datestr(now,'yyyymmddTHHMMSS');
+fprintf(logfid,'\n\n***\nRunning FlyBowlClassSex2 version %s analysis_protocol %s at %s\n',version,analysis_protocol,timestamp);
+
 %% load the data
 
-fprintf('Loading data...\n');
+fprintf(logfid,'Loading data...\n');
 
 trxfile = fullfile(expdir,dataloc_params.trxfilestr);
 load(trxfile,'trx');
@@ -34,7 +50,7 @@ sexclassifier_params = ReadParams(sexclassifierparamsfile);
 sexclassifierin = ReadParams(sexclassifierintxtfile);
 
 %% compute areas
-fprintf('Computing area...\n');
+fprintf(logfid,'Computing area...\n');
 
 nflies = numel(trx); 
 X = cell(1,nflies);
@@ -60,7 +76,7 @@ metadatafile = fullfile(expdir,dataloc_params.metadatafilestr);
 metadata = ReadMetadataFile(metadatafile);
 
 if isfield(metadata,'gender') && ~strcmpi(metadata.gender,'b'),
-  warning('gender is not "b", not doing sex classification, just setting sex to %s for all flies',upper(metadata.gender));
+  fprintf(logfid,'gender is not "b", not doing sex classification, just setting sex to %s for all flies',upper(metadata.gender));
 
   % set sex to metadata.gender for all flies
   % also set diagnostics that we can
@@ -92,7 +108,7 @@ else
 
 %% learn a 2-state HMM for area in an unsupervised manner
 
-fprintf('gender = "b", learning 2-state HMM...\n');
+fprintf(logfid,'gender = "b", learning 2-state HMM...\n');
 
 % initialize parameters
 nstates = 2;
@@ -126,9 +142,10 @@ maxerrx = sexclassifierin.areasmooth_maxerrx; %#ok<NASGU>
 if dosave,
   try
     save(sexclassifieroutmatfile,'mu_area','var_area','ptrans','prior','ll',...
-      'nstates','state2sex','maxerrx','maxfreq','filterorder');
+      'nstates','state2sex','maxerrx','maxfreq','filterorder','version','analysis_protocol');
   catch ME,
     warning('Could not save to file %s: %s',sexclassifieroutmatfile,getReport(ME));
+    fprintf(logfid,'Could not save to file %s: %s\n',sexclassifieroutmatfile,getReport(ME));
   end
 end
 
@@ -207,6 +224,12 @@ for i = 1:numel(fns),
   summary_diagnostics.(sprintf('max_%s',fn)) = max([counts.(fn)]);
 end
 
+fns1 = fieldnames(summary_diagnostics);
+fprintf(logfid,'Summary diagnostics:\n');
+for i = 1:numel(fns1),
+  fprintf(logfid,'  %s: %f\n',fns1{i},summary_diagnostics.(fns1{i}));
+end
+
 %% write diagnostics
 
 sexclassifierdiagnosticsfile = fullfile(expdir,dataloc_params.sexclassifierdiagnosticsfilestr);
@@ -236,9 +259,19 @@ end
 %% resave
 
 if dosave,
+  sexclassifierinfo = struct('version',version,'analysis_protocol',analysis_protocol,'timestamp',timestamp); %#ok<NASGU>
   try
-    save('-append',trxfile,'trx');
+    save('-append',trxfile,'trx','sexclassifierinfo');
   catch ME,
     warning('Could not save to file %s: %s',trxfile,getReport(ME));
+    fprintf(logfid,'Could not save to file %s: %s',trxfile,getReport(ME));    
   end
+end
+
+%% close log
+
+fprintf(logfid,'Finished running FlyBowlClassifySex2 at %s.\n',datestr(now,'yyyymmddTHHMMSS'));
+
+if logfid > 1,
+  fclose(logfid);
 end
