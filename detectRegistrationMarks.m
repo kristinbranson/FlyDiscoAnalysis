@@ -25,7 +25,9 @@ function registration = detectRegistrationMarks(varargin)
   registration,...
   nr,nc,...
   imsavename,...
-  hfig,figpos] = ...
+  hfig,figpos,...
+  useNormXCorr,...
+  doTransposeImage] = ...
   myparse(varargin,...
   'saveName','',...
   'bkgdImage',[],...
@@ -66,7 +68,9 @@ function registration = detectRegistrationMarks(varargin)
   'registrationData',[],...
   'nr',[],'nc',[],...
   'imsavename','',...
-  'hfig',1,'figpos',[10,10,1600,800]);
+  'hfig',1,'figpos',[10,10,1600,800],...
+  'useNormXCorr',false,...
+  'doTransposeImage',false);
 
 iscircle = ismember(method,{'circle','circle_manual'});
 
@@ -120,7 +124,11 @@ if ~isBkgdImage && ~isempty(annName),
       error('Shape of movie could not be read from ann file of movie file');
     end
   end
-  bkgdImage = reshape(bkgdImage,[nr,nc]);
+  if doTransposeImage,
+    bkgdImage = reshape(bkgdImage,[nc,nr])';
+  else
+    bkgdImage = reshape(bkgdImage,[nr,nc]);
+  end
   isBkgdImage = true;
 end
 if ~isBkgdImage,
@@ -245,9 +253,18 @@ if nBowlMarkers > 0,
       methodcurr = 'grad2';
     otherwise,
       bowlMarkerTemplate = im2double(imread(bowlMarkerType));
-      bowlMarkerTemplate = bowlMarkerTemplate - min(bowlMarkerTemplate(:));
-      bowlMarkerTemplate = bowlMarkerTemplate / max(bowlMarkerTemplate(:));
-      bowlMarkerTemplate = 2*bowlMarkerTemplate-1;
+      if useNormXCorr,
+        bowlMarkerTemplate = 255*bowlMarkerTemplate;
+        sz1 = size(bowlMarkerTemplate);
+        offr0 = floor(sz1(1)/2);
+        offr1 = sz1(1)-offr0;
+        offc0 = floor(sz1(2)/2);
+        offc1 = sz1(2)-offc0;
+      else
+        bowlMarkerTemplate = bowlMarkerTemplate - min(bowlMarkerTemplate(:));
+        bowlMarkerTemplate = bowlMarkerTemplate / max(bowlMarkerTemplate(:));
+        bowlMarkerTemplate = 2*bowlMarkerTemplate-1;
+      end
       bowlfils = cell(1,2*nRotations);
       thetas = linspace(0,180,2*nRotations+1);
       thetas = thetas(1:end-1);
@@ -257,8 +274,16 @@ if nBowlMarkers > 0,
       % compute normalized maximum correlation
       filI4 = -inf(nr,nc);
       for i = 1:2*nRotations,
-        filI4 = max(filI4,imfilter(bkgdImage,bowlfils{i},'replicate') ./ ...
-          imfilter(bkgdImage,ones(size(bowlfils{i})),'replicate'));
+        if useNormXCorr,
+          tmp = normxcorr2(bowlMarkerTemplate,bkgdImage);
+          tmp = tmp(offr0+1:end-offr1+1,offc0+1:end-offc1+1);
+          tmp(1:sz1(1),:) = 0; tmp(end-sz1(1)+1:end,:) = 0;
+          tmp(:,1:sz1(2)) = 0; tmp(:,end-sz1(2)+1:end) = 0;
+          filI4 = max(filI4,tmp);
+        else
+          filI4 = max(filI4,imfilter(bkgdImage,bowlfils{i},'replicate') ./ ...
+            imfilter(bkgdImage,ones(size(bowlfils{i})),'replicate'));
+        end
       end
       methodcurr = 'template';
   end

@@ -76,3 +76,5 @@ hackhitstatsmatfilestr,hackhitstats.mat
 behaviordetectionparamsfilestr,behavior_detection_params.txt
 fractimestatstxtfilestr,fractime_stats.txt
 fractimestatsmatfilestr,fractime_stats.mat
+automaticchecks_incoming_logfilestr,Log_AutomaticChecks_Incoming.txt
+registertrx_logfilestr,Log_RegisterTrx.txt

@@ -2,10 +2,6 @@ function [success,msgs,iserror] = FlyBowlAutomaticChecks_Incoming(expdir,varargi
 
 version = '0.1';
 
-fprintf('\n\n***\nRunning FlyBowlAutomaticChecks_Incoming version %s at %s\n',version,datestr(now,'yyyymmddTHHMMSS'));
-
-try
-
 success = true;
 msgs = {};
 
@@ -23,6 +19,22 @@ min_barcode_expdatenum = datenum(min_barcode_expdatestr,datetime_format);
 
 datalocparamsfile = fullfile(settingsdir,analysis_protocol,datalocparamsfilestr);
 dataloc_params = ReadParams(datalocparamsfile);
+if isfield(dataloc_params,'automaticchecks_incoming_logfilestr') && ~DEBUG,
+  logfile = fullfile(expdir,dataloc_params.automaticchecks_incoming_logfilestr);
+  logfid = fopen(logfile,'a');
+  if logfid < 1,
+    warning('Could not open log file %s\n',logfile);
+    logfid = 1;
+  end
+else
+  logfid = 1;
+end
+
+fprintf(logfid,'\n\n***\nRunning FlyBowlAutomaticChecks_Incoming version %s at %s\n',version,datestr(now,'yyyymmddTHHMMSS'));
+
+try
+
+
 paramsfile = fullfile(settingsdir,analysis_protocol,dataloc_params.automaticchecksincomingparamsfilestr);
 check_params = ReadParams(paramsfile);
 if ~iscell(check_params.control_line_names),
@@ -326,11 +338,15 @@ end
   
 %% print results to STDOUT
 
-fprintf('Finished running FlyBowlAutomaticChecks_Incoming.\n');
-fprintf('success = %d\n',success);
+fprintf(logfid,'Finished running FlyBowlAutomaticChecks_Incoming.\n');
+fprintf(logfid,'success = %d\n',success);
 if isempty(msgs),
-  fprintf('No error or warning messages.\n');
+  fprintf(logfid,'No error or warning messages.\n');
 else
-  fprintf('Warning/error messages:\n');
-  fprintf('%s\n',msgs{:});
+  fprintf(logfid,'Warning/error messages:\n');
+  fprintf(logfid,'%s\n',msgs{:});
+end
+
+if logfid > 1,
+  fclose(logfid);
 end

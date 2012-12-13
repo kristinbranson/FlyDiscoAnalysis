@@ -1,4 +1,10 @@
-function trx = FlyBowlRegisterTrx(expdir,varargin)
+function [success,msgs] = FlyBowlRegisterTrx(expdir,varargin)
+
+success = true;
+msgs = {};
+
+version = '0.1';
+timestamp = datestr(now,'yyyymmddTHHMMSS');
 
 fns_notperframe = {'id','moviename','annname','firstframe','arena','off',...
   'nframes','endframe','matname','fps','pxpermm'};
@@ -14,7 +20,20 @@ fns_notperframe = {'id','moviename','annname','firstframe','arena','off',...
 %% read in the data locations
 datalocparamsfile = fullfile(settingsdir,analysis_protocol,datalocparamsfilestr);
 dataloc_params = ReadParams(datalocparamsfile);
-      
+
+if isfield(dataloc_params,'registertrx_logfilestr'),
+  logfile = fullfile(expdir,dataloc_params.registertrx_logfilestr);
+  logfid = fopen(logfile,'a');
+  if logfid < 1,
+    warning('Could not open log file %s\n',logfile);
+    logfid = 1;
+  end
+else
+  logfid = 1;
+end
+
+fprintf(logfid,'\n\n***\nRunning FlyBowlRegisterTrx version %s at %s\n',version,timestamp);
+
 %% read in registration params
 
 % name of parameters file
@@ -24,6 +43,9 @@ if ~exist(registrationparamsfile,'file'),
 end
 % read
 registration_params = ReadParams(registrationparamsfile);
+if isfield(registration_params,'doTemporalRegistration'),
+  dotemporalreg = registration_params.doTemporalRegistration;
+end
 
 %% detect registration marks
 
@@ -43,8 +65,15 @@ if isfield(registration_params,'bowlMarkerType'),
     % plate -> bowlmarkertype
     plateids = str2double(registration_params.bowlMarkerType(1:2:end-1));
     bowlmarkertypes = registration_params.bowlMarkerType(2:2:end);
-    metadata = parseExpDir(expdir);
-    plateid = str2double(metadata.plate);
+    [metadata,success1] = parseExpDir(expdir);
+    if ~success1,
+      metadata = ReadMetadataFile(fullfile(expdir,dataloc_params.metadatafilestr));
+    end
+    if ischar(metadata.plate),
+      plateid = str2double(metadata.plate);
+    else
+      plateid = metadata.plate;
+    end
     i = find(plateid == plateids,1);
     if isempty(i),
       error('bowlMarkerType not set for plate %d',plateid);
@@ -60,8 +89,15 @@ if isfield(registration_params,'maxDistCornerFrac_BowlLabel') && ...
     numel(registration_params.maxDistCornerFrac_BowlLabel) > 1,
   plateids = registration_params.maxDistCornerFrac_BowlLabel(1:2:end-1);
   cornerfracs = registration_params.maxDistCornerFrac_BowlLabel(2:2:end);
-  metadata = parseExpDir(expdir);
-  plateid = str2double(metadata.plate);
+  [metadata,success1] = parseExpDir(expdir);
+  if ~success1,
+    metadata = ReadMetadataFile(fullfile(expdir,dataloc_params.metadatafilestr));
+  end
+  if ischar(metadata.plate),
+    plateid = str2double(metadata.plate);
+  else
+    plateid = metadata.plate;
+  end
   i = find(plateid == plateids,1);
   if isempty(i),
     error('maxDistCornerFrac_BowlLabel not set for plate %d',plateid);
@@ -70,7 +106,7 @@ if isfield(registration_params,'maxDistCornerFrac_BowlLabel') && ...
 end
 
 fnsignore = intersect(fieldnames(registration_params),...
-  {'minFliesLoadedTime','maxFliesLoadedTime','extraBufferFliesLoadedTime','usemediandt'});
+  {'minFliesLoadedTime','maxFliesLoadedTime','extraBufferFliesLoadedTime','usemediandt','doTemporalRegistration'});
   
 registration_params_cell = struct2paramscell(rmfield(registration_params,fnsignore));
 % file to save image to
@@ -81,8 +117,14 @@ end
 try
   registration_data = detectRegistrationMarks(registration_params_cell{:},'annName',annfile,'movieName',moviefile);
 catch ME,
-  error(['Error detecting registration marks:\n',getReport(ME)]);
+  fprintf(logfid,'Error detecting registration marks:\n');
+  fprintf(logfid,getReport(ME));
+  success = false;
+  msgs = {['Error detecting registration marks: ',getReport(ME)]};
+  return;
 end
+
+fprintf(logfid,'Detected registration marks.\n');
 
 
 %% apply spatial registration
@@ -163,6 +205,8 @@ for fly = 1:length(trx),
   trx(fly).pxpermm = 1 / registration_data.scale;
   
 end
+
+fprintf(logfid,'Applied spatial registration.\n');
 
 %% crop start and end of trajectories
 
@@ -319,9 +363,15 @@ if dotemporalreg,
       trx(i).off = -trx(i).firstframe + 1;
       
     end
-    trx(trxdelete) = [];
+    trx(trxdelete) = []; %#ok<NASGU>
     
   end
+  
+  fprintf(logfid,'Applied temporal registration.\n');
+  
+else
+  
+  fprintf(logfid,'NOT applying temporal registration.\n');
   
 end
 
@@ -330,30 +380,53 @@ end
 % name of output trx mat file
 trxfile = fullfile(expdir,dataloc_params.trxfilestr);
 
+didsave = false;
 try
   if exist(trxfile,'file'),
     delete(trxfile);
   end
-  save(trxfile,'trx','timestamps');
+  registrationinfo = struct('version',version,'timestamp',timestamp);
+  save(trxfile,'trx','timestamps','registrationinfo');
+  didsave = true;
 catch ME
   warning('Could not save registered trx: %s',getReport(ME));
+  success = false;
+  msgs{end+1} = ['Could not save registered trx: %s',getReport(ME)];
+end
+
+if didsave,
+  fprintf(logfid,'Saved registered trx to file %s\n',trxfile);
+else
+  fprintf(logfid,'Could not save registered trx:\n%s\n',getReport(ME));
 end
 
 %% save params to mat file
 
 registrationmatfile = fullfile(expdir,dataloc_params.registrationmatfilestr);
-tmp = rmfield(registration_data,'registerfn'); %#ok<NASGU>
+tmp = rmfield(registration_data,'registerfn'); 
+tmp.registrationinfo = registrationinfo;
+didsave = false;
 try
   if exist(registrationmatfile,'file'),
     delete(registrationmatfile);
   end
   save(registrationmatfile,'-struct','tmp');
+  didsave = true;
 catch ME
   warning('Could not save registered data to mat file: %s',getReport(ME));
+  success = false;
+  msgs{end+1} = ['Could not save registered data to mat file: %s',getReport(ME)];
+end
+
+if didsave,
+  fprintf(logfid,'Saved registration data to file %s\n',registrationmatfile);
+else
+  fprintf(logfid,'Could not save registration data to mat file:\n%s\n',getReport(ME));
 end
 
 %% save params to text file
 registrationtxtfile = fullfile(expdir,dataloc_params.registrationtxtfilestr);
+didsave = false;
 try
   if exist(registrationtxtfile,'file'),
     delete(registrationtxtfile);
@@ -368,6 +441,21 @@ for i = 1:numel(fnssave),
   fprintf(fid,'%s,%f\n',fn,registration_data.(fn));
 end
 fclose(fid);
+didsave = true;
 catch ME
-  warning('Could not save registered data to trx file: %s',getReport(ME));
+  warning('Could not save registration data to txt file: %s',getReport(ME));
+  success = false;
+  msgs{end+1} = ['Could not save registration data to txt file: %s',getReport(ME)];
+end
+
+if didsave,
+  fprintf(logfid,'Saved registration data to txt file %s\n',registrationtxtfile);
+else
+  fprintf(logfid,'Could not save registration data to txt file:\n%s\n',getReport(ME));
+end
+
+%% close log
+
+if logfid > 1,
+  fclose(logfid);
 end

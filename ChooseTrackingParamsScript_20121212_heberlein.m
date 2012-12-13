@@ -466,7 +466,7 @@ figure(hfig);
 clf;
 
 hax = subplot(2,2,1);
-colors = cat(1,jet(ngal4_chosen)*.9,repmat(.5,[ncontrols_chosen,3]));
+colors = jet(nchosen)*.9;
 cla;
 hold on;
 for i = exporderplot,
@@ -580,10 +580,10 @@ end
 
 %% choose percentiles for size
 
-thresh_prctiles_area = [.1,100-.1];
-thresh_prctiles_a = [.1,100-.1];
-thresh_prctiles_b = [.05,100-.1];
-thresh_prctiles_ecc = [.05,100-.1];
+thresh_prctiles_area = [.02,100-.02];
+thresh_prctiles_a = [.1,100-.01];
+thresh_prctiles_b = [.01,100-.1];
+thresh_prctiles_ecc = [.005,100-.2];
 
 if isfixed,
   min_area = weighted_prctile(area,thresh_prctiles_area(1),weight_area);
@@ -633,6 +633,12 @@ fprintf('min_area = %.3f, mean_area = %.3f, max_area = %.3f\n',min_area,mean_are
 fprintf('min_a = %.3f, mean_a = %.3f, max_a = %.3f\n',min_a/2,mean_a/2,max_a/2);
 fprintf('min_b = %.3f, mean_b = %.3f, max_b = %.3f\n',min_b/2,mean_b/2,max_b/2);
 fprintf('min_ecc = %.3f, mean_ecc = %.3f, max_ecc = %.3f\n',min_ecc,mean_ecc,max_ecc);
+
+% 20121212_heberlein
+% min_area = 50.027, mean_area = 111.303, max_area = 186.837
+% min_a = 3.249, mean_a = 4.998, max_a = 6.731
+% min_b = 1.090, mean_b = 1.758, max_b = 2.344
+% min_ecc = 0.247, mean_ecc = 0.353, max_ecc = 0.492
 
 % 20120220 housing_CS
 % min_area = 66.049, mean_area = 100.472, max_area = 148.277
@@ -741,6 +747,10 @@ center_dampen = numpos ./ denpos;
 fprintf('Constant velocity center position dampening: %f\n',1-center_dampen);
 fprintf('Constant velocity angle dampening: %f\n',1-angle_dampen);
 
+% 20121212_heberlein
+% Constant velocity center position dampening: 0.195514
+% Constant velocity angle dampening: 0.538359
+
 % 20111221
 % Constant velocity center position dampening: 0.168682
 % Constant velocity angle dampening: 0.539082
@@ -783,6 +793,9 @@ end
 
 ang_dist_wt = mean_err_pos / mean_err_angle;
 fprintf('Weight of angle in matching criterion: %f\n',ang_dist_wt);
+
+% 20121212_heberlein
+% Weight of angle in matching criterion: 154.395669
 
 % 20111221
 % Weight of angle in matching criterion: 148.266042
@@ -889,6 +902,10 @@ min_jump = prctile(distjump,prctile_thresh_minjump);
 fprintf('Max jump = %f\n',max_jump);
 fprintf('Min jump = %f\n',min_jump);
 
+% 20121212_heberlein
+% Max jump = 225.031989
+% Min jump = 36.841147
+
 % 20110402
 % Max jump = 133.212798
 % Min jump = 14.222188
@@ -972,6 +989,11 @@ max_velocity_angle_weight = velocity_angle_weight * dcenter_thresh;
 
 fprintf('velocity_angle_weight = %f\n',velocity_angle_weight);
 fprintf('max_velocity_angle_weight = %f\n',max_velocity_angle_weight);
+
+% 20121212_heberlein
+% Chose dcenter_thresh = 9.889386
+% velocity_angle_weight = 0.043727
+% max_velocity_angle_weight = 0.432432
 
 % 20110402
 %velocity_angle_weight = 0.030749
