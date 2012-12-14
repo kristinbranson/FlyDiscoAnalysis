@@ -1,5 +1,7 @@
 function trx = FlyBowlComputePerFrameFeatures(expdir,varargin)
 
+version = '0.1';
+
 [analysis_protocol,settingsdir,datalocparamsfilestr,forcecompute,perframefns,DEBUG] = ...
   myparse(varargin,...
   'analysis_protocol','current',...
@@ -25,6 +27,23 @@ fprintf('Loading trajectories for %s...\n',expdir);
 
 trx.AddExpDir(expdir);
 
+%% log file
+
+if isfield(trx.dataloc_params,'perframefeature_logfilestr') && ~DEBUG,
+  logfile = fullfile(expdir,trx.dataloc_params.perframefeature_logfilestr);
+  logfid = fopen(logfile,'a');
+  if logfid < 1,
+    warning('Could not open log file %s\n',logfile);
+    logfid = 1;
+  end
+else
+  logfid = 1;
+end
+
+timestamp = datestr(now,'yyyymmddTHHMMSS');
+fprintf(logfid,'\n\n***\nRunning FlyBowlComputePerFrameFeatures version %s analysis_protocol %s at %s\n',version,analysis_protocol,timestamp);
+
+
 %% compute per-frame features
 
 if isempty(perframefns) % added CSC 20110321: optionally specify to-be-computed frames as parameter, reads from perframefnsfile (as before) otherwise
@@ -42,6 +61,14 @@ end
 % compute each
 for i = 1:nfns,
   fn = perframefns{i};
-  fprintf('Computing %s...\n',fn);
-  trx.(fn); %#ok<VUNUS>
+  fprintf(logfid,'Computing %s...\n',fn);
+  trx.(fn); 
+end
+
+%% close log
+
+fprintf(logfid,'Finished running FlyBowlComputePerFrameFeatures at %s.\n',datestr(now,'yyyymmddTHHMMSS'));
+
+if logfid > 1,
+  fclose(logfid);
 end

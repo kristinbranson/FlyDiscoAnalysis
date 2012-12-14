@@ -3,11 +3,16 @@ function [bkgd_diagnostics,res] = BkgdModelDiagnostics(expdir,varargin)
 bkgd_diagnostics = struct;
 
 %% parse parameters
-[analysis_protocol,settingsdir,datalocparamsfilestr] = ...
+[analysis_protocol,settingsdir,datalocparamsfilestr,logfid] = ...
   myparse(varargin,...
   'analysis_protocol','current',...
   'settingsdir','/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/settings',...
-  'datalocparamsfilestr','dataloc_params.txt');
+  'datalocparamsfilestr','dataloc_params.txt',...
+  'logfid',1);
+
+version = '0.1';
+timestamp = datestr(now,'yyyymmddTHHMMSS');
+fprintf(logfid,'Running BkgdModelDiagnostics version %s analysis_protocol %s at %s\n',version,analysis_protocol,timestamp);
 
 %% read parameters
 
@@ -328,19 +333,26 @@ bkgd_diagnostics.frac_bkgdinterpolated = frac;
 expbgfgmodelfile = fullfile(settingsdir,analysis_protocol,dataloc_params.expbgfgmodelmatfilestr);
 if isfield(params,'expbgfgmodelmatfilestr'),
   if iscell(params.expbgfgmodelmatfilestr),
-    metadata = parseExpDir(expdir);
+    [metadata,success1] = parseExpDir(expdir);
+    if ~success1,
+      metadata = ReadMetadataFile(fullfile(expdir,dataloc_params.metadatafilestr));
+    end
     if isempty(metadata),
-      warning('Unable to parse plate from experiment directory, using %s',expbgfgmodelfile);
+      fprintf(logfid,'Unable to parse plate from experiment directory, using %s\n',expbgfgmodelfile);
     else
-      plate = str2double(metadata.plate);
+      if ischar(metadata.plate),
+        plate = str2double(metadata.plate);
+      else
+        plate = metadata.plate;
+      end
       if isnan(plate),
-        warning('Unable to parse plate from experiment directory, using %s',expbgfgmodelfile);
+        fprintf(logfid,'Unable to parse plate from experiment directory, using %s\n',expbgfgmodelfile);
       else
         plates = str2double(params.expbgfgmodelmatfilestr(1:2:end-1));
         files = params.expbgfgmodelmatfilestr(2:2:end);
         platei = find(plates == plate,1);
         if isempty(platei),
-          warning('Unable to find plate %d in params using %s',plate,expbgfgmodelfile);
+          fprintf(logfid,'Unable to find plate %d in params using %s\n',plate,expbgfgmodelfile);
         else
           expbgfgmodelfile = fullfile(settingsdir,analysis_protocol,files{platei});
         end          
@@ -639,7 +651,7 @@ save(bkgddiagnosticsmatfilename,'-struct','bkgd_diagnostics');
 bkgddiagnosticsfilename = fullfile(expdir,dataloc_params.bkgddiagnosticsfilestr);
 fid1 = fopen(bkgddiagnosticsfilename,'w');
 if fid1 < 0,
-  warning('Could not open bkgddiagnostics file %s for writing',bkgddiagnosticsfilename);
+  fprintf(logfid,'Could not open bkgddiagnostics file %s for writing\n',bkgddiagnosticsfilename);
 else
   fns = {'bkgdcenter','bkgddev','alwaysbkgd','bkgdcenter_llr',...
     'imfore','diffim','llrfore','minllrperfly','meanllrperfly','maxllrperfly'};

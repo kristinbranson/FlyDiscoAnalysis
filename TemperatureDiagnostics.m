@@ -1,11 +1,17 @@
 function diagnostics = TemperatureDiagnostics(expdir,varargin)
 
+
 %% parse parameters
-[analysis_protocol,settingsdir,datalocparamsfilestr] = ...
+[analysis_protocol,settingsdir,datalocparamsfilestr,logfid] = ...
   myparse(varargin,...
   'analysis_protocol','current',...
   'settingsdir','/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/settings',...
-  'datalocparamsfilestr','dataloc_params.txt');
+  'datalocparamsfilestr','dataloc_params.txt',...
+  'logfid',1);
+
+version = '0.1';
+timestamp = datestr(now,'yyyymmddTHHMMSS');
+fprintf(logfid,'Running TemperatureDiagnostics version %s analysis_protocol %s at %s\n',version,analysis_protocol,timestamp);
 
 %% read parameters
 
@@ -17,7 +23,7 @@ dataloc_params = ReadParams(datalocparamsfile);
 % read temperature file
 temperaturefile = fullfile(expdir,dataloc_params.temperaturefilestr);
 if ~exist(temperaturefile,'file'),
-  warning('Temperature stream file %s does not exist.',temperaturefile);
+  fprintf(logfid,'Temperature stream file %s does not exist.\n',temperaturefile);
   stream = [];
 else
   tempdata = importdata(temperaturefile,',');
@@ -50,7 +56,7 @@ diagnostics.std = nanstd(stream,1);
 temperaturediagnosticsfile = fullfile(expdir,dataloc_params.temperaturediagnosticsfilestr);
 fid = fopen(temperaturediagnosticsfile,'w');
 if fid < 0,
-  warning('Could not open temperature diagnostics file %s for writing',temperaturediagnosticsfile);
+  fprintf(logfid,'Could not open temperature diagnostics file %s for writing\n',temperaturediagnosticsfile);
 else
   fns = fieldnames(diagnostics);
   for i = 1:numel(fns),

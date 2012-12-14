@@ -1,5 +1,8 @@
 function [success,msgs,iserror] = FlyBowlAutomaticChecks_Complete(expdir,varargin)
 
+version = '0.1';
+timestamp = datestr(now,'yyyymmddTHHMMSS');
+
 success = true;
 msgs = {};
 
@@ -17,6 +20,26 @@ end
 
 datalocparamsfile = fullfile(settingsdir,analysis_protocol,datalocparamsfilestr);
 dataloc_params = ReadParams(datalocparamsfile);
+
+%% log file
+
+if isfield(dataloc_params,'automaticchecks_complete_logfilestr') && ~DEBUG,
+  logfile = fullfile(expdir,dataloc_params.automaticchecks_complete_logfilestr);
+  logfid = fopen(logfile,'a');
+  if logfid < 1,
+    warning('Could not open log file %s\n',logfile);
+    logfid = 1;
+  end
+else
+  logfid = 1;
+end
+
+fprintf(logfid,'\n\n***\nRunning FlyBowlAutomaticChecks_Complete version %s analysis_protocol %s at %s\n',version,analysis_protocol,timestamp);
+
+try
+  
+%% more parameters
+
 paramsfile = fullfile(settingsdir,analysis_protocol,dataloc_params.automaticcheckscompleteparamsfilestr);
 check_params = ReadParams(paramsfile);
 metadatafile = fullfile(expdir,dataloc_params.metadatafilestr);
@@ -254,4 +277,24 @@ end
 
 if ~DEBUG,
   fclose(fid);
+end
+
+catch ME,
+  msgs{end+1} = getReport(ME);
+  success = false;
+end
+
+%% print results to log file
+
+fprintf(logfid,'success = %d\n',success);
+if isempty(msgs),
+  fprintf(logfid,'No error or warning messages.\n');
+else
+  fprintf(logfid,'Warning/error messages:\n');
+  fprintf(logfid,'%s\n',msgs{:});
+end
+fprintf(logfid,'Finished running FlyBowlAutomaticChecks_Complete at %s.\n',datestr(now,'yyyymmddTHHMMSS'));
+
+if logfid > 1,
+  fclose(logfid);
 end

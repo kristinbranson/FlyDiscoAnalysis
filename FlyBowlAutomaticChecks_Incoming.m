@@ -7,28 +7,36 @@ msgs = {};
 
 datetime_format = 'yyyymmddTHHMMSS';
 
-[analysis_protocol,settingsdir,datalocparamsfilestr,DEBUG,min_barcode_expdatestr] = ...
+[analysis_protocol,settingsdir,datalocparamsfilestr,DEBUG,min_barcode_expdatestr,logfid] = ...
   myparse(varargin,...
   'analysis_protocol','current',...
   'settingsdir','/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/settings',...
   'datalocparamsfilestr','dataloc_params.txt','debug',false,...
-  'min_barcode_expdatestr','20110301T000000');
+  'min_barcode_expdatestr','20110301T000000',...
+  'logfid',[]);
 min_barcode_expdatenum = datenum(min_barcode_expdatestr,datetime_format);
 
 %% parameters
 
 datalocparamsfile = fullfile(settingsdir,analysis_protocol,datalocparamsfilestr);
 dataloc_params = ReadParams(datalocparamsfile);
-if isfield(dataloc_params,'automaticchecks_incoming_logfilestr') && ~DEBUG,
-  logfile = fullfile(expdir,dataloc_params.automaticchecks_incoming_logfilestr);
-  logfid = fopen(logfile,'a');
-  if logfid < 1,
-    warning('Could not open log file %s\n',logfile);
+
+didopenlog = false;
+if isempty(logfid),
+  if isfield(dataloc_params,'automaticchecks_incoming_logfilestr') && ~DEBUG,
+    logfile = fullfile(expdir,dataloc_params.automaticchecks_incoming_logfilestr);
+    logfid = fopen(logfile,'a');
+    if logfid < 1,
+      warning('Could not open log file %s\n',logfile);
+      logfid = 1;
+    else
+      didopenlog = true;
+    end
+  else
     logfid = 1;
   end
-else
-  logfid = 1;
 end
+
 
 fprintf(logfid,'\n\n***\nRunning FlyBowlAutomaticChecks_Incoming version %s analysis_protocol %s at %s\n',version,analysis_protocol,datestr(now,'yyyymmddTHHMMSS'));
 
@@ -336,7 +344,7 @@ catch ME,
   msgs = {getReport(ME)};
 end
   
-%% print results to STDOUT
+%% print results to log file
 
 fprintf(logfid,'Finished running FlyBowlAutomaticChecks_Incoming at %s.\n',datestr(now,'yyyymmddTHHMMSS'));
 fprintf(logfid,'success = %d\n',success);
@@ -347,6 +355,6 @@ else
   fprintf(logfid,'%s\n',msgs{:});
 end
 
-if logfid > 1,
+if didopenlog,
   fclose(logfid);
 end

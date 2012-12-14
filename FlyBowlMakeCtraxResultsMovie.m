@@ -15,8 +15,21 @@ dataloc_params = ReadParams(datalocparamsfile);
 %% ctrax movie parameters
 ctraxresultsmovieparamsfile = fullfile(settingsdir,analysis_protocol,dataloc_params.ctraxresultsmovieparamsfilestr);
 ctraxresultsmovie_params = ReadParams(ctraxresultsmovieparamsfile);
+defaulttempdatadir = '/groups/branson/bransonlab/projects/olympiad/TempData_FlyBowlMakeCtraxResultsMovie';
 if ~isfield(ctraxresultsmovie_params,'tempdatadir'),
-  ctraxresultsmovie_params.tempdatadir = '/groups/branson/bransonlab/projects/olympiad/TempData_FlyBowlMakeCtraxResultsMovie';
+  ctraxresultsmovie_params.tempdatadir = defaulttempdatadir;
+elseif isunix
+  [status1,res] = unix(sprintf('echo %s',ctraxresultsmovie_params.tempdatadir));
+  if status1 == 0,
+    ctraxresultsmovie_params.tempdatadir = strtrim(res);
+  end
+end
+
+if ~exist(ctraxresultsmovie_params.tempdatadir,'dir'),
+  [success1,msg1] = mkdir(ctraxresultsmovie_params.tempdatadir);
+  if ~success1,
+    error('Error making directory %s: %s',ctraxresultsmovie_params.tempdatadir,msg1);
+  end
 end
 
 %% location of data
@@ -65,6 +78,61 @@ endframes_off = firstframes_off + ctraxresultsmovie_params.nframes - 1;
 
 
 firstframes = registration_params.start_frame + firstframes_off;
+
+%% option to not specify nzoomr, nzoomc
+
+if ischar(ctraxresultsmovie_params.nzoomr) || ischar(ctraxresultsmovie_params.nzoomc),
+  
+  % figure out number of flies
+  load(trxfile,'trx');
+  
+  firstframe = min([trx.firstframe]);
+  endframe = max([trx.endframe]);
+  trxnframes = endframe-firstframe+1;
+  nflies = zeros(1,trxnframes);
+  for i = 1:numel(trx),
+    j0 = trx(i).firstframe-firstframe+1;
+    j1 = trx(i).endframe-firstframe+1;
+    nflies(j0:j1) = nflies(j0:j1)+1;
+  end
+  mediannflies = median(nflies);
+
+  if isnumeric(ctraxresultsmovie_params.nzoomr),
+    nzoomr = ctraxresultsmovie_params.nzoomr;
+    nzoomc = round(mediannflies/nzoomr);
+  elseif isnumeric(ctraxresultsmovie_params.nzoomc),
+    nzoomc = ctraxresultsmovie_params.nzoomc;
+    nzoomr = round(mediannflies/nzoomc);
+  else
+    nzoomr = ceil(sqrt(mediannflies));
+    nzoomc = round(mediannflies/nzoomr);
+  end
+  ctraxresultsmovie_params.nzoomr = nzoomr;
+  ctraxresultsmovie_params.nzoomc = nzoomc;
+  
+  if iscell(ctraxresultsmovie_params.figpos),  
+    [readframe,~,fid] = get_readframe_fcn(moviefile);
+    im = readframe(1);
+    [nr,nc,~] = size(im);
+    
+    rowszoom = floor(nr/nzoomr);
+    imsize = [nr,nc+rowszoom*nzoomc];
+    figpos = str2double(ctraxresultsmovie_params.figpos);
+    if isnan(figpos(3)),
+      figpos(3) = figpos(4)*imsize(2)/imsize(1);
+    elseif isnan(figpos(4)),
+      figpos(4) = figpos(3)*imsize(1)/imsize(2);
+    end
+    ctraxresultsmovie_params.figpos = figpos;
+    
+    if fid > 1,
+      fclose(fid);
+    end
+  end
+  
+  
+  
+end
 
 %% create movie
 

@@ -3,18 +3,23 @@ function [bias_diagnostics,hfig] = BowlBiasDiagnostics(expdir,varargin)
 bias_diagnostics = struct;
 
 %% parse parameters
-[analysis_protocol,settingsdir,datalocparamsfilestr] = ...
+[analysis_protocol,settingsdir,datalocparamsfilestr,logfid] = ...
   myparse(varargin,...
   'analysis_protocol','current',...
   'settingsdir','/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/settings',...
-  'datalocparamsfilestr','dataloc_params.txt');
+  'datalocparamsfilestr','dataloc_params.txt',...
+  'logfid',1);
+
+version = '0.1';
+timestamp = datestr(now,'yyyymmddTHHMMSS');
+fprintf(logfid,'Running BowlBiasDiagnostics version %s analysis_protocol %s at %s\n',version,analysis_protocol,timestamp);
 
 %% read experiment trx
 
 trx = Trx('analysis_protocol',analysis_protocol,'settingsdir',settingsdir,...
   'datalocparamsfilestr',datalocparamsfilestr);
 
-fprintf('Loading trajectories for %s...\n',expdir);
+fprintf(logfid,'Loading trajectories for %s...\n',expdir);
 
 trx.AddExpDir(expdir);
 
@@ -353,7 +358,7 @@ try
   end
   save2png(savename,hfig);
 catch ME,
-  warning('Could not write bias diagnostics image to file %s:\n%s',savename,getReport(ME));
+  fprintf(logfid,'Could not write bias diagnostics image to file %s:\n%s\n',savename,getReport(ME));
 end
   
 %% save to mat file
@@ -361,7 +366,7 @@ biasdiagnosticsmatfilename = fullfile(expdir,trx.dataloc_params.biasdiagnosticsm
 try
   save(biasdiagnosticsmatfilename,'-struct','bias_diagnostics');
 catch ME,
-  warning('Could not save bias diagnostics to mat file %s:\n%s',biasdiagnosticsmatfilename,getReport(ME));
+  fprintf(logfid,'Could not save bias diagnostics to mat file %s:\n%s\n',biasdiagnosticsmatfilename,getReport(ME));
 end
 
 %% write to text file
@@ -369,7 +374,7 @@ end
 biasdiagnosticsfilename = fullfile(expdir,trx.dataloc_params.biasdiagnosticsfilestr);
 fid = fopen(biasdiagnosticsfilename,'w');
 if fid < 0,
-  warning('Could not open bias diagnostics file %s for writing',biasdiagnosticsfilename);
+  fprintf(logfid,'Could not open bias diagnostics file %s for writing\n',biasdiagnosticsfilename);
 else
   fns = fieldnames(bias_diagnostics);
   for i = 1:numel(fns),

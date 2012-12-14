@@ -5,7 +5,7 @@ function video_diagnostics = VideoDiagnostics(expdir,varargin)
 video_diagnostics = struct;
 
 %% parse parameters
-[analysis_protocol,settingsdir,datalocparamsfilestr,nboxes_lims,nax_ufmf,hfig,radius_ufmf,fig_pos,DEBUG] = ...
+[analysis_protocol,settingsdir,datalocparamsfilestr,nboxes_lims,nax_ufmf,hfig,radius_ufmf,fig_pos,DEBUG,logfid] = ...
   myparse(varargin,...
   'analysis_protocol','current',...
   'settingsdir','/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/settings',...
@@ -15,7 +15,12 @@ video_diagnostics = struct;
   'hfig',1,...
   'radius_ufmf',100,...
   'fig_pos',[1,1,1548,926],...
-  'DEBUG',false);
+  'DEBUG',false,...
+  'logfid',1);
+
+version = '0.1';
+timestamp = datestr(now,'yyyymmddTHHMMSS');
+fprintf(logfid,'Running VideoDiagnostics version %s analysis_protocol %s at %s\n',version,analysis_protocol,timestamp);
 
 datalocparamsfile = fullfile(settingsdir,analysis_protocol,datalocparamsfilestr);
 dataloc_params = ReadParams(datalocparamsfile);
@@ -85,7 +90,7 @@ if isvideo && ~DEBUG,
     end
     save2png(savename,hfig);
   catch ME,
-    warning('Could not write video diagnostics image to file %s:\n%s',savename,getReport(ME));
+    fprintf(logfid,'Could not write video diagnostics image to file %s:\n%s\n',savename,getReport(ME));
   end
 
 end
@@ -96,7 +101,7 @@ if ~DEBUG,
   try
     save(videodiagnosticsmatfilename,'-struct','video_diagnostics');
   catch ME,
-    warning('Could not save video diagnostics to mat file %s:\n%s',videodiagnosticsmatfilename,getReport(ME));
+    fprintf(logfid,'Could not save video diagnostics to mat file %s:\n%s\n',videodiagnosticsmatfilename,getReport(ME));
   end
 end
 
@@ -109,7 +114,7 @@ else
   fid = fopen(videodiagnosticsfilename,'w');
 end
 if fid < 0,
-  warning('Could not open video diagnostics file %s for writing',videodiagnosticsfilename);
+  fprintf(logfid,'Could not open video diagnostics file %s for writing\n',videodiagnosticsfilename);
 else
   fns = fieldnames(video_diagnostics);
   for i = 1:numel(fns),
