@@ -152,6 +152,7 @@ if ~DEBUG,
   if exist(savename,'file'),
     delete(savename);
   end
+  set(stathandles.hfig,'Units','pixels','Position',stathandles.position);
   save2png(savename,stathandles.hfig);
 end
 
@@ -244,6 +245,7 @@ for i = 1:numel(histids),
     if exist(savename,'file'),
       delete(savename);
     end
+    set(handles.hfig,'Units','pixels','Position',handles.position);
     save2png(savename,handles.hfig);
   end
   

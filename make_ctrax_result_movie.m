@@ -724,7 +724,9 @@ for segi = 1:numel(firstframes),
     if frame == firstframes(1),
       fr = getframe_invisible(hax);
       [height,width,~] = size(fr);
+      fprintf('Size of frame is %d x %d\n',height,width);
       gfdata = getframe_initialize(hax);
+      [fr,height,width] = getframe_invisible_nocheck(gfdata,[height,width],false,false);
 
 %       height = ceil(height/4)*4;
 %       width = ceil(width/4)*4;

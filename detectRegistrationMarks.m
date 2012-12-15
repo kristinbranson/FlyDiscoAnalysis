@@ -584,6 +584,7 @@ if ~isempty(imsavename),
         warning('Could not delete file %s:\n %s',imsavename,getReport(ME));
       end
     end
+    set(hfig,'Units','pixels','Position',figpos);
     save2png(imsavename,hfig);
   catch ME,
     warning('Could not save to %s:\n%s',imsavename,getReport(ME));

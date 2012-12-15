@@ -191,3 +191,4 @@ handles.h = h;
 handles.hy = hy;
 handles.hti = hti;
 handles.hx = hx;
+handles.position = position;

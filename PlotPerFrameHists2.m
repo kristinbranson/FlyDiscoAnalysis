@@ -157,3 +157,4 @@ handles.hleg = hleg;
 handles.hxlabel = hxlabel;
 handles.hylabel = hylabel;
 handles.hti = hti;
+handles.position = position;

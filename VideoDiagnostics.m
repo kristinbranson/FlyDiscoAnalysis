@@ -55,7 +55,7 @@ else
   % make an image of the frames with the most boxes
   figure(hfig);
   clf;
-  set(hfig,'Position',fig_pos);
+  set(hfig,'Units','pixels','Position',fig_pos);
   hax = createsubplots(nax_ufmf(1),nax_ufmf(2),.01);
   hax = reshape(hax,nax_ufmf([2,1]))';
   for i = 1:prod(nax_ufmf),
@@ -88,6 +88,7 @@ if isvideo && ~DEBUG,
     if exist(savename,'file'),
       delete(savename);
     end
+    set(hfig,'Units','pixels','Position',fig_pos);
     save2png(savename,hfig);
   catch ME,
     fprintf(logfid,'Could not write video diagnostics image to file %s:\n%s\n',savename,getReport(ME));

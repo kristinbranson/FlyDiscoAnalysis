@@ -625,7 +625,11 @@ if doautomaticcheckscomplete,
   
 end
 
-%%
+%% clean up
+
+if isdeployed,
+  delete(findall(0,'type','figure'));
+end
 
 fprintf(logfid,'Analysis pipeline completed!\n');
 success = true;

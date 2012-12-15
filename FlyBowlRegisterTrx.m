@@ -461,3 +461,9 @@ fprintf(logfid,'Finished running FlyBowlRegisterTrx at %s.\n',datestr(now,'yyyym
 if logfid > 1,
   fclose(logfid);
 end
+
+%% close figures
+
+if isdeployed,
+  delete(findall(0,'type','figure'));
+end

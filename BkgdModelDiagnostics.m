@@ -640,6 +640,7 @@ savename = fullfile(expdir,dataloc_params.bkgddiagnosticsimagefilestr);
 if exist(savename,'file'),
   delete(savename);
 end
+set(hfig,'Units','Pixels','Position',params.figpos);
 save2png(savename,hfig);
   
 %% save to mat file

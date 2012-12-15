@@ -57,7 +57,10 @@ set(handle,'PaperPosition',[0,0,position(3:4)]);
 set(handle,'PaperSize',position(3:4));
 
 % Save the png (this is the same method used by "saveas")
+pos = get(handle,'Position');
+units = get(handle,'Units');
 print(handle,'-dpng',pngFileName,sprintf('-r%d',dpi))
+set(handle,'Units',units,'Position',pos);
 
 % Restore the previous settings
 set(handle,'PaperType',prePaperType);

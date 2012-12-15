@@ -356,6 +356,7 @@ try
   if exist(savename,'file'),
     delete(savename);
   end
+  set(hfig,'Units','Pixels','Position',params.figpos);
   save2png(savename,hfig);
 catch ME,
   fprintf(logfid,'Could not write bias diagnostics image to file %s:\n%s\n',savename,getReport(ME));
