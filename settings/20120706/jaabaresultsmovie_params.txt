@@ -11,3 +11,4 @@ nframes,500,500,500
 #nframes,10,10,10
 figpos,1,1,1844,1024
 tempdatadir,/groups/branson/bransonlab/projects/olympiad/TempData_FlyBowlMakeCtraxResultsMovie
+behavior2color,Chase,.2 .133 .533,Touch,.533 .8 .933,WingExtension,.667 .267 .6,AttemptedCopulation,.067 .467 .2,WingFlick,.533 .133 .333

@@ -18,6 +18,9 @@ if isempty(classifierparamsfiles),
   dataloc_params = ReadParams(datalocparamsfile);
   paramsfile = fullfile(settingsdir,analysis_protocol,dataloc_params.jaabadetectparamsfilestr);
   params = ReadParams(paramsfile);
+  if ~iscell(params.classifierparamsfiles),
+    params.classifierparamsfiles = {params.classifierparamsfiles};
+  end
   classifierparamsfiles = cellfun(@(x) fullfile(settingsdir,analysis_protocol,x),params.classifierparamsfiles,'UniformOutput',false);
 end
 classifierparams = ReadClassifierParamsFile(classifierparamsfiles,'isrelativepath',true);

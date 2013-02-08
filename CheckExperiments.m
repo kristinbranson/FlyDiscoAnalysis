@@ -1,10 +1,11 @@
 function CheckExperiments(expdirs,varargin)
 
-[checkprotocol,checkfix,classifierparamsfiles,npar,analysis_protocol] = myparse(varargin,...
+[checkprotocol,checkfix,classifierparamsfiles,npar,analysis_protocol,usesage] = myparse(varargin,...
   'checkprotocol',true,'checkfix',true,...
   'classifierparamsfiles',{},...
   'npar',[],...
-  'analysis_protocol','current');
+  'analysis_protocol','current',...
+  'usesage',true);
 
 if isempty(npar),
   npar = max(1,matlabpool('size'));
@@ -16,9 +17,37 @@ for i = 1:nexps,
   [~,name] = fileparts(expdirs{i});
   experiment_names{i} = ['FlyBowl_',name];
 end
-metadata = SAGEListBowlExperiments('experiment_name',experiment_names,'checkflags',false,...
-  'data_type',{'sexclassifier_diagnostics_mean_nflies','QuickStats_BackSubStats_meanNConnComps'},...
-  'removemissingdata',false);
+if usesage,
+  metadata = SAGEListBowlExperiments('experiment_name',experiment_names,'checkflags',false,...
+    'data_type',{'sexclassifier_diagnostics_mean_nflies','QuickStats_BackSubStats_meanNConnComps'},...
+    'removemissingdata',false);
+else
+  for i = 1:nexps,
+    expdir = expdirs{i};
+    metadatacurr = parseExpDir(expdir,true);
+    metadatacurr.automated_pf = 'U';
+    metadatacurr.manual_pf = 'U';
+    if ~exist(expdir,'dir'),
+      fprintf('Experiment directory %s does not exist\n',expdir);
+      metadatacurr.automated_pf = 'F';
+    else
+      filename = fullfile(expdir,'automatic_checks_complete_results.txt');
+      if ~exist(filename,'file'),
+        filename = fullfile(expdir,'automatic_checks_incoming_results.txt');
+      end
+      if exist(filename,'file'),
+        res = ReadParams(filename);
+        if isfield(res,'automated_pf'),
+          metadatacurr.automated_pf = res.automated_pf;
+        end
+        if isfield(res,'automated_pf_category'),
+          metadatacurr.automated_pf_category = res.automated_pf_category;
+        end
+      end
+    end
+    metadata(i) = metadatacurr;
+  end
+end
 
 [ism,idx] = ismember(experiment_names,{metadata.experiment_name});
 if any(~ism),
@@ -42,13 +71,13 @@ if checkprotocol,
     fn = fullfile(expdirs{i},'analysis_protocol.txt');
     if ~exist(fn,'file'),
       analysis_protocols{i} = 'MISSING';
-      continue;
+    else
+      fid = fopen(fn,'r');
+      s = fgetl(fid);
+      s = strtrim(s);
+      fclose(fid);
+      analysis_protocols{i} = s;
     end
-    fid = fopen(fn,'r');
-    s = fgetl(fid);
-    s = strtrim(s);
-    fclose(fid);
-    analysis_protocols{i} = s;
     annfile = fullfile(expdirs{i},'movie.ufmf.ann');
     if ~exist(annfile,'file'),
       ctrax_versions{i} = 'MISSING';
@@ -65,22 +94,25 @@ if checkprotocol,
   [allctrax_versions,~,ctrax_versionidx] = unique(ctrax_versions);
   
   fprintf('Analysis protocols:\n');
-  isfailure = ~strcmp({metadata.automated_pf},'P') | strcmp({metadata.manual_pf},'F');
+  ispass = strcmp({metadata.automated_pf},'P') & ~strcmp({metadata.manual_pf},'F');
+  isunknown = strcmp({metadata.automated_pf},'U') & ~strcmp({metadata.manual_pf},'F');
+  isfailure = ~(ispass|isunknown);
+  
   for i = 1:numel(allprotocols),
-    fprintf('%s: %d experiments, %d pass, %d fail\n',allprotocols{i},nnz(protocolidx==i),...
-      nnz(~isfailure&protocolidx==i),nnz(isfailure&protocolidx==i));
+    fprintf('%s: %d experiments, %d pass, %d unknown, %d fail\n',allprotocols{i},nnz(protocolidx==i),...
+      nnz(ispass&protocolidx==i),nnz(isunknown&protocolidx==i),nnz(isfailure&protocolidx==i));
   end
     
   fprintf('Max areas:\n');
   for i = 1:numel(allmaxareas),
-    fprintf('%f: %d experiments, %d pass, %d fail\n',allmaxareas(i),nnz(maxareaidx==i),...
-      nnz(~isfailure&maxareaidx==i),nnz(isfailure&maxareaidx==i));
+    fprintf('%f: %d experiments, %d pass, %d unknown, %d fail\n',allmaxareas(i),nnz(maxareaidx==i),...
+      nnz(ispass&maxareaidx==i),nnz(isunknown&maxareaidx==i),nnz(isfailure&maxareaidx==i));
   end
 
   fprintf('Ctrax versions:\n');
   for i = 1:numel(allctrax_versions),
-    fprintf('%s: %d experiments, %d pass, %d fail\n',allctrax_versions{i},nnz(ctrax_versionidx==i),...
-      nnz(~isfailure&ctrax_versionidx==i),nnz(isfailure&ctrax_versionidx==i));
+    fprintf('%s: %d experiments, %d pass, %d unknown, %d fail\n',allctrax_versions{i},nnz(ctrax_versionidx==i),...
+      nnz(ispass&ctrax_versionidx==i),nnz(isunknown&ctrax_versionidx==i),nnz(isfailure&ctrax_versionidx==i));
   end
   
   input('Hit enter to continue.');

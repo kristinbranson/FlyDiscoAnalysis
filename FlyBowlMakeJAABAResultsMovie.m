@@ -22,6 +22,17 @@ end
 classifierparamsfiles = cellfun(@(x) fullfile(settingsdir,analysis_protocol,x),dataloc_params.jaabaclassifierparamsfilestrs,...
   'UniformOutput',false);
 
+if isfield(jaabaresultsmovie_params,'behavior2color'),
+  n = numel(jaabaresultsmovie_params.behavior2color);
+  behavior2color = cell(floor(n/2),2);
+  for i = 1:floor(n/2),
+    behavior2color{i,1} = jaabaresultsmovie_params.behavior2color{2*i-1};
+    behavior2color{i,2} = str2double(regexp(jaabaresultsmovie_params.behavior2color{2*i},'\s+','split'));
+  end
+else
+  behavior2color = {};
+end
+
 %% location of data
 
 [~,basename] = fileparts(expdir);
@@ -80,7 +91,9 @@ firstframes = registration_params.start_frame + firstframes_off;
   'avifileTempDataFile',[avifile,'-temp'],...
   'dynamicflyselection',true,...
   'doshowsex',true,...
-  'classifierparamsfiles',classifierparamsfiles);
+  'classifierparamsfiles',classifierparamsfiles,...
+  'behavior2color',behavior2color,...
+  'debug',false);
 
 if ishandle(1),
   close(1);
@@ -122,7 +135,7 @@ if subtitles,
   cmd = sprintf('mencoder %s -o %s -ovc xvid -xvidencopts fixed_quant=4 -vf scale=%d:%d,flip -sub %s -subfont-text-scale 2 -msglevel all=2',...
     avifile,tmpfile,newwidth,newheight,subtitlefile);
 else
-  cmd = sprintf('mencoder %s -o %s -ovc xvid -xvidencopts fixed_quant=4 -vf scale=%d:%d',...
+  cmd = sprintf('mencoder %s -o %s -ovc xvid -xvidencopts fixed_quant=4 -vf scale=%d:%d -msglevel all=2',...
     avifile,xvidfile,newwidth,newheight);
 end
 

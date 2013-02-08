@@ -133,6 +133,9 @@ doshowsex = doshowsex && isfield(trx,'sex') && ~any(cellfun(@isempty,{trx.sex}))
 if doshowsex,
   sexes = {};
   for i = 1:numel(trx),
+    if ~iscell(trx(i).sex),
+      trx(i).sex = num2cell(trx(i).sex);
+    end
     sexes = union(sexes,unique(trx(i).sex));
   end
   sexes = upper(sexes);

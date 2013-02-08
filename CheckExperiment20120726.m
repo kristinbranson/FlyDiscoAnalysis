@@ -51,24 +51,24 @@ end
 
 %% check registered_trx
 
-% filename = fullfile(expdir,dataloc_params.trxfilestr);
-% if ~exist(filename,'file'),
-%   msg = sprintf('Trx file %s does not exist',filename);
-%   fprintf([msg,'\n']);
-%   success = false;
-%   msgs{end+1} = msg;
-% else
-%   
-%   tmp = load(filename);
-%   n = numel(unique([tmp.trx.dt]));
-%   if n > 1,
-%     msg = sprintf('More than one unique value for dt in %s',filename);
-%     fprintf([msg,'\n']);
-%     success = false;
-%     msgs{end+1} = msg;
-%   end
-%   
-% end
+filename = fullfile(expdir,dataloc_params.trxfilestr);
+if ~exist(filename,'file'),
+  msg = sprintf('Trx file %s does not exist',filename);
+  fprintf([msg,'\n']);
+  success = false;
+  msgs{end+1} = msg;
+else
+  
+  tmp = load(filename);
+  n = numel(unique([tmp.trx.dt]));
+  if n > 1,
+    msg = sprintf('More than one unique value for dt in %s',filename);
+    fprintf([msg,'\n']);
+    success = false;
+    msgs{end+1} = msg;
+  end
+  
+end
 
 %% check dt
 
