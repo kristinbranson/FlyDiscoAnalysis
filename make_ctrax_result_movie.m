@@ -148,6 +148,12 @@ if doshowsex,
 end
 
 doplotwings = doplotwings && all(isfield(trx,{'xwingl','ywingl','xwingr','ywingr'}));
+doplotwings_perfly = repmat(doplotwings,[1,numel(trx)]);
+if doplotwings && isfield(trx,'wingtype'),
+  for i = 1:numel(trx),
+    doplotwings_perfly(i) = all(strcmpi(trx(i).wingtype,'full'));
+  end
+end
 
 nzoom = length(zoomflies);
 if nzoom > 0,
@@ -535,7 +541,7 @@ for segi = 1:numel(firstframes),
           end
           htri(fly) = drawflyo(trx(fly),idx(fly));
           set(htri(fly),'color',colors(fly,:));
-          if doplotwings,
+          if doplotwings && doplotwings_perfly(fly),
             xwing = [trx(fly).xwingl(idx(fly)),trx(fly).x(idx(fly)),trx(fly).xwingr(idx(fly))];
             ywing = [trx(fly).ywingl(idx(fly)),trx(fly).y(idx(fly)),trx(fly).ywingr(idx(fly))];
             hwing(fly) = plot(xwing,ywing,'.-','color',colors(fly,:));
@@ -546,7 +552,7 @@ for segi = 1:numel(firstframes),
             hsexmarker(fly) = plot(nan,nan,'.','color',colors(fly,:),'markerfacecolor',colors(fly,:));
           end
           htri(fly) = plot(nan,nan,'-','color',colors(fly,:));
-          if doplotwings,
+          if doplotwings && doplotwings_perfly(fly),
             hwing(fly) = plot(nan,nan,'.-','color',colors(fly,:));
           end
         end
@@ -568,7 +574,7 @@ for segi = 1:numel(firstframes),
           end
           updatefly(htri(fly),trx(fly).x(idx(fly)),trx(fly).y(idx(fly)),...
             trx(fly).theta(idx(fly)),trx(fly).a(idx(fly)),trx(fly).b(idx(fly)));
-          if doplotwings,
+          if doplotwings && doplotwings_perfly(fly),
             xwing = [trx(fly).xwingl(idx(fly)),trx(fly).x(idx(fly)),trx(fly).xwingr(idx(fly))];
             ywing = [trx(fly).ywingl(idx(fly)),trx(fly).y(idx(fly)),trx(fly).ywingr(idx(fly))];
             set(hwing(fly),'XData',xwing,'YData',ywing);
@@ -579,7 +585,7 @@ for segi = 1:numel(firstframes),
           if doshowsex,
             set(hsexmarker(fly),'xdata',[],'ydata',[]);
           end
-          if doplotwings,
+          if doplotwings && doplotwings_perfly(fly),
             set(hwing(fly),'XData',[],'YData',[]);
           end
         end
@@ -607,7 +613,7 @@ for segi = 1:numel(firstframes),
           else
             s = sprintf('%d',fly);
           end
-          if doplotwings,
+          if doplotwings && doplotwings_perfly(fly),
             xwingl = trx(fly).xwingl(idx(fly)) - round(trx(fly).x(idx(fly))) + boxradius + .5;
             ywingl = trx(fly).ywingl(idx(fly)) - round(trx(fly).y(idx(fly))) + boxradius + .5;
             xwingl = xwingl * scalefactor;
@@ -626,8 +632,10 @@ for segi = 1:numel(firstframes),
 
           if frame == firstframes(1),
             hzoom(i,j) = drawflyo(x,y,theta,a,b);
-            if doplotwings,
+            if doplotwings && doplotwings_perfly(fly),
               hzoomwing(i,j) = plot(xwing,ywing,'.-','color',colors(fly,:));
+            else
+              hzoomwing(i,j) = plot(nan,nan,'.-','color',colors(fly,:));
             end
             if isdisplay,
               htextzoom(i,j) = text((x0(j)+x1(j))/2,.95*y0(i)+.05*y1(i),s,...
@@ -643,8 +651,10 @@ for segi = 1:numel(firstframes),
             end
           else
             updatefly(hzoom(i,j),x,y,theta,a,b);
-            if doplotwings,
+            if doplotwings && doplotwings_perfly(fly),
               set(hzoomwing(i,j),'XData',xwing,'YData',ywing,'Color',colors(fly,:));
+            else
+              set(hzoomwing(i,j),'XData',nan,'YData',nan,'Color',colors(fly,:));
             end
             if isdisplay,
               set(htextzoom(i,j),'string',s,'color',colors(fly,:));

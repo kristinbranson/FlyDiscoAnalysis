@@ -40,7 +40,13 @@ while true,
   frameconditions{nstats} = m{2}; %#ok<AGROW>
   flyconditions{nstats} = m{3}; %#ok<AGROW>
   minZboth{nstats} = str2double(m{4}); %#ok<AGROW>
+  if isnan(minZboth{nstats}),
+    error('minZboth is not a number: %s\n',m{4});
+  end
   minZfly{nstats} = str2double(m{5}); %#ok<AGROW>
+  if isnan(minZfly{nstats}),
+    error('minZfly is not a number: %s\n',m{5});
+  end
   if minZboth{nstats} > minZfly{nstats},
     error('minZboth must be <= minZfly, Read: %s',s);
   end

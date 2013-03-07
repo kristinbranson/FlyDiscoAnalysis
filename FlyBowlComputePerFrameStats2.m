@@ -3,14 +3,32 @@ function FlyBowlComputePerFrameStats2(expdir,varargin)
 special_cases = {'fractime','duration','boutfreq'};
 
 [analysis_protocol,settingsdir,datalocparamsfilestr,...
-  dorecompute,debug,verbose] = ...
+  dorecompute,debug,verbose,docomputehists] = ...
   myparse(varargin,...
   'analysis_protocol','current',...
   'settingsdir','/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/settings',...
   'datalocparamsfilestr','dataloc_params.txt',...
   'dorecompute',true,...
   'debug',false,...
-  'verbose',true); 
+  'verbose',true,...
+  'docomputehists',true); 
+
+if ischar(docomputehists),
+  docomputehists = str2double(docomputehists);
+end
+if ischar(verbose),
+  verbose = str2double(verbose);
+end
+if ischar(debug),
+  debug = str2double(debug);
+end
+if ischar(dorecompute),
+  dorecompute = str2double(dorecompute);
+end
+
+if verbose,
+  fprintf('Analysis protocol: %s\n',analysis_protocol);
+end
 
 %% load this experiment
 if verbose,
@@ -246,7 +264,13 @@ if ~debug,
 end
 end
 
+%% hists
+
+if docomputehists,
+
+
 %% read the histogram params
+
 
 histperframefeaturesfile = fullfile(trx.settingsdir,trx.analysis_protocol,trx.dataloc_params.histperframefeaturesfilestr);
 hist_perframefeatures = ReadHistPerFrameFeatures2(histperframefeaturesfile);
@@ -546,4 +570,6 @@ end
 % end
 % 
 % close all;
+
+end
 

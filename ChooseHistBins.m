@@ -4,30 +4,48 @@ addpath /groups/branson/home/bransonk/tracking/code/JCtrax/filehandling;
 settingsdir = '/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/settings';
 realrootdir = '/groups/sciserv/flyolympiad/Olympiad_Screen/fly_bowl/bowl_data';
 %rootdir = '/groups/branson/bransonlab/projects/olympiad/HackHitData';
-rootdir = '/groups/branson/bransonlab/projects/olympiad/FlyBowlCtrax/20120220_non_olympiad_azanchir_mating_galit_CS_20120211/results';
+rootdir = '/groups/branson/bransonlab/projects/olympiad/FlyBowlData';
 rootdir_fixed = '';
 
-analysis_protocol = '20120220_non_olympiad_azanchir_mating_galit_CS_20120211';
+analysis_protocol = 'current';
 datalocparamsfilestr = 'dataloc_params.txt';
 params = {'analysis_protocol',analysis_protocol,...
   'datalocparamsfilestr',datalocparamsfilestr,...
   'settingsdir',settingsdir};
 
+
 behaviornames = {
-  'walking'
-  'stopped'
-  'jumping'
-  'righting'
-  'chasing'
-  'backup'
-  'crabwalk'
-  'pivottail'
-  'pivothead'
-  'touch'
-  'winggrooming'
-  'copulation'
   'attemptedcopulation'
+  'backup'
+  'bodyturn'
+  'chase'
+  'copulation'
+  'crabwalkall'
+  'crabwalkextreme'
+  'jump'
+  'pivotcenter'
+  'pivottail'
+  'righting'
+  'stop'
+  'walk'
   };
+
+
+% behaviornames = {
+%   'walking'
+%   'stopped'
+%   'jumping'
+%   'righting'
+%   'chasing'
+%   'backup'
+%   'crabwalk'
+%   'pivottail'
+%   'pivothead'
+%   'touch'
+%   'winggrooming'
+%   'copulation'
+%   'attemptedcopulation'
+%   };
 %behaviornames = {'chase','walk','stop','jump'};
 
 fps = 30.3445;
@@ -39,9 +57,9 @@ dataloc_params = ReadParams(datalocparamsfile);
 
 %% choose experiments to histogram
 
-moviefilestr = 'movie.ufmf';
+moviefilestr = dataloc_params.moviefilestr;
 trxfilestr = dataloc_params.ctraxfilestr;
-annfilestr = 'movie.ufmf.ann';
+annfilestr = dataloc_params.annfilestr;
 % 
 % expfiles = dir(fullfile(rootoutputdir,'*_*'));
 % experiments_all = [];
@@ -59,59 +77,68 @@ annfilestr = 'movie.ufmf.ann';
 %   end
 % end
 
-experiment_params = struct;
-% root data dir
-experiment_params.rootdir = rootdir;
-% what dates should we analyze
-%experiment_params.daterange = {'20110201T000000','20111221T000000'};
-% remove failures
-experiment_params.checkflags = false;
-% remove missing data
-experiment_params.removemissingdata = false;
-% azanchir experiments
-experiment_params.screen_type = 'non_olympiad_azanchir*';
-
-% for specifying galits data
-experiment_params.line_name = 'EXT_CantonS_*';
-experiment_params.effector = 'NoEffector_0_9999';
-experiment_params.handling_protocol = ...
-  {'HP_flybowl_v007p1.xls','HP_flybowl_v007p2.xls','HP_flybowl_v007p3.xls',...
-  'HP_flybowl_v007p6.xls','HP_flybowl_v007p7.xls'};
-experiment_params.protocol = 'EP_flybowl_v011p3.xls';
-
-% how to weight various things
-weight_order = {'genotype','date','rig','bowl'};
-% required files
-%subreadfiles = {'chase_labels.mat','stop_labels.mat','walk_labels.mat','jump_labels.mat'};
-subreadfiles = {'perframe/dnose2ell_angle_min20to20.mat'};
-% what lines
-%experiment_params.linename = '';
+% experiment_params = struct;
+% % root data dir
+% experiment_params.rootdir = rootdir;
+% % what dates should we analyze
+% %experiment_params.daterange = {'20110201T000000','20111221T000000'};
+% % remove failures
+% experiment_params.checkflags = false;
+% % remove missing data
+% experiment_params.removemissingdata = false;
+% % azanchir experiments
+% experiment_params.screen_type = 'non_olympiad_azanchir*';
 % 
+% % for specifying galits data
+% experiment_params.line_name = 'EXT_CantonS_*';
+% experiment_params.effector = 'NoEffector_0_9999';
+% experiment_params.handling_protocol = ...
+%   {'HP_flybowl_v007p1.xls','HP_flybowl_v007p2.xls','HP_flybowl_v007p3.xls',...
+%   'HP_flybowl_v007p6.xls','HP_flybowl_v007p7.xls'};
+% experiment_params.protocol = 'EP_flybowl_v011p3.xls';
+% 
+% % how to weight various things
+weight_order = {'genotype','date','rig','bowl'};
+% % required files
+% %subreadfiles = {'chase_labels.mat','stop_labels.mat','walk_labels.mat','jump_labels.mat'};
+% subreadfiles = {'perframe/dnose2ell_angle_min20to20.mat'};
+% % what lines
+% %experiment_params.linename = '';
+% % 
 ngal4 = 100;
 ncontrols = 100;
-tmpparams = struct2paramscell(experiment_params);
+% tmpparams = struct2paramscell(experiment_params);
+% 
+% %[~,~,~,experiments_all] = getExperimentDirs(tmpparams{:});
+% experiments_all = SAGEListBowlExperiments(tmpparams{:});
 
-%[~,~,~,experiments_all] = getExperimentDirs(tmpparams{:});
-experiments_all = SAGEListBowlExperiments(tmpparams{:});
-
-baddata = false(1,numel(experiments_all));
-for i = 1:numel(experiments_all),
-  if ~exist(experiments_all(i).file_system_path,'dir'),
-    baddata(i) = true;
-    continue;
-  end
-  [~,experiment_name] = myfileparts(experiments_all(i).file_system_path);
-%   annfile = fullfile(rootdir,experiment_name,annfilestr);
-%   if ~exist(annfile,'file'),
-%     baddata(i) = true;
-%   end
-  for j = 1:numel(subreadfiles),
-    if ~exist(fullfile(rootdir,experiment_name,subreadfiles{j}),'file'),
-      baddata(i) = true;
-    end
-  end
+expdirs_all = importdata('/groups/branson/home/bransonk/behavioranalysis/code/Jdetect/Jdetect/experiments/datamanagement/expdirs_primary20130306.txt');
+clear experiments_all;
+for i = 1:numel(expdirs_all),
+  metadatacurr = parseExpDir(expdirs_all{i},true);
+  metadatacurr.line = metadatacurr.line_name;
+  experiments_all(i) = metadatacurr;
 end
-experiments_all(baddata) = [];
+
+
+% baddata = false(1,numel(experiments_all));
+% for i = 1:numel(experiments_all),
+%   if ~exist(experiments_all(i).file_system_path,'dir'),
+%     baddata(i) = true;
+%     continue;
+%   end
+%   [~,experiment_name] = myfileparts(experiments_all(i).file_system_path);
+% %   annfile = fullfile(rootdir,experiment_name,annfilestr);
+% %   if ~exist(annfile,'file'),
+% %     baddata(i) = true;
+% %   end
+%   for j = 1:numel(subreadfiles),
+%     if ~exist(fullfile(rootdir,experiment_name,subreadfiles{j}),'file'),
+%       baddata(i) = true;
+%     end
+%   end
+% end
+% experiments_all(baddata) = [];
 
 % 
 % baddata = false(1,numel(experiments_all));
@@ -228,6 +255,10 @@ for fni = 1:numel(perframefns),
       end
       % get per-frame data for these flies
       tmp = load(filename,'data');
+      if ~iscell(tmp.data),
+        warning('Data in %s is not a cell, skipping.',filename);
+        continue;
+      end
       datacurr = cell2mat(tmp.data);
     end
     thresh = prctile(datacurr,[prctile_store,100-prctile_store]);

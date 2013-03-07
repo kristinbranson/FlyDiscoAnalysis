@@ -47,5 +47,6 @@ if sagecompatible,
   res1.rig = str2double(res.rig);
   res1.plate = str2double(res.plate);
   res1.flag_aborted = res.notstarted;
+  res1.effector = res.effector;
   res = res1;
 end
