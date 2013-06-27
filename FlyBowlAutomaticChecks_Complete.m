@@ -231,6 +231,11 @@ end
 if DEBUG,
   fid = 1;
 else
+  if exist(outfile,'file'),
+    try
+      delete(outfile);
+    end
+  end
   fid = fopen(outfile,'w');
 end
 if fid < 0,

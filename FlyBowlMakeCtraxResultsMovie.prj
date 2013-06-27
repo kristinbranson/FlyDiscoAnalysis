@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <deployment-project plugin="plugin.deploytool" plugin-version="1.0">
-  <configuration target="target.standalone" target-name="Standalone Application" name="FlyBowlMakeCtraxResultsMovie" location="/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis" file="/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/FlyBowlMakeCtraxResultsMovie.prj" build-checksum="1671686066">
+  <configuration target="target.standalone" target-name="Standalone Application" name="FlyBowlMakeCtraxResultsMovie" location="/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis" file="/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/FlyBowlMakeCtraxResultsMovie.prj" build-checksum="2007008329">
     <param.project.name>/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/FlyBowlMakeCtraxResultsMovie.prj</param.project.name>
     <param.target.type>Standalone Application</param.target.type>
     <param.appname>FlyBowlMakeCtraxResultsMovie</param.appname>
@@ -78,12 +78,8 @@
     <matlab>
       <root>/localhome/bransonk/software/matlab/R2012a</root>
       <path>
-        <directory>/groups/branson/home/bransonk/tracking/code/lds/hmm</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/Ctrax/matlab/netlab</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/SAGE/MATLABInterface/Trunk</directory>
         <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/filehandling</directory>
         <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/misc</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis</directory>
         <directory>${MATLAB_ROOT}/toolbox/matlab/demos</directory>
         <directory>${MATLAB_ROOT}/toolbox/matlab/graph2d</directory>
         <directory>${MATLAB_ROOT}/toolbox/matlab/graph3d</directory>
@@ -233,7 +229,7 @@
       <vista>false</vista>
       <linux>true</linux>
       <solaris>false</solaris>
-      <osver>2.6.32-41-generic</osver>
+      <osver>2.6.32-45-generic</osver>
       <os32>false</os32>
       <os64>true</os64>
       <arch>glnxa64</arch>

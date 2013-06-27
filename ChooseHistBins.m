@@ -4,7 +4,8 @@ addpath /groups/branson/home/bransonk/tracking/code/JCtrax/filehandling;
 settingsdir = '/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/settings';
 realrootdir = '/groups/sciserv/flyolympiad/Olympiad_Screen/fly_bowl/bowl_data';
 %rootdir = '/groups/branson/bransonlab/projects/olympiad/HackHitData';
-rootdir = '/groups/branson/bransonlab/projects/olympiad/FlyBowlData';
+%rootdir = '/groups/branson/bransonlab/projects/olympiad/FlyBowlData';
+rootdir = realrootdir;
 rootdir_fixed = '';
 
 analysis_protocol = 'current';
@@ -13,6 +14,8 @@ params = {'analysis_protocol',analysis_protocol,...
   'datalocparamsfilestr',datalocparamsfilestr,...
   'settingsdir',settingsdir};
 
+expdirfile = '/groups/branson/home/bransonk/behavioranalysis/code/Jdetect/JAABA_guff/perframe/expdirs_jaabadetect20130606.txt';
+%expdirfile = '/groups/branson/home/bransonk/behavioranalysis/code/Jdetect/Jdetect/experiments/datamanagement/expdirs_primary20130306.txt';
 
 behaviornames = {
   'attemptedcopulation'
@@ -27,6 +30,10 @@ behaviornames = {
   'pivottail'
   'righting'
   'stop'
+  'touch'
+  'wingextension'
+  'winggrooming'
+  'wingflick'
   'walk'
   };
 
@@ -112,7 +119,7 @@ ncontrols = 100;
 % %[~,~,~,experiments_all] = getExperimentDirs(tmpparams{:});
 % experiments_all = SAGEListBowlExperiments(tmpparams{:});
 
-expdirs_all = importdata('/groups/branson/home/bransonk/behavioranalysis/code/Jdetect/Jdetect/experiments/datamanagement/expdirs_primary20130306.txt');
+expdirs_all = importdata(expdirfile);
 clear experiments_all;
 for i = 1:numel(expdirs_all),
   metadatacurr = parseExpDir(expdirs_all{i},true);
@@ -245,7 +252,16 @@ for fni = 1:numel(perframefns),
           error('Could not find score or label file for %s',m);
         end
         scoredata = load(filename);
-        datacurr = (cell2mat(scoredata.allScores.t1s)-cell2mat(scoredata.allScores.t0s))/fps;
+        if isfield(scoredata.allScores,'postprocessed'),
+          datacurr = [];
+          for j = 1:numel(scoredata.allScores.postprocessed),
+            scoredata.allScores.postprocessed{j}(isnan(scoredata.allScores.postprocessed{j})) = 0;
+            [t0s,t1s] = get_interval_ends(scoredata.allScores.postprocessed{j});
+            datacurr = [datacurr,(t1s-t0s)/fps]; %#ok<AGROW>
+          end
+        else
+          datacurr = (cell2mat(scoredata.allScores.t1s)-cell2mat(scoredata.allScores.t0s))/fps;
+        end
       end
     else
       filename = fullfile(expdir,dataloc_params.perframedir,[fn,'.mat']);

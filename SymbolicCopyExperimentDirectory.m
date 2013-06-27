@@ -67,6 +67,9 @@ if exist(inperframedir,'dir') && (isempty(copyfiles) || ismember('perframe',copy
 
   for i = 1:numel(subfiles),
     infile = fullfile(inperframedir,subfiles{i});
+    if ~exist(infile,'file'),
+      continue;
+    end
     outfile = fullfile(outperframedir,subfiles{i});
     if ~exist(outfile,'file'),
       if dosoftlink,

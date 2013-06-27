@@ -62,17 +62,19 @@ accmag,any,any,25,500
 accmag,any,male,25,500
 accmag,any,female,25,500
 
-velmag_ctr,nearwall,any,5,500
-du_ctr,nearwall,any,5,500
-absdv_cor,nearwall,any,5,500
+velmag_ctr,nearwall,any,25,500
+du_ctr,nearwall,any,25,500
+absdv_cor,nearwall,any,25,500
 
-velmag_ctr,nearfly,any,5,500
-du_ctr,nearfly,any,5,500
-absdv_cor,nearfly,any,5,500
+velmag_ctr,nearfly,any,25,500
+du_ctr,nearfly,any,25,500
+absdv_cor,nearfly,any,25,500
 
-velmag_ctr,notnearfly_notnearwall,any,5,500
-du_ctr,notnearfly_notnearwall,any,5,500
-absdv_cor,notnearfly_notnearwall,any,5,500
+velmag_ctr,notnearfly_notnearwall,any,25,500
+du_ctr,notnearfly_notnearwall,any,25,500
+absdv_cor,notnearfly_notnearwall,any,25,500
+
+velmag_ctr,attemptedcopulation,any,5,500
 
 du_ctr,backup,any,5,500
 absdv_cor,backup,any,5,500
@@ -100,9 +102,23 @@ absdv_cor,pivottail,any,5,500
 
 velmag_ctr,righting,any,5,500
 
+velmag_ctr,stop,any,5,500
+
+velmag_ctr,touch,any,5,500
+
 velmag_ctr,walk,any,5,500
 du_ctr,walk,any,5,500
 absdv_cor,walk,any,5,500
+
+velmag_ctr,wingextension,any,5,500
+du_ctr,wingextension,any,5,500
+absdv_cor,wingextension,any,5,500
+
+velmag_ctr,wingflick,any,5,500
+du_ctr,wingflick,any,5,500
+absdv_cor,wingflick,any,5,500
+
+velmag_ctr,winggrooming,any,5,500
 
 # change in orientation
 
@@ -126,10 +142,11 @@ corfrac_maj,any,any,25,500
 corfrac_maj,any,male,25,500
 corfrac_maj,any,female,25,500
 
-absdtheta,nearwall,any,5,500
-absdtheta,nearfly,any,5,500
-absdtheta,notnearfly_notnearwall,any,5,500
+absdtheta,nearwall,any,25,500
+absdtheta,nearfly,any,25,500
+absdtheta,notnearfly_notnearwall,any,25,500
 absdtheta,backup,any,5,500
+corfrac_maj,backup,any,5,500
 absdtheta,bodyturn,any,5,500
 corfrac_maj,bodyturn,any,5,500
 absdtheta,chase,male,5,500
@@ -142,7 +159,12 @@ corfrac_maj,pivotcenter,any,5,500
 absdtheta,pivottail,any,5,500
 corfrac_maj,pivottail,any,5,500
 absdtheta,righting,any,5,500
+absdtheta,stop,any,5,500
+absdtheta,touch,any,5,500
 absdtheta,walk,any,5,500
+absdtheta,wingextension,any,5,500
+absdtheta,wingflick,any,5,500
+absdtheta,winggrooming,any,5,500
 
 # social
 
@@ -198,9 +220,14 @@ danglesub,nearfly,any,25,500
 danglesub,nearfly,male,25,500
 danglesub,nearfly,female,25,500
 
-dcenter,nearwall,any,5,500
-dnose2ell,nearwall,any,5,500
-nflies_close,nearwall,any,5,500
+dcenter,nearwall,any,25,500
+dnose2ell,nearwall,any,25,500
+nflies_close,nearwall,any,25,500
+
+dcenter,move,any,25,500
+dnose2tail,move,any,25,500
+ddcenter,move,any,25,500
+danglesub,move,any,25,500
 
 dnose2ell,attemptedcopulation,any,5,500
 nflies_close,attemptedcopulation,any,5,500
@@ -209,6 +236,10 @@ ddnose2ell,attemptedcopulation,any,5,500
 dcenter,backupstart,any,2,500
 dnose2ell,backupstart,any,2,500
 nflies_close,backupstart,any,2,500
+
+dcenter,bodyturn,any,5,500
+dnose2ell,bodyturn,any,5,500
+nflies_close,bodyturn,any,5,500
 
 dcenter,bodyturnstart,any,2,500
 dnose2ell,bodyturnstart,any,2,500
@@ -222,6 +253,10 @@ dcenter,crabwalkallstart,any,2,500
 dnose2ell,crabwalkallstart,any,2,500
 nflies_close,crabwalkallstart,any,2,500
 
+dcenter,crabwalkextreme,any,5,500
+dnose2ell,crabwalkextreme,any,5,500
+nflies_close,crabwalkextreme,any,5,500
+
 dcenter,crabwalkextremestart,any,2,500
 dnose2ell,crabwalkextremestart,any,2,500
 nflies_close,crabwalkextremestart,any,2,500
@@ -229,6 +264,10 @@ nflies_close,crabwalkextremestart,any,2,500
 dcenter,jumpstart,any,2,500
 dnose2ell,jumpstart,any,2,500
 nflies_close,jumpstart,any,2,500
+
+dcenter,pivotcenter,any,5,500
+dnose2ell,pivotcenter,any,5,500
+nflies_close,pivotcenter,any,5,500
 
 dcenter,pivotcenterstart,any,2,500
 dnose2ell,pivotcenterstart,any,2,500
@@ -246,10 +285,36 @@ dcenter,stop,any,5,500
 dnose2ell,stop,any,5,500
 nflies_close,stop,any,5,500
 
+dcenter,touch,any,2,500
+dnose2ell,touch,any,2,500
+nflies_close,touch,any,2,500
+
 dcenter,walk,any,5,500
 dnose2ell,walk,any,5,500
 nflies_close,walk,any,5,500
 
+dcenter,wingextension,male,5,500
+dnose2ell,wingextension,male,5,500
+nflies_close,wingextension,male,5,500
+
+dcenter,wingflick,any,5,500
+dnose2ell,wingflick,any,5,500
+dell2nose,wingflick,any,5,500
+nflies_close,wingflick,any,5,500
+
+dcenter,wingflick,male,5,500
+dnose2ell,wingflick,male,5,500
+dell2nose,wingflick,male,5,500
+nflies_close,wingflick,male,5,500
+
+dcenter,wingflick,female,5,500
+dnose2ell,wingflick,female,5,500
+dell2nose,wingflick,female,5,500
+nflies_close,wingflick,female,5,500
+
+dcenter,winggrooming,any,5,500
+dnose2ell,winggrooming,any,5,500
+nflies_close,winggrooming,any,5,500
 
 # relative social
 
@@ -288,11 +353,17 @@ absthetadiff_nose2ell,backupstart_nearfly,any,2,500
 absanglefrom1to2_nose2ell,bodyturnstart_nearfly,any,2,500
 
 absanglefrom1to2_nose2ell,chase,male,5,500
+absanglefrom1to2_nose2ell,chase,female,5,500
 angleonclosestfly,chase,male,5,500
+angleonclosestfly,chase,female,5,500
 veltoward_nose2ell,chase,male,5,500
+veltoward_nose2ell,chase,female,5,500
 magveldiff_nose2ell,chase,male,5,500
+magveldiff_nose2ell,chase,female,5,500
 absthetadiff_nose2ell,chase,male,5,500
+absthetadiff_nose2ell,chase,female,5,500
 absphidiff_nose2ell,chase,male,5,500
+absphidiff_nose2ell,chase,female,5,500
 
 absanglefrom1to2_nose2ell,crabwalkallstart_nearfly,any,2,500
 veltoward_nose2ell,crabwalkall_nearfly,any,5,500
@@ -316,11 +387,49 @@ absanglefrom1to2_nose2ell,stop_nearfly,any,5,500
 angleonclosestfly,stop_nearfly,any,5,500
 absthetadiff_nose2ell,stop_nearfly,any,5,500
 
+absanglefrom1to2_nose2ell,touch,any,5,500
+absanglefrom1to2_nose2ell,touch,male,5,500
+absanglefrom1to2_nose2ell,touch,female,5,500
+
+angleonclosestfly,touch,any,5,500
+angleonclosestfly,touch,male,5,500
+angleonclosestfly,touch,female,5,500
+
+veltoward_nose2ell,touch,any,5,500
+veltoward_nose2ell,touch,male,5,500
+veltoward_nose2ell,touch,female,5,500
+
+magveldiff_nose2ell,touch,any,5,500
+magveldiff_nose2ell,touch,male,5,500
+magveldiff_nose2ell,touch,female,5,500
+
+absthetadiff_nose2ell,touch,any,5,500
+absthetadiff_nose2ell,touch,male,5,500
+absthetadiff_nose2ell,touch,female,5,500
+
+absphidiff_nose2ell,touch,any,5,500
+absphidiff_nose2ell,touch,male,5,500
+absphidiff_nose2ell,touch,female,5,500
+
+absanglefrom1to2_nose2ell,wingextension,male,5,500
+absanglefrom1to2_nose2ell,wingextension,female,5,500
+angleonclosestfly,wingextension,male,5,500
+angleonclosestfly,wingextension,female,5,500
+veltoward_nose2ell,wingextension,male,5,500
+veltoward_nose2ell,wingextension,female,5,500
+magveldiff_nose2ell,wingextension,male,5,500
+magveldiff_nose2ell,wingextension,female,5,500
+absthetadiff_nose2ell,wingextension,male,5,500
+absthetadiff_nose2ell,wingextension,female,5,500
+absphidiff_nose2ell,wingextension,male,5,500
+absphidiff_nose2ell,wingextension,female,5,500
+
 # wall
 
 dist2wall,any,any,25,500
 dist2wall,any,male,25,500
 dist2wall,any,female,25,500
+dist2wall,move,any,25,500
 
 absangle2wall,nearwall,any,25,500
 absangle2wall,nearwall,male,25,500
@@ -338,6 +447,9 @@ absdangle2wall,nearwall,any,25,500
 absdangle2wall,nearwall,male,25,500
 absdangle2wall,nearwall,female,25,500
 
+dist2wall,attemptedcopulation,any,5,500
+absangle2wall,attemptedcopulation,any,5,500
+
 dist2wall,backupstart,any,2,500
 absangle2wall,backupstart_nearwall,any,2,500
 
@@ -353,8 +465,14 @@ absangle2wall,crabwalkextreme,any,5,500
 dist2wall,jump,any,5,500
 absangle2wall,jump,any,5,500
 
-dist2wall,pivotcenter,any,2,500
-absangle2wall,pivotcenter,any,2,500
+dist2wall,jumpstart,any,5,500
+absangle2wall,jumpstart,any,5,500
+
+dist2wall,move,any,25,500
+absangle2wall,move,any,25,500
+
+dist2wall,pivotcenterstart,any,2,500
+absangle2wall,pivotcenterstart,any,2,500
 
 dist2wall,pivottailstart,any,2,500
 absangle2wall,pivottailstart,any,2,500
@@ -365,8 +483,14 @@ absangle2wall,rightingstart,any,2,500
 dist2wall,stop,any,5,500
 absangle2wall,stop,any,5,500
 
+dist2wall,touch,any,5,500
+absangle2wall,touch,any,5,500
+
 dist2wall,walk,any,5,500
 absangle2wall,walk,any,5,500
+
+dist2wall,winggrooming,any,5,500
+absangle2wall,winggrooming,any,5,500
 
 # appearance
 
@@ -400,6 +524,24 @@ darea,any,any,25,500
 darea,any,male,25,500
 darea,any,female,25,500
 
+darea,attemptedcopulation,any,5,500
+darea,backup,any,5,500
+darea,bodyturn,any,5,500
+darea,chase,any,5,500
+darea,crabwalkall,any,5,500
+darea,crabwalkextreme,any,5,500
+darea,copulation,any,5,500
+darea,jump,any,5,500
+darea,pivotcenter,any,5,500
+darea,pivottail,any,5,500
+darea,righting,any,5,500
+darea,stop,any,5,500
+darea,touch,any,5,500
+darea,walk,any,5,500
+darea,wingextension,any,5,500
+darea,wingflick,any,5,500
+darea,winggrooming,any,5,500
+
 decc,any,any,25,500
 decc,any,male,25,500
 decc,any,female,25,500
@@ -411,6 +553,290 @@ phi,any,any,25,500
 x_mm,any,any,25,500
 y_mm,any,any,25,500
 theta_mm,any,any,25,500
+
+# wing position
+
+angle_biggest_wing,any,any,25,500
+angle_biggest_wing,any,male,25,500
+angle_biggest_wing,any,female,25,500
+
+angle_smallest_wing,any,any,25,500
+angle_smallest_wing,any,male,25,500
+angle_smallest_wing,any,female,25,500
+
+max_wing_angle,any,any,25,500
+max_wing_angle,any,male,25,500
+max_wing_angle,any,female,25,500
+
+min_wing_angle,any,any,25,500
+min_wing_angle,any,male,25,500
+min_wing_angle,any,female,25,500
+
+mean_wing_angle,any,any,25,500
+mean_wing_angle,any,male,25,500
+mean_wing_angle,any,female,25,500
+
+wing_angle_diff,any,any,25,500
+wing_angle_diff,any,male,25,500
+wing_angle_diff,any,female,25,500
+
+wing_angle_imbalance,any,any,25,500
+wing_angle_imbalance,any,male,25,500
+wing_angle_imbalance,any,female,25,500
+
+wing_anglel,any,any,25,500
+wing_anglel,any,male,25,500
+wing_anglel,any,female,25,500
+
+wing_angler,any,any,25,500
+wing_angler,any,male,25,500
+wing_angler,any,female,25,500
+
+wing_trough_angle,any,any,25,500
+wing_trough_angle,any,male,25,500
+wing_trough_angle,any,female,25,500
+
+max_wing_angle,nearfly,any,25,500
+wing_angle_diff,nearfly,any,25,500
+max_wing_angle,nearfly,male,25,500
+wing_angle_diff,nearfly,male,25,500
+max_wing_angle,nearfly,female,25,500
+wing_angle_diff,nearfly,female,25,500
+
+max_wing_angle,touch,any,5,500
+wing_angle_diff,touch,any,5,500
+max_wing_angle,touch,male,5,500
+wing_angle_diff,touch,male,5,500
+max_wing_angle,touch,female,5,500
+wing_angle_diff,touch,female,5,50
+
+max_wing_angle,chase,any,5,500
+wing_angle_diff,chase,any,5,500
+max_wing_angle,chase,male,5,500
+wing_angle_diff,chase,male,5,500
+
+max_wing_angle,attemptedcopulation,any,5,500
+wing_angle_diff,attemptedcopulation,any,5,500
+max_wing_angle,attemptedcopulation,male,5,500
+wing_angle_diff,attemptedcopulation,male,5,500
+
+max_wing_angle,winggrooming,any,5,500
+wing_angle_diff,winggrooming,any,5,500
+
+angle_biggest_wing,wingextension,any,5,500
+angle_smallest_wing,wingextension,any,5,500
+max_wing_angle,wingextension,any,5,500
+min_wing_angle,wingextension,any,5,500
+mean_wing_angle,wingextension,any,5,500
+wing_angle_diff,wingextension,any,5,500
+wing_angle_imbalance,wingextension,any,5,500
+wing_anglel,wingextension,any,5,500
+wing_angler,wingextension,any,5,500
+wing_trough_angle,wingextension,any,5,500
+
+max_wing_angle,wingflick,any,5,500
+min_wing_angle,wingflick,any,5,500
+mean_wing_angle,wingflick,any,5,500
+wing_angle_diff,wingflick,any,5,500
+wing_angle_imbalance,wingflick,any,5,500
+wing_anglel,wingflick,any,5,500
+wing_angler,wingflick,any,5,500
+wing_trough_angle,wingflick,any,5,500
+
+max_wing_angle,wingflick,male,5,500
+min_wing_angle,wingflick,male,5,500
+mean_wing_angle,wingflick,male,5,500
+wing_angle_diff,wingflick,male,5,500
+wing_angle_imbalance,wingflick,male,5,500
+wing_anglel,wingflick,male,5,500
+wing_angler,wingflick,male,5,500
+wing_trough_angle,wingflick,male,5,500
+
+max_wing_angle,wingflick,female,5,500
+min_wing_angle,wingflick,female,5,500
+mean_wing_angle,wingflick,female,5,500
+wing_angle_diff,wingflick,female,5,500
+wing_angle_imbalance,wingflick,female,5,500
+wing_anglel,wingflick,female,5,500
+wing_angler,wingflick,female,5,500
+wing_trough_angle,wingflick,female,5,500
+
+# wing appearance
+
+area_inmost_wing,any,any,25,500
+area_inmost_wing,any,male,25,500
+area_inmost_wing,any,female,25,500
+
+area_outmost_wing,any,any,25,500
+area_outmost_wing,any,male,25,500
+area_outmost_wing,any,female,25,500
+
+max_wing_area,any,any,25,500
+max_wing_area,any,male,25,500
+max_wing_area,any,female,25,500
+
+min_wing_area,any,any,25,500
+min_wing_area,any,male,25,500
+min_wing_area,any,female,25,500
+
+mean_wing_area,any,any,25,500
+mean_wing_area,any,male,25,500
+mean_wing_area,any,female,25,500
+
+nwingsdetected,any,any,25,500
+nwingsdetected,any,male,25,500
+nwingsdetected,any,female,25,500
+
+wing_areal_mm,any,any,25,500
+wing_areal_mm,any,male,25,500
+wing_areal_mm,any,female,25,500
+
+wing_arear_mm,any,any,25,500
+wing_arear_mm,any,male,25,500
+wing_arear_mm,any,female,25,500
+
+area_inmost_wing,wingextension,any,5,500
+area_outmost_wing,wingextension,any,5,500
+max_wing_area,wingextension,any,5,500
+min_wing_area,wingextension,any,5,500
+mean_wing_area,wingextension,any,5,500
+nwingsdetected,wingextension,any,5,500
+wing_areal_mm,wingextension,any,5,500
+wing_arear_mm,wingextension,any,5,500
+
+area_inmost_wing,winggrooming,any,5,500
+area_outmost_wing,winggrooming,any,5,500
+max_wing_area,winggrooming,any,5,500
+min_wing_area,winggrooming,any,5,500
+mean_wing_area,winggrooming,any,5,500
+nwingsdetected,winggrooming,any,5,500
+wing_areal_mm,winggrooming,any,5,500
+wing_arear_mm,winggrooming,any,5,500
+
+mean_wing_area,wingflick,any,5,500
+nwingsdetected,wingflick,any,5,500
+
+# wing motion
+
+dangle_biggest_wing,any,any,25,500
+dangle_biggest_wing,any,male,25,500
+dangle_biggest_wing,any,female,25,500
+
+dangle_smallest_wing,any,any,25,500
+dangle_smallest_wing,any,male,25,500
+dangle_smallest_wing,any,female,25,500
+
+darea_inmost_wing,any,any,25,500
+darea_inmost_wing,any,male,25,500
+darea_inmost_wing,any,female,25,500
+
+darea_outmost_wing,any,any,25,500
+darea_outmost_wing,any,male,25,500
+darea_outmost_wing,any,female,25,500
+
+dmax_wing_angle,any,any,25,500
+dmax_wing_angle,any,male,25,500
+dmax_wing_angle,any,female,25,500
+
+dmax_wing_area,any,any,25,500
+dmax_wing_area,any,male,25,500
+dmax_wing_area,any,female,25,500
+
+dmin_wing_angle,any,any,25,500
+dmin_wing_angle,any,male,25,500
+dmin_wing_angle,any,female,25,500
+
+dmin_wing_area,any,any,25,500
+dmin_wing_area,any,male,25,500
+dmin_wing_area,any,female,25,500
+
+dnwingsdetected,any,any,25,500
+dnwingsdetected,any,male,25,500
+dnwingsdetected,any,female,25,500
+
+dwing_angle_diff,any,any,25,500
+dwing_angle_diff,any,male,25,500
+dwing_angle_diff,any,female,25,500
+
+dwing_angle_imbalance,any,any,25,500
+dwing_angle_imbalance,any,male,25,500
+dwing_angle_imbalance,any,female,25,500
+
+max_absdwing_angle,any,any,25,500
+max_absdwing_angle,any,male,25,500
+max_absdwing_angle,any,female,25,500
+
+max_absdwing_area,any,any,25,500
+max_absdwing_area,any,male,25,500
+max_absdwing_area,any,female,25,500
+
+max_dwing_angle_in,any,any,25,500
+max_dwing_angle_in,any,male,25,500
+max_dwing_angle_in,any,female,25,500
+
+max_dwing_angle_out,any,any,25,500
+max_dwing_angle_out,any,male,25,500
+max_dwing_angle_out,any,female,25,500
+
+min_absdwing_angle,any,any,25,500
+min_absdwing_angle,any,male,25,500
+min_absdwing_angle,any,female,25,500
+
+min_absdwing_area,any,any,25,500
+min_absdwing_area,any,male,25,500
+min_absdwing_area,any,female,25,500
+
+min_dwing_angle_in,any,any,25,500
+min_dwing_angle_in,any,male,25,500
+min_dwing_angle_in,any,female,25,500
+
+min_dwing_angle_out,any,any,25,500
+min_dwing_angle_out,any,male,25,500
+min_dwing_angle_out,any,female,25,500
+
+max_absdwing_angle,nearfly,any,25,500
+max_absdwing_angle,nearfly,male,25,500
+max_absdwing_angle,nearfly,female,25,500
+
+max_absdwing_angle,touch,any,5,500
+max_absdwing_angle,touch,male,5,500
+max_absdwing_angle,touch,female,5,500
+
+max_absdwing_angle,chase,any,5,500
+max_absdwing_angle,chase,male,5,500
+
+darea_outmost_wing,wingextension,any,5,500
+dmax_wing_angle,wingextension,any,5,500
+dmax_wing_area,wingextension,any,5,500
+dmin_wing_angle,wingextension,any,5,500
+dmin_wing_area,wingextension,any,5,500
+dwing_angle_diff,wingextension,any,5,500
+dwing_angle_imbalance,wingextension,any,5,500
+max_absdwing_angle,wingextension,any,5,500
+max_absdwing_area,wingextension,any,5,500
+max_dwing_angle_in,wingextension,any,5,500
+max_dwing_angle_out,wingextension,any,5,500
+min_absdwing_angle,wingextension,any,5,500
+min_absdwing_area,wingextension,any,5,500
+min_dwing_angle_in,wingextension,any,5,500
+min_dwing_angle_out,wingextension,any,5,500
+
+dmax_wing_angle,wingflick,any,5,500
+dmin_wing_angle,wingflick,any,5,500
+dwing_angle_diff,wingflick,any,5,500
+dwing_angle_imbalance,wingflick,any,5,500
+max_absdwing_angle,wingflick,any,5,500
+max_absdwing_area,wingflick,any,5,500
+max_dwing_angle_in,wingflick,any,5,500
+max_dwing_angle_out,wingflick,any,5,500
+min_absdwing_angle,wingflick,any,5,500
+min_absdwing_area,wingflick,any,5,500
+min_dwing_angle_in,wingflick,any,5,500
+min_dwing_angle_out,wingflick,any,5,500
+
+dwing_angle_imbalance,winggrooming,any,5,500
+max_absdwing_angle,winggrooming,any,5,500
+max_absdwing_area,winggrooming,any,5,500
 
 # fractime per behavior
 
@@ -426,8 +852,8 @@ fractime,backup,female,0,500
 fractime,backup_nearwall,any,0,500
 fractime,backup_nearfly,any,0,500
 fractime,backup_notnearfly_notnearwall,any,0,500
-fractime,backup,firsthalf,0,500
-fractime,backup,secondhalf,0,500
+fractime,backup,firsthalf,0,250
+fractime,backup,secondhalf,0,250
 
 fractime,bodyturn,any,0,500
 fractime,bodyturn,male,0,500
@@ -435,18 +861,24 @@ fractime,bodyturn,female,0,500
 fractime,bodyturn_nearwall,any,0,500
 fractime,bodyturn_nearfly,any,0,500
 fractime,bodyturn_notnearfly_notnearwall,any,0,500
-fractime,bodyturn,firsthalf,0,500
-fractime,bodyturn,secondhalf,0,500
+fractime,bodyturn,firsthalf,0,250
+fractime,bodyturn,secondhalf,0,250
 
 fractime,chase,any,0,500
 fractime,chase,male,0,500
 fractime,chase,female,0,500
+fractime,chase,firsthalf,0,250
+fractime,chase,secondhalf,0,250
 fractime,chase,male_firsthalf,0,250
 fractime,chase,male_secondhalf,0,250
+fractime,chase,female_firsthalf,0,250
+fractime,chase,female_secondhalf,0,250
 
 fractime,copulation,any,0,500
 fractime,copulation,male,0,500
 fractime,copulation,female,0,500
+fractime,copulation,firsthalf,0,250
+fractime,copulation,secondhalf,0,250
 
 fractime,crabwalkall,any,0,500
 fractime,crabwalkall,male,0,500
@@ -454,8 +886,8 @@ fractime,crabwalkall,female,0,500
 fractime,crabwalkall_nearwall,any,0,500
 fractime,crabwalkall_nearfly,any,0,500
 fractime,crabwalkall_notnearfly_notnearwall,any,0,500
-fractime,crabwalkall,firsthalf,0,500
-fractime,crabwalkall,secondhalf,0,500
+fractime,crabwalkall,firsthalf,0,250
+fractime,crabwalkall,secondhalf,0,250
 
 fractime,crabwalkextreme,any,0,500
 fractime,crabwalkextreme,male,0,500
@@ -463,8 +895,8 @@ fractime,crabwalkextreme,female,0,500
 fractime,crabwalkextreme_nearwall,any,0,500
 fractime,crabwalkextreme_nearfly,any,0,500
 fractime,crabwalkextreme_notnearfly_notnearwall,any,0,500
-fractime,crabwalkextreme,firsthalf,0,500
-fractime,crabwalkextreme,secondhalf,0,500
+fractime,crabwalkextreme,firsthalf,0,250
+fractime,crabwalkextreme,secondhalf,0,250
 
 fractime,jump,any,0,500
 fractime,jump,male,0,500
@@ -472,8 +904,8 @@ fractime,jump,female,0,500
 fractime,jump_nearwall,any,0,500
 fractime,jump_nearfly,any,0,500
 fractime,jump_notnearfly_notnearwall,any,0,500
-fractime,jump,firsthalf,0,500
-fractime,jump,secondhalf,0,500
+fractime,jump,firsthalf,0,250
+fractime,jump,secondhalf,0,250
 
 fractime,pivotcenter,any,0,500
 fractime,pivotcenter,male,0,500
@@ -481,8 +913,8 @@ fractime,pivotcenter,female,0,500
 fractime,pivotcenter_nearwall,any,0,500
 fractime,pivotcenter_nearfly,any,0,500
 fractime,pivotcenter_notnearfly_notnearwall,any,0,500
-fractime,pivotcenter,firsthalf,0,500
-fractime,pivotcenter,secondhalf,0,500
+fractime,pivotcenter,firsthalf,0,250
+fractime,pivotcenter,secondhalf,0,250
 
 fractime,pivottail,any,0,500
 fractime,pivottail,male,0,500
@@ -490,8 +922,8 @@ fractime,pivottail,female,0,500
 fractime,pivottail_nearwall,any,0,500
 fractime,pivottail_nearfly,any,0,500
 fractime,pivottail_notnearfly_notnearwall,any,0,500
-fractime,pivottail,firsthalf,0,500
-fractime,pivottail,secondhalf,0,500
+fractime,pivottail,firsthalf,0,250
+fractime,pivottail,secondhalf,0,250
 
 fractime,righting,any,0,500
 fractime,righting,male,0,500
@@ -499,8 +931,8 @@ fractime,righting,female,0,500
 fractime,righting_nearwall,any,0,500
 fractime,righting_nearfly,any,0,500
 fractime,righting_notnearfly_notnearwall,any,0,500
-fractime,righting,firsthalf,0,500
-fractime,righting,secondhalf,0,500
+fractime,righting,firsthalf,0,250
+fractime,righting,secondhalf,0,250
 
 fractime,stop,any,0,500
 fractime,stop,male,0,500
@@ -508,8 +940,18 @@ fractime,stop,female,0,500
 fractime,stop_nearwall,any,0,500
 fractime,stop_nearfly,any,0,500
 fractime,stop_notnearfly_notnearwall,any,0,500
-fractime,stop,firsthalf,0,500
-fractime,stop,secondhalf,0,500
+fractime,stop,firsthalf,0,250
+fractime,stop,secondhalf,0,250
+
+fractime,touch,any,0,500
+fractime,touch,male,0,500
+fractime,touch,female,0,500
+fractime,touch,firsthalf,0,250
+fractime,touch,secondhalf,0,250
+fractime,touch,male_firsthalf,0,250
+fractime,touch,male_secondhalf,0,250
+fractime,touch,female_firsthalf,0,250
+fractime,touch,female_secondhalf,0,250
 
 fractime,walk,any,0,500
 fractime,walk,male,0,500
@@ -517,8 +959,57 @@ fractime,walk,female,0,500
 fractime,walk_nearwall,any,0,500
 fractime,walk_nearfly,any,0,500
 fractime,walk_notnearfly_notnearwall,any,0,500
-fractime,walk,firsthalf,0,500
-fractime,walk,secondhalf,0,500
+fractime,walk,firsthalf,0,250
+fractime,walk,secondhalf,0,250
+
+fractime,wingextension,any,0,500
+fractime,wingextension,male,0,500
+fractime,wingextension,female,0,500
+fractime,wingextension_nearfly,any,0,500
+fractime,wingextension_notnearfly,any,0,500
+fractime,wingextension,firsthalf,0,250
+fractime,wingextension,secondhalf,0,250
+
+fractime,wingflick,any,0,500
+fractime,wingflick,male,0,500
+fractime,wingflick,female,0,500
+fractime,wingflick_nearfly,any,0,500
+fractime,wingflick_notnearfly,any,0,500
+fractime,wingflick,firsthalf,0,250
+fractime,wingflick,secondhalf,0,250
+
+fractime,winggrooming,any,0,500
+fractime,winggrooming,male,0,500
+fractime,winggrooming,female,0,500
+fractime,winggrooming_nearwall,any,0,500
+fractime,winggrooming_nearfly,any,0,500
+fractime,winggrooming_notnearfly_notnearwall,any,0,500
+fractime,winggrooming,firsthalf,0,250
+fractime,winggrooming,secondhalf,0,250
+
+fractime,move,any,0,500
+fractime,move,male,0,500
+fractime,move,female,0,500
+fractime,move_nearwall,any,0,500
+fractime,move_nearfly,any,0,500
+fractime,move_notnearfly_notnearwall,any,0,500
+fractime,move,firsthalf,0,250
+fractime,move,secondhalf,0,250
+
+fractime,touch_notchase,any,0,500
+fractime,touch_notchase,male,0,500
+
+fractime,stop_notwinggrooming,any,0,500
+
+fractime,chase_notwingextension,any,0,500
+fractime,chase_notwingextension,male,0,500
+
+fractime,wingextension_notchase,any,0,500
+fractime,pivotcenter_stop,any,0,500
+
+fractime,notanybehavior,any,0,500
+fractime,notanybehavior,male,0,500
+fractime,notanybehavior,female,0,500
 
 # bout frequency per behavior
 
@@ -534,63 +1025,83 @@ boutfreq,pivotcenter,any,0,500
 boutfreq,pivottail,any,0,500
 boutfreq,righting,any,0,500
 boutfreq,stop,any,0,500
+boutfreq,touch,any,0,500
 boutfreq,walk,any,0,500
+boutfreq,wingextension,any,0,500
+boutfreq,wingflick,any,0,500
+boutfreq,winggrooming,any,0,500
 
 # bout duration per behavior
 
-duration,attemptedcopulation,any,2,500
-duration,attemptedcopulation,male,2,500
-duration,attemptedcopulation,female,2,500
+duration,attemptedcopulation,any,5,500
+duration,attemptedcopulation,male,5,500
+duration,attemptedcopulation,female,5,500
 
-duration,backup,any,2,500
-duration,backup,male,2,500
-duration,backup,female,2,500
+duration,backup,any,5,500
+duration,backup,male,5,500
+duration,backup,female,5,500
 
-duration,bodyturn,any,2,500
-duration,bodyturn,male,2,500
-duration,bodyturn,female,2,500
+duration,bodyturn,any,5,500
+duration,bodyturn,male,5,500
+duration,bodyturn,female,5,500
 
-duration,chase,any,2,500
-duration,chase,male,2,500
-duration,chase,female,2,500
+duration,chase,any,5,500
+duration,chase,male,5,500
+duration,chase,female,5,500
 
-duration,copulation,any,2,500
-duration,copulation,male,2,500
-duration,copulation,female,2,500
+duration,copulation,any,5,500
+duration,copulation,male,5,500
+duration,copulation,female,5,500
 
-duration,crabwalkall,any,2,500
-duration,crabwalkall,male,2,500
-duration,crabwalkall,female,2,500
+duration,crabwalkall,any,5,500
+duration,crabwalkall,male,5,500
+duration,crabwalkall,female,5,500
 
-duration,crabwalkextreme,any,2,500
-duration,crabwalkextreme,male,2,500
-duration,crabwalkextreme,female,2,500
+duration,crabwalkextreme,any,5,500
+duration,crabwalkextreme,male,5,500
+duration,crabwalkextreme,female,5,500
 
-duration,jump,any,2,500
-duration,jump,male,2,500
-duration,jump,female,2,500
+duration,jump,any,5,500
+duration,jump,male,5,500
+duration,jump,female,5,500
 
-duration,pivotcenter,any,2,500
-duration,pivotcenter,male,2,500
-duration,pivotcenter,female,2,500
+duration,pivotcenter,any,5,500
+duration,pivotcenter,male,5,500
+duration,pivotcenter,female,5,500
 
-duration,pivottail,any,2,500
-duration,pivottail,male,2,500
-duration,pivottail,female,2,500
+duration,pivottail,any,5,500
+duration,pivottail,male,5,500
+duration,pivottail,female,5,500
 
-duration,righting,any,2,500
-duration,righting,male,2,500
-duration,righting,female,2,500
+duration,righting,any,5,500
+duration,righting,male,5,500
+duration,righting,female,5,500
 
-duration,stop,any,2,500
-duration,stop,male,2,500
-duration,stop,female,2,500
+duration,stop,any,5,500
+duration,stop,male,5,500
+duration,stop,female,5,500
 
-duration,walk,any,2,500
-duration,walk,male,2,500
-duration,walk,female,2,500
+duration,touch,any,5,500
+duration,touch,male,5,500
+duration,touch,female,5,500
 
-duration,move,any,2,500
-duration,move,male,2,500
-duration,move,female,2,500
+duration,walk,any,5,500
+duration,walk,male,5,500
+duration,walk,female,5,500
+
+duration,wingextension,any,5,500
+duration,wingextension,male,5,500
+duration,wingextension,female,5,500
+
+duration,wingflick,any,5,500
+duration,wingflick,male,5,500
+duration,wingflick,female,5,500
+
+duration,winggrooming,any,5,500
+duration,winggrooming,male,5,500
+duration,winggrooming,female,5,500
+
+duration,move,any,25,500
+duration,move,male,25,500
+duration,move,female,25,500
 

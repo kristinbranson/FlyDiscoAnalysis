@@ -83,15 +83,19 @@ area,any,female,25,500
 
 # bout duration per behavior
 
-duration,attemptedcopulation,male,2,500
-duration,backup,any,2,500
-duration,bodyturn,any,2,500
-duration,chase,male,2,500
-duration,crabwalkall,any,2,500
-duration,crabwalkextreme,any,2,500
-duration,jump,any,2,500
-duration,pivotcenter,any,2,500
-duration,pivottail,any,2,500
-duration,righting,any,2,500
-duration,stop,any,2,500
-duration,walk,any,2,500
+duration,attemptedcopulation,male,5,500
+duration,backup,any,5,500
+#duration,bodyturn,any,5,500
+duration,chase,male,5,500
+duration,crabwalkall,any,5,500
+duration,crabwalkextreme,any,5,500
+duration,jump,any,5,500
+duration,pivotcenter,any,5,500
+duration,pivottail,any,5,500
+duration,righting,any,5,500
+duration,stop,any,5,500
+#duration,touch,any,5,500
+duration,walk,any,5,500
+#duration,wingextension,any,5,500
+#duration,wingflick,any,5,500
+#duration,winggrooming,any,5,500

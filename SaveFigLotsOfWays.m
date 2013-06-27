@@ -1,6 +1,6 @@
 function outfilenames = SaveFigLotsOfWays(hfig,basename)
 
-formats = {'fig','png'};
+formats = {'fig','png','pdf','svg'};
 [path,basename] = myfileparts(basename);
 
 

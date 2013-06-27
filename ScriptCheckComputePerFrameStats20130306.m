@@ -1,4 +1,4 @@
-mindatenum = datenum('20130306','yyyymmdd');
+mindatenum = datenum('20130317','yyyymmdd');
 isok = false(1,numel(expdirs));
 for i = find(~isok),
   expdir = expdirs{i};

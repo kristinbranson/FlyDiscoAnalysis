@@ -122,7 +122,8 @@ end
 
 h = nan(1,nfns);
 for i = 1:nfns,
-  h(i) = errorbar(hax,i,meanmeans(i),stderrmean(i),'o','color',colors(i,:),'markerfacecolor',colors(i,:));
+  h(i) = plot(hax,i,meanmeans(i),'o','color',colors(i,:),'markerfacecolor',colors(i,:));
+  h1(i) = plot(hax,[i,i],meanmeans(i)+stderrmean(i)*[-1,1],'-','color',colors(i,:));
 end
 
 %% set axis limits

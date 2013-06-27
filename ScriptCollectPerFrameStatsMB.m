@@ -1,14 +1,22 @@
-rootdatadir = '/groups/branson/bransonlab/projects/olympiad/FlyBowlData';
-expdirs = importdata('/groups/branson/home/bransonk/behavioranalysis/code/Jdetect/Jdetect/experiments/datamanagement/expdirs_primary20130306.txt');
-mindatenum = datenum('20130306','yyyymmdd');
+expdirs = importdata('/groups/branson/home/bransonk/behavioranalysis/code/Jdetect/Jdetect/experiments/mushroombody/MBData_primary_explist_20130317.txt');
+mindatenum = datenum('20130307','yyyymmdd');
 
 allstats = struct;
 statfns = {};
+metadata = [];
 for i = 1:numel(expdirs),
   if mod(i,100) == 0,
     fprintf('%d / %d\n',i,numel(expdirs));
   end
   expdir = expdirs{i};
+  
+  metadatacurr = ReadMetadataFile(fullfile(expdirs{i},'Metadata.xml'));
+  metadatacurr.file_system_path = expdirs{i};
+  metadatacurr.automated_pf = 'F';
+  metadatacurr.line_name = metadatacurr.line;
+
+  metadata = structappend(metadata,metadatacurr);
+  
   statsfile = fullfile(expdir,'stats_perframe.mat');
   tmp = dir(statsfile);
   if isempty(tmp),
@@ -32,63 +40,69 @@ for i = 1:numel(expdirs),
     allstats.(fn)(i) = statsdata.statsperexp.(fn).meanmean;
   end
   
+  metadata(end).automated_pf = 'P';
+  
 end
 
-% read metadata for these experiments
-metadata = SAGEListBowlExperiments('checkflags',false,'rootdir',rootdatadir,'data_type',{'QuickStats_BackSubStats_meanNConnComps','ctrax_diagnostics_nframes_analyzed'},'removemissingdata',false);
-[ism,idx] = ismember(expdirs,{metadata.file_system_path});
-clear metadata_ordered;
-for i = find(ism)',
-  metadata_ordered(i) = metadata(idx(i));
-end
-% ism is always true
-badidx = ~ism;
-
-% correct some metadata
-checkdata = load('PrimaryDataCheck20130306.mat');
-for i = 1:numel(checkdata.expdirs),
-  [~,name] = fileparts(checkdata.expdirs{i});
-  checkdata.expdirs{i} = fullfile(rootdatadir,name);
-end
-[ism2,idx2] = ismember(expdirs,checkdata.expdirs);
-for i = find(ism2)',
-  if checkdata.isok(idx2(i)),
-    metadata_ordered(i).automated_pf = 'P';
-  end
-end
-
-metadata = metadata_ordered(~badidx);
-if any(badidx),
-  for i = 1:numel(statfns),
-    allstats.(statfns{i})(badidx) = [];
-  end
-end
-
-
-idxanalyze = strcmp({metadata.screen_type},'primary') & ...
+idxanalyze = strcmp({metadata.screen_type},'non_olympiad_mushroombody') & ...
   strcmpi({metadata.automated_pf},'P') & ...
-  ~strcmpi({metadata.manual_pf},'F') & ...
   ([metadata.flag_redo] ~= 1) & ...
   ([metadata.flag_aborted] ~= 1);
 
-%% sanity check that everything still lines up
-i = 1234;
-expdir = metadata(i).file_system_path;
-statsfile = fullfile(expdir,'stats_perframe.mat');
-statsdata = load(statsfile,'statsperexp');
-for j = 1:numel(statfns),
-  fn = statfns{j};
-  v1 = statsdata.statsperexp.(fn).meanmean;
-  v2 = allstats.(fn)(i);
-  if (~isnan(v1) || ~isnan(v2)) && v1 ~= v2,
-    fprintf('%d: %s\n',j,fn);
+
+%% add "set" -- super-experiment
+
+MAX_SET_TIMERANGE = 10/(24*60);
+MAX_EXPS_PER_SET = 4;
+
+[line_names,~,lineidx] = unique({metadata.line_name});
+sets = nan(1,numel(metadata));
+seti = 0;
+for linei = 1:numel(line_names),
+  expidx1 = find(lineidx==linei);
+  [rigs,~,rigidx] = unique([metadata(expidx1).rig]);
+  for rigi = 1:numel(rigs),
+    expidx2 = expidx1(rigidx==rigi);
+
+    % sort by datetime
+    [exp_datenum,order] = sort(datenum({metadata(expidx2).exp_datetime},'yyyymmddTHHMMSS'));
+    expidx2 = expidx2(order);
+    min_set_time = 0;
+    nperset = 0;
+  
+    for i = 1:numel(expidx2),
+      
+      % start a new set?
+      if exp_datenum(i)-min_set_time > MAX_SET_TIMERANGE || nperset >= MAX_EXPS_PER_SET,
+        min_set_time = inf;
+        seti = seti+1;
+        nperset = 0;
+      end
+      sets(expidx2(i)) = seti;
+      nperset = nperset+1;
+      min_set_time = min(min_set_time,exp_datenum(i));
+      
+    end
   end
 end
 
+for seti = 1:max(sets),
+  expidx = find(sets==seti);
+  %fprintf('Experiments in set %d:\n',seti);
+  %fprintf('%s\n',metadata(expidx).experiment_name);
+  [~,order] = sort({metadata(expidx).exp_datetime});
+  min_datetime = metadata(expidx(order(1))).exp_datetime;
+  set_name = sprintf('%s__Rig%d__%s',metadata(expidx(1)).line_name,...
+    metadata(expidx(1)).rig,...
+    min_datetime);
+  for i = expidx(:)',
+    metadata(i).set = set_name;
+  end
+end
 
 %% save
 
-save CollectedPerFrameStats20130314.mat allstats metadata idxanalyze;
+save CollectedPerFrameStatsMB20130317.mat allstats metadata idxanalyze;
 
 %% remove bad data
 
@@ -183,11 +197,28 @@ end
 
 %% save
 
-save -append CollectedPerFrameStats20130314.mat setstats linestats setidx set2lineidx linemeanstats linestdstats linensets setmeanstats setstdstats setnexps;
+save -append CollectedPerFrameStatsMB20130317.mat setstats linestats setidx set2lineidx linemeanstats linestdstats linensets setmeanstats setstdstats setnexps;
 
 %% plot each statistic for all lines
 
 %lines_show = line_names(1:20:end)';
+
+statfns_plot = {
+  'fractime_flyany_framestop'
+  'fractime_flyany_framewalk'
+  'fractime_flyany_framejump'
+  'fractime_flyany_framerighting'
+  'fractime_flyany_framepivottail'
+  'fractime_flyany_framepivotcenter'
+  'fractime_flyany_framebodyturn'
+  'fractime_flyany_framebackup'
+  'fractime_flyany_framecrabwalkall'
+  'fractime_flyany_framecrabwalkextreme'
+  'fractime_flyany_framechase'
+  'fractime_flyany_frameattemptedcopulation'
+  'velmag_ctr_flyany_framewalk'};
+
+
 
 linename_perset = {setstats.metadata.line_name};
 p = [0,1,5,25,50,75,95,99,100];
@@ -208,14 +239,23 @@ linecolors(lineidxcontrol,:) = 0;
 short_line_names = regexprep(line_names,'^GMR_','');
 short_line_names = regexprep(short_line_names,'_AE_01$','');
 short_line_names = regexprep(short_line_names,'_01$','');
+short_line_names = regexprep(short_line_names,'_BX3G_1500154$','');
 
-xtick0 = 0:500:nlines;
+xtick0 = 0:20:nlines;
 xticklabel0 = cellstr(num2str(xtick0'));
 
-outdir = 'PerFrameStatFigs20130314';
+outdir = 'MBPerFrameStatFigs20130317';
 mkdir(outdir);
 
-for stati = 1:nstats,
+% statis = find(~cellfun(@isempty,regexp(statfns,'^fractime','once')) | ...
+%   ~cellfun(@isempty,regexp(statfns,'^velmag','once')));
+statis = find(ismember(statfns,statfns_plot));
+
+[~,lineidx] = ismember({metadata.line_name},line_names);
+
+npad = 1;
+
+for stati = statis',
 
   hfig = 1000;
   if ~ishandle(hfig),
@@ -230,20 +270,34 @@ for stati = 1:nstats,
   
   for j = npregions:-1:1
     ycurr = prctiles_control([npregions+1-j,npregions+1+j],stati);
-    patch([-4,nlines+5,nlines+5,-4,-4],ycurr([1,1,2,2,1]),diff(5+p([npregions+1-j,npregions+1+j]))/105*[1,1,1],'LineStyle','none');
+    patch([-npad+1,nlines+npad,nlines+npad,-npad+1,-npad+1],ycurr([1,1,2,2,1]),diff(5+p([npregions+1-j,npregions+1+j]))/105*[1,1,1],'LineStyle','none');
     hold on;
   end
-  plot([-4,nlines+5],prctiles_control(npregions+1,stati)+[0,0],'k-');
+  plot([-npad+1,nlines+npad],prctiles_control(npregions+1,stati)+[0,0],'k-');
   for j = 1:numel(p),
     text(1,prctiles_control(j,stati),sprintf('%d%%ile',p(j)),'HorizontalAlignment','left');
   end
   
+  isnodata = isnan(linemeanstats(:,stati));
+  nbadlines = nnz(isnodata);
   [v,order] = sort(linemeanstats(:,stati));
   [~,reorder] = sort(order);
   for j = 1:nlines,
-    idxcurr = set2lineidx == j;
+    if isnodata(j),
+      continue;
+    end
+    idxcurr = find(set2lineidx == j);
+%     for k = 1:numel(idxcurr),
+%       idxexp = setidx == idxcurr(k);
+%       if numel(idxcurr) == 1,
+%         off = 0;
+%       else
+%         off = (k-1)/(numel(idxcurr)-1)*.75-.75/2;
+%       end
+%       plot(reorder(j)+off,allstats.(statfns{stati})(idxexp),'x','color',(linecolors(j,:)+1)/2);
+%     end
     plot(reorder([j,j]),linemeanstats(j,stati)+[-1,1]*linestdstats(j,stati),'-','color',(linecolors(j,:)+1)/2);
-    plot(reorder(j),setmeanstats(idxcurr,stati),'.','color',(linecolors(j,:)+3)/4);
+    plot(reorder(j),setmeanstats(idxcurr,stati),'.','color',(linecolors(j,:)+1)/2);
     plot(reorder(j),linemeanstats(j,stati),'*','color',linecolors(j,:));
   end  
   
@@ -255,8 +309,8 @@ for stati = 1:nstats,
     dv = maxv-minv;
     ylim = [minv-dv*.01,maxv+dv*.01];
   end
-  
-  set(gca,'XLim',[-4,nlines+5],'YLim',ylim);
+   
+  set(gca,'XLim',[-npad+1,nlines-nbadlines+npad],'YLim',ylim);
 
   ylabel(statfns{stati},'Interpreter','None');
   
@@ -267,27 +321,22 @@ for stati = 1:nstats,
 %   hxtick = rotateticklabel(gca,90);
 
   
-  hsig = nan(1,numel(idxsig));
-  for jj = 1:numel(hsig),
-    j = idxsig(jj);
-    shortname = short_line_names{j};
-    hsig(jj) = text(reorder(j),linemeanstats(j,stati),[' ',shortname],'color',linecolors(j,:),'HorizontalAlignment','left','VerticalAlignment','middle','Interpreter','none');
-  end
-
-  if ~ismember(reorder(lineidxcontrol),xtick0),
-    xticki = find(reorder(lineidxcontrol)>xtick0,1,'last');
-    xtick = [xtick0(1:xticki),reorder(lineidxcontrol),xtick0(xticki+1:end)];
-    xticklabel = [xticklabel0(1:xticki);{'pBDPGAL4U'};xticklabel0(xticki+1:end)];
-  else
-    xtick = xtick0;
-    xticklabel = xticklabel0;
+%   hsig = nan(1,numel(idxsig));
+%   for jj = 1:numel(hsig),
+%     j = idxsig(jj);
+%     shortname = short_line_names{j};
+%     hsig(jj) = text(reorder(j),linemeanstats(j,stati),[' ',shortname],'color',linecolors(j,:),'HorizontalAlignment','left','VerticalAlignment','middle','Interpreter','none');
+%   end
+  
+  set(gca,'XTick',1:nlines-nbadlines,'XTickLabel',short_line_names(order(1:nlines-nbadlines)));
+  htick = rotateticklabel(gca);    
+  for i = 1:nlines-nbadlines,
+    set(htick(i),'Color',linecolors(order(i),:));
   end
   
-  set(gca,'XTick',xtick,'XTickLabel',xticklabel);
-      
   drawnow;
   
-  SaveFigLotsOfWays(hfig,fullfile(outdir,sprintf('SortedLines_%s_AllGAL4s',statfns{stati})));
+  SaveFigLotsOfWays(hfig,fullfile(outdir,sprintf('SortedLines_%s_MB',statfns{stati})));
   
 end
 

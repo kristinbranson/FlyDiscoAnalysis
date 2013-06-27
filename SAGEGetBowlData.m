@@ -7,7 +7,7 @@ currdir = which('SAGEGetBowlData');
 
 %% parse inputs
 [docheckflags,daterange,SAGEpath,removemissingdata,dataset,rootdir,MAX_SET_TIMERANGE,MAX_EXPS_PER_SET,unflatten,...
-  analysis_protocol,settingsdir,datalocparamsfilestr, CIRCLECENTERX,CIRCLECENTERY,leftovers] = ...
+  analysis_protocol,settingsdir,datalocparamsfilestr, CIRCLECENTERX,CIRCLECENTERY,readfromfilesystem,leftovers] = ...
   myparse_nocheck(varargin,...
   'checkflags',true,...
   'daterange',[],...
@@ -21,7 +21,8 @@ currdir = which('SAGEGetBowlData');
   'analysis_protocol','current',...
   'settingsdir','/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/settings',...
   'datalocparamsfilestr','dataloc_params.txt',...
-  'CIRCLECENTERX',1025/2,'CIRCLECENTERY',1025/2);
+  'CIRCLECENTERX',1025/2,'CIRCLECENTERY',1025/2,...
+  'readfromfilesystem',false);
 
 %% add SAGE to path
 if ~exist('SAGE.Lab','class'),
@@ -144,6 +145,111 @@ if ischar(rootdir),
     end
     datamerge(i).file_system_path = fullfile(rootdir,basename);
   end
+end
+
+%% read missing data from file system
+
+if readfromfilesystem,
+
+  filestrs = {
+    'bias_diagnostics.mat'
+    'bkgd_diagnostics.mat'
+    'registrationdata.mat'
+    'video_diagnostics.mat'
+    'ctrax_diagnostics.txt'
+    'sexclassifier_diagnostics.txt'
+    'temperature_diagnostics.txt'
+    };
+  prefixes = {
+    'bias_diagnostics_'
+    'bkgd_diagnostics_'
+    'registrationdata_'
+    'video_diagnostics_'
+    'ctrax_diagnostics_'
+    'sexclassifier_diagnostics_'
+    'temperature_diagnostics_'
+    };
+
+  isread = zeros(1,numel(filestrs));
+  fnsread = {};
+  fileidx = [];
+  for i = 1:numel(datamerge),
+    
+    for j = find(~isread),
+      filename = fullfile(datamerge(i).file_system_path,filestrs{j});
+      if exist(filename,'file'),
+        [~,~,ext] = fileparts(filestrs{j});
+        if strcmp(ext,'.mat'),
+          s = load(filename);
+        else
+          s = ReadParams(filename);
+        end
+        fprintf('Read fields for file %s from experiment %s\n',filestrs{j},datamerge(i).experiment_name);
+        fnscurr = fieldnames(s)';
+        fnscurr = cellfun(@(x) [prefixes{j},x],fnscurr,'UniformOutput',false);
+        fnsread = [fnsread,fnscurr];
+        fileidx(end+1:end+numel(fnscurr)) = j;
+        isread(j) = i;
+      end
+      if all(isread),
+        break;
+      end
+    end    
+  end
+
+  % choose those that match data_type
+  i = find(strcmp(varargin(1:2:end-1),'data_type'));
+  if ~isempty(i),
+    i = i*2;
+    data_types_requested = varargin{i};
+    idxkeep = false(size(fileidx));
+    for i = 1:numel(data_types_requested),
+      s = data_types_requested{i};
+      s = ['^',strrep(s,'*','.*'),'$'];
+      idxkeep = idxkeep | ~cellfun(@isempty,regexp(fnsread,s,'once'));
+    end    
+  else
+    idxkeep = true(size(fileidx));
+  end
+  
+  fileidxread = unique(fileidx(idxkeep));
+  fns = fieldnames(datamerge);
+  fnsmetadata = fieldnames(data);
+  ignoreidx = ismember(fns,fnsmetadata);
+  for i = 1:numel(datamerge),
+    ismissing = ~ignoreidx & structfun(@isempty,datamerge(i));
+    if ~any(ismissing),
+      continue;
+    end
+    for j = fileidxread,
+      filename = fullfile(datamerge(i).file_system_path,filestrs{j});
+      if ~exist(filename,'file'),
+        continue;
+      end
+      [~,~,ext] = fileparts(filestrs{j});
+      if strcmp(ext,'.mat'),
+        s = load(filename);
+      else
+        s = ReadParams(filename);
+      end
+      fnscurr = fieldnames(s)';
+      fnscurr1 = cellfun(@(x) [prefixes{j},x],fnscurr,'UniformOutput',false);
+      idxcurr = find(ismember(fnscurr1,fns));
+      for k = idxcurr,
+        fn = fnscurr{k};
+        fn1 = fnscurr1{k};
+        if ~isempty(datamerge(i).(fn1)),
+          fprintf('%s, %s: replacing %s with %s\n',datamerge(i).experiment_name,fn1,mat2str(datamerge(i).(fn1)),mat2str(s.(fn)));
+        else
+          fprintf('%s, %s: read %s from file\n',datamerge(i).experiment_name,fn1,mat2str(s.(fn)));
+        end
+        datamerge(i).(fn1) = s.(fn);
+      end
+    end
+    
+  end
+  
+  
 end
 
 %% add rig x bowl
@@ -435,7 +541,7 @@ for i = 1:numel(perframefns),
         if isempty(datamerge(j).(fn)),
           missingdata(j) = true;
         else
-          error('For %s, nconditions = 0 but non-empty data',fn); %#ok<SPERR>
+          error('For %s, nconditions = 0 but non-empty data',fn); 
         end
       else
         allconditions = union(allconditions,conditions);
@@ -444,7 +550,7 @@ for i = 1:numel(perframefns),
             ~(strcmp(prefix,'hist') && ismember(statfn,{'Z_perfly','fracframesanalyzed_perfly'}))),
           n = numel(datamerge(j).(fn))/nfliesanalyzedtotal;
           if n ~= round(n),
-            error('Error splitting %s into different conditions: size of array not a multiple of nflies = %d',fn,nfliesanalyzedtotal); %#ok<SPERR>
+            error('Error splitting %s into different conditions: size of array not a multiple of nflies = %d',fn,nfliesanalyzedtotal); 
           end
           datamerge(j).(fn) = mat2cell(reshape(datamerge(j).(fn),[n,nfliesanalyzedtotal]),n,nfliesanalyzed);
           for l = 1:nconditions,
@@ -453,7 +559,7 @@ for i = 1:numel(perframefns),
         else
           n = numel(datamerge(j).(fn)) / nconditions;
           if n ~= round(n),
-            error('Error splitting %s into different conditions: size of array not a multiple of nconditions = %d',fn,nconditions); %#ok<SPERR>
+            error('Error splitting %s into different conditions: size of array not a multiple of nconditions = %d',fn,nconditions); 
           end
           datamerge(j).(fn) = reshape(datamerge(j).(fn),[n,nconditions]);
           for l = 1:nconditions,

@@ -1,4 +1,4 @@
-function CheckExperiments(expdirs,varargin)
+function issuccess = CheckExperiments(expdirs,varargin)
 
 [checkprotocol,checkfix,classifierparamsfiles,npar,analysis_protocol,usesage] = myparse(varargin,...
   'checkprotocol',true,'checkfix',true,...
@@ -22,6 +22,7 @@ if usesage,
     'data_type',{'sexclassifier_diagnostics_mean_nflies','QuickStats_BackSubStats_meanNConnComps'},...
     'removemissingdata',false);
 else
+  metadata = [];
   for i = 1:nexps,
     expdir = expdirs{i};
     metadatacurr = parseExpDir(expdir,true);
@@ -45,7 +46,7 @@ else
         end
       end
     end
-    metadata(i) = metadatacurr;
+    metadata = structappend(metadata,metadatacurr);
   end
 end
 

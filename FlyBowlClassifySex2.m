@@ -53,6 +53,11 @@ sexclassifierin = ReadParams(sexclassifierintxtfile);
 fprintf(logfid,'Computing area...\n');
 
 nflies = numel(trx); 
+
+if nflies <= 0,
+  error('No flies tracked in this video');
+end
+
 X = cell(1,nflies);
 for fly = 1:nflies,
   % compute area
@@ -140,6 +145,11 @@ maxfreq = sexclassifierin.areasmooth_maxfreq; %#ok<NASGU>
 maxerrx = sexclassifierin.areasmooth_maxerrx; %#ok<NASGU>
 
 if dosave,
+  try
+    if exist(sexclassifieroutmatfile,'file'),
+      delete(sexclassifieroutmatfile);
+    end
+  end
   try
     save(sexclassifieroutmatfile,'mu_area','var_area','ptrans','prior','ll',...
       'nstates','state2sex','maxerrx','maxfreq','filterorder','version','analysis_protocol');
@@ -262,9 +272,17 @@ if dosave,
   sexclassifierinfo = struct('version',version,'analysis_protocol',analysis_protocol,'timestamp',timestamp); %#ok<NASGU>
   try
     save('-append',trxfile,'trx','sexclassifierinfo');
-  catch ME,
-    warning('Could not save to file %s: %s',trxfile,getReport(ME));
-    fprintf(logfid,'Could not save to file %s: %s',trxfile,getReport(ME));    
+  catch %#ok<CTCH>
+    try
+      tmp = load(trxfile);
+      delete(trxfile);
+      tmp.trx = trx;
+      tmp.sexclassifierinfo = sexclassifierinfo;
+      save(trxfile,'-struct','tmp');
+    catch ME,
+      warning('Could not save to file %s: %s',trxfile,getReport(ME));
+      fprintf(logfid,'Could not save to file %s: %s',trxfile,getReport(ME));
+    end
   end
 end
 
