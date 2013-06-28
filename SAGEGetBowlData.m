@@ -7,7 +7,7 @@ currdir = which('SAGEGetBowlData');
 
 %% parse inputs
 [docheckflags,daterange,SAGEpath,removemissingdata,dataset,rootdir,MAX_SET_TIMERANGE,MAX_EXPS_PER_SET,unflatten,...
-  analysis_protocol,settingsdir,datalocparamsfilestr, CIRCLECENTERX,CIRCLECENTERY,readfromfilesystem,leftovers] = ...
+  analysis_protocol,settingsdir,datalocparamsfilestr, CIRCLECENTERX,CIRCLECENTERY,readfromfile,leftovers] = ...
   myparse_nocheck(varargin,...
   'checkflags',true,...
   'daterange',[],...
@@ -22,7 +22,7 @@ currdir = which('SAGEGetBowlData');
   'settingsdir','/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/settings',...
   'datalocparamsfilestr','dataloc_params.txt',...
   'CIRCLECENTERX',1025/2,'CIRCLECENTERY',1025/2,...
-  'readfromfilesystem',false);
+  'readfromfile',false);
 
 %% add SAGE to path
 if ~exist('SAGE.Lab','class'),
@@ -149,7 +149,7 @@ end
 
 %% read missing data from file system
 
-if readfromfilesystem,
+if readfromfile,
 
   filestrs = {
     'bias_diagnostics.mat'
@@ -212,6 +212,12 @@ if readfromfilesystem,
     idxkeep = true(size(fileidx));
   end
   
+  for i = find(idxkeep),
+    if ~isfield(datamerge,fnsread{i}),
+      [datamerge.(fnsread{i})] = deal([]);
+    end
+  end
+  
   fileidxread = unique(fileidx(idxkeep));
   fns = fieldnames(datamerge);
   fnsmetadata = fieldnames(data);
@@ -241,7 +247,11 @@ if readfromfilesystem,
         if ~isempty(datamerge(i).(fn1)),
           fprintf('%s, %s: replacing %s with %s\n',datamerge(i).experiment_name,fn1,mat2str(datamerge(i).(fn1)),mat2str(s.(fn)));
         else
-          fprintf('%s, %s: read %s from file\n',datamerge(i).experiment_name,fn1,mat2str(s.(fn)));
+          if (~ischar(s.(fn)) && numel(s.(fn)) > 100) || ndims(s.(fn)) > 2 || iscell(s.(fn)) || isstruct(s.(fn)),
+            fprintf('%s, %s: read from file, size = %s\n',datamerge(i).experiment_name,fn1,mat2str(size(s.(fn))));
+          else
+            fprintf('%s, %s: read %s from file\n',datamerge(i).experiment_name,fn1,mat2str(s.(fn)));
+          end
         end
         datamerge(i).(fn1) = s.(fn);
       end
