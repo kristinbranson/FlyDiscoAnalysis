@@ -124,14 +124,16 @@ if isempty(data),
 end
 
 [experiment_ids,uniqueidx,idxperrow] = unique([data.experiment_id]);
-datamerge = rmfield(data(uniqueidx),{'data','data_type'});
-for i = 1:numel(data),
-  j = idxperrow(i);
-  fn = data(i).data_type;
-  % need to shorten some names
-  fn = regexprep(fn,'^hist_perframe','hist');
-  fn = regexprep(fn,'^stats_perframe','stats');
-  datamerge(j).(fn) = data(i).data;
+datamerge = rmfield(data(uniqueidx),intersect(fieldnames(data),{'data','data_type'}));
+if isfield(data,'data_type'),
+  for i = 1:numel(data),
+    j = idxperrow(i);
+    fn = data(i).data_type;
+    % need to shorten some names
+    fn = regexprep(fn,'^hist_perframe','hist');
+    fn = regexprep(fn,'^stats_perframe','stats');
+    datamerge(j).(fn) = data(i).data;
+  end
 end
 
 % convert file system path
