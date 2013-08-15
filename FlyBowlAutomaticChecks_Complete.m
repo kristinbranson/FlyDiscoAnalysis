@@ -227,21 +227,23 @@ end
 
 %% check for scores files
 
-%try
-  jaabadetectparams = ReadParams(fullfile(settingsdir,analysis_protocol,dataloc_params.jaabadetectparamsfilestr));
-  [issuccess_scores,msgs_scores] = CheckScores({expdir},fullfile(settingsdir,analysis_protocol,jaabadetectparams.classifierparamsfiles));
-  if any(~issuccess_scores),
-    msgs{end+1} = ['Bad JAABA scores files:',sprintf('\n%s',msgs_scores{:})];
-    success = false;
-    iserror(category2idx.badjaabascores) = true;
-  elseif ~isempty(msgs_scores),
-    msgs(end+1:end+numel(msgs_scores)) = msgs_scores;
+try
+  if isfield(dataloc_params,'jaabadetectparamsfilestr'),
+    jaabadetectparams = ReadParams(fullfile(settingsdir,analysis_protocol,dataloc_params.jaabadetectparamsfilestr));
+    [issuccess_scores,msgs_scores] = CheckScores({expdir},fullfile(settingsdir,analysis_protocol,jaabadetectparams.classifierparamsfiles));
+    if any(~issuccess_scores),
+      msgs{end+1} = ['Bad JAABA scores files:',sprintf('\n%s',msgs_scores{:})];
+      success = false;
+      iserror(category2idx.badjaabascores) = true;
+    elseif ~isempty(msgs_scores),
+      msgs(end+1:end+numel(msgs_scores)) = msgs_scores;
+    end
   end
-% catch ME,
-%   msgs{end+1} = sprintf('Error checking JAABA scores files: %s',getReport(ME));
-%   success = false;
-%   iserror(category2idx.completed_checks_other) = true;
-% end
+catch ME,
+  msgs{end+1} = sprintf('Error checking JAABA scores files: %s',getReport(ME));
+  success = false;
+  iserror(category2idx.completed_checks_other) = true;
+end
 
 %% check for missing desired files
 
