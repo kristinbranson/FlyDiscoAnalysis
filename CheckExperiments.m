@@ -1,7 +1,7 @@
 function issuccess = CheckExperiments(expdirs,varargin)
 
-[checkprotocol,checkfix,classifierparamsfiles,npar,analysis_protocol,usesage] = myparse(varargin,...
-  'checkprotocol',true,'checkfix',true,...
+[checkprotocol,checkfix,checktracking,classifierparamsfiles,npar,analysis_protocol,usesage] = myparse(varargin,...
+  'checkprotocol',true,'checkfix',true,'checktracking',true,...
   'classifierparamsfiles',{},...
   'npar',[],...
   'analysis_protocol','current',...
@@ -84,15 +84,26 @@ if checkprotocol,
       ctrax_versions{i} = 'MISSING';
     else
       [maxarea,version] = read_ann(annfile,'maxarea','version');
+      if isempty(maxarea),
+        fprintf('Could not read maxarea for file %s\n',annfile);
+        continue;
+      end
       maxareas(i) = maxarea;
       ctrax_versions{i} = version;
     end
   end
+
+  missingprotocols = cellfun(@isempty,analysis_protocols);
+  missingmaxareas = isnan(maxareas);
+  missingctrax_versions = cellfun(@isempty,ctrax_versions);
   
   % check analysis protocols
-  [allprotocols,~,protocolidx] = unique(analysis_protocols);
-  [allmaxareas,~,maxareaidx] = unique(maxareas);
-  [allctrax_versions,~,ctrax_versionidx] = unique(ctrax_versions);
+  allprotocols = unique(analysis_protocols(~missingprotocols));
+  [~,protocolidx] = ismember(analysis_protocols,allprotocols);
+  allmaxareas = unique(maxareas(~missingmaxareas));
+  [~,maxareaidx] = ismember(maxareas,allmaxareas);
+  allctrax_versions = unique(ctrax_versions(~missingctrax_versions));
+  [~,ctrax_versionidx] = ismember(ctrax_versions,allctrax_versions);
   
   fprintf('Analysis protocols:\n');
   ispass = strcmp({metadata.automated_pf},'P') & ~strcmp({metadata.manual_pf},'F');
@@ -100,20 +111,69 @@ if checkprotocol,
   isfailure = ~(ispass|isunknown);
   
   for i = 1:numel(allprotocols),
-    fprintf('%s: %d experiments, %d pass, %d unknown, %d fail\n',allprotocols{i},nnz(protocolidx==i),...
+    fprintf('\n%s: %d experiments, %d pass, %d unknown, %d fail\n',allprotocols{i},nnz(protocolidx==i),...
       nnz(ispass&protocolidx==i),nnz(isunknown&protocolidx==i),nnz(isfailure&protocolidx==i));
+    fprintf('%s\n',expdirs{protocolidx==i});
+  end
+  if any(missingprotocols);
+    i = 0;
+    fprintf('\n%s: %d experiments, %d pass, %d unknown, %d fail\n','missing protocol',nnz(protocolidx==i),...
+      nnz(ispass&protocolidx==i),nnz(isunknown&protocolidx==i),nnz(isfailure&protocolidx==i));
+    fprintf('%s\n',expdirs{protocolidx==i});
   end
     
-  fprintf('Max areas:\n');
+  fprintf('\n\nMax areas:\n');
   for i = 1:numel(allmaxareas),
-    fprintf('%f: %d experiments, %d pass, %d unknown, %d fail\n',allmaxareas(i),nnz(maxareaidx==i),...
+    fprintf('\n%f: %d experiments, %d pass, %d unknown, %d fail\n',allmaxareas(i),nnz(maxareaidx==i),...
       nnz(ispass&maxareaidx==i),nnz(isunknown&maxareaidx==i),nnz(isfailure&maxareaidx==i));
+    fprintf('%s\n',expdirs{maxareaidx==i});
   end
-
-  fprintf('Ctrax versions:\n');
+  if any(missingmaxareas),
+    i = 0;
+    fprintf('\n%s: %d experiments, %d pass, %d unknown, %d fail\n','missing area',nnz(maxareaidx==i),...
+      nnz(ispass&maxareaidx==i),nnz(isunknown&maxareaidx==i),nnz(isfailure&maxareaidx==i));
+    fprintf('%s\n',expdirs{maxareaidx==i});
+  end
+  
+  fprintf('\n\nCtrax versions:\n');
   for i = 1:numel(allctrax_versions),
-    fprintf('%s: %d experiments, %d pass, %d unknown, %d fail\n',allctrax_versions{i},nnz(ctrax_versionidx==i),...
+    fprintf('\n%s: %d experiments, %d pass, %d unknown, %d fail\n',allctrax_versions{i},nnz(ctrax_versionidx==i),...
       nnz(ispass&ctrax_versionidx==i),nnz(isunknown&ctrax_versionidx==i),nnz(isfailure&ctrax_versionidx==i));
+    fprintf('%s\n',expdirs{ctrax_versionidx==i});
+  end
+  if any(missingctrax_versions),
+    i = 0;
+    fprintf('\n%s: %d experiments, %d pass, %d unknown, %d fail\n','missing ctrax version',nnz(ctrax_versionidx==i),...
+      nnz(ispass&ctrax_versionidx==i),nnz(isunknown&ctrax_versionidx==i),nnz(isfailure&ctrax_versionidx==i));
+    fprintf('%s\n',expdirs{ctrax_versionidx==i});
+  end
+  
+  input('Hit enter to continue.');
+  
+end
+
+if checktracking,
+  
+  nframestracked = nan(1,nexps);
+  ntrx = nan(1,nexps);
+  for i = 1:nexps,
+    diagnosticsfile = fullfile(expdirs{i},'ctrax_diagnostics.txt');
+    if exist(diagnosticsfile,'file'),
+      di = ReadParams(diagnosticsfile);
+      if isfield(di,'nframes_analyzed'),
+        nframestracked(i) = di.nframes_analyzed;
+      end      
+    end
+    trxfile = fullfile(expdirs{i},'ctrax_results.mat');
+    if exist(trxfile,'file'),
+      trx = load_tracks(trxfile);
+      ntrx(i) = numel(trx);
+    end
+  end
+  
+  [~,order] = sort(nframestracked);
+  for i = order,
+    fprintf('%s: nframes tracked = %d, n trajectories = %d\n',expdirs{i},nframestracked(i),ntrx(i));
   end
   
   input('Hit enter to continue.');

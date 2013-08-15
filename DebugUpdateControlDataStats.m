@@ -36,7 +36,7 @@ end
 
 %% parameters
 
-analysis_protocol = '20120706';
+analysis_protocol = '20130722';
 dateformat = 'yyyymmddTHHMMSS';
 % params = {'settingsdir',settingsdir,...
 %   'analysis_protocol',analysis_protocol,...
@@ -55,7 +55,14 @@ params = {'settingsdir',settingsdir,...
 
 datalocparamsfilestr = 'dataloc_params.txt';
 startyear = 2011;
-startmonth = 2;
+startmonth = 3;
+
+%% load in metadata from file
+
+load('CollectedPrimaryMetadata20130613.mat','metadata');
+usemetadata = true;
+idx = strcmp({metadata.line_name},'pBDPGAL4U');
+metadata = metadata(idx);
 
 %% loop through months
 
@@ -67,6 +74,12 @@ timestamp = datestr(now,30);
 
 year = startyear;
 month = startmonth;
+
+if usemetadata,
+  dns = datenum({metadata.exp_datetime},dateformat);
+end
+
+
 while true,
   dvstart = [year,month,1,0,0,0];
   if month == 12,
@@ -79,10 +92,19 @@ while true,
   if datenum(dvend) > now,
     break;
   end
+
   daterange = {datestr(dvstart,dateformat),datestr(dvend,dateformat)};
   fprintf('Computing control data statistics for %s to %s...\n',daterange{:});
   outdir = fullfile(dataloc_params.pBDPGAL4Ustatsdir,sprintf('%sto%s_computed%s',daterange{:},timestamp));
-  UpdateControlDataStats(rootdir,params{:},'daterange',daterange,'outdir',outdir);
+  
+  if usemetadata,
+    dnstart = datenum(dvstart);
+    dnend = datenum(dvend);
+    idx = dns>=dnstart & dns<=dnend;
+    UpdateControlDataStats(rootdir,params{:},'daterange',daterange,'outdir',outdir,'experiments',metadata(idx));
+  else
+    UpdateControlDataStats(rootdir,params{:},'daterange',daterange,'outdir',outdir);
+  end
 end
 
 %% make current link here
@@ -125,11 +147,15 @@ cd(pwdprev);
 %% also do everything into one directory
 
 dvstart = [2011,02,1,0,0,0];
-dvend = [2012,09,1,0,0,0];
+dvend = [2013,07,1,0,0,0];
 daterange = {datestr(dvstart,dateformat),datestr(dvend,dateformat)};
 fprintf('Computing control data statistics for %s to %s...\n',daterange{:});
 outdir = fullfile(dataloc_params.pBDPGAL4Ustatsdir,sprintf('%sto%s_computed%s',daterange{:},timestamp));
-UpdateControlDataStats(rootdir,params{:},'daterange',daterange,'outdir',outdir);
+if usemetadata,
+  UpdateControlDataStats(rootdir,params{:},'daterange',daterange,'outdir',outdir,'experiments',metadata);
+else
+  UpdateControlDataStats(rootdir,params{:},'daterange',daterange,'outdir',outdir);
+end
 
 
 %%

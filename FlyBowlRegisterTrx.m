@@ -3,7 +3,7 @@ function [success,msgs] = FlyBowlRegisterTrx(expdir,varargin)
 success = true;
 msgs = {};
 
-version = '0.1';
+version = '0.2';
 timestamp = datestr(now,'yyyymmddTHHMMSS');
 
 fns_notperframe = {'id','moviename','annname','firstframe','arena','off',...
@@ -385,7 +385,8 @@ try
   if exist(trxfile,'file'),
     delete(trxfile);
   end
-  registrationinfo = struct('version',version,'timestamp',timestamp,'analysis_protocol',analysis_protocol);
+  real_analysis_protocol = GetRealAnalysisProtocol(analysis_protocol,settingsdir);
+  registrationinfo = struct('version',version,'timestamp',timestamp,'analysis_protocol',analysis_protocol,'linked_analysis_protocol',real_analysis_protocol);
   save(trxfile,'trx','timestamps','registrationinfo');
   didsave = true;
 catch ME
@@ -440,6 +441,13 @@ for i = 1:numel(fnssave),
   fn = fnssave{i};
   fprintf(fid,'%s,%f\n',fn,registration_data.(fn));
 end
+fnssave = {'version','timestamp','analysis_protocol','linked_analysis_protocol'};
+fnssave = intersect(fnssave,fieldnames(registrationinfo));
+for i = 1:numel(fnssave),
+  fn = fnssave{i};
+  fprintf(fid,'%s,%s\n',fn,registrationinfo.(fn));
+end
+
 fclose(fid);
 didsave = true;
 catch ME

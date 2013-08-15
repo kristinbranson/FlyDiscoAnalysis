@@ -20,7 +20,8 @@ video_diagnostics = struct;
 
 version = '0.1';
 timestamp = datestr(now,'yyyymmddTHHMMSS');
-fprintf(logfid,'Running VideoDiagnostics version %s analysis_protocol %s at %s\n',version,analysis_protocol,timestamp);
+real_analysis_protocol = GetRealAnalysisProtocol(analysis_protocol,settingsdir);
+fprintf(logfid,'Running VideoDiagnostics version %s analysis_protocol %s (linked to %s) at %s\n',version,analysis_protocol,real_analysis_protocol,timestamp);
 
 datalocparamsfile = fullfile(settingsdir,analysis_protocol,datalocparamsfilestr);
 dataloc_params = ReadParams(datalocparamsfile);
@@ -96,22 +97,21 @@ if isvideo && ~DEBUG,
 
 end
 
-%% save to mat file
-if ~DEBUG,
-  videodiagnosticsmatfilename = fullfile(expdir,dataloc_params.videodiagnosticsmatfilestr);
-  try
-    save(videodiagnosticsmatfilename,'-struct','video_diagnostics');
-  catch ME,
-    fprintf(logfid,'Could not save video diagnostics to mat file %s:\n%s\n',videodiagnosticsmatfilename,getReport(ME));
-  end
-end
-
 %% write to text file
 
 videodiagnosticsfilename = fullfile(expdir,dataloc_params.videodiagnosticsfilestr);
 if DEBUG,
   fid = 1;
 else
+  
+  if exist(videodiagnosticsfilename,'file'),
+    try
+      delete(videodiagnosticsfilename);
+    catch ME,
+      fprintf(logfid,'Could not delete txt file %s: %s\n',videodiagnosticsfilename,getReport(ME));
+    end
+  end
+  
   fid = fopen(videodiagnosticsfilename,'w');
 end
 if fid < 0,
@@ -125,5 +125,29 @@ else
   end
   if ~DEBUG,
     fclose(fid);
+  end
+end
+
+%% save to mat file
+
+video_diagnostics.version = version;
+video_diagnostics.analysis_protocol = analysis_protocol;
+video_diagnostics.linked_analysis_protocol = real_analysis_protocol;
+
+if ~DEBUG,
+  videodiagnosticsmatfilename = fullfile(expdir,dataloc_params.videodiagnosticsmatfilestr);
+  
+  if exist(videodiagnosticsmatfilename,'file'),
+    try
+      delete(videodiagnosticsmatfilename);
+    catch ME,
+      fprintf(logfid,'Could not delete mat file %s: %s\n',videodiagnosticsmatfilename,getReport(ME));
+    end
+  end
+  
+  try
+    save(videodiagnosticsmatfilename,'-struct','video_diagnostics');
+  catch ME,
+    fprintf(logfid,'Could not save video diagnostics to mat file %s:\n%s\n',videodiagnosticsmatfilename,getReport(ME));
   end
 end

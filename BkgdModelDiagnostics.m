@@ -12,7 +12,9 @@ bkgd_diagnostics = struct;
 
 version = '0.1';
 timestamp = datestr(now,'yyyymmddTHHMMSS');
-fprintf(logfid,'Running BkgdModelDiagnostics version %s analysis_protocol %s at %s\n',version,analysis_protocol,timestamp);
+real_analysis_protocol = GetRealAnalysisProtocol(analysis_protocol,settingsdir);
+
+fprintf(logfid,'Running BkgdModelDiagnostics version %s analysis_protocol %s (linked to %s) at %s\n',version,analysis_protocol,real_analysis_protocol,timestamp);
 
 %% read parameters
 
@@ -361,6 +363,7 @@ if isfield(params,'expbgfgmodelmatfilestr'),
   end
 end
 if isempty(expbgfgmodelfile) || ~exist(expbgfgmodelfile,'file'),
+  fprintf(logfid,'No background/foreground model found, not computing llr\n');
   llr = zeros(nr,nc);
 else
   model = load(expbgfgmodelfile);
@@ -636,16 +639,17 @@ fclose(fid);
 
 %% save image
 
+drawnow;
 savename = fullfile(expdir,dataloc_params.bkgddiagnosticsimagefilestr);
 if exist(savename,'file'),
-  delete(savename);
+  try
+    delete(savename);
+  catch ME,
+    fprintf(logfid,'Could not delete file %s: %s\n',savename,getReport(ME));
+  end
 end
 set(hfig,'Units','Pixels','Position',params.figpos);
 save2png(savename,hfig);
-  
-%% save to mat file
-bkgddiagnosticsmatfilename = fullfile(expdir,dataloc_params.bkgddiagnosticsmatfilestr);
-save(bkgddiagnosticsmatfilename,'-struct','bkgd_diagnostics');
 
 %% write to text file
 
@@ -672,6 +676,28 @@ else
     end
   end
   fclose(fid1);
+end
+
+%% save to mat file
+
+bkgd_diagnostics.version = version;
+bkgd_diagnostics.bkgdmodeldiagnosticsparamsfile = bkgdmodeldiagnosticsparamsfile;
+bkgd_diagnostics.params = params;
+bkgd_diagnostics.analysis_protocol = analysis_protocol;
+bkgd_diagnostics.linked_analysis_protocol = real_analysis_protocol;
+
+bkgddiagnosticsmatfilename = fullfile(expdir,dataloc_params.bkgddiagnosticsmatfilestr);
+if exist(bkgddiagnosticsmatfilename,'file'),
+  try
+    delete(bkgddiagnosticsmatfilename);
+  catch ME,
+    fprintf(logfid,'Could not delete mat file %s: %s\n',bkgddiagnosticsmatfilename,getReport(ME));
+  end
+end
+try
+  save(bkgddiagnosticsmatfilename,'-struct','bkgd_diagnostics');
+catch ME,
+  fprintf(logfid,'Could not save to mat file %s: %s\n',bkgddiagnosticsmatfilename,getReport(ME));
 end
 
 function [edges,centers] = get_bins(nbins,lim,catchless,catchmore)

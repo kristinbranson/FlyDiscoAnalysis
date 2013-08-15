@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <deployment-project plugin="plugin.deploytool" plugin-version="1.0">
-  <configuration target="target.standalone" target-name="Standalone Application" name="FlyBowlRegisterTrx" location="/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis" file="/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/FlyBowlRegisterTrx.prj" build-checksum="1431967511">
+  <configuration target="target.standalone" target-name="Standalone Application" name="FlyBowlRegisterTrx" location="/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis" file="/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/FlyBowlRegisterTrx.prj" build-checksum="440674277">
     <param.project.name>/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/FlyBowlRegisterTrx.prj</param.project.name>
     <param.target.type>Standalone Application</param.target.type>
     <param.appname>FlyBowlRegisterTrx</param.appname>
@@ -31,7 +31,9 @@
     <param.disable.display>false</param.disable.display>
     <param.create.log>false</param.create.log>
     <param.log.file />
-    <param.user.defined.mcr.options />
+    <param.user.defined.mcr.options>
+      <item>-singleCompThread</item>
+    </param.user.defined.mcr.options>
     <unset>
       <param.project.name />
       <param.target.type />
@@ -55,17 +57,11 @@
       <param.disable.display />
       <param.create.log />
       <param.log.file />
-      <param.user.defined.mcr.options />
     </unset>
     <fileset.main>
       <file>${PROJECT_ROOT}/FlyBowlRegisterTrx.m</file>
     </fileset.main>
-    <fileset.resources>
-      <file>${PROJECT_ROOT}/ReadParams.m</file>
-      <file>${PROJECT_ROOT}/detectRegistrationMarks.m</file>
-      <file>/groups/branson/home/bransonk/tracking/code/JCtrax/filehandling</file>
-      <file>/groups/branson/home/bransonk/tracking/code/JCtrax/misc</file>
-    </fileset.resources>
+    <fileset.resources />
     <fileset.package />
     <build-deliverables>
       <file name="run_FlyBowlRegisterTrx.sh" location="${PROJECT_ROOT}/FlyBowlRegisterTrx/distrib" optional="false">/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/FlyBowlRegisterTrx/distrib/run_FlyBowlRegisterTrx.sh</file>
@@ -76,11 +72,20 @@
     <matlab>
       <root>/localhome/bransonk/software/matlab/R2012a</root>
       <path>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/filehandling</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/misc</directory>
+        <directory>/groups/branson/home/bransonk/behavioranalysis/code/Jdetect/Jdetect/tests</directory>
+        <directory>/groups/branson/home/bransonk/behavioranalysis/code/Jdetect/Jdetect/perframe/params</directory>
+        <directory>/groups/branson/home/bransonk/behavioranalysis/code/Jdetect/Jdetect/perframe/larva_compute_perframe_features</directory>
         <directory>/groups/branson/home/bransonk/behavioranalysis/code/Jdetect/Jdetect/perframe/compute_perframe_features</directory>
         <directory>/groups/branson/home/bransonk/behavioranalysis/code/Jdetect/Jdetect/filehandling</directory>
         <directory>/groups/branson/home/bransonk/behavioranalysis/code/Jdetect/Jdetect/misc</directory>
+        <directory>/groups/branson/home/bransonk/behavioranalysis/code/Jdetect/Jdetect/perframe</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis</directory>
+        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/simplewing</directory>
+        <directory>/groups/branson/home/bransonk/tracking/code/lds/hmm</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/anatomy/fileio</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/SAGE/MATLABInterface/Trunk</directory>
+        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/filehandling</directory>
+        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/misc</directory>
         <directory>${MATLAB_ROOT}/toolbox/matlab/demos</directory>
         <directory>${MATLAB_ROOT}/toolbox/matlab/graph2d</directory>
         <directory>${MATLAB_ROOT}/toolbox/matlab/graph3d</directory>
@@ -230,7 +235,7 @@
       <vista>false</vista>
       <linux>true</linux>
       <solaris>false</solaris>
-      <osver>2.6.32-41-generic</osver>
+      <osver>2.6.32-49-generic</osver>
       <os32>false</os32>
       <os64>true</os64>
       <arch>glnxa64</arch>

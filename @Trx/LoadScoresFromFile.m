@@ -25,4 +25,3 @@ for flyi = 1:numel(flies),
   end
   scoreidx{flyi} = scores_curr.allScores.scores{flyi}(T0:T1);
 end
-

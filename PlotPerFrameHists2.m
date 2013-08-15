@@ -1,4 +1,4 @@
-function handles = PlotPerFrameHists2(id,field,idx,hist_perframefeatures,...
+function [handles,didplot] = PlotPerFrameHists2(id,field,idx,hist_perframefeatures,...
   histperexp,histperfly,bininfo,hist_plot_params,expname,varargin)
 
 % parse plotting parameters
@@ -24,18 +24,7 @@ end
 
 black = ones(1,3)/255;
 
-%% set up figure
-if ~isempty(hax) && ishandle(hax),
-  hfig = get(hax,'Parent');
-else
-  if ~ishandle(hfig),
-    figure(hfig);
-  else
-    clf(hfig);
-  end
-  set(hfig,'Visible',visible,'Position',position,'Renderer','painters');
-  hax = axes('Position',axposition,'Parent',hfig,'XColor',black,'YColor',black);
-end
+%% select out relevant histogram data
 
 % which fields, conditions
 ntypes = numel(idx);
@@ -50,6 +39,31 @@ for ii = 1:ntypes,
     fns{ii} = fns{ii}(1:63);
   end
   flyconditions{ii} = hist_perframefeatures(i).flycondition;
+end
+
+[centers,edges,meanfrac,~,stderrfrac,~,Zpertype] = ...
+  SelectHistData2(fns,bininfo,hist_plot_params,plottype,...
+  histperfly,histperexp);
+
+isdata = any(~isnan([meanfrac{:}]));
+if ~isdata,
+  handles = [];
+  didplot = false;
+  return;
+end
+
+
+%% set up figure
+if ~isempty(hax) && ishandle(hax),
+  hfig = get(hax,'Parent');
+else
+  if ~ishandle(hfig),
+    figure(hfig);
+  else
+    clf(hfig);
+  end
+  set(hfig,'Visible',visible,'Position',position,'Renderer','painters');
+  hax = axes('Position',axposition,'Parent',hfig,'XColor',black,'YColor',black);
 end
 
 % choose colors for each plot
@@ -69,11 +83,6 @@ if any(isnan(typecolors(:,1))),
   end
 end
 
-
-%% select out relevant histogram data
-[centers,edges,meanfrac,~,stderrfrac,~,Zpertype] = ...
-  SelectHistData2(fns,bininfo,hist_plot_params,plottype,...
-  histperfly,histperexp);
 
 %%
 
@@ -158,3 +167,5 @@ handles.hxlabel = hxlabel;
 handles.hylabel = hylabel;
 handles.hti = hti;
 handles.position = position;
+
+didplot = true;

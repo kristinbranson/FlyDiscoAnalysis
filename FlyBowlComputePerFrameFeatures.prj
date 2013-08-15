@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <deployment-project plugin="plugin.deploytool" plugin-version="1.0">
-  <configuration target="target.standalone" target-name="Standalone Application" name="FlyBowlComputePerFrameFeatures" location="/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis" file="/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/FlyBowlComputePerFrameFeatures.prj" build-checksum="2222948319">
+  <configuration target="target.standalone" target-name="Standalone Application" name="FlyBowlComputePerFrameFeatures" location="/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis" file="/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/FlyBowlComputePerFrameFeatures.prj" build-checksum="1300722507">
     <param.project.name>/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/FlyBowlComputePerFrameFeatures.prj</param.project.name>
     <param.target.type>Standalone Application</param.target.type>
     <param.appname>FlyBowlComputePerFrameFeatures</param.appname>
@@ -31,7 +31,9 @@
     <param.disable.display>false</param.disable.display>
     <param.create.log>false</param.create.log>
     <param.log.file />
-    <param.user.defined.mcr.options />
+    <param.user.defined.mcr.options>
+      <item>-singleCompThread</item>
+    </param.user.defined.mcr.options>
     <unset>
       <param.project.name />
       <param.target.type />
@@ -55,13 +57,12 @@
       <param.disable.display />
       <param.create.log />
       <param.log.file />
-      <param.user.defined.mcr.options />
     </unset>
     <fileset.main>
       <file>${PROJECT_ROOT}/FlyBowlComputePerFrameFeatures.m</file>
     </fileset.main>
     <fileset.resources>
-      <file>${PROJECT_ROOT}/DebugTrx.m</file>
+      <file>${PROJECT_ROOT}/@Trx</file>
       <file>${PROJECT_ROOT}/FlyBowlComputePerFrameFeatures.m</file>
       <file>${PROJECT_ROOT}/IllustratePerFrameProps.m</file>
       <file>${PROJECT_ROOT}/LowPassFilterArea.m</file>
@@ -98,10 +99,15 @@
       <file>${PROJECT_ROOT}/compute_absyaw.m</file>
       <file>${PROJECT_ROOT}/compute_accmag.m</file>
       <file>${PROJECT_ROOT}/compute_angle2wall.m</file>
+      <file>${PROJECT_ROOT}/compute_angle_biggest_wing.m</file>
+      <file>${PROJECT_ROOT}/compute_angle_smallest_wing.m</file>
       <file>${PROJECT_ROOT}/compute_anglefrom1to2.m</file>
       <file>${PROJECT_ROOT}/compute_angleonclosestfly.m</file>
       <file>${PROJECT_ROOT}/compute_anglesub.m</file>
       <file>${PROJECT_ROOT}/compute_area.m</file>
+      <file>${PROJECT_ROOT}/compute_area_inmost_wing.m</file>
+      <file>${PROJECT_ROOT}/compute_area_mm.m</file>
+      <file>${PROJECT_ROOT}/compute_area_outmost_wing.m</file>
       <file>${PROJECT_ROOT}/compute_areasmooth.m</file>
       <file>${PROJECT_ROOT}/compute_arena_angle.m</file>
       <file>${PROJECT_ROOT}/compute_arena_r.m</file>
@@ -117,8 +123,12 @@
       <file>${PROJECT_ROOT}/compute_d2theta.m</file>
       <file>${PROJECT_ROOT}/compute_da.m</file>
       <file>${PROJECT_ROOT}/compute_dangle2wall.m</file>
+      <file>${PROJECT_ROOT}/compute_dangle_biggest_wing.m</file>
+      <file>${PROJECT_ROOT}/compute_dangle_smallest_wing.m</file>
       <file>${PROJECT_ROOT}/compute_danglesub.m</file>
       <file>${PROJECT_ROOT}/compute_darea.m</file>
+      <file>${PROJECT_ROOT}/compute_darea_inmost_wing.m</file>
+      <file>${PROJECT_ROOT}/compute_darea_outmost_wing.m</file>
       <file>${PROJECT_ROOT}/compute_darena_angle.m</file>
       <file>${PROJECT_ROOT}/compute_db.m</file>
       <file>${PROJECT_ROOT}/compute_dcenter.m</file>
@@ -129,9 +139,16 @@
       <file>${PROJECT_ROOT}/compute_decc.m</file>
       <file>${PROJECT_ROOT}/compute_dell2nose.m</file>
       <file>${PROJECT_ROOT}/compute_dist2wall.m</file>
+      <file>${PROJECT_ROOT}/compute_dmax_wing_angle.m</file>
+      <file>${PROJECT_ROOT}/compute_dmax_wing_area.m</file>
+      <file>${PROJECT_ROOT}/compute_dmean_wing_angle.m</file>
+      <file>${PROJECT_ROOT}/compute_dmean_wing_area.m</file>
+      <file>${PROJECT_ROOT}/compute_dmin_wing_angle.m</file>
+      <file>${PROJECT_ROOT}/compute_dmin_wing_area.m</file>
       <file>${PROJECT_ROOT}/compute_dnose2ell.m</file>
       <file>${PROJECT_ROOT}/compute_dnose2ell_anglerange.m</file>
       <file>${PROJECT_ROOT}/compute_dnose2tail.m</file>
+      <file>${PROJECT_ROOT}/compute_dnwingsdetected.m</file>
       <file>${PROJECT_ROOT}/compute_dphi.m</file>
       <file>${PROJECT_ROOT}/compute_dtheta.m</file>
       <file>${PROJECT_ROOT}/compute_dtheta_tail.m</file>
@@ -141,10 +158,26 @@
       <file>${PROJECT_ROOT}/compute_dv_cor.m</file>
       <file>${PROJECT_ROOT}/compute_dv_ctr.m</file>
       <file>${PROJECT_ROOT}/compute_dv_tail.m</file>
+      <file>${PROJECT_ROOT}/compute_dwing_angle_diff.m</file>
+      <file>${PROJECT_ROOT}/compute_dwing_angle_imbalance.m</file>
       <file>${PROJECT_ROOT}/compute_ecc.m</file>
       <file>${PROJECT_ROOT}/compute_flipdv_cor.m</file>
       <file>${PROJECT_ROOT}/compute_ischased.m</file>
       <file>${PROJECT_ROOT}/compute_magveldiff.m</file>
+      <file>${PROJECT_ROOT}/compute_max_absdwing_angle.m</file>
+      <file>${PROJECT_ROOT}/compute_max_absdwing_area.m</file>
+      <file>${PROJECT_ROOT}/compute_max_dwing_angle_in.m</file>
+      <file>${PROJECT_ROOT}/compute_max_dwing_angle_out.m</file>
+      <file>${PROJECT_ROOT}/compute_max_wing_angle.m</file>
+      <file>${PROJECT_ROOT}/compute_max_wing_area.m</file>
+      <file>${PROJECT_ROOT}/compute_mean_wing_angle.m</file>
+      <file>${PROJECT_ROOT}/compute_mean_wing_area.m</file>
+      <file>${PROJECT_ROOT}/compute_min_absdwing_angle.m</file>
+      <file>${PROJECT_ROOT}/compute_min_absdwing_area.m</file>
+      <file>${PROJECT_ROOT}/compute_min_dwing_angle_in.m</file>
+      <file>${PROJECT_ROOT}/compute_min_dwing_angle_out.m</file>
+      <file>${PROJECT_ROOT}/compute_min_wing_angle.m</file>
+      <file>${PROJECT_ROOT}/compute_min_wing_area.m</file>
       <file>${PROJECT_ROOT}/compute_nflies_close.m</file>
       <file>${PROJECT_ROOT}/compute_phi.m</file>
       <file>${PROJECT_ROOT}/compute_phisideways.m</file>
@@ -157,6 +190,10 @@
       <file>${PROJECT_ROOT}/compute_velmag_nose.m</file>
       <file>${PROJECT_ROOT}/compute_velmag_tail.m</file>
       <file>${PROJECT_ROOT}/compute_veltoward.m</file>
+      <file>${PROJECT_ROOT}/compute_wing_angle_diff.m</file>
+      <file>${PROJECT_ROOT}/compute_wing_angle_imbalance.m</file>
+      <file>${PROJECT_ROOT}/compute_wing_areal_mm.m</file>
+      <file>${PROJECT_ROOT}/compute_wing_arear_mm.m</file>
       <file>${PROJECT_ROOT}/compute_xnose_mm.m</file>
       <file>${PROJECT_ROOT}/compute_yaw.m</file>
       <file>${PROJECT_ROOT}/compute_ynose_mm.m</file>
@@ -187,16 +224,20 @@
     <matlab>
       <root>/localhome/bransonk/software/matlab/R2012a</root>
       <path>
-        <directory>/groups/branson/bransonlab/projects/olympiad/FlyBowlDataCapture</directory>
+        <directory>/groups/branson/home/bransonk/behavioranalysis/code/Jdetect/Jdetect/tests</directory>
+        <directory>/groups/branson/home/bransonk/behavioranalysis/code/Jdetect/Jdetect/perframe/params</directory>
+        <directory>/groups/branson/home/bransonk/behavioranalysis/code/Jdetect/Jdetect/perframe/larva_compute_perframe_features</directory>
+        <directory>/groups/branson/home/bransonk/behavioranalysis/code/Jdetect/Jdetect/perframe/compute_perframe_features</directory>
+        <directory>/groups/branson/home/bransonk/behavioranalysis/code/Jdetect/Jdetect/filehandling</directory>
+        <directory>/groups/branson/home/bransonk/behavioranalysis/code/Jdetect/Jdetect/misc</directory>
+        <directory>/groups/branson/home/bransonk/behavioranalysis/code/Jdetect/Jdetect/perframe</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis</directory>
+        <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/simplewing</directory>
+        <directory>/groups/branson/home/bransonk/tracking/code/lds/hmm</directory>
+        <directory>/groups/branson/bransonlab/projects/olympiad/anatomy/fileio</directory>
         <directory>/groups/branson/bransonlab/projects/olympiad/SAGE/MATLABInterface/Trunk</directory>
         <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/filehandling</directory>
         <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/misc</directory>
-        <directory>/groups/branson/home/bransonk/tracking/code/Ctrax/matlab/netlab</directory>
-        <directory>${PROJECT_ROOT}/../SAGE/MATLABInterface/Trunk</directory>
-        <directory>/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis</directory>
-        <directory>${PROJECT_ROOT}/../../filehandling</directory>
-        <directory>${PROJECT_ROOT}/../../misc</directory>
-        <directory>${PROJECT_ROOT}/../../perframe</directory>
         <directory>${MATLAB_ROOT}/toolbox/matlab/demos</directory>
         <directory>${MATLAB_ROOT}/toolbox/matlab/graph2d</directory>
         <directory>${MATLAB_ROOT}/toolbox/matlab/graph3d</directory>
@@ -346,7 +387,7 @@
       <vista>false</vista>
       <linux>true</linux>
       <solaris>false</solaris>
-      <osver>2.6.32-41-generic</osver>
+      <osver>2.6.32-49-generic</osver>
       <os32>false</os32>
       <os64>true</os64>
       <arch>glnxa64</arch>

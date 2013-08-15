@@ -54,8 +54,9 @@ if isempty(logfid),
   
 end
 
-fprintf(logfid,'\n\n***\nRunning FlyBowlExtraDiagnostics version %s analysis_protocol %s at %s\n',version,analysis_protocol,timestamp);
+real_analysis_protocol = GetRealAnalysisProtocol(analysis_protocol,settingsdir);
 
+fprintf(logfid,'\n\n***\nRunning FlyBowlExtraDiagnostics version %s analysis_protocol %s (linked to %s) at %s\n',version,analysis_protocol,real_analysis_protocol,timestamp);
 
 %% compute temperature diagnostics
 if dotemperature,

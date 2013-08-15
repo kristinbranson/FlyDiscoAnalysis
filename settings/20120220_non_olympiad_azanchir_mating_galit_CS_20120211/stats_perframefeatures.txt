@@ -1,453 +1,750 @@
-# <per-frame feature>,<frame condition name>,<fly condition name>,<min n. frames both valid>,,<min n. frames fly valid>
+# <per-frame feature>,<frame condition name>,<fly condition name>,<min n. frames both valid>,<min n. frames fly valid>
 
-#################### detected behaviors ####################
+# motion
 
-# stops
-fractime,stopped,any,0,500
-duration,stopped,any,2,500
-boutfreq,stopped,any,0,500
+velmag_ctr,any,any,25,500
 
-fractime,stopped_nearwall,any,0,500
+velmag,any,any,25,500
 
-fractime,stopped_nearfly,any,0,500
+velmag_nose,any,any,25,500
 
-fractime,stopped,firsthalf,0,250
+velmag_tail,any,any,25,500
 
-fractime,stopped,secondhalf,0,250
+du_ctr,any,any,25,500
 
-# walks
-fractime,walking,any,0,500
-duration,walking,any,2,500
-boutfreq,walking,any,0,500
+du_cor,any,any,25,500
 
-fractime,walking_nearwall,any,0,500
+du_tail,any,any,25,500
 
-fractime,walking_nearfly,any,0,500
-fractime,walking_notchasing_nearfly,any,0,500
+dv_ctr,any,any,25,500
 
-fractime,walking,firsthalf,0,250
+dv_cor,any,any,25,500
 
-fractime,walking,secondhalf,0,250
+dv_tail,any,any,25,500
 
-# jumps
-fractime,jumping,any,0,500
-duration,jumping,any,2,500
-boutfreq,jumping,any,0,500
+absdv_cor,any,any,25,500
 
-boutfreq,jumping_nearwall,any,0,500
+phisideways,move,any,25,500
 
-boutfreq,jumping_nearfly,any,0,500
+yaw,move,any,25,500
 
-boutfreq,jumping,firsthalf,0,250
+absyaw,move,any,25,500
 
-boutfreq,jumping,secondhalf,0,250
+accmag,any,any,25,500
+
+velmag_ctr,nearwall,any,25,500
+du_ctr,nearwall,any,25,500
+absdv_cor,nearwall,any,25,500
+
+velmag_ctr,nearfly,any,25,500
+du_ctr,nearfly,any,25,500
+absdv_cor,nearfly,any,25,500
+
+velmag_ctr,notnearfly_notnearwall,any,25,500
+du_ctr,notnearfly_notnearwall,any,25,500
+absdv_cor,notnearfly_notnearwall,any,25,500
+
+velmag_ctr,attemptedcopulation,any,5,500
+
+du_ctr,backup,any,5,500
+absdv_cor,backup,any,5,500
+
+du_ctr,bodyturn,any,5,500
+absdv_cor,bodyturn,any,5,500
 
 
-# chases
-fractime,chasing,any,0,500
-duration,chasing,any,2,500
-boutfreq,chasing,any,0,500
+du_ctr,crabwalkall,any,5,500
+absdv_cor,crabwalkall,any,5,500
 
-fractime,chasing,firsthalf,0,250
+du_ctr,crabwalkextreme,any,5,500
+absdv_cor,crabwalkextreme,any,5,500
 
-fractime,chasing,secondhalf,0,250
+velmag_ctr,jump,any,5,500
+
+du_ctr,pivotcenter,any,5,500
+absdv_cor,pivotcenter,any,5,500
+
+du_tail,pivottail,any,5,500
+absdv_cor,pivottail,any,5,500
+
+velmag_ctr,righting,any,5,500
+
+velmag_ctr,stop,any,5,500
+
+velmag_ctr,touch,any,5,500
+
+velmag_ctr,walk,any,5,500
+du_ctr,walk,any,5,500
+absdv_cor,walk,any,5,500
+
+velmag_ctr,wingextension,any,5,500
+du_ctr,wingextension,any,5,500
+absdv_cor,wingextension,any,5,500
+
+velmag_ctr,wingflick,any,5,500
+du_ctr,wingflick,any,5,500
+absdv_cor,wingflick,any,5,500
+
+velmag_ctr,winggrooming,any,5,500
+
+# change in orientation
+
+dtheta,any,any,25,500
+
+dphi,move,any,25,500
+
+absdtheta,any,any,25,500
+
+abssmoothdtheta,any,any,25,500
+
+corfrac_maj,any,any,25,500
+
+absdtheta,nearwall,any,25,500
+absdtheta,nearfly,any,25,500
+absdtheta,notnearfly_notnearwall,any,25,500
+absdtheta,backup,any,5,500
+corfrac_maj,backup,any,5,500
+absdtheta,bodyturn,any,5,500
+corfrac_maj,bodyturn,any,5,500
+absdtheta,crabwalkall,any,5,500
+corfrac_maj,crabwalkall,any,5,500
+absdtheta,crabwalkextreme,any,5,500
+corfrac_maj,crabwalkextreme,any,5,500
+absdtheta,pivotcenter,any,5,500
+corfrac_maj,pivotcenter,any,5,500
+absdtheta,pivottail,any,5,500
+corfrac_maj,pivottail,any,5,500
+absdtheta,righting,any,5,500
+absdtheta,stop,any,5,500
+absdtheta,touch,any,5,500
+absdtheta,walk,any,5,500
+absdtheta,wingextension,any,5,500
+absdtheta,wingflick,any,5,500
+absdtheta,winggrooming,any,5,500
+
+# social
+
+dcenter,any,any,25,500
+
+dnose2ell,any,any,25,500
+
+dnose2ell_angle_min30to30,any,any,25,500
+
+dnose2ell_angle_min20to20,any,any,25,500
+
+dnose2ell_angle_30tomin30,any,any,25,500
+
+dnose2tail,any,any,25,500
+
+dell2nose,any,any,25,500
+
+anglesub,any,any,25,500
+
+nflies_close,any,any,25,500
+
+ddcenter,nearfly,any,25,500
+
+ddnose2ell,nearfly,any,25,500
+
+ddell2nose,nearfly,any,25,500
+
+danglesub,nearfly,any,25,500
+
+dcenter,nearwall,any,25,500
+dnose2ell,nearwall,any,25,500
+nflies_close,nearwall,any,25,500
+
+dcenter,move,any,25,500
+dnose2tail,move,any,25,500
+ddcenter,move,any,25,500
+danglesub,move,any,25,500
+
+dnose2ell,attemptedcopulation,any,5,500
+nflies_close,attemptedcopulation,any,5,500
+ddnose2ell,attemptedcopulation,any,5,500
+
+dcenter,backupstart,any,2,500
+dnose2ell,backupstart,any,2,500
+nflies_close,backupstart,any,2,500
+
+dcenter,bodyturn,any,5,500
+dnose2ell,bodyturn,any,5,500
+nflies_close,bodyturn,any,5,500
+
+dcenter,bodyturnstart,any,2,500
+dnose2ell,bodyturnstart,any,2,500
+nflies_close,bodyturnstart,any,2,500
+
+
+dcenter,crabwalkallstart,any,2,500
+dnose2ell,crabwalkallstart,any,2,500
+nflies_close,crabwalkallstart,any,2,500
+
+dcenter,crabwalkextreme,any,5,500
+dnose2ell,crabwalkextreme,any,5,500
+nflies_close,crabwalkextreme,any,5,500
+
+dcenter,crabwalkextremestart,any,2,500
+dnose2ell,crabwalkextremestart,any,2,500
+nflies_close,crabwalkextremestart,any,2,500
+
+dcenter,jumpstart,any,2,500
+dnose2ell,jumpstart,any,2,500
+nflies_close,jumpstart,any,2,500
+
+dcenter,pivotcenter,any,5,500
+dnose2ell,pivotcenter,any,5,500
+nflies_close,pivotcenter,any,5,500
+
+dcenter,pivotcenterstart,any,2,500
+dnose2ell,pivotcenterstart,any,2,500
+nflies_close,pivotcenterstart,any,2,500
+
+dcenter,pivottailstart,any,2,500
+dnose2ell,pivottailstart,any,2,500
+nflies_close,pivottailstart,any,2,500
+
+dcenter,rightingstart,any,2,500
+dnose2ell,rightingstart,any,2,500
+nflies_close,rightingstart,any,2,500
+
+dcenter,stop,any,5,500
+dnose2ell,stop,any,5,500
+nflies_close,stop,any,5,500
+
+dcenter,touch,any,2,500
+dnose2ell,touch,any,2,500
+nflies_close,touch,any,2,500
+
+dcenter,walk,any,5,500
+dnose2ell,walk,any,5,500
+nflies_close,walk,any,5,500
+
+
+dcenter,wingflick,any,5,500
+dnose2ell,wingflick,any,5,500
+dell2nose,wingflick,any,5,500
+nflies_close,wingflick,any,5,500
 
 
 
-# backups
+dcenter,winggrooming,any,5,500
+dnose2ell,winggrooming,any,5,500
+nflies_close,winggrooming,any,5,500
+
+# relative social
+
+absanglefrom1to2_nose2ell,nearfly,any,25,500
+
+angleonclosestfly,nearfly,any,25,500
+
+veltoward_nose2ell,nearfly,any,25,500
+
+magveldiff_nose2ell,nearfly,any,25,500
+
+absthetadiff_nose2ell,nearfly,any,25,500
+
+absphidiff_nose2ell,nearfly,any,25,500
+
+
+absanglefrom1to2_nose2ell,backupstart_nearfly,any,2,500
+veltoward_nose2ell,backup_nearfly,any,5,500
+absthetadiff_nose2ell,backupstart_nearfly,any,2,500
+
+absanglefrom1to2_nose2ell,bodyturnstart_nearfly,any,2,500
+
+
+absanglefrom1to2_nose2ell,crabwalkallstart_nearfly,any,2,500
+veltoward_nose2ell,crabwalkall_nearfly,any,5,500
+absthetadiff_nose2ell,crabwalkallstart_nearfly,any,2,500
+
+absanglefrom1to2_nose2ell,crabwalkextremestart_nearfly,any,2,500
+veltoward_nose2ell,crabwalkextreme_nearfly,any,5,500
+absthetadiff_nose2ell,crabwalkextremestart_nearfly,any,2,500
+
+absanglefrom1to2_nose2ell,jumpstart_nearfly,any,2,500
+
+absanglefrom1to2_nose2ell,pivotcenterstart_nearfly,any,2,500
+absthetadiff_nose2ell,pivotcenterstart_nearfly,any,2,500
+
+absanglefrom1to2_nose2ell,pivottailstart_nearfly,any,2,500
+absthetadiff_nose2ell,pivottailstart_nearfly,any,2,500
+
+absanglefrom1to2_nose2ell,rightingstart_nearfly,any,2,500
+
+absanglefrom1to2_nose2ell,stop_nearfly,any,5,500
+angleonclosestfly,stop_nearfly,any,5,500
+absthetadiff_nose2ell,stop_nearfly,any,5,500
+
+absanglefrom1to2_nose2ell,touch,any,5,500
+
+angleonclosestfly,touch,any,5,500
+
+veltoward_nose2ell,touch,any,5,500
+
+magveldiff_nose2ell,touch,any,5,500
+
+absthetadiff_nose2ell,touch,any,5,500
+
+absphidiff_nose2ell,touch,any,5,500
+
+
+# wall
+
+dist2wall,any,any,25,500
+dist2wall,move,any,25,500
+
+absangle2wall,nearwall,any,25,500
+
+ddist2wall,nearwall,any,25,500
+
+dangle2wall,nearwall,any,25,500
+
+absdangle2wall,nearwall,any,25,500
+
+dist2wall,attemptedcopulation,any,5,500
+absangle2wall,attemptedcopulation,any,5,500
+
+dist2wall,backupstart,any,2,500
+absangle2wall,backupstart_nearwall,any,2,500
+
+dist2wall,bodyturnstart,any,2,500
+absangle2wall,bodyturnstart,any,2,500
+
+dist2wall,crabwalkall,any,5,500
+absangle2wall,crabwalkall,any,5,500
+
+dist2wall,crabwalkextreme,any,5,500
+absangle2wall,crabwalkextreme,any,5,500
+
+dist2wall,jump,any,5,500
+absangle2wall,jump,any,5,500
+
+dist2wall,jumpstart,any,5,500
+absangle2wall,jumpstart,any,5,500
+
+dist2wall,move,any,25,500
+absangle2wall,move,any,25,500
+
+dist2wall,pivotcenterstart,any,2,500
+absangle2wall,pivotcenterstart,any,2,500
+
+dist2wall,pivottailstart,any,2,500
+absangle2wall,pivottailstart,any,2,500
+
+dist2wall,rightingstart,any,2,500
+absangle2wall,rightingstart,any,2,500
+
+dist2wall,stop,any,5,500
+absangle2wall,stop,any,5,500
+
+dist2wall,touch,any,5,500
+absangle2wall,touch,any,5,500
+
+dist2wall,walk,any,5,500
+absangle2wall,walk,any,5,500
+
+dist2wall,winggrooming,any,5,500
+absangle2wall,winggrooming,any,5,500
+
+# appearance
+
+area,any,any,25,500
+
+a_mm,any,any,25,500
+
+b_mm,any,any,25,500
+
+ecc,any,any,25,500
+
+# change in appearance
+
+da,any,any,25,500
+
+db,any,any,25,500
+
+darea,any,any,25,500
+
+darea,attemptedcopulation,any,5,500
+darea,backup,any,5,500
+darea,bodyturn,any,5,500
+darea,chase,any,5,500
+darea,crabwalkall,any,5,500
+darea,crabwalkextreme,any,5,500
+darea,copulation,any,5,500
+darea,jump,any,5,500
+darea,pivotcenter,any,5,500
+darea,pivottail,any,5,500
+darea,righting,any,5,500
+darea,stop,any,5,500
+darea,touch,any,5,500
+darea,walk,any,5,500
+darea,wingextension,any,5,500
+darea,wingflick,any,5,500
+darea,winggrooming,any,5,500
+
+decc,any,any,25,500
+
+# position
+
+arena_angle,any,any,25,500
+phi,any,any,25,500
+x_mm,any,any,25,500
+y_mm,any,any,25,500
+theta_mm,any,any,25,500
+
+# wing position
+
+angle_biggest_wing,any,any,25,500
+
+angle_smallest_wing,any,any,25,500
+
+max_wing_angle,any,any,25,500
+
+min_wing_angle,any,any,25,500
+
+mean_wing_angle,any,any,25,500
+
+wing_angle_diff,any,any,25,500
+
+wing_angle_imbalance,any,any,25,500
+
+wing_anglel,any,any,25,500
+
+wing_angler,any,any,25,500
+
+wing_trough_angle,any,any,25,500
+
+max_wing_angle,nearfly,any,25,500
+wing_angle_diff,nearfly,any,25,500
+
+max_wing_angle,touch,any,5,500
+wing_angle_diff,touch,any,5,500
+
+max_wing_angle,chase,any,5,500
+wing_angle_diff,chase,any,5,500
+
+max_wing_angle,attemptedcopulation,any,5,500
+wing_angle_diff,attemptedcopulation,any,5,500
+
+max_wing_angle,winggrooming,any,5,500
+wing_angle_diff,winggrooming,any,5,500
+
+angle_biggest_wing,wingextension,any,5,500
+angle_smallest_wing,wingextension,any,5,500
+max_wing_angle,wingextension,any,5,500
+min_wing_angle,wingextension,any,5,500
+mean_wing_angle,wingextension,any,5,500
+wing_angle_diff,wingextension,any,5,500
+wing_angle_imbalance,wingextension,any,5,500
+wing_anglel,wingextension,any,5,500
+wing_angler,wingextension,any,5,500
+wing_trough_angle,wingextension,any,5,500
+
+max_wing_angle,wingflick,any,5,500
+min_wing_angle,wingflick,any,5,500
+mean_wing_angle,wingflick,any,5,500
+wing_angle_diff,wingflick,any,5,500
+wing_angle_imbalance,wingflick,any,5,500
+wing_anglel,wingflick,any,5,500
+wing_angler,wingflick,any,5,500
+wing_trough_angle,wingflick,any,5,500
+
+
+
+# wing appearance
+
+area_inmost_wing,any,any,25,500
+
+area_outmost_wing,any,any,25,500
+
+max_wing_area,any,any,25,500
+
+min_wing_area,any,any,25,500
+
+mean_wing_area,any,any,25,500
+
+nwingsdetected,any,any,25,500
+
+wing_areal_mm,any,any,25,500
+
+wing_arear_mm,any,any,25,500
+
+area_inmost_wing,wingextension,any,5,500
+area_outmost_wing,wingextension,any,5,500
+max_wing_area,wingextension,any,5,500
+min_wing_area,wingextension,any,5,500
+mean_wing_area,wingextension,any,5,500
+nwingsdetected,wingextension,any,5,500
+wing_areal_mm,wingextension,any,5,500
+wing_arear_mm,wingextension,any,5,500
+
+area_inmost_wing,winggrooming,any,5,500
+area_outmost_wing,winggrooming,any,5,500
+max_wing_area,winggrooming,any,5,500
+min_wing_area,winggrooming,any,5,500
+mean_wing_area,winggrooming,any,5,500
+nwingsdetected,winggrooming,any,5,500
+wing_areal_mm,winggrooming,any,5,500
+wing_arear_mm,winggrooming,any,5,500
+
+mean_wing_area,wingflick,any,5,500
+nwingsdetected,wingflick,any,5,500
+
+# wing motion
+
+dangle_biggest_wing,any,any,25,500
+
+dangle_smallest_wing,any,any,25,500
+
+darea_inmost_wing,any,any,25,500
+
+darea_outmost_wing,any,any,25,500
+
+dmax_wing_angle,any,any,25,500
+
+dmax_wing_area,any,any,25,500
+
+dmin_wing_angle,any,any,25,500
+
+dmin_wing_area,any,any,25,500
+
+dnwingsdetected,any,any,25,500
+
+dwing_angle_diff,any,any,25,500
+
+dwing_angle_imbalance,any,any,25,500
+
+max_absdwing_angle,any,any,25,500
+
+max_absdwing_area,any,any,25,500
+
+max_dwing_angle_in,any,any,25,500
+
+max_dwing_angle_out,any,any,25,500
+
+min_absdwing_angle,any,any,25,500
+
+min_absdwing_area,any,any,25,500
+
+min_dwing_angle_in,any,any,25,500
+
+min_dwing_angle_out,any,any,25,500
+
+max_absdwing_angle,nearfly,any,25,500
+
+max_absdwing_angle,touch,any,5,500
+
+max_absdwing_angle,chase,any,5,500
+
+darea_outmost_wing,wingextension,any,5,500
+dmax_wing_angle,wingextension,any,5,500
+dmax_wing_area,wingextension,any,5,500
+dmin_wing_angle,wingextension,any,5,500
+dmin_wing_area,wingextension,any,5,500
+dwing_angle_diff,wingextension,any,5,500
+dwing_angle_imbalance,wingextension,any,5,500
+max_absdwing_angle,wingextension,any,5,500
+max_absdwing_area,wingextension,any,5,500
+max_dwing_angle_in,wingextension,any,5,500
+max_dwing_angle_out,wingextension,any,5,500
+min_absdwing_angle,wingextension,any,5,500
+min_absdwing_area,wingextension,any,5,500
+min_dwing_angle_in,wingextension,any,5,500
+min_dwing_angle_out,wingextension,any,5,500
+
+dmax_wing_angle,wingflick,any,5,500
+dmin_wing_angle,wingflick,any,5,500
+dwing_angle_diff,wingflick,any,5,500
+dwing_angle_imbalance,wingflick,any,5,500
+max_absdwing_angle,wingflick,any,5,500
+max_absdwing_area,wingflick,any,5,500
+max_dwing_angle_in,wingflick,any,5,500
+max_dwing_angle_out,wingflick,any,5,500
+min_absdwing_angle,wingflick,any,5,500
+min_absdwing_area,wingflick,any,5,500
+min_dwing_angle_in,wingflick,any,5,500
+min_dwing_angle_out,wingflick,any,5,500
+
+dwing_angle_imbalance,winggrooming,any,5,500
+max_absdwing_angle,winggrooming,any,5,500
+max_absdwing_area,winggrooming,any,5,500
+
+# fractime per behavior
+
+fractime,attemptedcopulation,any,0,500
+
 fractime,backup,any,0,500
-duration,backup,any,2,500
-boutfreq,backup,any,0,500
+fractime,backup_nearwall,any,0,500
+fractime,backup_nearfly,any,0,500
+fractime,backup_notnearfly_notnearwall,any,0,500
+fractime,backup,firsthalf,0,250
+fractime,backup,secondhalf,0,250
 
+fractime,bodyturn,any,0,500
+fractime,bodyturn_nearwall,any,0,500
+fractime,bodyturn_nearfly,any,0,500
+fractime,bodyturn_notnearfly_notnearwall,any,0,500
+fractime,bodyturn,firsthalf,0,250
+fractime,bodyturn,secondhalf,0,250
 
-# crabwalk
-fractime,crabwalk,any,0,500
-duration,crabwalk,any,2,500
-boutfreq,crabwalk,any,0,500
+fractime,chase,any,0,500
+fractime,chase,firsthalf,0,250
+fractime,chase,secondhalf,0,250
 
+fractime,copulation,any,0,500
+fractime,copulation,firsthalf,0,250
+fractime,copulation,secondhalf,0,250
 
-# pivottail
+fractime,crabwalkall,any,0,500
+fractime,crabwalkall_nearwall,any,0,500
+fractime,crabwalkall_nearfly,any,0,500
+fractime,crabwalkall_notnearfly_notnearwall,any,0,500
+fractime,crabwalkall,firsthalf,0,250
+fractime,crabwalkall,secondhalf,0,250
+
+fractime,crabwalkextreme,any,0,500
+fractime,crabwalkextreme_nearwall,any,0,500
+fractime,crabwalkextreme_nearfly,any,0,500
+fractime,crabwalkextreme_notnearfly_notnearwall,any,0,500
+fractime,crabwalkextreme,firsthalf,0,250
+fractime,crabwalkextreme,secondhalf,0,250
+
+fractime,jump,any,0,500
+fractime,jump_nearwall,any,0,500
+fractime,jump_nearfly,any,0,500
+fractime,jump_notnearfly_notnearwall,any,0,500
+fractime,jump,firsthalf,0,250
+fractime,jump,secondhalf,0,250
+
+fractime,pivotcenter,any,0,500
+fractime,pivotcenter_nearwall,any,0,500
+fractime,pivotcenter_nearfly,any,0,500
+fractime,pivotcenter_notnearfly_notnearwall,any,0,500
+fractime,pivotcenter,firsthalf,0,250
+fractime,pivotcenter,secondhalf,0,250
+
 fractime,pivottail,any,0,500
-duration,pivottail,any,2,500
-boutfreq,pivottail,any,0,500
+fractime,pivottail_nearwall,any,0,500
+fractime,pivottail_nearfly,any,0,500
+fractime,pivottail_notnearfly_notnearwall,any,0,500
+fractime,pivottail,firsthalf,0,250
+fractime,pivottail,secondhalf,0,250
 
+fractime,righting,any,0,500
+fractime,righting_nearwall,any,0,500
+fractime,righting_nearfly,any,0,500
+fractime,righting_notnearfly_notnearwall,any,0,500
+fractime,righting,firsthalf,0,250
+fractime,righting,secondhalf,0,250
 
-# touch
+fractime,stop,any,0,500
+fractime,stop_nearwall,any,0,500
+fractime,stop_nearfly,any,0,500
+fractime,stop_notnearfly_notnearwall,any,0,500
+fractime,stop,firsthalf,0,250
+fractime,stop,secondhalf,0,250
+
 fractime,touch,any,0,500
-duration,touch,any,2,500
-boutfreq,touch,any,0,500
 fractime,touch,firsthalf,0,250
 fractime,touch,secondhalf,0,250
 
+fractime,walk,any,0,500
+fractime,walk_nearwall,any,0,500
+fractime,walk_nearfly,any,0,500
+fractime,walk_notnearfly_notnearwall,any,0,500
+fractime,walk,firsthalf,0,250
+fractime,walk,secondhalf,0,250
 
-# winggrooming
+fractime,wingextension,any,0,500
+fractime,wingextension_nearfly,any,0,500
+fractime,wingextension_notnearfly,any,0,500
+fractime,wingextension,firsthalf,0,250
+fractime,wingextension,secondhalf,0,250
+
+fractime,wingflick,any,0,500
+fractime,wingflick_nearfly,any,0,500
+fractime,wingflick_notnearfly,any,0,500
+fractime,wingflick,firsthalf,0,250
+fractime,wingflick,secondhalf,0,250
+
 fractime,winggrooming,any,0,500
-duration,winggrooming,any,2,500
+fractime,winggrooming_nearwall,any,0,500
+fractime,winggrooming_nearfly,any,0,500
+fractime,winggrooming_notnearfly_notnearwall,any,0,500
+fractime,winggrooming,firsthalf,0,250
+fractime,winggrooming,secondhalf,0,250
+
+fractime,move,any,0,500
+fractime,move_nearwall,any,0,500
+fractime,move_nearfly,any,0,500
+fractime,move_notnearfly_notnearwall,any,0,500
+fractime,move,firsthalf,0,250
+fractime,move,secondhalf,0,250
+
+fractime,touch_notchase,any,0,500
+
+fractime,stop_notwinggrooming,any,0,500
+
+fractime,chase_notwingextension,any,0,500
+
+fractime,wingextension_notchase,any,0,500
+fractime,pivotcenter_stop,any,0,500
+
+fractime,notanybehavior,any,0,500
+
+# bout frequency per behavior
+
+boutfreq,backup,any,0,500
+boutfreq,bodyturn,any,0,500
+boutfreq,crabwalkall,any,0,500
+boutfreq,crabwalkextreme,any,0,500
+boutfreq,jump,any,0,500
+boutfreq,pivotcenter,any,0,500
+boutfreq,pivottail,any,0,500
+boutfreq,righting,any,0,500
+boutfreq,stop,any,0,500
+boutfreq,touch,any,0,500
+boutfreq,walk,any,0,500
+boutfreq,wingextension,any,0,500
+boutfreq,wingflick,any,0,500
 boutfreq,winggrooming,any,0,500
 
+# bout duration per behavior
 
-############################ speed #############################
+duration,attemptedcopulation,any,5,500
 
-# speed while walking
-velmag_ctr,walking,any,50,500
-velmag_ctr,walking_notchasing,any,50,500
-# speed while chasing
-velmag_ctr,chasing,any,50,500
-# speed while stopped (debugging only)
-velmag_ctr,stopped,any,50,500
-# speed while jumping
-velmag_ctr,jumping,any,2,500
-# speed while walking near the wall
-velmag_ctr,walking_nearwall,any,50,500
-velmag_ctr,walking_notchasing_nearwall,any,50,500
-# speed while walking near another fly
-velmag_ctr,walking_nearfly,any,50,500
-velmag_ctr,walking_notchasing_nearfly,any,50,500
-# speed while walking, per half of video
-velmag_ctr,walking,firsthalf,25,250
-velmag_ctr,walking,secondhalf,25,250
-# speed while chasing, per half of video
-velmag_ctr,chasing,firsthalf,25,250
-velmag_ctr,chasing,secondhalf,25,250
+duration,backup,any,5,500
 
-# change in orientation while walking
-absdtheta,walking,any,50,500
-absdtheta,walking_notchasing,any,50,500
-# change in orientation while chasing
-absdtheta,chasing,any,50,500
-# change in orientation while stopped (debugging only)
-absdtheta,stopped,any,50,500
-# change in orientation while jumping
-absdtheta,jumping,any,2,500
-# change in orientation while turning
-absdtheta,pivottail,any,25,500
-# change in orientation while walking near the wall
-absdtheta,walking_nearwall,any,50,500
-absdtheta,walking_notchasing_nearwall,any,50,500
-# change in orientation while walking near another fly
-absdtheta,walking_nearfly,any,50,500
-absdtheta,walking_notchasing_nearfly,any,50,500
-# change in orientation while walking, per half of video
-absdtheta,walking,firsthalf,25,250
-absdtheta,walking,secondhalf,25,250
+duration,bodyturn,any,5,500
 
-# change in velocity direction while walking
-absdphi,walking,any,50,500
-absdphi,walking_notchasing,any,50,500
-# change in velocity direction while chasing
-absdphi,chasing,any,50,500
-# change in velocity direction while jumping
-absdphi,jumping,any,2,500
-# change in velocity direction while turning
-absdphi,pivottail,any,25,500
-# change in velocity direction while walking near the wall
-absdphi,walking_nearwall,any,50,500
-absdphi,walking_notchasing_nearwall,any,50,500
-# change in velocity direction while walking near another fly
-absdphi,walking_nearfly,any,50,500
-absdphi,walking_notchasing_nearfly,any,50,500
+duration,chase,any,5,500
 
-# forward velocity while walking
-du_ctr,walking,any,50,500
-du_ctr,walking_notchasing,any,50,500
-# forward velocity while chasing
-du_ctr,chasing,any,50,500
-# forward velocity while stopped (debugging only)
-du_ctr,stopped,any,50,500
-# forward velocity while jumping
-du_ctr,jumping,any,2,500
-# forward velocity while backing up
-du_ctr,backup,any,25,500
-# forward velocity while crabwalking
-du_ctr,crabwalk,any,25,500
-# forward velocity while touching
-du_ctr,touch,any,50,500
-# forward velocity while walking near the wall
-du_ctr,walking_nearwall,any,50,500
-du_ctr,walking_notchasing_nearwall,any,50,500
-# forward velocity while walking near another fly
-du_ctr,walking_nearfly,any,50,500
-du_ctr,walking_notchasing_nearfly,any,50,500
+duration,copulation,any,5,500
 
-# sideways velocity while walking
-absdv_ctr,walking,any,50,500
-absdv_ctr,walking_notchasing,any,50,500
-# sideways velocity while chasing
-absdv_ctr,chasing,any,50,500
-# sideways velocity while stopped (debugging only)
-absdv_ctr,stopped,any,50,500
-# sideways velocity while jumping
-absdv_ctr,jumping,any,2,500
-# sideways velocity while crabwalking
-absdv_ctr,crabwalk,any,25,500
-# sideways velocity while backing up
-absdv_ctr,backup,any,25,500
-# sideways velocity while touching
-absdv_ctr,touch,any,50,500
-# sideways velocity while walking near the wall
-absdv_ctr,walking_nearwall,any,50,500
-absdv_ctr,walking_notchasing_nearwall,any,50,500
-# sideways velocity while walking near another fly
-absdv_ctr,walking_nearfly,any,50,500
-absdv_ctr,walking_notchasing_nearfly,any,50,500
+duration,crabwalkall,any,5,500
 
-# difference between orientation and velocity direction while walking
-absphisideways,walking,any,50,500
-absphisideways,walking_notchasing,any,50,500
-# difference between orientation and velocity direction while chasing
-absphisideways,chasing,any,50,500
-# difference between orientation and velocity direction while crabwalking
-absphisideways,crabwalk,any,25,500
-# difference between orientation and velocity direction while backing up
-absphisideways,backup,any,25,500
-# difference between orientation and velocity direction while touching
-absphisideways,touch,any,50,500
-# difference between orientation and velocity direction while walking near the wall
-absphisideways,walking_nearwall,any,50,500
-absphisideways,walking_notchasing_nearwall,any,50,500
-# difference between orientation and velocity direction while walking near another fly
-absphisideways,walking_nearfly,any,50,500
-absphisideways,walking_notchasing_nearfly,any,50,500
+duration,crabwalkextreme,any,5,500
 
-# center of rotation
-corfrac_maj,moving,any,50,500
-corfrac_maj,chasing,any,50,500
-corfrac_maj,walking,any,50,500
-corfrac_maj,pivottail,any,50,500
-corfrac_maj,crabwalk,any,50,500
-corfrac_maj,backup,any,50,500
-corfrac_maj,moving_notchasing,any,50,500
+duration,jump,any,5,500
 
-############################ social #############################
+duration,pivotcenter,any,5,500
 
-# distance to closest fly while stopped
-dnose2ell,stopped,any,50,500
-# distance to closest fly while moving
-dnose2ell,moving,any,50,500
-dnose2ell,moving_notchasing,any,50,500
-# distance to closest fly while walking
-dnose2ell,walking,any,50,500
-dnose2ell,walking_notchasing,any,50,500
-# distance to closest fly while chasing
-dnose2ell,chasing,any,50,500
-# distance to closest fly while jumping
-dnose2ell,jumping,any,2,500
-# distance to closest fly while touching
-dnose2ell,touch,any,50,500
-# distance to closest fly while crabwalking
-dnose2ell,crabwalk,any,25,500
-# distance to closest fly while backing up
-dnose2ell,backup,any,25,500
-# distance to closest fly while wing grooming
-dnose2ell,winggrooming,any,50,500
-# distance to closest fly while pivottailing
-dnose2ell,pivottail,any,25,500
+duration,pivottail,any,5,500
 
-# distance to closest fly while stopped
-dcenter,stopped,any,50,500
-# distance to closest fly while moving
-dcenter,moving,any,50,500
-dcenter,moving_notchasing,any,50,500
-# distance to closest fly while walking
-dcenter,walking,any,50,500
-dcenter,walking_notchasing,any,50,500
-# distance to closest fly while chasing
-dcenter,chasing,any,50,500
-# distance to closest fly while jumping
-dcenter,jumping,any,2,500
+duration,righting,any,5,500
 
-# distance to closest fly while stopped
-dell2nose,stopped,any,50,500
-# distance to closest fly while moving
-dell2nose,moving,any,50,500
-dell2nose,moving_notchasing,any,50,500
-# distance to closest fly while walking
-dell2nose,walking,any,50,500
-dell2nose,walking_notchasing,any,50,500
-# distance to closest fly while chasing
-dell2nose,chasing,any,50,500
-# distance to closest fly while jumping
-dell2nose,jumping,any,2,500
+duration,stop,any,5,500
 
-# angle subtended by closest fly while stopped
-anglesub,stopped_nearfly,any,50,500
-# angle subtended by closest fly while moving
-anglesub,moving_nearfly,any,50,500
-anglesub,moving_notchasing_nearfly,any,50,500
-# angle subtended by closest fly while walking
-anglesub,walking_nearfly,any,50,500
-anglesub,walking_notchasing_nearfly,any,50,500
-# angle subtended by closest fly while chasing
-anglesub,chasing_nearfly,any,50,500
-# angle subtended by closest fly while jumping
-anglesub,jumping_nearfly,any,2,500
+duration,touch,any,5,500
 
-# change in distance to closest fly while moving
-ddnose2ell,moving_nearfly,any,50,500
-ddnose2ell,moving_notchasing_nearfly,any,50,500
-# change in distance to closest fly while walking
-ddnose2ell,walking_nearfly,any,50,500
-ddnose2ell,walking_notchasing_nearfly,any,50,500
-# change in distance to closest fly while chasing
-ddnose2ell,chasing_nearfly,any,50,500
-# change in distance to closest fly while jumping
-ddnose2ell,jumping_nearfly,any,2,500
+duration,walk,any,5,500
 
-# change in distance to closest fly while stopped
-ddell2nose,stopped_nearfly,any,50,500
-# change in distance to closest fly while moving
-ddell2nose,moving_nearfly,any,50,500
-ddell2nose,moving_notchasing_nearfly,any,50,500
-# change in distance to closest fly while walking
-ddell2nose,walking_nearfly,any,50,500
-ddell2nose,walking_notchasing_nearfly,any,50,500
-# change in distance to closest fly while chasing
-ddell2nose,chasing,any,50,500
-# change in distance to closest fly while jumping
-ddell2nose,jumping_nearfly,any,2,500
+duration,wingextension,any,5,500
 
-# magveldiff to closest fly while moving
-magveldiff_nose2ell,moving_nearfly,any,50,500
-magveldiff_nose2ell,moving_notchasing_nearfly,any,50,500
-# magveldiff to closest fly while walking
-magveldiff_nose2ell,walking_nearfly,any,50,500
-magveldiff_nose2ell,walking_notchasing_nearfly,any,50,500
-# magveldiff to closest fly while chasing
-magveldiff_nose2ell,chasing,any,50,500
+duration,wingflick,any,5,500
 
-# veltoward closest fly while moving
-veltoward_nose2ell,moving_nearfly,any,50,500
-veltoward_nose2ell,moving_notchasing_nearfly,any,50,500
-# veltoward closest fly while walking
-veltoward_nose2ell,walking_nearfly,any,50,500
-veltoward_nose2ell,walking_notchasing_nearfly,any,50,500
-# veltoward closest fly while chasing
-veltoward_nose2ell,chasing,any,50,500
-# veltoward closest fly while jumping
-veltoward_nose2ell,jumping_nearfly,any,2,500
+duration,winggrooming,any,5,500
 
-# absthetadiff closest fly while stopped
-absthetadiff_center,stopped_nearfly,any,50,500
-# absthetadiff closest fly while moving
-absthetadiff_nose2ell,moving_nearfly,any,50,500
-absthetadiff_nose2ell,moving_notchasing_nearfly,any,50,500
-# absthetadiff closest fly while walking
-absthetadiff_nose2ell,walking_nearfly,any,50,500
-absthetadiff_nose2ell,walking_notchasing_nearfly,any,50,500
-# absthetadiff closest fly while chasing
-absthetadiff_nose2ell,chasing,any,50,500
+duration,move,any,25,500
 
-# absphidiff closest fly while walking
-absphidiff_nose2ell,walking_nearfly,any,50,500
-absphidiff_nose2ell,walking_notchasing_nearfly,any,50,500
-# absphidiff closest fly while chasing
-absphidiff_nose2ell,chasing,any,50,500
-
-# absanglefrom1to2 closest fly while stopped
-absanglefrom1to2_nose2ell,stopped_nearfly,any,50,500
-# absanglefrom1to2 closest fly while moving
-absanglefrom1to2_nose2ell,moving_nearfly,any,50,500
-absanglefrom1to2_nose2ell,moving_notchasing_nearfly,any,50,500
-# absanglefrom1to2 closest fly while walking
-absanglefrom1to2_nose2ell,walking_nearfly,any,50,500
-absanglefrom1to2_nose2ell,walking_notchasing_nearfly,any,50,500
-# absanglefrom1to2 closest fly while chasing
-absanglefrom1to2_nose2ell,chasing,any,50,500
-# absanglefrom1to2 closest fly while jumping
-absanglefrom1to2_nose2ell,jumping,any,50,500
-
-# angleonclosestfly closest fly while stopped
-absangleonclosestfly,stopped_nearfly,any,50,500
-# angleonclosestfly closest fly while moving
-absangleonclosestfly,moving_nearfly,any,50,500
-absangleonclosestfly,moving_notchasing_nearfly,any,50,500
-# angleonclosestfly closest fly while walking
-absangleonclosestfly,walking_nearfly,any,50,500
-absangleonclosestfly,walking_notchasing_nearfly,any,50,500
-# angleonclosestfly closest fly while chasing
-absangleonclosestfly,chasing,any,50,500
-# angleonclosestfly closest fly while touching
-absangleonclosestfly,touch,any,50,500
-
-# number of flies close while stopped
-nflies_close,stopped,any,50,500
-# number of flies close while moving
-nflies_close,moving,any,50,500
-nflies_close,moving_notchasing,any,50,500
-# number of flies close while walking
-nflies_close,walking,any,50,500
-nflies_close,walking_notchasing,any,50,500
-# number of flies close while chasing
-nflies_close,chasing,any,50,500
-# number of flies close while jumping
-nflies_close,jumping,any,2,500
-
-############################ relationship to wall ############################
-
-# angle to wall while stopped near the wall
-absangle2wall,stopped_nearwall,any,50,500
-# angle to wall while walking near the wall
-absangle2wall,walking_nearwall,any,50,500
-absangle2wall,walking_notchasing_nearwall,any,50,500
-# angle to wall at start of jump near the wall
-absangle2wall,jumpstart_nearwall,any,2,500
-
-# change in angle to wall while moving near the wall
-absdangle2wall,moving_nearwall,any,50,500
-absdangle2wall,moving_notchasing_nearwall,any,50,500
-# change in angle to wall while walking near the wall
-absdangle2wall,walking_nearwall,any,50,500
-absdangle2wall,walking_notchasing_nearwall,any,50,500
-
-# distance to wall while stopped
-dist2wall,stopped,any,50,500
-# distance to wall while moving
-dist2wall,moving,any,50,500
-dist2wall,moving_notchasing,any,50,500
-# distance to wall while walking
-dist2wall,walking,any,50,500
-dist2wall,walking_notchasing,any,50,500
-# distance to wall while chasing
-dist2wall,chasing,any,50,500
-# distance to wall while jumping
-dist2wall,jumping,any,2,500
-# distance to wall while backing up
-dist2wall,backup,any,25,500
-
-# distance to wall while crabwalking
-dist2wall,crabwalk,any,25,500
-# distance to wall while pivottail
-dist2wall,pivottail,any,25,500
-# distance to wall while touching
-dist2wall,touch,any,25,500
-# distance to wall while wing grooming
-dist2wall,winggrooming,any,25,500
-
-# change in distance to wall while moving near the wall
-ddist2wall,moving_nearwall,any,50,500
-ddist2wall,moving_notchasing_nearwall,any,50,500
-# change in distance to wall while walking near the wall
-ddist2wall,walking_nearwall,any,50,500
-ddist2wall,walking_notchasing_nearwall,any,50,500
-
-#################### appearance #####################
-
-areasmooth,any,any,50,500
-
-a_mm,any,any,50,500
-
-b_mm,any,any,50,500
-
-#################### global position ####################
-
-x_mm,any,any,50,500
-x_mm,walking,any,50,500
-x_mm,stopped,any,50,500
-x_mm,chasing,any,50,500
-x_mm,jumping,any,2,500
-
-y_mm,any,any,50,500
-y_mm,walking,any,50,500
-y_mm,stopped,any,50,500
-y_mm,chasing,any,50,500
-y_mm,jumping,any,2,500

@@ -11,7 +11,8 @@ function diagnostics = TemperatureDiagnostics(expdir,varargin)
 
 version = '0.1';
 timestamp = datestr(now,'yyyymmddTHHMMSS');
-fprintf(logfid,'Running TemperatureDiagnostics version %s analysis_protocol %s at %s\n',version,analysis_protocol,timestamp);
+real_analysis_protocol = GetRealAnalysisProtocol(analysis_protocol,settingsdir);
+fprintf(logfid,'Running TemperatureDiagnostics version %s analysis_protocol %s (linked to %s) at %s\n',version,analysis_protocol,real_analysis_protocol,timestamp);
 
 %% read parameters
 
@@ -54,6 +55,15 @@ diagnostics.std = nanstd(stream,1);
 
 %% write to file
 temperaturediagnosticsfile = fullfile(expdir,dataloc_params.temperaturediagnosticsfilestr);
+
+if exist(temperaturediagnosticsfile,'file'),
+  try
+    delete(temperaturediagnosticsfile);
+  catch ME,
+    fprintf(logfid,'Could not delete txt file %s: %s\n',temperaturediagnosticsfile,getReport(ME));
+  end
+end
+
 fid = fopen(temperaturediagnosticsfile,'w');
 if fid < 0,
   fprintf(logfid,'Could not open temperature diagnostics file %s for writing\n',temperaturediagnosticsfile);
@@ -65,3 +75,27 @@ else
   end
   fclose(fid);
 end
+
+%% and mat file
+
+temperaturediagnosticsmatfile = fullfile(expdir,dataloc_params.temperaturediagnosticsmatfilestr);
+
+diagnostics.version = version;
+diagnostics.timestamp = timestamp;
+diagnostics.analysis_protocol = analysis_protocol;
+diagnostics.linked_analysis_protocol = real_analysis_protocol;
+
+if exist(temperaturediagnosticsmatfile,'file'),
+  try
+    delete(temperaturediagnosticsmatfile);
+  catch ME,
+    fprintf(logfid,'Could not delete mat file %s: %s\n',temperaturediagnosticsmatfile,getReport(ME));
+  end
+end
+
+try
+  save(temperaturediagnosticsmatfile,'-struct','diagnostics');
+catch ME,
+  fprintf(logfid,'Could not save to mat file %s: %s\n',temperaturediagnosticsmatfile,getReport(ME));
+end
+  

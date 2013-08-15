@@ -52,6 +52,8 @@ end
 % conversion from pixels to mm
 if isfield(traj,'pxpermm'),
   obj.pxpermm(n) = traj(1).pxpermm;
+else
+  obj.pxpermm(n) = nan;
 end
 % name of movie
 if isfield(traj,'moviename'),
@@ -64,4 +66,6 @@ obj.nframes(flies) = [traj.nframes];
 % fps
 if isfield(traj,'fps'),
   obj.fps(n) = traj(1).fps;
+else
+  obj.fps(n) = nan;
 end

@@ -1,5 +1,7 @@
 function FlyBowlComputePerFrameStats2(expdir,varargin)
 
+version = '0.1';
+
 special_cases = {'fractime','duration','boutfreq'};
 
 [analysis_protocol,settingsdir,datalocparamsfilestr,...
@@ -56,6 +58,25 @@ trx.AddExpDir(expdir,'dooverwrite',false,'openmovie',false);
 %   end
 %   trx.LoadLabelsFromFile(labelfiles{i});
 % end
+
+%% log file
+
+if isfield(trx.dataloc_params,'perframestats_logfilestr') && ~debug,
+  logfile = fullfile(expdir,trx.dataloc_params.perframestats_logfilestr);
+  logfid = fopen(logfile,'a');
+  if logfid < 1,
+    warning('Could not open log file %s\n',logfile);
+    logfid = 1;
+  end
+else
+  logfid = 1;
+end
+
+timestamp = datestr(now,'yyyymmddTHHMMSS');
+real_analysis_protocol = GetRealAnalysisProtocol(analysis_protocol,settingsdir);
+
+fprintf(logfid,'\n\n***\nRunning FlyBowlComputePerFrameStats2 version %s analysis_protocol %s (linked to %s) at %s\n',version,analysis_protocol,real_analysis_protocol,timestamp);
+
 
 %% read the stats params
 
@@ -188,7 +209,7 @@ for i = 1:numel(stats_perframefeatures),
       [bout_starts] = ComputeBouts(doanalyze,doanalyze_fly);
       nbouts = numel(bout_starts);
       statsperflycurr.mean(fly) = nbouts / nnz(doanalyze_fly);
-      statsperflycurr.Z(fly) = nnz(doanalyze_ffly);
+      statsperflycurr.Z(fly) = nnz(doanalyze_fly);
       statsperflycurr.std(fly) = nan;
       statsperflycurr.prctiles(:,fly) = nan;
       alldata = alldata + nbouts;
@@ -260,7 +281,8 @@ if ~debug,
     end
   end
   save(statsmatsavename,'statsperfly','statsperexp','frameconditiondict',...
-    'flyconditiondict','stats_params');
+    'flyconditiondict','stats_params',...
+    'version','timestamp','analysis_protocol','real_analysis_protocol');
 end
 end
 
@@ -527,7 +549,8 @@ if ~debug,
     end
   end
   save(histmatsavename,'histperfly','histperexp','bins','frameconditiondict',...
-    'flyconditiondict');
+    'flyconditiondict','histperframefeaturesfile','hist_perframefeatures',...
+    'version','timestamp','analysis_protocol','real_analysis_protocol');
   SaveAllPerFrameHistTxtFile(histtxtsavename,histperfly,histperexp);
 end
 
@@ -572,4 +595,13 @@ end
 % close all;
 
 end
+
+%% close log
+
+fprintf(logfid,'Finished running FlyBowlComputePerFrameStats2 at %s.\n',datestr(now,'yyyymmddTHHMMSS'));
+
+if logfid > 1,
+  fclose(logfid);
+end
+
 

@@ -41,6 +41,8 @@ classdef Trx < handle
   
   properties (SetAccess = protected, GetAccess = public)
 
+    version = '0.1';
+    
     % number of flies
     nflies = 0;
     
@@ -274,10 +276,12 @@ classdef Trx < handle
       filename = obj.GetPerFrameFile(fn,n);
       try
         if ~obj.DEBUG,
+          timestamp = datestr(now,'yyyymmddTHHMMSS'); %#ok<NASGU>
+          version = obj.version; %#ok<PROP,NASGU>
           if exist(filename,'file'),
             delete(filename);
           end
-          save(filename,'data','units');
+          save(filename,'data','units','timestamp','version');
         end
       catch ME
         warning('Could not save %s data to %s: %s',fn,filename,getReport(ME));

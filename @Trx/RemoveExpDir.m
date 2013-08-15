@@ -10,10 +10,24 @@ end
 obj.expdirs(n) = [];
 
 % clear video info
-obj.nrs(n) = [];
-obj.ncs(n) = [];
-obj.ncolors(n) = [];
-obj.nframes(n) = [];
+if numel(obj.nrs) >= n,
+  obj.nrs(n) = [];
+  obj.ncs(n) = [];
+  obj.ncolors(n) = [];
+  obj.movie_nframes(n) = [];
+end
+
+flies = obj.exp2flies{n};
+
+% clear trajectory frame info
+obj.firstframes(flies) = [];
+obj.endframes(flies) = [];
+obj.nframes(flies) = [];
+
+% clear fps
+if numel(obj.fps) >= n,
+  obj.fps(n) = [];
+end
 
 % clear trajectory files
 obj.trxfiles(n) = [];
@@ -43,6 +57,7 @@ end
 if numel(obj.datacached) >= n,
   obj.datacached(n) = [];
   obj.fnscached(n) = [];
+  obj.nfnscached(n) = [];
 end
 if numel(obj.ndatacachedperexp) >= n,
   obj.ndatacached = obj.ndatacached - obj.ndatacachedperexp(n);

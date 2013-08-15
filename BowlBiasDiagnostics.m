@@ -12,7 +12,8 @@ bias_diagnostics = struct;
 
 version = '0.1';
 timestamp = datestr(now,'yyyymmddTHHMMSS');
-fprintf(logfid,'Running BowlBiasDiagnostics version %s analysis_protocol %s at %s\n',version,analysis_protocol,timestamp);
+real_analysis_protocol = GetRealAnalysisProtocol(analysis_protocol,settingsdir);
+fprintf(logfid,'Running BowlBiasDiagnostics version %s analysis_protocol %s (linked to %s) at %s\n',version,analysis_protocol,real_analysis_protocol,timestamp);
 
 %% read experiment trx
 
@@ -352,27 +353,34 @@ linkaxes(hax([7,8]),'x');
 %% save image
 
 savename = fullfile(expdir,trx.dataloc_params.biasdiagnosticsimagefilestr);
-try
-  if exist(savename,'file'),
+
+if exist(savename,'file'),
+  try
     delete(savename);
+  catch ME,
+    fprintf(logfid,'Could not delete file %s: %s\n',savename,getReport(ME));
   end
+end
+
+try
   set(hfig,'Units','Pixels','Position',params.figpos);
   save2png(savename,hfig);
 catch ME,
   fprintf(logfid,'Could not write bias diagnostics image to file %s:\n%s\n',savename,getReport(ME));
 end
-  
-%% save to mat file
-biasdiagnosticsmatfilename = fullfile(expdir,trx.dataloc_params.biasdiagnosticsmatfilestr);
-try
-  save(biasdiagnosticsmatfilename,'-struct','bias_diagnostics');
-catch ME,
-  fprintf(logfid,'Could not save bias diagnostics to mat file %s:\n%s\n',biasdiagnosticsmatfilename,getReport(ME));
-end
 
 %% write to text file
 
 biasdiagnosticsfilename = fullfile(expdir,trx.dataloc_params.biasdiagnosticsfilestr);
+
+if exist(biasdiagnosticsfilename,'file'),
+  try
+    delete(biasdiagnosticsfilename);
+  catch ME,
+    fprintf(logfid,'Could not delete txt file %s: %s\n',biasdiagnosticsfilename,getReport(ME));
+  end
+end
+
 fid = fopen(biasdiagnosticsfilename,'w');
 if fid < 0,
   fprintf(logfid,'Could not open bias diagnostics file %s for writing\n',biasdiagnosticsfilename);
@@ -384,4 +392,28 @@ else
     fprintf(fid,'\n');
   end
   fclose(fid);
+end
+
+%% save to mat file
+
+bias_diagnostics.version = version;
+bias_diagnostics.biasdiagnosticsparamsfile = biasdiagnosticsparamsfile;
+bias_diagnostics.params = params;
+bias_diagnostics.analysis_protocol = analysis_protocol;
+bias_diagnostics.linked_analysis_protocol = real_analysis_protocol;
+
+biasdiagnosticsmatfilename = fullfile(expdir,trx.dataloc_params.biasdiagnosticsmatfilestr);
+
+if exist(biasdiagnosticsmatfilename,'file'),
+  try
+    delete(biasdiagnosticsmatfilename);
+  catch ME,
+    fprintf(logfid,'Could not delete mat file %s: %s\n',biasdiagnosticsmatfilename,getReport(ME));
+  end
+end
+
+try
+  save(biasdiagnosticsmatfilename,'-struct','bias_diagnostics');
+catch ME,
+  fprintf(logfid,'Could not save bias diagnostics to mat file %s:\n%s\n',biasdiagnosticsmatfilename,getReport(ME));
 end

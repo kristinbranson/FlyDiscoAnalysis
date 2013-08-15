@@ -1,6 +1,6 @@
 function [trx,summary_diagnostics,X] = FlyBowlClassifySex2(expdir,varargin)
 
-version = '0.1';
+version = '0.2';
 
 %% parse parameters
 [analysis_protocol,settingsdir,datalocparamsfilestr,dosave] = ...
@@ -28,7 +28,9 @@ else
 end
 
 timestamp = datestr(now,'yyyymmddTHHMMSS');
-fprintf(logfid,'\n\n***\nRunning FlyBowlClassSex2 version %s analysis_protocol %s at %s\n',version,analysis_protocol,timestamp);
+real_analysis_protocol = GetRealAnalysisProtocol(analysis_protocol,settingsdir);
+
+fprintf(logfid,'\n\n***\nRunning FlyBowlClassSex2 version %s analysis_protocol %s (linked to %s) at %s\n',version,analysis_protocol,real_analysis_protocol,timestamp);
 
 %% load the data
 
@@ -242,6 +244,7 @@ end
 
 %% write diagnostics
 
+sexclassifierinfo = struct('version',version,'analysis_protocol',analysis_protocol,'linked_analysis_protocol',real_analysis_protocol,'timestamp',timestamp); %#ok<NASGU>
 sexclassifierdiagnosticsfile = fullfile(expdir,dataloc_params.sexclassifierdiagnosticsfilestr);
 if dosave,
   if exist(sexclassifierdiagnosticsfile,'file'),
@@ -261,6 +264,10 @@ fns = fieldnames(summary_diagnostics);
 for i = 1:numel(fns),
   fprintf(fid,'%s,%f\n',fns{i},summary_diagnostics.(fns{i}));
 end
+fns = fieldnames(sexclassifierinfo);
+for i = 1:numel(fns),
+  fprintf(fid,'%s,%s\n',fns{i},sexclassifierinfo.(fns{i}));
+end
 
 if dosave && fid > 1,
   fclose(fid);
@@ -269,7 +276,6 @@ end
 %% resave
 
 if dosave,
-  sexclassifierinfo = struct('version',version,'analysis_protocol',analysis_protocol,'timestamp',timestamp); %#ok<NASGU>
   try
     save('-append',trxfile,'trx','sexclassifierinfo');
   catch %#ok<CTCH>

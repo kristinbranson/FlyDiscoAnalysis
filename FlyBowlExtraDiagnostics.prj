@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <deployment-project plugin="plugin.deploytool" plugin-version="1.0">
-  <configuration target="target.standalone" target-name="Standalone Application" name="FlyBowlExtraDiagnostics" location="/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis" file="/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/FlyBowlExtraDiagnostics.prj" build-checksum="641580828">
+  <configuration target="target.standalone" target-name="Standalone Application" name="FlyBowlExtraDiagnostics" location="/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis" file="/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/FlyBowlExtraDiagnostics.prj" build-checksum="3073373366">
     <param.project.name>/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/FlyBowlExtraDiagnostics.prj</param.project.name>
     <param.target.type>Standalone Application</param.target.type>
     <param.appname>FlyBowlExtraDiagnostics</param.appname>
@@ -31,7 +31,9 @@
     <param.disable.display>false</param.disable.display>
     <param.create.log>false</param.create.log>
     <param.log.file />
-    <param.user.defined.mcr.options />
+    <param.user.defined.mcr.options>
+      <item>-singleCompThread</item>
+    </param.user.defined.mcr.options>
     <unset>
       <param.project.name />
       <param.target.type />
@@ -55,28 +57,12 @@
       <param.disable.display />
       <param.create.log />
       <param.log.file />
-      <param.user.defined.mcr.options />
     </unset>
     <fileset.main>
       <file>${PROJECT_ROOT}/FlyBowlExtraDiagnostics.m</file>
     </fileset.main>
     <fileset.resources>
-      <file>${PROJECT_ROOT}/@Trx</file>
-      <file>${PROJECT_ROOT}/BkgdModelDiagnostics.m</file>
-      <file>${PROJECT_ROOT}/BowlBiasDiagnostics.m</file>
-      <file>${PROJECT_ROOT}/ExpBGFGModel_compute_log_lik_appearance_given_back.m</file>
-      <file>${PROJECT_ROOT}/ExpBGFGModel_compute_log_lik_appearance_given_fore.m</file>
-      <file>${PROJECT_ROOT}/ExpBGFGModel_compute_log_lik_dist_obj.m</file>
-      <file>${PROJECT_ROOT}/ExpBGFGModel_lik.m</file>
-      <file>${PROJECT_ROOT}/ExpFGBGModel_compute_log_lik.m</file>
-      <file>${PROJECT_ROOT}/ExpFGBGModel_compute_log_lik_ratio.m</file>
-      <file>${PROJECT_ROOT}/ReadParams.m</file>
-      <file>${PROJECT_ROOT}/TemperatureDiagnostics.m</file>
-      <file>${PROJECT_ROOT}/save2png.m</file>
       <file>/groups/branson/home/bransonk/tracking/code/Ctrax/matlab/netlab</file>
-      <file>/groups/branson/home/bransonk/tracking/code/JCtrax/filehandling</file>
-      <file>/groups/branson/home/bransonk/tracking/code/JCtrax/misc</file>
-      <file>/groups/branson/home/bransonk/tracking/code/JCtrax/misc/createsubplots.m</file>
     </fileset.resources>
     <fileset.package />
     <build-deliverables>
@@ -89,7 +75,6 @@
       <root>/localhome/bransonk/software/matlab/R2012a</root>
       <path>
         <directory>/groups/branson/home/bransonk/tracking/code/Ctrax/matlab/netlab</directory>
-        <directory>${PROJECT_ROOT}/../SAGE/MATLABInterface/Trunk</directory>
         <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/filehandling</directory>
         <directory>/groups/branson/home/bransonk/tracking/code/JCtrax/misc</directory>
         <directory>${MATLAB_ROOT}/toolbox/matlab/demos</directory>
@@ -241,7 +226,7 @@
       <vista>false</vista>
       <linux>true</linux>
       <solaris>false</solaris>
-      <osver>2.6.32-41-generic</osver>
+      <osver>2.6.32-50-generic</osver>
       <os32>false</os32>
       <os64>true</os64>
       <arch>glnxa64</arch>

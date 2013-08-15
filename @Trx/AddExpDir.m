@@ -33,7 +33,13 @@ if openmovie && ~isempty(obj.dataloc_params.moviefilestr),
 end
 
 % read trajectories
-obj.trxfiles{n} = fullfile(obj.expdirs{n},obj.dataloc_params.trxfilestr);
+if isfield(obj.dataloc_params,'wingtrxfilestr') && ...
+    exist(fullfile(obj.expdirs{n},obj.dataloc_params.wingtrxfilestr),'file'),
+  trxfilestr = obj.dataloc_params.wingtrxfilestr;
+else
+  trxfilestr = obj.dataloc_params.trxfilestr;
+end
+obj.trxfiles{n} = fullfile(obj.expdirs{n},trxfilestr);
 if isempty(traj),
   if ~exist(obj.trxfiles{n},'file'),
     error('Trajectory file %s does not exist',obj.trxfiles{n});

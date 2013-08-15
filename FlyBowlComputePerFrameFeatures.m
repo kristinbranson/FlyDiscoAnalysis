@@ -1,6 +1,6 @@
 function trx = FlyBowlComputePerFrameFeatures(expdir,varargin)
 
-version = '0.1';
+version = '0.2';
 
 [analysis_protocol,settingsdir,datalocparamsfilestr,forcecompute,perframefns,DEBUG] = ...
   myparse(varargin,...
@@ -41,16 +41,22 @@ else
 end
 
 timestamp = datestr(now,'yyyymmddTHHMMSS');
-fprintf(logfid,'\n\n***\nRunning FlyBowlComputePerFrameFeatures version %s analysis_protocol %s at %s\n',version,analysis_protocol,timestamp);
+real_analysis_protocol = GetRealAnalysisProtocol(analysis_protocol,settingsdir);
+
+fprintf(logfid,'\n\n***\nRunning FlyBowlComputePerFrameFeatures version %s analysis_protocol %s (linked to %s) at %s\n',version,analysis_protocol,real_analysis_protocol,timestamp);
 
 
 %% compute per-frame features
 
-if isempty(perframefns) % added CSC 20110321: optionally specify to-be-computed frames as parameter, reads from perframefnsfile (as before) otherwise
-  perframefnsfile = fullfile(trx.settingsdir,trx.analysis_protocol,trx.dataloc_params.perframefnsfilestr);
+perframefnsfile = fullfile(trx.settingsdir,trx.analysis_protocol,trx.dataloc_params.perframefnsfilestr);
+if isempty(perframefns),
   perframefns = importdata(perframefnsfile);
 end
 nfns = numel(perframefns);
+
+% what files exist already
+tmp = dir(fullfile(perframefnsfile,'*.mat'));
+perframefns_preexist = regexprep({tmp.name},'\.mat$','');
 
 % clean this data to force computation
 if forcecompute,
@@ -65,6 +71,33 @@ for i = 1:nfns,
   trx.(fn); 
 end
 
+%% save info to a mat file
+
+filename = fullfile(expdir,trx.dataloc_params.perframeinfomatfilestr);
+fprintf(logfid,'Saving debug info to file %s...\n',filename);
+cpffinfo = struct;
+cpffinfo.perframefns = perframefns;
+cpffinfo.forcecompute = forcecompute;
+cpffinfo.perframefns_preexist = perframefns_preexist;
+cpffinfo.version = version;
+cpffinfo.analysis_protocol = analysis_protocol;
+cpffinfo.linked_analysis_protocol = real_analysis_protocol;
+cpffinfo.timestamp = timestamp;
+cpffinfo.landmark_params = trx.landmark_params;
+cpffinfo.perframe_params = trx.perframe_params; %#ok<STRNU>
+
+if exist(filename,'file'),
+  try %#ok<TRYNC>
+    delete(filename);
+  end
+end
+try
+  save(filename,'-struct','cpffinfo');
+catch ME,
+  warning('Could not save information to file %s',filename);
+end
+
+
 %% close log
 
 fprintf(logfid,'Finished running FlyBowlComputePerFrameFeatures at %s.\n',datestr(now,'yyyymmddTHHMMSS'));
@@ -72,3 +105,4 @@ fprintf(logfid,'Finished running FlyBowlComputePerFrameFeatures at %s.\n',datest
 if logfid > 1,
   fclose(logfid);
 end
+

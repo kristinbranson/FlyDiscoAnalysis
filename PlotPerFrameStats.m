@@ -16,44 +16,69 @@ if ~ishandle(hfig),
   figure(hfig);
 end
 
+width = min(position(3),position(3)/100*numel(stats_perframefeatures));
+position(3) = width;
+
 clf(hfig);
 set(hfig,'Units','pixels','Visible',visible,'Position',position);
 hax = axes('Position',axposition,'Parent',hfig);
 
 %% fns corresponding to fields
 
-if isempty(allfields),
-  allfields = unique({stats_perframefeatures.field});
-end
-nfields = numel(allfields);
+fieldnamesentered = false;
 
-fns = {};
-flyconditions = {};
-frameconditions = {};
-fields = {};
-% only allow conditions in allframeconditions, allflyconditions
-goodidx = true(1,numel(stats_perframefeatures));
-if ~isempty(allframeconditions),
-  goodidx = ismember({stats_perframefeatures.framecondition},allframeconditions);
-end
-if ~isempty(allflyconditions),
-  goodidx = goodidx & ismember({stats_perframefeatures.flycondition},allflyconditions);
-end
-
-for fieldi = 1:nfields,
-  field = allfields{fieldi};
-  idx = find(strcmp(field,{stats_perframefeatures.field}) & goodidx);
-  for i = idx,
-    fns{end+1} = sprintf('%s_fly%s_frame%s',field,stats_perframefeatures(i).flycondition,...
-      stats_perframefeatures(i).framecondition); %#ok<AGROW>
-    % truncate name
-    if numel(fns{end}) > 63,
-      fns{end} = fns{end}(1:63);
+if iscell(stats_perframefeatures),
+  fns = stats_perframefeatures;
+  
+  m = regexp(fns,'^(.*)_fly(.*)_frame(.*)$','once','tokens');
+  fields = cellfun(@(x) x{1},m,'UniformOutput',false);
+  flyconditions = cellfun(@(x) x{2},m,'UniformOutput',false);
+  frameconditions = cellfun(@(x) x{3},m,'UniformOutput',false);
+  for i = 1:numel(fns),
+    if numel(fns{i}) > 63,
+      fns{i} = fns{i}(1:63);
     end
-    fields{end+1} = field;
   end
-  flyconditions = [flyconditions,{stats_perframefeatures(idx).flycondition}]; %#ok<AGROW>
-  frameconditions = [frameconditions,{stats_perframefeatures(idx).framecondition}]; %#ok<AGROW>
+  
+  
+  fieldnamesentered = true;
+  
+else
+  
+  if isempty(allfields),
+    allfields = unique({stats_perframefeatures.field});
+  end
+  nfields = numel(allfields);
+  
+  fns = {};
+  flyconditions = {};
+  frameconditions = {};
+  fields = {};
+  % only allow conditions in allframeconditions, allflyconditions
+  goodidx = true(1,numel(stats_perframefeatures));
+  if ~isempty(allframeconditions),
+    goodidx = ismember({stats_perframefeatures.framecondition},allframeconditions);
+  end
+  if ~isempty(allflyconditions),
+    goodidx = goodidx & ismember({stats_perframefeatures.flycondition},allflyconditions);
+  end
+  
+  for fieldi = 1:nfields,
+    field = allfields{fieldi};
+    idx = find(strcmp(field,{stats_perframefeatures.field}) & goodidx);
+    for i = idx,
+      fns{end+1} = sprintf('%s_fly%s_frame%s',field,stats_perframefeatures(i).flycondition,...
+        stats_perframefeatures(i).framecondition); %#ok<AGROW>
+      % truncate name
+      if numel(fns{end}) > 63,
+        fns{end} = fns{end}(1:63);
+      end
+      fields{end+1} = field;
+    end
+    flyconditions = [flyconditions,{stats_perframefeatures(idx).flycondition}]; %#ok<AGROW>
+    frameconditions = [frameconditions,{stats_perframefeatures(idx).framecondition}]; %#ok<AGROW>
+  end
+  
 end
 
 nfns = numel(fns);
@@ -144,17 +169,31 @@ if numel(allflyconditions) == 1 && numel(allframeconditions) == 1,
 elseif numel(allflyconditions) == 1,
   typestrs = cell(1,nfns);
   for i = 1:nfns,
-    typestrs{i} = sprintf('%s,%s',fields{i},frameconditions{i});
+    if strcmp(frameconditions{i},'any'),
+      typestrs{i} = fields{i};
+    else
+      typestrs{i} = sprintf('%s,%s',fields{i},frameconditions{i});
+    end
   end
 elseif numel(allframeconditions) == 1,
   typestrs = cell(1,nfns);
   for i = 1:nfns,
-    typestrs{i} = sprintf('%s,%s',fields{i},flyconditions{i});
+    if strcmp(flyconditions{i},'any'),
+      typestrs{i} = fields{i};
+    else
+      typestrs{i} = sprintf('%s,%s',fields{i},flyconditions{i});
+    end
   end
 else
   typestrs = cell(1,nfns);
   for i = 1:nfns,
-    typestrs{i} = sprintf('%s, %s, %s',fields{i},flyconditions{i},frameconditions{i});
+    typestrs{i} = fields{i};
+    if ~strcmp(flyconditions{i},'any'),
+      typestrs{i} = sprintf('%s, %s',typestrs{i},flyconditions{i});
+    end
+    if ~strcmp(frameconditions{i},'any'),
+      typestrs{i} = sprintf('%s, %s',typestrs{i},frameconditions{i});
+    end
   end
 end
 set(hax,'XTick',1:nfns,'XTickLabel',typestrs);

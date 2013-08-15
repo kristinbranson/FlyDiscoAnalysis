@@ -3,6 +3,8 @@ function [success,msgs,iserror] = FlyBowlAutomaticChecks_Complete(expdir,varargi
 version = '0.1';
 timestamp = datestr(now,'yyyymmddTHHMMSS');
 
+try
+
 success = true;
 msgs = {};
 
@@ -34,9 +36,10 @@ else
   logfid = 1;
 end
 
-fprintf(logfid,'\n\n***\nRunning FlyBowlAutomaticChecks_Complete version %s analysis_protocol %s at %s\n',version,analysis_protocol,timestamp);
+real_analysis_protocol = GetRealAnalysisProtocol(analysis_protocol,settingsdir);
 
-try
+fprintf(logfid,'\n\n***\nRunning FlyBowlAutomaticChecks_Complete version %s analysis_protocol %s (linked to %s) at %s\n',version,analysis_protocol,real_analysis_protocol,timestamp);
+
   
 %% more parameters
 
@@ -53,7 +56,9 @@ categories = {...
   'ctrax_infinity_bug',...
   'missing_registration_files',...
   'missing_sexclassification_files',...
+  'missing_wingtracking_files',...
   'missing_perframestats_files',...
+  'bad_jaaba_scores',...
   'missing_extra_diagnostics_files',...
   'missing_results_movie_files',...
   'missing_other_analysis_files',...
@@ -220,19 +225,54 @@ for i = 1:numel(check_params.required_files),
   end
 end
 
+%% check for scores files
+
+%try
+  jaabadetectparams = ReadParams(fullfile(settingsdir,analysis_protocol,dataloc_params.jaabadetectparamsfilestr));
+  [issuccess_scores,msgs_scores] = CheckScores({expdir},fullfile(settingsdir,analysis_protocol,jaabadetectparams.classifierparamsfiles));
+  if any(~issuccess_scores),
+    msgs{end+1} = ['Bad JAABA scores files:',sprintf('\n%s',msgs_scores{:})];
+    success = false;
+    iserror(category2idx.badjaabascores) = true;
+  elseif ~isempty(msgs_scores),
+    msgs(end+1:end+numel(msgs_scores)) = msgs_scores;
+  end
+% catch ME,
+%   msgs{end+1} = sprintf('Error checking JAABA scores files: %s',getReport(ME));
+%   success = false;
+%   iserror(category2idx.completed_checks_other) = true;
+% end
+
+%% check for missing desired files
+
+if isfield(check_params,'desired_files'),
+  for i = 1:numel(check_params.desired_files),
+    fn = check_params.desired_files{i};
+    if any(fn == '*'),
+      isfile = ~isempty(dir(fullfile(expdir,fn)));
+    else
+      isfile = exist(fullfile(expdir,fn),'file');
+    end
+    if ~isfile,
+      msgs{end+1} = sprintf('Missing desired file %s',fn); %#ok<AGROW>
+    end
+  end
+end
+
 %% output results to file, merging with automatedchecks incoming
 
 if exist(automatedchecksincomingfile,'file'),
   automatedchecks_incoming = ReadParams(automatedchecksincomingfile);
 else
-  automatedchecks_incoming = struct('automated_pf','P','notes_curation','');
+  fprintf(logfid,'Automated checks incoming file %s not find, assuming automated_pf incoming = U\n',automatedchecksincomingfile);
+  automatedchecks_incoming = struct('automated_pf','U','notes_curation','');
 end
 
 if DEBUG,
   fid = 1;
 else
   if exist(outfile,'file'),
-    try
+    try %#ok<TRYNC>
       delete(outfile);
     end
   end
@@ -284,10 +324,42 @@ if ~DEBUG,
   fclose(fid);
 end
 
+%% save info to mat file
+
+filename = fullfile(expdir,dataloc_params.automaticcheckscompleteinfomatfilestr);
+fprintf(logfid,'Saving debug info to file %s...\n',filename);
+
+accinfo = struct;
+accinfo.paramsfile = paramsfile;
+accinfo.check_params = check_params;
+accinfo.version = version;
+accinfo.analysis_protocol = analysis_protocol;
+accinfo.linked_analysis_protocol = real_analysis_protocol;
+accinfo.timestamp = timestamp;
+accinfo.iserror = iserror;
+accinfo.categories = categories;
+accinfo.msgs = msgs;
+accinfo.automatedchecks_incoming = automatedchecks_incoming;
+accinfo.success = success; %#ok<STRNU>
+
+if ~DEBUG,
+  if exist(filename,'file'),
+    try %#ok<TRYNC>
+      delete(filename);
+    end
+  end
+  try
+    save(filename,'-struct','accinfo');
+  catch ME,
+    warning('Could not save information to file %s: %s',filename,getReport(ME));
+  end
+end
+
 catch ME,
   msgs{end+1} = getReport(ME);
   success = false;
 end
+
 
 %% print results to log file
 

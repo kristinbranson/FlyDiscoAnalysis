@@ -1,11 +1,12 @@
 function [success,msgs,iserror] = FlyBowlAutomaticChecks_Incoming(expdir,varargin)
 
-version = '0.1';
+version = '0.2.1';
 
 success = true;
 msgs = {};
 
 datetime_format = 'yyyymmddTHHMMSS';
+timestamp = datestr(now,datetime_format);
 
 [analysis_protocol,settingsdir,datalocparamsfilestr,DEBUG,min_barcode_expdatestr,logfid] = ...
   myparse(varargin,...
@@ -37,8 +38,14 @@ if isempty(logfid),
   end
 end
 
+%% get the real analysis protocol
 
-fprintf(logfid,'\n\n***\nRunning FlyBowlAutomaticChecks_Incoming version %s analysis_protocol %s at %s\n',version,analysis_protocol,datestr(now,'yyyymmddTHHMMSS'));
+real_analysis_protocol = GetRealAnalysisProtocol(analysis_protocol,settingsdir);
+
+
+%% start
+
+fprintf(logfid,'\n\n***\nRunning FlyBowlAutomaticChecks_Incoming version %s analysis_protocol %s (real analysis protocol %s) at %s\n',version,analysis_protocol,real_analysis_protocol,timestamp);
 
 try
 
@@ -49,7 +56,7 @@ if ~iscell(check_params.control_line_names),
   check_params.control_line_names = {check_params.control_line_names};
 end
 metadatafile = fullfile(expdir,dataloc_params.metadatafilestr);
-ufmfdiagnosticsfile = fullfile(expdir,dataloc_params.ufmfdiagnosticsfilestr);
+moviefile = fullfile(expdir,dataloc_params.moviefilestr);
 temperaturefile = fullfile(expdir,dataloc_params.temperaturefilestr); %#ok<NASGU>
 outfile = fullfile(expdir,dataloc_params.automaticchecksincomingresultsfilestr);
 
@@ -59,6 +66,7 @@ categories = {'flag_aborted_set_to_1',...
   'missing_metadata_file',...
   'missing_metadata_fields',...
   'short_video',...
+  'bad_video_timestamps',...
   'missing_capture_files',...
   'flag_redo_set_to_1',...
   'fliesloaded_time_too_short',...
@@ -171,31 +179,47 @@ end
 
 %% check video length
 
-if ~exist(ufmfdiagnosticsfile,'file'),
-  success = false;
-  msgs{end+1} = 'Missing UFMF diagnostics file.';
-  iserror(category2idx.missing_capture_files) = true;
-else
-  [ufmf_diagnostics,success1,errmsg1] = readUFMFDiagnostics(ufmfdiagnosticsfile);
-  if ~success1,
-    success = false;
-    msgs{end+1} = sprintf('Error reading UFMF diagnostics file: %s',errmsg1);
-    iserror(category2idx.incoming_checks_other) = true;
-  else
-    if ~isfield(ufmf_diagnostics,'summary') || ~isfield(ufmf_diagnostics.summary,'nFrames'),
-      success = false;
-      msgs{end+1} = 'ufmf_diagnostics_summary_nFrames missing.';
-      iserror(category2idx.incoming_checks_other) = true;
-    else
-      if ufmf_diagnostics.summary.nFrames < check_params.min_ufmf_diagnostics_summary_nframes,
-        success = false;
-        msgs{end+1} = sprintf('Video contains %d < %d frames.',ufmf_diagnostics.summary.nFrames,check_params.min_ufmf_diagnostics_summary_nframes);
-        iserror(category2idx.short_video) = true;
-      end
+headerinfo = [];
+if exist(moviefile,'file'),
+  try
+    headerinfo = ufmf_read_header(moviefile);
+    if ~isfield(headerinfo,'nframes'),
+      error('No field nframes in UFMF header');
     end
+    nframes = headerinfo.nframes;
+    if nframes < check_params.min_ufmf_diagnostics_summary_nframes,
+      success = false;
+      msgs{end+1} = sprintf('Video contains %d < %d frames.',ufmf_diagnostics.summary.nFrames,check_params.min_ufmf_diagnostics_summary_nframes);
+      iserror(category2idx.short_video) = true;
+    end
+  catch ME,
+    success = false;
+    msgs{end+1} = sprintf('Error reading nframes from movie header: %s',getReport(ME,'extended','hyperlinks','off'));
+    iserror(category2idx.incoming_checks_other) = true;    
   end
 end
 
+%% check for bad timestamps
+
+if ~isempty(headerinfo),
+
+  if ~isfield(headerinfo,'timestamps'),
+    msgs{end+1} = 'No field timestamps in UFMF header';
+    success = false;
+    iserror(category2idx.incoming_checks_other) = true;    
+  else
+    dt = diff(headerinfo.timestamps);
+    nneg = nnz(dt <= 0);
+    if nneg > 0,
+      success = false;
+      msgs{end+1} = sprintf('%d frames in movie with non-increasing timestamps',nneg);
+      iserror(category2idx.bad_video_timestamps) = true;
+    end
+  end
+  
+end
+
+%%
 
 if isscreen,
 
@@ -322,18 +346,23 @@ if success,
   fprintf(fid,'automated_pf,U\n');
 else
   fprintf(fid,'automated_pf,F\n');
-  fprintf(fid,'notes_curation,');
-  s = sprintf('%s\\n',msgs{:});
-  s = s(1:end-2);
-  fprintf(fid,'%s\n',s);
   i = find(iserror,1);
   if isempty(i),
     s = 'incoming_checks_other';
   else
     s = categories{i};
   end
-  fprintf(fid,'automated_pf_category,%s\n',s);
+  fprintf(fid,'automated_pf_category,%s\n',s);end
+if ~isempty(msgs),
+  fprintf(fid,'notes_curation,');
+  s = sprintf('%s\\n',msgs{:});
+  s = s(1:end-2);
+  fprintf(fid,'%s\n',s);
 end
+fprintf(fid,'version,%s\n',version);
+fprintf(fid,'timestamp,%s\n',timestamp);
+fprintf(fid,'analysis_protocol,%s\n',analysis_protocol);
+fprintf(fid,'linked_analysis_protocol,%s\n',real_analysis_protocol);
 
 if ~DEBUG && fid > 1,
   fclose(fid);
@@ -343,6 +372,35 @@ catch ME,
   success = false;
   msgs = {getReport(ME)};
 end
+
+%% save info to mat file
+
+filename = fullfile(expdir,dataloc_params.automaticchecksincominginfomatfilestr);
+fprintf(logfid,'Saving debug info to file %s...\n',filename);
+
+aciinfo = struct;
+aciinfo.paramsfile = paramsfile;
+aciinfo.check_params = check_params;
+aciinfo.version = version;
+aciinfo.analysis_protocol = analysis_protocol;
+aciinfo.linked_analysis_protocol = real_analysis_protocol;
+aciinfo.timestamp = timestamp;
+aciinfo.iserror = iserror;
+aciinfo.categories = categories;
+aciinfo.msgs = msgs;
+aciinfo.success = success; %#ok<STRNU>
+
+if exist(filename,'file'),
+  try %#ok<TRYNC>
+    delete(filename);
+  end
+end
+try
+  save(filename,'-struct','aciinfo');
+catch ME,
+  warning('Could not save information to file %s: %s',filename,getReport(ME));
+end
+
   
 %% print results to log file
 

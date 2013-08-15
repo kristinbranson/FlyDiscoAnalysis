@@ -1,6 +1,7 @@
 function FlyBowlPlotPerFrameStats2(expdir,varargin)
 
 special_cases = {'fractime','duration','boutfreq'};
+version = '0.1';
 
 [analysis_protocol,settingsdir,datalocparamsfilestr,visible,controldatadirstr,DEBUG,...
   usedaterange,usepreviousmonth,plotstatsonly,controlstats,controlhist] = ...
@@ -33,6 +34,24 @@ dateformat = 'yyyymmddTHHMMSS';
 datalocparamsfile = fullfile(settingsdir,analysis_protocol,datalocparamsfilestr);
 dataloc_params = ReadParams(datalocparamsfile);
 
+%% log file
+
+if isfield(dataloc_params,'plotperframestats_logfilestr') && ~DEBUG,
+  logfile = fullfile(expdir,dataloc_params.plotperframestats_logfilestr);
+  logfid = fopen(logfile,'a');
+  if logfid < 1,
+    warning('Could not open log file %s\n',logfile);
+    logfid = 1;
+  end
+else
+  logfid = 1;
+end
+
+timestamp = datestr(now,'yyyymmddTHHMMSS');
+real_analysis_protocol = GetRealAnalysisProtocol(analysis_protocol,settingsdir);
+
+fprintf(logfid,'\n\n***\nRunning FlyBowlPlotPerFrameStats2 version %s analysis_protocol %s (linked to %s) at %s\n',version,analysis_protocol,real_analysis_protocol,timestamp);
+
 %% load experiment data
 
 statsmatsavename = fullfile(expdir,dataloc_params.statsperframematfilestr);
@@ -53,8 +72,11 @@ end
 
 %% load stats params
 
-statsperframefeaturesfile = fullfile(settingsdir,analysis_protocol,dataloc_params.statsperframefeaturesfilestr);
-stats_perframefeatures = ReadStatsPerFrameFeatures2(statsperframefeaturesfile);
+%statsperframefeaturesfile = fullfile(settingsdir,analysis_protocol,dataloc_params.statsperframefeaturesfilestr);
+%stats_perframefeatures = ReadStatsPerFrameFeatures2(statsperframefeaturesfile);
+
+statsplotparamsfile = fullfile(settingsdir,analysis_protocol,dataloc_params.statsplotparamsfilestr);
+stats_plotparams = ReadStatsPlotParams(statsplotparamsfile);
 
 %% load hist params
 
@@ -141,23 +163,31 @@ end
 %% plot means, stds
 
 [tmp,basename] = fileparts(expdir);
-stathandles = PlotPerFrameStats(stats_perframefeatures,statsperfly,statsperexp,controlstats,basename,'visible',visible);
-drawnow;  
-% plot a second time to get this to work on the cluster
-stathandles = PlotPerFrameStats(stats_perframefeatures,statsperfly,statsperexp,controlstats,basename,'visible',visible);
-drawnow;  
-if ~DEBUG,
-  savename = sprintf('stats.png');
-  savename = fullfile(figdir,savename);
-  if exist(savename,'file'),
-    delete(savename);
+
+groups = fieldnames(stats_plotparams);
+
+for i = 1:numel(groups),
+  group = groups{i};
+  name = sprintf('%s, %s',basename,group);
+  %stathandles = PlotPerFrameStats(stats_plotparams.(group),statsperfly,statsperexp,controlstats,name,'visible',visible,'hfig',i);
+  %drawnow;
+  % plot a second time to get this to work on the cluster
+  stathandles = PlotPerFrameStats(stats_plotparams.(group),statsperfly,statsperexp,controlstats,name,'visible',visible,'hfig',i);
+  if ~DEBUG,
+    savename = sprintf('stats_%s.png',group);
+    savename = fullfile(figdir,savename);
+    if exist(savename,'file'),
+      delete(savename);
+    end
+    set(stathandles.hfig,'Units','pixels','Position',stathandles.position);
+    save2png(savename,stathandles.hfig);
   end
-  set(stathandles.hfig,'Units','pixels','Position',stathandles.position);
-  save2png(savename,stathandles.hfig);
 end
 
 if plotstatsonly,
-  close all;
+  if isdeployed,
+    close all;
+  end
   return;
 end
 
@@ -226,11 +256,15 @@ for i = 1:numel(histids),
   
   
   
-  handles = PlotPerFrameHists2(id,field,idxcurr,hist_perframefeatures,...
+  [handles,didplot] = PlotPerFrameHists2(id,field,idxcurr,hist_perframefeatures,...
     histperexp,histperfly,...
     bins.(binfn),hist_plot_params,expname,...
     'visible',visible,...
     'hax',hax);
+  
+  if ~didplot,
+    continue;
+  end
   
   if ~isempty(controlhist),
     % fix legend
@@ -251,19 +285,30 @@ for i = 1:numel(histids),
   
 end
 
-%% plot means, stds
-% 
-% [tmp,basename] = fileparts(expdir);
-% stathandles = PlotPerFrameStats(stats_perframefeatures,statsperfly,statsperexp,controlstats,basename,'visible',visible);
-% drawnow;  
-% if ~DEBUG,
-%   savename = sprintf('stats.png');
-%   savename = fullfile(figdir,savename);
-%   if exist(savename,'file'),
-%     delete(savename);
-%   end
-%   save2png(savename,stathandles.hfig);
-% end
+%% save info to a mat file
 
-close all;
+filename = fullfile(expdir,dataloc_params.plotperframestatsinfomatfilestr);
+fprintf(logfid,'Saving debug info to file %s...\n',filename);
+ppfsinfo = struct;
+ppfsinfo.statsplotparamsfile = statsplotparamsfile;
+ppfsinfo.stats_plotparams = stats_plotparams;
+ppfsinfo.version = version;
+ppfsinfo.analysis_protocol = analysis_protocol;
+ppfsinfo.linked_analysis_protocol = real_analysis_protocol;
+ppfsinfo.timestamp = timestamp;
+
+if exist(filename,'file'),
+  try %#ok<TRYNC>
+    delete(filename);
+  end
+end
+try
+  save(filename,'-struct','ppfsinfo');
+catch ME,
+  warning('Could not save information to file %s: %s',filename,getReport(ME));
+end
+
+if isdeployed,
+  close all;
+end
 
