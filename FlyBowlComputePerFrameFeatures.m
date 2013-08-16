@@ -25,7 +25,7 @@ trx = Trx('analysis_protocol',analysis_protocol,'settingsdir',settingsdir,...
 
 fprintf('Loading trajectories for %s...\n',expdir);
 
-trx.AddExpDir(expdir);
+trx.AddExpDir(expdir,'openmovie',false);
 
 %% log file
 
