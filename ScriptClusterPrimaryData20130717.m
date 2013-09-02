@@ -6,20 +6,24 @@ addpath /groups/branson/home/bransonk/tracking/code/JCtrax/filehandling;
 addpath /groups/branson/bransonlab/projects/olympiad/SAGE/MATLABInterface/Trunk;
 addpath /groups/branson/bransonlab/projects/olympiad/anatomy/fileio;
 
-datafile = '/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/CollectedPrimaryPerFrameStats20130614.mat';
+datafile = '/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/CollectedPrimaryPerFrameStats20130824.mat';
 imagerydatafile = '/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/ImageryData20130725.mat';
 
 %% parameters
 
 maxfraclinesmissingdata = 1;
+doanatomyprocessing = false;
 
 %% load in data
 
 load(datafile);
-load(imagerydatafile);
+if doanatomyprocessing,
+  load(imagerydatafile);
+end
 
 %% compartment translations
 
+if doanatomyprocessing,
 manual2autocomp = struct;
 manual2autocomp.OL = {'AME','ME','LO','LOP'};
 manual2autocomp.SEG = {'SOG'};
@@ -216,6 +220,7 @@ for i = 1:numel(line_names),
   end
 end
 
+end
 
 %% choose some statistics
 
@@ -502,6 +507,21 @@ line_names_curr = {...
   '.*'
   };
 
+%% choose all lines that have some anatomy data
+
+nauto = zeros(1,nlines);
+compartments = fieldnames(linestats.int_manual);
+ncompartments = numel(compartments);
+for i = 1:ncompartments,
+  fn = compartments{i};
+  nauto = nauto + ~isnan(linestats.int_manual.(fn));
+end
+fracauto = nauto / ncompartments;
+
+lineidxcurr = fracauto > .5;
+line_names_curr = line_names(lineidxcurr);
+
+
 %% filter these out
 
 % stats
@@ -529,6 +549,12 @@ for ii = 1:nstatscurr,
   i = statidxcurr(ii);
   datacluster(:,ii) = linestats.normmeans.(statfns{i})(lineidxcurr);
 end
+
+anatdata = nan(nlinescurr,ncompartments);
+for i = 1:ncompartments,
+  anatdata(:,i) = linestats.int_manual.(compartments{i})(lineidxcurr);
+end
+
 
 %% z-score this data
 
@@ -570,6 +596,46 @@ shortlinenames = line_names_curr;
 shortlinenames = regexprep(shortlinenames,'GMR_','R');
 shortlinenames = regexprep(shortlinenames,'_AE_01','');
 shortlinenames = regexprep(shortlinenames,'_AD_01','D');
+
+%% canonical correlation analysis
+
+% fill in nans with zeros
+zdatacluster_nonan = zdatacluster;
+zdatacluster_nonan(isnan(zdatacluster)) = 0;
+anatdata_nonan = anatdata;
+anatdata_nonan(isnan(anatdata)) = 0;
+[canon_behavior,canon_anatomy,r,U,V] = canoncorr(zdatacluster_nonan,anatdata_nonan);
+
+int_manual = linestats.int_manual;
+int_manual.line_names = linestats.line_names;
+
+hfig = 123;
+figure(hfig);
+clf;
+stati = find(strcmp(shortstatnames,'velmag_ctr'));
+scatter(U(:,1),U(:,2),[],zdatacluster(:,stati),'.');
+xlabel('Behavior projection 1');
+ylabel('Behavior projection 2');
+title('Colored by velmag ctr');
+
+hfig = 124;
+figure(hfig);
+clf;
+h = scatter(U(:,1),U(:,2),[],V(:,1),'.');
+hax = gca;
+xlabel('Behavior projection 1');
+ylabel('Behavior projection 2');
+title('Colored by anatomy projection 1');
+hdata_b1b2a1 = SetUpButtonDown_ReturnPointIndex(hax,U(:,1),U(:,2),{@ButtonDownFcn_ShowLineInfo,line_names_curr,'int_manual',int_manual});
+ClearButtonDown_ReturnPointIndex(hdata_b1b2a1);
+
+hfig = 125;
+figure(hfig);
+clf;
+plot(U(:,1),V(:,1),'k.');
+xlabel('Behavior projection 1');
+ylabel('Anatomy projection 1');
+
 
 %% compute pairwise distance between lines, ignoring entries for which either has nan
 
