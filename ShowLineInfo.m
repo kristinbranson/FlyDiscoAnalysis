@@ -148,6 +148,7 @@ if showanatomy,
   end
 
   hwait = mywaitbar(0,'Reading max projection images');
+  nlinesplotted = 0;
   for i = 1:nlines,
     filename = fullfile(anatomydir,sprintf('meanim_%s.png',line_names{i}));
     hwait = mywaitbar((i-1)/(nlines+1),hwait,sprintf('Reading %s...\n',line_names{i}));
@@ -155,14 +156,19 @@ if showanatomy,
       im = imread(filename);
       image(im,'Parent',hax(i));
       axis(hax(i),'image');
+      nlinesplotted = nlinesplotted+1;
+    else
+      fprintf('Line %s has no image\n',line_names{i});
     end
     title(hax(i),line_names{i},'Interpreter','none');
     set(hax(i),'XTick',[],'YTick',[]);
     drawnow;
   end
-  
-  impixelinfo(hfigs(1));
-  linkaxes(hax);  
+
+  if nlinesplotted > 0,
+    impixelinfo(hfigs(1));
+    linkaxes(hax);
+  end
   
   if ishandle(hwait),
     delete(hwait);

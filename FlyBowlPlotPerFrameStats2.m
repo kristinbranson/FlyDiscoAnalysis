@@ -1,7 +1,7 @@
 function FlyBowlPlotPerFrameStats2(expdir,varargin)
 
 special_cases = {'fractime','duration','boutfreq'};
-version = '0.1';
+version = '0.2';
 
 [analysis_protocol,settingsdir,datalocparamsfilestr,visible,controldatadirstr,DEBUG,...
   usedaterange,usepreviousmonth,plotstatsonly,controlstats,controlhist] = ...
@@ -302,10 +302,12 @@ if exist(filename,'file'),
     delete(filename);
   end
 end
-try
-  save(filename,'-struct','ppfsinfo');
-catch ME,
-  warning('Could not save information to file %s: %s',filename,getReport(ME));
+if ~DEBUG,
+  try
+    save(filename,'-struct','ppfsinfo');
+  catch ME,
+    warning('Could not save information to file %s: %s',filename,getReport(ME));
+  end
 end
 
 if isdeployed,

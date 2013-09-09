@@ -45,7 +45,7 @@ end
   SelectHistData2(fns,bininfo,hist_plot_params,plottype,...
   histperfly,histperexp);
 
-isdata = any(~isnan([meanfrac{:}]));
+isdata = any([meanfrac{:}]>0);
 if ~isdata,
   handles = [];
   didplot = false;
@@ -133,6 +133,13 @@ set(hax,'XLim',[edges(1),edges(end)]);
 allys = [meanfrac{:}]+[stderrfrac{:}];
 maxy = max(allys);
 mosty = prctile(allys,99.9);
+% make sure there is some non-zero data
+if maxy <= 0,
+  maxy = 1; mosty = 1;
+elseif mosty <= 0,
+  mosty = maxy;
+end
+
 if ~all(isnan(allys)),
   if mosty / maxy > .9,
     set(hax,'YLim',[-.01*maxy,maxy*1.01]);
