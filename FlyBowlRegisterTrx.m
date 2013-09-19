@@ -66,7 +66,7 @@ if isfield(registration_params,'bowlMarkerType'),
     plateids = str2double(registration_params.bowlMarkerType(1:2:end-1));
     bowlmarkertypes = registration_params.bowlMarkerType(2:2:end);
     [metadata,success1] = parseExpDir(expdir);
-    if ~success1,
+    if ~success1 || ~isfield(metadata,'plate'),
       metadata = ReadMetadataFile(fullfile(expdir,dataloc_params.metadatafilestr));
     end
     if ischar(metadata.plate),
@@ -90,7 +90,7 @@ if isfield(registration_params,'maxDistCornerFrac_BowlLabel') && ...
   plateids = registration_params.maxDistCornerFrac_BowlLabel(1:2:end-1);
   cornerfracs = registration_params.maxDistCornerFrac_BowlLabel(2:2:end);
   [metadata,success1] = parseExpDir(expdir);
-  if ~success1,
+  if ~success1 || ~isfield(metadata,'plate'),
     metadata = ReadMetadataFile(fullfile(expdir,dataloc_params.metadatafilestr));
   end
   if ischar(metadata.plate),
