@@ -1,11 +1,10 @@
 function [datamerge,experiment_ids,iswarning] = SAGEListBowlExperiments(varargin)
 
-[data_type,dataset,leftovers] = myparse_nocheck(varargin,...
-  'data_type','QuickStats_BackSubStats_meanNConnComps',...
-    'dataset','score');
+[dataset,removemissingdata,leftovers] = myparse_nocheck(varargin,...
+  'dataset','metadata','removemissingdata',false);
 
 [datamerge,experiment_ids,iswarning] = SAGEGetBowlData(leftovers{:},...
-  'dataset',dataset,'data_type',data_type);
+  'dataset',dataset,'removemissingdata',removemissingdata);
 
 % for backwards compatibility
 for i = 1:numel(datamerge),

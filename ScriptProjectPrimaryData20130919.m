@@ -6,8 +6,6 @@ addpath /groups/branson/bransonlab/projects/olympiad/SAGE/MATLABInterface/Trunk;
 addpath /groups/branson/bransonlab/projects/olympiad/anatomy/fileio;
 
 datafile = '/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/CollectedPrimaryPerFrameStatsAndAnatomy20130912.mat';
-imagerydatafile = '/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/ImageryData20130725.mat';
-vncdatafile = '/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/VNCAnnotations20130905.csv';
 
 %% load in data
 
@@ -17,11 +15,10 @@ load(datafile);
 
 maxfraclinesmissingdata = 1;
 doanatomyprocessing = false;
-statfnset = 'few';
+statfnset = 'many';
 lineset = 'all';
 disttransform = 'linearthenlog';
 linear2loginflectionpt = 3;
-
 
 %% choose some statistics
 
@@ -475,9 +472,16 @@ signorm = nanstd(setdata_norm,1,1);
 % z-score the line data
 zdatacluster_norm = bsxfun(@rdivide,bsxfun(@minus,datacluster_norm,munorm),signorm);
 
-% remove nans
-zdatacluster_norm_nonan = zdatacluster_norm;
-zdatacluster_norm_nonan(isnan(zdatacluster_norm)) = 0;
+% and the control set data
+zcontrol_setdata_norm = bsxfun(@rdivide,bsxfun(@minus,setdata_norm,munorm),signorm);
+
+% % remove nans
+% zdatacluster_norm_nonan = zdatacluster_norm;
+% zdatacluster_norm_nonan(isnan(zdatacluster_norm)) = 0;
+% 
+% % same for the control set data
+% zcontrol_setdata_norm_nonan = zcontrol_setdata_norm;
+% zcontrol_setdata_norm_nonan(isnan(zcontrol_setdata_norm)) = 0;
 
 % 
 % % fill in nans with zeros
@@ -520,11 +524,13 @@ statfnscurr0 = statfnscurr;
 statidxcurr0 = statidxcurr;
 datacluster0 = datacluster;
 zdatacluster_norm0 = zdatacluster_norm;
+zcontrol_setdata_norm0 = zcontrol_setdata_norm;
 
 statfnscurr(statidxremove) = [];
 statidxcurr(statidxremove) = [];
 datacluster(:,statidxremove) = [];
 zdatacluster_norm(:,statidxremove) = [];
+zcontrol_setdata_norm(:,statidxremove) = [];
 signorm(statidxremove) = [];
 nstatscurr = numel(statidxcurr);
 
@@ -543,6 +549,74 @@ shortlinenames = regexprep(shortlinenames,'GMR_','R');
 shortlinenames = regexprep(shortlinenames,'_AE_01','');
 shortlinenames = regexprep(shortlinenames,'_AD_01','D');
 
+%% non-linear transformation
+
+if strcmpi(disttransform,'linearthenlog'),
+  
+  % line data
+  zdatacluster_transform = nan(size(zdatacluster_norm));
+  idx = abs(zdatacluster_norm)<=linear2loginflectionpt;
+  zdatacluster_transform(idx) = zdatacluster_norm(idx);
+  zdatacluster_transform(~idx) = (linear2loginflectionpt+...
+    log(abs(zdatacluster_norm(~idx))-linear2loginflectionpt+1)).*...
+    sign(zdatacluster_norm(~idx));
+
+  % control set data
+  zcontrol_setdata_transform = nan(size(zcontrol_setdata_norm));
+  idx = abs(zcontrol_setdata_norm)<=linear2loginflectionpt;
+  zcontrol_setdata_transform(idx) = zcontrol_setdata_norm(idx);
+  zcontrol_setdata_transform(~idx) = (linear2loginflectionpt+...
+    log(abs(zcontrol_setdata_norm(~idx))-linear2loginflectionpt+1)).*...
+    sign(zcontrol_setdata_norm(~idx));
+  
+elseif strcmpi(disttransform,'log'),
+
+  zdatacluster_transform = log(abs(zdatacluster_norm)).*sign(zdatacluster_norm);
+
+  zcontrol_setdata_transform = log(abs(zcontrol_setdata_norm)).*sign(zcontrol_setdata_norm);
+
+else
+  
+  zdatacluster_transform = zdatacluster_norm;
+
+  zcontrol_setdata_transform = zcontrol_setdata_norm;
+
+end
+
+%% PCA
+
+X = zdatacluster_transform;
+X(isnan(X)) = 0;
+mu_pca = mean(X,1);
+X = bsxfun(@minus,X,mu_pca);
+[coeff,proj_pca,latent,tsquared] = princomp(X);
+
+% find the projection of all the control sets
+Xcontrol = zcontrol_setdata_transform;
+Xcontrol(isnan(Xcontrol)) = 0;
+Xcontrol = bsxfun(@minus,Xcontrol,mu_pca);
+projcontrol_pca = Xcontrol*coeff;
+
+% control variance
+Scontrol_pca = cov(projcontrol_pca,1);
+mucontrol_pca = mean(projcontrol_pca,1);
+[a,b,theta] = cov2ell(Scontrol_pca(1:2,1:2));
+
+hfig = 1;
+figure(hfig);
+clf;
+
+maxnstdsplot = 5;
+colors = gray(maxnstdsplot);
+for i = maxnstdsplot:-1:1,
+  hcov(i) = ellipsedrawpatch(a*i/2,b*i/2,mucontrol_pca(1),mucontrol_pca(2),theta,colors(i,:));
+  hold on;
+end
+
+plot(projcontrol_pca(:,1),projcontrol_pca(:,2),'kx');
+hold on;
+plot(proj_pca(:,1),proj_pca(:,2),'.','Color',[.8,0,0]);
+
 %% sparse pca
 
 shortstatnames_pca = shortstatnames(~statidxremove_rank);
@@ -558,64 +632,3 @@ for i = 1:size(B,2);
     fprintf('%s: %f\n',shortstatnames_pca{j},B(j,i));
   end
 end
-
-%% compute pairwise distance between lines, ignoring entries for which either has nan
-
-% L1 distance
-
-lined = zeros(nlinescurr,nlinescurr);
-if strcmpi(disttransform,'linearthenlog'),
-  zdatacluster_transform = nan(size(zdatacluster_norm));
-  idx = abs(zdatacluster_norm)<=linear2loginflectionpt;
-  zdatacluster_transform(idx) = zdatacluster_norm(idx);
-  zdatacluster_transform(~idx) = (linear2loginflectionpt+...
-    log(abs(zdatacluster_norm(~idx))-linear2loginflectionpt+1)).*...
-    sign(zdatacluster_norm(~idx));
-elseif strcmpi(disttransform,'log'),
-  zdatacluster_transform = log(abs(zdatacluster_norm)).*sign(zdatacluster_norm);
-else
-  zdatacluster_transform = zdatacluster_norm;
-end
-
-for linei = 1:nlinescurr,
-  for linej = linei+1:nlinescurr,
-    dcurr = abs(zdatacluster_transform(linei,:)-zdatacluster_transform(linej,:));
-    lined(linei,linej) = nanmean(dcurr);
-    lined(linej,linei) = lined(linei,linej);
-  end
-end
-linedvec = squareform(lined,'tovector');
-
-%% compute pairwise distance between stats, ignoring entries for which either has nan
-
-% 1- abs(correlation coeff)
-statd = zeros(nstatscurr,nstatscurr);
-for stati = 1:nstatscurr,
-  ignorei = isnan(zdatacluster_transform(:,stati));
-  for statj = stati+1:nstatscurr,
-    ignorecurr = ignorei | isnan(zdatacluster_transform(:,statj));
-    if all(ignorecurr),
-      statd(stati,statj) = nan;
-    else
-      r = corrcoef(zdatacluster_transform(~ignorecurr,stati),zdatacluster_transform(~ignorecurr,statj));
-      statd(stati,statj) = 1 - abs(r(1,2));
-    end
-    statd(statj,stati) = statd(stati,statj);
-  end
-end
-statdvec = squareform(statd,'tovector');
-
-%% my version of a clustergram
-
-cgobj = clustergram(zdatacluster_norm',...
-  'RowLabels',shortstatnames,...
-  'ColumnLabels',shortlinenames,...
-  'Standardize','none',...
-  'Cluster','all',...
-  'RowPDist',statdvec,...
-  'ColumnPDist',linedvec,...
-  'Linkage','average',...
-  'OptimalLeafOrder',true,...
-  'ImputeFun',@ClustergramImputeFun);
-
-set(cgobj,'Colormap',myredbluecmap(256));
