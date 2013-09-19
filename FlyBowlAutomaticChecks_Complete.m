@@ -232,9 +232,15 @@ try
     jaabadetectparams = ReadParams(fullfile(settingsdir,analysis_protocol,dataloc_params.jaabadetectparamsfilestr));
     [issuccess_scores,msgs_scores] = CheckScores({expdir},fullfile(settingsdir,analysis_protocol,jaabadetectparams.classifierparamsfiles));
     if any(~issuccess_scores),
-      msgs{end+1} = ['Bad JAABA scores files:',sprintf('\n%s',msgs_scores{:})];
+      msgcurr = sprintf('Bad JAABA scores files\n');
+      for i = 1:numel(msgs_scores),
+        if ~isempty(msgs_scores{i}),
+          msgcurr = [msgcurr,sprintf('%s\n',msgs_scores{i}{:})]; %#ok<AGROW>
+        end
+      end
+      msgs{end+1} = msgcurr;
       success = false;
-      iserror(category2idx.badjaabascores) = true;
+      iserror(category2idx.bad_jaaba_scores) = true;
     elseif ~isempty(msgs_scores),
       msgs(end+1:end+numel(msgs_scores)) = msgs_scores;
     end
