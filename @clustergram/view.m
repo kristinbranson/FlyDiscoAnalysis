@@ -506,22 +506,28 @@ end
 
 function dotShowGroupDetails(h,~,obj)
 
-persistent metadata;
+%persistent metadata;
+global LINENAMESSELECTED;
+global SHOWAVERAGEANATOMY;
 
-if isempty(metadata),
-  [f,p] = uigetfile('*.mat','Select metadata mat file');
-  if ~ischar(f),
-    return;
-  end
-  metadatafile = fullfile(p,f);
-  metadata = load(metadatafile,'metadata');
-  metadata = metadata.metadata;
+if isempty(SHOWAVERAGEANATOMY),
+  SHOWAVERAGEANATOMY = false;
 end
-  
-
-hfigout = 12345;
-hfigout2 = 12346;
-anatomydir = '/nobackup/branson/AverageAnatomyData20130618';
+% 
+% if isempty(metadata),
+%   [f,p] = uigetfile('*.mat','Select metadata mat file');
+%   if ~ischar(f),
+%     return;
+%   end
+%   metadatafile = fullfile(p,f);
+%   metadata = load(metadatafile,'metadata');
+%   metadata = metadata.metadata;
+% end
+%   
+% 
+% hfigout = 12345;
+% hfigout2 = 12346;
+% anatomydir = '/nobackup/branson/AverageAnatomyData20130618';
 
 hFig = gcbf;
 appdata = getappdata(hFig, 'DendrogramData');
@@ -545,89 +551,97 @@ if any(isad),
 end
 nlines = numel(line_names);
 
-% create an html page with links to all experiments
-timestamp = datestr(now,'yyyymmddTHHMMSS');
-filenamecurr = fullfile(tempdir,sprintf('selectedgroup_%s.html',timestamp));
-fid = fopen(filenamecurr,'w');
+LINENAMESSELECTED = line_names;
 
-fprintf(fid,'<html>\n<title>Group selected %s</title>\n<body>\n',timestamp);
-for i = 1:nlines,
-  fprintf(fid,'<h1>%s</h1>\n',line_names{i});
-  idx = find(strcmp({metadata.line_name},line_names{i}));
-  if isempty(idx),
-    fprintf(fid,'<p>No experiments found.</p>\n');
-  else
-    fprintf(fid,'<ul>\n');
-    for j = idx(:)',
-      [~,name] = fileparts(metadata(j).file_system_path);
-      filename = fullfile(metadata(j).file_system_path,...
-        sprintf('ctrax_results_movie_%s.avi',name));
-      if ~exist(filename,'file'),
-        continue;
-      end
-      fprintf(fid,'  <li><a href="file://%s">%s</a></li>\n',filename,name);
-    end
-    fprintf(fid,'</ul>\n');
-  end
-end
-fprintf(fid,'</body>\n</html>\n');
-fclose(fid);
-
-if ~exist(filenamecurr,'file'),
-  warning('Could not open temporary file %s',filenamecurr);
-  return;
-end
-% open this page
-web(filenamecurr,'-browser');
-
-figure(hfigout);
-clf;
-nc = ceil(sqrt(nlines));
-nr = ceil((nlines)/nc);
-hax = createsubplots(nr,nc,[.01,.01],hfigout);
-if numel(hax) > nlines,
-  delete(hax(nlines+1:end));
-end
-
-mu = single(0);
-nread = 0;
-hwait = mywaitbar(0,'Reading images');
-for i = 1:nlines,
-  filename = fullfile(anatomydir,sprintf('meanim_%s.png',line_names{i}));
-  hwait = mywaitbar((i-1)/(nlines+1),hwait,sprintf('Reading %s...\n',line_names{i}));
-  if exist(filename,'file'),
-    im = imread(filename);
-    image(im,'Parent',hax(i));
-    axis(hax(i),'image');
-  end
-  title(hax(i),line_names{i},'Interpreter','none');
-  set(hax(i),'XTick',[],'YTick',[]);
-  drawnow;
-  filename = fullfile(anatomydir,sprintf('meanim_%s.mat',line_names{i}));
-  if exist(filename,'file'),
-    tmp = load(filename,'meanim');
-    mu = mu + tmp.meanim;
-    nread = nread+1;
-  end
-end
-
-mu = mu / nread;
-figure(hfigout2);
-clf;
-hax(nlines+1) = gca;
-imagesc(max(mu,[],3)','Parent',hax(nlines+1));
-axis(hax(nlines+1),'image');
-title(hax(nlines+1),'Mean image','Interpreter','none');
-colormap(hfigout,kjetsmooth(256));
-set(hax(nlines+1),'XTick',[],'YTick',[]);
-colorbar('peer',hax(nlines+1));
-impixelinfo(hfigout);
-impixelinfo(hfigout2);
-linkaxes(hax(1:nlines+1));
-
-if ishandle(hwait),
-  delete(hwait);
-end
+ShowLineInfo(line_names,'showaverageanatomy',false);
+% 
+% % create an html page with links to all experiments
+% timestamp = datestr(now,'yyyymmddTHHMMSS');
+% filenamecurr = fullfile(tempdir,sprintf('selectedgroup_%s.html',timestamp));
+% fid = fopen(filenamecurr,'w');
+% 
+% fprintf(fid,'<html>\n<title>Group selected %s</title>\n<body>\n',timestamp);
+% for i = 1:nlines,
+%   fprintf(fid,'<h1>%s</h1>\n',line_names{i});
+%   idx = find(strcmp({metadata.line_name},line_names{i}));
+%   if isempty(idx),
+%     fprintf(fid,'<p>No experiments found.</p>\n');
+%   else
+%     fprintf(fid,'<ul>\n');
+%     for j = idx(:)',
+%       [~,name] = fileparts(metadata(j).file_system_path);
+%       filename = fullfile(metadata(j).file_system_path,...
+%         sprintf('ctrax_results_movie_%s.avi',name));
+%       if ~exist(filename,'file'),
+%         continue;
+%       end
+%       fprintf(fid,'  <li><a href="file://%s">%s</a></li>\n',filename,name);
+%     end
+%     fprintf(fid,'</ul>\n');
+%   end
+% end
+% fprintf(fid,'</body>\n</html>\n');
+% fclose(fid);
+% 
+% if ~exist(filenamecurr,'file'),
+%   warning('Could not open temporary file %s',filenamecurr);
+%   return;
+% end
+% % open this page
+% web(filenamecurr,'-browser');
+% 
+% figure(hfigout);
+% clf;
+% nc = ceil(sqrt(nlines));
+% nr = ceil((nlines)/nc);
+% hax = createsubplots(nr,nc,[.01,.01],hfigout);
+% if numel(hax) > nlines,
+%   delete(hax(nlines+1:end));
+% end
+% 
+% mu = single(0);
+% nread = 0;
+% hwait = mywaitbar(0,'Reading images');
+% isim = false(1,nlines);
+% for i = 1:nlines,
+%   filename = fullfile(anatomydir,sprintf('meanim_%s.png',line_names{i}));
+%   hwait = mywaitbar((i-1)/(nlines+1),hwait,sprintf('Reading %s...\n',line_names{i}));
+%   if exist(filename,'file'),
+%     im = imread(filename);
+%     image(im,'Parent',hax(i));
+%     axis(hax(i),'image');
+%     isim(i) = true;
+%   end
+%   title(hax(i),line_names{i},'Interpreter','none');
+%   set(hax(i),'XTick',[],'YTick',[]);
+%   drawnow;
+%   filename = fullfile(anatomydir,sprintf('meanim_%s.mat',line_names{i}));
+%   if exist(filename,'file'),
+%     tmp = load(filename,'meanim');
+%     mu = mu + tmp.meanim;
+%     nread = nread+1;
+%   end
+% end
+% 
+% mu = mu / nread;
+% figure(hfigout2);
+% clf;
+% hax(nlines+1) = gca;
+% imagesc(max(mu,[],3)','Parent',hax(nlines+1));
+% axis(hax(nlines+1),'image');
+% title(hax(nlines+1),'Mean image','Interpreter','none');
+% colormap(hfigout,kjetsmooth(256));
+% set(hax(nlines+1),'XTick',[],'YTick',[]);
+% colorbar('peer',hax(nlines+1));
+% impixelinfo(hfigout);
+% impixelinfo(hfigout2);
+% hax1 = hax(1:nlines+1);
+% hax1(~isim) = [];
+% linkaxes(hax1);
+% 
+% if ishandle(hwait),
+%   delete(hwait);
+% end
 
 
 end

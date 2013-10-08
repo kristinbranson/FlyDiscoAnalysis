@@ -5,7 +5,11 @@ addpath /groups/branson/home/bransonk/tracking/code/JCtrax/filehandling;
 addpath /groups/branson/bransonlab/projects/olympiad/SAGE/MATLABInterface/Trunk;
 addpath /groups/branson/bransonlab/projects/olympiad/anatomy/fileio;
 
-datafile = '/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/CollectedPrimaryPerFrameStatsAndAnatomy20130912.mat';
+datafile = '/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/CollectedPrimaryPerFrameStatsAndAnatomy20130928.mat';
+% imagerydatafile = '/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/ImageryData20130725.mat';
+% vncdatafile = '/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/VNCAnnotations20130905.csv';
+
+anatomydatadir = '/nobackup/branson/AverageAnatomyData20130618';
 
 %% load in data
 
@@ -22,317 +26,7 @@ linear2loginflectionpt = 3;
 
 %% choose some statistics
 
-switch statfnset,
-  
-  case 'many',
-
-    statfnscurr = {
-      'fractime_flyany_frameattemptedcopulation'
-      'fractime_flyany_framebackup'
-      'fractime_flyany_framebodyturn'
-      'fractime_flyany_framechase'
-      'fractime_flyany_framecopulation'
-      'fractime_flyany_framecrabwalkall'
-      'fractime_flyany_framecrabwalkextreme'
-      'fractime_flyany_framejump'
-      'fractime_flyany_framenotanybehavior'
-      'fractime_flyany_framepivotcenter'
-      'fractime_flyany_framepivottail'
-      'fractime_flyany_framerighting'
-      'fractime_flyany_framestop'
-      'fractime_flyany_frametouch'
-      'fractime_flyany_framewalk'
-      'fractime_flyany_framewingextension'
-      'fractime_flyany_framewingflick'
-      'fractime_flyany_framewinggrooming'
-      
-      'fractime_flyany_framechase_notwingextension'
-      'fractime_flyany_framestop_notwinggrooming'
-      'fractime_flyany_frametouch_notchase'
-      'fractime_flyany_framewingextension_notchase'
-      
-      'fractime_flyany_framebackup_nearfly'
-      'fractime_flyany_framebackup_nearwall'
-      'fractime_flyany_framebackup_notnearfly_notnearwall'
-      
-      'fractime_flyany_framecrabwalkextreme_nearfly'
-      'fractime_flyany_framecrabwalkextreme_nearwall'
-      'fractime_flyany_framecrabwalkextreme_notnearfly_notnearwall'
-      
-      
-      'fractime_flyany_framejump_nearfly'
-      'fractime_flyany_framejump_nearwall'
-      'fractime_flyany_framejump_notnearfly_notnearwall'
-      
-      
-      'fractime_flyany_framemove_nearfly'
-      'fractime_flyany_framemove_nearwall'
-      'fractime_flyany_framemove_notnearfly_notnearwall'
-      
-      
-      'fractime_flyany_framepivotcenter_nearfly'
-      'fractime_flyany_framepivotcenter_nearwall'
-      'fractime_flyany_framepivotcenter_notnearfly_notnearwall'
-      
-      'fractime_flyany_framepivottail_nearfly'
-      'fractime_flyany_framepivottail_nearwall'
-      'fractime_flyany_framepivottail_notnearfly_notnearwall'
-      
-      
-      'fractime_flyany_framerighting_nearfly'
-      'fractime_flyany_framerighting_nearwall'
-      'fractime_flyany_framerighting_notnearfly_notnearwall'
-      
-      'fractime_flyany_framestop_nearfly'
-      'fractime_flyany_framestop_nearwall'
-      'fractime_flyany_framestop_notnearfly_notnearwall'
-      
-      'fractime_flyany_framewalk_nearfly'
-      'fractime_flyany_framewalk_nearwall'
-      'fractime_flyany_framewalk_notnearfly_notnearwall'
-      
-      'fractime_flyfemale_framebackup'
-      'fractime_flyfemale_framebodyturn'
-      'fractime_flyfemale_framechase'
-      'fractime_flyfemale_framecrabwalkextreme'
-      'fractime_flyfemale_framejump'
-      'fractime_flyfemale_framenotanybehavior'
-      'fractime_flyfemale_framepivotcenter'
-      'fractime_flyfemale_framepivottail'
-      'fractime_flyfemale_framerighting'
-      'fractime_flyfemale_framestop'
-      'fractime_flyfemale_frametouch'
-      'fractime_flyfemale_framewalk'
-      'fractime_flyfemale_framewingflick'
-      'fractime_flyfemale_framewinggrooming'
-      
-      'fractime_flymale_frameattemptedcopulation'
-      'fractime_flymale_framebackup'
-      'fractime_flymale_framebodyturn'
-      'fractime_flymale_framechase'
-      'fractime_flymale_framecrabwalkextreme'
-      'fractime_flymale_framejump'
-      'fractime_flymale_framenotanybehavior'
-      'fractime_flymale_framepivotcenter'
-      'fractime_flymale_framepivottail'
-      'fractime_flymale_framerighting'
-      'fractime_flymale_framestop'
-      'fractime_flymale_frametouch'
-      'fractime_flymale_framewalk'
-      'fractime_flymale_framewingextension'
-      'fractime_flymale_framewingflick'
-      'fractime_flymale_framewinggrooming'
-      
-      'absangle2wall_flyany_framemove'
-      'absangle2wall_flyany_framenearwall'
-      'absangle2wall_flyany_framestop'
-      
-      'absanglefrom1to2_nose2ell_flyany_framenearfly'
-      'absanglefrom1to2_nose2ell_flyany_framestop_nearfly'
-      'absanglefrom1to2_nose2ell_flyany_frametouch'
-      
-      'absdangle2wall_flyany_framenearwall'
-      
-      'absdtheta_flyany_frameany'
-      'absdtheta_flyany_framepivotcenter'
-      'absdtheta_flyany_framepivottail'
-      'absdtheta_flyany_framebodyturn'
-      'absdtheta_flyany_framewalk'
-      
-      'absdv_cor_flyany_framecrabwalkall'
-      'absdv_cor_flyany_framecrabwalkextreme'
-      'absdv_cor_flyany_framenearfly'
-      'absdv_cor_flyany_framenearwall'
-      'absdv_cor_flyany_framenotnearfly_notnearwall'
-      'absdv_cor_flyany_framewalk'
-      
-      'absphidiff_nose2ell_flymale_framechase'
-      
-      'absthetadiff_nose2ell_flyany_framenearfly'
-      'absthetadiff_nose2ell_flyany_frametouch'
-      
-      'absthetadiff_nose2ell_flyfemale_frametouch'
-      'absthetadiff_nose2ell_flymale_frametouch'
-      
-      'absthetadiff_nose2ell_flyfemale_framenearfly'
-      'absthetadiff_nose2ell_flymale_framenearfly'
-      
-      'absthetadiff_nose2ell_flymale_framechase'
-      'absthetadiff_nose2ell_flymale_framewingextension'
-      
-      'absyaw_flyany_framemove'
-      
-      'angleonclosestfly_flyany_framenearfly'
-      'angleonclosestfly_flyany_framestop_nearfly'
-      'angleonclosestfly_flyany_frametouch'
-      
-      'angleonclosestfly_flyfemale_framenearfly'
-      'angleonclosestfly_flyfemale_frametouch'
-      
-      'angleonclosestfly_flymale_framechase'
-      'angleonclosestfly_flymale_framenearfly'
-      'angleonclosestfly_flymale_frametouch'
-      'angleonclosestfly_flymale_framewingextension'
-      
-      'anglesub_flyany_frameany'
-      
-      'corfrac_maj_flyany_framepivotcenter'
-      'corfrac_maj_flyany_framepivottail'
-      
-      'dangle2wall_flyany_framenearwall'
-      'danglesub_flyany_framenearfly'
-      
-      'darea_flyany_frameany'
-      
-      'dcenter_flyany_frameany'
-      'dcenter_flyany_framemove'
-      'dcenter_flyany_framewingflick'
-      'dcenter_flyany_framestop'
-      
-      'dcenter_flyfemale_frameany'
-      'dcenter_flymale_frameany'
-      
-      'ddcenter_flyany_framenearfly'
-      'ddist2wall_flyany_framenearwall'
-      
-      'ddnose2ell_flyany_framenearfly'
-      'ddnose2ell_flymale_framechase'
-      
-      'dell2nose_flyany_frameany'
-      'dell2nose_flymale_frameany'
-      'dell2nose_flyfemale_frameany'
-      'dell2nose_flyany_framewingflick'
-      
-      'dist2wall_flyany_frameany'
-      'dist2wall_flyany_framemove'
-      'dist2wall_flyany_framestop'
-      
-      'dist2wall_flyany_framewalk'
-      
-      'dist2wall_flyfemale_frameany'
-      'dist2wall_flymale_frameany'
-      
-      'dmax_wing_angle_flyany_frameany'
-      
-      'dnose2ell_angle_30tomin30_flyany_frameany'
-      'dnose2ell_angle_30tomin30_flyfemale_frameany'
-      'dnose2ell_angle_30tomin30_flymale_frameany'
-      
-      'dnose2ell_flyany_frameany'
-      
-      'dnose2ell_flyany_framestop'
-      'dnose2ell_flyany_frametouch'
-      'dnose2ell_flyany_framewalk'
-      
-      'dnose2ell_flyfemale_frameany'
-      'dnose2ell_flymale_frameany'
-      
-      'dnose2tail_flyany_frameany'
-      'dnose2tail_flyany_framemove'
-      'dnose2tail_flyfemale_frameany'
-      'dnose2tail_flymale_frameany'
-      
-      'dtheta_flyany_frameany'
-      
-      'du_ctr_flyany_frameany'
-      'du_ctr_flyany_framebackup'
-      
-      'du_ctr_flyany_framewalk'
-      'du_ctr_flyfemale_frameany'
-      'du_ctr_flymale_frameany'
-      'du_ctr_flymale_framechase'
-      
-      'duration_flyany_framebackup'
-      'duration_flyany_framebodyturn'
-      'duration_flyany_framecrabwalkextreme'
-      'duration_flyany_framejump'
-      'duration_flyany_framemove'
-      'duration_flyany_framepivotcenter'
-      'duration_flyany_framepivottail'
-      'duration_flyany_framerighting'
-      'duration_flyany_framestop'
-      'duration_flyany_frametouch'
-      'duration_flyany_framewalk'
-      'duration_flyany_framewingextension'
-      'duration_flyany_framewingflick'
-      'duration_flyany_framewinggrooming'
-      
-      'duration_flymale_frameattemptedcopulation'
-      'duration_flymale_framechase'
-      
-      'dwing_angle_diff_flyany_frameany'
-      
-      'max_absdwing_angle_flyany_frameany'
-      'max_absdwing_angle_flyany_framewingextension'
-      'max_absdwing_angle_flyany_framewingflick'
-      'max_absdwing_angle_flyany_framewinggrooming'
-      
-      'max_wing_angle_flyany_frameany'
-      'max_wing_angle_flyany_framewingextension'
-      'max_wing_angle_flyany_framewingflick'
-      'max_wing_angle_flyany_framewinggrooming'
-      
-      'nflies_close_flyany_frameany'
-      'nflies_close_flyany_framestop'
-      'nflies_close_flyany_framewalk'
-      'nflies_close_flyfemale_frameany'
-      'nflies_close_flymale_frameany'
-      'nflies_close_flymale_framechase'
-      
-      'velmag_ctr_flyany_frameany'
-      'velmag_ctr_flyany_framejump'
-      'velmag_ctr_flyany_framenearfly'
-      'velmag_ctr_flyany_framenearwall'
-      'velmag_ctr_flyany_framenotnearfly_notnearwall'
-      'velmag_ctr_flyany_framewalk'
-      'velmag_ctr_flyfemale_frameany'
-      'velmag_ctr_flymale_frameany'
-      'velmag_ctr_flymale_framechase'
-      
-      'veltoward_nose2ell_flyany_framenearfly'
-      'veltoward_nose2ell_flymale_framechase'
-      
-      'wing_angle_diff_flyany_frameany'
-      
-      'wing_angle_diff_flyany_framewingextension'
-      
-      'wing_angle_imbalance_flyany_frameany'
-      
-      'wing_anglel_flyany_frameany'
-      'wing_angler_flyany_frameany'
-      'yaw_flyany_framemove'
-      };
-    
-  case 'few'
-
-    statfnscurr = {
-      'velmag_ctr_flyany_frameany'
-      'fractime_flyany_framestop'
-      'fractime_flyany_framewinggrooming'
-      'fractime_flyany_framewalk'
-      'fractime_flyany_framecrabwalkextreme'
-      'fractime_flyany_framecrabwalkall'
-      'fractime_flyany_framebackup'
-      'absdtheta_flyany_frameany'
-      'fractime_flyany_framepivottail'
-      'fractime_flyany_framebodyturn'
-      'fractime_flyany_framepivotcenter'
-      'fractime_flyany_framejump'
-      'fractime_flyany_framerighting'
-      'dnose2ell_flyany_frameany'
-      'dcenter_flyany_frameany'
-      'nflies_close_flyany_frameany'
-      'fractime_flyany_frametouch'
-      'fractime_flyany_framechase'
-      'fractime_flyany_frameattemptedcopulation'
-      'wing_angle_diff_flyany_frameany'
-      'fractime_flyany_framewingextension'
-      'fractime_flyany_framewingflick'
-      'dist2wall_flyany_frameany'
-      'fractime_flyany_framenotanybehavior'
-      };
-    
-end
+ScriptSetStatsToAnalyze;
 
 %% choose some lines
 
@@ -400,10 +94,10 @@ end
 %% hand-selected correlation removal
 
 normalizeby = {
-  'fractime_flyany_framestop'
-  'velmag_ctr_flyany_frameany'
-  'dcenter_flyany_frameany'
-  'dist2wall_flyany_frameany'
+%  'fractime_flyany_framestop'
+%   'velmag_ctr_flyany_frameany'
+%   'dcenter_flyany_frameany'
+%   'dist2wall_flyany_frameany'
   };
 
 setiscontrol = strcmp({setstats.metadata.line_name},main_control_line_name);
@@ -471,17 +165,16 @@ signorm = nanstd(setdata_norm,1,1);
 
 % z-score the line data
 zdatacluster_norm = bsxfun(@rdivide,bsxfun(@minus,datacluster_norm,munorm),signorm);
-
-% and the control set data
 zcontrol_setdata_norm = bsxfun(@rdivide,bsxfun(@minus,setdata_norm,munorm),signorm);
 
-% % remove nans
-% zdatacluster_norm_nonan = zdatacluster_norm;
-% zdatacluster_norm_nonan(isnan(zdatacluster_norm)) = 0;
-% 
-% % same for the control set data
-% zcontrol_setdata_norm_nonan = zcontrol_setdata_norm;
-% zcontrol_setdata_norm_nonan(isnan(zcontrol_setdata_norm)) = 0;
+% non-normalized version
+mucontrol = nanmean(setdata,1);
+sigcontrol = nanstd(setdata,1,1);
+zdatacluster = bsxfun(@rdivide,bsxfun(@minus,datacluster,mucontrol),sigcontrol);
+
+% remove nans
+zdatacluster_norm_nonan = zdatacluster_norm;
+zdatacluster_norm_nonan(isnan(zdatacluster_norm)) = 0;
 
 % 
 % % fill in nans with zeros
@@ -602,33 +295,294 @@ Scontrol_pca = cov(projcontrol_pca,1);
 mucontrol_pca = mean(projcontrol_pca,1);
 [a,b,theta] = cov2ell(Scontrol_pca(1:2,1:2));
 
-hfig = 1;
-figure(hfig);
-clf;
+%% plot the PCA
 
-maxnstdsplot = 5;
-colors = gray(maxnstdsplot);
-for i = maxnstdsplot:-1:1,
-  hcov(i) = ellipsedrawpatch(a*i/2,b*i/2,mucontrol_pca(1),mucontrol_pca(2),theta,colors(i,:));
-  hold on;
+colorbyfns = {'fractime_flyany_framestop','nflies_close_flyany_frameany','dcenter_flyany_frameany','fractime_flyany_framechase','fractime_flyany_frametouch'};
+
+for fni = 1:numel(colorbyfns),
+    
+  colorbyfn = colorbyfns{fni};
+  
+  hfig = fni;
+  figure(hfig);
+  clf;
+  
+  x = proj_pca(:,1)-mucontrol_pca(1);
+  y = proj_pca(:,2)-mucontrol_pca(2);
+  
+  maxnstdsplot = 3;
+  colors = gray(maxnstdsplot);
+  fracdataplot = normcdf([1:maxnstdsplot;-1:-1:-maxnstdsplot],0,1);
+  fracdataplot = fracdataplot(1,:)-fracdataplot(2,:);
+  fracdataplot(2:end) = fracdataplot(2:end)-fracdataplot(1:end-1);
+  
+  hcov = nan(1,maxnstdsplot);
+  for i = maxnstdsplot:-1:1,
+    hcov(i) = ellipsedrawpatch(a*i/2,b*i/2,0,0,theta,1-fracdataplot(i)+zeros(1,3));
+    if i == 1,
+      hold on;
+      hax = gca;
+    end
+  end
+  set(hcov,'LineStyle','--','EdgeColor',[.7,.7,.7]);
+  xlim = [min(x),max(x)];
+  ylim = [min(y),max(y)];
+  dx = diff(xlim);
+  dy = diff(ylim);
+  xlim = xlim+.05*dx*[-1,1];
+  ylim = ylim+.05*dy*[-1,1];
+  plot([0,0],ylim,'--','Color',[.7,.7,.7]);
+  plot(xlim,[0,0],'--','Color',[.7,.7,.7]);
+  
+  %plot(projcontrol_pca(:,1),projcontrol_pca(:,2),'kx');
+  %hold on;
+  
+  stati = find(strcmp(statfnscurr,colorbyfn));
+  ncolors = 256;
+  colors = jet(ncolors)*.9;
+  minz = min(zdatacluster_transform(:,stati));
+  maxz = max(zdatacluster_transform(:,stati));
+  colori = max(1,ceil((zdatacluster_transform(:,stati)-minz)/(maxz-minz)*ncolors));
+  hpts = nan(1,nlinescurr);
+  for i = 1:nlinescurr,
+    hpts(i) = plot(x(i),y(i),'.','Color',colors(colori(i),:));
+  end
+  %hpts = scatter(x,y,[],zdatacluster_transform(:,stati),'.');
+  axis equal;
+  axis([xlim,ylim]);
+  
+  xlabel('PC 1');
+  ylabel('PC 2');
+  
+  set(hax,'UserData',struct('selectedpts',[]));
+  title(colorbyfn,'Interpreter','none');
+  
+  hdata_b1b2a1 = SetUpButtonDown_ReturnPointIndex(hax,x,y,{@ButtonDownFcn_SelectAndShowLineInfo,line_names_curr,hpts});
+
 end
+  
+%DrawBehaviorVisualization(stats,colors,statlims,x1,x2,y1,y2,'hax',hax)
 
-plot(projcontrol_pca(:,1),projcontrol_pca(:,2),'kx');
-hold on;
-plot(proj_pca(:,1),proj_pca(:,2),'.','Color',[.8,0,0]);
 
 %% sparse pca
 
-shortstatnames_pca = shortstatnames(~statidxremove_rank);
-X = zdatacluster_norm(:,~statidxremove_rank);
+X = zdatacluster_transform;
 X(isnan(X)) = 0;
-[B SD L D paths] = spca(X,[],20,0,-10,100,[],true);
+mu_spca = mean(X,1);
+X = bsxfun(@minus,X,mu_spca);
+[coeffs_spca SD L D paths] = spca(X,[],2,0,-10,100,[],true);
 
-for i = 1:size(B,2);
-  idx = find(abs(B(:,i)) > 0);
+for i = 1:size(coeffs_spca,2);
+  idx = find(abs(coeffs_spca(:,i)) > 0);
   fprintf('\nPC %d:\n',i);
-  [~,order] = sort(abs(B(idx,i)),1,'descend');
+  [~,order] = sort(abs(coeffs_spca(idx,i)),1,'descend');
   for j = idx(order)',
-    fprintf('%s: %f\n',shortstatnames_pca{j},B(j,i));
+    fprintf('%s: %f\n',shortstatnames{j},coeffs_spca(j,i));
   end
 end
+
+proj_spca = X*coeffs_spca;
+
+% find the projection of all the control sets
+Xcontrol = zcontrol_setdata_transform;
+Xcontrol(isnan(Xcontrol)) = 0;
+Xcontrol = bsxfun(@minus,Xcontrol,mu_spca);
+projcontrol_spca = Xcontrol*coeffs_spca;
+
+% control variance
+Scontrol_spca = cov(projcontrol_spca,1);
+mucontrol_spca = mean(projcontrol_spca,1);
+[a,b,theta] = cov2ell(Scontrol_spca(1:2,1:2));
+
+
+%% plot the SPCA
+
+colorbyfns = {'absdv_cor_flyany_framenearfly','dnose2ell_flyany_frameany'};
+
+for fni = 1:numel(colorbyfns),
+    
+  colorbyfn = colorbyfns{fni};
+  
+  hfig = fni + 10;
+  figure(hfig);
+  clf;
+  
+  x = proj_spca(:,1)-mucontrol_spca(1);
+  y = proj_spca(:,2)-mucontrol_spca(2);
+  
+  maxnstdsplot = 3;
+  colors = gray(maxnstdsplot);
+  fracdataplot = normcdf([1:maxnstdsplot;-1:-1:-maxnstdsplot],0,1);
+  fracdataplot = fracdataplot(1,:)-fracdataplot(2,:);
+  fracdataplot(2:end) = fracdataplot(2:end)-fracdataplot(1:end-1);
+  
+  hcov = nan(1,maxnstdsplot);
+  for i = maxnstdsplot:-1:1,
+    hcov(i) = ellipsedrawpatch(a*i/2,b*i/2,0,0,theta,1-fracdataplot(i)+zeros(1,3));
+    if i == 1,
+      hold on;
+      hax = gca;
+    end
+  end
+  set(hcov,'LineStyle','--','EdgeColor',[.7,.7,.7]);
+  xlim = [min(x),max(x)];
+  ylim = [min(y),max(y)];
+  dx = diff(xlim);
+  dy = diff(ylim);
+  xlim = xlim+.05*dx*[-1,1];
+  ylim = ylim+.05*dy*[-1,1];
+  plot([0,0],ylim,'--','Color',[.7,.7,.7]);
+  plot(xlim,[0,0],'--','Color',[.7,.7,.7]);
+  
+  %plot(projcontrol_pca(:,1),projcontrol_pca(:,2),'kx');
+  %hold on;
+  
+  stati = find(strcmp(statfnscurr,colorbyfn));
+  ncolors = 256;
+  colors = jet(ncolors)*.9;
+  minz = min(zdatacluster_transform(:,stati));
+  maxz = max(zdatacluster_transform(:,stati));
+  colori = max(1,ceil((zdatacluster_transform(:,stati)-minz)/(maxz-minz)*ncolors));
+  hpts = nan(1,nlinescurr);
+  for i = 1:nlinescurr,
+    hpts(i) = plot(x(i),y(i),'.','Color',colors(colori(i),:));
+  end
+  %hpts = scatter(x,y,[],zdatacluster_transform(:,stati),'.');
+  axis equal;
+  axis([xlim,ylim]);
+  
+  xlabel('PC 1');
+  ylabel('PC 2');
+  
+  set(hax,'UserData',struct('selectedpts',[]));
+  title(colorbyfn,'Interpreter','none');
+  
+  hdata_b1b2a1 = SetUpButtonDown_ReturnPointIndex(hax,x,y,{@ButtonDownFcn_SelectAndShowLineInfo,line_names_curr,hpts});
+
+end
+  
+%DrawBehaviorVisualization(stats,colors,statlims,x1,x2,y1,y2,'hax',hax)
+
+%% t-sne projection
+
+
+X = [zdatacluster_transform;zcontrol_setdata_transform];
+X(isnan(X)) = 0;
+mu_tsne = mean(X,1);
+X = bsxfun(@minus,X,mu_tsne);
+
+stati = find(strcmp(statfnscurr,'frame_flyany_framestop'));
+ydata = tsne(X,zdatacluster_transform(:,stati));
+proj_tsne = ydata(1:nlines,:);
+projcontrol_tsne = ydata(nlines+1:end,:);
+
+% approximate projection for control sets using nearest neighbor
+% Xcontrol = zcontrol_setdata_transform;
+% Xcontrol(isnan(Xcontrol)) = 0;
+% Xcontrol = bsxfun(@minus,Xcontrol,mu_tsne);
+% D = dist2(X,Xcontrol);
+% [mind,mini] = min(D,[],1);
+% 
+% projcontrol_tsne = ydata(mini,:);
+
+% control variance
+Scontrol_tsne = cov(projcontrol_tsne,1);
+mucontrol_tsne = mean(projcontrol_tsne,1);
+[a,b,theta] = cov2ell(Scontrol_tsne(1:2,1:2));
+
+
+%% plot the t-sne projection
+
+colorbyfns = {'fractime_flyany_framestop','nflies_close_flyany_frameany','dcenter_flyany_frameany','fractime_flyany_framechase','fractime_flyany_frametouch','fractime_flyany_framejump','fractime_flyany_framewinggrooming','fractime_flyany_framepivotcenter'};
+
+for fni = 1:numel(colorbyfns),
+    
+  colorbyfn = colorbyfns{fni};
+  
+  hfig = fni + 10;
+  figure(hfig);
+  clf;
+  set(hfig,'Units','pixels','Position',[376 1028 382 258]);
+  
+  x = ydata(:,1) - mucontrol_tsne(1);
+  y = ydata(:,2) - mucontrol_tsne(2);
+  xcontrol = projcontrol_tsne(:,1)-mucontrol_tsne(1);
+  ycontrol = projcontrol_tsne(:,2)-mucontrol_tsne(2);
+  
+  plot(xcontrol,ycontrol,'k.');
+  hold on;
+%   
+%   maxnstdsplot = 3;
+%   colors = gray(maxnstdsplot);
+%   fracdataplot = normcdf([1:maxnstdsplot;-1:-1:-maxnstdsplot],0,1);
+%   fracdataplot = fracdataplot(1,:)-fracdataplot(2,:);
+%   fracdataplot(2:end) = fracdataplot(2:end)-fracdataplot(1:end-1);
+%   
+%   hcov = nan(1,maxnstdsplot);
+%   for i = maxnstdsplot:-1:1,
+%     hcov(i) = ellipsedrawpatch(a*i/2,b*i/2,0,0,theta,1-fracdataplot(i)+zeros(1,3));
+%     if i == 1,
+%       hold on;
+%       hax = gca;
+%     end
+%   end
+%   set(hcov,'LineStyle','--','EdgeColor',[.7,.7,.7]);
+  xlim = [min(x),max(x)];
+  ylim = [min(y),max(y)];
+  dx = diff(xlim);
+  dy = diff(ylim);
+  xlim = xlim+.05*dx*[-1,1];
+  ylim = ylim+.05*dy*[-1,1];
+  plot([0,0],ylim,'--','Color',[.7,.7,.7]);
+  hold on;
+  hax = gca;
+  plot(xlim,[0,0],'--','Color',[.7,.7,.7]);
+  
+  %plot(projcontrol_pca(:,1),projcontrol_pca(:,2),'kx');
+  %hold on;
+
+  stati = find(strcmp(statfnscurr,colorbyfn));
+  
+  if false
+    ncolors = 256;
+    colors = jet(ncolors)*.9;
+    minz = min(zdatacluster_transform(:,stati));
+    maxz = max(zdatacluster_transform(:,stati));
+    colori = max(1,ceil((zdatacluster_transform(:,stati)-minz)/(maxz-minz)*ncolors));
+    hpts = nan(1,nlinescurr);
+    for i = 1:nlinescurr,
+      hpts(i) = plot(x(i),y(i),'.','Color',colors(colori(i),:));
+    end
+  else
+    idx = ismember(line_names,linenames_jump_avoid);
+    s = 24+zeros(1,nlinescurr);
+    s(idx) = 48;
+    hpts = scatter(x(1:nlinescurr),y(1:nlinescurr),[],zdatacluster_norm(:,stati),'.');
+    %set(hpts,'MarkerEdgeColor','k')
+    box off;
+    %set(gca,'Color',[.5,.5,.5]);
+    colormap(jet(256)*.75);
+    set(gca,'CLim',[-10,10]);
+    colorbar;
+%     for i = find(idx),
+%       text(x(i),y(i),shortlinenames{i},'HorizontalAlignment','left','VerticalAlignment','middle');
+%     end
+  end
+  axis square;
+  axis([xlim,ylim]);
+  
+%   xlabel('PC 1');
+%   ylabel('PC 2');
+  
+  set(hax,'UserData',struct('selectedpts',[]));
+  title(colorbyfn,'Interpreter','none');
+  
+  drawnow;
+  
+  SaveFigLotsOfWays(hfig,sprintf('projectionfigs/TSNEColoredBy_%s_20130928',colorbyfn));
+  %hdata_b1b2a1 = SetUpButtonDown_ReturnPointIndex(hax,x,y,{@ButtonDownFcn_SelectAndShowLineInfo,line_names_curr,hpts});
+
+end
+
+%% plot anatomy of the jump lines
+

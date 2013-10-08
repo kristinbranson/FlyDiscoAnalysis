@@ -1341,6 +1341,11 @@ function [Z, lineH, T, Perm] = computeDendrogram(data, leafOrderFlag,...
 %== Create an invisible figure for dendrogram
 hfig = figure('Visible','off', 'Name', 'ClustergramDendrogramFigure');
 
+global CLUSTERGRAMORDER;
+if ~isstruct(CLUSTERGRAMORDER),
+  CLUSTERGRAMORDER = struct;
+end
+
 try
     if leafOrderFlag
         %= Calculate pairwise distances and linkage
@@ -1351,6 +1356,8 @@ try
         end
         Z = linkage(dist, linkageArgs);
         order = optimalleaforder(Z, dist);
+        CLUSTERGRAMORDER.(dendroLoc) = order;
+        
         clear('dist');
         
         if isempty(order) || (numel(unique(order)) ~= numel(order))

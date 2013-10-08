@@ -4,10 +4,12 @@ persistent metadata;
 anatomydir = '/nobackup/branson/AverageAnatomyData20130618';
 timestamp = datestr(now,'yyyymmddTHHMMSS');
 hfigs_default = [];
+persistent imdata;
 
-[metadata,showanatomy,showbehavior,showaverageanatomy,hfigs1,anatomydir,...
+[metadata,imdata,showanatomy,showbehavior,showaverageanatomy,hfigs1,anatomydir,...
   groupname,int_manual] = myparse(varargin,...
   'metadata',metadata,...
+  'imdata',imdata,...
   'showanatomy',true,...
   'showbehavior',true,...
   'showaverageanatomy',false,...
@@ -33,6 +35,15 @@ if isempty(metadata),
   metadata = load(metadatafile,'metadata');
   metadata = metadata.metadata;
 end
+if isempty(imdata),
+  [f,p] = uigetfile('*.mat','Select imdata mat file','ImageryData20130824.mat');
+  if ~ischar(f),
+    return;
+  end
+  imagerydatafile = fullfile(p,f);
+  imdata = load(imagerydatafile,'imdata');
+  imdata = imdata.imdata;
+end  
 
 nlines = numel(line_names);
 
@@ -85,6 +96,38 @@ if showbehavior || (showanatomy && ~isempty(int_manual)),
             end
             if exist(plotsname,'dir'),
               fprintf(fid,'<a href="file://%s">Analysis plots</a>',plotsname);
+            end
+            fprintf(fid,'</li>\n');
+            
+          end
+          fprintf(fid,'</ul>\n');
+        end
+        idxanat = find(strcmp({imdata.line},line_names{i}));
+        if isempty(idxanat),
+          fprintf(fid,'<p>No images found.</p>\n');
+        else
+          fprintf(fid,'<ul>\n');
+          for j = idxanat(:)',            
+            name = imdata(j).name;
+            maxproj_file = imdata(j).maxproj_file_system_path;
+            maxproj_ch2_file = regexprep(maxproj_file,'_total.jpg$','_ch2_total.jpg');
+            reg_file = regexprep(maxproj_file,'_total.jpg$','.reg.local.jpg');
+            translation_file = imdata(j).translation_file_path;
+            if ~exist(maxproj_file,'file') && ~exist(translation_file,'file'),
+              continue;
+            end
+            fprintf(fid,'  <li>%s: ',name);
+            if exist(maxproj_file,'file'),
+              fprintf(fid,'<a href="file://%s">Max projection image</a>',maxproj_file);
+            end
+            if exist(maxproj_ch2_file,'file') && ~strcmp(maxproj_file,maxproj_ch2_file),
+              fprintf(fid,', <a href="file://%s">Max proj, channel 2</a>',maxproj_ch2_file);
+            end
+            if exist(reg_file,'file') && ~strcmp(maxproj_file,reg_file),
+              fprintf(fid,', <a href="file://%s">Registered image</a>',reg_file);
+            end
+            if exist(translation_file,'file'),
+              fprintf(fid,', <a href="file://%s">Translation video</a>',translation_file);
             end
             fprintf(fid,'</li>\n');
             

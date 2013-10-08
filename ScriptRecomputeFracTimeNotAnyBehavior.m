@@ -1,11 +1,15 @@
 %% set up path
 
+% note that this script only fixes fractime_flyany_framenotanybehavior, not
+% other framenotanybehavior statistics
+
 addpath /groups/branson/home/bransonk/tracking/code/JCtrax/misc;
 addpath /groups/branson/home/bransonk/tracking/code/JCtrax/filehandling;
 addpath /groups/branson/bransonlab/projects/olympiad/SAGE/MATLABInterface/Trunk;
 addpath /groups/branson/bransonlab/projects/olympiad/anatomy/fileio;
 
 datafile = '/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/CollectedPrimaryPerFrameStatsAndAnatomy20130912.mat';
+outdatafile = '/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/CollectedPrimaryPerFrameStatsAndAnatomy20130920.mat';
 
 %% parameters
 
@@ -104,3 +108,38 @@ for expi = 1:nexps,
   fractimenotanybehavior(expi) = nnz(~isbehavior) / numel(isbehavior);
   
 end
+
+%% save results
+
+save -v7.3 FracTimeNotAnyBehavior20130920.mat fractimenotanybehavior isproblem metadata
+
+%% replace in stats structures
+
+% per-experiment stats
+allstats.fractime_flyany_framenotanybehavior = fractimenotanybehavior;
+% note that I did not recompute the std over flies
+
+% per-set stats
+[set_names,~,setidx] = unique({metadata.set});
+nsets = numel(set_names);
+fn = 'fractime_flyany_framenotanybehavior';
+stati = find(strcmp(statfns,fn));
+idxcurr = ~isnan(allstats.(fn)) & ~isinf(allstats.(fn));
+setmeans(:,stati) = accumarray(setidx(idxcurr)',allstats.(fn)(idxcurr)',[nsets,1],@mean);
+
+% per-line stats
+[ism,set2lineidx] = ismember({setmetadata.line_name},linestats.line_names);
+[~,exp2lineidx] = ismember({metadata.line_name},linestats.line_names);
+nlines = numel(linestats.line_names);
+
+idxcurr = ism' & ~isnan(setmeans(:,stati)) & ~isinf(setmeans(:,stati));
+linemeans(:,stati) = accumarray(set2lineidx(idxcurr)',setmeans(idxcurr,stati)',[nlines,1],@mean);
+%linestds(:,stati) = accumarray(set2lineidx(idxcurr)',setmeans(idxcurr,stati)',[nlines,1],@(x) std(x,1));
+
+idxcontrol = find(strcmp(linestats.line_names,main_control_line_name));
+controlstd(stati) = nanstd(setmeans(set2lineidx==idxcontrol,stati),1,1);
+
+%% save replaced results
+
+res = who('-file',datafile);
+save('-v7.3',outdatafile,res{:});

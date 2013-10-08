@@ -5,6 +5,8 @@ DEBUG = true;
 hdata = struct;
 hdata.hax = hax;
 hdata.hchil = setdiff(findall(hax,'HitTest','on'),hax);
+hfig = get(hax,'Parent');
+hdata.hfig = hfig;
 if nargin < 5,
   maxdfrac = 1/100;
 end
@@ -42,6 +44,9 @@ set(hax,'ButtonDownFcn',@ButtonDownFcn_ReturnPointIndex);
         eventdata.distance = d;
         eventdata.xclick = xclick;
         eventdata.yclick = yclick;
+        eventdata.selectiontype = get(hfig,'SelectionType');
+        eventdata.xpoint = x(j);
+        eventdata.ypoint = y(j);
         
         callback(hObject,eventdata,args{:});
       end

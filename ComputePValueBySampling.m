@@ -37,14 +37,23 @@ for seti = idxgoodcontrolset,
   set2expcurr(seti,1:numel(tmp)) = tmp;
 end
 
+isgoodline = ~isnan(linestats.normmeans.(statfn)) & ...
+  ~isinf(linestats.normmeans.(statfn));
+
 for linei = 1:nlines-1,
   
-  if mod(linei,100) == 0,
+  if mod(linei,100) == 1,
     fprintf('Stat %s (%d / %d), line %s (%d / %d)\n',statfn,stati,nstats,...
       linestats.line_names{linei},linei,nlines-1);
   end
   
   %fprintf('Line %s: %d / %d\n',linestats.line_names{linei},linei,nlines);
+  
+  if ~isgoodline(linei),
+    fracsmaller_stat(linei) = 1;
+    fracbigger_stat(linei) = 1;
+    continue;
+  end
   
   % number of experiments in each set
   setidxcurr = find(set2lineidx==linei & isgoodset);
