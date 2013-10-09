@@ -24,6 +24,8 @@ defaultmaskfile = 'FullBrainMask.mat';
 
 nlines = numel(line_names);
 
+%% persistent data
+
 if isempty(cachedir),
   p = uigetdir(defaultcachedir,'Select directory to cache results to');
   if ~ischar(p),
@@ -120,13 +122,93 @@ if isempty(maskdata),
 end  
 ncompartments = numel(maskdata.leg_symmetric);
 
-% what files exist and what files are missing?
-perim_projim = 
-
-
-
-% compute the projections for each compartment in each image for each line
+%% what images are there per line?
+imsperline = cell(1,nlines);
 lineidx = cell(1,nlines);
+for linei = 1:nlines,
+  line_name = line_names{linei};  
+  % find all the images of this line
+  idx = find(strcmp({imdata.line},line_name));
+  [~,order] = sort([imdata(idx).qi]);
+  idx = idx(order);
+  imsperline{linei} = {};  
+  for jj = 1:numel(idx),
+    j = idx(jj);
+    imname = imdata(j).raw_file_system_path;
+    if exist(imname,'file'),
+      imsperline{linei}{end+1} = imname;
+    else
+      idx(jj) = 0;
+    end
+    lineidx{linei} = idx(idx~=0);
+  end
+end
+
+%% what files exist and what files are missing?
+
+% per-image, per-compartment files
+perim_percomp_projfiles = cell(ncompartments+1,nlines);
+perim_percomp_projmissing = cell(ncompartments+1,nlines);
+for linei = 1:nlines,
+  line_name = line_names{linei};
+  for k = 1:ncompartments+1,
+    perim_percomp_projmissing{linei,k} = true(1,numel(imsperline{line}));
+    perim_percomp_projfiles{linei,k} = cell(1,numel(imsperline{line}));
+    if k == ncompartments+1,
+      compname = 'ALL';
+    else
+      compname = maskdata.leg_symmetric{k};
+    end
+    for j = 1:numel(imsperline{line}),
+      [~,name] = fileparts(imsperline{line});
+      name = regexp(name,'^(.*)\..*$','once','tokens');
+      name = name{1};
+      perim_percomp_projfiles{linei,k}{j} = fullfile(cachedir,line_name,sprintf('%s_%s_maxproj.png',compname,name));
+      perim_percomp_projmissing{linei,k}(j) = ~exist(perim_percomp_projfiles{linei,k}{j},'file');
+    end
+  end
+end
+
+% per-line, per-compartment files
+perline_percomp_projfiles = cell(ncompartments+1,nlines);
+perline_percomp_projmissing = true(ncompartments+1,nlines);
+for linei = 1:nlines,
+  line_name = line_names{linei};
+  for k = 1:ncompartments+1,
+    if k == ncompartments+1,
+      compname = 'ALL';
+    else
+      compname = maskdata.leg_symmetric{k};
+    end
+    perline_percomp_projfiles{linei,k} = fullfile(cachedir,line_name,sprintf('%s_%s_meanim_maxproj.png',compname,line_name));
+    perline_percomp_projmissing(linei,k) = ~exist(perline_percomp_projfiles{linei,k},'file');
+  end
+end
+
+% per-line text files
+perline_txtfiles = cell(1,nlines);
+perline_txtmissing = true(1,nlines);
+for linei = 1:nlines,
+  line_name = line_names{linei};
+  perline_txtfiles{linei} = fullfile(cachedir,line_name,sprintf('%s_totalintensity_per_compartment.txt',line_name));
+  perline_txtmissing(linei) = ~exist(perline_txtfiles{linei},'file');
+end
+
+% per-group, per-compartment files
+pergroup_percomp_projfiles = cell(ncompartments+1,1);
+pergroup_percomp_projmissing = true(ncompartments+1,1);
+for k = 1:ncompartments+1,
+  if k == ncompartments+1,
+    compname = 'ALL';
+  else
+    compname = maskdata.leg_symmetric{k};
+  end
+  pergroup_percomp_projfiles{k} = fullfile(cachedir,groupname,sprintf('%s_%s_maxproj.png',compname,groupname));
+  pergroup_percomp_projmissing(k) = ~exist(pergroup_percomp_projfiles{k},'file');
+end
+  
+  
+% compute the projections for each compartment in each image for each line
 for linei = 1:nlines,
   line_name = line_names{linei};
   
