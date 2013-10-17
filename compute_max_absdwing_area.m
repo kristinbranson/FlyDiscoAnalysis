@@ -6,7 +6,7 @@ data = cell(1,nflies);
 for i = 1:nflies,
   fly = flies(i);
 
-  data{i} = max(abs(diff(trx(fly).wing_areal_mm)),abs(diff(trx(fly).wing_arear_mm))) ./ trx(fly).dt;
+  data{i} = max(abs(diff(trx(fly).wing_areal_mm,1,2)),abs(diff(trx(fly).wing_arear_mm,1,2))) ./ trx(fly).dt;
   
 end
 units = parseunits('mm^2/s');

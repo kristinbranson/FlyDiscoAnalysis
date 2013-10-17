@@ -70,9 +70,14 @@ fprintf(logfid,'\n\n***\nRunning FlyBowlComputePerFrameFeatures version %s analy
 
 %% compute per-frame features
 for i = 1:nfns,
-  fn = perframefns{i};
-  fprintf(logfid,'Computing %s...\n',fn);
-  trx.(fn); 
+  try
+    fn = perframefns{i};
+    fprintf(logfid,'Computing %s...\n',fn);
+    trx.(fn); 
+  catch ME
+    fprintf(2,'Error occurred computing fn ''%s''\n',fn);
+    disp(ME.getReport());
+  end    
 end
 
 %% save info to a mat file

@@ -6,8 +6,8 @@ data = cell(1,nflies);
 for i = 1:nflies,
   fly = flies(i);
 
-  dareal = diff(trx(fly).wing_areal_mm);
-  darear = diff(trx(fly).wing_arear_mm);
+  dareal = diff(trx(fly).wing_areal_mm,1,2);
+  darear = diff(trx(fly).wing_arear_mm,1,2);
   data{i} = dareal;
   idx = trx(fly).wing_arear_mm(1:end-1) > trx(fly).wing_areal_mm(1:end-1);
   data{i}(idx) = darear(idx);

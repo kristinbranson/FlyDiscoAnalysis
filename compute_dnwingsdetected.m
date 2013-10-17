@@ -6,7 +6,7 @@ data = cell(1,nflies);
 for i = 1:nflies,
   fly = flies(i);
 
-  data{i} = diff(trx(fly).nwingsdetected) ./ trx(fly).dt;
+  data{i} = diff(trx(fly).nwingsdetected,1,2) ./ trx(fly).dt;
   
 end
 units = parseunits('unit/s');
