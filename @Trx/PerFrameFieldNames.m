@@ -1,5 +1,7 @@
 function fns = PerFrameFieldNames()
 
+% AL 20131014: this method is currently unused.
+
 fns = {
   'absangle2wall'
   'abscorfrac_min'

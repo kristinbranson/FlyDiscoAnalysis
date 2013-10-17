@@ -16,16 +16,39 @@ if ischar(forcecompute),
   forcecompute = str2double(forcecompute) ~= 0;
 end
 
-%% load the trx
-
+%% Init trx
 fprintf('Initializing trx...\n');
 
 trx = Trx('analysis_protocol',analysis_protocol,'settingsdir',settingsdir,...
   'datalocparamsfilestr',datalocparamsfilestr,'DEBUG',DEBUG);
 
+%% Cleanup/log existing perframefns
+perframefnsfile = fullfile(trx.settingsdir,trx.analysis_protocol,trx.dataloc_params.perframefnsfilestr);
+if isempty(perframefns),
+  perframefns = importdata(perframefnsfile);
+end
+nfns = numel(perframefns);
+
+% what files exist already
+tmp = dir(fullfile(expdir,trx.dataloc_params.perframedir,'*.mat'));
+perframefns_preexist = regexprep({tmp.name},'\.mat$','');
+
+% clean this data to force computation
+if forcecompute,
+  WINGTRACK_PERFRAMEFILES = {'nwingsdetected' 'wing_areal' 'wing_arear' 'wing_trough_angle'};
+  % AL 20131016: Blow away all preexisting (says wingtracking) to account for obsolete perframefns  
+  perframefns_rm = setdiff(perframefns_preexist,WINGTRACK_PERFRAMEFILES);
+  for i = 1:numel(perframefns_rm)
+    pfftmp = fullfile(expdir,trx.dataloc_params.perframedir,[perframefns_rm{i} '.mat']);
+    fprintf('Deleting per-frame data file %s\n',perframefns_rm{i});
+    delete(pfftmp);
+  end
+end
+
+%% Load trx
 fprintf('Loading trajectories for %s...\n',expdir);
 
-trx.AddExpDir(expdir,'openmovie',false);
+trx.AddExpDir(expdir,'openmovie',false); % writes trajectory fns to perframe dir
 
 %% log file
 
@@ -45,26 +68,7 @@ real_analysis_protocol = GetRealAnalysisProtocol(analysis_protocol,settingsdir);
 
 fprintf(logfid,'\n\n***\nRunning FlyBowlComputePerFrameFeatures version %s analysis_protocol %s (linked to %s) at %s\n',version,analysis_protocol,real_analysis_protocol,timestamp);
 
-
 %% compute per-frame features
-
-perframefnsfile = fullfile(trx.settingsdir,trx.analysis_protocol,trx.dataloc_params.perframefnsfilestr);
-if isempty(perframefns),
-  perframefns = importdata(perframefnsfile);
-end
-nfns = numel(perframefns);
-
-% what files exist already
-tmp = dir(fullfile(perframefnsfile,'*.mat'));
-perframefns_preexist = regexprep({tmp.name},'\.mat$','');
-
-% clean this data to force computation
-if forcecompute,
-  %deletefns = setdiff(perframefns,Trx.TrajectoryFieldNames());
-  trx.CleanPerFrameData();
-end
-
-% compute each
 for i = 1:nfns,
   fn = perframefns{i};
   fprintf(logfid,'Computing %s...\n',fn);

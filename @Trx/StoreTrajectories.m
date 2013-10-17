@@ -4,10 +4,7 @@ if ~exist('dooverwrite','var'),
   dooverwrite = true;
 end
 
-traj_fns = {'x','y','theta','a','b','timestamps','area',...
-  'x_mm','y_mm','a_mm','b_mm','theta_mm','dt','sex','area_mm',...
-  'wing_anglel','wing_angler',...
-  'xspine','yspine','xspine_mm','yspine_mm'};
+traj_fns = Trx.TrajectoryFieldNames();
 
 for i = 1:numel(traj_fns),
   fn = traj_fns{i};

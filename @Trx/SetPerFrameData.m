@@ -37,6 +37,7 @@ else
 end
 obj.FreeDataCache(ndataadd);
 
+assert(~any(strcmp(obj.fnscached{n},fn)),'''%s'' already in cache for fly %d.',fn,n); % AL
 obj.nfnscached(n) = obj.nfnscached(n) + 1;
 j = obj.nfnscached(n);
 %fprintf('Incremented nfnscached(%d) to %d for %s\n',n,obj.nfnscached(n),fn);
