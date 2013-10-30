@@ -630,12 +630,6 @@ for i = 1:nbehaviors,
         if isempty(tlabelpos),
           continue;
         end
-        ilabelpos = tlabelpos - td.trx(fly).firstframe + 1;
-        idxsex = cellfun(@isempty,regexp(td.trx(fly).sex(ilabelpos),statfn.sex,'once'));
-        tlabelpos(idxsex) = [];
-        if isempty(tlabelpos),
-          continue;
-        end
 
         idxexpfly = find(frameweights{i}{j}.exp == k & ...
           frameweights{i}{j}.flies == fly);
@@ -646,6 +640,14 @@ for i = 1:nbehaviors,
                 
         for stati = 1:nstatsest(i),
           statfn = statfns_est.(behavior)(stati);
+          
+          ilabelpos = tlabelpos - td.trx(fly).firstframe + 1;
+          idxsex = cellfun(@isempty,regexp(td.trx(fly).sex(ilabelpos),statfn.sex,'once'));
+          tlabelpos(idxsex) = [];
+          if isempty(tlabelpos),
+            continue;
+          end          
+          ilabelpos = tlabelpos - td.trx(fly).firstframe + 1;
 
           % load in per-frame stat
           pfd = load(fullfile(expdirs{k},'perframe',[statfn.statfn,'.mat']));
@@ -899,6 +901,49 @@ for i = 1:numel(orderedtesttypes),
 end
 
 %SaveFigLotsOfWays(hfig,'GTFlyBowlPaper/GTFracTimeJumpWingExt20130925');
+
+%% plot in a different way
+
+hfig = 85;
+figure(hfig);
+clf;
+
+i = 1;
+behavior = behaviors{i};
+
+% control behavior
+controlmean = linestats.means.(statfn)(end);
+controlstd = linestats.stds.(statfn)(end);
+
+% normalize
+zlabel = (fractimelabel(i,1:end-1)-controlmean)/controlstd;
+zpred = (fractimepred(i,1:end-1)-controlmean)/controlstd;
+
+minv = min(zlabel);
+maxv = max(zlabel);
+
+lim = [minv/1.05,maxv*1.05];
+
+% equal line
+plot(lim,lim,'c--');
+hold on;
+
+statfn = sprintf('fractime_flyany_frame%s',lower(behavior));
+
+plot(max(minv,fractimelabel(i,1:end-1)),max(minv,fractimepred(i,1:end-1)),'wo','MarkerFaceColor',[.7,0,0]);
+plot(repmat(fractimelabel(i,1:end-1),[2,1]),...
+  [max(minv,fractimepred(i,1:end-1)-fractimepred_std(i,1:end-1))
+  fractimepred(i,1:end-1)+fractimepred_std(i,1:end-1)],'-','Color',[.7,0,0]);
+plot([max(minv,fractimelabel(i,1:end-1)-fractimelabel_std(i,1:end-1))
+  fractimelabel(i,1:end-1)+fractimelabel_std(i,1:end-1)],...
+  repmat(fractimepred(i,1:end-1),[2,1]),'-','Color',[.7,0,0]);
+  
+set(gca,'YScale','log','XScale','log');
+xlabel('Frac. time labeled');
+ylabel('Frac. time predicted');
+box off;
+
+axis([lim,lim]);
 
 %% plot stat comparison
 

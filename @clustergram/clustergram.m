@@ -425,7 +425,14 @@ methods
     end % End of constructor
 end % End of method block
 
+methods (Access = public)
+  
+  [hfig,hax] = printToFigure(obj,varargin)
+  
+end
+
 methods
+  
     function varargout = clusterGroup(obj, groupIdx, dim, varargin)
         %CLUSTERGROUP Select a specified cluster group.
         %

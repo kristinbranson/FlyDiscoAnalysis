@@ -509,7 +509,7 @@ for fni = 1:numel(colorbyfns),
   xcontrol = projcontrol_tsne(:,1)-mucontrol_tsne(1);
   ycontrol = projcontrol_tsne(:,2)-mucontrol_tsne(2);
   
-  plot(xcontrol,ycontrol,'k.');
+  plot(xcontrol,ycontrol,'x','Color',[.3,.3,.3]);
   hold on;
 %   
 %   maxnstdsplot = 3;
@@ -543,14 +543,15 @@ for fni = 1:numel(colorbyfns),
 
   stati = find(strcmp(statfnscurr,colorbyfn));
   
-  if false
+  if true
     ncolors = 256;
     colors = jet(ncolors)*.9;
     minz = min(zdatacluster_transform(:,stati));
     maxz = max(zdatacluster_transform(:,stati));
-    colori = max(1,ceil((zdatacluster_transform(:,stati)-minz)/(maxz-minz)*ncolors));
+    colori = ncolors+1-max(1,ceil((zdatacluster_transform(:,stati)-minz)/(maxz-minz)*ncolors));
     hpts = nan(1,nlinescurr);
     for i = 1:nlinescurr,
+      %hpts(i) = plot(x(i),y(i),'ko','MarkerFaceColor',colors(colori(i),:));
       hpts(i) = plot(x(i),y(i),'.','Color',colors(colori(i),:));
     end
   else
@@ -579,10 +580,14 @@ for fni = 1:numel(colorbyfns),
   
   drawnow;
   
-  SaveFigLotsOfWays(hfig,sprintf('projectionfigs/TSNEColoredBy_%s_20130928',colorbyfn));
-  %hdata_b1b2a1 = SetUpButtonDown_ReturnPointIndex(hax,x,y,{@ButtonDownFcn_SelectAndShowLineInfo,line_names_curr,hpts});
+  if true,
+    hdata_b1b2a1 = SetUpButtonDown_ReturnPointIndex(hax,x,y,{@ButtonDownFcn_SelectAndShowLineInfo,line_names_curr,hpts});
+  else
+    SaveFigLotsOfWays(hfig,sprintf('projectionfigs/TSNEColoredBy_%s_20130928',colorbyfn));
+  end
 
 end
+
 
 %% plot anatomy of the jump lines
 

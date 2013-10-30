@@ -17,6 +17,7 @@ requiredfiles = {'scores_WingExtension.mat'};
 % if the variance is 3x bigger, then it is not worth adding
 maxfactorexp = sqrt(3);
 minnframes = 200;
+minncontrolsets = 10;
 
 %% read in metadata from SAGE
 
@@ -317,7 +318,7 @@ allnframestotal = structfun(@(x) x(~badexps),allnframestotal,'UniformOutput',fal
 
 %% save to file
 
-save CollectedPrimaryPerFrameStats20130912.mat ...
+save CollectedPrimaryPerFrameStats20131024.mat ...
   allnframestotal allstats allstdstats ...
   expdirs main_control_line_name metadata nexps nstats statfns;
 
@@ -358,7 +359,7 @@ controlstd = nanstd(setmeans(set2lineidx==idxcontrol,:),1,1);
 
 %% save to file
 
-save CollectedPrimaryPerFrameStats20130912.mat ...
+save -append CollectedPrimaryPerFrameStats20131024.mat ...
   allnframestotal allstats allstdstats control_line_names controlstd ...
   exp2lineidx expdirs idxcontrol ...
   line_names linemeans linemetadata linensets ...
@@ -414,6 +415,8 @@ for stati = 1:numel(statfns),
   x = allstats.(statfn)(idxcurr);
   setstats.means.(statfn) = accumarray(setidx(idxcurr)',x',[nsets,1],@mean)';
   setstats.stds.(statfn) = accumarray(setidx(idxcurr)',x',[nsets,1],@(y) std(y,1))';
+  setstats.means.(statfn)(setstats.nexps.(statfn)==0) = nan;
+  setstats.stds.(statfn)(setstats.nexps.(statfn)==0) = nan;
     
 end
 
@@ -477,6 +480,57 @@ maxcontroldatenum = max(controldatenum);
 setstats.normmeans = struct;
 setstats.controlmeans = struct;
 setstats.nsetscontrolnorm = struct;
+setstats.usedallcontrols = struct;
+setstats.usedalldata = struct;
+
+% for some stats, we should use all control sets or all the data
+usealldata = false(1,nstats);
+nnotenoughcontrolsets = zeros(1,nstats);
+arenocontrolsets = false(1,nstats);
+useallcontrolsets = false(1,nstats);
+for stati = 1:nstats,
+  statfn = statfns{stati};
+  idxcurr = setstats.nexps.(statfn)(setiscontrol) >= minnexps;
+  ncontrolsetscurr = nnz(idxcurr);
+  if ncontrolsetscurr < minncontrolsets,
+    usealldata(stati) = true;
+    fprintf('Using all data for stat (%d control sets) %s\n',ncontrolsetscurr,statfn);
+    continue;
+  end
+
+  for seti = 1:nsets,
+    
+    mindatenumcurr = max(mincontroldatenum,setdatenum(seti)-controldateradius);
+    maxdatenumcurr = mindatenumcurr+controldateradius*2+1;
+    if maxdatenumcurr > maxcontroldatenum,
+      maxdatenumcurr = maxcontroldatenum;
+      mindatenumcurr = maxdatenumcurr-controldateradius*2+1;
+    end
+  
+    idxdate = (controldatenum>=mindatenumcurr & controldatenum <= maxdatenumcurr)';
+    ncontrolsetscurr = nnz(idxcurr & idxdate);
+
+    if ncontrolsetscurr == 0,
+      if ncontrolsetscurr == 0,
+        arenocontrolsets(stati) = true;
+        break;
+      end
+      nnotenoughcontrolsets(stati) = nnotenoughcontrolsets(stati)+1;
+      %fprintf('Need all control sets for stat %s (%d control sets for range %s to %s)\n',statfn,ncontrolsetscurr,datestr(mindatenumcurr),datestr(maxdatenumcurr));
+      %break;
+    end
+  end
+  if nnotenoughcontrolsets(stati) > nsets / 10 || arenocontrolsets(stati),
+    if arenocontrolsets(stati),
+      fprintf('Need all control sets for stat %s (some have 0 control sets)\n',statfn);
+    else
+      fprintf('Need all control sets for stat %s (%d sets do not have enough control sets)\n',statfn,nnotenoughcontrolsets(stati));
+    end
+    useallcontrolsets(stati) = true;
+  end
+  
+end
+
 for seti = 1:nsets,
   
   fprintf('Set %s %d / %d\n',setstats.metadata(seti).set,seti,nsets);
@@ -496,11 +550,25 @@ for seti = 1:nsets,
     
     if seti == 1,
       setstats.normmeans.(statfn) = nan(1,nsets);
+      setstats.controlmeans.(statfn) = nan(1,nsets);
+      setstats.nsetscontrolnorm.(statfn) = zeros(1,nsets);
+      setstats.usedallcontrols.(statfn) = useallcontrolsets(stati);
+      setstats.usedalldata.(statfn) = usealldata(stati);
     end
     
-    idxcurr = setidxcontrol(idxdate & setstats.nexps.(statfn)(setiscontrol) >= minnexps);
+    if usealldata(stati),
+      idxcurr = find(setstats.nexps.(statfn) >= minnexps);
+    elseif useallcontrolsets(stati),
+      idxcurr = setidxcontrol(setstats.nexps.(statfn)(setiscontrol) >= minnexps);
+    else
+      idxcurr = setidxcontrol(idxdate & setstats.nexps.(statfn)(setiscontrol) >= minnexps);
+    end
     idxcurr = setdiff(idxcurr,seti);
+      
     setstats.controlmeans.(statfn)(seti) = mean(setstats.means.(statfn)(idxcurr));
+    if isnan(setstats.controlmeans.(statfn)(seti)),
+      error('set %d %s, stat %d %s\n',seti,setstats.metadata(seti).set,stati,statfn);
+    end
     setstats.nsetscontrolnorm.(statfn)(seti) = nnz(idxcurr);
     setstats.normmeans.(statfn)(seti) = setstats.means.(statfn)(seti) - setstats.controlmeans.(statfn)(seti);
 
@@ -573,8 +641,36 @@ nlines = numel(line_names);
 [~,exp2lineidx] = ismember({metadata.line_name},line_names);
 [~,set2lineidx] = ismember({setmetadata.line_name},line_names);
 
+%% control means
+
+normcontrolmean = struct;
+normcontrolstd = struct;
+for fni = 1:nstats,
+  statfn = statfns{fni};
+  if ~usealldata(fni),
+    idxcurr = setstats.nexps.(statfn) >= minnexps & setiscontrol & ...
+      ~isnan(setstats.normmeans.(statfn)) & ~isinf(setstats.normmeans.(statfn));
+  else
+    idxcurr = setstats.nexps.(statfn) >= minnexps & ...
+      ~isnan(setstats.normmeans.(statfn)) & ~isinf(setstats.normmeans.(statfn));
+  end
+  normcontrolmean.(statfn) = mean(setstats.normmeans.(statfn)(idxcurr));
+  normcontrolstd.(statfn) = std(setstats.normmeans.(statfn)(idxcurr),1);
+end
+
+%% add normmean to allstats
+
+nexps = numel(metadata);
+[~,exp2setidx] = ismember({metadata.set},{setstats.metadata.set});
+allstatsnorm = struct;
+for fni = 1:nstats,
+  statfn = statfns{fni};
+  x = allstats.(statfn);
+  allstatsnorm.(statfn) = allstats.(statfn) - setstats.controlmeans.(statfn)(exp2setidx);
+end
+
 %% resave
 
 linestats.metadata = linemetadata;
 
-save -append CollectedPrimaryPerFrameStats20130912.mat setstats linestats nlines set2lineidx nsets linemetadata linemeans linensets line_names exp2lineidx;
+save -append CollectedPrimaryPerFrameStats20131024.mat setstats linestats nlines set2lineidx nsets linemetadata linemeans linensets line_names exp2lineidx normcontrolmean normcontrolstd nexps allstatsnorm;
