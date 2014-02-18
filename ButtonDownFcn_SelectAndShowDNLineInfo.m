@@ -1,4 +1,5 @@
-function ButtonDownFcn_SelectAndShowLineInfo(hObject,eventdata,line_names,hpts,varargin)
+function ButtonDownFcn_SelectAndShowDNLineInfo(hObject,eventdata,line_names,hpts,...
+  isdnexpr,dnnames,varargin)
 
 userdata = get(hObject,'UserData');
 if ~isstruct(userdata),
@@ -14,7 +15,7 @@ end
 if strcmpi(eventdata.selectiontype,'alt'),
   if userdata.isselected(eventdata.pointindex),
     line_names_curr = line_names(userdata.isselected);
-    ShowLineInfo(line_names_curr,varargin{:});
+    ShowDNLineInfo(line_names_curr,isdnexpr(userdata.isselected,:),dnnames,varargin{:});
   end
   return;
 end
@@ -22,7 +23,7 @@ end
 if strcmpi(eventdata.selectiontype,'extend'),
   if userdata.isselected(eventdata.pointindex),
     line_names_curr = line_names(eventdata.pointindex);
-    ShowLineInfo(line_names_curr,varargin{:});
+    ShowDNLineInfo(line_names_curr,isdnexpr(userdata.isselected,:),dnnames,varargin{:});
   end
   return;
 end
@@ -34,8 +35,9 @@ end
 
 if ~userdata.isselected(eventdata.pointindex),
   color = get(hpts(eventdata.pointindex),'Color');
-  userdata.oldmarker{eventdata.pointindex} = get(hpts(eventdata.pointindex),'Marker');
+  userdata.oldmarkers{eventdata.pointindex} = get(hpts(eventdata.pointindex),'Marker');
   set(hpts(eventdata.pointindex),'Marker','o','MarkerFaceColor',color);
+
   shortlinename = line_names{eventdata.pointindex};
   shortlinename = regexprep(shortlinename,'GMR_','R');
   shortlinename = regexprep(shortlinename,'_AE_01','');
@@ -51,7 +53,7 @@ if ~userdata.isselected(eventdata.pointindex),
   end
   drawnow;
 else
-  set(hpts(eventdata.pointindex),'Marker',userdata.oldmarker{eventdata.pointindex});
+  set(hpts(eventdata.pointindex),'Marker',userdata.oldmarkers{eventdata.pointindex},'MarkerFaceColor','none');
   if ishandle(userdata.htext(eventdata.pointindex)),
     set(userdata.htext(eventdata.pointindex),'Visible','off');
   end

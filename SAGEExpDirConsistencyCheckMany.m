@@ -1,6 +1,6 @@
 function [isconsistent,filesmissing,expdirs] = SAGEExpDirConsistencyCheckMany(varargin)
 
-[analysis_protocol,settingsdir,datalocparamsfilestr,outfilename,rootdatadir,restartexperiment,experiments,leftovers] = ...
+[analysis_protocol,settingsdir,datalocparamsfilestr,outfilename,rootdatadir,restartexperiment,experiments,screen_type,leftovers] = ...
   myparse_nocheck(varargin,...
   'analysis_protocol','current',...
   'settingsdir','/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/settings',...
@@ -8,7 +8,8 @@ function [isconsistent,filesmissing,expdirs] = SAGEExpDirConsistencyCheckMany(va
   'outfilename','',...
   'rootdatadir','/groups/sciserv/flyolympiad/Olympiad_Screen/fly_bowl/bowl_data',...
   'restartexperiment','',...
-  'experiments',[]);
+  'experiments',[],...
+  'screen_type','primary');
 
 global DISABLESAGEWAITBAR;
 DISABLESAGEWAITBAR = true;
@@ -23,8 +24,9 @@ fprintf('Getting all experiment directories...\n');
   'settingsdir',settingsdir,'protocol',analysis_protocol,...
   leftovers{:});
 
-fprintf('Reading cross dates...\n');
-% get cross date
+fprintf('Reading cross dates and screen types...\n');
+% get cross date and only find experiments with the right screen_type
+ignoreidx = false(1,numel(expdirs));
 badidx = false(1,numel(expdirs));
 for i = 1:numel(expdirs),
   metadatafile = fullfile(rootdatadir,expdirs{i},'Metadata.xml');
@@ -42,6 +44,15 @@ for i = 1:numel(expdirs),
   if ~isfield(metadata,'cross_date'),
     warning('Cross date not found in metadata file %s',metadatafile);
     continue;
+  end
+  if ~isfield(metadata,'screen_type'),
+    warning('Screen type not found in metadata file %s',metadatafile);
+  else
+    experiments(i).screen_type = metadata.screen_type;
+    if ~isempty(screen_type) && ~strcmp(screen_type,metadata.screen_type),
+      ignoreidx(i) = true;
+      continue;
+    end
   end
   cross_date = metadata.cross_date;
   experiments(i).cross_date = cross_date;
@@ -63,9 +74,10 @@ for i = 1:numel(expdirs),
   experiments(i).cross_datenum = crossdatenum;
 end
 
-fprintf('Removing %d experiment directories that have no metadata file...\n',nnz(badidx));
-experiments(badidx) = [];
-expdirs(badidx) = [];
+fprintf('Removing %d experiment directories that have no metadata file...\n',nnz(badidx&~ignoreidx));
+fprintf('Removing %d experiment directories based on the screen type constraint ...\n',nnz(ignoreidx));
+experiments(ignoreidx|badidx) = [];
+expdirs(ignoreidx|badidx) = [];
 
 else
   expdirs = {experiments.file_system_path};

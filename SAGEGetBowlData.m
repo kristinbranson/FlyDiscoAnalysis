@@ -541,6 +541,10 @@ for i = 1:numel(perframefns),
     try
     datamerge(j).(newfn) = struct;
     conditions = datamerge(j).(conditionfn);
+    if isempty(conditions) || isnumeric(conditions) && conditions == 0,
+      %fprintf('no data for %s\n',conditionfn);
+      continue;
+    end
     nconditions = numel(conditions);
     nfliesanalyzed = datamerge(j).(nfliesanalyzedfn);
     nfliesanalyzedtotal = sum(nfliesanalyzed);

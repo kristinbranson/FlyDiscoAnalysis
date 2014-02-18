@@ -78,6 +78,10 @@ for jj = 1:numel(idxcurr),
   nimscurr = nimscurr+1;
 end
 
+if nimscurr == 0,
+  return;
+end
+
 meanim = meanim / nimscurr;
   
 outfile = fullfile(savedir,sprintf('meanim_%s.png',line_name));

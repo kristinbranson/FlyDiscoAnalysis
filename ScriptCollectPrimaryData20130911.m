@@ -18,6 +18,7 @@ requiredfiles = {'scores_WingExtension.mat'};
 maxfactorexp = sqrt(3);
 minnframes = 200;
 minncontrolsets = 10;
+minnexps = 2;
 
 %% read in metadata from SAGE
 
@@ -101,6 +102,40 @@ fprintf('For the remaining experiments found using SAGE and not the directory se
 
 % from now on, just use metadata
 
+%% compare automated_pf
+
+automated_pf_fromfile = repmat('?',[1,numel(metadata)]);
+for i = 1:numel(metadata),
+  
+  fprintf('%d / %d: %s\n',i,numel(metadata),metadata(i).experiment_name);
+  expdir = metadata(i).file_system_path;
+  apffile = fullfile(expdir,'automatic_checks_complete_results.txt');
+  if ~exist(apffile,'file'),
+    apffile = fullfile(expdir,'automatic_checks_incoming_results.txt');
+    if ~exist(apffile,'file'),
+      fprintf('No automated checks files exist for %s\n',metadata(i).experiment_name);
+      continue;
+    end      
+  end
+  tmp = ReadParams(apffile);
+  if ~isfield(tmp,'automated_pf'),
+    fprintf('No automated_pf field for %s\n',metadata(i).experiment_name);
+    continue;
+  end
+  automated_pf_fromfile(i) = tmp.automated_pf;
+  
+end
+
+automated_pf_fromsage = repmat('?',[1,numel(metadata)]);
+automated_pf_fromsage(~cellfun(@isempty,{metadata.automated_pf})) = [metadata.automated_pf];
+idxmismatch = find(automated_pf_fromfile ~= automated_pf_fromsage);
+
+[tmp1,tmp2,tmp3] = unique([automated_pf_fromfile(idxmismatch)',automated_pf_fromsage(idxmismatch)'],'rows');
+for i = 1:size(tmp1,1),
+  fprintf('%d / %d experiments have automated_pf = %s on the file system and %s in SAGE:\n',nnz(tmp3==i),numel(metadata),tmp1(i,1),tmp1(i,2));
+  fprintf('    %s\n',metadata(idxmismatch(tmp3==i)).experiment_name);
+end
+
 %% remove weird line names, dates that are not actually our data
 
 isquestionable = ~cellfun(@isempty,regexp({metadata.line_name},'^EXT','once'))' | ...
@@ -118,6 +153,8 @@ metadata(isothercontrol) = [];
 ismanualf = strcmp({metadata.manual_pf},'F');
 fprintf('Removing %d experiments with manual pf\n',nnz(ismanualf));
 % Removing 471 experiments with manual pf
+% 20131122: Removing 604 experiments with manual pf
+% 20131127: Removing 648 experiments with manual pf
 metadata(ismanualf) = [];
 
 ignorecategories = {
@@ -127,9 +164,11 @@ ignorecategories = {
 isautomatedf = ~strcmp({metadata.automated_pf},'P');
 fprintf('%d experiments have automated_pf ~= P.\n',nnz(isautomatedf));
 % 565 experiments have automated_pf ~= P
+% 20131122: 553 experiments have automated_pf ~= P.
+% 20131127: 553 experiments have automated_pf ~= P.
 idxautomatedpf = find(isautomatedf);
 
-[categories,~,idx] = unique({metadata.automated_pf_category});
+[categories,~,idx] = unique({metadata(isautomatedf).automated_pf_category});
 counts = hist(idx,1:numel(categories));
 for i = 1:numel(categories),
   fprintf('%s: %d\n',categories{i},counts(i));
@@ -150,6 +189,32 @@ end
 % shiftflytemp_time_too_long: 1 -- ignore
 % short_video: 80 -- failures
 
+% 20131122:
+% bad_number_of_flies: 254
+% bad_number_of_flies_per_sex: 61
+% flag_aborted_set_to_1: 49
+% flag_redo_set_to_1: 72
+% fliesloaded_time_too_long: 20
+% fliesloaded_time_too_short: 8
+% missing_capture_files: 1
+% missing_results_movie_files: 7
+% missing_video: 2
+% shiftflytemp_time_too_long: 1
+% short_video: 78
+
+% 20131127
+% bad_number_of_flies: 254
+% bad_number_of_flies_per_sex: 61
+% flag_aborted_set_to_1: 49
+% flag_redo_set_to_1: 72
+% fliesloaded_time_too_long: 20
+% fliesloaded_time_too_short: 8
+% missing_capture_files: 1
+% missing_results_movie_files: 7
+% missing_video: 2
+% shiftflytemp_time_too_long: 1
+% short_video: 78
+
 idx = find(strcmp({metadata.automated_pf_category},'incoming_checks_unknown'));
 for i = idx,
   filename = fullfile(metadata(i).file_system_path,'automatic_checks_complete_results.txt');
@@ -168,7 +233,7 @@ isautomatedf(ismaybeok) = false;
 
 metadata(isautomatedf) = [];
 
-save CollectedPrimaryMetadata20130912.mat metadata;
+save CollectedPrimaryMetadata20131127.mat metadata;
 
 %% load in statistics
 
@@ -308,6 +373,9 @@ end
 MINNFRAMESTOTAL = 400000;
 nframestotal = allnframestotal.velmag_ctr_flyany_frameany;
 badexps = nframestotal < MINNFRAMESTOTAL;
+fprintf('Removing %d experiments without enough frames\n',nnz(badexps));
+% 20131122: Removing 0 experiments without enough frames
+% 20131127: Removing 0 experiments without enough frames
 
 expdirs(badexps) = [];
 metadata(badexps) = [];
@@ -318,72 +386,112 @@ allnframestotal = structfun(@(x) x(~badexps),allnframestotal,'UniformOutput',fal
 
 %% save to file
 
-save CollectedPrimaryPerFrameStats20131024.mat ...
+save CollectedPrimaryPerFrameStats20131127.mat ...
   allnframestotal allstats allstdstats ...
   expdirs main_control_line_name metadata nexps nstats statfns;
+
+%% remove data when there are not enough samples
+
+for stati = 1:nstats,
+  
+  statfn = statfns{stati};
+  
+  % remove experiments that have nans or infs
+  % too small or bad nframestotal
+  % or not enough 
+  nframestotal = allnframestotal.(statfn);  
+  badidx = isnan(allstats.(statfn)) | isinf(allstats.(statfn)) | ...
+    isinf(nframestotal) | isnan(nframestotal) | ...
+    nframestotal < minnframes;
+  
+  if any(badidx),
+    fprintf('Removing %d experiments of data for %s\n',nnz(badidx),statfn);
+    allstats.(statfn)(badidx) = nan;
+    allstdstats.(statfn)(badidx) = nan;
+    allnframestotal.(statfn)(badidx) = nan;
+  end
+  
+end
 
 %% compute set stats using all experiments
 
 [set_names,firstidx,setidx] = unique({metadata.set});
 nsets = numel(set_names);
 setmeans = nan(nsets,nstats);
+setstds = nan(nsets,nstats);
 setnexps = nan(nsets,nstats);
 setmetadata = metadata(firstidx);
 for stati = 1:nstats,
-  fn = statfns{stati};
-  idxcurr = ~isnan(allstats.(fn)) & ~isinf(allstats.(fn));
-  setmeans(:,stati) = accumarray(setidx(idxcurr)',allstats.(fn)(idxcurr)',[nsets,1],@mean);
+  statfn = statfns{stati};
+  
+  idxcurr = ~isnan(allstats.(statfn)) & ~isinf(allstats.(statfn));
+
+  setmeans(:,stati) = accumarray(setidx(idxcurr)',allstats.(statfn)(idxcurr)',[nsets,1],@mean,nan);
+  setstds(:,stati) = accumarray(setidx(idxcurr)',allstats.(statfn)(idxcurr)',[nsets,1],@(x) std(x,1),nan);
   setnexps(:,stati) = hist(setidx(idxcurr),1:nsets);
 end
 
 %% compute line stats using all sets
 
-[line_names,firstidx,set2lineidx] = unique({setmetadata.line_name});
+[ line_names,firstidx,set2lineidx] = unique({setmetadata.line_name});
 [~,exp2lineidx] = ismember({metadata.line_name},line_names);
 nlines = numel(line_names);
 linemeans = nan(nlines,nstats);
 linestds = nan(nlines,nstats);
 linensets = nan(nlines,nstats);
+linenexps = nan(nlines,nstats);
 linemetadata = setmetadata(firstidx);
 
 for stati = 1:nstats,
-  fn = statfns{stati};
-  idxcurr = ~isnan(setmeans(:,stati)) & ~isinf(setmeans(:,stati));
-  linemeans(:,stati) = accumarray(set2lineidx(idxcurr)',setmeans(idxcurr,stati)',[nlines,1],@mean);
-  linestds(:,stati) = accumarray(set2lineidx(idxcurr)',setmeans(idxcurr,stati)',[nlines,1],@(x) std(x,1));
+  statfn = statfns{stati};
+  idxcurr = ~isnan(setmeans(:,stati)) & ~isinf(setmeans(:,stati)) & ...
+    setnexps(:,stati) >= minnexps;
+  expidxcurr =  ~isnan(allstats.(statfn)) & ~isinf(allstats.(statfn));
+
+  linemeans(:,stati) = accumarray(set2lineidx(idxcurr)',setmeans(idxcurr,stati)',[nlines,1],@mean,nan);
+
+  % standard deviation over experiments!
+  linestds(:,stati) = accumarray(exp2lineidx(expidxcurr)',allstats.(statfn)(expidxcurr)',[nlines,1],@(x) std(x,1),nan);
+
   linensets(:,stati) = hist(set2lineidx(idxcurr),1:nlines);
+  linenexps(:,stati) = hist(exp2lineidx(expidxcurr),1:nlines);
 end
 
 idxcontrol = find(strcmp(line_names,main_control_line_name));
 controlstd = nanstd(setmeans(set2lineidx==idxcontrol,:),1,1);
+controlmean = nanmean(setmeans(set2lineidx==idxcontrol,:),1);
 
 %% save to file
 
-save -append CollectedPrimaryPerFrameStats20131024.mat ...
+save -append CollectedPrimaryPerFrameStats20131127.mat ...
   allnframestotal allstats allstdstats control_line_names controlstd ...
   exp2lineidx expdirs idxcontrol ...
-  line_names linemeans linemetadata linensets ...
+  line_names linemeans linemetadata linensets linestds linenexps ...
   main_control_line_name metadata nexps nlines nsets nstats ...
-  set2lineidx set_names setidx setmeans setmetadata setnexps ...
+  set2lineidx set_names setidx setmeans setstds setmetadata setnexps ...
   statfns;
 
 %% code for comparing old and new versions
 
-olddata = load('CollectedPrimaryPerFrameStats20130905.mat','allstats','allstdstats','allnframestotal','metadata');
+olddata = load('CollectedPrimaryPerFrameStats20131122.mat','allstats','allstdstats','allnframestotal','metadata','setstats','linestats');
 
 [ism,idx] = ismember({olddata.metadata.experiment_name},{metadata.experiment_name});
 idxm = find(ism);
-fn = 'fractime_flyany_framewingextension';
-d = olddata.allstats.(fn)(ism)-allstats.(fn)(idx(ism));
-[maxdiff,ii] = max(abs(d));
-i = idxm(ii);
-fprintf('Biggest change for %s: experiment %s, old = %f, new = %f, difference = %f\n',fn,olddata.metadata(i).experiment_name,...
-  olddata.allstats.(fn)(i),...
-  allstats.(fn)(idx(i)),...
-  olddata.allstats.fractime_flyany_framewinggrooming(i)-allstats.(fn)(idx(i)));
+for stati = 1:numel(statfns),
+  fn = statfns{stati};
+  %fn = 'fractime_flyany_framewingextension';
+  d = olddata.allstats.(fn)(ism)-allstats.(fn)(idx(ism));
+  [maxdiff,ii] = max(abs(d));
+  if maxdiff > 0,
+    i = idxm(ii);
+    fprintf('Biggest change for %s: experiment %s, old = %f, new = %f, difference = %f\n',fn,olddata.metadata(i).experiment_name,...
+      olddata.allstats.(fn)(i),...
+      allstats.(fn)(idx(i)),...
+      olddata.allstats.(fn)(i)-allstats.(fn)(idx(i)));
+  end
+end
 
-
-%% remove experiments from statistics for which they don't have enough frames
+%% collect setstats
 
 [set_names,firstidx,setidx] = unique({metadata.set});
 nsets = numel(set_names);
@@ -395,74 +503,58 @@ for stati = 1:numel(statfns),
 
   statfn = statfns{stati};
   
-  % remove experiments that have nans or infs
-  idxcurr = ~isnan(allstats.(statfn)) & ~isinf(allstats.(statfn));
-  
-  % remove experiments that don't have nframestotal
-  nframestotal = allnframestotal.(statfn)(idxcurr);
-  badexp1 = isnan(nframestotal);
-  idxcurr(idxcurr) = ~badexp1;
-    
-  % remove experiments that don't have enough frames
-  badexp1 = nframestotal < minnframes;
-  fprintf('%s: removing %d experiments that don''t have enough frames\n',statfn,nnz(badexp1));
-  idxcurr(idxcurr) = ~badexp1;
-  
-  % count number of experiments per set
-  setstats.nexps.(statfn) = hist(setidx(idxcurr),1:numel(set_names));
+  setstats.means.(statfn) = setmeans(:,stati)';
+  setstats.stds.(statfn) = setstds(:,stati)';
+  setstats.nexps.(statfn) = setnexps(:,stati)';
 
-  % compute statistics
-  x = allstats.(statfn)(idxcurr);
-  setstats.means.(statfn) = accumarray(setidx(idxcurr)',x',[nsets,1],@mean)';
-  setstats.stds.(statfn) = accumarray(setidx(idxcurr)',x',[nsets,1],@(y) std(y,1))';
-  setstats.means.(statfn)(setstats.nexps.(statfn)==0) = nan;
-  setstats.stds.(statfn)(setstats.nexps.(statfn)==0) = nan;
-    
 end
 
-%% update line stats
+%% collect line stats
 
-% < 2 experiments will increase the variance of the estimate, assuming most
-% sets 
-minnexps = 2;
-
-linestats = struct('means',struct,'stds',struct,'nexps',struct,'metadata',struct);
+linestats = struct('means',struct,'stds',struct,'nsets',struct,'metadata',struct);
 [linestats.line_names,firstidx,set2lineidx] = unique({setstats.metadata.line});
+linestats.metadata = setstats.metadata(firstidx);
 nlines = numel(linestats.line_names);
 for stati = 1:numel(statfns),
   
   statfn = statfns{stati};
   
-  % remove sets that don't have enough experiments or have bad values
-  idxcurr = setstats.nexps.(statfn) >= minnexps & ...
-    ~isnan(setstats.means.(statfn)) & ...
-    ~isinf(setstats.means.(statfn));
-  
-  fprintf('%s: removing %d sets that don''t have enough experiments\n',statfn,nnz(~idxcurr));
-  
-  % count number of sets for each line
-  linestats.nsets.(statfn) = hist(set2lineidx(idxcurr),1:numel(linestats.line_names));
-  for i = 0:10,
-    n1 = nnz(linensets(:,stati)==i);
-    n2 = nnz(linestats.nsets.(statfn)==i);
-    if n1 == 0 && n2 == 0,
-      continue;
-    end
-    fprintf('Nlines with %d sets: %d -> %d\n',i,n1,n2);
-  end
-
-  % compute statistics
-  x = setstats.means.(statfn)(idxcurr);
-  linestats.means.(statfn) = accumarray(set2lineidx(idxcurr)',x',[nlines,1],@mean)';
-  linestats.stds.(statfn) = accumarray(set2lineidx(idxcurr)',x',[nlines,1],@(y) std(y,1))';
-  linestats.means.(statfn)(linestats.nsets.(statfn)==0) = nan;
-  linestats.stds.(statfn)(linestats.nsets.(statfn)==0) = nan;
+  linestats.means.(statfn) = linemeans(:,stati)';
+  linestats.stds.(statfn) = linestds(:,stati)';
+  linestats.nsets.(statfn) = linensets(:,stati)';
+  linestats.nexps.(statfn) = linenexps(:,stati)';
 
 end
 
 %% save
 
-save -append CollectedPrimaryPerFrameStats20130912.mat setstats linestats nlines set2lineidx setidx nsets;
+save -append CollectedPrimaryPerFrameStats20131127.mat setstats linestats nlines set2lineidx setidx nsets;
+
+%% compare old and new
+
+[ism,idx] = ismember({olddata.linestats.metadata.line_name},{linestats.metadata.line_name});
+lines_changed = {};
+for stati = 1:numel(statfns),
+  fn = statfns{stati};
+  %fn = 'fractime_flyany_framewingextension';
+  d = olddata.linestats.means.(fn)(ism)-linestats.means.(fn)(idx(ism));
+  ischange = ~isnan(d) & d ~= 0;
+  if any(ischange),
+    fprintf('%d lines changed for %s\n',nnz(ischange),fn);
+    lines_changed = union(lines_changed,{linestats.metadata(ischange).line_name});
+  end
+%   [maxdiff,ii] = max(abs(d));
+%   if maxdiff > 0,
+%     i = idxm(ii);
+%     fprintf('Biggest change for %s: line %s, old = %f, new = %f, difference = %f, %f z\n',fn,olddata.linestats.metadata(i).line_name,...
+%       olddata.linestats.means.(fn)(i),...
+%       linestats.means.(fn)(idx(i)),...
+%       (olddata.linestats.means.(fn)(i)-linestats.means.(fn)(idx(i))),...
+%       (olddata.linestats.means.(fn)(i)-linestats.means.(fn)(idx(i)))/controlstd(stati));
+%   end
+end
+fprintf('%d lines changed for some feature:\n',numel(lines_changed));
+fprintf('%s\n',lines_changed{:});
 
 %% subtract off control means for the surrounding month
 
@@ -531,6 +623,23 @@ for stati = 1:nstats,
   
 end
 
+% compute the global control mean and standard deviation
+controlmean = nanmean(setmeans(set2lineidx==idxcontrol,:),1);
+controlstd = nanstd(setmeans(set2lineidx==idxcontrol,:),1,1);
+controlmean(usealldata) = nanmean(setmeans(:,usealldata),1);
+controlstd(usealldata) = nanstd(setmeans(:,usealldata),1,1);
+
+for stati = 1:nstats,
+  
+  statfn = statfns{stati};
+  
+  setstats.normmeans.(statfn) = nan(1,nsets);
+  setstats.controlmeans.(statfn) = nan(1,nsets);
+  setstats.nsetscontrolnorm.(statfn) = zeros(1,nsets);
+  setstats.usedallcontrols.(statfn) = useallcontrolsets(stati);
+  setstats.usedalldata.(statfn) = usealldata(stati);
+end
+
 for seti = 1:nsets,
   
   fprintf('Set %s %d / %d\n',setstats.metadata(seti).set,seti,nsets);
@@ -544,17 +653,10 @@ for seti = 1:nsets,
   
   idxdate = (controldatenum>=mindatenumcurr & controldatenum <= maxdatenumcurr)';
   
+
   for stati = 1:nstats,
-    
+  
     statfn = statfns{stati};
-    
-    if seti == 1,
-      setstats.normmeans.(statfn) = nan(1,nsets);
-      setstats.controlmeans.(statfn) = nan(1,nsets);
-      setstats.nsetscontrolnorm.(statfn) = zeros(1,nsets);
-      setstats.usedallcontrols.(statfn) = useallcontrolsets(stati);
-      setstats.usedalldata.(statfn) = usealldata(stati);
-    end
     
     if usealldata(stati),
       idxcurr = find(setstats.nexps.(statfn) >= minnexps);
@@ -570,7 +672,7 @@ for seti = 1:nsets,
       error('set %d %s, stat %d %s\n',seti,setstats.metadata(seti).set,stati,statfn);
     end
     setstats.nsetscontrolnorm.(statfn)(seti) = nnz(idxcurr);
-    setstats.normmeans.(statfn)(seti) = setstats.means.(statfn)(seti) - setstats.controlmeans.(statfn)(seti);
+    setstats.normmeans.(statfn)(seti) = setstats.means.(statfn)(seti) - setstats.controlmeans.(statfn)(seti) + controlmean(stati);
 
   end
 end
@@ -592,6 +694,47 @@ for stati = 1:numel(statfns),
 
 end
 
+linestats.usedallcontrols = setstats.usedallcontrols;
+linestats.usedalldata = setstats.usedalldata;
+
+%% normalized exp stats
+
+expstats = struct;
+expstats.means = struct;
+expstats.stds = struct;
+expstats.nframes = struct;
+expstats.normmeans = struct;
+expstats.metadata = metadata;
+
+for i = 1:numel(statfns),
+  fn = statfns{i};
+  expstats.means.(fn) = allstats.(fn);
+  expstats.stds.(fn) = allstdstats.(fn);
+  expstats.nframes.(fn) = allnframestotal.(fn);
+end
+
+[~,exp2setidx] = ismember({expstats.metadata.set},{setstats.metadata.set});
+setiscontrol = strcmp({setstats.metadata.line_name},main_control_line_name);
+
+for i = 1:numel(statfns),
+  fn = statfns{i};
+  
+  expstats.normmeans.(fn) = expstats.means.(fn) - setstats.controlmeans.(fn)(exp2setidx) + controlmean(i);
+
+end
+
+%% normalized standard deviations over sets
+
+for stati = 1:nstats,
+  statfn = statfns{stati};
+  expidxcurr =  ~isnan(expstats.normmeans.(statfn)) & ~isinf(expstats.normmeans.(statfn));
+
+  % standard deviation over experiments!
+  linestats.normstds.(statfn) = ...
+    accumarray(exp2lineidx(expidxcurr)',expstats.normmeans.(statfn)(expidxcurr)',[nlines,1],@(x) std(x,1),nan)';
+end
+
+
 %% remove lines that do not have enough data
 
 idxremove = linestats.nsets.velmag_ctr_flyany_frameany == 0;
@@ -600,7 +743,9 @@ linestatfns = ...
   {'means'
   'stds'
   'nsets'
+  'nexps'
   'normmeans'
+  'normstds'
   };
 
 for j = 1:numel(linestatfns),
@@ -612,6 +757,7 @@ for j = 1:numel(linestatfns),
 end
 
 linestats.line_names(idxremove) = [];
+linestats.metadata(idxremove) = [];
 
 linecompfns = {
   'int_manual'
@@ -635,6 +781,8 @@ end
 linemetadata(idxremove) = [];
 linemeans(idxremove,:) = [];
 linensets(idxremove,:) = [];
+linenexps(idxremove,:) = [];
+linestds(idxremove,:) = [];
 
 line_names = linestats.line_names;
 nlines = numel(line_names);
@@ -642,35 +790,33 @@ nlines = numel(line_names);
 [~,set2lineidx] = ismember({setmetadata.line_name},line_names);
 
 %% control means
-
-normcontrolmean = struct;
-normcontrolstd = struct;
-for fni = 1:nstats,
-  statfn = statfns{fni};
-  if ~usealldata(fni),
-    idxcurr = setstats.nexps.(statfn) >= minnexps & setiscontrol & ...
-      ~isnan(setstats.normmeans.(statfn)) & ~isinf(setstats.normmeans.(statfn));
-  else
-    idxcurr = setstats.nexps.(statfn) >= minnexps & ...
-      ~isnan(setstats.normmeans.(statfn)) & ~isinf(setstats.normmeans.(statfn));
-  end
-  normcontrolmean.(statfn) = mean(setstats.normmeans.(statfn)(idxcurr));
-  normcontrolstd.(statfn) = std(setstats.normmeans.(statfn)(idxcurr),1);
-end
-
-%% add normmean to allstats
-
-nexps = numel(metadata);
-[~,exp2setidx] = ismember({metadata.set},{setstats.metadata.set});
-allstatsnorm = struct;
-for fni = 1:nstats,
-  statfn = statfns{fni};
-  x = allstats.(statfn);
-  allstatsnorm.(statfn) = allstats.(statfn) - setstats.controlmeans.(statfn)(exp2setidx);
-end
+% 
+% normcontrolmean = struct;
+% normcontrolstd = struct;
+% for fni = 1:nstats,
+%   statfn = statfns{fni};
+%   if ~usealldata(fni),
+%     idxcurr = setstats.nexps.(statfn) >= minnexps & setiscontrol & ...
+%       ~isnan(setstats.normmeans.(statfn)) & ~isinf(setstats.normmeans.(statfn));
+%   else
+%     idxcurr = setstats.nexps.(statfn) >= minnexps & ...
+%       ~isnan(setstats.normmeans.(statfn)) & ~isinf(setstats.normmeans.(statfn));
+%   end
+%   normcontrolmean.(statfn) = mean(setstats.normmeans.(statfn)(idxcurr));
+%   normcontrolstd.(statfn) = std(setstats.normmeans.(statfn)(idxcurr),1);
+% end
+% 
+% %% add normmean to allstats
+% 
+% nexps = numel(metadata);
+% [~,exp2setidx] = ismember({metadata.set},{setstats.metadata.set});
+% allstatsnorm = struct;
+% for fni = 1:nstats,
+%   statfn = statfns{fni};
+%   x = allstats.(statfn);
+%   allstatsnorm.(statfn) = allstats.(statfn) - setstats.controlmeans.(statfn)(exp2setidx);
+% end
 
 %% resave
 
-linestats.metadata = linemetadata;
-
-save -append CollectedPrimaryPerFrameStats20131024.mat setstats linestats nlines set2lineidx nsets linemetadata linemeans linensets line_names exp2lineidx normcontrolmean normcontrolstd nexps allstatsnorm;
+save -append CollectedPrimaryPerFrameStats20131127.mat setstats linestats nlines set2lineidx nsets linemetadata linemeans linensets line_names exp2lineidx nexps expstats;

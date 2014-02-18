@@ -62,7 +62,7 @@ if isempty(alllines_meanim),
     alllinematfile = fullfile(p,f);
   end
   fprintf('Loading in all line mean image...');
-  alllines_meanim = load(maskfile);
+  alllines_meanim = load(alllinematfile);
   alllines_meanim = alllines_meanim.meanim;
 
 end

@@ -46,14 +46,14 @@ switch computername,
     
 end
 
-analysis_protocol = 'current';
-outfilename = 'SAGEExpDirConsistencyCheckResults20120625.tsv';
+analysis_protocol = '20130909';
+outfilename = 'SAGEExpDirConsistencyCheckResults20131113.tsv';
 
 %% set parameters
 
 params = {'settingsdir',settingsdir,'rootdatadir',rootdatadir,...
   'analysis_protocol',analysis_protocol,'outfilename',outfilename,...
-  'daterange',{'20120401T000000'}};
+  'daterange',{}};
 
 %% 
 

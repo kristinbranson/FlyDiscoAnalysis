@@ -4,7 +4,7 @@ if nargin < 2,
   sagecompatible = false;
 end
 
-effectors = {'TrpA','CTRL_CantonS_1101243','CTRL_CantonS_1500002_0029'};
+effectors = {'TrpA','CTRL_CantonS_1101243','CTRL_CantonS_1500002_0029','CTRL_CSMH_1500154_0030','UAS_dTrpA1_3_0062','UAS_dTrpA1_2_0002'};
 expr = ['^(?<pathstr>(.*[/\\])*)(?<line>[^/^\\]+)_(?<effector>(',sprintf('|(%s)',effectors{:}),'))_Rig(?<rig>[0-9]+)Plate(?<plate>[0-9]+)Bowl(?<bowl>[A-Z]+)_(?<notstarted>(notstarted_)?)(?<date>\d{8}T\d{6}).*$'];
 res = regexp(expdir,expr,'names','once');
 success = ~isempty(res);

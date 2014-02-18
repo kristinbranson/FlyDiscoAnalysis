@@ -36,7 +36,7 @@ end
 
 %% parameters
 
-analysis_protocol = '20130722';
+analysis_protocol = '20130909';
 dateformat = 'yyyymmddTHHMMSS';
 % params = {'settingsdir',settingsdir,...
 %   'analysis_protocol',analysis_protocol,...
@@ -59,7 +59,7 @@ startmonth = 3;
 
 %% load in metadata from file
 
-load('CollectedPrimaryMetadata20130613.mat','metadata');
+load('CollectedPrimaryMetadata20131127.mat','metadata');
 usemetadata = true;
 idx = strcmp({metadata.line_name},'pBDPGAL4U');
 metadata = metadata(idx);

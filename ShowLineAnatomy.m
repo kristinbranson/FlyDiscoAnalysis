@@ -466,8 +466,16 @@ ylabel(hax_group(3),'Mean mean');
         if strcmp(show_mode,'Mean image'),
           filename = fullfile(cachelinedir,sprintf('%s_%s_meanim_maxproj.png',compartment,line_name));
         else
-          name = imnames_perline{linei1}{imidx_perline(linei1)};
-          filename = fullfile(cachelinedir,sprintf('%s_%s_maxproj.png',compartment,name));
+          if isempty(imnames_perline{linei1}),
+            name = '';
+            filename = '';
+          else
+            name = imnames_perline{linei1}{imidx_perline(linei1)};
+            filename = fullfile(cachelinedir,sprintf('%s_%s_maxproj.png',compartment,name));
+          end
+        end
+        if isempty(filename),
+          continue;
         end
         if ~exist(filename,'file'),
           warning('File %s does not exist, not changing image for this line.',filename);
@@ -487,11 +495,13 @@ ylabel(hax_group(3),'Mean mean');
           maxim = max(maxim,im);
         end
       end
-      set(him(linei1),'CData',maxim);
-      if strcmp(show_mode,'Mean image'),
-        set(hax(linei1),'CLim',[0,1]);
-      else
-        set(hax(linei1),'CLim',[0,maxv_perline_perim{linei1}(imidx_perline(linei1))]);
+      if ishandle(him(linei1)),
+        set(him(linei1),'CData',maxim);
+        if strcmp(show_mode,'Mean image'),
+          set(hax(linei1),'CLim',[0,1]);
+        else
+          set(hax(linei1),'CLim',[0,maxv_perline_perim{linei1}(imidx_perline(linei1))]);
+        end
       end
     end
     
@@ -575,6 +585,9 @@ ylabel(hax_group(3),'Mean mean');
 
   function NextImage(~,~,linei1)
     
+    if ~ishandle(him(linei)),
+      return;
+    end
     if strcmp(show_mode,'Mean image'),
       warning('Cannot change image while in "Mean image" mode');
       return;

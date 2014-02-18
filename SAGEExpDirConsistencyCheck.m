@@ -287,7 +287,7 @@ if ~isconsistent,
   end  
   fprintf(outfid,'\n');
   myfclose(outfid);
-elseif filesmissing,
+elseif filesmissing && incoming_results.automated_pf ~= 'F',
   fprintf('\n%s consistent but missing files:\n',expdir);
   fprintf('%s\n',missingfiles{:});
 end

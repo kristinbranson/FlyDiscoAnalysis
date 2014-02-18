@@ -2,12 +2,13 @@ function [hfigs,hax,filenamecurr] = ShowLineInfo(line_names,varargin)
 
 persistent metadata;
 anatomydir = '/nobackup/branson/AverageAnatomyData20130618';
+lineresultsdir = '/groups/branson/bransonlab/projects/olympiad/LineResults';
 timestamp = datestr(now,'yyyymmddTHHMMSS');
 hfigs_default = [];
 persistent imdata;
 
-[metadata,imdata,showanatomy,showbehavior,showaverageanatomy,hfigs1,anatomydir,...
-  groupname,int_manual] = myparse(varargin,...
+[metadata,imdata,showanatomy,showbehavior,showaverageanatomy,hfigs1,anatomydir,lineresultsdir,...
+  groupname,int_manual,filenamecurr] = myparse(varargin,...
   'metadata',metadata,...
   'imdata',imdata,...
   'showanatomy',true,...
@@ -15,8 +16,10 @@ persistent imdata;
   'showaverageanatomy',false,...
   'hfigs',hfigs_default,...
   'anatomydir',anatomydir,...
+  'lineresultsdir',lineresultsdir,...
   'groupname',sprintf('Group selected %s',timestamp),...
-  'int_manual',[]);
+  'int_manual',[],...
+  'outfilename','');
 if numel(hfigs1) >= numel(hfigs_default),
   hfigs = hfigs1;
 elseif isempty(hfigs1),
@@ -48,9 +51,10 @@ end
 nlines = numel(line_names);
 
 % create an html page with links to all experiments
-filenamecurr = '';
 if showbehavior || (showanatomy && ~isempty(int_manual)),
-  filenamecurr = fullfile(tempdir,sprintf('selectedgroup_%s.html',timestamp));
+  if isempty(filenamecurr),
+    filenamecurr = fullfile(tempdir,sprintf('selectedgroup_%s.html',timestamp));
+  end
   fid = fopen(filenamecurr,'w');
   if fid < 1,
     warning('Could not open temporary file %s for writing.\n');
@@ -74,6 +78,15 @@ if showbehavior || (showanatomy && ~isempty(int_manual)),
     if showbehavior,
       for i = 1:nlines,
         fprintf(fid,'<h1>%s</h1>\n',line_names{i});
+        lineresultsdircurr = fullfile(lineresultsdir,line_names{i});
+        if exist(lineresultsdircurr,'dir'),
+          lineresultsimfile = fullfile(lineresultsdircurr,'stats_basic.png');
+          fprintf(fid,'<p><a href="%s"><img src="%s" height="500"></a></p>\n',lineresultsimfile,lineresultsimfile);
+          fprintf(fid,'<p><a href="%s">Line result plots</a></p>\n',lineresultsdircurr);
+        else
+          fprintf(fid,'<p>Line results plots not found.</p>\n');
+        end
+        
         idx = find(strcmp({metadata.line_name},line_names{i}));
         if isempty(idx),
           fprintf(fid,'<p>No experiments found.</p>\n');

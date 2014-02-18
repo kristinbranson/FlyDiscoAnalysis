@@ -57,23 +57,28 @@ if numel(daterange) >= 2 && ~isempty(daterange{2}),
   maxdatenum = datenum(daterange{2},'yyyymmddTHHMMSS');
 end
 
+hwait = mywaitbar(0,'Listing experiment directories...');
 
 tmp = dir(rootreaddir);
 expdir_reads = {tmp([tmp.isdir]).name};
-tmp = dir(rootwritedir);
-expdir_writes = {tmp([tmp.isdir]).name};
-expdirs = union(expdir_reads,expdir_writes);
+if ~strcmp(rootreaddir,rootwritedir),
+  tmp = dir(rootwritedir);
+  expdir_writes = {tmp([tmp.isdir]).name};
+  expdirs = union(expdir_reads,expdir_writes);
+else
+  expdirs = expdir_reads;
+end
 
 expdir_reads = cell(size(expdirs));
 expdir_writes = cell(size(expdirs));
 
 idx = false(size(expdirs));
 experiments = struct;
-hwait = mywaitbar(0,'Looking for experiment directories...');
+hwait = mywaitbar(0,hwait,'Looking for experiment directories...');
 for i = 1:numel(expdirs),
   
   if mod(i,10) == 0,
-    hwait = mywaitbar(i/numel(expdirs),hwait,'Looking for experiment directories...\n');
+    hwait = mywaitbar(i/numel(expdirs),hwait,'Looking for experiment directories...');
     drawnow;
   end
   
@@ -94,9 +99,11 @@ for i = 1:numel(expdirs),
   end
   
   % check date range
-  v = datenum(parsedcurr.date,'yyyymmddTHHMMSS');
-  if v < mindatenum || v > maxdatenum,
-    continue;
+  if ~isinf(mindatenum) || ~isinf(maxdatenum),
+    v = datenum(parsedcurr.date,'yyyymmddTHHMMSS');
+    if v < mindatenum || v > maxdatenum,
+      continue;
+    end
   end
   
   % check line name
@@ -165,6 +172,8 @@ if ishandle(hwait),
   delete(hwait);
   drawnow;
 end
+
+fprintf('Removing %d directories that do not satisfy input constraints\n',nnz(~idx));
 
 expdirs = expdirs(idx);
 expdir_reads = expdir_reads(idx);

@@ -8,7 +8,8 @@ nlinesread = 0;
 defaultfilename = 'AllLinesAnatomyPValueData20130917.mat';
 
 persistent pupperbounds pvaluetablefun highthresh lowthresh mask falsepositivedata imdata; %#ok<USENS>
-[anatomydatadir,fdr,defaultfilename,imdata] = myparse(varargin,'anatomydatadir','/nobackup/branson/AverageAnatomyData20130618',...
+[anatomydatadir,fdr,defaultfilename,imdata] = myparse(varargin,...
+  'anatomydatadir','/groups/branson/bransonlab/projects/olympiad/AverageAnatomyData20140204',...
   'fdr',.1,'defaultfilename',defaultfilename,'imdata',[]);
 
 if isempty(pvaluetablefun),
@@ -98,28 +99,36 @@ fprintf('Computing statistics...\n');
 
 meanim = meanim / nlinesread;
 
-pvalue = ones([nr,nc,nz]);
-goodidx = (countspos+countsneg)>0;
-maskcurr = goodidx&mask;
-pvalue(maskcurr) = pvaluetablefun(countspos(maskcurr),countspos(maskcurr)+countsneg(maskcurr),pupperbounds(maskcurr));
+if nargout >= 3,
+  
+  pvalue = ones([nr,nc,nz]);
+  goodidx = (countspos+countsneg)>0;
+  maskcurr = goodidx&mask;
+  pvalue(maskcurr) = pvaluetablefun(countspos(maskcurr),countspos(maskcurr)+countsneg(maskcurr),pupperbounds(maskcurr));
+  
+end
 
-% nfalsepos(i) is the fraction of voxels in randomly selected lines that
-% have pvalues in [edges(i),edges(i+1))
-nsamplei = min(size(falsepositivedata.meanfrac,2),nlinesread);
-nfalsepos = falsepositivedata.meanfrac(:,nsamplei);
-counts = histc(pvalue(maskcurr),falsepositivedata.edges);
-% npos(i) is the fraction of voxels in these lines that have pvalues in
-% [edges(i),edges(i+1))
-npos = counts ./ nnz(maskcurr);
-% the expected fraction of these that are false positive is the ratio
-fdrvec = nfalsepos ./ npos;
-fdrvec(npos==0) = 0;
-fdri = find(fdrvec>=fdr,1);
-
-if isempty(fdri),
-  maxpvaluesig = 1;
-else
-  maxpvaluesig = falsepositivedata.edges(fdri);
+if nargout >= 4,
+  
+  % nfalsepos(i) is the fraction of voxels in randomly selected lines that
+  % have pvalues in [edges(i),edges(i+1))
+  nsamplei = min(size(falsepositivedata.meanfrac,2),nlinesread);
+  nfalsepos = falsepositivedata.meanfrac(:,nsamplei);
+  counts = histc(pvalue(maskcurr),falsepositivedata.edges);
+  % npos(i) is the fraction of voxels in these lines that have pvalues in
+  % [edges(i),edges(i+1))
+  npos = counts ./ nnz(maskcurr);
+  % the expected fraction of these that are false positive is the ratio
+  fdrvec = nfalsepos ./ npos;
+  fdrvec(npos==0) = 0;
+  fdri = find(fdrvec>=fdr,1);
+  
+  if isempty(fdri),
+    maxpvaluesig = 1;
+  else
+    maxpvaluesig = falsepositivedata.edges(fdri);
+  end
+  
 end
 % 
 % % Benjamini correction

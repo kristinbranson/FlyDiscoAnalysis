@@ -4,10 +4,10 @@ addpath /groups/branson/home/bransonk/tracking/code/JCtrax/filehandling;
 addpath /groups/branson/bransonlab/projects/olympiad/SAGE/MATLABInterface/Trunk;
 addpath /groups/branson/bransonlab/projects/olympiad/anatomy/fileio;
 
-datafile = '/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/CollectedPrimaryPerFrameStatsAndAnatomy20130920.mat';
-outmatfile = 'ComputePValueBySamplingData20130925.mat';
-resultsdir = 'ComputePValueBySamplingResults20130925';
-
+datafile = '/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/CollectedPrimaryPerFrameStats20131127.mat';
+outmatfile = 'ComputePValueBySamplingData20131127.mat';
+resultsdir = 'ComputePValueBySamplingResults20131127';
+  
 %%  load in data
 
 load(datafile);
