@@ -189,7 +189,7 @@ if exist(moviefile,'file'),
     nframes = headerinfo.nframes;
     if nframes < check_params.min_ufmf_diagnostics_summary_nframes,
       success = false;
-      msgs{end+1} = sprintf('Video contains %d < %d frames.',ufmf_diagnostics.summary.nFrames,check_params.min_ufmf_diagnostics_summary_nframes);
+      msgs{end+1} = sprintf('Video contains %d < %d frames.',nframes,check_params.min_ufmf_diagnostics_summary_nframes);
       iserror(category2idx.short_video) = true;
     end
   catch ME,

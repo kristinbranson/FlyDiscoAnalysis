@@ -8,8 +8,8 @@ for i = 1:nflies,
 
   imbalancer = trx(fly).wing_angler+trx(fly).wing_anglel;
   imbalancel = -imbalancer;
-  dimbalancer = diff(imbalancer);
-  dimbalancel = diff(imbalancel);
+  dimbalancer = diff(imbalancer,1,2);
+  dimbalancel = diff(imbalancel,1,2);
   data{i} = dimbalancel;
   idx = imbalancer(1:end-1) > imbalancel(1:end-1);
   data{i}(idx) = dimbalancer(idx);

@@ -336,7 +336,7 @@ expbgfgmodelfile = fullfile(settingsdir,analysis_protocol,dataloc_params.expbgfg
 if isfield(params,'expbgfgmodelmatfilestr'),
   if iscell(params.expbgfgmodelmatfilestr),
     [metadata,success1] = parseExpDir(expdir);
-    if ~success1,
+    if ~success1 || ~isfield(metadata,'plate'),
       metadata = ReadMetadataFile(fullfile(expdir,dataloc_params.metadatafilestr));
     end
     if isempty(metadata),

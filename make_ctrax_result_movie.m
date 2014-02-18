@@ -674,9 +674,7 @@ for segi = 1:numel(firstframes),
         else
           if frame == firstframes(1),
             hzoom(i,j) = plot(nan,nan,'-');
-            if doplotwings,
-              hzoomwing(i,j) = plot(nan,nan,'.-');
-            end
+            hzoomwing(i,j) = plot(nan,nan,'.-');
             if isdisplay,
               htextzoom(i,j) = text((x0(j)+x1(j))/2,.95*y0(i)+.05*y1(i),'',...
                 'horizontalalignment','center',...

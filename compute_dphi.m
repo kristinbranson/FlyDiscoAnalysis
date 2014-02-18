@@ -6,7 +6,9 @@ nflies = numel(flies);
 data = cell(1,nflies);
 for i = 1:nflies,
   fly = flies(i);
-  data{i} = modrange(diff(trx(fly).phi),-pi,pi)./trx(fly).dt;
+  diffphi = diff(trx(fly).phi,1,2);
+  flydt = trx(fly).dt;
+  data{i} = modrange(diffphi,-pi,pi)./flydt;
 end
 units = parseunits('rad/s');
 
