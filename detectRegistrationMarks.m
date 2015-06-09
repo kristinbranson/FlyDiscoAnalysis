@@ -27,7 +27,8 @@ function registration = detectRegistrationMarks(varargin)
   imsavename,...
   hfig,figpos,...
   useNormXCorr,...
-  doTransposeImage] = ...
+  doTransposeImage,...
+  ledindicator] = ...
   myparse(varargin,...
   'saveName','',...
   'bkgdImage',[],...
@@ -70,7 +71,8 @@ function registration = detectRegistrationMarks(varargin)
   'imsavename','',...
   'hfig',1,'figpos',[10,10,1600,800],...
   'useNormXCorr',false,...
-  'doTransposeImage',false);
+  'doTransposeImage',false,...
+  'ledindicator',false);
 
 iscircle = ismember(method,{'circle','circle_manual'});
 
@@ -158,6 +160,7 @@ end
 
 [nr,nc,ncolors] = size(bkgdImage); %#ok<NASGU>
 r = min(nr,nc);
+
 
 %% feature detection filtering
 
@@ -386,32 +389,32 @@ end
 
 %% find the rotation
 
-if nBowlMarkers > 0 && success,
+% if nBowlMarkers > 0 && success,
+% 
+%   if iscircle
+%     % registration marker
+%     bowlMarkerPairTheta = bowlMarkerTheta;
+%   else
+%     % take the average of the pair of points around the bowl marker
+%     d1 = mod(dtheta(1)+pi,2*pi)-pi;
+%     d2 = mod(dtheta(end)+pi,2*pi)-pi;
+%     inrange = d1 > 0 && d1 <= maxDThetaBowlMarkerPair && ...
+%       d2 < 0 && -d2 <= maxDThetaBowlMarkerPair;
+%     if inrange,
+%       x = (registrationPoints(1,1)+registrationPoints(1,end))/2;
+%       y = (registrationPoints(2,1)+registrationPoints(2,end))/2;
+%       bowlMarkerPairTheta = atan2(y-originY,x-originX);
+%     else
+%       bowlMarkerPairTheta = bowlMarkerTheta;
+%     end
+%   end
+%   
+%   offTheta = mod(bowlMarkerPairTheta_true-bowlMarkerPairTheta+pi,2*pi)-pi;
+% else
+%   offTheta = 0;
+% end
 
-  if iscircle
-    % registration marker
-    bowlMarkerPairTheta = bowlMarkerTheta;
-  else
-    % take the average of the pair of points around the bowl marker
-    d1 = mod(dtheta(1)+pi,2*pi)-pi;
-    d2 = mod(dtheta(end)+pi,2*pi)-pi;
-    inrange = d1 > 0 && d1 <= maxDThetaBowlMarkerPair && ...
-      d2 < 0 && -d2 <= maxDThetaBowlMarkerPair;
-    if inrange,
-      x = (registrationPoints(1,1)+registrationPoints(1,end))/2;
-      y = (registrationPoints(2,1)+registrationPoints(2,end))/2;
-      bowlMarkerPairTheta = atan2(y-originY,x-originX);
-    else
-      bowlMarkerPairTheta = bowlMarkerTheta;
-    end
-  end
-  
-  offTheta = mod(bowlMarkerPairTheta_true-bowlMarkerPairTheta+pi,2*pi)-pi;
-else
-  offTheta = 0;
-end
-
-
+offTheta = 0;
 %% find scale
 
 if iscircle,
@@ -447,6 +450,9 @@ registration = struct('offX',offX,...
   'bkgdImage',bkgdImage,...
   'featureStrengths',featureStrengths,...
   'affine',affine);
+if ledindicator
+    registration.bowlMarkerPoints = bowlMarkerPoints;
+end
 
 if iscircle,
   registration.circleCenterX = circleCenterX;
@@ -473,7 +479,7 @@ registration.registerfn = registerfn;
 
 %% create images illustrating fitting
 
-if ~isempty(imsavename),
+if ~isempty(imsavename) && ~ledindicator,
   
   figure(hfig);
   clf(hfig);
@@ -595,7 +601,70 @@ if ~isempty(imsavename),
   end
   
 end
+%% create image illustrating LED detection
+if ~isempty(imsavename) && ledindicator,
+  figpos = [10,10,800,800];
+  figure(hfig);
+  clf(hfig);
+  set(hfig,'Units','pixels','Position',figpos);
+  nimsplot = 1;
+  hax = createsubplots(1,nimsplot,.025,hfig);
+   
+  % plot background image in jet colormap
+  imagesc(bkgdImage,'parent',hax(1),[0,1]);
+  colormap(hax(1),'jet');
+  axis(hax(1),'image');
+  axis(hax(1),'xy');
+  hold(hax(1),'on');
 
+  % plot detected registration points if not circle mode
+  if ~iscircle,
+    plot(hax(1),registrationPoints(1,:),registrationPoints(2,:),'ks');
+    plot(hax(1),registrationPoints(1,:),registrationPoints(2,:),'wd');
+  end
+
+  % plot detected/labeled circle if is circle mode
+  if iscircle,
+    tmp = linspace(0,2*pi,ceil(2*pi*circleRadius));
+    plot(hax(1),circleCenterX + circleRadius*cos(tmp),...
+      circleCenterY + circleRadius*sin(tmp),...
+      'w-','linewidth',2);
+    plot(hax(1),circleCenterX + circleRadius*cos(tmp),...
+      circleCenterY + circleRadius*sin(tmp),...
+      'k--','linewidth',2);
+    plot(hax(1),circleCenterX,circleCenterY,'ks','markerfacecolor','k');
+    plot(hax(1),circleCenterX,circleCenterY,'wd');
+  end
+  
+  % plot bowl marker(s)
+  if nBowlMarkers > 0,
+    plot(hax(1),bowlMarkerPoints(1,:),bowlMarkerPoints(2,:),'ks','markersize',12);
+    plot(hax(1),bowlMarkerPoints(1,:),bowlMarkerPoints(2,:),'kx','markersize',12);
+  end
+
+ title(hax(1),'Maxvalue image and LED detection');
+ 
+  try
+    if exist(imsavename,'file'),
+      try
+        delete(imsavename);
+      catch ME,
+        warning('Could not delete file %s:\n %s',imsavename,getReport(ME));
+      end
+    end
+    set(hfig,'Units','pixels','Position',figpos);
+    save2png(imsavename,hfig);
+  catch ME,
+    warning('Could not save to %s:\n%s',imsavename,getReport(ME));
+  end
+  
+  if isdeployed && ishandle(hfig),
+    close(hfig);
+  end
+  
+end
+ 
+ 
 %%
 
 if DEBUG,

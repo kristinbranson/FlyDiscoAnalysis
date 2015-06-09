@@ -20,6 +20,10 @@ ufmfdiagnosticsfilestr,ufmf_diagnostics.txt
 ufmflogfilestr,ufmf_log.txt
 perframedir,perframe
 registrationimagefilestr,registrationimage.png
+ledregistrationimagefilstr,ledregistrationimage.png
+ledprotocolfilestr,protocol.mat
+indicatorparamsfilestr,indicator_params.txt
+indicatordatafilestr,indicatordata.mat
 sexclassifiermatfilestr,sexclassifier.mat
 sexclassifiertxtfilestr,sexclassifier.txt
 registrationparamsfilestr,registration_params.txt

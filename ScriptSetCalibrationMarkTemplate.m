@@ -3,12 +3,14 @@
 addpath /groups/branson/home/bransonk/tracking/code/JCtrax/misc;
 addpath /groups/branson/home/bransonk/tracking/code/JCtrax/filehandling;
 addpath /groups/branson/bransonlab/projects/olympiad/SAGE/MATLABInterface/Trunk;
-settingsdir = '/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/settings';
+% settingsdir = '/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/settings';
+settingsdir = '/groups/branson/home/robiea/Code_versioned/FlyBubbleAnalysis/settings/';
+
 
 %% parameters
 
-analysis_protocol = '20121212_non_olympiad_heberlein';
-expfile = '/groups/branson/bransonlab/projects/olympiad/FlyBowlCtrax/20121212_non_olympiad_heberlein/expdirs_ChooseCtraxParameters_20121212.txt';
+analysis_protocol = '20150428_flybubble_centralcomplex';
+expfile = '/groups/branson/home/robiea/Projects_data/CentralComplex/explist_forregistrationmark';
 datalocparamsfilestr = 'dataloc_params.txt';
 dataloc_params = ReadParams(fullfile(settingsdir,analysis_protocol,datalocparamsfilestr));
 
@@ -71,7 +73,8 @@ figure(2);
 imagesc(template);
 axis image;
 
-imwrite(template,'CircleTemplate_heberlein.png');
+
+imwrite(uint8(template),'LEDTemplate_FlyBubble_RigA.png');
 
 %% distance from the corner
 x = mean(xlim);
