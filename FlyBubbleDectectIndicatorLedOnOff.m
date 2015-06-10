@@ -77,41 +77,54 @@ fclose(fid);
 end 
 
 %%
-IRthreshold = max(meanimage)-min(meanimage)/2; 
-% pad need to be more than 1/2 duty cycle / sampling frequency 
-pad = indicator_params.pad;
-indicatorLED = [];
-thresholdimageorig = zeros(1,numel(meanimage));
-idx = [];
-idx = find(meanimage > IRthreshold );
-thresholdimageorig(idx) = 1;
-%thresholdimageorig = meanimage > IRthreshold;
-indicatorLED.StartEndStatus = logical([thresholdimageorig(1),thresholdimageorig(end)]);
-indicatorLED.indicatordigital = thresholdimageorig;
-% pad threshold image
-thresholdimage = zeros(1,numel(meanimage)+2*pad);
-thresholdimage(pad+1:end-pad) = thresholdimageorig;
-%find the start of light pulses
-onpulsecount = 0;
-for i = pad+1:(numel(thresholdimage)-pad)
-    if (thresholdimage(i) == 1) && (mean(thresholdimage(i-pad:i-1)) == 0);
-        onpulsecount = onpulsecount+1;
-        indicatorLED.startframe(onpulsecount) = i-pad;
+% imagediff = max(meanimage)-min(meanimage);
+% if imagediff <= 10
+%     error('Change is indicator meanimage value is small: %d, no indicator light',imagediff);
+% else
+try
+        
+    IRthreshold = max(meanimage)-min(meanimage)/2;
+    % pad need to be more than 1/2 duty cycle / sampling frequency
+    pad = indicator_params.pad;
+    indicatorLED = [];
+%     thresholdimageorig = zeros(1,numel(meanimage));
+%     idx = [];
+%     idx = find(meanimage > IRthreshold );
+%     thresholdimageorig(idx) = 1;
+    thresholdimageorig = meanimage > IRthreshold;
+    indicatorLED.StartEndStatus = logical([thresholdimageorig(1),thresholdimageorig(end)]);
+    indicatorLED.indicatordigital = thresholdimageorig;
+    % pad threshold image
+    thresholdimage = zeros(1,numel(meanimage)+2*pad);
+    thresholdimage(pad+1:end-pad) = thresholdimageorig;
+    %find the start of light pulses
+    onpulsecount = 0;
+    for i = pad+1:(numel(thresholdimage)-pad)
+        if (thresholdimage(i) == 1) && (mean(thresholdimage(i-pad:i-1)) == 0);
+            onpulsecount = onpulsecount+1;
+            indicatorLED.startframe(onpulsecount) = i-pad;
+        end
+        
     end
+    %find the end of light pulses
+    offpulsecount = 0;
+    for i = pad+1:numel(thresholdimage)-pad
+        if (thresholdimage(i) == 0) && thresholdimage(i-1) == 1 && (mean(thresholdimage(i+1:i+pad)) == 0);
+            offpulsecount = offpulsecount+1;
+            indicatorLED.endframe(offpulsecount) = i-pad;
+        end
+    end
+    indicatorLED.starttimes = headerinfo.timestamps(indicatorLED.startframe)';
+    indicatorLED.endtimes = headerinfo.timestamps(indicatorLED.endframe)';
     
+    indicatordata.indicatorLED = indicatorLED;
+    catch
+        imagediff = max(meanimage)-min(meanimage);
+        fprintf(logfid,'Error calculating indicator on-off: meanimage value is small: %d, no indicator light',imagediff)
+        success = false;
+        msgs = {'Error calculating indicator LED on-off: no indicator detected'};
+        return;
 end
-%find the end of light pulses
-offpulsecount = 0;
-for i = pad+1:numel(thresholdimage)-pad    
-    if (thresholdimage(i) == 0) && thresholdimage(i-1) == 1 && (mean(thresholdimage(i+1:i+pad)) == 0);
-        offpulsecount = offpulsecount+1;
-        indicatorLED.endframe(offpulsecount) = i-pad;
-    end
-end
-indicatorLED.starttimes = headerinfo.timestamps(indicatorLED.startframe)';
-indicatorLED.endtimes = headerinfo.timestamps(indicatorLED.endframe)';
-
-indicatordata.indicatorLED = indicatorLED; 
 
 %% plot figure
 % figure, plot(meanimage)

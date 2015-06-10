@@ -1,4 +1,4 @@
-function trx = FlyBowlComputePerFrameFeatures(expdir,varargin)
+function trx = FlyBubbleComputePerFrameFeatures(expdir,varargin)
 
 version = '0.2';
 
