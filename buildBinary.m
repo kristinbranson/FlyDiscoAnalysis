@@ -1,5 +1,7 @@
 function buildBinary(projname)
-
+% buildBinary(projname)
+%
+% buildBinary FlyBubbleRegisterTrx
 projfile = [projname '.prj'];
 assert(exist(projfile,'file')==2,'Can''t find file ''%s''.',projfile);
 
