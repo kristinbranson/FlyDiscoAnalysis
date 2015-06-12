@@ -24,6 +24,7 @@ ledregistrationimagefilstr,ledregistrationimage.png
 ledprotocolfilestr,protocol.mat
 indicatorparamsfilestr,indicator_params.txt
 indicatordatafilestr,indicatordata.mat
+indicator_logfilestr,indicator_log.txt
 sexclassifiermatfilestr,sexclassifier.mat
 sexclassifiertxtfilestr,sexclassifier.txt
 registrationparamsfilestr,registration_params.txt
