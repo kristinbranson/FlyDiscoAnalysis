@@ -11,7 +11,7 @@ timestamp = datestr(now,datetime_format);
 [analysis_protocol,settingsdir,datalocparamsfilestr,DEBUG,min_barcode_expdatestr,logfid] = ...
   myparse(varargin,...
   'analysis_protocol','20150428_flybubble_centralcomplex',...
-  'settingsdir','/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/settings',...
+  'settingsdir','/groups/branson/home/robiea/Code_versioned/FlyBubbleAnalysis/settings',...
   'datalocparamsfilestr','dataloc_params.txt','debug',false,...
   'min_barcode_expdatestr','20110301T000000',...
   'logfid',[]);
@@ -57,6 +57,7 @@ if ~iscell(check_params.control_line_names),
 end
 metadatafile = fullfile(expdir,dataloc_params.metadatafilestr);
 moviefile = fullfile(expdir,dataloc_params.moviefilestr);
+protocolfile = fullfile(expdir,dataloc_params.ledprotocolfilestr);
 temperaturefile = fullfile(expdir,dataloc_params.temperaturefilestr); %#ok<NASGU>
 outfile = fullfile(expdir,dataloc_params.automaticchecksincomingresultsfilestr);
 
@@ -187,7 +188,20 @@ if exist(moviefile,'file'),
       error('No field nframes in UFMF header');
     end
     nframes = headerinfo.nframes;
-    if nframes < check_params.min_ufmf_diagnostics_summary_nframes,
+     if exist(protocolfile,'file')
+      protocolinfo = load(protocolfile);
+      if ~isfield(protocolinfo.protocol,'duration')
+        error('No duration field in protocol file')
+      end
+      exptime = sum(protocolinfo.protocol.duration)/1000;
+      expframes = exptime/(1/check_params.frame_rate);
+      min_frames = expframes - (expframes*.05); % some buffer in short movie length
+      if nframes < min_frames,
+        success = false;
+        msgs{end+1} = sprintf('Video contains %d < %d frames.',nframes,check_params.min_ufmf_diagnostics_summary_nframes);
+        iserror(category2idx.short_video) = true;
+      end
+     elseif nframes < check_params.min_ufmf_diagnostics_summary_nframes,
       success = false;
       msgs{end+1} = sprintf('Video contains %d < %d frames.',nframes,check_params.min_ufmf_diagnostics_summary_nframes);
       iserror(category2idx.short_video) = true;
