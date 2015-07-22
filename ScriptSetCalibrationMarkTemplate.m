@@ -9,8 +9,8 @@ settingsdir = '/groups/branson/home/robiea/Code_versioned/FlyBubbleAnalysis/sett
 
 %% parameters
 
-analysis_protocol = '20150428_flybubble_centralcomplex';
-expfile = '/groups/branson/home/robiea/Projects_data/CentralComplex/explist_forregistrationmark';
+analysis_protocol = '20150717_flybubble_flybowlMing';
+expfile = '/groups/branson/home/robiea/Projects_data/Ming/explist_forregistration';
 datalocparamsfilestr = 'dataloc_params.txt';
 dataloc_params = ReadParams(fullfile(settingsdir,analysis_protocol,datalocparamsfilestr));
 
@@ -74,7 +74,7 @@ imagesc(template);
 axis image;
 
 
-imwrite(uint8(template),'LEDTemplate_FlyBubble_RigA.png');
+imwrite(uint8(template),'CirleTemplate_FlyBowlMing.png');
 
 %% distance from the corner
 x = mean(xlim);

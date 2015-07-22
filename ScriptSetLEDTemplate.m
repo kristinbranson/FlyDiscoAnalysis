@@ -9,8 +9,10 @@ settingsdir = '/groups/branson/home/robiea/Code_versioned/FlyBubbleAnalysis/sett
 
 %% parameters
 
-analysis_protocol = '20150428_flybubble_centralcomplex';
-expfile = '/groups/branson/home/robiea/Projects_data/CentralComplex/explist_forregistrationmark';
+% analysis_protocol = '20150428_flybubble_centralcomplex';
+% expfile = '/groups/branson/home/robiea/Projects_data/CentralComplex/explist_forregistrationmark';
+analysis_protocol = '20150717_flybubble_flybowlMing';
+expfile = '/groups/branson/home/robiea/Projects_data/Ming/explist_forregistration';
 datalocparamsfilestr = 'dataloc_params.txt';
 dataloc_params = ReadParams(fullfile(settingsdir,analysis_protocol,datalocparamsfilestr));
 
@@ -31,7 +33,8 @@ for expi = 1:numel(expdirs),
 end
 
 expi = expis(1);
-
+% for ming (no plate)
+% expis = expi;
 %%
 
 % for i = 1:numel(expis),
@@ -65,7 +68,8 @@ for i = 1:numel(expis),
     annfilename = fullfile(expdir,dataloc_params.annfilestr);
     [readfcn,nframes,fid,headerinfo] = get_readframe_fcn(moviefilename);
     im = readfcn(1);
-    for j = 1:100:(headerinfo.nframes/5)
+   % for j = 1:100:(headerinfo.nframes/5)
+   for j = 1:10:(headerinfo.nframes)
         tmp = readfcn(j);
         idx = tmp > im;
         im(idx) = tmp(idx);
@@ -95,7 +99,7 @@ imagesc(template);
 axis image;
 
 
-imwrite(uint8(template),'LEDTemplate_FlyBubble_RigA.png');
+imwrite(uint8(template),'LEDTemplate_FlyBowlMing.png');
 
 %% distance from the corner
 x = mean(xlim);
