@@ -68,7 +68,8 @@ end
 %% start
 timestamp = datestr(now,'yyyymmddTHHMMSS');
 fprintf(logfid,'\n\n***\nRunning TrackWings analysis_protocol %s (real analysis protocol %s) at %s\n',analysis_protocol,real_analysis_protocol,timestamp);
-fprintf(logfid,'Settings snapshot: %s\n\n',settingsSnapshot);
+fprintf(logfid,'\nCode snapshot: %s\n\n',codeSnapshot);
+fprintf(logfid,'\nSettings snapshot: %s\n\n',settingsSnapshot);
 
 %% main function call
 [trx,perframedata,info,wtunits,trackdata] = ...

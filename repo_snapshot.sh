@@ -51,5 +51,5 @@ if [ $nocolor = true ]; then
 else
     "$scriptpath/git-graph.sh" | head -n $headn
 fi
-git status --porcelain
+git status --porcelain .
 popd >/dev/null
