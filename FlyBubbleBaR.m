@@ -80,13 +80,51 @@ classdef FlyBubbleBaR
       fprintf('Writing mcc args to file: %s...\n',FlyBubbleBaR.BUILDMCCFULLFILE);
       cellstrexport(mccargs,FlyBubbleBaR.BUILDMCCFULLFILE);
       
-      fprintf('BEGIN BUILD\n');
+      today = datestr(now,'yyyymmdd');
+      fprintf('BEGIN BUILD on %s\n',today);
       pause(2.0);
       mcc(mccargs{:});
       
-      % post
-      % move build outputs, snapshot, diary into build dirs
-      % change permissions for binaries
+      % postbuild
+      bindir = fullfile(fbroot,'builds','bubble',today);      
+      if exist(bindir,'dir')==0
+        fprintf('Creating bin dir %s...\n',bindir);
+        [succ,msg] = mkdir(bindir);
+        if ~succ
+          error('FlyBubbleBaR:build','Failed to create bin dir: %s\n',msg);
+        end
+      end
+      fprintf('Moving binaries + build artifacts into: %s\n',bindir);
+      % move buildmcc file, buildsnapshot file into bindir with name change
+      % move binaries
+      binsrc = fullfile(fbroot,proj);
+      bindst = fullfile(bindir,proj);
+      runsrc = fullfile(fbroot,['run_' proj '.sh']);
+      rundst = fullfile(bindir,['run_' proj '.sh']);
+      mccsrc = FlyBubbleBaR.BUILDMCCFULLFILE;
+      mccdst = fullfile(bindir,[proj '.' FlyBubbleBaR.BUILDMCCFILE]);
+      sssrc = FlyBubbleBaR.BUILDSNAPSHOTFULLFILE;
+      ssdst = fullfile(bindir,[proj '.' FlyBubbleBaR.BUILDSNAPSHOTFILE]);
+      
+      if exist(bindst,'file')>0 || exist(rundst,'file')>0 || ...
+         exist(mccdst,'file')>0 || exist(ssdst,'file')>0
+        warning('FlyBubbleBaR:build','Overwriting existing files in bin dir.');
+      end
+      FlyBubbleBaR.buildmv(binsrc,bindst);
+      FlyBubbleBaR.buildmv(runsrc,rundst);
+      FlyBubbleBaR.buildmv(mccsrc,mccdst);
+      FlyBubbleBaR.buildmv(sssrc,ssdst);
+      fileattrib(bindst,'+x');
+      fileattrib(rundst,'+x');
+      
+      mccExc = fullfile(fbroot,'mccExcludedFiles.log');
+      readme = fullfile(fbroot,'readme.txt');
+      if exist(mccExc,'file')>0
+        delete(mccExc);
+      end
+      if exist(readme,'file')>0
+        delete(readme);
+      end
     end
     
     function s = codesnapshot
@@ -129,6 +167,14 @@ classdef FlyBubbleBaR
       [~,s] = system(cmd);
       s = regexp(s,sprintf('\n'),'split');
       s = s(:);
+    end
+    
+    function buildmv(src,dst)
+      [succ,msg] = movefile(src,dst);
+      if ~succ
+        error('FlyBubbleBaR:build','Failed to move file ''%s'' -> ''%s'': %s\n',...
+          src,dst,msg);
+      end
     end
     
   end  
