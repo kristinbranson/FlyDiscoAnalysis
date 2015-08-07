@@ -1,6 +1,14 @@
 function [trx,perframedata,info,wtunits,trackdata] = FlyBubbleTrackWings(expdir,varargin)
 
-[analysis_protocol,settingsdir,datalocparamsfilestr,coparamsfile,wtparamsfile,logfid,DEBUG,leftovers] = ...
+[analysis_protocol,...
+  settingsdir,...
+  datalocparamsfilestr,...
+  coparamsfile,...
+  wtparamsfile,...
+  logfid,...
+  DEBUG,...
+  checkbuild,...
+  leftovers] = ...
   myparse_nocheck(varargin,...
   'analysis_protocol','current_bubble',...
   'settingsdir','/groups/branson/home/robiea/Code_versioned/FlyBubbleAnalysis/settings',...
@@ -8,9 +16,31 @@ function [trx,perframedata,info,wtunits,trackdata] = FlyBubbleTrackWings(expdir,
   'coparamsfile','',...
   'wtparamsfile','',...
   'logfid',[],...
-  'debug',false...
-	);
+  'debug',false,...
+  'checkbuild',false); 
 
+if ischar(DEBUG)
+  DEBUG = str2double(DEBUG);
+end
+if ischar(checkbuild)
+  checkbuild = str2double(checkbuild);
+end  
+
+if checkbuild
+  % just print out the build version; only works when deployed
+  if ~isdeployed
+    error('FlyBubbleTrackWings:deployed','Checkbuild only available when deployed.');
+  end
+  tmp = importdata('build.snapshot');
+  cellfun(@(x)fprintf(1,'%s\n',x),tmp);
+  
+  trx = [];
+  perframedata = [];
+  info = [];
+  wtunits = [];
+  trackdata = [];
+  return;
+end
 
 %% parameters
 datalocparamsfile = fullfile(settingsdir,analysis_protocol,datalocparamsfilestr);
@@ -48,28 +78,16 @@ end
 
 %% get the real analysis protocol and bookkeeping info
 real_analysis_protocol = GetRealAnalysisProtocol(analysis_protocol,settingsdir);
-
-if isunix
-  snapshotScript = which('repo_snapshot.sh');
-  cmd = sprintf('%s -nocolor -brief %s',snapshotScript,settingsdir);
-  [~,settingsSnapshot] = system(cmd);  
-  if isdeployed
-    %todo
-    codeSnapshot = 'deployed';
-  else
-    cmd = sprintf('%s -nocolor -brief %s',snapshotScript,fileparts(mfilename('fullpath')));
-    [~,codeSnapshot] = system(cmd);
-  end
-else
-  settingsSnapshot = 'No snapshot, not running on unix.';
-  codeSnapshot = settingsSnapshot;
-end
+settingsSS = FlyBubbleBaR.settingssnapshot(settingsdir);
+codeSS = FlyBubbleBaR.codesnapshot();
 
 %% start
 timestamp = datestr(now,'yyyymmddTHHMMSS');
 fprintf(logfid,'\n\n***\nRunning TrackWings analysis_protocol %s (real analysis protocol %s) at %s\n',analysis_protocol,real_analysis_protocol,timestamp);
-fprintf(logfid,'\nCode snapshot: %s\n\n',codeSnapshot);
-fprintf(logfid,'\nSettings snapshot: %s\n\n',settingsSnapshot);
+fprintf(logfid,'\nCode snapshot: \n');
+fprintf(logfid,'%s\n',codeSS{:});
+fprintf(logfid,'\nSettings snapshot: \n');
+fprintf(logfid,'%s\n',settingsSS{:});
 
 %% main function call
 [trx,perframedata,info,wtunits,trackdata] = ...
@@ -85,8 +103,8 @@ fprintf(logfid,'\nSettings snapshot: %s\n\n',settingsSnapshot);
 info.analysis_protocol = analysis_protocol;
 info.linked_analysis_protocol = real_analysis_protocol;
 info.extra_parameters = leftovers;
-info.settings_snapshot = settingsSnapshot;
-info.code_snapshot = codeSnapshot;
+info.settings_snapshot = settingsSS;
+info.code_snapshot = codeSS;
 
 if ~DEBUG,
   if exist(ifofilestr,'file'),
