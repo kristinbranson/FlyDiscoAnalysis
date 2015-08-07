@@ -90,6 +90,7 @@ behaviordetectionparamsfilestr,behavior_detection_params.txt
 fractimestatstxtfilestr,fractime_stats.txt
 fractimestatsmatfilestr,fractime_stats.mat
 jaabadetectparamsfilestr,jaaba_detect_params.txt
+chooseorientparamsfilestr,ChooseOrientationParameters.mat
 wingtrackingparamsfilestr,WingTrackingParameters.txt
 wingtrackinginfomatfilestr,wingtracking_info.mat
 jaabadetectinfomatfilestr,jaabadetect_info.mat
