@@ -110,12 +110,13 @@ classdef FlyBubbleBaR
         script = FlyBubbleBaR.SnapshotScript;
         cmd = sprintf('%s -nocolor -brief %s',script,FlyBubbleBaR.Root);
         [~,s] = system(cmd);
-        
+        s = regexp(s,sprintf('\n'),'split');
+
         cmd = sprintf('%s -nocolor -brief %s',script,manifest.jctrax);
-        [~,tmp] = system(cmd);
+        [~,s2] = system(cmd);
+        s2 = regexp(s2,sprintf('\n'),'split');
         
-        s = [s sprintf('\n') tmp];
-        s = cellstr(s);
+        s = [s(:);s2(:)];
       else
         s = {'No snapshot available, non-unix interactive session.'};
       end
@@ -126,7 +127,8 @@ classdef FlyBubbleBaR
       script = FlyBubbleBaR.SnapshotScript;
       cmd = sprintf('%s -nocolor -brief %s',script,settingsdir);
       [~,s] = system(cmd);
-      s = cellstr(s);
+      s = regexp(s,sprintf('\n'),'split');
+      s = s(:);
     end
     
   end  
