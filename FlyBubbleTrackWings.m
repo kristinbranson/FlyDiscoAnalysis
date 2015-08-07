@@ -55,11 +55,15 @@ if isempty(coparamsfile)
   coparamsfile = fullfile(settingsdir,analysis_protocol,dataloc_params.chooseorientparamsfilestr);
 end
 if isempty(wtparamsfile)
-  wtparamsfile = fullfile(settingsdir,analysis_protocol,dataloc_params.wingtrackingparamsfilestr);
+  wtparamsfileshort = dataloc_params.wingtrackingparamsfilestr;
+  if isempty(wtparamsfileshort)
+    wtparamsfile = []; % will result in use of DefaultWingTrackingParams in ChooseOrientationsAndTrackWings
+  else    
+    wtparamsfile = fullfile(settingsdir,analysis_protocol,wtparamsfileshort);
+  end
 end
 
 %% start log
-
 didopenlog = false;
 if isempty(logfid),
   if isfield(dataloc_params,'trackwings_logfilestr') && ~DEBUG,
