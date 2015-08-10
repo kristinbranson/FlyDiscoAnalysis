@@ -16,6 +16,10 @@
 % appearancecost: N x 2 vector where appearancecost(t,s) is the
 % appearance-based cost for choosing state s at time t
 %
+% Outputs:
+% theta: N x 1 vector of chosen/optimized orientations
+% s: N x 1 indicator vector taking values 1 (theta unchanged from orig) or
+% 2 (theta flipped)
 function [theta,s] = choose_orientations_generic(theta,weight_theta,appearancecost)
 
 inputsz = size(theta);

@@ -273,6 +273,16 @@ for fly = 1:nflies,
 
   [newtheta,s] = choose_orientations_generic(theta,weight_theta,appearancecost); 
   trx(fly).theta(i0:i1) = newtheta;
+  if isfield(trx,'theta_mm')
+    absdtheta = abs(modrange(newtheta-theta,-pi,pi));
+    ANGLECHANGED_THRESH = 0.1; % anything between ~eps and ~pi prob fine
+    assert( isequal(absdtheta>ANGLECHANGED_THRESH,s==2) );
+    tfflipped = (s==2);
+
+    thmm = trx(fly).theta_mm(i0:i1);
+    thmm(tfflipped) = modrange(thmm(tfflipped)-pi,-pi,pi);
+    trx(fly).theta_mm(i0:i1) = thmm;
+  end
   
   if iswingareainfo,
     idx2 = find(s==2)+i0-1;
