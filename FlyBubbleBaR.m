@@ -23,21 +23,23 @@ classdef FlyBubbleBaR
     
     function p = getpath()
       m = FlyBubbleBaR.Manifest;      
+      
+      hmmroot = m.hmm;
       jctroot = m.jctrax;
+      
+      % AL: Order important here. FBA has code that shadows eg hmm
       p = { ...
         FlyBubbleBaR.Root; ...
         fullfile(jctroot,'filehandling'); ...
         fullfile(jctroot,'misc'); ...
-        fullfile(jctroot,'simplewing')};
+        fullfile(jctroot,'simplewing'); ...
+        hmmroot;
+        };
     end
     
     function setpath()
-      m = FlyBubbleBaR.Manifest;
-      
-      jctroot = m.jctrax;
-      addpath(fullfile(jctroot,'filehandling'));
-      addpath(fullfile(jctroot,'misc'));
-      addpath(fullfile(jctroot,'simplewing'));
+      p = FlyBubbleBaR.getpath();
+      addpath(p{:},'-begin');      
     end
     
     function build(proj)
@@ -183,6 +185,6 @@ end
 function s = lclReadManifest(fname)
 tmp = importdata(fname);
 tmp = regexp(tmp,',','split');
-tmp = tmp{1};
+tmp = cat(1,tmp{:});
 s = cell2struct(tmp(:,2),tmp(:,1));
 end
