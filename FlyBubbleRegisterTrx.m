@@ -97,7 +97,7 @@ end
 
 fnsignore = intersect(fieldnames(registration_params),...
   {'minFliesLoadedTime','maxFliesLoadedTime','extraBufferFliesLoadedTime','usemediandt','doTemporalRegistration','OptogeneticExp','LEDMarkerType','maxDistCornerFrac_LEDLabel'});
-  
+
 registration_params_cell = struct2paramscell(rmfield(registration_params,fnsignore));
 % file to save image to
 if isfield(dataloc_params,'registrationimagefilestr'),
@@ -189,7 +189,7 @@ for fly = 1:length(trx),
       trx(fly).dt = repmat(1/trx(fly).fps,[1,trx(fly).nframes-1]);
     end
   end
-
+  
   trx(fly).fps = 1/mean(trx(fly).dt);
   trx(fly).pxpermm = 1 / registration_data.scale;
   
@@ -199,130 +199,130 @@ logger.log('Applied spatial registration.\n');
 
 %% create maxvalueimage for LED experiments  (needs fps)
 if isfield(registration_params,'OptogeneticExp');
-    if registration_params.OptogeneticExp
-        moviefilename = fullfile(expdir,dataloc_params.moviefilestr);
-        [readfcn,~,~,headerinfo] = get_readframe_fcn(moviefilename);
-        %determine minimum frames to process
-        if isfield(dataloc_params,'ledprotocolfilestr');
-            if exist(fullfile(expdir,dataloc_params.ledprotocolfilestr),'file');
-                load(fullfile(expdir,dataloc_params.ledprotocolfilestr))
-                if ~isempty(protocol)
-                    fps = 1/meddt;                    
-                    secstoLEDpulse = protocol.delayTime(1) + ((protocol.duration(1)/1000-protocol.delayTime(1))/protocol.iteration(1));
-                    frametoLEDpulse = secstoLEDpulse*fps;
-                    if protocol.pulseWidthSP(1) <= 1/fps*1000*2 %pulseWidth(ms) < 2 times sampling
-                        jump = 1;
-                    else
-                    jump = round(protocol.pulseWidthSP(1)/1/fps*1000);
-                    end 
-                end
-            end
-        else
-            % reasonable guess
-            frametoLEDpulse = headerinfo.nframes/3;
-            jump = 10;
+  if registration_params.OptogeneticExp
+    moviefilename = fullfile(expdir,dataloc_params.moviefilestr);
+    [readfcn,~,~,headerinfo] = get_readframe_fcn(moviefilename);
+    %determine minimum frames to process
+    if isfield(dataloc_params,'ledprotocolfilestr');
+      if exist(fullfile(expdir,dataloc_params.ledprotocolfilestr),'file');
+        load(fullfile(expdir,dataloc_params.ledprotocolfilestr))
+        if ~isempty(protocol)
+          fps = 1/meddt;
+          secstoLEDpulse = protocol.delayTime(1) + ((protocol.duration(1)/1000-protocol.delayTime(1))/protocol.iteration(1));
+          frametoLEDpulse = secstoLEDpulse*fps;
+          if protocol.pulseWidthSP(1) <= 1/fps*1000*2 %pulseWidth(ms) < 2 times sampling
+            jump = 1;
+          else
+            jump = round(protocol.pulseWidthSP(1)/1/fps*1000);
+          end
         end
-        frametoLEDpulse = max([round(frametoLEDpulse),min(200,headerinfo.nframes)]);
-        jump = min(jump,round(frametoLEDpulse/100));
-        im = readfcn(1);
-        for j = 1:jump:frametoLEDpulse
-            tmp = readfcn(j);
-            idx = tmp > im;
-            im(idx) = tmp(idx);
-%             if (mod(j,1000) == 0);
-%                 disp(round((j/frametoLEDpulse)*100))
-%             end
-        end
+      end
+    else
+      % reasonable guess
+      frametoLEDpulse = headerinfo.nframes/3;
+      jump = 10;
     end
+    frametoLEDpulse = max([round(frametoLEDpulse),min(200,headerinfo.nframes)]);
+    jump = min(jump,round(frametoLEDpulse/100));
+    im = readfcn(1);
+    for j = 1:jump:frametoLEDpulse
+      tmp = readfcn(j);
+      idx = tmp > im;
+      im(idx) = tmp(idx);
+      %             if (mod(j,1000) == 0);
+      %                 disp(round((j/frametoLEDpulse)*100))
+      %             end
+    end
+  end
 end
 %% detect LED indicator (modified from detect registration marks)
 if isfield(registration_params,'OptogeneticExp')
-    if registration_params.OptogeneticExp
-        % name of annotation file
-        annfile = fullfile(expdir,dataloc_params.annfilestr);
-        
-        % name of movie file
-        moviefile = fullfile(expdir,dataloc_params.moviefilestr);
-        
-        % template filename should be relative to settings directory
-        if isfield(registration_params,'LEDMarkerType'),
-            if ischar(registration_params.LEDMarkerType),
-                if ~ismember(registration_params.LEDMarkerType,{'gradient'}),
-                    registration_params.LEDMarkerType = fullfile(settingsdir,analysis_protocol,registration_params.LEDMarkerType);
-                end
-            else
-                % plate -> bowlmarkertype
-                plateids = str2double(registration_params.LEDMarkerType(1:2:end-1));
-                ledmarkertypes = registration_params.LEDMarkerType(2:2:end);
-                [metadata,success1] = parseExpDir(expdir);
-                if ~success1 || ~isfield(metadata,'plate'),
-                    metadata = ReadMetadataFile(fullfile(expdir,dataloc_params.metadatafilestr));
-                end
-                if ischar(metadata.plate),
-                    plateid = str2double(metadata.plate);
-                else
-                    plateid = metadata.plate;
-                end
-                i = find(plateid == plateids,1);
-                if isempty(i),
-                    error('LEDMarkerType not set for plate %d',plateid);
-                end
-                if ~ismember(ledmarkertypes{i},{'gradient'}),
-                    registration_params.LEDMarkerType = fullfile(settingsdir,analysis_protocol,ledmarkertypes{i});
-                end
-            end
+  if registration_params.OptogeneticExp
+    % name of annotation file
+    annfile = fullfile(expdir,dataloc_params.annfilestr);
+    
+    % name of movie file
+    moviefile = fullfile(expdir,dataloc_params.moviefilestr);
+    
+    % template filename should be relative to settings directory
+    if isfield(registration_params,'LEDMarkerType'),
+      if ischar(registration_params.LEDMarkerType),
+        if ~ismember(registration_params.LEDMarkerType,{'gradient'}),
+          registration_params.LEDMarkerType = fullfile(settingsdir,analysis_protocol,registration_params.LEDMarkerType);
         end
-        
-        % maxDistCornerFrac_BowlLabel might depend on bowl
-        if isfield(registration_params,'maxDistCornerFrac_LEDLabel') && ...
-                numel(registration_params.maxDistCornerFrac_LEDLabel) > 1,
-            plateids = registration_params.maxDistCornerFrac_LEDLabel(1:2:end-1);
-            cornerfracs = registration_params.maxDistCornerFrac_LEDLabel(2:2:end);
-            [metadata,success1] = parseExpDir(expdir);
-            if ~success1 || ~isfield(metadata,'plate'),
-                metadata = ReadMetadataFile(fullfile(expdir,dataloc_params.metadatafilestr));
-            end
-            if ischar(metadata.plate),
-                plateid = str2double(metadata.plate);
-            else
-                plateid = metadata.plate;
-            end
-            i = find(plateid == plateids,1);
-            if isempty(i),
-                error('maxDistCornerFrac_LEDLabel not set for plate %d',plateid);
-            end
-            registration_params.maxDistCornerFrac_LEDLabel = cornerfracs(i);
+      else
+        % plate -> bowlmarkertype
+        plateids = str2double(registration_params.LEDMarkerType(1:2:end-1));
+        ledmarkertypes = registration_params.LEDMarkerType(2:2:end);
+        [metadata,success1] = parseExpDir(expdir);
+        if ~success1 || ~isfield(metadata,'plate'),
+          metadata = ReadMetadataFile(fullfile(expdir,dataloc_params.metadatafilestr));
         end
-        
-        registration_params.bowlMarkerType = registration_params.LEDMarkerType;
-        registration_params.maxDistCornerFrac_BowlLabel = registration_params.maxDistCornerFrac_LEDLabel;
-        
-        fnsignore = intersect(fieldnames(registration_params),...
-            {'minFliesLoadedTime','maxFliesLoadedTime','extraBufferFliesLoadedTime','usemediandt','doTemporalRegistration','OptogeneticExp','LEDMarkerType','maxDistCornerFrac_LEDLabel'});
-        
-        registration_params_cell = struct2paramscell(rmfield(registration_params,fnsignore));        
-       
-        % file to save image to
-        if isfield(dataloc_params,'ledregistrationimagefilstr'),
-            registration_params_cell(end+1:end+2) = {'imsavename',fullfile(expdir,dataloc_params.ledregistrationimagefilstr)};
-        end        
-        
-        % detect
-        try
-            ledindicator_data = detectRegistrationMarks(registration_params_cell{:},'annName',annfile,'movieName',moviefile,'bkgdImage',im2double(im),'ledindicator',true);            
-        catch ME,
-            logger.log('Error detecting led indicator:\n');
-            logger.log(getReport(ME));
-            success = false;
-            msgs = {['Error detecting led indicator: ',getReport(ME)]};
-            return;
+        if ischar(metadata.plate),
+          plateid = str2double(metadata.plate);
+        else
+          plateid = metadata.plate;
         end
-        registration_data.ledIndicatorPoints = ledindicator_data.bowlMarkerPoints;
-        
-        logger.log('Detected led indicator.\n');
-               
-        
+        i = find(plateid == plateids,1);
+        if isempty(i),
+          error('LEDMarkerType not set for plate %d',plateid);
+        end
+        if ~ismember(ledmarkertypes{i},{'gradient'}),
+          registration_params.LEDMarkerType = fullfile(settingsdir,analysis_protocol,ledmarkertypes{i});
+        end
+      end
     end
+    
+    % maxDistCornerFrac_BowlLabel might depend on bowl
+    if isfield(registration_params,'maxDistCornerFrac_LEDLabel') && ...
+        numel(registration_params.maxDistCornerFrac_LEDLabel) > 1,
+      plateids = registration_params.maxDistCornerFrac_LEDLabel(1:2:end-1);
+      cornerfracs = registration_params.maxDistCornerFrac_LEDLabel(2:2:end);
+      [metadata,success1] = parseExpDir(expdir);
+      if ~success1 || ~isfield(metadata,'plate'),
+        metadata = ReadMetadataFile(fullfile(expdir,dataloc_params.metadatafilestr));
+      end
+      if ischar(metadata.plate),
+        plateid = str2double(metadata.plate);
+      else
+        plateid = metadata.plate;
+      end
+      i = find(plateid == plateids,1);
+      if isempty(i),
+        error('maxDistCornerFrac_LEDLabel not set for plate %d',plateid);
+      end
+      registration_params.maxDistCornerFrac_LEDLabel = cornerfracs(i);
+    end
+    
+    registration_params.bowlMarkerType = registration_params.LEDMarkerType;
+    registration_params.maxDistCornerFrac_BowlLabel = registration_params.maxDistCornerFrac_LEDLabel;
+    
+    fnsignore = intersect(fieldnames(registration_params),...
+      {'minFliesLoadedTime','maxFliesLoadedTime','extraBufferFliesLoadedTime','usemediandt','doTemporalRegistration','OptogeneticExp','LEDMarkerType','maxDistCornerFrac_LEDLabel'});
+    
+    registration_params_cell = struct2paramscell(rmfield(registration_params,fnsignore));
+    
+    % file to save image to
+    if isfield(dataloc_params,'ledregistrationimagefilstr'),
+      registration_params_cell(end+1:end+2) = {'imsavename',fullfile(expdir,dataloc_params.ledregistrationimagefilstr)};
+    end
+    
+    % detect
+    try
+      ledindicator_data = detectRegistrationMarks(registration_params_cell{:},'annName',annfile,'movieName',moviefile,'bkgdImage',im2double(im),'ledindicator',true);
+    catch ME,
+      logger.log('Error detecting led indicator:\n');
+      logger.log(getReport(ME));
+      success = false;
+      msgs = {['Error detecting led indicator: ',getReport(ME)]};
+      return;
+    end
+    registration_data.ledIndicatorPoints = ledindicator_data.bowlMarkerPoints;
+    
+    logger.log('Detected led indicator.\n');
+    
+    
+  end
 end
 %% crop start and end of trajectories
 
@@ -473,7 +473,7 @@ if dotemporalreg,
           trx(i).(fn) = trx(i).(fn)(1:trx(i).nframes-nperfn(j));
         end
         trx(i).endframe = i1;
-      end      
+      end
       
       trx(i).off = -trx(i).firstframe + 1;
       
@@ -518,7 +518,7 @@ end
 %% save params to mat file
 
 registrationmatfile = fullfile(expdir,dataloc_params.registrationmatfilestr);
-tmp = rmfield(registration_data,'registerfn'); 
+tmp = rmfield(registration_data,'registerfn');
 tmp.registrationinfo = registrationinfo;
 
 didsave = false;
@@ -547,33 +547,33 @@ try
   if exist(registrationtxtfile,'file'),
     delete(registrationtxtfile);
   end
-fid = fopen(registrationtxtfile,'w');
-
-fnssave = {'offX','offY','offTheta','scale','bowlMarkerTheta','featureStrengths',...
-  'circleCenterX','circleCenterY','circleRadius',...
-  'seconds_crop_start','seconds_crop_end','start_frame','end_frame'};
-
-fnssave = intersect(fnssave,fieldnames(registration_data));
-for i = 1:numel(fnssave),
-  fn = fnssave{i};
-  fprintf(fid,'%s,%f\n',fn,registration_data.(fn));
-end
-fnssave = {'version','timestamp','analysis_protocol','linked_analysis_protocol'};
-fnssave = intersect(fnssave,fieldnames(registrationinfo));
-for i = 1:numel(fnssave),
-  fn = fnssave{i};
-  fprintf(fid,'%s,%s\n',fn,registrationinfo.(fn));
-end
-
-if isfield(registration_params,'OptogeneticExp')
+  fid = fopen(registrationtxtfile,'w');
+  
+  fnssave = {'offX','offY','offTheta','scale','bowlMarkerTheta','featureStrengths',...
+    'circleCenterX','circleCenterY','circleRadius',...
+    'seconds_crop_start','seconds_crop_end','start_frame','end_frame'};
+  
+  fnssave = intersect(fnssave,fieldnames(registration_data));
+  for i = 1:numel(fnssave),
+    fn = fnssave{i};
+    fprintf(fid,'%s,%f\n',fn,registration_data.(fn));
+  end
+  fnssave = {'version','timestamp','analysis_protocol','linked_analysis_protocol'};
+  fnssave = intersect(fnssave,fieldnames(registrationinfo));
+  for i = 1:numel(fnssave),
+    fn = fnssave{i};
+    fprintf(fid,'%s,%s\n',fn,registrationinfo.(fn));
+  end
+  
+  if isfield(registration_params,'OptogeneticExp')
     if registration_params.OptogeneticExp
-        fprintf(fid,'%s,%d\n','ledX',registration_data.ledIndicatorPoints(1));
-        fprintf(fid,'%s,%d\n','ledY',registration_data.ledIndicatorPoints(2));
+      fprintf(fid,'%s,%d\n','ledX',registration_data.ledIndicatorPoints(1));
+      fprintf(fid,'%s,%d\n','ledY',registration_data.ledIndicatorPoints(2));
     end
-end
-
-fclose(fid);
-didsave = true;
+  end
+  
+  fclose(fid);
+  didsave = true;
 catch ME
   warning('Could not save registration data to txt file: %s',getReport(ME));
   success = false;
@@ -586,7 +586,7 @@ else
   logger.log('Could not save registration data to txt file:\n%s\n',getReport(ME));
 end
 
-%% 
+%%
 logger.close();
 
 %% close figures
