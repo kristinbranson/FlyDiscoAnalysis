@@ -21,8 +21,9 @@ classdef PipelineLogger < handle
       % Optional PVs:
       % logfid. If provided, Logger takes ownership of this (should be live) file handle.
       % debug. logical scalar.
+      % versionstr. Caller version str for print
       
-      [logfid,debug] = myparse(varargin,'logfid',[],'debug',false);
+      [logfid,debug,versionstr] = myparse(varargin,'logfid',[],'debug',false,'versionstr','');
       
       obj.expdir = expdir;
       obj.stage = pipelinestage;
@@ -45,8 +46,13 @@ classdef PipelineLogger < handle
       settingsSS = FlyBubbleBaR.settingssnapshot(settingsdir);
       codeSS = FlyBubbleBaR.codesnapshot();
       timestamp = datestr(now,'yyyymmddTHHMMSS');
-      fprintf(logfid,'\n\n***\nRunning %s analysis_protocol %s (real analysis protocol %s) at %s\n',...
-        obj.stage,analysis_protocol,real_analysis_protocol,timestamp);
+      if isempty(versionstr)
+        fprintf(logfid,'\n\n***\nRunning %s analysis_protocol %s (real analysis protocol %s) at %s\n',...
+          obj.stage,analysis_protocol,real_analysis_protocol,timestamp);
+      else
+        fprintf(logfid,'\n\n***\nRunning %s ver %s analysis_protocol %s (real analysis protocol %s) at %s\n',...
+          obj.stage,versionstr,analysis_protocol,real_analysis_protocol,timestamp);
+      end
       fprintf(logfid,'\nCode snapshot: \n');
       fprintf(logfid,'%s\n',codeSS{:});
       fprintf(logfid,'\nSettings snapshot: \n');

@@ -19,7 +19,7 @@ dataloc_params = ReadParams(datalocparamsfile);
 %%
 logger = PipelineLogger(expdir,mfilename(),...
         dataloc_params,'classifysex_logfilestr',...
-        settingsdir,analysis_protocol);     
+        settingsdir,analysis_protocol,'versionstr',version);     
 
 %% load the data
 logger.log('Loading data...\n');
