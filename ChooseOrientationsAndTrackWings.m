@@ -64,6 +64,8 @@ if ~isempty(paramsfile),
 end
 
 if isempty(wingtracking_params)
+  warning('ChooseOrientationsAndTrackWings:params',...
+    'No wingtracking parameters provided. Using DefaultWingTrackingParams().');
   wingtracking_params = DefaultWingTrackingParams();
 elseif ischar(wingtracking_params),
   [~,~,ext] = fileparts(wingtracking_params);
