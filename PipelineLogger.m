@@ -59,6 +59,7 @@ classdef PipelineLogger < handle
       fprintf(logfid,'%s\n',settingsSS{:});
       
       info = struct();
+      info.version = versionstr;
       info.analysis_protocol = analysis_protocol;
       info.linked_analysis_protocol = real_analysis_protocol;
       info.settings_snapshot = settingsSS;

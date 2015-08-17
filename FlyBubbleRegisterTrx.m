@@ -4,7 +4,6 @@ success = true;
 msgs = {};
 
 version = '0.2';
-timestamp = datestr(now,'yyyymmddTHHMMSS');
 
 fns_notperframe = {'id','moviename','annname','firstframe','arena','off',...
   'nframes','endframe','matname','fps','pxpermm'};
@@ -21,18 +20,9 @@ fns_notperframe = {'id','moviename','annname','firstframe','arena','off',...
 datalocparamsfile = fullfile(settingsdir,analysis_protocol,datalocparamsfilestr);
 dataloc_params = ReadParams(datalocparamsfile);
 
-if isfield(dataloc_params,'registertrx_logfilestr'),
-  logfile = fullfile(expdir,dataloc_params.registertrx_logfilestr);
-  logfid = fopen(logfile,'a');
-  if logfid < 1,
-    warning('Could not open log file %s\n',logfile);
-    logfid = 1;
-  end
-else
-  logfid = 1;
-end
-
-fprintf(logfid,'\n\n***\nRunning FlyBowlRegisterTrx version %s analysis_protocol %s at %s\n',version,analysis_protocol,timestamp);
+logger = PipelineLogger(expdir,mfilename(),dataloc_params,...
+  'registertrx_logfilestr',settingsdir,analysis_protocol,...
+  'versionstr',version);
 
 %% read in registration params
 
@@ -117,14 +107,14 @@ end
 try
   registration_data = detectRegistrationMarks(registration_params_cell{:},'annName',annfile,'movieName',moviefile);
 catch ME,
-  fprintf(logfid,'Error detecting registration marks:\n');
-  fprintf(logfid,getReport(ME));
+  logger.log('Error detecting registration marks:\n');
+  logger.log(getReport(ME));
   success = false;
   msgs = {['Error detecting registration marks: ',getReport(ME)]};
   return;
 end
 
-fprintf(logfid,'Detected registration marks.\n');
+logger.log('Detected registration marks.\n');
 
 %% apply spatial registration
 
@@ -205,7 +195,7 @@ for fly = 1:length(trx),
   
 end
 
-fprintf(logfid,'Applied spatial registration.\n');
+logger.log('Applied spatial registration.\n');
 
 %% create maxvalueimage for LED experiments  (needs fps)
 if isfield(registration_params,'OptogeneticExp');
@@ -304,37 +294,32 @@ if isfield(registration_params,'OptogeneticExp')
             registration_params.maxDistCornerFrac_LEDLabel = cornerfracs(i);
         end
         
-        
-        
         registration_params.bowlMarkerType = registration_params.LEDMarkerType;
         registration_params.maxDistCornerFrac_BowlLabel = registration_params.maxDistCornerFrac_LEDLabel;
         
         fnsignore = intersect(fieldnames(registration_params),...
             {'minFliesLoadedTime','maxFliesLoadedTime','extraBufferFliesLoadedTime','usemediandt','doTemporalRegistration','OptogeneticExp','LEDMarkerType','maxDistCornerFrac_LEDLabel'});
         
-        registration_params_cell = struct2paramscell(rmfield(registration_params,fnsignore));
-        
+        registration_params_cell = struct2paramscell(rmfield(registration_params,fnsignore));        
        
         % file to save image to
         if isfield(dataloc_params,'ledregistrationimagefilstr'),
             registration_params_cell(end+1:end+2) = {'imsavename',fullfile(expdir,dataloc_params.ledregistrationimagefilstr)};
-        end
-        
+        end        
         
         % detect
         try
-            ledindicator_data = detectRegistrationMarks(registration_params_cell{:},'annName',annfile,'movieName',moviefile,'bkgdImage',im2double(im),'ledindicator',true);
-            
+            ledindicator_data = detectRegistrationMarks(registration_params_cell{:},'annName',annfile,'movieName',moviefile,'bkgdImage',im2double(im),'ledindicator',true);            
         catch ME,
-            fprintf(logfid,'Error detecting led indicator:\n');
-            fprintf(logfid,getReport(ME));
+            logger.log('Error detecting led indicator:\n');
+            logger.log(getReport(ME));
             success = false;
             msgs = {['Error detecting led indicator: ',getReport(ME)]};
             return;
         end
         registration_data.ledIndicatorPoints = ledindicator_data.bowlMarkerPoints;
         
-        fprintf(logfid,'Detected led indicator.\n');
+        logger.log('Detected led indicator.\n');
                
         
     end
@@ -382,7 +367,7 @@ if dotemporalreg,
   timeCropStart = registration_params.maxFliesLoadedTime - seconds_fliesloaded;
   if timeCropStart < 0,
     warning('Load time = %f seconds, greater than max allowed load time = %f seconds.',...
-      seconds_fliesloaded,registration_params.maxFliesLoadedTime);
+      seconds_fliesloaded,registration_params.maxFliesLoadedTime); %#ok<*WNTAG>
     timeCropStart = 0;
   end
   
@@ -488,8 +473,7 @@ if dotemporalreg,
           trx(i).(fn) = trx(i).(fn)(1:trx(i).nframes-nperfn(j));
         end
         trx(i).endframe = i1;
-      end
-      
+      end      
       
       trx(i).off = -trx(i).firstframe + 1;
       
@@ -498,11 +482,11 @@ if dotemporalreg,
     
   end
   
-  fprintf(logfid,'Applied temporal registration.\n');
+  logger.log('Applied temporal registration.\n');
   
 else
   
-  fprintf(logfid,'NOT applying temporal registration.\n');
+  logger.log('NOT applying temporal registration.\n');
   
 end
 
@@ -516,8 +500,7 @@ try
   if exist(trxfile,'file'),
     delete(trxfile);
   end
-  real_analysis_protocol = GetRealAnalysisProtocol(analysis_protocol,settingsdir);
-  registrationinfo = struct('version',version,'timestamp',timestamp,'analysis_protocol',analysis_protocol,'linked_analysis_protocol',real_analysis_protocol);
+  registrationinfo = logger.runInfo;
   save(trxfile,'trx','timestamps','registrationinfo');
   didsave = true;
 catch ME
@@ -527,9 +510,9 @@ catch ME
 end
 
 if didsave,
-  fprintf(logfid,'Saved registered trx to file %s\n',trxfile);
+  logger.log('Saved registered trx to file %s\n',trxfile);
 else
-  fprintf(logfid,'Could not save registered trx:\n%s\n',getReport(ME));
+  logger.log('Could not save registered trx:\n%s\n',getReport(ME));
 end
 
 %% save params to mat file
@@ -552,9 +535,9 @@ catch ME
 end
 
 if didsave,
-  fprintf(logfid,'Saved registration data to file %s\n',registrationmatfile);
+  logger.log('Saved registration data to file %s\n',registrationmatfile);
 else
-  fprintf(logfid,'Could not save registration data to mat file:\n%s\n',getReport(ME));
+  logger.log('Could not save registration data to mat file:\n%s\n',getReport(ME));
 end
 
 %% save params to text file
@@ -589,7 +572,6 @@ if isfield(registration_params,'OptogeneticExp')
     end
 end
 
-
 fclose(fid);
 didsave = true;
 catch ME
@@ -599,18 +581,13 @@ catch ME
 end
 
 if didsave,
-  fprintf(logfid,'Saved registration data to txt file %s\n',registrationtxtfile);
+  logger.log('Saved registration data to txt file %s\n',registrationtxtfile);
 else
-  fprintf(logfid,'Could not save registration data to txt file:\n%s\n',getReport(ME));
+  logger.log('Could not save registration data to txt file:\n%s\n',getReport(ME));
 end
 
-%% close log
-
-fprintf(logfid,'Finished running FlyBowlRegisterTrx at %s.\n',datestr(now,'yyyymmddTHHMMSS'));
-
-if logfid > 1,
-  fclose(logfid);
-end
+%% 
+logger.close();
 
 %% close figures
 
