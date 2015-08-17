@@ -55,6 +55,8 @@ classdef PipelineLogger < handle
       info = struct();
       info.analysis_protocol = analysis_protocol;
       info.linked_analysis_protocol = real_analysis_protocol;
+      info.settings_snapshot = settingsSS;
+      info.code_snapshot = codeSS;
       info.timestamp = timestamp;
       obj.runInfo = info;
     end

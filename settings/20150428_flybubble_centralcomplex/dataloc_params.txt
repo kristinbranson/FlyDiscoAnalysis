@@ -92,7 +92,6 @@ fractimestatsmatfilestr,fractime_stats.mat
 jaabadetectparamsfilestr,jaaba_detect_params.txt
 chooseorientparamsfilestr,ChooseOrientationParameters.mat
 wingtrackingparamsfilestr,WingTrackingParameters.txt
-wingtrackinginfomatfilestr,wingtracking_info.mat
 jaabadetectinfomatfilestr,jaabadetect_info.mat
 statsplotparamsfilestr,stats_plotparams.txt
 plotperframestatsinfomatfilestr,plotperframestats_info.mat
