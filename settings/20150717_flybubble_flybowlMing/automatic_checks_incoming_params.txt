@@ -4,4 +4,4 @@ min_ufmf_diagnostics_summary_nframes,1000
 control_line_names,pBDPGAL4U
 required_files,metaData.xml,movie.ufmf,protocol.mat
 desired_files,cameraSettings.json,expNotes.xml,expTimeStamp.txt
-frame_rate,150
+frame_rate,30
