@@ -29,7 +29,7 @@ if [ "$#" -eq 0 ]; then
 elif [ "$#" -eq 1 ]; then
     DIR=$1
 else
-    echo "Usage: $0 [-nocolor] [-brief] [settingsdir]"
+    echo "Usage: $0 [-nocolor] [-brief] [repodir]"
     exit 1
 fi
 
@@ -42,7 +42,7 @@ pushd . >/dev/null
 cd $DIR
 echo $DIR
 if [ $brief = true ]; then
-    headn=5
+    headn=2
 else
     headn=10
 fi
