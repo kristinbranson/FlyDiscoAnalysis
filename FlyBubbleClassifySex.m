@@ -258,7 +258,10 @@ for i = 1:numel(fns),
 end
 fns = fieldnames(sexclassifierinfo);
 for i = 1:numel(fns),
-  fprintf(fid,'%s,%s\n',fns{i},sexclassifierinfo.(fns{i}));
+  val = sexclassifierinfo.(fns{i});
+  if ischar(val)
+    fprintf(fid,'%s,%s\n',fns{i},val);
+  end
 end
 
 if dosave && fid > 1,
