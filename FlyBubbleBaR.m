@@ -62,6 +62,14 @@ classdef FlyBubbleBaR
       
       fbroot = FlyBubbleBaR.Root;
       
+      % include all compute*.m. For now only used by computePFF but I don't
+      % see how it hurts
+      cpffs = dir(fullfile(fbroot,'compute*.m'));
+      cpffs = {cpffs.name}';
+      cpffs = cellfun(@(x)fullfile(fbroot,x),cpffs,'uni',0);
+      dashACPFFs = [repmat({'-a'},size(cpffs)) cpffs];
+      dashACPFFs = dashACPFFs';
+      
       mccargs = {...
        '-o',proj,...
        '-W',['main:' proj],...
@@ -77,7 +85,8 @@ classdef FlyBubbleBaR
        Ipth{:},...
        '-a',fullfile(fbroot,'build.snapshot'),...
        '-a',fullfile(fbroot,'repo_snapshot.sh'),...
-       '-a',fullfile(fbroot,'FlyBubbleManifest.txt')}; %#ok<CCAT>
+       '-a',fullfile(fbroot,'FlyBubbleManifest.txt'),...
+       dashACPFFs{:}}; %#ok<CCAT>
      
       fprintf('Writing mcc args to file: %s...\n',FlyBubbleBaR.BUILDMCCFULLFILE);
       cellstrexport(mccargs,FlyBubbleBaR.BUILDMCCFULLFILE);
