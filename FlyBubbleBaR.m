@@ -9,8 +9,17 @@ classdef FlyBubbleBaR
     
     Manifest = lclReadManifest( fullfile(FlyBubbleBaR.Root,FlyBubbleBaR.MANIFESTFILE) );
     
-    SnapshotScript = fullfile(FlyBubbleBaR.Root,'repo_snapshot.sh');
-    
+    SnapshotScript = fullfile(FlyBubbleBaR.Root,'repo_snapshot.sh');    
+
+    BUILDPROJECTS = {
+      'FlyBubbleAutomaticChecks_Incoming'
+      'FlyBubbleClassifySex'
+      'FlyBubbleComputePerFrameFeatures'
+      'FlyBubbleDectectIndicatorLedOnOff'
+      'FlyBubbleRegisterTrx'
+      'FlyBubbleTrackWings'
+      };
+      
     BUILDSNAPSHOTFILE = 'build.snapshot';    
     BUILDSNAPSHOTFULLFILE = fullfile(FlyBubbleBaR.Root,FlyBubbleBaR.BUILDSNAPSHOTFILE);
     
@@ -40,6 +49,16 @@ classdef FlyBubbleBaR
     function setpath()
       p = FlyBubbleBaR.getpath();
       addpath(p{:},'-begin');      
+    end
+    
+    function buildAll()
+      projs = FlyBubbleBaR.BUILDPROJECTS;
+      for p=projs(:)',p=p{1}; %#ok<FXSET>
+        fprintf(' ######\n');
+        fprintf(' BUILDING %s...\n',p);
+        pause(2);
+        FlyBubbleBaR.build(p);
+      end
     end
     
     function build(proj)
@@ -189,6 +208,7 @@ classdef FlyBubbleBaR
     end
     
   end  
+  
 end
 
 function s = lclReadManifest(fname)
