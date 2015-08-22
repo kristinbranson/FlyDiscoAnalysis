@@ -116,7 +116,8 @@ classdef FlyBubbleBaR
       mcc(mccargs{:});
       
       % postbuild
-      bindir = fullfile(fbroot,'builds','bubble',today);      
+      mnfst = FlyBubbleBaR.Manifest;      
+      bindir = fullfile(mnfst.build,'bubble',today);      
       if exist(bindir,'dir')==0
         fprintf('Creating bin dir %s...\n',bindir);
         [succ,msg] = mkdir(bindir);
