@@ -100,67 +100,67 @@ if isfield(metadata,'gender') && ~strcmpi(metadata.gender,'b'),
   ll = [];
   
 else
-
-%% learn a 2-state HMM for area in an unsupervised manner
-
-logger.log('gender = "b", learning 2-state HMM...\n');
-
-% initialize parameters
-nstates = 2;
-Psame = sexclassifierin.psame;
-ptrans = ones(nstates)-Psame;
-ptrans(eye(nstates)==1) = Psame;
-if isfield(sexclassifier_params,'frac_female'),
-  prior = [1-sexclassifier_params.frac_female,sexclassifier_params.frac_female];
-else
-  prior = ones(1,nstates)/nstates; 
-end
-state2sex = cell(1,nstates);
-
-% em for hmm
-[mu_area,var_area,ll]=hmm_multiseq_1d(X,nstates,Psame,...
-  sexclassifier_params.niters_em,sexclassifier_params.tol_em,...
-  [],prior);
-if mu_area(1) > mu_area(2),
-  mu_area = mu_area(end:-1:1);
-  var_area = var_area(end:-1:1);
-end
-state2sex{argmax(mu_area)} = 'F';
-state2sex{argmin(mu_area)} = 'M';
-
-%% save classifier
-
-filterorder = sexclassifierin.areasmooth_filterorder; %#ok<NASGU>
-maxfreq = sexclassifierin.areasmooth_maxfreq; %#ok<NASGU>
-maxerrx = sexclassifierin.areasmooth_maxerrx; %#ok<NASGU>
-
-if dosave,
-  try
-    if exist(sexclassifieroutmatfile,'file'),
-      delete(sexclassifieroutmatfile);
+  
+  %% learn a 2-state HMM for area in an unsupervised manner
+  
+  logger.log('gender = "b", learning 2-state HMM...\n');
+  
+  % initialize parameters
+  nstates = 2;
+  Psame = sexclassifierin.psame;
+  ptrans = ones(nstates)-Psame;
+  ptrans(eye(nstates)==1) = Psame;
+  if isfield(sexclassifier_params,'frac_female'),
+    prior = [1-sexclassifier_params.frac_female,sexclassifier_params.frac_female];
+  else
+    prior = ones(1,nstates)/nstates;
+  end
+  state2sex = cell(1,nstates);
+  
+  % em for hmm
+  [mu_area,var_area,ll]=hmm_multiseq_1d(X,nstates,Psame,...
+    sexclassifier_params.niters_em,sexclassifier_params.tol_em,...
+    [],prior);
+  if mu_area(1) > mu_area(2),
+    mu_area = mu_area(end:-1:1);
+    var_area = var_area(end:-1:1);
+  end
+  state2sex{argmax(mu_area)} = 'F';
+  state2sex{argmin(mu_area)} = 'M';
+  
+  %% save classifier
+  
+  filterorder = sexclassifierin.areasmooth_filterorder; %#ok<NASGU>
+  maxfreq = sexclassifierin.areasmooth_maxfreq; %#ok<NASGU>
+  maxerrx = sexclassifierin.areasmooth_maxerrx; %#ok<NASGU>
+  
+  if dosave,
+    try
+      if exist(sexclassifieroutmatfile,'file'),
+        delete(sexclassifieroutmatfile);
+      end
+    end
+    try
+      save(sexclassifieroutmatfile,'mu_area','var_area','ptrans','prior','ll',...
+        'nstates','state2sex','maxerrx','maxfreq','filterorder','version','analysis_protocol');
+    catch ME,
+      warning('FlyBubbleClassifySex:save',...
+        'Could not save to file %s: %s',sexclassifieroutmatfile,getReport(ME));
+      logger.log('Could not save to file %s: %s\n',sexclassifieroutmatfile,getReport(ME));
     end
   end
-  try
-    save(sexclassifieroutmatfile,'mu_area','var_area','ptrans','prior','ll',...
-      'nstates','state2sex','maxerrx','maxfreq','filterorder','version','analysis_protocol');
-  catch ME,
-    warning('FlyBubbleClassifySex:save',...
-      'Could not save to file %s: %s',sexclassifieroutmatfile,getReport(ME));
-    logger.log('Could not save to file %s: %s\n',sexclassifieroutmatfile,getReport(ME));
+  
+  %% classify sex
+  
+  clear diagnostics;
+  for fly = 1:numel(trx),
+    
+    % Viterbi to classify per-frame
+    [trx(fly).sex,diagnostics(fly)] = ClassifySex(X{fly}',...
+      mu_area,var_area,ptrans,state2sex); %#ok<AGROW>
+    
   end
-end
-
-%% classify sex
-
-clear diagnostics;
-for fly = 1:numel(trx), 
   
-  % Viterbi to classify per-frame
-  [trx(fly).sex,diagnostics(fly)] = ClassifySex(X{fly}',...
-    mu_area,var_area,ptrans,state2sex); %#ok<AGROW>
-  
-end
-
 end
 
 %% count number of flies, females, males
