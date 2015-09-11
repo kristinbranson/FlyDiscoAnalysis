@@ -123,16 +123,24 @@ classdef FlyBubbleBaR
         cpffs2 = {cpffs2.name}';
         cpffs2 = cellfun(@(x)fullfile(cpffsroot2,x),cpffs2,'uni',0);
         
-        cpffs = [cpffs1(:);cpffs2(:)];
-        dashACPFFs = [repmat({'-a'},size(cpffs)) cpffs];
+        paramsroot = fullfile(pfdir,'params');
+        prms = dir(fullfile(paramsroot,'*.xml'));
+        prms = {prms.name}';
+        prms = cellfun(@(x)fullfile(paramsroot,x),prms,'uni',0);        
+        
+        explicitincludes = [cpffs1(:);cpffs2(:);prms(:)];
+        explicitincludes{end+1,1} = fullfile(pfdir,'StartJAABA.m');
+        explicitincludes{end+1,1} = fullfile(pfdir,'version.txt');
+        
+        dashACPFFs = [repmat({'-a'},size(explicitincludes)) explicitincludes];
         dashACPFFs = dashACPFFs';
       else
         % include all compute*.m. For now only used by computePFF but I don't
         % see how it hurts
-        cpffs = dir(fullfile(fbroot,'compute*.m'));
-        cpffs = {cpffs.name}';
-        cpffs = cellfun(@(x)fullfile(fbroot,x),cpffs,'uni',0);
-        dashACPFFs = [repmat({'-a'},size(cpffs)) cpffs];
+        explicitincludes = dir(fullfile(fbroot,'compute*.m'));
+        explicitincludes = {explicitincludes.name}';
+        explicitincludes = cellfun(@(x)fullfile(fbroot,x),explicitincludes,'uni',0);
+        dashACPFFs = [repmat({'-a'},size(explicitincludes)) explicitincludes];
         dashACPFFs = dashACPFFs';
       end
         

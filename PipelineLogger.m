@@ -42,6 +42,10 @@ classdef PipelineLogger < handle
       end
       obj.fid = logfid;
       
+      if isdeployed
+        fprintf(logfid,'Running deployed. CTFRoot=%s\n',ctfroot);
+      end
+      
       real_analysis_protocol = GetRealAnalysisProtocol(analysis_protocol,settingsdir);
       settingsSS = FlyBubbleBaR.settingssnapshot(settingsdir);
       codeSS = FlyBubbleBaR.codesnapshot();
