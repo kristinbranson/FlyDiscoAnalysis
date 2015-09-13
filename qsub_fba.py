@@ -72,6 +72,7 @@ def main():
     # if not outsubdir, then outdir is expdir and use LOGS
     nowstr = datetime.datetime.now().strftime("%Y%m%dT%H%M%S")
     if args.outsubdir:
+        args.outsubdir = "run." + args.outsubdir
         if args.outsubdirauto:
             args.outsubdir = "{0:s}{1:s}".format(args.outsubdir,nowstr)
         else:
@@ -80,6 +81,7 @@ def main():
             if nexist>0:
                 print("{0:d} outsubdirs '{1:s}' already exist.".format(nexist,
                                                                        args.outsubdir))
+
     
     # create template script
     templatescript = "./qsub_template.{0:s}.sh".format(nowstr)
@@ -114,8 +116,8 @@ def main():
 
         # set outdir, logdir: full paths for output/logs
         # At this point, if outsubdirauto was used then outsubdir has been set
-        if args.outsubdir:
-            args.outdirfull = os.path.join(exp,"run."+args.outsubdir)
+        if args.outsubdir:            
+            args.outdirfull = os.path.join(exp,args.outsubdir)
             args.logdirfull = args.outdirfull
             if not os.path.isdir(args.outdirfull):
                 os.mkdir(args.outdirfull)

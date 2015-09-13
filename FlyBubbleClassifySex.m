@@ -3,11 +3,15 @@ function [trx,summary_diagnostics,X] = FlyBubbleClassifySex(expdir,varargin)
 version = '0.2';
 
 %% parse parameters
-[analysis_protocol,settingsdir,datalocparamsfilestr,dosave] = ...
-  myparse(varargin,...
+[analysis_protocol,...
+  settingsdir,...
+  datalocparamsfilestr,...
+  outdir,...
+  dosave] = myparse(varargin,...
   'analysis_protocol','current_bubble',...
   'settingsdir','/groups/branson/home/robiea/Code_versioned/FlyBubbleAnalysis/settings',...
   'datalocparamsfilestr','dataloc_params.txt',...
+  'outdir',[],...
   'dosave',true);
 
 fprintf('Classifying sex for %s\n',expdir);
@@ -33,10 +37,16 @@ endframe = max([trx.endframe]);
 %% data locations
 sexclassifierparamsfile = fullfile(settingsdir,analysis_protocol,dataloc_params.sexclassifierparamsfilestr);
 sexclassifierintxtfile = fullfile(settingsdir,analysis_protocol,dataloc_params.sexclassifiertxtfilestr);
-sexclassifieroutmatfile = fullfile(expdir,dataloc_params.sexclassifiermatfilestr);
-
 sexclassifier_params = ReadParams(sexclassifierparamsfile);
 sexclassifierin = ReadParams(sexclassifierintxtfile);
+
+%% output files
+sexclassifieroutmatfile = fullfile(expdir,outdir,...
+  dataloc_params.sexclassifiermatfilestr);
+sexclassifierdiagnosticsfile = fullfile(expdir,outdir,...
+  dataloc_params.sexclassifierdiagnosticsfilestr);
+trxfileout = fullfile(expdir,outdir,dataloc_params.trxfilestr);
+tftrxappend = strcmp(trxfile,trxfileout);
 
 %% compute areas
 logger.log('Computing area...\n');
@@ -236,7 +246,6 @@ end
 sexclassifierinfo = logger.runInfo;
 sexclassifierinfo.version = version;
 
-sexclassifierdiagnosticsfile = fullfile(expdir,dataloc_params.sexclassifierdiagnosticsfilestr);
 if dosave,
   if exist(sexclassifierdiagnosticsfile,'file'),
     try %#ok<TRYNC>
@@ -272,19 +281,23 @@ end
 
 if dosave,
   try
-    save('-append',trxfile,'trx','sexclassifierinfo');
-  catch %#ok<CTCH>
-    try
-      tmp = load(trxfile);
-      delete(trxfile);
-      tmp.trx = trx;
-      tmp.sexclassifierinfo = sexclassifierinfo;
-      save(trxfile,'-struct','tmp');
-    catch ME,
-      warning('FlyBubbleClassifySex:save',...
-        'Could not save to file %s: %s',trxfile,getReport(ME));
-      logger.log('Could not save to file %s: %s',trxfile,getReport(ME));
+    if tftrxappend
+      save('-append',trxfileout,'trx','sexclassifierinfo');
+    else
+      save(trxfileout,'trx','sexclassifierinfo');
     end
+  catch %#ok<CTCH>
+%     try
+%       tmp = load(trxfile);
+%       %delete(trxfile); % AL20150913 now have trxfileout
+%       tmp.trx = trx;
+%       tmp.sexclassifierinfo = sexclassifierinfo;
+%       save(trxfileout,'-struct','tmp');
+%     catch ME,
+      warning('FlyBubbleClassifySex:save',...
+        'Could not save to file %s: %s',trxfileout,getReport(ME));
+      logger.log('Could not save to file %s: %s',trxfileout,getReport(ME));
+%     end
   end
 end
 
