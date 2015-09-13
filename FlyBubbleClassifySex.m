@@ -284,7 +284,10 @@ if dosave,
     if tftrxappend
       save('-append',trxfileout,'trx','sexclassifierinfo');
     else
-      save(trxfileout,'trx','sexclassifierinfo');
+      tmp = load(trxfile);
+      tmp.trx = trx;
+      tmp.sexclassifierinfo = sexclassifierinfo;
+      save(trxfileout,'-struct','tmp');
     end
   catch %#ok<CTCH>
 %     try
