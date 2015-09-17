@@ -6,50 +6,27 @@ success = true;
 msgs = {};
 
 datetime_format = 'yyyymmddTHHMMSS';
-timestamp = datestr(now,datetime_format);
 
 [analysis_protocol,settingsdir,datalocparamsfilestr,DEBUG,min_barcode_expdatestr,logfid] = ...
   myparse(varargin,...
-  'analysis_protocol','20150428_flybubble_centralcomplex',...
+  'analysis_protocol','current_bubble',...
   'settingsdir','/groups/branson/home/robiea/Code_versioned/FlyBubbleAnalysis/settings',...
-  'datalocparamsfilestr','dataloc_params.txt','debug',false,...
+  'datalocparamsfilestr','dataloc_params.txt',...
+  'debug',false,...
   'min_barcode_expdatestr','20110301T000000',...
   'logfid',[]);
 min_barcode_expdatenum = datenum(min_barcode_expdatestr,datetime_format);
 
 %% parameters
-
 datalocparamsfile = fullfile(settingsdir,analysis_protocol,datalocparamsfilestr);
 dataloc_params = ReadParams(datalocparamsfile);
 
-didopenlog = false;
-if isempty(logfid),
-  if isfield(dataloc_params,'automaticchecks_incoming_logfilestr') && ~DEBUG,
-    logfile = fullfile(expdir,dataloc_params.automaticchecks_incoming_logfilestr);
-    logfid = fopen(logfile,'a');
-    if logfid < 1,
-      warning('Could not open log file %s\n',logfile);
-      logfid = 1;
-    else
-      didopenlog = true;
-    end
-  else
-    logfid = 1;
-  end
-end
-
-%% get the real analysis protocol
-
-real_analysis_protocol = GetRealAnalysisProtocol(analysis_protocol,settingsdir);
-
-
-%% start
-
-fprintf(logfid,'\n\n***\nRunning FlyBowlAutomaticChecks_Incoming version %s analysis_protocol %s (real analysis protocol %s) at %s\n',version,analysis_protocol,real_analysis_protocol,timestamp);
+%%
+logger = PipelineLogger(expdir,mfilename(),dataloc_params,...
+  'automaticchecks_incoming_logfilestr',settingsdir,analysis_protocol,...
+  'logfid',logfid,'debug',DEBUG,'versionstr',version);
 
 try
-
-
 paramsfile = fullfile(settingsdir,analysis_protocol,dataloc_params.automaticchecksincomingparamsfilestr);
 check_params = ReadParams(paramsfile);
 if ~iscell(check_params.control_line_names),
@@ -347,13 +324,15 @@ else
     try
       delete(outfile);
     catch ME,
-      warning('Could not delete file %s:\n %s',outfile,getReport(ME));
+      warning('FlyBubbleAutomaticChecksIncoming:output',...
+        'Could not delete file %s:\n %s',outfile,getReport(ME));
     end
   end
   fid = fopen(outfile,'w');
 end
 if fid < 0,
-  warning('Could not open automatic checks results file %s for writing, just printing to stdout.',outfile);
+  warning('FlyBubbleAutomaticChecksIncoming:output',...
+    'Could not open automatic checks results file %s for writing, just printing to stdout.',outfile);
   fid = 1;
 end
 if success,
@@ -366,17 +345,19 @@ else
   else
     s = categories{i};
   end
-  fprintf(fid,'automated_pf_category,%s\n',s);end
+  fprintf(fid,'automated_pf_category,%s\n',s);
+end
 if ~isempty(msgs),
   fprintf(fid,'notes_curation,');
   s = sprintf('%s\\n',msgs{:});
   s = s(1:end-2);
   fprintf(fid,'%s\n',s);
 end
+runInfo = logger.runInfo;
 fprintf(fid,'version,%s\n',version);
-fprintf(fid,'timestamp,%s\n',timestamp);
-fprintf(fid,'analysis_protocol,%s\n',analysis_protocol);
-fprintf(fid,'linked_analysis_protocol,%s\n',real_analysis_protocol);
+fprintf(fid,'timestamp,%s\n',runInfo.timestamp);
+fprintf(fid,'analysis_protocol,%s\n',runInfo.analysis_protocol);
+fprintf(fid,'linked_analysis_protocol,%s\n',runInfo.linked_analysis_protocol);
 
 if ~DEBUG && fid > 1,
   fclose(fid);
@@ -390,19 +371,16 @@ end
 %% save info to mat file
 
 filename = fullfile(expdir,dataloc_params.automaticchecksincominginfomatfilestr);
-fprintf(logfid,'Saving debug info to file %s...\n',filename);
+logger.log('Saving debug info to file %s...\n',filename);
 
-aciinfo = struct;
+aciinfo = runInfo;
 aciinfo.paramsfile = paramsfile;
 aciinfo.check_params = check_params;
 aciinfo.version = version;
-aciinfo.analysis_protocol = analysis_protocol;
-aciinfo.linked_analysis_protocol = real_analysis_protocol;
-aciinfo.timestamp = timestamp;
 aciinfo.iserror = iserror;
 aciinfo.categories = categories;
 aciinfo.msgs = msgs;
-aciinfo.success = success; %#ok<STRNU>
+aciinfo.success = success; 
 
 if exist(filename,'file'),
   try %#ok<TRYNC>
@@ -412,21 +390,17 @@ end
 try
   save(filename,'-struct','aciinfo');
 catch ME,
-  warning('Could not save information to file %s: %s',filename,getReport(ME));
+  warning('FlyBubbleAutomaticChecksIncoming:save',...
+    'Could not save information to file %s: %s',filename,getReport(ME));
 end
 
   
 %% print results to log file
-
-fprintf(logfid,'Finished running FlyBowlAutomaticChecks_Incoming at %s.\n',datestr(now,'yyyymmddTHHMMSS'));
-fprintf(logfid,'success = %d\n',success);
+logger.log('success = %d\n',success);
 if isempty(msgs),
-  fprintf(logfid,'No error or warning messages.\n');
+  logger.log('No error or warning messages.\n');
 else
-  fprintf(logfid,'Warning/error messages:\n');
-  fprintf(logfid,'%s\n',msgs{:});
+  logger.log('Warning/error messages:\n');
+  logger.log('%s\n',msgs{:});
 end
-
-if didopenlog,
-  fclose(logfid);
-end
+logger.close();

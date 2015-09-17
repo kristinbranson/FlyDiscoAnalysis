@@ -9,8 +9,17 @@ classdef FlyBubbleBaR
     
     Manifest = lclReadManifest( fullfile(FlyBubbleBaR.Root,FlyBubbleBaR.MANIFESTFILE) );
     
-    SnapshotScript = fullfile(FlyBubbleBaR.Root,'repo_snapshot.sh');
-    
+    SnapshotScript = fullfile(FlyBubbleBaR.Root,'repo_snapshot.sh');    
+
+    BUILDPROJECTS = {
+      'FlyBubbleAutomaticChecks_Incoming'
+      'FlyBubbleClassifySex'
+      'FlyBubbleComputePerFrameFeatures'
+      'FlyBubbleDectectIndicatorLedOnOff'
+      'FlyBubbleRegisterTrx'
+      'FlyBubbleTrackWings'
+      };
+      
     BUILDSNAPSHOTFILE = 'build.snapshot';    
     BUILDSNAPSHOTFULLFILE = fullfile(FlyBubbleBaR.Root,FlyBubbleBaR.BUILDSNAPSHOTFILE);
     
@@ -23,27 +32,63 @@ classdef FlyBubbleBaR
     
     function p = getpath()
       m = FlyBubbleBaR.Manifest;      
+      
+      hmmroot = m.hmm;
       jctroot = m.jctrax;
+      
+      % AL: Order important here. FBA has code that shadows eg hmm
       p = { ...
         FlyBubbleBaR.Root; ...
         fullfile(jctroot,'filehandling'); ...
         fullfile(jctroot,'misc'); ...
-        fullfile(jctroot,'simplewing')};
+        fullfile(jctroot,'simplewing'); ...
+        hmmroot;
+        };
+    end
+    
+    function p = getpathFBJaabadetect()
+      m = FlyBubbleBaR.Manifest;      
+      jba = m.jaaba;
+      
+      % Order important: eg perframe/compute_* fcns shadow those in .Root
+      p = { ...
+        fullfile(jba,'tests'); ...
+        fullfile(jba,'filehandling'); ...
+        fullfile(jba,'misc'); ...
+        fullfile(jba,'perframe/params'); ...
+        fullfile(jba,'perframe/compute_perframe_features'); ...
+        fullfile(jba,'perframe/larva_compute_perframe_features'); ...
+        fullfile(jba,'perframe'); ...
+        FlyBubbleBaR.Root; ...
+        };      
     end
     
     function setpath()
-      m = FlyBubbleBaR.Manifest;
-      
-      jctroot = m.jctrax;
-      addpath(fullfile(jctroot,'filehandling'));
-      addpath(fullfile(jctroot,'misc'));
-      addpath(fullfile(jctroot,'simplewing'));
+      p = FlyBubbleBaR.getpath();
+      addpath(p{:},'-begin');      
+    end
+    
+    function setpathFBJaabadetect()
+      p = FlyBubbleBaR.getpathFBJaabadetect();
+      addpath(p{:},'-begin');      
+    end
+    
+    function buildAll()
+      projs = FlyBubbleBaR.BUILDPROJECTS;
+      for p=projs(:)',p=p{1}; %#ok<FXSET>
+        fprintf(' ######\n');
+        fprintf(' BUILDING %s...\n',p);
+        pause(2);
+        FlyBubbleBaR.build(p);
+      end
     end
     
     function build(proj)
       % build(proj)
       %
       % FlyBubbleBaR.build FlyBubbleTrackWings
+      
+      tfFBJD = strcmp(proj,'FlyBubbleJAABADetect'); % special case
             
       % take snapshot + save it to snapshot file
       codeSSfname = FlyBubbleBaR.BUILDSNAPSHOTFULLFILE;
@@ -53,30 +98,71 @@ classdef FlyBubbleBaR
       cellstrexport(codeSS,codeSSfname);
       fprintf('... done with snapshot.\n');
 
-      pth = FlyBubbleBaR.getpath();
+      if tfFBJD
+        pth = FlyBubbleBaR.getpathFBJaabadetect();
+      else
+        pth = FlyBubbleBaR.getpath();
+      end
       pth = pth(:);
       Ipth = [repmat({'-I'},numel(pth),1) pth];
       Ipth = Ipth';
       
       fbroot = FlyBubbleBaR.Root;
       
+      if tfFBJD
+        mfest = FlyBubbleBaR.Manifest;
+        pfdir = fullfile(mfest.jaaba,'perframe');
+        
+        cpffsroot1 = fullfile(pfdir,'compute_perframe_features');
+        cpffs1 = dir(fullfile(cpffsroot1,'compute*.m'));
+        cpffs1 = {cpffs1.name}';
+        cpffs1 = cellfun(@(x)fullfile(cpffsroot1,x),cpffs1,'uni',0);
+
+        cpffsroot2 = fullfile(pfdir,'larva_compute_perframe_features');
+        cpffs2 = dir(fullfile(cpffsroot2,'compute*.m'));
+        cpffs2 = {cpffs2.name}';
+        cpffs2 = cellfun(@(x)fullfile(cpffsroot2,x),cpffs2,'uni',0);
+        
+        paramsroot = fullfile(pfdir,'params');
+        prms = dir(fullfile(paramsroot,'*.xml'));
+        prms = {prms.name}';
+        prms = cellfun(@(x)fullfile(paramsroot,x),prms,'uni',0);        
+        
+        explicitincludes = [cpffs1(:);cpffs2(:);prms(:)];
+        explicitincludes{end+1,1} = fullfile(pfdir,'StartJAABA.m');
+        explicitincludes{end+1,1} = fullfile(pfdir,'version.txt');
+        
+        dashACPFFs = [repmat({'-a'},size(explicitincludes)) explicitincludes];
+        dashACPFFs = dashACPFFs';
+      else
+        % include all compute*.m. For now only used by computePFF but I don't
+        % see how it hurts
+        explicitincludes = dir(fullfile(fbroot,'compute*.m'));
+        explicitincludes = {explicitincludes.name}';
+        explicitincludes = cellfun(@(x)fullfile(fbroot,x),explicitincludes,'uni',0);
+        dashACPFFs = [repmat({'-a'},size(explicitincludes)) explicitincludes];
+        dashACPFFs = dashACPFFs';
+      end
+        
       mccargs = {...
-       '-o',proj,...
-       '-W',['main:' proj],...
-       '-T','link:exe',...
-       '-d',fbroot,...
-       '-w','enable:specified_file_mismatch',...
-       '-w','enable:repeated_file',...
-       '-w','enable:switch_ignored',...
-       '-w','enable:missing_lib_sentinel',...
-       '-w','enable:demo_license',...
-       '-R','-singleCompThread',...
-       '-v',fullfile(fbroot,[proj '.m']),...
-       Ipth{:},...
-       '-a',fullfile(fbroot,'build.snapshot'),...
-       '-a',fullfile(fbroot,'repo_snapshot.sh'),...
-       '-a',fullfile(fbroot,'FlyBubbleManifest.txt')}; %#ok<CCAT>
-     
+        '-o',proj,...
+        '-W',['main:' proj],...
+        '-T','link:exe',...
+        '-d',fbroot,...
+        '-w','enable:specified_file_mismatch',...
+        '-w','enable:repeated_file',...
+        '-w','enable:switch_ignored',...
+        '-w','enable:missing_lib_sentinel',...
+        '-w','enable:demo_license',...
+        '-R','-singleCompThread',...
+        '-v',fullfile(fbroot,[proj '.m']),...
+        Ipth{:},...
+        '-a',fullfile(fbroot,FlyBubbleBaR.BUILDSNAPSHOTFILE),...
+        '-a',fullfile(fbroot,'repo_snapshot.sh'),...
+        '-a',fullfile(fbroot,'FlyBubbleManifest.txt'),...
+        dashACPFFs{:}}; %#ok<CCAT>
+      
+
       fprintf('Writing mcc args to file: %s...\n',FlyBubbleBaR.BUILDMCCFULLFILE);
       cellstrexport(mccargs,FlyBubbleBaR.BUILDMCCFULLFILE);
       
@@ -86,7 +172,8 @@ classdef FlyBubbleBaR
       mcc(mccargs{:});
       
       % postbuild
-      bindir = fullfile(fbroot,'builds','bubble',today);      
+      mnfst = FlyBubbleBaR.Manifest;      
+      bindir = fullfile(mnfst.build,'bubble',today);      
       if exist(bindir,'dir')==0
         fprintf('Creating bin dir %s...\n',bindir);
         [succ,msg] = mkdir(bindir);
@@ -130,9 +217,12 @@ classdef FlyBubbleBaR
     function s = codesnapshot
       % Return status of FlyBubble code and dependencies.
       % When deployed, this returns the state at the time of build.
+      %
+      % Note: this reports status of all modules in Manifest even if they 
+      % are not used in a particular build (eg jaaba)
 
       if isdeployed
-        s = importdata('build.snapshot');        
+        s = importdata(FlyBubbleBaR.BUILDSNAPSHOTFILE);        
       elseif isunix
         
         % This method assumes that the user has set their path using
@@ -143,18 +233,21 @@ classdef FlyBubbleBaR
         if ~isequal(fileparts(twh),fullfile(manifest.jctrax,'simplewing'))
           warning('FlyBubbleBaR:manifest',...
             'Runtime path appears to differ from that specified by Manifest.txt. Code snapshot is likely to be incorrect.');
-        end      
+        end   
         
         script = FlyBubbleBaR.SnapshotScript;
         cmd = sprintf('%s -nocolor -brief %s',script,FlyBubbleBaR.Root);
         [~,s] = system(cmd);
         s = regexp(s,sprintf('\n'),'split');
-
-        cmd = sprintf('%s -nocolor -brief %s',script,manifest.jctrax);
-        [~,s2] = system(cmd);
-        s2 = regexp(s2,sprintf('\n'),'split');
-        
-        s = [s(:);s2(:)];
+        modules = fieldnames(manifest);        
+        modules = setdiff(modules,'build');
+        for i = 1:numel(modules)        
+          mod = modules{i};
+          cmd = sprintf('%s -nocolor -brief %s',script,manifest.(mod));
+          [~,stmp] = system(cmd);
+          stmp = regexp(stmp,sprintf('\n'),'split');
+          s = [s(:);{''};sprintf('### %s',upper(mod));stmp(:)];
+        end
       else
         s = {'No snapshot available, non-unix interactive session.'};
       end
@@ -178,11 +271,12 @@ classdef FlyBubbleBaR
     end
     
   end  
+  
 end
 
 function s = lclReadManifest(fname)
 tmp = importdata(fname);
 tmp = regexp(tmp,',','split');
-tmp = tmp{1};
+tmp = cat(1,tmp{:});
 s = cell2struct(tmp(:,2),tmp(:,1));
 end

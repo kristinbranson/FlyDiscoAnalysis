@@ -64,6 +64,8 @@ if ~isempty(paramsfile),
 end
 
 if isempty(wingtracking_params)
+  warning('ChooseOrientationsAndTrackWings:params',...
+    'No wingtracking parameters provided. Using DefaultWingTrackingParams().');
   wingtracking_params = DefaultWingTrackingParams();
 elseif ischar(wingtracking_params),
   [~,~,ext] = fileparts(wingtracking_params);
@@ -201,104 +203,107 @@ else
 end
 
 if dofliporientation,
-for fly = 1:nflies,
-  
-  t0 = max(firstframe,trx(fly).firstframe);
-  t1 = min(endframe,trx(fly).endframe);
-  if t1<t0,
-    continue;
-  end
-  i0 = t0-trx(fly).firstframe + 1;
-  i1 = t1-trx(fly).firstframe + 1;
-  x = trx(fly).x(i0:i1);
-  y = trx(fly).y(i0:i1);
-  theta = trx(fly).theta(i0:i1);
-  N = numel(x);
-  
-  % appearance cost is made up of velocity-based cost and wing-based cost
-  appearancecost = zeros(2,N);
-  
-  % use speed to determine how confident we are in the velocity-based
-  % measurement
-  fil = zeros(1,nframes_speed);
-  fil(1) = -1;
-  fil(end) = 1;
-  dx = imfilter(x,fil,'replicate');
-  dy = imfilter(y,fil,'replicate');
-  dt = imfilter(1:numel(x),fil,'same','corr','replicate');
-  % v(i) is the speed from frame i-floor(nframes_speed/2) to i+ceil(nframes_speed/2)
-  v = sqrt(dx.^2 + dy.^2)./dt;
-  phi = atan2(dy,dx);
-  
-  dphitheta0 = abs(modrange(phi-theta,-pi,pi));
-  dphitheta1 = abs(modrange(phi-theta-pi,-pi,pi));
-  
-  if istouchinginfo,  
-    istouching = trackdata.istouching{fly}(i0:i1);
-  else
-    istouching = false(1,N);
-  end
-  
-  isjumping = v>=min_jump_speed;
-  
-  isbad = isjumping | istouching;
-  fil1 = ones(1,nframes_speed);
-  isbad = imfilter(isbad,fil1,'replicate');
-  
-  weight_phi = max(0,min(1,(v-min_speed)/(min_jump_speed-min_speed)));
-  weight_phi(isbad) = 0;
-  appearancecost(1,:) = appearancecost(1,:) + dphitheta0.*weight_phi*lambda_phi;
-  appearancecost(2,:) = appearancecost(2,:) + dphitheta1.*weight_phi*lambda_phi;
-  
-  if iswingareainfo,
-    wing_area = trackdata.wing_areal{fly}(:,i0:i1) + trackdata.wing_arear{fly}(:,i0:i1);
-    wing_area(:,istouching) = 0;
+  info.nflip = nan(nflies,1);
+  for fly = 1:nflies,
     
-    wing_area_weight = min(1,max(0,sqrt(wing_area)-min_wing_area)/(max_wing_area-min_wing_area));
-    appearancecost = appearancecost + lambda_wingarea*wing_area_weight;
-  end
-  
-  % don't rely on change in orientation as much when the fly is circular
-  % ecc_factor is >= 1 for ecc <= max_ecc_confident
-  % ecc_factor is min_ecc_factor for ecc = 1
-  % and interpolates linearly between (max_ecc_confident,1) and
-  % (1,min_ecc_factor)
-  a = trx(fly).a;
-  b = trx(fly).b;
-  ecc = b ./ a;
-  parama = (min_ecc_factor-1)/(1-max_ecc_confident);
-  paramb = min_ecc_factor - parama;
-  ecc_factor = parama.*ecc + paramb;
-  weight_theta = max(min_ecc_factor,min(1,ecc_factor)) .* lambda_theta;
+    t0 = max(firstframe,trx(fly).firstframe);
+    t1 = min(endframe,trx(fly).endframe);
+    if t1<t0,
+      continue;
+    end
+    i0 = t0-trx(fly).firstframe + 1;
+    i1 = t1-trx(fly).firstframe + 1;
+    x = trx(fly).x(i0:i1);
+    y = trx(fly).y(i0:i1);
+    theta = trx(fly).theta(i0:i1);
+    N = numel(x);
+    
+    % appearance cost is made up of velocity-based cost and wing-based cost
+    appearancecost = zeros(2,N);
+    
+    % use speed to determine how confident we are in the velocity-based
+    % measurement
+    fil = zeros(1,nframes_speed);
+    fil(1) = -1;
+    fil(end) = 1;
+    dx = imfilter(x,fil,'replicate');
+    dy = imfilter(y,fil,'replicate');
+    dt = imfilter(1:numel(x),fil,'same','corr','replicate');
+    % v(i) is the speed from frame i-floor(nframes_speed/2) to i+ceil(nframes_speed/2)
+    v = sqrt(dx.^2 + dy.^2)./dt;
+    phi = atan2(dy,dx);
+    
+    dphitheta0 = abs(modrange(phi-theta,-pi,pi));
+    dphitheta1 = abs(modrange(phi-theta-pi,-pi,pi));
+    
+    if istouchinginfo,
+      istouching = trackdata.istouching{fly}(i0:i1);
+    else
+      istouching = false(1,N);
+    end
+    
+    isjumping = v>=min_jump_speed;
+    
+    isbad = isjumping | istouching;
+    fil1 = ones(1,nframes_speed);
+    isbad = imfilter(isbad,fil1,'replicate');
+    
+    weight_phi = max(0,min(1,(v-min_speed)/(min_jump_speed-min_speed)));
+    weight_phi(isbad) = 0;
+    appearancecost(1,:) = appearancecost(1,:) + dphitheta0.*weight_phi*lambda_phi;
+    appearancecost(2,:) = appearancecost(2,:) + dphitheta1.*weight_phi*lambda_phi;
+    
+    if iswingareainfo,
+      wing_area = trackdata.wing_areal{fly}(:,i0:i1) + trackdata.wing_arear{fly}(:,i0:i1);
+      wing_area(:,istouching) = 0;
+      
+      wing_area_weight = min(1,max(0,sqrt(wing_area)-min_wing_area)/(max_wing_area-min_wing_area));
+      appearancecost = appearancecost + lambda_wingarea*wing_area_weight;
+    end
+    
+    % don't rely on change in orientation as much when the fly is circular
+    % ecc_factor is >= 1 for ecc <= max_ecc_confident
+    % ecc_factor is min_ecc_factor for ecc = 1
+    % and interpolates linearly between (max_ecc_confident,1) and
+    % (1,min_ecc_factor)
+    a = trx(fly).a;
+    b = trx(fly).b;
+    ecc = b ./ a;
+    parama = (min_ecc_factor-1)/(1-max_ecc_confident);
+    paramb = min_ecc_factor - parama;
+    ecc_factor = parama.*ecc + paramb;
+    weight_theta = max(min_ecc_factor,min(1,ecc_factor)) .* lambda_theta;
+    
+    [newtheta,s] = choose_orientations_generic(theta,weight_theta,appearancecost);
 
-  [newtheta,s] = choose_orientations_generic(theta,weight_theta,appearancecost); 
-  trx(fly).theta(i0:i1) = newtheta;
-  if isfield(trx,'theta_mm')
     absdtheta = abs(modrange(newtheta-theta,-pi,pi));
-    ANGLECHANGED_THRESH = 0.1; % anything between ~eps and ~pi prob fine
+    ANGLECHANGED_THRESH = 0.1; % anything between ~eps and ~pi prob fine for this thresh
     assert( isequal(absdtheta>ANGLECHANGED_THRESH,s==2) );
     tfflipped = (s==2);
-
-    thmm = trx(fly).theta_mm(i0:i1);
-    thmm(tfflipped) = modrange(thmm(tfflipped)-pi,-pi,pi);
-    trx(fly).theta_mm(i0:i1) = thmm;
+    info.nflip(fly) = nnz(tfflipped);
+    
+    trx(fly).theta(i0:i1) = newtheta;
+    if isfield(trx,'theta_mm')
+      thmm = trx(fly).theta_mm(i0:i1);
+      thmm(tfflipped) = modrange(thmm(tfflipped)-pi,-pi,pi);
+      trx(fly).theta_mm(i0:i1) = thmm;
+    end
+    
+    if iswingareainfo,
+      idx2 = find(s==2)+i0-1;
+      for i = 1:numel(perframefns),
+        fn = perframefns{i};
+        perframedata.(fn){fly}(idx2) = perframedata1.(fn){fly}(idx2);
+      end
+      for i = 1:numel(trxwingfns),
+        fn = trxwingfns{i};
+        trx(fly).(fn)(idx2) = trx1(fly).(fn)(idx2);
+      end
+      
+    end
+    
   end
   
-  if iswingareainfo,
-    idx2 = find(s==2)+i0-1;
-    for i = 1:numel(perframefns),
-      fn = perframefns{i};
-      perframedata.(fn){fly}(idx2) = perframedata1.(fn){fly}(idx2);
-    end
-    for i = 1:numel(trxwingfns),
-      fn = trxwingfns{i};
-      trx(fly).(fn)(idx2) = trx1(fly).(fn)(idx2);
-    end
-    
-  end  
-    
-end
-
 end
 
 if ~isempty(savefile),

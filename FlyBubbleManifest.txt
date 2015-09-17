@@ -1,1 +1,4 @@
 jctrax,/groups/flyprojects/home/leea30/git/jctrax
+hmm,/groups/flyprojects/home/leea30/git/hmm
+jaaba,/groups/flyprojects/home/leea30/git/jaaba
+build,/groups/flyprojects/home/leea30/git/fba.build

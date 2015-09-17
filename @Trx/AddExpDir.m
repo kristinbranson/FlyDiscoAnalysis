@@ -2,7 +2,12 @@
 % Adds data associated with experiment expdir to the data represented by obj.
 function AddExpDir(obj,expdir,varargin)
 
-[dooverwrite,openmovie,traj] = myparse(varargin,'dooverwrite',true,'openmovie',true,'traj',[]);
+[dooverwrite,openmovie,traj,tryloadwingtrx] = myparse(varargin,...
+  'dooverwrite',true,...
+  'openmovie',true,...
+  'traj',[],...
+  'tryloadwingtrx',true... % if true, load traj from dataloc_params.wingtrxfilestr
+  );   
 
 % remove trailing /
 if expdir(end) == '/' || (ispc && expdir(end) == '\'),
@@ -33,7 +38,7 @@ if openmovie && ~isempty(obj.dataloc_params.moviefilestr),
 end
 
 % read trajectories
-if isfield(obj.dataloc_params,'wingtrxfilestr') && ...
+if tryloadwingtrx && isfield(obj.dataloc_params,'wingtrxfilestr') && ...
     exist(fullfile(obj.expdirs{n},obj.dataloc_params.wingtrxfilestr),'file'),
   trxfilestr = obj.dataloc_params.wingtrxfilestr;
 else
