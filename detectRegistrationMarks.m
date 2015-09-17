@@ -28,7 +28,8 @@ function registration = detectRegistrationMarks(varargin)
   hfig,figpos,...
   useNormXCorr,...
   doTransposeImage,...
-  ledindicator] = ...
+  ledindicator,...
+  regXY] = ...
   myparse(varargin,...
   'saveName','',...
   'bkgdImage',[],...
@@ -72,7 +73,8 @@ function registration = detectRegistrationMarks(varargin)
   'hfig',1,'figpos',[10,10,1600,800],...
   'useNormXCorr',false,...
   'doTransposeImage',false,...
-  'ledindicator',false);
+  'ledindicator',false,...
+  'regXY',[]);
 
 iscircle = ismember(method,{'circle','circle_manual'});
 
@@ -256,6 +258,10 @@ if nBowlMarkers > 0,
       methodcurr = 'grad2';
     otherwise,
       bowlMarkerTemplate = im2double(imread(bowlMarkerType));
+      h = fspecial('gaussian',[5,5],1);
+      bowlMarkerTemplate =  imfilter(bowlMarkerTemplate,h);
+      bkgdImage = imfilter(bkgdImage,h);
+      
       if useNormXCorr,
         bowlMarkerTemplate = 255*bowlMarkerTemplate;
         sz1 = size(bowlMarkerTemplate);
@@ -263,7 +269,7 @@ if nBowlMarkers > 0,
         offr1 = sz1(1)-offr0;
         offc0 = floor(sz1(2)/2);
         offc1 = sz1(2)-offc0;
-      else
+      else %is what runs in ledma
         bowlMarkerTemplate = bowlMarkerTemplate - min(bowlMarkerTemplate(:));
         bowlMarkerTemplate = bowlMarkerTemplate / max(bowlMarkerTemplate(:));
         bowlMarkerTemplate = 2*bowlMarkerTemplate-1;
@@ -295,6 +301,11 @@ if nBowlMarkers > 0,
 
   maxDistCorner_BowlLabel = maxDistCornerFrac_BowlLabel * r;
   filI4(distCorner > maxDistCorner_BowlLabel) = -inf;
+  % make corner with registration mark -inf
+  if ledindicator
+    filI4 = neginfOutDetection(regXY(2),regXY(1),filI4,maxDistCorner_BowlLabel);
+%     filI4 = zeroOutDetection(regXY(2),regXY(1),filI4);
+  end
   
   bowlMarkerPoints = nan(2,nBowlMarkers);
   for i = 1:nBowlMarkers,
@@ -450,9 +461,8 @@ registration = struct('offX',offX,...
   'bkgdImage',bkgdImage,...
   'featureStrengths',featureStrengths,...
   'affine',affine);
-if ledindicator
-    registration.bowlMarkerPoints = bowlMarkerPoints;
-end
+
+registration.bowlMarkerPoints = bowlMarkerPoints;
 
 if iscircle,
   registration.circleCenterX = circleCenterX;
@@ -822,6 +832,17 @@ end
     j1 = max(1,round(y)-featureRadius);
     j2 = min(nr,round(y)+featureRadius);
     filI(j1:j2,i1:i2) = 0;
+    
+  end
+
+ function filI = neginfOutDetection(x,y,filI,rd)
+    
+    % zero out region around feature
+    i1 = max(1,round(x)-rd);
+    i2 = min(nc,round(x)+rd);
+    j1 = max(1,round(y)-rd);
+    j2 = min(nr,round(y)+rd);
+    filI(j1:j2,i1:i2) = -inf;
     
   end
 

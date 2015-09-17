@@ -262,20 +262,17 @@ if isfield(registration_params,'OptogeneticExp')
                 end
             else
                 % plate -> bowlmarkertype
-                plateids = str2double(registration_params.LEDMarkerType(1:2:end-1));
+                rigids = registration_params.LEDMarkerType(1:2:end-1);
                 ledmarkertypes = registration_params.LEDMarkerType(2:2:end);
                 [metadata,success1] = parseExpDir(expdir);
-                if ~success1 || ~isfield(metadata,'plate'),
+                if ~success1 || ~isfield(metadata,'rig'),
                     metadata = ReadMetadataFile(fullfile(expdir,dataloc_params.metadatafilestr));
                 end
-                if ischar(metadata.plate),
-                    plateid = str2double(metadata.plate);
-                else
-                    plateid = metadata.plate;
-                end
-                i = find(plateid == plateids,1);
+                rigid = metadata.rig;
+                
+                i = strcmp(rigid,rigids);
                 if isempty(i),
-                    error('LEDMarkerType not set for plate %d',plateid);
+                    error('LEDMarkerType not set for plate %d',rigid);
                 end
                 if ~ismember(ledmarkertypes{i},{'gradient'}),
                     registration_params.LEDMarkerType = fullfile(settingsdir,analysis_protocol,ledmarkertypes{i});
@@ -323,7 +320,7 @@ if isfield(registration_params,'OptogeneticExp')
         
         % detect
         try
-            ledindicator_data = detectRegistrationMarks(registration_params_cell{:},'annName',annfile,'movieName',moviefile,'bkgdImage',im2double(im),'ledindicator',true);
+            ledindicator_data = detectRegistrationMarks(registration_params_cell{:},'annName',annfile,'movieName',moviefile,'bkgdImage',im2double(im),'ledindicator',true,'regXY',registration_data.bowlMarkerPoints);
             
         catch ME,
             fprintf(logfid,'Error detecting led indicator:\n');
