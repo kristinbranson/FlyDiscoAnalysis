@@ -4,7 +4,6 @@ success = true;
 msgs = {};
 
 version = '0.2';
-timestamp = datestr(now,'yyyymmddTHHMMSS');
 
 fns_notperframe = {'id','moviename','annname','firstframe','arena','off',...
   'nframes','endframe','matname','fps','pxpermm'};
@@ -21,18 +20,9 @@ fns_notperframe = {'id','moviename','annname','firstframe','arena','off',...
 datalocparamsfile = fullfile(settingsdir,analysis_protocol,datalocparamsfilestr);
 dataloc_params = ReadParams(datalocparamsfile);
 
-if isfield(dataloc_params,'registertrx_logfilestr'),
-  logfile = fullfile(expdir,dataloc_params.registertrx_logfilestr);
-  logfid = fopen(logfile,'a');
-  if logfid < 1,
-    warning('Could not open log file %s\n',logfile);
-    logfid = 1;
-  end
-else
-  logfid = 1;
-end
-
-fprintf(logfid,'\n\n***\nRunning FlyBowlRegisterTrx version %s analysis_protocol %s at %s\n',version,analysis_protocol,timestamp);
+logger = PipelineLogger(expdir,mfilename(),dataloc_params,...
+  'registertrx_logfilestr',settingsdir,analysis_protocol,...
+  'versionstr',version);
 
 %% read in registration params
 
@@ -117,14 +107,14 @@ end
 try
   registration_data = detectRegistrationMarks(registration_params_cell{:},'annName',annfile,'movieName',moviefile);
 catch ME,
-  fprintf(logfid,'Error detecting registration marks:\n');
-  fprintf(logfid,getReport(ME));
+  logger.log('Error detecting registration marks:\n');
+  logger.log(getReport(ME));
   success = false;
   msgs = {['Error detecting registration marks: ',getReport(ME)]};
   return;
 end
 
-fprintf(logfid,'Detected registration marks.\n');
+logger.log('Detected registration marks.\n');
 
 %% apply spatial registration
 
@@ -205,7 +195,7 @@ for fly = 1:length(trx),
   
 end
 
-fprintf(logfid,'Applied spatial registration.\n');
+logger.log('Applied spatial registration.\n');
 
 %% create maxvalueimage for LED experiments  (needs fps)
 if isfield(registration_params,'OptogeneticExp');
@@ -495,11 +485,11 @@ if dotemporalreg,
     
   end
   
-  fprintf(logfid,'Applied temporal registration.\n');
+  logger.log('Applied temporal registration.\n');
   
 else
   
-  fprintf(logfid,'NOT applying temporal registration.\n');
+  logger.log('NOT applying temporal registration.\n');
   
 end
 
@@ -513,8 +503,7 @@ try
   if exist(trxfile,'file'),
     delete(trxfile);
   end
-  real_analysis_protocol = GetRealAnalysisProtocol(analysis_protocol,settingsdir);
-  registrationinfo = struct('version',version,'timestamp',timestamp,'analysis_protocol',analysis_protocol,'linked_analysis_protocol',real_analysis_protocol);
+  registrationinfo = logger.runInfo;
   save(trxfile,'trx','timestamps','registrationinfo');
   didsave = true;
 catch ME
@@ -524,9 +513,9 @@ catch ME
 end
 
 if didsave,
-  fprintf(logfid,'Saved registered trx to file %s\n',trxfile);
+  logger.log('Saved registered trx to file %s\n',trxfile);
 else
-  fprintf(logfid,'Could not save registered trx:\n%s\n',getReport(ME));
+  logger.log('Could not save registered trx:\n%s\n',getReport(ME));
 end
 
 %% save params to mat file
@@ -549,9 +538,9 @@ catch ME
 end
 
 if didsave,
-  fprintf(logfid,'Saved registration data to file %s\n',registrationmatfile);
+  logger.log('Saved registration data to file %s\n',registrationmatfile);
 else
-  fprintf(logfid,'Could not save registration data to mat file:\n%s\n',getReport(ME));
+  logger.log('Could not save registration data to mat file:\n%s\n',getReport(ME));
 end
 
 %% save params to text file
@@ -561,34 +550,33 @@ try
   if exist(registrationtxtfile,'file'),
     delete(registrationtxtfile);
   end
-fid = fopen(registrationtxtfile,'w');
-
-fnssave = {'offX','offY','offTheta','scale','bowlMarkerTheta','featureStrengths',...
-  'circleCenterX','circleCenterY','circleRadius',...
-  'seconds_crop_start','seconds_crop_end','start_frame','end_frame'};
-
-fnssave = intersect(fnssave,fieldnames(registration_data));
-for i = 1:numel(fnssave),
-  fn = fnssave{i};
-  fprintf(fid,'%s,%f\n',fn,registration_data.(fn));
-end
-fnssave = {'version','timestamp','analysis_protocol','linked_analysis_protocol'};
-fnssave = intersect(fnssave,fieldnames(registrationinfo));
-for i = 1:numel(fnssave),
-  fn = fnssave{i};
-  fprintf(fid,'%s,%s\n',fn,registrationinfo.(fn));
-end
-
-if isfield(registration_params,'OptogeneticExp')
+  fid = fopen(registrationtxtfile,'w');
+  
+  fnssave = {'offX','offY','offTheta','scale','bowlMarkerTheta','featureStrengths',...
+    'circleCenterX','circleCenterY','circleRadius',...
+    'seconds_crop_start','seconds_crop_end','start_frame','end_frame'};
+  
+  fnssave = intersect(fnssave,fieldnames(registration_data));
+  for i = 1:numel(fnssave),
+    fn = fnssave{i};
+    fprintf(fid,'%s,%f\n',fn,registration_data.(fn));
+  end
+  fnssave = {'version','timestamp','analysis_protocol','linked_analysis_protocol'};
+  fnssave = intersect(fnssave,fieldnames(registrationinfo));
+  for i = 1:numel(fnssave),
+    fn = fnssave{i};
+    fprintf(fid,'%s,%s\n',fn,registrationinfo.(fn));
+  end
+  
+  if isfield(registration_params,'OptogeneticExp')
     if registration_params.OptogeneticExp
-        fprintf(fid,'%s,%d\n','ledX',registration_data.ledIndicatorPoints(1));
-        fprintf(fid,'%s,%d\n','ledY',registration_data.ledIndicatorPoints(2));
+      fprintf(fid,'%s,%d\n','ledX',registration_data.ledIndicatorPoints(1));
+      fprintf(fid,'%s,%d\n','ledY',registration_data.ledIndicatorPoints(2));
     end
-end
-
-
-fclose(fid);
-didsave = true;
+  end
+  
+  fclose(fid);
+  didsave = true;
 catch ME
   warning('Could not save registration data to txt file: %s',getReport(ME));
   success = false;
@@ -596,18 +584,13 @@ catch ME
 end
 
 if didsave,
-  fprintf(logfid,'Saved registration data to txt file %s\n',registrationtxtfile);
+  logger.log('Saved registration data to txt file %s\n',registrationtxtfile);
 else
-  fprintf(logfid,'Could not save registration data to txt file:\n%s\n',getReport(ME));
+  logger.log('Could not save registration data to txt file:\n%s\n',getReport(ME));
 end
 
-%% close log
-
-fprintf(logfid,'Finished running FlyBowlRegisterTrx at %s.\n',datestr(now,'yyyymmddTHHMMSS'));
-
-if logfid > 1,
-  fclose(logfid);
-end
+%%
+logger.close();
 
 %% close figures
 
