@@ -18,6 +18,7 @@ classdef FlyBubbleBaR
       'FlyBubbleDectectIndicatorLedOnOff'
       'FlyBubbleRegisterTrx'
       'FlyBubbleTrackWings'
+      'FlyBubbleJAABADetect'
       };
       
     BUILDSNAPSHOTFILE = 'build.snapshot';    
