@@ -313,15 +313,15 @@ if isfield(registration_params,'OptogeneticExp')
             ledindicator_data = detectRegistrationMarks(registration_params_cell{:},'annName',annfile,'movieName',moviefile,'bkgdImage',im2double(im),'ledindicator',true,'regXY',registration_data.bowlMarkerPoints);
             
         catch ME,
-            fprintf(logfid,'Error detecting led indicator:\n');
-            fprintf(logfid,getReport(ME));
+            logger.log('Error detecting led indicator:\n');
+            logger.log(getReport(ME));
             success = false;
             msgs = {['Error detecting led indicator: ',getReport(ME)]};
             return;
         end
         registration_data.ledIndicatorPoints = ledindicator_data.bowlMarkerPoints;
         
-        fprintf(logfid,'Detected led indicator.\n');
+        logger.log('Detected led indicator.\n');
                
         
     end
