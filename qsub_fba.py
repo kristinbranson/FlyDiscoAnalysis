@@ -12,7 +12,7 @@ import re
 def main():
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("elist",help="file containing list of experiments to process")
+    parser.add_argument("--elist",help="file containing list of experiments to process")
     parser.add_argument("--bindir",default="/groups/flyprojects/home/leea30/git/fba.build/bubble/current")
     parser.add_argument("--setdir",default="/groups/flyprojects/home/leea30/git/fba.flybubble/settings")
     parser.add_argument("-ap","--anlsprot",default="current_bubble")
@@ -56,8 +56,12 @@ def main():
     args.QSUBARGS = "-pe batch 1 -j y -b y -cwd"
     
     # read/check explist
-    with open(args.elist) as f:
-        exps = f.read().splitlines()
+    if args.elist is None:
+      exps = sys.stdin.read().splitlines()
+      # intentionally don't close stdin
+    else: 
+        with open(args.elist) as f:
+            exps = f.read().splitlines()
     badexps = [e for e in exps if not os.path.exists(e)]
     if badexps:
         print("Bad experiments found:")
