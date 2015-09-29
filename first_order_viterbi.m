@@ -24,7 +24,7 @@
 %                   max_{s_{1:t-2}} [p(x_{1:t-1},s_{1:t-1})] ]
 % = max_{s_{t-1}}[p(x_t|x_{t-1},s_t=a) * P(s_t=a|s_{t-1}) * ll(t-1,s_{t-1})]
 
-function [states,normscore] = first_order_viterbi(x,nstates,x_trans_fun,...
+function [states,normscore] = first_order_viterbi(x,nstates,log_x_trans_fun,...
   log_s_trans_fun)
 
 T = size(x,1);
@@ -45,7 +45,7 @@ for t = 2:T,
   scorex = zeros(nstates,1);
   score = zeros(nstates,1);
   for a = 1:nstates,
-    scorex(a) = x_trans_fun(x(t,:),x(t-1,:),a);
+    scorex(a) = log_x_trans_fun(x(t,:),x(t-1,:),a);
   end
   %if all(scorex < eps),
   %    scorex(:) = 1;
