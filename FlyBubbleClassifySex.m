@@ -117,9 +117,21 @@ else
   
   % initialize parameters
   nstates = 2;
-  Psame = sexclassifierin.psame;
-  ptrans = ones(nstates)-Psame;
-  ptrans(eye(nstates)==1) = Psame;
+  if isfield(sexclassifierin,'ptrans')
+    fprintf(1,'''ptrans'' field present in SC settings...\n');
+
+    ptrans = sexclassifierin.ptrans;
+    psame = 1-ptrans;
+  else
+    fprintf(1,'''ptrans'' field not present in SC settings. Using ''psame'' field...\n');
+   
+    psame = sexclassifierin.psame;
+    ptrans = 1-psame;
+  end
+  fprintf(1,' ... setting [psame ptrans] = [%.03g %.03g]\n',psame,ptrans);
+  ptransmat = ones(nstates)*ptrans;
+  ptransmat(eye(nstates)==1) = psame;
+  
   if isfield(sexclassifier_params,'frac_female'),
     prior = [1-sexclassifier_params.frac_female,sexclassifier_params.frac_female];
   else
@@ -128,7 +140,7 @@ else
   state2sex = cell(1,nstates);
   
   % em for hmm
-  [mu_area,var_area,ll]=hmm_multiseq_1d(X,nstates,Psame,...
+  [mu_area,var_area,ll,mu_area_km,var_area_km]=hmm_multiseq_1d(X,nstates,ptransmat,...
     sexclassifier_params.niters_em,sexclassifier_params.tol_em,...
     [],prior);
   if mu_area(1) > mu_area(2),
@@ -138,6 +150,12 @@ else
   state2sex{argmax(mu_area)} = 'F';
   state2sex{argmin(mu_area)} = 'M';
   
+  fprintf(1,'mu_area(1) mu_area_km(1) mu_area(2) mu_area_km(2): %0.3f %0.3f %0.3f %0.3f\n',...
+    mu_area(1),mu_area_km(1),mu_area(2),mu_area_km(2));
+  fprintf(1,'vr_area(1) vr_area_km(1) vr_area(2) vr_area_km(2): %0.3f %0.3f %0.3f %0.3f\n',...
+    var_area(1),var_area_km(1),var_area(2),var_area_km(2));
+    
+    
   %% save classifier
   
   filterorder = sexclassifierin.areasmooth_filterorder; %#ok<NASGU>
@@ -167,7 +185,7 @@ else
     
     % Viterbi to classify per-frame
     [trx(fly).sex,diagnostics(fly)] = ClassifySex(X{fly}',...
-      mu_area,var_area,ptrans,state2sex); %#ok<AGROW>
+      mu_area,var_area,ptransmat,state2sex); %#ok<AGROW>
     
   end
   

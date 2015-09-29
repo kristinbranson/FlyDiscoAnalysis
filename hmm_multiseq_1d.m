@@ -17,7 +17,7 @@
 % Iterates until a proportional change < tol in the log likelihood 
 % or cyc steps of Baum-Welch
 
-function [Mu,Cov,LL]=hmm_multiseq_1d(X,K,Psame,cyc,tol,minCov,Pi)
+function [Mu,Cov,LL,MuKmeans,CovKmeans]=hmm_multiseq_1d(X,K,Ptransmat,cyc,tol,minCov,Pi)
 
 EPSILON = 1e-16;
 
@@ -36,11 +36,13 @@ Ts = nan(1,N);
 for n = 1:N,
   Ts(n) = size(X{n},1);
 end
-if numel(Psame) ~= 1,
-  error('Psame must be a scalar');
-end
-P = ones(K)-Psame;
-P(eye(K)==1)=Psame;
+assert(isequal(size(Ptransmat),[2 2]));
+P = Ptransmat;
+% if numel(Ptransmat) ~= 1,
+%   error('Psame must be a scalar');
+% end
+% P = ones(K)-Ptransmat;
+% P(eye(K)==1)=Ptransmat;
 
 if nargin<6 || isempty(minCov), minCov=max(1e-9,var(cat(1,X{:}),1)*1e-2); end
 if nargin<5 || isempty(tol), tol=0.0001; end;
@@ -54,6 +56,10 @@ for i = 1:K,
   Cov(i) = cov(Xmat(idx==i));
 end
 Cov(Cov < minCov) = minCov;
+
+% AL curiosity
+MuKmeans = Mu;
+CovKmeans = Cov;
 %Cov=diag(diag(cov(Xmat)));
 %Mu=randn(K,p)*sqrtm(Cov)+ones(K,1)*mean(Xmat);
 
