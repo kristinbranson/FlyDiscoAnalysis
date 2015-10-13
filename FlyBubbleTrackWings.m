@@ -46,6 +46,7 @@ trxfilestr = fullfile(expdir,dataloc_params.trxfilestr);
 movfilestr = fullfile(expdir,dataloc_params.moviefilestr);
 annfilestr = fullfile(expdir,dataloc_params.annfilestr);
 resfilestr = fullfile(expdir,dataloc_params.wingtrxfilestr);
+pfdir = fullfile(expdir,dataloc_params.perframedir);
 %ifofilestr = fullfile(expdir,dataloc_params.wingtrackinginfomatfilestr);
 if isempty(coparamsfile)
   coparamsfile = fullfile(settingsdir,analysis_protocol,dataloc_params.chooseorientparamsfilestr);
@@ -80,7 +81,7 @@ if ~DEBUG
   tmp.trx = trx;
   tmp.wingtrackinfo = info;
   try
-    fprintf('Saving oriented trx and info to %s.\n',trxfilestr);
+    logger.log('Saving oriented trx and info to %s.\n',trxfilestr);
     save(trxfilestr,'-struct','tmp');
   catch ME
     warning('FlyBubbleTrackWings:save','Could not save file %s: %s\n',...
@@ -96,12 +97,29 @@ if ~DEBUG,
     end
   end
   try
-    fprintf('Saving wing tracking results to file %s.\n',resfilestr);
+    logger.log('Saving wing tracking results to file %s.\n',resfilestr);
     save(resfilestr,'perframedata','wtunits','trackdata');
   catch ME
     warning('FlyBubbleTrackWings:save',...
       'Could not save wing tracking results to file %s: %s',resfilestr,getReport(ME));
   end
+end
+
+%% save per-frame data
+
+logger.log('Saving per-frame data...\n');
+
+if ~exist(pfdir,'dir'),
+  mkdir(pfdir);
+end
+
+fns = fieldnames(perframedata);
+fns = setdiff(fns,{'istouching'});
+for i = 1:numel(fns),
+  fn = fns{i};
+  s = struct('data',{perframedata.(fn)},'units',wtunits.(fn)); %#ok<NASGU>
+  filename = fullfile(pfdir,[fn,'.mat']);
+  save(filename,'-struct','s');
 end
 
 %% 
