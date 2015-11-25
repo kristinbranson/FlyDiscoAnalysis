@@ -26,6 +26,7 @@ def main():
     parser.add_argument("--pff",action="store_true")
     parser.add_argument("--dec",action="store_true")
     parser.add_argument("--jdt",action="store_true")
+    parser.add_argument("exps",nargs="*",help="full path to experiments to process")
 
     args = parser.parse_args()
     
@@ -57,9 +58,10 @@ def main():
     
     # read/check explist
     if args.elist is None:
-      exps = sys.stdin.read().splitlines()
-      # intentionally don't close stdin
+        exps = args.exps
     else: 
+        if args.exps:
+            print("elist and exps both supplied; using elist")
         with open(args.elist) as f:
             exps = f.read().splitlines()
     badexps = [e for e in exps if not os.path.exists(e)]
