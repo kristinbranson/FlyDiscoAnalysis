@@ -123,7 +123,7 @@ def main():
     for f in os.listdir(args.exp):
         fMatchesPat = any([re.match(pat,f) for pat in ORIGARTSPAT])
         if (args.dryrun and f not in ORIGARTS and not fMatchesPat and f not in artsmv) or \
-           (not args.dryrun and f not in ORIGARTS and not fMatchesPat):
+           (not args.dryrun and f not in ORIGARTS and not fMatchesPat and f!=args.arcdir):
             unknownFiles.append(f)
     if unknownFiles:
         print args.exp + ': Unknown remainder files: [ ' + ', '.join(unknownFiles) + ' ]'
