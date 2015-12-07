@@ -10,4 +10,4 @@ prior_male,0.550937
 areasmooth_maxerrx,0.279077
 areasmooth_maxfreq,0.005000
 areasmooth_filterorder,1.000000
-psame,.9998
+ptrans,1e-300
