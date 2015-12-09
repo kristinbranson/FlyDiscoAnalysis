@@ -103,7 +103,7 @@ def main():
     artsmv = []
     for s in stages:
         arts = STAGE2ARTS[s]
-        arts = [el[0] for el in arts]
+        arts = [el[0] for el in arts if el[1]!='overwrite']
         for a in arts:
             if a not in artsmv and os.path.exists(os.path.join(args.exp,a)):
                 artsmv.append(a)
