@@ -13,11 +13,35 @@ function FlyBubbleMakeCtraxResultsMovie(expdir,varargin)
 datalocparamsfile = fullfile(settingsdir,analysis_protocol,datalocparamsfilestr);
 dataloc_params = ReadParams(datalocparamsfile);
 
+%% location of data
+
+[~,basename,~] = fileparts(expdir);
+moviefile = fullfile(expdir,dataloc_params.moviefilestr);
+trxfile = fullfile(expdir,dataloc_params.trxfilestr);
+avifilestr = sprintf('%s_%s',dataloc_params.ctraxresultsavifilestr,basename);
+xvidfile = fullfile(expdir,[avifilestr,'.avi']);
+indicatorfile = fullfile(expdir,dataloc_params.indicatordatafilestr);
+metadatafile = fullfile(expdir,'Metadata.xml');
+metadata = ReadMetadataFile(metadatafile);
+commonregistrationparamsfile = fullfile(settingsdir,analysis_protocol,'registration_params.txt');
+commonregistrationparams = ReadParams(commonregistrationparamsfile);
+ledprotocoldatestr = metadata.led_protocol(end-7:end);
+ledprotocolfile = fullfile(expdir,'protocol.mat');
+
 %% ctrax movie parameters
-ctraxresultsmovieparamsfile = fullfile(settingsdir,analysis_protocol,dataloc_params.ctraxresultsmovieparamsfilestr);
-ctraxresultsmovie_params = ReadParams(ctraxresultsmovieparamsfile);
+defaultctraxresultsmovieparamsfile = fullfile(settingsdir,analysis_protocol,dataloc_params.ctraxresultsmovieparamsfilestr);
+specificctraxresultsmovie_paramsfile = fullfile(settingsdir,analysis_protocol,['ctraxresultsmovie_params_',ledprotocoldatestr,'.txt']);
+defaultparams = 1;
+if exist(specificctraxresultsmovie_paramsfile,'file'),
+  ctraxresultsmovie_params = ReadParams(specificctraxresultsmovie_paramsfile);
+  defaultparams = 0;
+else
+  ctraxresultsmovie_params = ReadParams(defaultctraxresultsmovie_paramsfile);
+end
+
 %defaulttempdatadir = '/groups/branson/bransonlab/projects/olympiad/TempData_FlyBowlMakeCtraxResultsMovie';
 defaulttempdatadir = '/Users/edwardsa/Documents/Branson_Lab/FlyBubble/FlyBubbleAnalysis/TempData_FlyBubbleMakeCtraxResultsMovie';
+avifile = fullfile(ctraxresultsmovie_params.tempdatadir,[avifilestr,'_temp.avi']);
 
 if ~isfield(ctraxresultsmovie_params,'tempdatadir'),
   ctraxresultsmovie_params.tempdatadir = defaulttempdatadir;
@@ -34,16 +58,6 @@ if ~exist(ctraxresultsmovie_params.tempdatadir,'dir'),
     error('Error making directory %s: %s',ctraxresultsmovie_params.tempdatadir,msg1);
   end
 end
-
-%% location of data
-
-[~,basename,~] = fileparts(expdir);
-moviefile = fullfile(expdir,dataloc_params.moviefilestr);
-trxfile = fullfile(expdir,dataloc_params.trxfilestr);
-avifilestr = sprintf('%s_%s',dataloc_params.ctraxresultsavifilestr,basename);
-avifile = fullfile(ctraxresultsmovie_params.tempdatadir,[avifilestr,'_temp.avi']);
-xvidfile = fullfile(expdir,[avifilestr,'.avi']);
-indicatorfile = fullfile(expdir,dataloc_params.indicatordatafilestr);
 
 %% read start and end of cropped trajectories
 
@@ -66,28 +80,35 @@ else
   end
 end
 
-if ~exist(indicatorfile,'file'),
-    nframes = registration_params.end_frame-registration_params.start_frame + 1;
-    firstframes_off = min(max(0,round(ctraxresultsmovie_params.firstframes*nframes)),nframes-1);
-    firstframes_off(ctraxresultsmovie_params.firstframes < 0) = nan;
-    middleframes_off = round(ctraxresultsmovie_params.middleframes*nframes);
-    middleframes_off(ctraxresultsmovie_params.middleframes < 0) = nan;
-    endframes_off = round(ctraxresultsmovie_params.endframes*nframes);
-    endframes_off(ctraxresultsmovie_params.endframes < 0) = nan;
-    idx = ~isnan(middleframes_off);
-    firstframes_off(idx) = ...
-      min(nframes-1,max(0,middleframes_off(idx) - ceil(ctraxresultsmovie_params.nframes(idx)/2)));
-    idx = ~isnan(endframes_off);
-    firstframes_off(idx) = ...
-      min(nframes-1,max(0,endframes_off(idx) - ctraxresultsmovie_params.nframes(idx)));
-    endframes_off = firstframes_off + ctraxresultsmovie_params.nframes - 1;
+%% determine start and end frames of snippets
+
+if ~commonregistrationparams.OptogeneticExp,
+  nframes = registration_params.end_frame-registration_params.start_frame + 1;
+  firstframes_off = min(max(0,round(ctraxresultsmovie_params.firstframes*nframes)),nframes-1);
+  firstframes_off(ctraxresultsmovie_params.firstframes < 0) = nan;
+  middleframes_off = round(ctraxresultsmovie_params.middleframes*nframes);
+  middleframes_off(ctraxresultsmovie_params.middleframes < 0) = nan;
+  endframes_off = round(ctraxresultsmovie_params.endframes*nframes);
+  endframes_off(ctraxresultsmovie_params.endframes < 0) = nan;
+  idx = ~isnan(middleframes_off);
+  firstframes_off(idx) = ...
+   min(nframes-1,max(0,middleframes_off(idx) - ceil(ctraxresultsmovie_params.nframes(idx)/2)));
+  idx = ~isnan(endframes_off);
+  firstframes_off(idx) = ...
+   min(nframes-1,max(0,endframes_off(idx) - ctraxresultsmovie_params.nframes(idx)));
+  endframes_off = firstframes_off + ctraxresultsmovie_params.nframes - 1;
 else
+  if defaultparams,
     
-    load(indicatorfile)
-    %nframes = registration_params.end_frame-registration_params.start_frame + 1;
-    firstframes_off = indicatorLED.startframe(ctraxresultsmovie_params.indicatorframes) - ctraxresultsmovie_params.nframes_beforeindicator;
-    endframes_off = firstframes_off + ctraxresultsmovie_params.nframes -1 ;
-    firstframes = registration_params.start_frame + firstframes_off;
+  else
+    if exist(indicatorfile,'file')
+      load(indicatorfile)
+      %nframes = registration_params.end_frame-registration_params.start_frame + 1;
+      firstframes_off = indicatorLED.startframe(ctraxresultsmovie_params.indicatorframes) - ctraxresultsmovie_params.nframes_beforeindicator;
+      endframes_off = firstframes_off + ctraxresultsmovie_params.nframes -1 ;
+      firstframes = registration_params.start_frame + firstframes_off;
+    end
+  end
 end
 
 %% option to not specify nzoomr, nzoomc
@@ -141,9 +162,65 @@ if ischar(ctraxresultsmovie_params.nzoomr) || ischar(ctraxresultsmovie_params.nz
     end
   end
   
-  
-  
 end
+
+%% create subtitle file
+
+subtitlefile = fullfile(expdir,'subtitles.srt');
+fid = fopen(subtitlefile,'w');
+dt = [0,ctraxresultsmovie_params.nframes];
+ts = cumsum(dt);
+
+if ~commonregistrationparams.OptogeneticExp,
+  for i = 1:numel(dt)-1,
+    fprintf(fid,'%d\n',i);
+    fprintf(fid,'%s --> %s\n',...
+     datestr(ts(i)/ctraxresultsmovie_params.fps/(3600*24),'HH:MM:SS,FFF'),...
+     datestr((ts(i+1)-1)/ctraxresultsmovie_params.fps/(3600*24),'HH:MM:SS,FFF'));
+    fprintf(fid,'%s, fr %d-%d\n\n',basename,...
+     firstframes_off(i)+1,...
+     endframes_off(i)+1);
+  end
+  fclose(fid);
+else
+    
+  load(ledprotocolfile);
+  load(indicatorfile);
+  stimtimes = indicatorLED.starttimes(ctraxresultsmovie_params.indicatorframes);
+    
+  j = 1;
+  t = protocol.duration(j)/1000;
+    
+  for i = 1:length(stimtimes),
+    while stimtimes(i) > t
+      j = j+1;
+      t = t + protocol.duration(j)/1000;
+    end
+    if protocol.pulseNum(j) > 1,
+      freq(i) = 1/(protocol.pulsePeriodSP(j)/1000);
+      stim_type{i} = ['Pulsed at ', num2str(freq(i)), 'Hz'];
+    else
+      stim_type{i} = 'Constant';
+    end
+    intensity(i) = protocol.intensity(j);
+    dutycycle(i) = protocol.pulseWidthSP(j);
+    step(i) = j;
+  end
+    
+  for j = 1:numel(dt)-1,
+    fprintf(fid,'%d\n',j);
+    fprintf(fid,'%s --> %s\n',...
+     datestr(ts(j)/ctraxresultsmovie_params.fps/(3600*24),'HH:MM:SS,FFF'),...
+     datestr((ts(j+1)-1)/ctraxresultsmovie_params.fps/(3600*24),'HH:MM:SS,FFF'));
+    fprintf(fid,'%s\n%s, %s, %s, %s\n\n',basename,...
+     ['Step ', num2str(step(i))],...     
+     stim_type{j},...
+     [num2str(intensity(j)), '% intensity'],...
+     ['Stim ', num2str(ctraxresultsmovie_params.indicatorframes(j)),'/', num2str(numel(indicatorLED.starttimes))]);
+  end
+  fclose(fid);
+end
+
 
 %% create movie
 
@@ -172,22 +249,8 @@ if ~succeeded,
   error('Failed to create raw avi %s',avifile);
 end
 
-%% create subtitle file
 
-subtitlefile = fullfile(expdir,'subtitles.srt');
-fid = fopen(subtitlefile,'w');
-dt = [0,ctraxresultsmovie_params.nframes];
-ts = cumsum(dt);
-for i = 1:numel(dt)-1,
-  fprintf(fid,'%d\n',i);
-  fprintf(fid,'%s --> %s\n',...
-    datestr(ts(i)/ctraxresultsmovie_params.fps/(3600*24),'HH:MM:SS,FFF'),...
-    datestr((ts(i+1)-1)/ctraxresultsmovie_params.fps/(3600*24),'HH:MM:SS,FFF'));
-  fprintf(fid,'%s, fr %d-%d\n\n',basename,...
-    firstframes_off(i)+1,...
-    endframes_off(i)+1);
-end
-fclose(fid);
+
 
 %% compress
 
