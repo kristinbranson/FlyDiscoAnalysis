@@ -3,10 +3,9 @@ function FlyBubbleMakeCtraxResultsMovie(expdir,varargin)
 
 [analysis_protocol,settingsdir,datalocparamsfilestr] = ...
   myparse(varargin,...
-  'analysis_protocol','current_bubble',...
-  'settingsdir','/Users/edwardsa/Documents/Branson_Lab/FlyBubble/FlyBubbleAnalysis/settings',...
+  'analysis_protocol','20150915_flybubble_centralcomplex',...
+  'settingsdir','/groups/branson/home/robiea/Code_versioned/FlyBubbleAnalysis/settings',...
   'datalocparamsfilestr','dataloc_params.txt');
-%'settingsdir','/groups/branson/bransonlab/projects/olympiad/FlyBubbleAnalysis/settings',...
 
 %% locations of parameters
 
@@ -40,7 +39,7 @@ else
 end
 
 %defaulttempdatadir = '/groups/branson/bransonlab/projects/olympiad/TempData_FlyBowlMakeCtraxResultsMovie';
-defaulttempdatadir = '/Users/edwardsa/Documents/Branson_Lab/FlyBubble/FlyBubbleAnalysis/TempData_FlyBubbleMakeCtraxResultsMovie';
+defaulttempdatadir = '/Volumes/branson/FlyBubble_testing/results_movie/FlyBubbleAnalysis/temp_FlyBubbleMakeCtraxResultsMovie';
 avifile = fullfile(ctraxresultsmovie_params.tempdatadir,[avifilestr,'_temp.avi']);
 
 if ~isfield(ctraxresultsmovie_params,'tempdatadir'),
@@ -209,11 +208,16 @@ else
     
   for j = 1:numel(dt)-1,
     fprintf(fid,'%d\n',j);
+    
+    t_start = ts(j)/ctraxresultsmovie_params.fps/(3600*24);
+    t_end = (ts(j) + (ts(j+1)-1-ts(j))/ctraxresultsmovie_params.subdecimationfactor)/ ...
+        ctraxresultsmovie_params.fps/(3600*24);
+     
     fprintf(fid,'%s --> %s\n',...
-     datestr(ts(j)/ctraxresultsmovie_params.fps/(3600*24),'HH:MM:SS,FFF'),...
-     datestr((ts(j+1)-1)/ctraxresultsmovie_params.fps/(3600*24),'HH:MM:SS,FFF'));
+     datestr(t_start,'HH:MM:SS,FFF'),...
+     datestr(t_end,'HH:MM:SS,FFF'));
     fprintf(fid,'%s\n%s, %s, %s, %s\n\n',basename,...
-     ['Step ', num2str(step(i))],...     
+     ['Step ', num2str(step(j))],...     
      stim_type{j},...
      [num2str(intensity(j)), '% intensity'],...
      ['Stim ', num2str(ctraxresultsmovie_params.indicatorframes(j)),'/', num2str(numel(indicatorLED.starttimes))]);
@@ -249,14 +253,13 @@ if ~succeeded,
   error('Failed to create raw avi %s',avifile);
 end
 
-
-
-
 %% compress
 
 tmpfile = [xvidfile,'.tmp'];
 newheight = 4*ceil(height/4);
 newwidth = 4*ceil(width/4);
+
+
 % subtitles are upside down, so encode with subtitles and flip, then flip
 % again
 cmd = sprintf('mencoder %s -o %s -ovc xvid -xvidencopts fixed_quant=4 -vf scale=%d:%d,flip -sub %s -subfont-text-scale 2 -msglevel all=2',...
