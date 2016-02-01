@@ -10,6 +10,6 @@ endframes,-1,-1,1
 indicatorframes,1,8,15,22,29,36,43,50,57
 nframes_beforeindicator,150
 nframes,400,400,400,400
-#nframes,10,10,10
+subdecimationfactor,3
 figpos,1,1,1844,1024
-tempdatadir,/Users/edwardsa/Documents/Branson_Lab/FlyBubble/FlyBubbleAnalysis/TempData_FlyBubbleMakeCtraxResultsMovie
+tempdatadir,/tier2/branson/FlyBubble_testing/results_movie/FlyBubbleAnalysis/temp_FlyBubbleMakeCtraxResultsMovie
