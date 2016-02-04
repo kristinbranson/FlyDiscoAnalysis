@@ -11,5 +11,5 @@ indicatorframes,1,5,6,10
 nframes_beforeindicator,150
 nframes,400,400,400,400
 subdecimationfactor,3
-figpos,1,1,1844,1024
-tempdatadir,/tier2/branson/FlyBubble_testing/results_movie/FlyBubbleAnalysis/temp_FlyBubbleMakeCtraxResultsMovie
+figpos,1,1,1434,1024
+tempdatadir,/groups/branson/bransonlab/projects/olympiad/TempData_FlyBowlMakeCtraxResultsMovie

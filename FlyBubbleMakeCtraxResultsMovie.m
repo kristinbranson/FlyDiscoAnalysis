@@ -38,8 +38,7 @@ else
   ctraxresultsmovie_params = ReadParams(defaultctraxresultsmovie_paramsfile);
 end
 
-%defaulttempdatadir = '/groups/branson/bransonlab/projects/olympiad/TempData_FlyBowlMakeCtraxResultsMovie';
-defaulttempdatadir = '/Volumes/branson/FlyBubble_testing/results_movie/FlyBubbleAnalysis/temp_FlyBubbleMakeCtraxResultsMovie';
+defaulttempdatadir = '/groups/branson/bransonlab/projects/olympiad/TempData_FlyBowlMakeCtraxResultsMovie';
 avifile = fullfile(ctraxresultsmovie_params.tempdatadir,[avifilestr,'_temp.avi']);
 
 if ~isfield(ctraxresultsmovie_params,'tempdatadir'),
@@ -195,32 +194,40 @@ else
       j = j+1;
       t = t + protocol.duration(j)/1000;
     end
+    
+    step(i) = j;
     if protocol.pulseNum(j) > 1,
       freq(i) = 1/(protocol.pulsePeriodSP(j)/1000);
-      stim_type{i} = ['Pulsed at ', num2str(freq(i)), 'Hz'];
+      stim_type{i} = ['Plsd ', num2str(freq(i)), 'Hz'];
     else
-      stim_type{i} = 'Constant';
+      stim_type{i} = 'Cnst';
     end
+    
     intensity(i) = protocol.intensity(j);
-    dutycycle(i) = protocol.pulseWidthSP(j);
-    step(i) = j;
+    dutycycle(i) = (protocol.pulseWidthSP(j)/protocol.pulsePeriodSP(j))*100;
+    duration(i) = protocol.pulseNum(j)*protocol.pulsePeriodSP(j);
+    
   end
     
-  for j = 1:numel(dt)-1,
-    fprintf(fid,'%d\n',j);
+  for k = 1:numel(dt)-1,
+    fprintf(fid,'%d\n',k);
     
-    t_start = ts(j)/ctraxresultsmovie_params.fps/(3600*24);
-    t_end = (ts(j) + (ts(j+1)-1-ts(j))/ctraxresultsmovie_params.subdecimationfactor)/ ...
+    t_start = ts(k)/ctraxresultsmovie_params.fps/(3600*24);
+    t_end = (ts(k) + (ts(k+1)-1-ts(k))/ctraxresultsmovie_params.subdecimationfactor)/ ...
         ctraxresultsmovie_params.fps/(3600*24);
      
     fprintf(fid,'%s --> %s\n',...
      datestr(t_start,'HH:MM:SS,FFF'),...
      datestr(t_end,'HH:MM:SS,FFF'));
-    fprintf(fid,'%s\n%s, %s, %s, %s\n\n',basename,...
-     ['Step ', num2str(step(j))],...     
-     stim_type{j},...
-     [num2str(intensity(j)), '% intensity'],...
-     ['Stim ', num2str(ctraxresultsmovie_params.indicatorframes(j)),'/', num2str(numel(indicatorLED.starttimes))]);
+    fprintf(fid,'%s\n%s %s %s %s %s %s\n\n',basename,...
+     ['Step ', num2str(step(k))],...     
+     ['(Stim ', num2str(ctraxresultsmovie_params.indicatorframes(k)),'/', ...
+       num2str(numel(indicatorLED.starttimes)),'):'],...
+     stim_type{k},...
+     ['(',num2str(dutycycle(k)),'% on)'],...
+     ['at ',num2str(intensity(k)), '% intensity'],...
+     ['for ',num2str(duration(k)), ' ms']);
+     
   end
   fclose(fid);
 end
