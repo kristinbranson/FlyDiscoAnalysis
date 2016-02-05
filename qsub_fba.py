@@ -26,11 +26,12 @@ def main():
     parser.add_argument("--pff",action="store_true")
     parser.add_argument("--dec",action="store_true")
     parser.add_argument("--jdt",action="store_true")
+    parser.add_argument("--mov",action="store_true")
     parser.add_argument("exps",nargs="*",help="full path to experiments to process")
 
     args = parser.parse_args()
     
-    STAGES = ['aci','reg','sex','wgt','pff','dec','jdt']
+    STAGES = ['aci','reg','sex','wgt','pff','dec','jdt','mov']
     stagemap = dict();
     for s in STAGES:
         val = getattr(args,s)
@@ -46,6 +47,7 @@ def main():
     stage2bin['pff'] = "run_FlyBubbleComputePerFrameFeatures.sh"
     stage2bin['dec'] = "run_FlyBubbleDectectIndicatorLedOnOff.sh"
     stage2bin['jdt'] = "run_FlyBubbleJAABADetect.sh"
+    stage2bin['mov'] = "run_FlyBubbleMakeCtraxResultsMovie.sh"
     
     # misc other args maybe settable in future
     args.KEYWORD = "fba"; # used for log/sh filenames, sge job name
@@ -174,6 +176,7 @@ def gencode(fname,expdir,jobid,args):
     gencodehelp(f,expdir,args,'pff')
     gencodehelp(f,expdir,args,'dec')
     gencodehelp(f,expdir,args,'jdt')
+    gencodehelp(f,expdir,args,'mov')
     print("",file=f)
 
     print("rm -rf",args.MCR_CACHE_ROOT+"."+jobid,file=f)
