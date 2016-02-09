@@ -35,7 +35,7 @@ if exist(specificctraxresultsmovie_paramsfile,'file'),
   ctraxresultsmovie_params = ReadParams(specificctraxresultsmovie_paramsfile);
   defaultparams = 0;
 else
-  ctraxresultsmovie_params = ReadParams(defaultctraxresultsmovie_paramsfile);
+  ctraxresultsmovie_params = ReadParams(defaultctraxresultsmovieparamsfile);
 end
 
 defaulttempdatadir = '/groups/branson/bransonlab/projects/olympiad/TempData_FlyBowlMakeCtraxResultsMovie';
@@ -97,11 +97,51 @@ if ~commonregistrationparams.OptogeneticExp,
   endframes_off = firstframes_off + ctraxresultsmovie_params.nframes - 1;
 else
   if defaultparams,
+    load(indicatorfile)
+    load(ledprotocolfile)
+    nsteps = numel(protocol.stepNum);
     
+    if nsteps == 1,
+      iter = protocol.iteration;
+      n = ceil(iter/6);     % take every nth iteration of the stimulus
+      indicatorframes = 1:n:iter;
+    elseif nsteps <= 3,
+      indicatorframes = zeros(1,2*nsteps);
+      for step = 1:nsteps,
+        iter = protocol.iteration(step);
+        if step==1,
+          indicatorframes(1)=1;
+          indicatorframes(2)=iter+1;
+        else
+          indicatorframes(2*step-1)=indicatorframes(2*step-2)+1;
+          indicatorframes(2*step)=indicatorframes(2*step-1)+iter;
+        end        
+      end
+    else
+      n = ceil(nsteps/6);
+      index = 1;
+      indicatorframes=ones(1,numel(1:n:nsteps));
+      for step = 1:n:nsteps,
+        if step==1,
+          indicatorframes(index)=1;
+          index=index+1;
+        else
+          indicatorframes(index) = indicatorframes(index-1);
+          for i = step-n:step-1
+            indicatorframes(index) = indicatorframes(index)+protocol.iteration(i);
+          end
+          index=index+1;
+          
+        end
+      end
+    end
+    
+    firstframes_off = indicatorLED.startframe(indicatorframes) - ctraxresultsmovie_params.nframes_beforeindicator;    
+    endframes_off = firstframes_off + ctraxresultsmovie_params.nframes -1 ;
+    firstframes = registration_params.start_frame + firstframes_off;
   else
     if exist(indicatorfile,'file')
       load(indicatorfile)
-      %nframes = registration_params.end_frame-registration_params.start_frame + 1;
       firstframes_off = indicatorLED.startframe(ctraxresultsmovie_params.indicatorframes) - ctraxresultsmovie_params.nframes_beforeindicator;
       endframes_off = firstframes_off + ctraxresultsmovie_params.nframes -1 ;
       firstframes = registration_params.start_frame + firstframes_off;
@@ -188,7 +228,13 @@ else
     
   j = 1;
   t = protocol.duration(j)/1000;
-    
+  
+  step = zeros(1,length(stimtimes));
+  freq = zeros(1,length(stimtimes));
+  intensity = zeros(1,length(stimtimes));
+  dutycycle = zeros(1,length(stimtimes));
+  duration = zeros(1,length(stimtimes));
+  
   for i = 1:length(stimtimes),
     while stimtimes(i) > t
       j = j+1;
