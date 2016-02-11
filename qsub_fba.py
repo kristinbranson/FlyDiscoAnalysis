@@ -27,6 +27,7 @@ def main():
     parser.add_argument("--dec",action="store_true")
     parser.add_argument("--jdt",action="store_true")
     parser.add_argument("--mov",action="store_true")
+    parser.add_argument("-pebatch",default="1",help="number of slots")
     parser.add_argument("exps",nargs="*",help="full path to experiments to process")
 
     args = parser.parse_args()
@@ -56,7 +57,7 @@ def main():
     args.TMP_ROOT_DIR = "/scratch/" + args.USERNAME
     args.MCR_CACHE_ROOT = args.TMP_ROOT_DIR + "/mcr_cache_root"
     args.stage2bin = stage2bin
-    args.QSUBARGS = "-pe batch 1 -j y -b y -cwd"
+    args.QSUBARGS = "-pe batch " + args.pebatch + " -j y -b y -cwd"
     
     # read/check explist
     if args.elist is None:
