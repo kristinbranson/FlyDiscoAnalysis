@@ -136,8 +136,19 @@ else
       end
     end
     
+    % make sure none of the steps are blank (have no stimulus)
+    for i=1:numel(indicatorframes),
+        if (protocol.intensity(indicatorframes(i)) == 0),
+            if ~(i==numel(indicatorframes)),
+                error('Step with intensity = 0 in middle of experiment. User needs to make specific ctrax results movie params file')
+            end
+      indicatorframes(i) = [];
+        end
+    end
+    ctraxresultsmovie_params.indicatorframes = indicatorframes;
     firstframes_off = indicatorLED.startframe(indicatorframes) - ctraxresultsmovie_params.nframes_beforeindicator;    
-    endframes_off = firstframes_off + ctraxresultsmovie_params.nframes -1 ;
+    ctraxresultsmovie_params.nframes = ones(1,length(firstframes_off))*ctraxresultsmovie_params.nframes;
+    endframes_off = firstframes_off + ctraxresultsmovie_params.nframes -1;
     firstframes = registration_params.start_frame + firstframes_off;
   else
     if exist(indicatorfile,'file')
