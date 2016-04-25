@@ -4,7 +4,7 @@ function [success,msgs] = FlyBubbleDectectIndicatorLedOnOff(expdir,varargin)
 success = true;
 msgs = [];
 
-version = '0.2';
+version = '0.3';
 timestamp = datestr(now,'yyyymmddTHHMMSS');
 
 [analysis_protocol,settingsdir,datalocparamsfilestr,registrationparamsfilestr,registrationmatfilestr] = ...
@@ -51,10 +51,10 @@ registration_params = ReadParams(registrationparamsfile);
 if isfield(registration_params,'OptogeneticExp')
   if registration_params.OptogeneticExp
     DoLEDdetection = true;
-    fprintf(logfid,'\n Optogenetic flag set to: %1.0f , running indicator detection',registration_params.OptogeneticExp);
+    fprintf(logfid,'\n Optogenetic flag set to: %1.0f, running indicator detection',registration_params.OptogeneticExp);
   else
     DoLEDdetection = false;
-    fprintf(logfid,'\n Optogenetic flag set to: %1.0f , skipping indicator detection',registration_params.OptogeneticExp)
+    fprintf(logfid,'\n Optogenetic flag set to: %1.0f, skipping indicator detection',registration_params.OptogeneticExp)
   end
 else
   error('Registration params optogenetic flag %s does not exist',registrationparamsfile);
