@@ -11,5 +11,5 @@ indicatorframes,1,3,6,8
 nframes_beforeindicator,150
 nframes,400,400,400,400
 #nframes,10,10,10
-figpos,1,1,1844,1024
+figpos,1,1,1434,1024
 tempdatadir,/Users/edwardsa/Documents/Branson_Lab/FlyBubble/FlyBubbleAnalysis/TempData_FlyBubbleMakeCtraxResultsMovie
