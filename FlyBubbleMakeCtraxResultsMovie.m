@@ -24,20 +24,27 @@ metadatafile = fullfile(expdir,'Metadata.xml');
 metadata = ReadMetadataFile(metadatafile);
 commonregistrationparamsfile = fullfile(settingsdir,analysis_protocol,'registration_params.txt');
 commonregistrationparams = ReadParams(commonregistrationparamsfile);
-ledprotocoldatestr = metadata.led_protocol(end-7:end);
-ledprotocolfile = fullfile(expdir,'protocol.mat');
+if commonregistrationparams.OptogeneticExp,
+  ledprotocoldatestr = metadata.led_protocol(end-7:end);
+  ledprotocolfile = fullfile(expdir,'protocol.mat');
+end
 
 %% ctrax movie parameters
 defaultctraxresultsmovieparamsfile = fullfile(settingsdir,analysis_protocol,dataloc_params.ctraxresultsmovieparamsfilestr);
-specificctraxresultsmovie_paramsfile = fullfile(settingsdir,analysis_protocol,['ctraxresultsmovie_params_',ledprotocoldatestr,'.txt']);
-defaultparams = 1;
-if exist(specificctraxresultsmovie_paramsfile,'file'),
+if commonregistrationparams.OptogeneticExp,
+  specificctraxresultsmovie_paramsfile = fullfile(settingsdir,analysis_protocol,['ctraxresultsmovie_params_',ledprotocoldatestr,'.txt']);
+  defaultparams = 1;
+  if exist(specificctraxresultsmovie_paramsfile,'file'),
+    ctraxresultsmovie_params = ReadParams(specificctraxresultsmovie_paramsfile);
+    defaultparams = 0;
+  else
+    ctraxresultsmovie_params = ReadParams(defaultctraxresultsmovieparamsfile);
+  end
+else
+  specificctraxresultsmovie_paramsfile = fullfile(settingsdir,analysis_protocol,'ctraxresultsmovie_params_non_optogenetic.txt');
   ctraxresultsmovie_params = ReadParams(specificctraxresultsmovie_paramsfile);
   defaultparams = 0;
-else
-  ctraxresultsmovie_params = ReadParams(defaultctraxresultsmovieparamsfile);
 end
-
 defaulttempdatadir = '/groups/branson/bransonlab/projects/olympiad/TempData_FlyBowlMakeCtraxResultsMovie';
 avifile = fullfile(ctraxresultsmovie_params.tempdatadir,[avifilestr,'_temp.avi']);
 

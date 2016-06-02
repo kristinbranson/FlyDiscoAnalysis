@@ -135,6 +135,9 @@ def main():
             args.logdirfull = os.path.join(exp,'LOGS')
 
         # generate code
+        if not os.path.isdir(args.logdirfull):
+            os.mkdir(args.logdirfull)
+            print("Creating logdir: " + args.logdirfull)
         shfile = os.path.join(args.logdirfull,"{0:s}.sh".format(jobid))
         logfile = os.path.join(args.logdirfull,"{0:s}.log".format(jobid))
         gencode(shfile,exp,jobid,args)
