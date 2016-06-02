@@ -41,7 +41,7 @@ if commonregistrationparams.OptogeneticExp,
     ctraxresultsmovie_params = ReadParams(defaultctraxresultsmovieparamsfile);
   end
 else
-  specificctraxresultsmovie_paramsfile = fullfile(settingsdir,analysis_protocol,'ctraxresultsmovie_params_non_optogenetic.txt');
+  specificctraxresultsmovie_paramsfile = fullfile(settingsdir,analysis_protocol,'ctraxresultsmovie_params_nonoptogenetic.txt');
   ctraxresultsmovie_params = ReadParams(specificctraxresultsmovie_paramsfile);
   defaultparams = 0;
 end
@@ -102,6 +102,7 @@ if ~commonregistrationparams.OptogeneticExp,
   firstframes_off(idx) = ...
    min(nframes-1,max(0,endframes_off(idx) - ctraxresultsmovie_params.nframes(idx)));
   endframes_off = firstframes_off + ctraxresultsmovie_params.nframes - 1;
+  firstframes = registration_params.start_frame + firstframes_off;
 else
   if defaultparams,
     load(indicatorfile)
