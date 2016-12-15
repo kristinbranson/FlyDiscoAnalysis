@@ -258,12 +258,16 @@ classdef FlyBubbleBaR
     end
     
     function s = settingssnapshot(settingsdir)
+      if isunix
       assert(exist(settingsdir,'dir')>0,'Cannot find dir ''%s''.',settingsdir);
       script = FlyBubbleBaR.SnapshotScript;
       cmd = sprintf('%s -nocolor -brief %s',script,settingsdir);
       [~,s] = system(cmd);
       s = regexp(s,sprintf('\n'),'split');
       s = s(:);
+      else
+        s = {'No snapshot available, non-unix interactive session.'};
+      end
     end
     
     function buildmv(src,dst)
