@@ -18,7 +18,7 @@ dataloc_params = ReadParams(datalocparamsfile);
 moviefile = fullfile(expdir,dataloc_params.moviefilestr);
 trxfile = fullfile(expdir,dataloc_params.trxfilestr);
 avifilestr = sprintf('%s_%s',dataloc_params.ctraxresultsavifilestr,basename);
-xvidfile = fullfile(expdir,[avifilestr,'.avi']);
+%xvidfile = fullfile(expdir,[avifilestr,'.avi']);
 indicatorfile = fullfile(expdir,dataloc_params.indicatordatafilestr);
 metadatafile = fullfile(expdir,'Metadata.xml');
 metadata = ReadMetadataFile(metadatafile);
@@ -47,6 +47,7 @@ else
 end
 defaulttempdatadir = '/groups/branson/bransonlab/projects/olympiad/TempData_FlyBowlMakeCtraxResultsMovie';
 avifile = fullfile(ctraxresultsmovie_params.tempdatadir,[avifilestr,'_temp.avi']);
+mp4file = fullfile(expdir,[avifilestr,'.mp4']);
 
 if ~isfield(ctraxresultsmovie_params,'tempdatadir'),
   ctraxresultsmovie_params.tempdatadir = defaulttempdatadir;
@@ -334,41 +335,57 @@ end
 
 %% compress
 
-tmpfile = [xvidfile,'.tmp'];
+%tmpfile = [xvidfile,'.tmp'];
 newheight = 4*ceil(height/4);
 newwidth = 4*ceil(width/4);
 
 
 % subtitles are upside down, so encode with subtitles and flip, then flip
 % again
-cmd = sprintf('mencoder %s -o %s -ovc xvid -xvidencopts fixed_quant=4 -vf scale=%d:%d,flip -sub %s -subfont-text-scale 2 -msglevel all=2',...
-  avifile,tmpfile,newwidth,newheight,subtitlefile);
+%cmd = sprintf('mencoder %s -o %s -ovc xvid -xvidencopts fixed_quant=4 -vf scale=%d:%d,flip -sub %s -subfont-text-scale 2 -msglevel all=2',...
+%  avifile,tmpfile,newwidth,newheight,subtitlefile);
+
+nowstr = datestr(now,'yyyymmddTHHMMSSFFF');
+passlogfile = sprintf('%s_%s',avifile,nowstr);
+cmd = sprintf('/misc/local/ffmpeg-2.6.3/bin/ffmpeg -i %s -y -passlogfile %s -c:v h264 -pix_fmt yuv420p -s %dx%d -b:v 1600k -vf "subtitles=%s:force_style=''FontSize=10,FontName=Helvetica''" -pass 1 -f mp4 /dev/null',...
+  avifile,passlogfile,newwidth,newheight,subtitlefile);
+cmd2 = sprintf('/misc/local/ffmpeg-2.6.3/bin/ffmpeg -i %s -y -passlogfile %s -c:v h264 -pix_fmt yuv420p -s %dx%d -b:v 1600k -vf "subtitles=%s:force_style=''FontSize=10,FontName=Helvetica''" -pass 2 -f mp4 %s',...
+  avifile,passlogfile,newwidth,newheight,subtitlefile,mp4file);
+
 status = system(cmd);
 if status ~= 0,
   fprintf('*****\n');
-  warning('Failed to compress avi to %s',xvidfile);
+  warning('ffmpeg first pass failed.');
   fprintf('Need to run:\n');
   fprintf('%s\n',cmd);
-  cmd2 = sprintf('mencoder %s -o %s -ovc xvid -xvidencopts fixed_quant=4 -vf flip -msglevel all=2',...
-    tmpfile,xvidfile);
+%  cmd2 = sprintf('mencoder %s -o %s -ovc xvid -xvidencopts fixed_quant=4 -vf flip -msglevel all=2',...
+%    tmpfile,xvidfile);
   fprintf('then\n');
   fprintf('%s\n',cmd2);
-  fprintf('then delete %s %s %s\n',tmpfile,avifile,subtitlefile);
+  fprintf('then delete %s %s* %s\n',avifile,passlogfile,subtitlefile);
   fprintf('*****\n');
 else
-  cmd = sprintf('mencoder %s -o %s -ovc xvid -xvidencopts fixed_quant=4 -vf flip -msglevel all=2',...
-    tmpfile,xvidfile);
-  status = system(cmd);
+%   cmd = sprintf('mencoder %s -o %s -ovc xvid -xvidencopts fixed_quant=4 -vf flip -msglevel all=2',...
+%     tmpfile,xvidfile);
+  status = system(cmd2);
   if status ~= 0,
     fprintf('*****\n');
-    warning('Failed to add subtitles to %s',xvidfile);
+    warning('ffmpeg second pass failed.');
     fprintf('Need to run:\n');
-    fprintf('%s\n',cmd);
-    fprintf('then delete %s %s %s\n',tmpfile,avifile,subtitlefile);
+    fprintf('%s\n',cmd2);
+    fprintf('then delete %s %s* %s\n',avifile,passlogfile,subtitlefile);
     fprintf('*****\n');    
   else
-    delete(tmpfile);
+    %delete(tmpfile);
     delete(avifile);
     delete(subtitlefile);
+    fname = [passlogfile '-*.log'];
+    if isscalar(dir(fname))
+      delete(fname);
+    end    
+    fname = [passlogfile '-*.log.mbtree'];
+    if isscalar(dir(fname))
+      delete(fname);
+    end    
   end
 end
