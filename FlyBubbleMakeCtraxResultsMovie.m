@@ -25,8 +25,12 @@ metadata = ReadMetadataFile(metadatafile);
 commonregistrationparamsfile = fullfile(settingsdir,analysis_protocol,'registration_params.txt');
 commonregistrationparams = ReadParams(commonregistrationparamsfile);
 if commonregistrationparams.OptogeneticExp,
-  ledprotocoldatestr = metadata.led_protocol(end-7:end);
+  datestrpattern = '20\d{6}';
+  match = regexp(metadata.led_protocol,datestrpattern);
+  
+  ledprotocoldatestr = metadata.led_protocol(match:match+7);
   ledprotocolfile = fullfile(expdir,'protocol.mat');
+  
 end
 
 %% ctrax movie parameters
@@ -120,10 +124,10 @@ else
         iter = protocol.iteration(step);
         if step==1,
           indicatorframes(1)=1;
-          indicatorframes(2)=iter+1;
+          indicatorframes(2)=iter;
         else
           indicatorframes(2*step-1)=indicatorframes(2*step-2)+1;
-          indicatorframes(2*step)=indicatorframes(2*step-1)+iter;
+          indicatorframes(2*step)=indicatorframes(2*step-1);
         end        
       end
     else
