@@ -20,16 +20,19 @@ trxfile = fullfile(expdir,dataloc_params.trxfilestr);
 avifilestr = sprintf('%s_%s',dataloc_params.ctraxresultsavifilestr,basename);
 %xvidfile = fullfile(expdir,[avifilestr,'.avi']);
 indicatorfile = fullfile(expdir,dataloc_params.indicatordatafilestr);
-metadatafile = fullfile(expdir,'Metadata.xml');
+% metadatafile = fullfile(expdir,'Metadata.xml');
+metadatafile = fullfile(expdir,dataloc_params.metadatafilestr);
 metadata = ReadMetadataFile(metadatafile);
-commonregistrationparamsfile = fullfile(settingsdir,analysis_protocol,'registration_params.txt');
+% commonregistrationparamsfile = fullfile(settingsdir,analysis_protocol,'registration_params.txt');
+commonregistrationparamsfile = fullfile(settingsdir,analysis_protocol,dataloc_params.registrationparamsfilestr);
 commonregistrationparams = ReadParams(commonregistrationparamsfile);
 if commonregistrationparams.OptogeneticExp,
   datestrpattern = '20\d{6}';
   match = regexp(metadata.led_protocol,datestrpattern);
   
   ledprotocoldatestr = metadata.led_protocol(match:match+7);
-  ledprotocolfile = fullfile(expdir,'protocol.mat');
+%   ledprotocolfile = fullfile(expdir,'protocol.mat');
+  ledprotocolfile = fullfile(expdir,dataloc_params.ledprotocolfilestr);
   
 end
 
@@ -45,6 +48,7 @@ if commonregistrationparams.OptogeneticExp,
     ctraxresultsmovie_params = ReadParams(defaultctraxresultsmovieparamsfile);
   end
 else
+%  ctraxresultsmovie_params_nonoptogenetic.txt doesn't exist as far as I can tell   
   specificctraxresultsmovie_paramsfile = fullfile(settingsdir,analysis_protocol,'ctraxresultsmovie_params_nonoptogenetic.txt');
   ctraxresultsmovie_params = ReadParams(specificctraxresultsmovie_paramsfile);
   defaultparams = 0;
@@ -317,7 +321,7 @@ end
   'nzoomr',ctraxresultsmovie_params.nzoomr,'nzoomc',ctraxresultsmovie_params.nzoomc,...
   'boxradius',ctraxresultsmovie_params.boxradius,'taillength',ctraxresultsmovie_params.taillength,...
   'fps',ctraxresultsmovie_params.fps,...
-  'maxnframes',+ctraxresultsmovie_params.nframes,...
+  'maxnframes',ctraxresultsmovie_params.nframes,...
   'firstframes',firstframes,...
   'figpos',ctraxresultsmovie_params.figpos,...
   'movietitle',basename,...
