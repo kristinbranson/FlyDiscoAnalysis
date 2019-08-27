@@ -1,0 +1,8 @@
+min_seconds_fliesloaded,0
+max_seconds_fliesloaded,400
+min_ufmf_diagnostics_summary_nframes,1000
+control_line_names,pBDPGAL4U
+required_files,Metadata.xml,movie.ufmf,protocol.mat
+desired_files,cameraSettings.json,expNotes.xml,expTimeStamp.txt
+required_fns,flag_aborted,flag_redo,seconds_fliesloaded,screen_type,line,cross_barcode
+frame_rate,30
