@@ -12,13 +12,13 @@ settingsdir = '/groups/branson/home/robiea/Code_versioned/FlyBubbleAnalysis/sett
 % analysis_protocol = '20150428_flybubble_centralcomplex';
 % expfile = '/groups/branson/home/robiea/Projects_data/CentralComplex/explist_forregistrationmark';
 analysis_protocol = '20150428_flybubble_centralcomplex';
-expfile = '/groups/branson/home/robiea/Projects_data/CentralComplex/exp_regtest.txt';
+% expfile = '/groups/branson/home/robiea/Projects_data/CentralComplex/exp_regtest.txt';
 datalocparamsfilestr = 'dataloc_params.txt';
 dataloc_params = ReadParams(fullfile(settingsdir,analysis_protocol,datalocparamsfilestr));
 
-expdirs = importdata(expfile);
-expdirs(cellfun(@isempty,expdirs)) = [];
-
+% expdirs = importdata(expfile);
+% expdirs(cellfun(@isempty,expdirs)) = [];
+expdirs = {'/groups/branson/home/robiea/Projects_data/Katie/tracked/20190716T130615_rig1_flyBowl3__GMR_OL0077B_rubin_protocol_OL0077_testing_noPixels'};
 expis = [];
 platebowls = {};
 
@@ -99,7 +99,7 @@ imagesc(template);
 axis image;
 
 
-imwrite(uint8(template),'LEDTemplate_FlyBowl_BowlC.png');
+imwrite(uint8(template),'LEDIndicator_KatieRig1.png');
 
 %% distance from the corner
 x = mean(xlim);
