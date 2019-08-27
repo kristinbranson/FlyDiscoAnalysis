@@ -2,5 +2,5 @@ min_num_flies,7
 min_num_males,0
 min_num_females,0
 max_num_flies,12
-required_files,analysis_protocol.txt,automatic_checks_incoming_results.txt,bias_diagnostics.mat,bias_diagnostics.png,bias_diagnostics.txt,bkgd_diagnostics.mat,bkgd_diagnostics.png,bkgd_diagnostics.txt,ctrax_diagnostics.txt,ctrax_results.mat,ctrax_results_movie_*.mp4,indicatordata.mat,ledregistrationimage.png,movie.ufmf.ann,protocol.mat,registered_trx.mat,registrationdata.mat,registrationdata.txt,registrationimage.png,sexclassifier_diagnostics.txt,wingtrackingresults.mat
+required_files,analysis_protocol.txt,automatic_checks_incoming_results.txt,bias_diagnostics.mat,bias_diagnostics.png,bias_diagnostics.txt,bkgd_diagnostics.mat,bkgd_diagnostics.png,bkgd_diagnostics.txt,ctrax_diagnostics.txt,ctrax_results.mat,ctrax_results_movie_*.mp4,indicatordata.mat,ledregistrationimage.png,movie.ufmf.ann,protocol.mat,registered_trx.mat,registrationdata.mat,registrationdata.txt,registrationimage.png,sexclassifier_diagnostics.txt,wingtracking_results.mat
 file_categories,other_analysis,automated_checks_incoming,extra_diagnostics,extra_diagnostics,extra_diagnostics,extra_diagnostics,extra_diagnostics,extra_diagnostics,tracking,tracking,results_movie,indicatorled,indicatorled,tracking,indicatorled,registration,registration,registration,registration,sexclassification,wingtracking

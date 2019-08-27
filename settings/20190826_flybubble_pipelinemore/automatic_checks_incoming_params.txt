@@ -1,5 +1,5 @@
 min_seconds_fliesloaded,0
-max_seconds_fliesloaded,60
+max_seconds_fliesloaded,120
 min_ufmf_diagnostics_summary_nframes,10000
 control_line_names,pBDPGAL4U
 required_files,Metadata.xml,movie.ufmf,protocol.mat
