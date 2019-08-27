@@ -85,7 +85,7 @@ if DoLEDdetection
   for i = 1:headerinfo.nframes
     %im = uint8(zeros(width+1,height+1));
     tmp = readfcn(i);
-    im = tmp(x:x+width,y:y+height);
+    im = tmp(y:y+height,x:x+width);
     maximage(i) = max(im(:));
     meanimage(i) = mean(im(:));
     if (mod(i,1000) == 0);
