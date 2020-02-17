@@ -441,8 +441,9 @@ if domakectraxresultsmovie,
   if ~isempty(i),
     [~,basename] = fileparts(expdir);
     avifilestr = sprintf('%s_%s',dataloc_params.ctraxresultsavifilestr,basename);
-    xvidfile = [avifilestr,'.avi'];
-    requiredfiles_makectraxresultsmovie{i} = xvidfile;
+%     xvidfile = [avifilestr,'.avi'];
+    h264file = [avifilestr,'.mp4'];
+    requiredfiles_makectraxresultsmovie{i} = h264file;
   end
   
   todo = CheckForMissingFiles(expdir,dataloc_params,requiredfiles_makectraxresultsmovie);
