@@ -205,7 +205,7 @@ if isfield(registration_params,'OptogeneticExp');
         %determine minimum frames to process
         if isfield(dataloc_params,'ledprotocolfilestr');
             if exist(fullfile(expdir,dataloc_params.ledprotocolfilestr),'file');
-                load(fullfile(expdir,dataloc_params.ledprotocolfilestr))
+                load(fullfile(expdir,dataloc_params.ledprotocolfilestr),'protocol')
                 if ~isempty(protocol)
                     fps = 1/meddt;                    
                     secstoLEDpulse = protocol.delayTime(1) + ((protocol.duration(1)/1000-protocol.delayTime(1))/protocol.iteration(1));
@@ -213,7 +213,7 @@ if isfield(registration_params,'OptogeneticExp');
                     if protocol.pulseWidthSP(1) <= 1/fps*1000*2 %pulseWidth(ms) < 2 times sampling
                         jump = 1;
                     else
-                    jump = round(protocol.pulseWidthSP(1)/1/fps*1000);
+                    jump = round(protocol.pulseWidthSP(1)/(1/fps*1000));
                     end 
                 end
             end
@@ -233,8 +233,33 @@ if isfield(registration_params,'OptogeneticExp');
 %                 disp(round((j/frametoLEDpulse)*100))
 %             end
         end
+        % check if im has indicator on 
+        if isfield(registration_params,'LEDMarkerType') && ischar(registration_params.LEDMarkerType),
+            LEDimg = imread(fullfile(settingsdir,analysis_protocol,registration_params.LEDMarkerType));
+            binLEDstep = 25;
+            hist_LED = histcounts(LEDimg,[0:binLEDstep:255]);
+            brightthres = sum(hist_LED(9:10));
+            diffimage = im - readfcn(1);
+            
+            [xgrid, ygrid] = meshgrid(1:size(diffimage,2), 1:size(diffimage,1));
+            mask = ((xgrid-registration_data.circleCenterX).^2 + (ygrid-registration_data.circleCenterY).^2) >= registration_data.circleRadius.^2;
+            outSideArenaPxs = diffimage(mask);
+            hist_outSideArenaPxs = histcounts(outSideArenaPxs,[0:binLEDstep:255]);
+            brightpxs = sum(hist_outSideArenaPxs(9:10));
+            if brightpxs <= brightthres %|| brightpxs >= 15
+                % no LED indicator in im, redo for whole movie
+                im = readfcn(1);
+                for j = 1:jump:headerinfo.nframes
+                    tmp = readfcn(j);
+                    idx = tmp > im;
+                    im(idx) = tmp(idx);
+                end
+            end
+        end
     end
 end
+%
+
 %% detect LED indicator (modified from detect registration marks)
 if isfield(registration_params,'OptogeneticExp')
     if registration_params.OptogeneticExp
