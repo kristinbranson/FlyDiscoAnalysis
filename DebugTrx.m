@@ -31,7 +31,7 @@ end
 % fclose(fid);
 
 %% create Trx instance with one experiment
-obj = Trx('settingsdir',settingsdir,'analysis_protocol',analysis_protocol);
+obj = FBATrx('settingsdir',settingsdir,'analysis_protocol',analysis_protocol);
 obj.AddExpDir(expdir);
 
 %% try out all the per-frame properties

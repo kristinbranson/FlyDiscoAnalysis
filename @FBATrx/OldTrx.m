@@ -1,4 +1,4 @@
-classdef Trx < handle
+classdef FBATrx < handle
 
   % Trx class
   %

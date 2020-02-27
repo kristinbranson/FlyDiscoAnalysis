@@ -4,7 +4,7 @@ if ~exist('dooverwrite','var'),
   dooverwrite = true;
 end
 
-traj_fns = Trx.TrajectoryFieldNames();
+traj_fns = FBATrx.TrajectoryFieldNames();
 
 for i = 1:numel(traj_fns),
   fn = traj_fns{i};

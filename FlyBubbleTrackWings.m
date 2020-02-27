@@ -45,7 +45,12 @@ dataloc_params = ReadParams(datalocparamsfile);
 trxfilestr = fullfile(expdir,dataloc_params.trxfilestr);
 movfilestr = fullfile(expdir,dataloc_params.moviefilestr);
 annfilestr = fullfile(expdir,dataloc_params.annfilestr);
-resfilestr = fullfile(expdir,dataloc_params.wingtrxfilestr);
+wtrxfilestr = fullfile(expdir,dataloc_params.wingtrxfilestr);
+if isfield(dataloc_params,'wingperframefilestr')
+    wpffilestr = fullfile(expdir,dataloc_params.wingperframefilestr);
+else
+    wpffilestr = fullfile(expdir,'wingtracking_perframedata.mat');
+end
 pfdir = fullfile(expdir,dataloc_params.perframedir);
 %ifofilestr = fullfile(expdir,dataloc_params.wingtrackinginfomatfilestr);
 if isempty(coparamsfile)
@@ -83,6 +88,12 @@ if ~DEBUG
   try
     logger.log('Saving oriented trx and info to %s.\n',trxfilestr);
     save(trxfilestr,'-struct','tmp');
+    % TO DO make this a relative softlink
+    pwdprev = pwd;
+    cd(expdir)
+    cmd = sprintf('ln -s ./%s ./%s', dataloc_params.trxfilestr,dataloc_params.wingtrxfilestr);
+    system(cmd);
+    cd(pwdprev);
   catch ME
     warning('FlyBubbleTrackWings:save','Could not save file %s: %s\n',...
       trxfilestr,getReport(ME));
@@ -91,21 +102,21 @@ end
 
 %% save: other results
 if ~DEBUG,
-  if exist(resfilestr,'file'),
+  if exist(wpffilestr,'file'),
     try %#ok<TRYNC>
-      delete(resfilestr);
+      delete(wpffilestr);
     end
   end
   try
-    logger.log('Saving wing tracking results to file %s.\n',resfilestr);
-    save(resfilestr,'perframedata','wtunits','trackdata');
+    logger.log('Saving wing tracking results to file %s.\n',wpffilestr);
+    save(wpffilestr,'perframedata','wtunits','trackdata');
   catch ME
     warning('FlyBubbleTrackWings:save',...
-      'Could not save wing tracking results to file %s: %s',resfilestr,getReport(ME));
+      'Could not save wing tracking results to file %s: %s',wpffilestr,getReport(ME));
   end
 end
 
-%% save per-frame data
+%% save per-frame data directly into perframe folder
 
 logger.log('Saving per-frame data...\n');
 

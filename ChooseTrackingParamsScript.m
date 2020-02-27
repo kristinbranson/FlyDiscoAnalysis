@@ -71,7 +71,7 @@ prctile_bound_walk = 99.975;
 
 %% load data
 
-%trx = Trx(params{:});
+%trx = FBATrx(params{:});
 
 trx = [];
 for i = 1:nexpdirs,

@@ -39,7 +39,7 @@ end
 
 fprintf('Initializing trx...\n');
 
-trx = Trx('analysis_protocol',analysis_protocol,'settingsdir',settingsdir,...
+trx = FBATrx('analysis_protocol',analysis_protocol,'settingsdir',settingsdir,...
   'datalocparamsfilestr',datalocparamsfilestr);
 rootdir = 'tmp_perframecheck';
 if ~exist(rootdir,'dir'),

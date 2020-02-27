@@ -405,32 +405,58 @@ end
 
 stage = 'jaabadetect';
 if dojaabadetect,
-  
-  try
-    datalocparamsfilestr = 'dataloc_params.txt';
-    datalocparamsfile = fullfile(settingsdir,analysis_protocol,datalocparamsfilestr);
-    dataloc_params = ReadParams(datalocparamsfile);
-    jaabaclassifierparamsfilestrs = fullfile(settingsdir,analysis_protocol,dataloc_params.jaabaclassifierparamsfilestrs);  
-    %TODO better way to read file here
-    jabfiles = textread(jaabaclassifierparamsfilestrs,'%s');
     
-    pwdprev = pwd;
-    jaabadir = fileparts(which('JAABADetect'));
-    cd(jaabadir);
-    fprintf('JAABAdetect...\n');
-    JAABADetect(expdir,'jabfiles',jabfiles,'forcecompute',forcecompute);
+    try
+        datalocparamsfilestr = 'dataloc_params.txt';
+        datalocparamsfile = fullfile(settingsdir,analysis_protocol,datalocparamsfilestr);
+        dataloc_params = ReadParams(datalocparamsfile);
+        jaabaclassifierparamsfilestrs = fullfile(settingsdir,analysis_protocol,dataloc_params.jaabaclassifierparamsfilestrs);
+        %TODO better way to read file here
+        jabfiles = textread(jaabaclassifierparamsfilestrs,'%s');
+        %     p = path;
+%         pwdprev = pwd;
+%         jaabadir = fileparts(which('JAABADetect'));
+%         cd(jaabadir);
+        fprintf('JAABAdetect...\n');
+        JAABADetect(expdir,'jabfiles',jabfiles,'forcecompute',forcecompute);
+%         cd(pwdprev);
+        %     path(p);
+        
+    catch ME,
+        msgs = {sprintf('Error running JAABADetect:\n%s',getReport(ME))};
+        fprintf('JAABADetect failed:\n');
+        fprintf('%s\n',msgs{:});
+%         cd(pwdprev);
+   
+        return;
+    end
     
-    cd(pwdprev);
-    
-  catch ME,
-    msgs = {sprintf('Error running JAABADetect:\n%s',getReport(ME))};
-    fprintf('JAABADetect failed:\n');
-    fprintf('%s\n',msgs{:});
-    cd(pwdprev);
-    return;
-  end
-  
 end
+%%
+% stage = 'jaabadetect';
+% if dojaabadetect,
+%     
+%     try
+%         fprintf('JAABADetect...\n');
+%         
+%         % run compiled version to get around trx class problem.
+%         cmd = sprintf('/groups/branson/home/leea30/git/fba.build/bubble/current/run_FlyBubbleJAABADetect.sh /groups/branson/bransonlab/projects/olympiad/MCR/v717 %s analysis_protocol %s settingsdir %s datalocparamsfilestr %s forcecompute %d', ...
+%             expdir, analysis_protocol, settingsdir, datalocparamsfilestr, forcecompute);
+%         [status] = system(cmd);
+%     catch ME,
+%         msgs = {sprintf('Error running JAABADetect:\n%s',getReport(ME))};
+%         fprintf('JAABADetect failed:\n');
+%         fprintf('%s\n',msgs{:});
+%         return;
+%     end
+%     if ~status,
+%         fprintf('JAABADetect failed: system call did not complete properly \n');
+%         return;
+%     end
+%     
+% end
+
+    
 %% make results movie
 
 stage = 'ctraxresultsmovie';

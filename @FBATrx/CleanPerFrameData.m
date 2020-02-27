@@ -8,7 +8,7 @@ assert(exist('fns','var')==1,'fns to clean up must be specified.');
 
 % if ~exist('fns','var') || isempty(fns),
 %   fns = -1; % clean up all non-wing, non-traj mats in per-frame dir  
-%   %fns = setdiff(Trx.PerFrameFieldNames(),Trx.TrajectoryFieldNames());
+%   %fns = setdiff(Trx.PerFrameFieldNames(),FBATrx.TrajectoryFieldNames());
 % end
 if ~iscell(fns),
   fns = {fns};

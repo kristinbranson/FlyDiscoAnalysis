@@ -161,10 +161,10 @@ i = 1;
 expdir = expdirs{i};
 inexpdir = inexpdirs{i};
 experiment_name = experiment_names{i};
-trx = Trx('analysis_protocol',analysis_protocol,'settingsdir',settingsdir);
+trx = FBATrx('analysis_protocol',analysis_protocol,'settingsdir',settingsdir);
 trx.AddExpDir(expdir);
 
-oldtrx = Trx('analysis_protocol',analysis_protocol,'settingsdir',settingsdir);
+oldtrx = FBATrx('analysis_protocol',analysis_protocol,'settingsdir',settingsdir);
 oldtrx.AddExpDir(inexpdir);
 
 perframefnsfile = fullfile(trx.settingsdir,trx.analysis_protocol,trx.dataloc_params.perframefnsfilestr);

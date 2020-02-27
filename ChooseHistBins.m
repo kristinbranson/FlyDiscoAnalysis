@@ -177,7 +177,7 @@ nexpdirs = numel(expdirs);
 
 %% load data
 
-% obj = Trx('settingsdir',settingsdir,'analysis_protocol',analysis_protocol);
+% obj = FBATrx('settingsdir',settingsdir,'analysis_protocol',analysis_protocol);
 % for i = 1:numel(expdirs),
 %   obj.AddExpDir(expdirs{i});
 % end

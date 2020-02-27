@@ -19,7 +19,7 @@ flyconditiondict = ReadParams(statflyconditionsfile);
 
 %% create trx variable
 
-trx = Trx('analysis_protocol',analysis_protocol,'settingsdir',settingsdir,...
+trx = FBATrx('analysis_protocol',analysis_protocol,'settingsdir',settingsdir,...
     'datalocparamsfilestr',datalocparamsfilestr);
 
 fprintf('Loading trajectories for %s...\n',expdir);

@@ -131,7 +131,7 @@ stats_params = ReadParams(fullfile(settingsdir,analysis_protocol,dataloc_params.
 
 %% create trx variable
 
-trx = Trx('analysis_protocol',analysis_protocol,'settingsdir',settingsdir,...
+trx = FBATrx('analysis_protocol',analysis_protocol,'settingsdir',settingsdir,...
     'datalocparamsfilestr',datalocparamsfilestr);
 
 fprintf('Loading trajectories for %s...\n',expdir);

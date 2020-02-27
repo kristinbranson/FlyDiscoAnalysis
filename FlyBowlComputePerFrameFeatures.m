@@ -19,7 +19,7 @@ end
 %% Init trx
 fprintf('Initializing trx...\n');
 
-trx = Trx('analysis_protocol',analysis_protocol,'settingsdir',settingsdir,...
+trx = FBATrx('analysis_protocol',analysis_protocol,'settingsdir',settingsdir,...
   'datalocparamsfilestr',datalocparamsfilestr,'DEBUG',DEBUG);
 
 %% Cleanup/log existing perframefns

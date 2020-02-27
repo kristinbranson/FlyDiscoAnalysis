@@ -17,7 +17,7 @@ fprintf(logfid,'Running BowlBiasDiagnostics version %s analysis_protocol %s (lin
 
 %% read experiment trx
 
-trx = Trx('analysis_protocol',analysis_protocol,'settingsdir',settingsdir,...
+trx = FBATrx('analysis_protocol',analysis_protocol,'settingsdir',settingsdir,...
   'datalocparamsfilestr',datalocparamsfilestr);
 
 fprintf(logfid,'Loading trajectories for %s...\n',expdir);

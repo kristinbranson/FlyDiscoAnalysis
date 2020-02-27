@@ -25,7 +25,7 @@ logger = PipelineLogger(expdir,mfilename(),dataloc_params,'perframefeature_logfi
 
 %% Init trx
 logger.log('Initializing trx...\n');
-trx = Trx('analysis_protocol',analysis_protocol,'settingsdir',settingsdir,...
+trx = FBATrx('analysis_protocol',analysis_protocol,'settingsdir',settingsdir,...
   'datalocparamsfilestr',datalocparamsfilestr,'DEBUG',DEBUG);
 
 %% Cleanup/log existing perframefns

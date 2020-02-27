@@ -35,7 +35,7 @@ sexclassifier_params = ReadParams(sexclassifierparamsfile);
 
 %% load the data
 
-trx = Trx('analysis_protocol',protocol,'settingsdir',settingsdir,...
+trx = FBATrx('analysis_protocol',protocol,'settingsdir',settingsdir,...
   'datalocparamsfilestr',dataloc_paramsfilestr);
 
 for i = 1:numel(expdirs),
