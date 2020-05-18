@@ -15,3 +15,4 @@
 /groups/branson/home/robiea/Projects_data/JAABA/ProjectFiles_jab/FlyBowlPaperClassifiers/JAABAClassifiers_fromSupplementalData_modernized/WingExtension_AR_v2p2_nwd.jab
 /groups/branson/home/robiea/Projects_data/JAABA/ProjectFiles_jab/FlyBowlPaperClassifiers/JAABAClassifiers_fromSupplementalData_modernized/WingFlick2_AR_v1p5.jab
 /groups/branson/home/robiea/Projects_data/JAABA/ProjectFiles_jab/FlyBowlPaperClassifiers/JAABAClassifiers_fromSupplementalData_modernized/WingGrooming_wingfeatures_v3p2_nwd.jab
+/groups/branson/home/robiea/Projects_data/JAABA/ProjectFiles_jab/Ming_FlyBowl/FemaleAggressionv4.2.jab
