@@ -162,19 +162,20 @@ if DoLEDdetection
       end
     else
       fprintf(logfid,'\n Error creating indicatordigital');
-      msgs = {'Error creating indicatordigital'};
+      msgs{end+1} = 'Error creating indicatordigital' ;
     end
     
     indicatorLED.indicatordigital = indicatordigital;
     indicatorLED.starttimes = headerinfo.timestamps(indicatorLED.startframe)';
     indicatorLED.endtimes = headerinfo.timestamps(indicatorLED.endframe)';
     indicatordata.indicatorLED = indicatorLED;
-  catch
+  catch exception
     imagediff = max(meanimage)-min(meanimage);
-    fprintf(logfid,'\n Error calculating indicator on-off: meanimage value is small: %d, no indicator light',imagediff)
-    success = false;
-    msgs = {'Error calculating indicator LED on-off: no indicator detected'};
-    return;
+    fprintf(logfid, '\n Error calculating indicator on-off: Error identifier was "%s", error message was "%s"', exception.identifier, exception.message) ;
+    fprintf(logfid, '\n Possibly relevant: meanimage value is small: %g', imagediff) ;
+    success = false ;
+    msgs{end+1} = 'Error calculating indicator LED on-off' ;
+    return
   end
   
 end
