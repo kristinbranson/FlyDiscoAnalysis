@@ -208,3 +208,7 @@ if isdeployed && debugdata.DEBUG > 0,
   close all;
 end
 fclose(fid);
+if fid>0 ,
+    fclose(fid);
+end
+
