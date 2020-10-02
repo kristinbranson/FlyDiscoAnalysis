@@ -53,7 +53,8 @@ else
   ctraxresultsmovie_params = ReadParams(specificctraxresultsmovie_paramsfile);
   defaultparams = 0;
 end
-defaulttempdatadir = '/groups/branson/bransonlab/projects/olympiad/TempData_FlyBowlMakeCtraxResultsMovie';
+%defaulttempdatadir = '/groups/branson/bransonlab/projects/olympiad/TempData_FlyBowlMakeCtraxResultsMovie';
+defaulttempdatadir = '/groups/branson/bransonlab/adam/TempData_FlyBowlMakeCtraxResultsMovie';
 avifile = fullfile(ctraxresultsmovie_params.tempdatadir,[avifilestr,'_temp.avi']);
 mp4file = fullfile(expdir,[avifilestr,'.mp4']);
 
