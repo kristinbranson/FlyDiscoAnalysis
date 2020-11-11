@@ -143,12 +143,12 @@ end
 
 %% check for files required at start
 
-[ismissingfile,missingfiles] = CheckForMissingFiles(expdir,dataloc_params,requiredfiles_start);
-if ismissingfile,
-  msgs = cellfun(@(x) sprintf('Missing start file %s',x),missingfiles,'UniformOutput',false);
-  fprintf('%s\n',msgs{:});
-  return;
-end
+% [ismissingfile,missingfiles] = CheckForMissingFiles(expdir,dataloc_params,requiredfiles_start);
+% if ismissingfile,
+%   msgs = cellfun(@(x) sprintf('Missing start file %s',x),missingfiles,'UniformOutput',false);
+%   fprintf('%s\n',msgs{:});
+%   return;
+% end
 
 %% incoming checks
 
