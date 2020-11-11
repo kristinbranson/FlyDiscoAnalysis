@@ -356,10 +356,18 @@ newwidth = 4*ceil(width/4);
 
 nowstr = datestr(now,'yyyymmddTHHMMSSFFF');
 passlogfile = sprintf('%s_%s',avifile,nowstr);
-cmd = sprintf('/misc/local/ffmpeg-2.6.3/bin/ffmpeg -i %s -y -passlogfile %s -c:v h264 -pix_fmt yuv420p -s %dx%d -b:v 1600k -vf "subtitles=%s:force_style=''FontSize=10,FontName=Helvetica''" -pass 1 -f mp4 /dev/null',...
-  avifile,passlogfile,newwidth,newheight,subtitlefile);
-cmd2 = sprintf('/misc/local/ffmpeg-2.6.3/bin/ffmpeg -i %s -y -passlogfile %s -c:v h264 -pix_fmt yuv420p -s %dx%d -b:v 1600k -vf "subtitles=%s:force_style=''FontSize=10,FontName=Helvetica''" -pass 2 -f mp4 %s',...
-  avifile,passlogfile,newwidth,newheight,subtitlefile,mp4file);
+if isequal(get_distro_codename(), 'Ubuntu') && exist('/usr/bin/ffmpeg', 'file') ,
+    ffmpeg_command = 'env -u LD_LIBRARY_PATH /usr/bin/ffmpeg' ;  
+        % Use the local ffmpeg, to avoid fontconfig issues
+        % Have to use env -u to clear Matlab's very Matlab-specific
+        % LD_LIBRARY_PATH
+else
+    ffmpeg_command = '/misc/local/ffmpeg-2.6.3/bin/ffmpeg' ;
+end
+cmd = sprintf('%s -i %s -y -passlogfile %s -c:v h264 -pix_fmt yuv420p -s %dx%d -b:v 1600k -vf "subtitles=%s:force_style=''FontSize=10,FontName=Helvetica''" -pass 1 -f mp4 /dev/null',...
+  ffmpeg_command, avifile,passlogfile,newwidth,newheight,subtitlefile);
+cmd2 = sprintf('%s -i %s -y -passlogfile %s -c:v h264 -pix_fmt yuv420p -s %dx%d -b:v 1600k -vf "subtitles=%s:force_style=''FontSize=10,FontName=Helvetica''" -pass 2 -f mp4 %s',...
+  ffmpeg_command, avifile,passlogfile,newwidth,newheight,subtitlefile,mp4file);
 
 status = system(cmd);
 if status ~= 0,
