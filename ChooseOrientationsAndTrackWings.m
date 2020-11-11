@@ -45,6 +45,7 @@ lambda_theta = 10;
   'debug',0,'trackdata',[],...
   'savefile','',...
   'dofliporientation',true);
+annfile = [] ;
 
 % if trx file
 if ischar(trx),

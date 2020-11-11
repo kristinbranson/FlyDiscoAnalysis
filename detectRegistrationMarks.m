@@ -75,6 +75,7 @@ function registration = detectRegistrationMarks(varargin)
   'doTransposeImage',false,...
   'ledindicator',false,...
   'regXY',[]);
+annName = [] ;
 
 iscircle = ismember(method,{'circle','circle_manual'});
 
@@ -93,9 +94,6 @@ end
 isBkgdImage = ~isempty(bkgdImage);
 
 if ~isBkgdImage && ~isempty(annName),
-  if ~exist(annName,'file'),
-    error('Ann file %s does not exist',annName);
-  end
   % try reading 
   [bkgdImage,bkgdMed,bkgdMean,bg_algorithm,movie_height,movie_width] = ...
     read_ann(annName,'background_center',...
@@ -146,7 +144,7 @@ if ~isBkgdImage,
   [readframe,~,fid,headerinfo] = get_readframe_fcn(movieName);
   
   % take the median
-  if headerinfo.nmeans > 1,
+  if isfield(headerinfo, 'nmeans') && headerinfo.nmeans > 1,
     meanims = ufmf_read_mean(headerinfo,'meani',2:headerinfo.nmeans);
   else
     sampleframes = unique(round(linspace(1,headerinfo.nframes,bkgdNSampleFrames)));
@@ -157,7 +155,9 @@ if ~isBkgdImage,
   end
   meanims = double(meanims);
   bkgdImage = median(meanims,4);
-  fclose(fid);
+  if fid>0 ,
+      fclose(fid);
+  end
 end
 
 [nr,nc,ncolors] = size(bkgdImage); %#ok<NASGU>
