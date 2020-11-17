@@ -187,6 +187,30 @@ if doautomaticchecksincoming,
   end
   
 end
+
+
+
+%% Run FlyTracker
+
+stage = 'flytracker' ;
+dotracking = true ;
+if dotracking ,
+  todo = true ;
+  if forcecompute || todo ,    
+    try
+      fprintf('FlyTracker...\n');      
+      FlyTrackerWrapperForFlyBubble(expdir, settingsdir, analysis_protocol, dataloc_params) ;     
+    catch ME,
+      msgs = {sprintf('Error running FlyTracker:\n%s',getReport(ME))};
+      fprintf('FlyTracker failed:\n');
+      fprintf('%s\n',msgs{:});
+      return
+    end
+  end  
+end
+
+
+
 %% registration
 
 stage = 'registration';
