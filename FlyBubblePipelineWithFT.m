@@ -534,21 +534,14 @@ if domakectraxresultsmovie,
     
     try
       fprintf('MakeCtraxResultsMovie...\n');
-      if ~ispc
-        FlyBubbleMakeCtraxResultsMovie(expdir,...
-          'settingsdir',settingsdir,'analysis_protocol',analysis_protocol,...
-          makectraxresultsmovie_params{:});
-      else
-        %version for windows
-        FlyBubbleMakeCtraxResultsMovie(expdir,...
-          'settingsdir',settingsdir,'analysis_protocol',analysis_protocol,...
-          makectraxresultsmovie_params{:});
-      end
+      FlyBubbleMakeCtraxResultsMovie(expdir,...
+                                     'settingsdir',settingsdir,'analysis_protocol',analysis_protocol,...
+                                     makectraxresultsmovie_params{:});
     catch ME,
       msgs = {sprintf('Error running MakeCtraxResultsMovie:\n%s',getReport(ME))};
       fprintf('MakeCtraxResultsMovie failed:\n');
       fprintf('%s\n',msgs{:});
-      return;
+      return
     end
   end
   
@@ -558,12 +551,12 @@ if domakectraxresultsmovie,
     msgs = cellfun(@(x) sprintf('Missing makectraxresultsmovie file %s',x),missingfiles,'UniformOutput',false);
     fprintf('MakeCtraxResultsMovie failed:\n');
     fprintf('%s\n',msgs{:});
-    return;
+    return
   end
   
 end
 
-  %% complete checks
+%% complete checks
 
 stage = 'automaticchecks_complete';
 

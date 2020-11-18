@@ -499,7 +499,7 @@ if domakectraxresultsmovie,
   
 end
 
-  %% complete checks
+%% complete checks
 
 stage = 'automaticchecks_complete';
 
