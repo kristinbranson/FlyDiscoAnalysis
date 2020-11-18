@@ -187,30 +187,6 @@ if doautomaticchecksincoming,
   end
   
 end
-
-
-
-%% Run FlyTracker
-
-stage = 'flytracker' ;
-dotracking = true ;
-if dotracking ,
-  todo = true ;
-  if forcecompute || todo ,    
-    try
-      fprintf('FlyTracker...\n');      
-      FlyTrackerWrapperForFlyBubble(expdir, settingsdir, analysis_protocol, dataloc_params) ;     
-    catch ME,
-      msgs = {sprintf('Error running FlyTracker:\n%s',getReport(ME))};
-      fprintf('FlyTracker failed:\n');
-      fprintf('%s\n',msgs{:});
-      return
-    end
-  end  
-end
-
-
-
 %% registration
 
 stage = 'registration';
@@ -501,21 +477,14 @@ if domakectraxresultsmovie,
     
     try
       fprintf('MakeCtraxResultsMovie...\n');
-      if ~ispc
-        FlyBubbleMakeCtraxResultsMovie(expdir,...
-          'settingsdir',settingsdir,'analysis_protocol',analysis_protocol,...
-          makectraxresultsmovie_params{:});
-      else
-        %version for windows
-        FlyBubbleMakeCtraxResultsMovie(expdir,...
-          'settingsdir',settingsdir,'analysis_protocol',analysis_protocol,...
-          makectraxresultsmovie_params{:});
-      end
+      FlyBubbleMakeCtraxResultsMovie(expdir,...
+                                     'settingsdir',settingsdir,'analysis_protocol',analysis_protocol,...
+                                     makectraxresultsmovie_params{:});
     catch ME,
       msgs = {sprintf('Error running MakeCtraxResultsMovie:\n%s',getReport(ME))};
       fprintf('MakeCtraxResultsMovie failed:\n');
       fprintf('%s\n',msgs{:});
-      return;
+      return
     end
   end
   
@@ -525,7 +494,7 @@ if domakectraxresultsmovie,
     msgs = cellfun(@(x) sprintf('Missing makectraxresultsmovie file %s',x),missingfiles,'UniformOutput',false);
     fprintf('MakeCtraxResultsMovie failed:\n');
     fprintf('%s\n',msgs{:});
-    return;
+    return
   end
   
 end

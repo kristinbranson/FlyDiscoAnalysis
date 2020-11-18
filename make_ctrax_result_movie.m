@@ -449,6 +449,7 @@ for segi = 1:numel(firstframes),
   endframe = endframes(segi);
 
   for frame = firstframe:endframe,
+  %for frame = firstframe:firstframe+100-1,
     if mod(frame - firstframe,5) == 0,
       fprintf('frame %d, write rate = %f s/fr\n',frame,toc/5);
       tic;
@@ -524,7 +525,7 @@ for segi = 1:numel(firstframes),
         end
         
       end
-    end;
+    end
     
     % plot the zoomed out position
     if frame == firstframes(1),
