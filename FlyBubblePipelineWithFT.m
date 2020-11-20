@@ -316,11 +316,15 @@ if dotrackwings,
       fprintf('Wing tracking...\n');
       FlyBubbleTrackWings(expdir,...
         'settingsdir',settingsdir,'analysis_protocol',analysis_protocol);
+%       FlyTracker2WingTracking(expdir, ...
+%                               'dataloc_params', dataloc_params, ...
+%                               'settingsdir', settingsdir, ...
+%                               'analysis_protocol', analysis_protocol) ;
    catch ME,
       msgs = {sprintf('Error running TrackWings:\n%s',getReport(ME))};
       fprintf('TrackWings failed:\n');
       fprintf('%s\n',msgs{:});
-      return;
+      return
    end
   end
   % make sure sexclassification files exist
@@ -329,7 +333,7 @@ if dotrackwings,
     msgs = cellfun(@(x) sprintf('Missing wingtracking file %s',x),missingfiles,'UniformOutput',false);
     fprintf('TrackWings failed:\n');
     fprintf('%s\n',msgs{:});
-    return;
+    return
   end
 end
 
