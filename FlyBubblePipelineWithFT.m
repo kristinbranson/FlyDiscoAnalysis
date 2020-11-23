@@ -174,8 +174,9 @@ end
 %   return;
 % end
 
-%% incoming checks
 
+
+%% incoming checks
 stage = 'automaticchecks_incoming';
 
 if doautomaticchecksincoming,
@@ -215,7 +216,6 @@ end
 
 
 %% Run FlyTracker
-
 stage = 'flytracker' ;
 if doflytracking ,
   todo = CheckForMissingFiles(expdir,dataloc_params,requiredfiles_flytracker) ;
@@ -245,11 +245,8 @@ end
 
 
 %% registration
-
 stage = 'registration';
-
-if doregistration,
-  
+if doregistration,  
   todo = CheckForMissingFiles(expdir,dataloc_params,requiredfiles_registration);
   if forcecompute || todo,
     
@@ -278,8 +275,10 @@ if doregistration,
   end
   
 end
-%% led indicator detection on/off
 
+
+
+%% led indicator detection on/off
 stage = 'ledonoffdetection';
 if doledonoffdetection,
   todo = CheckForMissingFiles(expdir,dataloc_params,requiredfiles_ledonoffdetection);
@@ -306,8 +305,9 @@ if doledonoffdetection,
   end
 end
 
-%% Wing tracking and choose orientations
 
+
+%% Wing tracking and choose orientations
 stage = 'trackwings';
 if dotrackwings,
   todo = CheckForMissingFiles(expdir,dataloc_params,requiredfiles_wingtracking);
