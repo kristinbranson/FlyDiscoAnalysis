@@ -3,7 +3,7 @@ function modpath()
   
   path_to_this_script = mfilename('fullpath') ;
   path_to_this_folder = fileparts(path_to_this_script) ;
-  path_to_parent_folder = fileparts(path_to_this_folder) ;
+  %path_to_parent_folder = fileparts(path_to_this_folder) ;
   addpath(fullfile(path_to_this_folder, 'JAABA', 'filehandling')) ;
   addpath(fullfile(path_to_this_folder, 'JAABA', 'misc')) ;
   addpath(fullfile(path_to_this_folder, 'simplewing')) ;
