@@ -2,24 +2,12 @@
 modpath() ;
 
 % Get the path to the settings folder
-%settingsdir = '/groups/branson/home/robiea/Code_versioned/FlyBubbleAnalysis/settings';
-%settingsdir = '/groups/branson/home/robiea/Code_versioned/FlyBubbleAnalysis_github/settings';
 path_to_this_folder = fileparts( mfilename('fullpath') ) ;
 path_to_parent_folder = fileparts(path_to_this_folder) ;
 settingsdir = fullfile(path_to_this_folder, 'settings') 
 
-%% parameters
-% analysis_protocol = '20161215_flybubble_seedsa';
-% analysis_protocol = 'current_non_olympiad_rubin_grooming';
-% analysis_protocol = 'current_bubble';
-% analysis_protocol = '20190826_flybubble_pipelinemore';
-
+% parameters
 analysis_protocol = '20190712_flybubble_flybowloptoKatie_mingrig_avi_flytracker';
-%analysis_protocol = '20190712_flybubble_flybowloptoKatie_mingrig'
-
-% analysis_protocol = '20200123_flybubble_centralcomplex';
-% analysis_protocol = '20150717_flybubble_flybowlMing';
-
 params = {'settingsdir',settingsdir,...
   'analysis_protocol',analysis_protocol, ...
   'forcecompute',false,...

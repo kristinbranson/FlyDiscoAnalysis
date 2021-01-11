@@ -1,24 +1,14 @@
 %Debug_FlyBubblePipeline.m
 
 path_to_this_script = mfilename('fullpath') ;
-path_to_this_folder = fileparts(path_to_this_script) ;
-path_to_parent_folder = fileparts(path_to_this_folder) ;
-addpath(fullfile(path_to_parent_folder, 'JAABA', 'filehandling')) ;
-addpath(fullfile(path_to_parent_folder, 'JAABA', 'misc')) ;
-addpath(fullfile(path_to_this_folder, 'simplewing')) ;
-addpath(fullfile(path_to_this_folder, 'hmm')) ;
-%addpath(fullfile(path_to_parent_folder, 'flySpaceTimeFeatures')) ;
-addpath(fullfile(path_to_parent_folder, 'JAABA', 'perframe')) ;
+% Set up path to libraries
+modpath() ;
 
-% addpath /groups/branson/home/robiea/Code_versioned/Jdetect_github/Jdetect/filehandling/;
-% addpath /groups/branson/home/robiea/Code_versioned/Jdetect_github/Jdetect/misc;
-% addpath /groups/branson/home/robiea/Code_versioned/FlyBubbleAnalysis_github/simplewing;
-% addpath /groups/branson/home/robiea/Code_versioned/FlyBubbleAnalysis_github/hmm;
-% addpath /groups/branson/home/robiea/Code_versioned/flySpaceTimeFeatures;
-% addpath /groups/branson/home/robiea/Code_versioned/Jdetect_github/Jdetect/perframe;
-
-% settingsdir = '/groups/branson/home/robiea/Code_versioned/FlyBubbleAnalysis/settings';
+% Get the path to the settings folder
+%settingsdir = '/groups/branson/home/robiea/Code_versioned/FlyBubbleAnalysis/settings';
 %settingsdir = '/groups/branson/home/robiea/Code_versioned/FlyBubbleAnalysis_github/settings';
+path_to_this_folder = fileparts( mfilename('fullpath') ) ;
+path_to_parent_folder = fileparts(path_to_this_folder) ;
 settingsdir = fullfile(path_to_this_folder, 'settings') 
 
 %% parameters
@@ -35,7 +25,7 @@ analysis_protocol = '20190712_flybubble_flybowloptoKatie_mingrig'
 
 params = {'settingsdir',settingsdir,...
   'analysis_protocol',analysis_protocol, ...
-  'forcecompute',true,...
+  'forcecompute',false,...
   'doautomaticchecksincoming',false,...
   'doregistration',true,...
   'doledonoffdetection',true,...  
