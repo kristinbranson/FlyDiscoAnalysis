@@ -41,7 +41,7 @@ perframefns_preexist = regexprep({tmp.name},'\.mat$','');
 
 % clean this data to force computation
 if forcecompute,
-  WINGTRACK_PERFRAMEFILES = {'nwingsdetected' 'wing_areal' 'wing_arear' 'wing_trough_angle'};
+  WINGTRACK_PERFRAMEFILES = {'nwingsdetected' 'wing_areal' 'wing_arear' 'wing_trough_angle' 'wing_anglel' 'wing_angler'};
   % AL 20131016: Blow away all preexisting (sans wingtracking) to account for obsolete perframefns  
   perframefns_rm = setdiff(perframefns_preexist,WINGTRACK_PERFRAMEFILES);
   for i = 1:numel(perframefns_rm)
