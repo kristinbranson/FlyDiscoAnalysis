@@ -1,6 +1,6 @@
 [submodule "JAABA"]
 	path = JAABA
-	url = git@github.com:kristinbranson/JAABA.git
+	url = https://github.com:kristinbranson/JAABA.git
 [submodule "FlyTracker"]
 	path = FlyTracker
-	url = git@github.com:kristinbranson/FlyTracker.git
+	url = https://github.com:kristinbranson/FlyTracker.git
