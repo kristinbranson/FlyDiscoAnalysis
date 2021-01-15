@@ -364,7 +364,7 @@ if isequal(get_distro_codename(), 'Ubuntu') && exist('/usr/bin/ffmpeg', 'file') 
         % Have to use env -u to clear Matlab's very Matlab-specific
         % LD_LIBRARY_PATH
 else
-    ffmpeg_command = '/misc/local/ffmpeg-2.6.3/bin/ffmpeg' ;
+    ffmpeg_command = '/misc/local/ffmpeg-4.3.1/bin/ffmpeg' ;
 end
 cmd = sprintf('%s -i %s -y -passlogfile %s -c:v h264 -pix_fmt yuv420p -s %dx%d -b:v 1600k -vf "subtitles=%s:force_style=''FontSize=10,FontName=Helvetica''" -pass 1 -f mp4 /dev/null',...
   ffmpeg_command, avifile,passlogfile,newwidth,newheight,subtitlefile);
