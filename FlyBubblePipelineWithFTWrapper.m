@@ -10,8 +10,8 @@ function FlyBubblePipelineWithFTWrapper(experiment_folder_path, settings_folder_
     % Read the experiment metadata to determine the analysis_protoocol
     metadata_file_path = fullfile(experiment_folder_path, 'metaData.xml') ;
     metadata = ReadMetadataFile(metadata_file_path) ;
-    if isfield(metadata, 'analysis_protocol') ,
-        analysis_protocol = metadata.analysis_protocol ;
+    if isfield(metadata, 'screen_name') ,
+        analysis_protocol = metadata.screen_name ;
     else
         error('No analysis protocol specified in %s', metadata_file_path) ;
     end
