@@ -15,6 +15,7 @@ function FlyBubblePipelineWithFTWrapper(experiment_folder_path, settings_folder_
     else
         error('No analysis protocol specified in %s', metadata_file_path) ;
     end
+    fprintf('Analysis protocol is: %s\n', analysis_protocol) ;
     
     % Build up the parameters cell array
     params = {'settingsdir',settings_folder_path,...
