@@ -733,18 +733,41 @@ for segi = 1:numel(firstframes),
       end
     end
     
+    fr = getframe(hax);
     if frame == firstframes(1),
-      fr = getframe_invisible(hax);
-      [height,width,~] = size(fr);
+      height = size(fr.cdata,1);
+      width = size(fr.cdata,2);
+%       fr = getframe_invisible(hax);
+%       [height,width,~] = size(fr);
       fprintf('Size of frame is %d x %d\n',height,width);
-      gfdata = getframe_initialize(hax);
-      [fr,height,width] = getframe_invisible_nocheck(gfdata,[height,width],false,false);
-
+%       gfdata = getframe_initialize(hax);
+%       [fr,height,width] = getframe_invisible_nocheck(gfdata,[height,width],false,false);
+% 
 %       height = ceil(height/4)*4;
 %       width = ceil(width/4)*4;
 %       fr = getframe_invisible(hax,[height,width]);
     else
-      fr = getframe_invisible_nocheck(gfdata,[height,width],false);
+      height1 = size(fr.cdata,1);
+      width1 = size(fr.cdata,2);
+      if height1 < height,
+        dheight1 = floor((height-height1)/2);
+        dheight2 = (height-height1)-dheight1;
+        fr.cdata = fr.cdata(dheight1:end-dheight2,:,:);
+      elseif height1 > height,
+        dheight1 = floor((height1-height)/2);
+        dheight2 = (height1-height)-dheight1;
+        fr.cdata = cat(1,zeros([dheight1,width1,3],class(fr.cdata)),fr.cdata,zeros([dheight2,width1,3],class(fr.cdata)));
+      end
+      if width1 < width,
+        dwidth1 = floor((width-width1)/2);
+        dwidth2 = (width-width1)-dwidth1;
+        fr.cdata = fr.cdata(:,dwidth1:end-dwidth2,:);
+      elseif width1 > width,
+        dwidth1 = floor((width1-width)/2);
+        dwidth2 = (width1-width)-dwidth1;
+        fr.cdata = cat(2,zeros([height,dwidth1,3],class(fr.cdata)),fr.cdata,zeros([height,dwidth2,3],class(fr.cdata)));
+      end
+      %fr = getframe_invisible_nocheck(gfdata,[height,width],false);
     end
     if useVideoWriter,
       writeVideo(aviobj,fr);
