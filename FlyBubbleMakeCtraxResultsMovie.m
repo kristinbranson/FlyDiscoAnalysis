@@ -317,6 +317,7 @@ end
 
 %% create movie
 %temp_avi_path = [avifile,'-temp'] ;
+
 scratch_folder_path = get_scratch_folder_path() ;
 temp_avi_path = [tempname(scratch_folder_path) '.avi'] ;
 [succeeded,~,~,height,width]= ...
