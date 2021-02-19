@@ -4,7 +4,7 @@ function FlyTrackerWrapperForFlyBubble(expdir, settingsdir, analysis_protocol, d
     flytracker_parent_calibration_file_name = dataloc_params.flytrackerparentcalibrationstr ;
     flytracker_parent_calibration_file_path = fullfile(settingsdir, analysis_protocol, flytracker_parent_calibration_file_name) ;
     flytracker_calibration_file_name = dataloc_params.flytrackercalibrationstr ;
-    flytracker_calibration_file_path = fullfile(settingsdir, analysis_protocol, flytracker_calibration_file_name) ;
+    flytracker_calibration_file_path = fullfile(expdir, flytracker_calibration_file_name) ;
     video_file_name = dataloc_params.moviefilestr ;
     video_file_path = fullfile(expdir, video_file_name) ;
     
