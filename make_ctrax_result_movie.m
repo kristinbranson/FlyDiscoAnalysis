@@ -793,6 +793,6 @@ end
 
 fprintf('Cleanup...\n');
 
-getframe_cleanup(gfdata);
+%getframe_cleanup(gfdata);
 
 succeeded = true;
