@@ -7,7 +7,7 @@ annfilestr,movie.ufmf.ann
 flytrackerparentcalibrationstr,parent_calibration_bubble20210218.mat
 flytrackercalibrationstr,flytracker-calibration.mat
 flytrackertrackstr,movie-track.mat
-ctraxfilestr,ctrax_results.mat
+ctraxfilestr,movie_JAABA/trx.mat
 trxfilestr,registered_trx.mat
 wingtrxfilestr,wingtracking_results.mat
 registrationmatfilestr,registrationdata.mat
