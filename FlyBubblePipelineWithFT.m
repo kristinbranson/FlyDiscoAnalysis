@@ -479,7 +479,7 @@ if dojaabadetect,
 %         jaabadir = fileparts(which('JAABADetect'));
 %         cd(jaabadir);
         fprintf('JAABAdetect...\n');
-        JAABADetect(expdir,'jabfiles',jabfiles,'forcecompute',forcecompute);
+        JAABADetect(expdir, 'jabfiles', jabfiles, 'forcecompute', forcecompute, 'doteardownpath', true) ;
 %         cd(pwdprev);
         %     path(p);
         
