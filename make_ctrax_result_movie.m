@@ -497,32 +497,39 @@ for segi = 1:numel(firstframes),
       for j = 1:nzoomc,
         fly = zoomflies(i,j);
         
-        % fly not visible?
-        if isnan(fly) || ~isalive(fly),
+        % Is fly visible?
+        if isnan(fly) || ~isalive(fly) ,
+          is_fly_visible = false ;
+        else
+          x = round(trx(fly).x(idx(fly)));
+          y = round(trx(fly).y(idx(fly)));
+          is_fly_visible = isfinite(x) && isfinite(y) ;
+        end                      
+        
+        if is_fly_visible ,
+          % grab a box around (x,y)
+          boxradx1 = min(boxradius,x-1);
+          boxradx2 = min(boxradius,size(im,2)-x);
+          boxrady1 = min(boxradius,y-1);
+          boxrady2 = min(boxradius,size(im,1)-y);
+          box = uint8(zeros(2*boxradius+1));
+          box(boxradius+1-boxrady1:boxradius+1+boxrady2, boxradius+1-boxradx1:boxradius+1+boxradx2) = ...
+            im(y-boxrady1:y+boxrady2,x-boxradx1:x+boxradx2);
+          if frame == firstframes(1),
+            himzoom(i,j) = image([x0(j),x1(j)],[y0(i),y1(i)],repmat(box,[1,1,3]));
+          else
+            set(himzoom(i,j),'cdata',repmat(box,[1,1,3]));
+          end          
+        else
+          % If fly is not visible, show a placeholder
           if frame == firstframes(1),
             himzoom(i,j) = image([x0(j),x1(j)],[y0(i),y1(i)],repmat(uint8(123),[boxradius*2+1,boxradius*2+1,3]));
           else
             set(himzoom(i,j),'cdata',repmat(uint8(123),[boxradius*2+1,boxradius*2+1,3]));
           end
-          continue;
+          continue
         end
         
-        % grab a box around (x,y)
-        x = round(trx(fly).x(idx(fly)));
-        y = round(trx(fly).y(idx(fly)));
-        boxradx1 = min(boxradius,x-1);
-        boxradx2 = min(boxradius,size(im,2)-x);
-        boxrady1 = min(boxradius,y-1);
-        boxrady2 = min(boxradius,size(im,1)-y);
-        box = uint8(zeros(2*boxradius+1));
-        box(boxradius+1-boxrady1:boxradius+1+boxrady2,...
-          boxradius+1-boxradx1:boxradius+1+boxradx2) = ...
-          im(y-boxrady1:y+boxrady2,x-boxradx1:x+boxradx2);
-        if frame == firstframes(1),
-          himzoom(i,j) = image([x0(j),x1(j)],[y0(i),y1(i)],repmat(box,[1,1,3]));
-        else
-          set(himzoom(i,j),'cdata',repmat(box,[1,1,3]));
-        end
         
       end
     end
