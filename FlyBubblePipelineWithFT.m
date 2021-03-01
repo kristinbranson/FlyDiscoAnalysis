@@ -182,20 +182,13 @@ stage = 'automaticchecks_incoming';
 if doautomaticchecksincoming,
   todo = CheckForMissingFiles(expdir,dataloc_params,requiredfiles_automaticchecksincoming);
   if forcecompute || todo,
-    try
-      fprintf('AutomaticChecks_Incoming...\n');
+    fprintf('AutomaticChecks_Incoming...\n');
 
-      [success1,msgs] = FlyBubbleAutomaticChecks_Incoming(expdir,...
-        'settingsdir',settingsdir,'analysis_protocol',analysis_protocol,...
-        automaticchecksincoming_params{:});
-      
-      if ~success1,
-        fprintf('AutomaticChecks_Incoming failed:\n');
-        fprintf('%s\n',msgs{:});
-        return;
-      end
-    catch ME,
-      msgs = {sprintf('Error running AutomaticChecks_Incoming:\n%s',getReport(ME))};
+    [success1,msgs] = FlyBubbleAutomaticChecks_Incoming(expdir,...
+      'settingsdir',settingsdir,'analysis_protocol',analysis_protocol,...
+      automaticchecksincoming_params{:});
+
+    if ~success1,
       fprintf('AutomaticChecks_Incoming failed:\n');
       fprintf('%s\n',msgs{:});
       return;
@@ -220,15 +213,8 @@ stage = 'flytracker' ;
 if doflytracking ,
   todo = CheckForMissingFiles(expdir,dataloc_params,requiredfiles_flytracker) ;
   if forcecompute || todo ,    
-    try
-      fprintf('FlyTracker...\n');      
-      FlyTrackerWrapperForFlyBubble(expdir, settingsdir, analysis_protocol, dataloc_params) ;     
-    catch ME,
-      msgs = {sprintf('Error running FlyTracker:\n%s',getReport(ME))};
-      fprintf('FlyTracker failed:\n');
-      fprintf('%s\n',msgs{:});
-      return
-    end
+    fprintf('FlyTracker...\n');      
+    FlyTrackerWrapperForFlyBubble(expdir, settingsdir, analysis_protocol, dataloc_params) ;     
   end  
   
   % make sure flytracker files exist
@@ -249,20 +235,11 @@ stage = 'registration';
 if doregistration,  
   todo = CheckForMissingFiles(expdir,dataloc_params,requiredfiles_registration);
   if forcecompute || todo,
-    
-    try
-      fprintf('RegisterTrx...\n');
+    fprintf('RegisterTrx...\n');
 
-      FlyBubbleRegisterTrx(expdir,...
-        'settingsdir',settingsdir,'analysis_protocol',analysis_protocol,...
-        registration_params{:});
-      
-    catch ME,
-      msgs = {sprintf('Error running RegisterTrx:\n%s',getReport(ME))};
-      fprintf('RegisterTrx failed:\n');
-      fprintf('%s\n',msgs{:});
-      return;
-    end
+    FlyBubbleRegisterTrx(expdir,...
+      'settingsdir',settingsdir,'analysis_protocol',analysis_protocol,...
+      registration_params{:});
   end
   
   % make sure registration files exist
@@ -283,17 +260,10 @@ stage = 'ledonoffdetection';
 if doledonoffdetection,
   todo = CheckForMissingFiles(expdir,dataloc_params,requiredfiles_ledonoffdetection);
   if forcecompute || todo, 
-    try
-      fprintf('Detect LED onoff ...\n');
-      FlyBubbleDectectIndicatorLedOnOff(expdir,...
-        'settingsdir',settingsdir,'analysis_protocol',analysis_protocol,...
-        registration_params{:});
-    catch ME,
-      msgs = {sprintf('Error running LED onoff detection:\n%s',getReport(ME))};
-      fprintf('RegisterTrx failed:\n');
-      fprintf('%s\n',msgs{:});
-      return;
-    end
+    fprintf('Detect LED onoff ...\n');
+    FlyBubbleDectectIndicatorLedOnOff(expdir,...
+      'settingsdir',settingsdir,'analysis_protocol',analysis_protocol,...
+      registration_params{:});
   end
   % make sure leddetection files exist requiredfiles_ledonoffdetection
   [ismissingfile,missingfiles] = CheckForMissingFiles(expdir,dataloc_params,requiredfiles_ledonoffdetection);
@@ -312,20 +282,11 @@ stage = 'trackwings';
 if dotrackwings,
   todo = CheckForMissingFiles(expdir,dataloc_params,requiredfiles_wingtracking);
   if forcecompute || todo,
-   try
-      fprintf('Wing tracking...\n');
-%       FlyBubbleTrackWings(expdir,...
-%         'settingsdir',settingsdir,'analysis_protocol',analysis_protocol);
-      FlyTracker2WingTracking(expdir, ...
-                              'dataloc_params', dataloc_params, ...
-                              'settingsdir', settingsdir, ...
-                              'analysis_protocol', analysis_protocol) ;
-   catch ME,
-      msgs = {sprintf('Error running TrackWings:\n%s',getReport(ME))};
-      fprintf('TrackWings failed:\n');
-      fprintf('%s\n',msgs{:});
-      return
-   end
+    fprintf('Wing tracking...\n');
+    FlyTracker2WingTracking(expdir, ...
+                            'dataloc_params', dataloc_params, ...
+                            'settingsdir', settingsdir, ...
+                            'analysis_protocol', analysis_protocol) ;
   end
   % make sure sexclassification files exist
   [ismissingfile,missingfiles] = CheckForMissingFiles(expdir,dataloc_params,requiredfiles_wingtracking);
@@ -344,20 +305,11 @@ stage = 'sexclassification';
 if dosexclassification,
   
   todo = CheckForMissingFiles(expdir,dataloc_params,requiredfiles_sexclassification);
-  if forcecompute || todo,
-    
-    try
-      fprintf('ClassifySex...\n');
-      FlyBubbleClassifySex(expdir,...
-        'settingsdir',settingsdir,'analysis_protocol',analysis_protocol,...
-        sexclassification_params{:});
-      
-    catch ME,
-      msgs = {sprintf('Error running SexClassification:\n%s',getReport(ME))};
-      fprintf('SexClassification failed:\n');
-      fprintf('%s\n',msgs{:});
-      return;
-    end
+  if forcecompute || todo,    
+    fprintf('ClassifySex...\n');
+    FlyBubbleClassifySex(expdir,...
+      'settingsdir',settingsdir,'analysis_protocol',analysis_protocol,...
+      sexclassification_params{:});
   end
   
   % make sure sexclassification files exist
@@ -375,8 +327,7 @@ end
 
 stage = 'computeperframefeatures';
 
-if docomputeperframefeatures,
-    
+if docomputeperframefeatures,    
   if ismember('PERFRAMEMATFILES',requiredfiles_computeperframefeatures),
     % read in per-frame fns to compute
     i = find(strcmpi('perframefns',computeperframefeatures_params),1);
@@ -392,21 +343,12 @@ if docomputeperframefeatures,
   end
   
   todo = CheckForMissingFiles(expdir,dataloc_params,requiredfiles_computeperframefeatures);
-  if forcecompute || todo,
-    
-    try
-      fprintf('ComputePerFrameFeatures...\n');
-      FlyBubbleComputePerFrameFeatures(expdir,...
-        'settingsdir',settingsdir,'analysis_protocol',analysis_protocol,...
-        'forcecompute',forcecompute,...
-        computeperframefeatures_params{:});
-      
-    catch ME,
-      msgs = {sprintf('Error running ComputePerFrameFeatures:\n%s',getReport(ME))};
-      fprintf('ComputePerFrameFeatures failed:\n');
-      fprintf('%s\n',msgs{:});
-      return;
-    end
+  if forcecompute || todo,    
+    fprintf('ComputePerFrameFeatures...\n');
+    FlyBubbleComputePerFrameFeatures(expdir,...
+      'settingsdir',settingsdir,'analysis_protocol',analysis_protocol,...
+      'forcecompute',forcecompute,...
+      computeperframefeatures_params{:});
   end
   
   % make sure computeperframefeatures files exist
@@ -429,27 +371,17 @@ if docomputehoghofperframefeatures,
   requiredfiles_computehoghofperframefeatures = fullfile(dataloc_params.perframedir,requiredfiles_computehoghofperframefeatures);
   todo = CheckForMissingFiles(expdir,dataloc_params,requiredfiles_computehoghofperframefeatures);
   if forcecompute || todo,
-    try
-      pwdprev = pwd;
-      
-      datalocparamsfilestr = 'dataloc_params.txt';
-      datalocparamsfile = fullfile(settingsdir,analysis_protocol,datalocparamsfilestr);
-      dataloc_params = ReadParams(datalocparamsfile);
-      trxfilestr = fullfile(expdir,dataloc_params.trxfilestr);
-      movfilestr = fullfile(expdir,dataloc_params.moviefilestr);
-      spacetimefeaturesdir = fileparts(which('preparePerFrameFtrs'));
-      cd (spacetimefeaturesdir);
-      fprintf('preparePreFrameFtrs hog_hof...\n');
-      preparePerFrameFtrs(movfilestr,trxfilestr,false,false);
-      
-      cd(pwdprev);
-    catch ME,
-      msgs = {sprintf('Error running preparePerFrameFtrs hog_hof features:\n%s',getReport(ME))};
-      fprintf('preparePreFrameFtrs hog_hof failed:\n');
-      fprintf('%s\n',msgs{:});
-      cd(pwdprev);
-      return;
-    end
+    pwdprev = pwd;      
+    datalocparamsfilestr = 'dataloc_params.txt';
+    datalocparamsfile = fullfile(settingsdir,analysis_protocol,datalocparamsfilestr);
+    dataloc_params = ReadParams(datalocparamsfile);
+    trxfilestr = fullfile(expdir,dataloc_params.trxfilestr);
+    movfilestr = fullfile(expdir,dataloc_params.moviefilestr);
+    spacetimefeaturesdir = fileparts(which('preparePerFrameFtrs'));
+    cd (spacetimefeaturesdir);
+    fprintf('preparePreFrameFtrs hog_hof...\n');
+    preparePerFrameFtrs(movfilestr,trxfilestr,false,false);      
+    cd(pwdprev);
   end
   % make sure computeperframefeatures files exist
   [ismissingfile,missingfiles] = CheckForMissingFiles(expdir,dataloc_params,requiredfiles_computeperframefeatures);
@@ -463,59 +395,25 @@ if docomputehoghofperframefeatures,
 end
 
 %% behavior detection
-
 stage = 'jaabadetect';
 if dojaabadetect,
-    
+    % For reasons I don't understand, this code errors if you remove the
+    % try/catch... (ALT, 2020-02-27)
     try
         datalocparamsfilestr = 'dataloc_params.txt';
         datalocparamsfile = fullfile(settingsdir,analysis_protocol,datalocparamsfilestr);
         dataloc_params = ReadParams(datalocparamsfile);
         jaabaclassifierparamsfilestrs = fullfile(settingsdir,analysis_protocol,dataloc_params.jaabaclassifierparamsfilestrs);
-        %TODO better way to read file here
         jabfiles = textread(jaabaclassifierparamsfilestrs,'%s');
-        %     p = path;
-%         pwdprev = pwd;
-%         jaabadir = fileparts(which('JAABADetect'));
-%         cd(jaabadir);
         fprintf('JAABAdetect...\n');
         JAABADetect(expdir, 'jabfiles', jabfiles, 'forcecompute', forcecompute, 'doteardownpath', true) ;
-%         cd(pwdprev);
-        %     path(p);
-        
     catch ME,
         msgs = {sprintf('Error running JAABADetect:\n%s',getReport(ME))};
         fprintf('JAABADetect failed:\n');
-        fprintf('%s\n',msgs{:});
-%         cd(pwdprev);
-   
-        return;
-    end
-    
+        fprintf('%s\n',msgs{:});   
+        return
+    end    
 end
-%%
-% stage = 'jaabadetect';
-% if dojaabadetect,
-%     
-%     try
-%         fprintf('JAABADetect...\n');
-%         
-%         % run compiled version to get around trx class problem.
-%         cmd = sprintf('/groups/branson/home/leea30/git/fba.build/bubble/current/run_FlyBubbleJAABADetect.sh /groups/branson/bransonlab/projects/olympiad/MCR/v717 %s analysis_protocol %s settingsdir %s datalocparamsfilestr %s forcecompute %d', ...
-%             expdir, analysis_protocol, settingsdir, datalocparamsfilestr, forcecompute);
-%         [status] = system(cmd);
-%     catch ME,
-%         msgs = {sprintf('Error running JAABADetect:\n%s',getReport(ME))};
-%         fprintf('JAABADetect failed:\n');
-%         fprintf('%s\n',msgs{:});
-%         return;
-%     end
-%     if ~status,
-%         fprintf('JAABADetect failed: system call did not complete properly \n');
-%         return;
-%     end
-%     
-% end
 
     
 %% make results movie
@@ -528,25 +426,16 @@ if domakectraxresultsmovie,
   if ~isempty(i),
     [~,basename] = fileparts(expdir);
     avifilestr = sprintf('%s_%s',dataloc_params.ctraxresultsavifilestr,basename);
-%     xvidfile = [avifilestr,'.avi'];
     h264file = [avifilestr,'.mp4'];
     requiredfiles_makectraxresultsmovie{i} = h264file;
   end
   
   todo = CheckForMissingFiles(expdir,dataloc_params,requiredfiles_makectraxresultsmovie);
-  if forcecompute || todo,
-    
-    try
-      fprintf('MakeCtraxResultsMovie...\n');
-      FlyBubbleMakeCtraxResultsMovie(expdir,...
-                                     'settingsdir',settingsdir,'analysis_protocol',analysis_protocol,...
-                                     makectraxresultsmovie_params{:});
-    catch ME,
-      msgs = {sprintf('Error running MakeCtraxResultsMovie:\n%s',getReport(ME))};
-      fprintf('MakeCtraxResultsMovie failed:\n');
-      fprintf('%s\n',msgs{:});
-      return
-    end
+  if forcecompute || todo ,    
+    fprintf('MakeCtraxResultsMovie...\n');
+    FlyBubbleMakeCtraxResultsMovie(expdir,...
+                                   'settingsdir',settingsdir,'analysis_protocol',analysis_protocol,...
+                                   makectraxresultsmovie_params{:});
   end
   
   % make sure makectraxresultsmovie files exist
@@ -567,19 +456,13 @@ stage = 'automaticchecks_complete';
 if doautomaticcheckscomplete,
   todo = CheckForMissingFiles(expdir,dataloc_params,requiredfiles_automaticcheckscomplete);
   if forcecompute || todo,
-    try
-      fprintf('AutomaticChecks_Complete...\n');
-      [success1,msgs] = FlyBubbleAutomaticChecks_Complete(expdir,...
-        'settingsdir',settingsdir,'analysis_protocol',analysis_protocol,...
-        automaticcheckscomplete_params{:});
-      
-      if ~success1,
-        fprintf('AutomaticChecks_Complete failed:\n');
-        fprintf('%s\n',msgs{:});
-        return;
-      end
-    catch ME,
-      msgs = {sprintf('Error running AutomaticChecks_Complete:\n%s',getReport(ME))};
+    fprintf('AutomaticChecks_Complete...\n');
+    [success1, msgs] = ...
+      FlyBubbleAutomaticChecks_Complete(expdir,...
+                                        'settingsdir',settingsdir, ...
+                                        'analysis_protocol',analysis_protocol,...
+                                        automaticcheckscomplete_params{:});
+    if ~success1,
       fprintf('AutomaticChecks_Complete failed:\n');
       fprintf('%s\n',msgs{:});
       return;
