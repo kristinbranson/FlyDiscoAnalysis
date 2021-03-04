@@ -148,7 +148,7 @@ end
 
 %% check barcode
 
-if isfield(metadata,'exp_datetime'),
+if isfield(metadata,'exp_datetime') && ~isempty(metadata.exp_datetime) ,
   exp_datenum = datenum(metadata.exp_datetime,datetime_format);
 else
   exp_datenum = nan;
