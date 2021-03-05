@@ -1,4 +1,4 @@
-function [trx,summary_diagnostics,X] = FlyBubbleClassifySex(expdir,varargin)
+function [trx,summary_diagnostics,X] = FlyDiscoClassifySex(expdir,varargin)
 
 version = '0.2';
 
@@ -172,7 +172,7 @@ else
       save(sexclassifieroutmatfile,'mu_area','var_area','ptrans','prior','ll',...
         'nstates','state2sex','maxerrx','maxfreq','filterorder','version','analysis_protocol');
     catch ME,
-      warning('FlyBubbleClassifySex:save',...
+      warning('FlyDiscoClassifySex:save',...
         'Could not save to file %s: %s',sexclassifieroutmatfile,getReport(ME));
       logger.log('Could not save to file %s: %s\n',sexclassifieroutmatfile,getReport(ME));
     end
@@ -272,7 +272,7 @@ if dosave,
   end      
   fid = fopen(sexclassifierdiagnosticsfile,'w');
   if fid < 0,
-    warning('FlyBubbleClassifySex:diags',...
+    warning('FlyDiscoClassifySex:diags',...
       'Could not open file %s for writing, printing diagnostics to stdout instead',sexclassifierdiagnosticsfile);
     fid = 1;
   end
@@ -315,7 +315,7 @@ if dosave,
 %       tmp.sexclassifierinfo = sexclassifierinfo;
 %       save(trxfileout,'-struct','tmp');
 %     catch ME,
-      warning('FlyBubbleClassifySex:save',...
+      warning('FlyDiscoClassifySex:save',...
         'Could not save to file %s: %s',trxfileout,getReport(ME));
       logger.log('Could not save to file %s: %s',trxfileout,getReport(ME));
 %     end

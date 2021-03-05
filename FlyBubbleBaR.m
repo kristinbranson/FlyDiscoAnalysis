@@ -13,7 +13,7 @@ classdef FlyBubbleBaR
 
     BUILDPROJECTS = {
       'FlyDiscoAutomaticChecksIncoming'
-      'FlyBubbleClassifySex'
+      'FlyDiscoClassifySex'
       'FlyBubbleComputePerFrameFeatures'
       'FlyDiscoDectectIndicatorLedOnOff'
       'FlyDiscoRegisterTrx'

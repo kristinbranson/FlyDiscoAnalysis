@@ -16,7 +16,7 @@ classdef PipelineLogger < handle
         varargin)
       % Construct/initialize Logger and print header
       % expdir: char, fullpath
-      % pipelinestage: char, eg 'FlyBubbleClassifySex'
+      % pipelinestage: char, eg 'FlyDiscoClassifySex'
       % 
       % Optional PVs:
       % logfid. If provided, Logger takes ownership of this (should be live) file handle.

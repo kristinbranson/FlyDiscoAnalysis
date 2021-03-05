@@ -1,4 +1,4 @@
-% Debug_FlyBubbleClassifySex 12/14/2016
+% Debug_FlyDiscoClassifySex 12/14/2016
 %%
 addpath /groups/branson/home/robiea/Code_versioned/Jdetect_github/Jdetect/filehandling/;
 addpath /groups/branson/home/robiea/Code_versioned/Jdetect_github/Jdetect/misc;
@@ -17,4 +17,4 @@ params = {'settingsdir',settingsdir,...
 
 %%
 
-FlyBubbleClassifySex(expdir,params{:});
+FlyDiscoClassifySex(expdir,params{:});
