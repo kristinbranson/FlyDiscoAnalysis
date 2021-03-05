@@ -21,10 +21,10 @@ min_barcode_expdatenum = datenum(min_barcode_expdatestr,datetime_format);
 datalocparamsfile = fullfile(settingsdir,analysis_protocol,datalocparamsfilestr);
 dataloc_params = ReadParams(datalocparamsfile);
 
-%%
-logger = PipelineLogger(expdir,mfilename(),dataloc_params,...
-  'automaticchecks_incoming_logfilestr',settingsdir,analysis_protocol,...
-  'logfid',logfid,'debug',DEBUG,'versionstr',version);
+% %%
+% logger = PipelineLogger(expdir,mfilename(),dataloc_params,...
+%   'automaticchecks_incoming_logfilestr',settingsdir,analysis_protocol,...
+%   'logfid',logfid,'debug',DEBUG,'versionstr',version);
 
 try
 paramsfile = fullfile(settingsdir,analysis_protocol,dataloc_params.automaticchecksincomingparamsfilestr);
@@ -353,11 +353,11 @@ if ~isempty(msgs),
   s = s(1:end-2);
   fprintf(fid,'%s\n',s);
 end
-runInfo = logger.runInfo;
-fprintf(fid,'version,%s\n',version);
-fprintf(fid,'timestamp,%s\n',runInfo.timestamp);
-fprintf(fid,'analysis_protocol,%s\n',runInfo.analysis_protocol);
-fprintf(fid,'linked_analysis_protocol,%s\n',runInfo.linked_analysis_protocol);
+% runInfo = logger.runInfo;
+% fprintf(fid,'version,%s\n',version);
+% fprintf(fid,'timestamp,%s\n',runInfo.timestamp);
+% fprintf(fid,'analysis_protocol,%s\n',runInfo.analysis_protocol);
+% fprintf(fid,'linked_analysis_protocol,%s\n',runInfo.linked_analysis_protocol);
 
 if ~DEBUG && fid > 1,
   fclose(fid);
@@ -371,7 +371,7 @@ end
 %% save info to mat file
 
 filename = fullfile(expdir,dataloc_params.automaticchecksincominginfomatfilestr);
-logger.log('Saving debug info to file %s...\n',filename);
+fprintf('Saving debug info to file %s...\n',filename);
 
 aciinfo = runInfo;
 aciinfo.paramsfile = paramsfile;
@@ -396,11 +396,11 @@ end
 
   
 %% print results to log file
-logger.log('success = %d\n',success);
+fprintf('success = %d\n',success);
 if isempty(msgs),
-  logger.log('No error or warning messages.\n');
+  fprintf('No error or warning messages.\n');
 else
-  logger.log('Warning/error messages:\n');
-  logger.log('%s\n',msgs{:});
+  fprintf('Warning/error messages:\n');
+  fprintf('%s\n',msgs{:});
 end
-logger.close();
+%logger.close();

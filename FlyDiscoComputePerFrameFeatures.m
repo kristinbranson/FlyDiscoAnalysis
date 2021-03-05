@@ -19,12 +19,12 @@ end
 datalocparamsfile = fullfile(settingsdir,analysis_protocol,datalocparamsfilestr);
 dataloc_params = ReadParams(datalocparamsfile);
 
-%% 
-logger = PipelineLogger(expdir,mfilename(),dataloc_params,'perframefeature_logfilestr',...
-  settingsdir,analysis_protocol,'versionstr',version,'debug',DEBUG);
+% %% 
+% logger = PipelineLogger(expdir,mfilename(),dataloc_params,'perframefeature_logfilestr',...
+%   settingsdir,analysis_protocol,'versionstr',version,'debug',DEBUG);
 
 %% Init trx
-logger.log('Initializing trx...\n');
+fprintf('Initializing trx...\n');
 trx = FBATrx('analysis_protocol',analysis_protocol,'settingsdir',settingsdir,...
   'datalocparamsfilestr',datalocparamsfilestr,'DEBUG',DEBUG);
 
@@ -46,20 +46,20 @@ if forcecompute,
   perframefns_rm = setdiff(perframefns_preexist,WINGTRACK_PERFRAMEFILES);
   for i = 1:numel(perframefns_rm)
     pfftmp = fullfile(expdir,trx.dataloc_params.perframedir,[perframefns_rm{i} '.mat']);
-    logger.log('Deleting per-frame data file %s\n',perframefns_rm{i});
+    fprintf('Deleting per-frame data file %s\n',perframefns_rm{i});
     delete(pfftmp);
   end
 end
 
 %% Load trx
-logger.log('Loading trajectories for %s...\n',expdir);
+fprintf('Loading trajectories for %s...\n',expdir);
 trx.AddExpDir(expdir,'openmovie',false,'tryloadwingtrx',false); % writes trajectory fns to perframe dir
 
 %% compute per-frame features
 for i = 1:nfns,
   try
     fn = perframefns{i};
-    logger.log('Computing %s...\n',fn);
+    fprintf('Computing %s...\n',fn);
     trx.(fn); 
   catch ME
     fprintf(2,'Error occurred computing fn ''%s''\n',fn);
@@ -70,8 +70,9 @@ end
 %% save info to a mat file
 
 filename = fullfile(expdir,trx.dataloc_params.perframeinfomatfilestr);
-logger.log('Saving debug info to file %s...\n',filename);
-cpffinfo = logger.runInfo;
+fprintf('Saving debug info to file %s...\n',filename);
+%cpffinfo = logger.runInfo;
+cpffinfo = struct() ;
 cpffinfo.perframefns = perframefns;
 cpffinfo.forcecompute = forcecompute;
 cpffinfo.perframefns_preexist = perframefns_preexist;
@@ -91,4 +92,4 @@ catch ME
 end
 
 %% 
-logger.close();
+%logger.close();

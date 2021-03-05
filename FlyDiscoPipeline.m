@@ -2,10 +2,18 @@ function [success,msgs,stage] = FlyDiscoPipeline(expdir,varargin)
 %runs the fly bubble pipeline 12/19/2016 - set up for Andy Seed's rig to
 %run analysis on windows 
 
+% Get info about the state of the repo, output to stdout
+this_script_path = mfilename('fullpath') ;
+source_folder_path = fileparts(this_script_path) ;
+git_report = get_git_report(source_folder_path) ;
+fprintf('%s', git_report) ;
+
+% Initialize the outputs
 success = false;
 msgs = {};
 stage = 'start';
 
+% Parse the 'named parameters'
 [analysis_protocol,...
  settingsdir,...
  datalocparamsfilestr,...

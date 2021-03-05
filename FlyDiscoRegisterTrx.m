@@ -3,7 +3,7 @@ function [success,msgs] = FlyDiscoRegisterTrx(expdir,varargin)
 success = true;
 msgs = {};
 
-version = '0.2';
+%version = '0.2';
 
 fns_notperframe = {'id','moviename','annname','firstframe','arena','off',...
   'nframes','endframe','matname','fps','pxpermm'};
@@ -20,9 +20,9 @@ fns_notperframe = {'id','moviename','annname','firstframe','arena','off',...
 datalocparamsfile = fullfile(settingsdir,analysis_protocol,datalocparamsfilestr);
 dataloc_params = ReadParams(datalocparamsfile);
 
-logger = PipelineLogger(expdir,mfilename(),dataloc_params,...
-  'registertrx_logfilestr',settingsdir,analysis_protocol,...
-  'versionstr',version);
+% logger = PipelineLogger(expdir,mfilename(),dataloc_params,...
+%   'registertrx_logfilestr',settingsdir,analysis_protocol,...
+%   'versionstr',version);
 
 %% read in registration params
 
@@ -107,14 +107,14 @@ end
 try
   registration_data = detectRegistrationMarks(registration_params_cell{:},'annName',annfile,'movieName',moviefile);
 catch ME,
-  logger.log('Error detecting registration marks:\n');
-  logger.log(getReport(ME));
+  fprintf('Error detecting registration marks:\n');
+  fprintf(getReport(ME));
   success = false;
   msgs = {['Error detecting registration marks: ',getReport(ME)]};
   return;
 end
 
-logger.log('Detected registration marks.\n');
+fprintf('Detected registration marks.\n');
 
 %% apply spatial registration
 
@@ -195,16 +195,16 @@ for fly = 1:length(trx),
   
 end
 
-logger.log('Applied spatial registration.\n');
+fprintf('Applied spatial registration.\n');
 
 %% create maxvalueimage for LED experiments  (needs fps)
-if isfield(registration_params,'OptogeneticExp');
+if isfield(registration_params,'OptogeneticExp') ,
     if registration_params.OptogeneticExp
         moviefilename = fullfile(expdir,dataloc_params.moviefilestr);
         [readfcn,~,~,headerinfo] = get_readframe_fcn(moviefilename);
         %determine minimum frames to process
-        if isfield(dataloc_params,'ledprotocolfilestr');
-            if exist(fullfile(expdir,dataloc_params.ledprotocolfilestr),'file');
+        if isfield(dataloc_params,'ledprotocolfilestr') ,
+            if exist(fullfile(expdir,dataloc_params.ledprotocolfilestr),'file') ,
                 load(fullfile(expdir,dataloc_params.ledprotocolfilestr),'protocol')
                 if ~isempty(protocol)
                     fps = 1/meddt;                    
@@ -237,14 +237,14 @@ if isfield(registration_params,'OptogeneticExp');
         if isfield(registration_params,'LEDMarkerType') && ischar(registration_params.LEDMarkerType),
             LEDimg = imread(fullfile(settingsdir,analysis_protocol,registration_params.LEDMarkerType));
             binLEDstep = 25;
-            hist_LED = histcounts(LEDimg,[0:binLEDstep:255]);
+            hist_LED = histcounts(LEDimg,(0:binLEDstep:255));
             brightthres = sum(hist_LED(9:10));
             diffimage = im - readfcn(1);
             
             [xgrid, ygrid] = meshgrid(1:size(diffimage,2), 1:size(diffimage,1));
             mask = ((xgrid-registration_data.circleCenterX).^2 + (ygrid-registration_data.circleCenterY).^2) >= registration_data.circleRadius.^2;
             outSideArenaPxs = diffimage(mask);
-            hist_outSideArenaPxs = histcounts(outSideArenaPxs,[0:binLEDstep:255]);
+            hist_outSideArenaPxs = histcounts(outSideArenaPxs,(0:binLEDstep:255));
             brightpxs = sum(hist_outSideArenaPxs(9:10));
             if brightpxs <= brightthres %|| brightpxs >= 15
                 % no LED indicator in im, redo for whole movie
@@ -338,15 +338,15 @@ if isfield(registration_params,'OptogeneticExp')
             ledindicator_data = detectRegistrationMarks(registration_params_cell{:},'annName',annfile,'movieName',moviefile,'bkgdImage',im2double(im),'ledindicator',true,'regXY',registration_data.bowlMarkerPoints);
             
         catch ME,
-            logger.log('Error detecting led indicator:\n');
-            logger.log(getReport(ME));
+            fprintf('Error detecting led indicator:\n');
+            fprintf(getReport(ME));
             success = false;
             msgs = {['Error detecting led indicator: ',getReport(ME)]};
             return;
         end
         registration_data.ledIndicatorPoints = ledindicator_data.bowlMarkerPoints;
         
-        logger.log('Detected led indicator.\n');
+        fprintf('Detected led indicator.\n');
                
         
     end
@@ -506,15 +506,15 @@ if dotemporalreg,
       trx(i).off = -trx(i).firstframe + 1;
       
     end
-    trx(trxdelete) = []; %#ok<NASGU>
+    trx(trxdelete) = []; 
     
   end
   
-  logger.log('Applied temporal registration.\n');
+  fprintf('Applied temporal registration.\n');
   
 else
   
-  logger.log('NOT applying temporal registration.\n');
+  fprintf('NOT applying temporal registration.\n');
   
 end
 
@@ -528,8 +528,8 @@ try
   if exist(trxfile,'file'),
     delete(trxfile);
   end
-  registrationinfo = logger.runInfo;
-  save(trxfile,'trx','timestamps','registrationinfo');
+  %registrationinfo = logger.runInfo;
+  save(trxfile,'trx','timestamps');
   didsave = true;
 catch ME
   warning('Could not save registered trx: %s',getReport(ME));
@@ -538,9 +538,9 @@ catch ME
 end
 
 if didsave,
-  logger.log('Saved registered trx to file %s\n',trxfile);
+  fprintf('Saved registered trx to file %s\n',trxfile);
 else
-  logger.log('Could not save registered trx:\n%s\n',getReport(ME));
+  fprintf('Could not save registered trx:\n%s\n',getReport(ME));
 end
 
 %% save params to mat file
@@ -563,9 +563,9 @@ catch ME
 end
 
 if didsave,
-  logger.log('Saved registration data to file %s\n',registrationmatfile);
+  fprintf('Saved registration data to file %s\n',registrationmatfile);
 else
-  logger.log('Could not save registration data to mat file:\n%s\n',getReport(ME));
+  fprintf('Could not save registration data to mat file:\n%s\n',getReport(ME));
 end
 
 %% save params to text file
@@ -609,13 +609,13 @@ catch ME
 end
 
 if didsave,
-  logger.log('Saved registration data to txt file %s\n',registrationtxtfile);
+  fprintf('Saved registration data to txt file %s\n',registrationtxtfile);
 else
-  logger.log('Could not save registration data to txt file:\n%s\n',getReport(ME));
+  fprintf('Could not save registration data to txt file:\n%s\n',getReport(ME));
 end
 
-%%
-logger.close();
+% %%
+% logger.close();
 
 %% close figures
 
