@@ -1,4 +1,4 @@
-% Debug_FlyBubbleComputePerFrameFeatures 12/14/2016
+% Debug_FlyDiscoComputePerFrameFeatures 12/14/2016
 
 %%
 addpath /groups/branson/home/robiea/Code_versioned/Jdetect_github/Jdetect/filehandling/;
@@ -17,4 +17,4 @@ params = {'settingsdir',settingsdir,...
   'analysis_protocol',analysis_protocol};
 
 %%
-FlyBubbleComputePerFrameFeatures(expdir,params{:})
+FlyDiscoComputePerFrameFeatures(expdir,params{:})

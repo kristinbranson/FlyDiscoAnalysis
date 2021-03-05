@@ -1,4 +1,4 @@
-function trx = FlyBubbleComputePerFrameFeatures(expdir,varargin)
+function trx = FlyDiscoComputePerFrameFeatures(expdir,varargin)
 
 version = '0.2';
 

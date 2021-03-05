@@ -1,4 +1,4 @@
-function trx = FlyBubbleComputePerFrameFeatures(expdir,varargin)
+function trx = FlyDiscoComputePerFrameFeatures(expdir,varargin)
 
 version = '0.2';
 
@@ -86,7 +86,7 @@ end
 try
   save(filename,'-struct','cpffinfo');
 catch ME
-  warning('FlyBubbleComputePerFrameFeatures:save',...
+  warning('FlyDiscoComputePerFrameFeatures:save',...
     'Could not save information to file %s: %s',filename,getReport(ME));
 end
 
