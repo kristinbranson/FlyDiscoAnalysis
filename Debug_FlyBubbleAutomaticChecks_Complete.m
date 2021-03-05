@@ -1,4 +1,4 @@
-% Debug_FlyBubbleAutomaticChecks_Complete 12/19/2016
+% Debug_FlyDiscoAutomaticChecksComplete 12/19/2016
 
 
 addpath /groups/branson/home/robiea/Code_versioned/Jdetect_github/Jdetect/filehandling/;
@@ -18,4 +18,4 @@ expdir = '/groups/branson/home/robiea/Projects_data/temp/grooming2_Line1_Unknown
 
 %% run
 
-FlyBubbleAutomaticChecks_Complete(expdir,params{:});
+FlyDiscoAutomaticChecksComplete(expdir,params{:});

@@ -1,4 +1,4 @@
-function FlyTrackerWrapperForFlyBubble(expdir, settingsdir, analysis_protocol, dataloc_params, do_force_tracking)
+function FlyTrackerWrapperForFlyDisco(expdir, settingsdir, analysis_protocol, dataloc_params, do_force_tracking)
   % Process arguments
   if nargin<5 || isempty(do_force_tracking) ,
     do_force_tracking = false ;

@@ -1,4 +1,4 @@
-function [success,msgs,iserror] = FlyBubbleAutomaticChecks_Complete(expdir,varargin)
+function [success,msgs,iserror] = FlyDiscoAutomaticChecksComplete(expdir,varargin)
 
 version = '0.1';
 timestamp = datestr(now,'yyyymmddTHHMMSS');
@@ -38,7 +38,7 @@ end
 
 real_analysis_protocol = GetRealAnalysisProtocol(analysis_protocol,settingsdir);
 
-fprintf(logfid,'\n\n***\nRunning FlyBubbleAutomaticChecks_Complete version %s analysis_protocol %s (linked to %s) at %s\n',version,analysis_protocol,real_analysis_protocol,timestamp);
+fprintf(logfid,'\n\n***\nRunning FlyDiscoAutomaticChecksComplete version %s analysis_protocol %s (linked to %s) at %s\n',version,analysis_protocol,real_analysis_protocol,timestamp);
 %% more parameters
 
 paramsfile = fullfile(settingsdir,analysis_protocol,dataloc_params.automaticcheckscompleteparamsfilestr);
@@ -371,7 +371,7 @@ else
   fprintf(logfid,'Warning/error messages:\n');
   fprintf(logfid,'%s\n',msgs{:});
 end
-fprintf(logfid,'Finished running FlyBubbleAutomaticChecks_Complete at %s.\n',datestr(now,'yyyymmddTHHMMSS'));
+fprintf(logfid,'Finished running FlyDiscoAutomaticChecksComplete at %s.\n',datestr(now,'yyyymmddTHHMMSS'));
 
 if logfid > 1,
   fclose(logfid);

@@ -214,7 +214,7 @@ if doflytracking ,
   todo = CheckForMissingFiles(expdir,dataloc_params,requiredfiles_flytracker) ;
   if forcecompute || todo ,    
     fprintf('FlyTracker...\n');      
-    FlyTrackerWrapperForFlyBubble(expdir, settingsdir, analysis_protocol, dataloc_params, forcecompute) ;     
+    FlyTrackerWrapperForFlyDisco(expdir, settingsdir, analysis_protocol, dataloc_params, forcecompute) ;     
   end  
   
   % make sure flytracker files exist
@@ -443,7 +443,7 @@ if doautomaticcheckscomplete,
   if forcecompute || todo,
     fprintf('AutomaticChecks_Complete...\n');
     [success1, msgs] = ...
-      FlyBubbleAutomaticChecks_Complete(expdir,...
+      FlyDiscoAutomaticChecksComplete(expdir,...
                                         'settingsdir',settingsdir, ...
                                         'analysis_protocol',analysis_protocol,...
                                         automaticcheckscomplete_params{:});
