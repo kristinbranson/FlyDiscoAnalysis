@@ -1,5 +1,5 @@
 % make results movies
-function FlyBubbleMakeCtraxResultsMovie(expdir,varargin)
+function FlyDiscoMakeCtraxResultsMovie(expdir,varargin)
 
 [analysis_protocol,settingsdir,datalocparamsfilestr] = ...
   myparse(varargin,...

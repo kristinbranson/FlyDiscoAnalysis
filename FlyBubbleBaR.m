@@ -19,7 +19,7 @@ classdef FlyBubbleBaR
       'FlyDiscoRegisterTrx'
       'FlyBubbleTrackWings'
       'FlyBubbleJAABADetect'
-      'FlyBubbleMakeCtraxResultsMovie'
+      'FlyDiscoMakeCtraxResultsMovie'
       };
       
     BUILDSNAPSHOTFILE = 'build.snapshot';    
