@@ -1,4 +1,4 @@
-function [success,msgs,iserror] = FlyBubbleAutomaticChecks_Incoming(expdir,varargin)
+function [success,msgs,iserror] = FlyDiscoAutomaticChecksIncoming(expdir,varargin)
 
 version = '0.2.1';
 

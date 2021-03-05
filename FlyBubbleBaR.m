@@ -12,7 +12,7 @@ classdef FlyBubbleBaR
     SnapshotScript = fullfile(FlyBubbleBaR.Root,'repo_snapshot.sh');    
 
     BUILDPROJECTS = {
-      'FlyBubbleAutomaticChecks_Incoming'
+      'FlyDiscoAutomaticChecksIncoming'
       'FlyBubbleClassifySex'
       'FlyBubbleComputePerFrameFeatures'
       'FlyBubbleDectectIndicatorLedOnOff'
