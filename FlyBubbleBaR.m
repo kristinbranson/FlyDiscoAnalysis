@@ -15,7 +15,7 @@ classdef FlyBubbleBaR
       'FlyDiscoAutomaticChecksIncoming'
       'FlyBubbleClassifySex'
       'FlyBubbleComputePerFrameFeatures'
-      'FlyBubbleDectectIndicatorLedOnOff'
+      'FlyDiscoDectectIndicatorLedOnOff'
       'FlyDiscoRegisterTrx'
       'FlyBubbleTrackWings'
       'FlyBubbleJAABADetect'
