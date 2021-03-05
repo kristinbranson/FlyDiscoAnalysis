@@ -96,7 +96,7 @@ stage = 'start';
          'temperaturediagnosticsfilestr','bkgddiagnosticsimagefilestr','bkgddiagnosticsfilestr','bkgddiagnosticsmatfilestr',...
          'videodiagnosticsfilestr','videodiagnosticsmatfilestr','videodiagnosticsimagefilestr'},...
          'requiredfiles_analysisprotocol',{'analysis_protocol.txt'},...
-         'requiredfiles_automaticcheckscomplete',{'automaticcheckscompleteresultsfilestr'});
+         'requiredfiles_automaticcheckscomplete',{'automaticcheckscompleteresultsfilestr'}); %#ok<ASGLU>
 %         'requiredfiles_start',{'annfilestr','ctraxfilestr'},...
 
 datalocparamsfile = fullfile(settingsdir,analysis_protocol,datalocparamsfilestr);
@@ -138,11 +138,11 @@ if ischar(dojaabadetect),
 end
 
 if ischar(docomputeperframestats),
-  docomputeperframestats = str2double(docomputeperframestats) ~= 0;
+  docomputeperframestats = str2double(docomputeperframestats) ~= 0;  %#ok<NASGU>
 end
 
 if ischar(doplotperframestats),
-  doplotperframestats = str2double(doplotperframestats) ~= 0;
+  doplotperframestats = str2double(doplotperframestats) ~= 0;  %#ok<NASGU>
 end
 
 if ischar(domakectraxresultsmovie),
@@ -150,7 +150,7 @@ if ischar(domakectraxresultsmovie),
 end
 
 if ischar(doextradiagnostics),
-  doextradiagnostics = str2double(doextradiagnostics) ~= 0;
+  doextradiagnostics = str2double(doextradiagnostics) ~= 0;  %#ok<NASGU>
 end
 
 if ischar(doautomaticcheckscomplete),
@@ -395,24 +395,9 @@ if docomputehoghofperframefeatures,
 end
 
 %% behavior detection
-stage = 'jaabadetect';
+%stage = 'jaabadetect'; 
 if dojaabadetect,
-    % For reasons I don't understand, this code errors if you remove the
-    % try/catch... (ALT, 2020-02-27)
-    try
-        datalocparamsfilestr = 'dataloc_params.txt';
-        datalocparamsfile = fullfile(settingsdir,analysis_protocol,datalocparamsfilestr);
-        dataloc_params = ReadParams(datalocparamsfile);
-        jaabaclassifierparamsfilestrs = fullfile(settingsdir,analysis_protocol,dataloc_params.jaabaclassifierparamsfilestrs);
-        jabfiles = textread(jaabaclassifierparamsfilestrs,'%s');
-        fprintf('JAABAdetect...\n');
-        JAABADetect(expdir, 'jabfiles', jabfiles, 'forcecompute', forcecompute, 'doteardownpath', true) ;
-    catch ME,
-        msgs = {sprintf('Error running JAABADetect:\n%s',getReport(ME))};
-        fprintf('JAABADetect failed:\n');
-        fprintf('%s\n',msgs{:});   
-        return
-    end    
+  JAABADetectWrapper(expdir, settingsdir, analysis_protocol, forcecompute) ;
 end
 
     
