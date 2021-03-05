@@ -1,4 +1,4 @@
-function [success,msgs,stage] = FlyBubblePipelineWithFT(expdir,varargin)
+function [success,msgs,stage] = FlyDiscoPipeline(expdir,varargin)
 %runs the fly bubble pipeline 12/19/2016 - set up for Andy Seed's rig to
 %run analysis on windows 
 
