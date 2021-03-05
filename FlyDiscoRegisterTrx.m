@@ -547,7 +547,7 @@ end
 
 registrationmatfile = fullfile(expdir,dataloc_params.registrationmatfilestr);
 tmp = rmfield(registration_data,'registerfn'); 
-tmp.registrationinfo = registrationinfo;
+%tmp.registrationinfo = registrationinfo;
 
 didsave = false;
 try
@@ -586,12 +586,12 @@ try
     fn = fnssave{i};
     fprintf(fid,'%s,%f\n',fn,registration_data.(fn));
   end
-  fnssave = {'version','timestamp','analysis_protocol','linked_analysis_protocol'};
-  fnssave = intersect(fnssave,fieldnames(registrationinfo));
-  for i = 1:numel(fnssave),
-    fn = fnssave{i};
-    fprintf(fid,'%s,%s\n',fn,registrationinfo.(fn));
-  end
+%   fnssave = {'version','timestamp','analysis_protocol','linked_analysis_protocol'};
+%   fnssave = intersect(fnssave,fieldnames(registrationinfo));
+%   for i = 1:numel(fnssave),
+%     fn = fnssave{i};
+%     fprintf(fid,'%s,%s\n',fn,registrationinfo.(fn));
+%   end
   
   if isfield(registration_params,'OptogeneticExp')
     if registration_params.OptogeneticExp

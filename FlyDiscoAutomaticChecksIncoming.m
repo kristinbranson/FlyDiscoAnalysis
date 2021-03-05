@@ -373,7 +373,8 @@ end
 filename = fullfile(expdir,dataloc_params.automaticchecksincominginfomatfilestr);
 fprintf('Saving debug info to file %s...\n',filename);
 
-aciinfo = runInfo;
+%aciinfo = runInfo;
+aciinfo = struct() ;
 aciinfo.paramsfile = paramsfile;
 aciinfo.check_params = check_params;
 aciinfo.version = version;
