@@ -1,6 +1,6 @@
-%DebugFlyBubbleRegisterTrx.m 4/15/2016
+%DebugFlyDiscoRegisterTrx.m 4/15/2016
 % 
-% /groups/flyprojects/home/leea30/git/fba.build/bubble/current/run_FlyBubbleRegisterTrx.sh /groups/branson/bransonlab/projects/olympiad/MCR/v717 /tier2/branson/fly_bubble/01_tracked/social_GMR_22D03_AE_01_dTrpA1_RigA_20160325T134540 
+% /groups/flyprojects/home/leea30/git/fba.build/bubble/current/run_FlyDiscoRegisterTrx.sh /groups/branson/bransonlab/projects/olympiad/MCR/v717 /tier2/branson/fly_bubble/01_tracked/social_GMR_22D03_AE_01_dTrpA1_RigA_20160325T134540 
 % settingsdir = ' /groups/flyprojects/home/olympiad/bubble_bin/FlyBubbleAnalysis/settings/ analysis_protocol current_bubble'
 %%
 addpath /groups/branson/home/bransonk/tracking/code/JCtrax/filehandling;
@@ -19,4 +19,4 @@ params = {'settingsdir',settingsdir,...
 
 %% run once
 
-FlyBubbleRegisterTrx(expdir,params{:});
+FlyDiscoRegisterTrx(expdir,params{:});

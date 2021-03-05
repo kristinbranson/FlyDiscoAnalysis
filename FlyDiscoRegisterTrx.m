@@ -1,4 +1,4 @@
-function [success,msgs] = FlyBubbleRegisterTrx(expdir,varargin)
+function [success,msgs] = FlyDiscoRegisterTrx(expdir,varargin)
 
 success = true;
 msgs = {};
