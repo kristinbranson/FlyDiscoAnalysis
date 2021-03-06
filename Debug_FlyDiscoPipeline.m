@@ -1,6 +1,6 @@
 %Debug_FlyBubblePipeline.m
-
-modpath;
+path_to_this_script = mfilename('fullpath') ;
+modpath();
 
 
 %% parameters
