@@ -1,4 +1,4 @@
-function [trx,summary_diagnostics,X] = FlyBubbleClassifySex(expdir,varargin)
+function [trx,summary_diagnostics,X] = FlyDiscoClassifySex(expdir,varargin)
 
 version = '0.2';
 
@@ -20,13 +20,13 @@ fprintf('Classifying sex for %s\n',expdir);
 datalocparamsfile = fullfile(settingsdir,analysis_protocol,datalocparamsfilestr);
 dataloc_params = ReadParams(datalocparamsfile);
 
-%%
-logger = PipelineLogger(expdir,mfilename(),...
-        dataloc_params,'classifysex_logfilestr',...
-        settingsdir,analysis_protocol,'versionstr',version);     
+% %%
+% logger = PipelineLogger(expdir,mfilename(),...
+%         dataloc_params,'classifysex_logfilestr',...
+%         settingsdir,analysis_protocol,'versionstr',version);     
 
 %% load the data
-logger.log('Loading data...\n');
+fprintf('Loading data...\n');
 
 trxfile = fullfile(expdir,dataloc_params.trxfilestr);
 load(trxfile,'trx');
@@ -49,7 +49,7 @@ trxfileout = fullfile(expdir,outdir,dataloc_params.trxfilestr);
 tftrxappend = strcmp(trxfile,trxfileout);
 
 %% compute areas
-logger.log('Computing area...\n');
+fprintf('Computing area...\n');
 
 nflies = numel(trx); 
 
@@ -81,7 +81,7 @@ metadatafile = fullfile(expdir,dataloc_params.metadatafilestr);
 metadata = ReadMetadataFile(metadatafile);
 
 if isfield(metadata,'gender') && ~strcmpi(metadata.gender,'b'),
-  logger.log('gender is not "b", not doing sex classification, just setting sex to %s for all flies',upper(metadata.gender));
+ fprintf('gender is not "b", not doing sex classification, just setting sex to %s for all flies',upper(metadata.gender));
 
   % set sex to metadata.gender for all flies
   % also set diagnostics that we can
@@ -89,7 +89,7 @@ if isfield(metadata,'gender') && ~strcmpi(metadata.gender,'b'),
   mean_area_all = nanmean(cat(1,X{:}));
   var_area_all = nanstd(cat(1,X{:}),1);
   for fly = 1:numel(trx),
-    trx(fly).sex = repmat({upper(metadata.gender)},[1,trx(fly).nframes]); %#ok<AGROW>
+    trx(fly).sex = repmat({upper(metadata.gender)},[1,trx(fly).nframes]);
     diagnostics_curr = struct;
     diagnostics_curr.normhmmscore = nan;
     diagnostics_curr.nswaps = 0;
@@ -113,7 +113,7 @@ else
   
   %% learn a 2-state HMM for area in an unsupervised manner
   
-  logger.log('gender = "b", learning 2-state HMM...\n');
+  fprintf('gender = "b", learning 2-state HMM...\n');
   
   % initialize parameters
   nstates = 2;
@@ -167,14 +167,16 @@ else
       if exist(sexclassifieroutmatfile,'file'),
         delete(sexclassifieroutmatfile);
       end
+    catch ,
+      % Ignore any errors that occur
     end
     try
       save(sexclassifieroutmatfile,'mu_area','var_area','ptrans','prior','ll',...
         'nstates','state2sex','maxerrx','maxfreq','filterorder','version','analysis_protocol');
     catch ME,
-      warning('FlyBubbleClassifySex:save',...
+      warning('FlyDiscoClassifySex:save',...
         'Could not save to file %s: %s',sexclassifieroutmatfile,getReport(ME));
-      logger.log('Could not save to file %s: %s\n',sexclassifieroutmatfile,getReport(ME));
+      fprintf('Could not save to file %s: %s\n',sexclassifieroutmatfile,getReport(ME));
     end
   end
   
@@ -254,15 +256,15 @@ for i = 1:numel(fns),
 end
 
 fns1 = fieldnames(summary_diagnostics);
-logger.log('Summary diagnostics:\n');
+fprintf('Summary diagnostics:\n');
 for i = 1:numel(fns1),
-  logger.log('  %s: %f\n',fns1{i},summary_diagnostics.(fns1{i}));
+  fprintf('  %s: %f\n',fns1{i},summary_diagnostics.(fns1{i}));
 end
 
 %% write diagnostics
 
-sexclassifierinfo = logger.runInfo;
-sexclassifierinfo.version = version;
+% sexclassifierinfo = logger.runInfo;
+% sexclassifierinfo.version = version;
 
 if dosave,
   if exist(sexclassifierdiagnosticsfile,'file'),
@@ -272,7 +274,7 @@ if dosave,
   end      
   fid = fopen(sexclassifierdiagnosticsfile,'w');
   if fid < 0,
-    warning('FlyBubbleClassifySex:diags',...
+    warning('FlyDiscoClassifySex:diags',...
       'Could not open file %s for writing, printing diagnostics to stdout instead',sexclassifierdiagnosticsfile);
     fid = 1;
   end
@@ -283,13 +285,13 @@ fns = fieldnames(summary_diagnostics);
 for i = 1:numel(fns),
   fprintf(fid,'%s,%f\n',fns{i},summary_diagnostics.(fns{i}));
 end
-fns = fieldnames(sexclassifierinfo);
-for i = 1:numel(fns),
-  val = sexclassifierinfo.(fns{i});
-  if ischar(val)
-    fprintf(fid,'%s,%s\n',fns{i},val);
-  end
-end
+% fns = fieldnames(sexclassifierinfo);
+% for i = 1:numel(fns),
+%   val = sexclassifierinfo.(fns{i});
+%   if ischar(val)
+%     fprintf(fid,'%s,%s\n',fns{i},val);
+%   end
+% end
 
 if dosave && fid > 1,
   fclose(fid);
@@ -300,11 +302,11 @@ end
 if dosave,
   try
     if tftrxappend
-      save('-append',trxfileout,'trx','sexclassifierinfo');
+      save('-append',trxfileout,'trx');
     else
       tmp = load(trxfile);
       tmp.trx = trx;
-      tmp.sexclassifierinfo = sexclassifierinfo;
+      %tmp.sexclassifierinfo = sexclassifierinfo;
       save(trxfileout,'-struct','tmp');
     end
   catch %#ok<CTCH>
@@ -315,11 +317,11 @@ if dosave,
 %       tmp.sexclassifierinfo = sexclassifierinfo;
 %       save(trxfileout,'-struct','tmp');
 %     catch ME,
-      warning('FlyBubbleClassifySex:save',...
+      warning('FlyDiscoClassifySex:save',...
         'Could not save to file %s: %s',trxfileout,getReport(ME));
-      logger.log('Could not save to file %s: %s',trxfileout,getReport(ME));
+      fprintf('Could not save to file %s: %s',trxfileout,getReport(ME));
 %     end
   end
 end
 
-logger.close();
+%logger.close();

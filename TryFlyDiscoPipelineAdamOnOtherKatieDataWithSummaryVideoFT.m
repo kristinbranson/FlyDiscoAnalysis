@@ -14,7 +14,7 @@ experiment_folder_path = ...
              'experiments', ...
              'SS36564_20XUAS_CsChrimson_mVenus_attP18_flyBowlMing_20200227_Continuous_2min_5int_20200107_20200229T132141')
 
-FlyBubblePipelineWithFTWrapper(experiment_folder_path, settings_folder_path)
+FlyDiscoPipelineWrapper(experiment_folder_path, settings_folder_path)
 
 % params = {'settingsdir',settings_folder_path,...
 %   'analysis_protocol',analysis_protocol, ...
@@ -82,4 +82,4 @@ FlyBubblePipelineWithFTWrapper(experiment_folder_path, settings_folder_path)
 % % [success,msgs,stage] = FlyBubblePipeline(expdir,params{:});
 % % end
 % 
-% [success,msgs,stage] = FlyBubblePipelineWithFT(expdir,params{:});
+% [success,msgs,stage] = FlyDiscoPipeline(expdir,params{:});

@@ -1,4 +1,4 @@
-function [success,msgs] = FlyBubbleDectectIndicatorLedOnOff(expdir,varargin)
+function [success,msgs] = FlyDiscoDectectIndicatorLedOnOff(expdir,varargin)
 
 
 success = true;
@@ -30,7 +30,7 @@ else
   logfid = 1;
 end
 
-fprintf(logfid,'\n\n***\nRunning FlyBubbleDectectIndicatorLedOnOff version %s analysis_protocol %s at %s\n',version,analysis_protocol,timestamp);
+fprintf(logfid,'\n\n***\nRunning FlyDiscoDectectIndicatorLedOnOff version %s analysis_protocol %s at %s\n',version,analysis_protocol,timestamp);
 %% read in indicator params
 
 indicatorparamsfile = fullfile(settingsdir,analysis_protocol,dataloc_params.indicatorparamsfilestr);

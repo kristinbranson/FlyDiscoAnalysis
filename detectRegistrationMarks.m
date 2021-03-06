@@ -838,11 +838,11 @@ end
  function filI = neginfOutDetection(x,y,filI,rd)
     
     % zero out region around feature
-    i1 = max(1,round(x)-rd);
-    i2 = min(nc,round(x)+rd);
-    j1 = max(1,round(y)-rd);
-    j2 = min(nr,round(y)+rd);
-    filI(j1:j2,i1:i2) = -inf;
+    i1 = max(1,round(round(x)-rd));  % ALT 2021-03-05: Added outer round() to eliminate warning, should preserve behavior
+    i2 = min(nc,round(round(x)+rd));
+    j1 = max(1,round(round(y)-rd));
+    j2 = min(nr,round(round(y)+rd));
+    filI(j1:j2,i1:i2) = -inf;  
     
   end
 

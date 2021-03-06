@@ -1,4 +1,4 @@
-function FlyTrackerWrapperForFlyBubble(expdir, settingsdir, analysis_protocol, dataloc_params, do_force_tracking)
+function FlyTrackerWrapperForFlyDisco(expdir, settingsdir, analysis_protocol, dataloc_params, do_force_tracking)
   % Process arguments
   if nargin<5 || isempty(do_force_tracking) ,
     do_force_tracking = false ;
@@ -12,7 +12,8 @@ function FlyTrackerWrapperForFlyBubble(expdir, settingsdir, analysis_protocol, d
   video_file_name = dataloc_params.moviefilestr ;
   video_file_path = fullfile(expdir, video_file_name) ;
   
-  num_cores = maxNumCompThreads ;
+  %num_cores = maxNumCompThreads() ;
+  num_cores = 2 ;  % We fix this for efficiency in production, and also reproducibility
   
   options.num_cores   = num_cores ;
   options.num_chunks  = options.num_cores*2 ;
