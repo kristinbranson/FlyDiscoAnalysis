@@ -1,18 +1,18 @@
 %Debug_FlyBubblePipeline.m
-path_to_this_script = mfilename('fullpath') ;
+
 modpath();
 
 
 %% parameters
-settingsdir = '/groups/branson/home/robiea/Code_versioned/FlyDiscoPipeline/settings';
+settingsdir = '/groups/branson/home/robiea/Code_versioned/FlyDiscoAnalysis/settings';
 
 % analysis_protocol = '20210228_flybubble_dickson_locomotionGtACR1';
 % analysis_protocol = '20210219_flybubble_dickson_nochrGtACR1testing'
-analysis_protocol = 'current_non_olympiad_dickson_locomotionGtACR1_24_nonLED';
+analysis_protocol = '20210219_flybubble_dickson_nochrGtACR1testing';
 
 params = {'settingsdir',settingsdir,...
     'analysis_protocol',analysis_protocol, ...
-    'forcecompute',true,...
+    'forcecompute',false,...
     'doautomaticchecksincoming',true,...
     'doflytracking',true, ...
     'doregistration',true,...
@@ -43,4 +43,4 @@ expdir = '/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/FlyBubb
 % [success,msgs,stage] = FlyBubblePipeline(expdir,params{:});
 % end
 
-[success,msgs,stage] = FlyBubblePipelineWithFT(expdir,params{:});
+[success,msgs,stage] = FlyDiscoPipeline(expdir,params{:});
