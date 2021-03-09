@@ -80,8 +80,13 @@ end
 metadatafile = fullfile(expdir,dataloc_params.metadatafilestr);
 metadata = ReadMetadataFile(metadatafile);
 
+% Fix possible metadata error
+if isfield(metadata, 'gender') && strcmpi(metadata.gender, 'both') ,
+  metadata.gender = 'b' ;
+end
+
 if isfield(metadata,'gender') && ~strcmpi(metadata.gender,'b'),
- fprintf('gender is not "b", not doing sex classification, just setting sex to %s for all flies',upper(metadata.gender));
+  fprintf('gender is not "b", not doing sex classification, just setting sex to %s for all flies',upper(metadata.gender));
 
   % set sex to metadata.gender for all flies
   % also set diagnostics that we can

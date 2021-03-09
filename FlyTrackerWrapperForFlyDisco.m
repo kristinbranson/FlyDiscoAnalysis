@@ -12,7 +12,7 @@ function FlyTrackerWrapperForFlyDisco(expdir, settingsdir, analysis_protocol, da
   video_file_name = dataloc_params.moviefilestr ;
   video_file_path = fullfile(expdir, video_file_name) ;
   
-  %num_cores = maxNumCompThreads() ;
+  %num_cores = maxNumCompThreads() ;  % set this to two when we submit the bsub jobs
   num_cores = 2 ;  % We fix this for efficiency in production, and also reproducibility
   
   options.num_cores   = num_cores ;
