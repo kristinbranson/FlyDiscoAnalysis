@@ -1,5 +1,5 @@
 experiment_name = 'emptysplit_20xUAS-ChrimsonRmVenusattp18_flyBowlMing_nopause_lengthofpersis_2min_10int_20191218T093239_2' ;
-% reset_test_experiment_folder(experiment_name);
+reset_test_experiment_folder(experiment_name);
 
 this_script_file_path = mfilename('fullpath') ;
 this_script_folder_path = fileparts(this_script_file_path) ;
