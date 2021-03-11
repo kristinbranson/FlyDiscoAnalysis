@@ -4,13 +4,16 @@ addpath /groups/branson/home/bransonk/tracking/code/JCtrax/misc;
 addpath /groups/branson/home/bransonk/tracking/code/JCtrax/filehandling;
 addpath /groups/branson/bransonlab/projects/olympiad/SAGE/MATLABInterface/Trunk;
 % settingsdir = '/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/settings';
-settingsdir = '/groups/branson/home/robiea/Code_versioned/FlyBubbleAnalysis/settings/';
+% settingsdir = '/groups/branson/home/robiea/Code_versioned/FlyBubbleAnalysis/settings/';
+settingsdir = '/groups/branson/home/robiea/Code_versioned/FlyDiscoAnalysis/settings/';
 
 
 %% parameters
 
-analysis_protocol = '20150717_flybubble_flybowlMing';
-expfile = '/groups/branson/home/robiea/Projects_data/Ming/explist_forregistration';
+% % analysis_protocol = '20150717_flybubble_flybowlMing';
+analysis_protocol = '20210219_flybubble_dickson_RGBGtACR1testing';
+% expfile = '/groups/branson/home/robiea/Projects_data/Ming/explist_forregistration';
+expfile = '/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/FlyBubbleRGB/locomotionGtACR1_24_RGB_EXT_VGLUT-GAL4_RigA_20210305T083721'
 datalocparamsfilestr = 'dataloc_params.txt';
 dataloc_params = ReadParams(fullfile(settingsdir,analysis_protocol,datalocparamsfilestr));
 

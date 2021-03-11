@@ -4,21 +4,21 @@ addpath /groups/branson/home/bransonk/tracking/code/JCtrax/misc;
 addpath /groups/branson/home/bransonk/tracking/code/JCtrax/filehandling;
 addpath /groups/branson/bransonlab/projects/olympiad/SAGE/MATLABInterface/Trunk;
 % settingsdir = '/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/settings';
-settingsdir = '/groups/branson/home/robiea/Code_versioned/FlyBubbleAnalysis/settings/';
+% settingsdir = '/groups/branson/home/robiea/Code_versioned/FlyBubbleAnalysis/settings/';
+settingsdir = '/groups/branson/home/robiea/Code_versioned/FlyDiscoAnalysis/settings/';
 
 
 %% parameters
 
-% analysis_protocol = '20150428_flybubble_centralcomplex';
-% expfile = '/groups/branson/home/robiea/Projects_data/CentralComplex/explist_forregistrationmark';
-analysis_protocol = '20150428_flybubble_centralcomplex';
-% expfile = '/groups/branson/home/robiea/Projects_data/CentralComplex/exp_regtest.txt';
+analysis_protocol = '20210219_flybubble_dickson_RGBGtACR1testing';
+
+
 datalocparamsfilestr = 'dataloc_params.txt';
 dataloc_params = ReadParams(fullfile(settingsdir,analysis_protocol,datalocparamsfilestr));
 
 % expdirs = importdata(expfile);
 % expdirs(cellfun(@isempty,expdirs)) = [];
-expdirs = {'/groups/branson/home/robiea/Projects_data/Katie/tracked/20190716T130615_rig1_flyBowl3__GMR_OL0077B_rubin_protocol_OL0077_testing_noPixels'};
+expdirs = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/FlyBubbleRGB/locomotionGtACR1_24_RGB_EXT_VGLUT-GAL4_RigA_20210305T083721'};
 expis = [];
 platebowls = {};
 
@@ -99,7 +99,7 @@ imagesc(template);
 axis image;
 
 
-imwrite(uint8(template),'LEDIndicator_KatieRig1.png');
+imwrite(uint8(template),'LEDIndicator_largeovaloffcenter.png');
 
 %% distance from the corner
 x = mean(xlim);
@@ -110,6 +110,6 @@ corners = [1,1,nc,nc;1,nr,nr,1];
 dcorner = sqrt(min((corners(1,:)-x).^2 + (corners(2,:)-y).^2));
 imr = min(nr,nc);
 
-dcornerfrac = dcorner / imr;
+dcornerfrac = dcorner / imr
 
-maxDistCornerFrac_BowlLabel = .12;
+% maxDistCornerFrac_BowlLabel = .12;
