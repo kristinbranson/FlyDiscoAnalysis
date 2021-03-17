@@ -53,20 +53,20 @@ if isfield(registration_params,'bowlMarkerType'),
     end
   else
     % plate -> bowlmarkertype
-    plateids = str2double(registration_params.bowlMarkerType(1:2:end-1));
+    plateids = registration_params.bowlMarkerType(1:2:end-1);
     bowlmarkertypes = registration_params.bowlMarkerType(2:2:end);
     [metadata,success1] = parseExpDir(expdir);
     if ~success1 || ~isfield(metadata,'plate'),
       metadata = ReadMetadataFile(fullfile(expdir,dataloc_params.metadatafilestr));
     end
-    if ischar(metadata.plate),
-      plateid = str2double(metadata.plate);
+    if isnumeric(metadata.plate),
+        plateid = num2str(metadata.plate);
     else
-      plateid = metadata.plate;
+        plateid = metadata.plate;
     end
-    i = find(plateid == plateids,1);
+    i = find(strcmp(num2str(plateid), plateids));
     if isempty(i),
-      error('bowlMarkerType not set for plate %d',plateid);
+      error('bowlMarkerType not set for plate %s',plateid);
     end
     if ~ismember(bowlmarkertypes{i},{'gradient'}),
       registration_params.bowlMarkerType = fullfile(settingsdir,analysis_protocol,bowlmarkertypes{i});
@@ -83,16 +83,16 @@ if isfield(registration_params,'maxDistCornerFrac_BowlLabel') && ...
   if ~success1 || ~isfield(metadata,'plate'),
     metadata = ReadMetadataFile(fullfile(expdir,dataloc_params.metadatafilestr));
   end
-  if ischar(metadata.plate),
-    plateid = str2double(metadata.plate);
+  if isnumeric(metadata.plate),
+    plateid = num2str(metadata.plate);
   else
     plateid = metadata.plate;
   end
-  i = find(plateid == plateids,1);
+  i = find(strcmp(num2str(plateid), plateids));
   if isempty(i),
     error('maxDistCornerFrac_BowlLabel not set for plate %d',plateid);
   end
-  registration_params.maxDistCornerFrac_BowlLabel = cornerfracs(i);
+  registration_params.maxDistCornerFrac_BowlLabel = str2num(cornerfracs{i});
 end
 
 fnsignore = intersect(fieldnames(registration_params),...
@@ -215,7 +215,7 @@ if isfield(registration_params,'OptogeneticExp')
                             error('More than one active LED color in protocol. Not currently supported')
                         end
                         % call function that transforms new protocol to old protocol
-                        [protocol,ledcolor] = convertRGBprotocol2protocolformat(RGBprotocol,countactiveLEDs);
+                        [protocol,ledcolor] = ConvertRGBprotocol2protocolformat(RGBprotocol,countactiveLEDs);
                     end
                 end
             end
@@ -225,82 +225,55 @@ end
 
 %% create maxvalueimage for LED experiments  (needs fps)
 if isfield(registration_params,'OptogeneticExp') ,
-    if registration_params.OptogeneticExp
+    if registration_params.OptogeneticExp && exist('protocol','var')
         moviefilename = fullfile(expdir,dataloc_params.moviefilestr);
         [readfcn,~,~,headerinfo] = get_readframe_fcn(moviefilename);
         %determine minimum frames to process
         % protocol now loaded in earlier cell - converted if need for RGB
-        % experiments 
+        firstactiveStepNum = find([protocol.intensity] ~= 0,1);
+        if isempty(firstactiveStepNum)
+            error('ChR = 1 for LED protcol with no active LEDs')
+        end
+        
+        % experiments
         if ~isempty(protocol)
             fps = 1/meddt;
-            secstoLEDpulse = protocol.delayTime(1) + ((protocol.duration(1)/1000-protocol.delayTime(1))/protocol.iteration(1));
-            % sets end range in which to find LED on 
+            secstoLEDpulse = protocol.delayTime(firstactiveStepNum) + ((protocol.duration(firstactiveStepNum)/1000-protocol.delayTime(firstactiveStepNum))/protocol.iteration(firstactiveStepNum));
+            % sets end range in which to find LED on
             frametoLEDpulse = secstoLEDpulse*fps;
-            if protocol.pulseWidthSP(1) <= 1/fps*1000*2 %pulseWidth(ms) < 2 times sampling
+            if protocol.pulseWidthSP(firstactiveStepNum) <= 1/fps*1000*2 %pulseWidth(ms) < 2 times sampling
                 jump = 1;
             else
                 % in frames
-                jump = round(protocol.pulseWidthSP(1)/1000*fps/2);                
+                jump = round(protocol.pulseWidthSP(firstactiveStepNum)/1000*fps/2);
             end
+            
+        else
+            % reasonable guess
+            frametoLEDpulse = headerinfo.nframes/3;
+            jump = 10;
         end
-    end
-else
-    % reasonable guess
-    frametoLEDpulse = headerinfo.nframes/3;
-    jump = 10;
-end
-frametoLEDpulse = max([round(frametoLEDpulse),min(200,headerinfo.nframes)]);
-jump = min(jump,round(frametoLEDpulse/100));
-im = readfcn(1);
-for j = 1:jump:frametoLEDpulse
-    tmp = readfcn(j);
-    idx = tmp > im;
-    im(idx) = tmp(idx);
-%   if (mod(j,1000) == 0);
-%     disp(round((j/frametoLEDpulse)*100))
-%   end
-end
-% check if im has indicator on
-if isfield(registration_params,'LEDMarkerType') && ischar(registration_params.LEDMarkerType),
-    LEDimg = imread(fullfile(settingsdir,analysis_protocol,registration_params.LEDMarkerType));
-    binLEDstep = 25;
-    hist_LED = histcounts(LEDimg,(0:binLEDstep:255));
-    brightthres = sum(hist_LED(9:10));
-    diffimage = im - readfcn(1);
-    
-    [xgrid, ygrid] = meshgrid(1:size(diffimage,2), 1:size(diffimage,1));
-    mask = ((xgrid-registration_data.circleCenterX).^2 + (ygrid-registration_data.circleCenterY).^2) >= registration_data.circleRadius.^2;
-    outSideArenaPxs = diffimage(mask);
-    hist_outSideArenaPxs = histcounts(outSideArenaPxs,(0:binLEDstep:255));
-    brightpxs = sum(hist_outSideArenaPxs(9:10));
-    if brightpxs <= brightthres %|| brightpxs >= 15
-        % no LED indicator in im, redo for whole movie
+        frametoLEDpulse = max([round(frametoLEDpulse),min(200,headerinfo.nframes)]);
+        jump = min(jump,round(frametoLEDpulse/100));
         im = readfcn(1);
-        for j = 1:jump:headerinfo.nframes
+        for j = 1:jump:frametoLEDpulse
             tmp = readfcn(j);
             idx = tmp > im;
             im(idx) = tmp(idx);
+            %   if (mod(j,1000) == 0);
+            %     disp(round((j/frametoLEDpulse)*100))
+            %   end
         end
-    end
-end
-
-%% detect LED indicator (modified from detect registration marks)
-if isfield(registration_params,'OptogeneticExp')
-    if registration_params.OptogeneticExp
-        % name of annotation file
-        annfile = fullfile(expdir,dataloc_params.annfilestr);
-        
-        % name of movie file
-        moviefile = fullfile(expdir,dataloc_params.moviefilestr);
-        
-        % template filename should be relative to settings directory
-        if isfield(registration_params,'LEDMarkerType'),
+        % check if im has indicator on
+        if isfield(registration_params,'LEDMarkerType') && registration_params.OptogeneticExp,
             if ischar(registration_params.LEDMarkerType),
                 if ~ismember(registration_params.LEDMarkerType,{'gradient'}),
                     registration_params.LEDMarkerType = fullfile(settingsdir,analysis_protocol,registration_params.LEDMarkerType);
                 end
             else
-                % plate -> bowlmarkertype
+                % rignames ABDC -> rigids
+                % will need to change if it turns out to be cartridge
+                % specific
                 rigids = registration_params.LEDMarkerType(1:2:end-1);
                 ledmarkertypes = registration_params.LEDMarkerType(2:2:end);
                 [metadata,success1] = parseExpDir(expdir);
@@ -319,25 +292,92 @@ if isfield(registration_params,'OptogeneticExp')
             end
         end
         
+        % need to load find LEDMarkType for this plate
+        if isfield(registration_params,'LEDMarkerType') && ischar(registration_params.LEDMarkerType) && registration_params.OptogeneticExp,
+            LEDimg = imread(registration_params.LEDMarkerType);
+            binLEDstep = 25;
+            hist_LED = histcounts(LEDimg,(0:binLEDstep:255));
+            brightthres = sum(hist_LED(9:10));
+            diffimage = im - readfcn(1);
+            
+            [xgrid, ygrid] = meshgrid(1:size(diffimage,2), 1:size(diffimage,1));
+            mask = ((xgrid-registration_data.circleCenterX).^2 + (ygrid-registration_data.circleCenterY).^2) >= registration_data.circleRadius.^2;
+            outSideArenaPxs = diffimage(mask);
+            hist_outSideArenaPxs = histcounts(outSideArenaPxs,(0:binLEDstep:255));
+            brightpxs = sum(hist_outSideArenaPxs(9:10));
+            if brightpxs <= brightthres %|| brightpxs >= 15
+                % no LED indicator in im, redo for whole movie
+                im = readfcn(1);
+                for j = 1:jump:headerinfo.nframes
+                    tmp = readfcn(j);
+                    idx = tmp > im;
+                    im(idx) = tmp(idx);
+                end
+            end
+        end
+    end
+end
+%% detect LED indicator (modified from detect registration marks)
+if isfield(registration_params,'OptogeneticExp')
+    if registration_params.OptogeneticExp
+        % name of annotation file
+        annfile = fullfile(expdir,dataloc_params.annfilestr);
+        
+        % name of movie file
+        moviefile = fullfile(expdir,dataloc_params.moviefilestr);
+        
+        % LED MarkerType set to metadata specific rig in previous cell 
+        
+%         if isfield(registration_params,'LEDMarkerType'),
+%             if ischar(registration_params.LEDMarkerType),
+%                 if ~ismember(registration_params.LEDMarkerType,{'gradient'}),
+%                     registration_params.LEDMarkerType = fullfile(settingsdir,analysis_protocol,registration_params.LEDMarkerType);
+%                 end
+%             else
+%                 % rignames ABDC -> rigids
+%                 % will need to change if it turns out to be cartridge
+%                 % specific
+%                 rigids = registration_params.LEDMarkerType(1:2:end-1);
+%                 ledmarkertypes = registration_params.LEDMarkerType(2:2:end);
+%                 [metadata,success1] = parseExpDir(expdir);
+%                 if ~success1 || ~isfield(metadata,'rig'),
+%                     metadata = ReadMetadataFile(fullfile(expdir,dataloc_params.metadatafilestr));
+%                 end
+%                 rigid = metadata.rig;
+%                 
+%                 i = strcmp(rigid,rigids);
+%                 if isempty(i),
+%                     error('LEDMarkerType not set for plate %d',rigid);
+%                 end
+%                 if ~ismember(ledmarkertypes{i},{'gradient'}),
+%                     registration_params.LEDMarkerType = fullfile(settingsdir,analysis_protocol,ledmarkertypes{i});
+%                 end
+%             end
+%         end
+        
         % maxDistCornerFrac_BowlLabel might depend on bowl
         if isfield(registration_params,'maxDistCornerFrac_LEDLabel') && ...
-                numel(registration_params.maxDistCornerFrac_LEDLabel) > 1,
+            numel(registration_params.maxDistCornerFrac_LEDLabel) > 1,
             plateids = registration_params.maxDistCornerFrac_LEDLabel(1:2:end-1);
             cornerfracs = registration_params.maxDistCornerFrac_LEDLabel(2:2:end);
             [metadata,success1] = parseExpDir(expdir);
             if ~success1 || ~isfield(metadata,'plate'),
                 metadata = ReadMetadataFile(fullfile(expdir,dataloc_params.metadatafilestr));
             end
-            if ischar(metadata.plate),
-                plateid = str2double(metadata.plate);
+            if isnumeric(metadata.plate),
+                plateid = num2str(metadata.plate);
             else
                 plateid = metadata.plate;
             end
-            i = find(plateid == plateids,1);
+            if iscell(plateids)
+                i = find(strcmp(num2str(plateid), plateids))
+            else
+                i = find(plateid == plateids,1);
+            end
             if isempty(i),
                 error('maxDistCornerFrac_LEDLabel not set for plate %d',plateid);
             end
-            registration_params.maxDistCornerFrac_LEDLabel = cornerfracs(i);
+            registration_params.maxDistCornerFrac_LEDLabel = str2num(cornerfracs{i});
         end
         
         

@@ -117,6 +117,23 @@ else
   if defaultparams,
     load(indicatorfile)
     load(ledprotocolfile)
+    if strcmp(metadata.assay,'FlyBubbleRGB') || strcmp(metadata.assay,'FlyBowlRGB')
+        if isfield(protocol,'Rintensity')
+            RGBprotocol = protocol;
+            clear protocol;
+            % test if RGBprotocol has only one active color
+            countactiveLEDs = [double(any(RGBprotocol.Rintensity));double(any(RGBprotocol.Gintensity));double(any(RGBprotocol.Bintensity))];
+            % check that there is 1 and only 1 color LED used in protocol
+            if sum(countactiveLEDs) == 0
+                error('ChR = 1 for LED protcol with no active LEDs')
+            elseif sum(countactiveLEDs) > 1
+                error('More than one active LED color in protocol. Not currently supported')
+            end
+            % call function that transforms new protocol to old protocol
+            [protocol,ledcolor] = ConvertRGBprotocol2protocolformat(RGBprotocol,countactiveLEDs);
+        end
+    end
+    
     nsteps = numel(protocol.stepNum);
     
     if nsteps == 1,
@@ -260,6 +277,24 @@ else
     
   load(ledprotocolfile);
   load(indicatorfile);
+  if strcmp(metadata.assay,'FlyBubbleRGB') || strcmp(metadata.assay,'FlyBowlRGB')
+        if isfield(protocol,'Rintensity')
+            RGBprotocol = protocol;
+            clear protocol;
+            % test if RGBprotocol has only one active color
+            countactiveLEDs = [double(any(RGBprotocol.Rintensity));double(any(RGBprotocol.Gintensity));double(any(RGBprotocol.Bintensity))];
+            % check that there is 1 and only 1 color LED used in protocol
+            if sum(countactiveLEDs) == 0
+                error('ChR = 1 for LED protcol with no active LEDs')
+            elseif sum(countactiveLEDs) > 1
+                error('More than one active LED color in protocol. Not currently supported')
+            end
+            % call function that transforms new protocol to old protocol
+            [protocol,ledcolor] = ConvertRGBprotocol2protocolformat(RGBprotocol,countactiveLEDs);
+        end
+    end
+  
+  
   stimtimes = indicatorLED.starttimes(ctraxresultsmovie_params.indicatorframes);
     
   j = 1;

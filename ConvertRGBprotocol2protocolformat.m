@@ -1,4 +1,4 @@
-function [protocol, ledcolor] = convertRGBprotocol2protocolformat(RGBprotocol,countactiveLEDs)
+function [protocol, ledcolor] = ConvertRGBprotocol2protocolformat(RGBprotocol,countactiveLEDs)
 % AR 20210311 
 % takes in RGB format ledprotocol and prodcues ChR (single
 % LED) format protocol
