@@ -45,6 +45,9 @@ annfile = fullfile(expdir,dataloc_params.annfilestr);
 % name of movie file
 moviefile = fullfile(expdir,dataloc_params.moviefilestr);
 
+% Collect metadata
+metadata = collect_metadata(expdir, dataloc_params.metadatafilestr) ;
+
 % template filename should be relative to settings directory
 if isfield(registration_params,'bowlMarkerType'),
   if ischar(registration_params.bowlMarkerType),
@@ -55,10 +58,10 @@ if isfield(registration_params,'bowlMarkerType'),
     % plate -> bowlmarkertype
     plateids = registration_params.bowlMarkerType(1:2:end-1);
     bowlmarkertypes = registration_params.bowlMarkerType(2:2:end);
-    [metadata,success1] = parseExpDir(expdir);
-    if ~success1 || ~isfield(metadata,'plate'),
-      metadata = ReadMetadataFile(fullfile(expdir,dataloc_params.metadatafilestr));
-    end
+%     [metadata,success1] = parseExpDir(expdir);
+%     if ~success1 || ~isfield(metadata,'plate'),
+%       metadata = ReadMetadataFile(fullfile(expdir,dataloc_params.metadatafilestr));
+%     end
     if isnumeric(metadata.plate),
         plateid = num2str(metadata.plate);
     else
@@ -79,10 +82,10 @@ if isfield(registration_params,'maxDistCornerFrac_BowlLabel') && ...
     numel(registration_params.maxDistCornerFrac_BowlLabel) > 1,
   plateids = registration_params.maxDistCornerFrac_BowlLabel(1:2:end-1);
   cornerfracs = registration_params.maxDistCornerFrac_BowlLabel(2:2:end);
-  [metadata,success1] = parseExpDir(expdir);
-  if ~success1 || ~isfield(metadata,'plate'),
-    metadata = ReadMetadataFile(fullfile(expdir,dataloc_params.metadatafilestr));
-  end
+%   [metadata,success1] = parseExpDir(expdir);
+%   if ~success1 || ~isfield(metadata,'plate'),
+%     metadata = ReadMetadataFile(fullfile(expdir,dataloc_params.metadatafilestr));
+%   end
   if isnumeric(metadata.plate),
     plateid = num2str(metadata.plate);
   else
@@ -276,10 +279,10 @@ if isfield(registration_params,'OptogeneticExp') ,
                 % specific
                 rigids = registration_params.LEDMarkerType(1:2:end-1);
                 ledmarkertypes = registration_params.LEDMarkerType(2:2:end);
-                [metadata,success1] = parseExpDir(expdir);
-                if ~success1 || ~isfield(metadata,'rig'),
-                    metadata = ReadMetadataFile(fullfile(expdir,dataloc_params.metadatafilestr));
-                end
+%                 [metadata,success1] = parseExpDir(expdir);
+%                 if ~success1 || ~isfield(metadata,'rig'),
+%                     metadata = ReadMetadataFile(fullfile(expdir,dataloc_params.metadatafilestr));
+%                 end
                 rigid = metadata.rig;
                 
                 i = strcmp(rigid,rigids);
@@ -360,10 +363,10 @@ if isfield(registration_params,'OptogeneticExp')
             numel(registration_params.maxDistCornerFrac_LEDLabel) > 1,
             plateids = registration_params.maxDistCornerFrac_LEDLabel(1:2:end-1);
             cornerfracs = registration_params.maxDistCornerFrac_LEDLabel(2:2:end);
-            [metadata,success1] = parseExpDir(expdir);
-            if ~success1 || ~isfield(metadata,'plate'),
-                metadata = ReadMetadataFile(fullfile(expdir,dataloc_params.metadatafilestr));
-            end
+%             [metadata,success1] = parseExpDir(expdir);
+%             if ~success1 || ~isfield(metadata,'plate'),
+%                 metadata = ReadMetadataFile(fullfile(expdir,dataloc_params.metadatafilestr));
+%             end
             if isnumeric(metadata.plate),
                 plateid = num2str(metadata.plate);
             else
