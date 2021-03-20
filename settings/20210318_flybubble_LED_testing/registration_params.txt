@@ -1,0 +1,27 @@
+bkgdNSampleFrames,10
+method,circle
+circleImageType,canny
+circleRLim,.475,.499
+circleXLim,.475,.525
+circleYLim,.475,.525
+circleImageThresh,1
+circleCannyThresh,.15,.25
+circleCannySigma,1
+circleNXTry,50
+circleNYTry,50
+circleNRTry,50
+circleRadius_mm,26.689
+maxDistCornerFrac_BowlLabel,1LO,.12,1RC,.12,1a,.12,1b,.12,2a,.12,2b,.12,3a,.12,3b,.12,4a,.12,4b,.12,1SO,.12,1SL,.12,1LOs,.12
+featureRadius,30
+bowlMarkerPairTheta_true,2.3
+nBowlMarkers,1
+# bowl marker indexed by rig
+bowlMarkerType,1LO,CircleTemplateLarge.png,1RC,RaggedCircle.png,1a,CircleTemplate_FlyBubble3.png,1b,CircleTemplate_FlyBubble3.png,2a,CircleTemplate_FlyBubble3.png,2b,CircleTemplate_FlyBubble3.png,3a,CircleTemplate_FlyBubble3.png,3b,CircleTemplate_FlyBubble3.png,4a,CircleTemplate_FlyBubble3.png,4b,CircleTemplate_FlyBubble3.png,1SO,CircleTemplate_FlyBubble3.png,1SL,CircleTemplateLarge.png,1LOs,CircleTemplate_FlyBubble3.png
+minTemplateFeatureStrength,-0.5
+minTemplateFeatureStrength,-0.5
+minTemplateFeatureStrength,-0.5
+usemediandt,1
+OptogeneticExp,1
+# maxdist indexed by plate
+maxDistCornerFrac_LEDLabel,1LO,.16,1RC,.16,1a,.16,1b,.16,2a,.16,2b,.16,3a,.16,3b,.16,4a,.16,4b,.16,1SO,.16,1SL,.16,1LOs,.16
+LEDMarkerType,A,LEDIndicator_largeovaloffcenter.png,B,LEDIndicator_largeovaloffcenter.png,C,LEDIndicator_largeovaloffcenter.png,D,LEDIndicator_largeovaloffcenter.png
