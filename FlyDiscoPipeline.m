@@ -473,11 +473,6 @@ if doautomaticcheckscomplete,
 end
 
 % If get here, analysis has completed successfully
-analysis_successful_file_path = fullfile(expdir, 'ANALYSIS-COMPLETED-SUCCESSFULLY') ;
-escaped_analysis_successful_file_path = escape_path_for_bash(analysis_successful_file_path) ;
-command_line = sprintf('touch %s', escaped_analysis_successful_file_path) ;
-system_with_error_handling(command_line) ;
-
 fprintf('Analysis pipeline completed!\n');
 success = true;
 
