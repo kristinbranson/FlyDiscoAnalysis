@@ -1,7 +1,10 @@
-function goldblum(do_transfer_data_from_rigs, do_use_bqueue, do_actually_submit_jobs, analysis_parameters, configuration)
+function goldblum(do_transfer_data_from_rigs, do_run_analysis, do_use_bqueue, do_actually_submit_jobs, analysis_parameters, configuration)
     % Deal with arguments
     if ~exist('do_transfer_data_from_rigs', 'var') || isempty(do_transfer_data_from_rigs) ,
         do_transfer_data_from_rigs = true ;
+    end
+    if ~exist('do_run_analysis', 'var') || isempty(do_run_analysis) ,
+        do_run_analysis = true ;
     end
     if ~exist('do_use_bqueue', 'var') || isempty(do_use_bqueue) ,
         do_use_bqueue = true ;
@@ -75,6 +78,10 @@ function goldblum(do_transfer_data_from_rigs, do_use_bqueue, do_actually_submit_
     end
     
     % Run the analysis script on the destination folder
-    find_experiments_and_analyze(destination_folder, settings_folder_path, lab_head_last_name, ...
-                                 do_use_bqueue, do_actually_submit_jobs, analysis_parameters) ;
+    if do_run_analysis ,
+        find_experiments_and_analyze(destination_folder, settings_folder_path, lab_head_last_name, ...
+                                     do_use_bqueue, do_actually_submit_jobs, analysis_parameters) ;
+    else
+        fprintf('Skipping analysis.\n') ;
+    end        
 end

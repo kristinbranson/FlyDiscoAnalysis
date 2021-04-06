@@ -1,7 +1,17 @@
-function analyze_experiment_folders(folder_path_from_experiment_index, settings_folder_path, ...
-                                    lab_head_last_name, ...
-                                    do_use_bqueue, do_actually_submit_jobs, analysis_parameters)     
+function analyze_experiment_folders(folder_path_from_experiment_index, settings_folder_path, lab_head_last_name, ...
+                                    do_use_bqueue, do_actually_submit_jobs, analysis_parameters)
 
+    % Proces arguments                                
+    if ~exist('do_use_bqueue', 'var') || isempty(do_use_bqueue) ,
+        do_use_bqueue = true ;
+    end
+    if ~exist('do_actually_submit_jobs', 'var') || isempty(do_actually_submit_jobs) ,
+        do_actually_submit_jobs = true ;
+    end
+    if ~exist('analysis_parameters', 'var') || isempty(analysis_parameters) ,
+        analysis_parameters = cell(1,0) ;
+    end
+    
     % Figure out which experiments still need to be analyzed                                  
     experiment_count = length(folder_path_from_experiment_index) ;
     is_to_be_analyzed_from_experiment_index = true(experiment_count, 1) ;
