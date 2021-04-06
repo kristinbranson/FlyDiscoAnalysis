@@ -4,3 +4,6 @@
 [submodule "FlyTracker"]
 	path = FlyTracker
 	url = https://github.com/kristinbranson/FlyTracker
+[submodule "goldblum/fuster"]
+	path = goldblum/fuster
+	url = https://github.com/JaneliaSciComp/fuster

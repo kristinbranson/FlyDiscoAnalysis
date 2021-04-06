@@ -5,6 +5,11 @@ function modpath()
   path_to_this_script = mfilename('fullpath') ;
   path_to_this_folder = fileparts(path_to_this_script) ;
   
+  % Run the goldblum modpath
+  goldblum_folder_path = fullfile(path_to_this_folder, 'goldblum') ;
+  goldblum_modpath_script_path = fullfile(goldblum_folder_path, 'modpath.m') ;
+  run(goldblum_modpath_script_path) ;    
+  
   % Run the FlyTracker modpath script
   flytracker_folder_path = fullfile(path_to_this_folder, 'FlyTracker') ;
   flytracker_modpath_script_path = fullfile(flytracker_folder_path, 'modpath.m') ;
