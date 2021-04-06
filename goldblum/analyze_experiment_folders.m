@@ -1,7 +1,10 @@
 function analyze_experiment_folders(folder_path_from_experiment_index, settings_folder_path, lab_head_last_name, ...
-                                    do_use_bqueue, do_actually_submit_jobs, analysis_parameters)
+                                    do_force_analysis, do_use_bqueue, do_actually_submit_jobs, analysis_parameters)
 
     % Proces arguments                                
+    if ~exist('do_force_analysis', 'var') || isempty(do_force_analysis) ,
+        do_force_analysis = false ;
+    end
     if ~exist('do_use_bqueue', 'var') || isempty(do_use_bqueue) ,
         do_use_bqueue = true ;
     end
@@ -11,11 +14,30 @@ function analyze_experiment_folders(folder_path_from_experiment_index, settings_
     if ~exist('analysis_parameters', 'var') || isempty(analysis_parameters) ,
         analysis_parameters = cell(1,0) ;
     end
+
+    % If do_force_analysis is true, clear any files indicating result of previous (or ongoing!) run
+    experiment_count = length(folder_path_from_experiment_index) ;
+    if do_force_analysis ,
+        for i = 1 : experiment_count ,
+            experiment_folder_path = folder_path_from_experiment_index{i} ;
+            analysis_successful_file_path = fullfile(experiment_folder_path, 'ANALYSIS-COMPLETED-SUCCESSFULLY') ;
+            if exist(analysis_successful_file_path, 'file') ,
+                delete(analysis_successful_file_path) ;
+            end
+            analysis_failed_file_path = fullfile(experiment_folder_path, 'ANALYSIS-FAILED') ;
+            if exist(analysis_failed_file_path, 'file') ,
+                delete(analysis_failed_file_path) ;
+            end
+            analysis_in_progress_file_path = fullfile(experiment_folder_path, 'ANALYSIS-IN-PROGRESS') ;
+            if exist(analysis_in_progress_file_path, 'file') ,
+                delete(analysis_in_progress_file_path) ;
+            end
+        end
+    end
     
     % Figure out which experiments still need to be analyzed                                  
-    experiment_count = length(folder_path_from_experiment_index) ;
     is_to_be_analyzed_from_experiment_index = true(experiment_count, 1) ;
-    for i = 1 : length(folder_path_from_experiment_index) ,
+    for i = 1 : experiment_count ,
         experiment_folder_path = folder_path_from_experiment_index{i} ;
         analysis_successful_file_path = fullfile(experiment_folder_path, 'ANALYSIS-COMPLETED-SUCCESSFULLY') ;
         analysis_failed_file_path = fullfile(experiment_folder_path, 'ANALYSIS-FAILED') ;        
@@ -33,7 +55,7 @@ function analyze_experiment_folders(folder_path_from_experiment_index, settings_
     if to_be_analyzed_experiment_count > 0 ,
         fprintf('Submitting these for analysis...\n') ;
     end
-                                  
+
     if do_use_bqueue ,
         maxiumum_slot_count = 400 ;
         slots_per_job = 4 ;

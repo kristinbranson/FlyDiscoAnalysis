@@ -1,6 +1,7 @@
 function find_experiments_and_analyze(experiments_root_path, settings_folder_path, lab_head_last_name, ...
                                       do_use_bqueue, do_actually_submit_jobs, analysis_parameters) 
     experiment_folder_paths = find_experiment_folders(experiments_root_path) ;
+    do_force_analysis = false ;
     analyze_experiment_folders(experiment_folder_paths, settings_folder_path, lab_head_last_name, ...
-                               do_use_bqueue, do_actually_submit_jobs, analysis_parameters) ;
+                               do_force_analysis, do_use_bqueue, do_actually_submit_jobs, analysis_parameters) ;
 end
