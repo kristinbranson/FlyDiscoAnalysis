@@ -39,4 +39,7 @@ function modpath()
 %   jaaba_perframe_folder_path = fullfile(path_to_this_folder, 'JAABA', 'perframe') ;
 %   jaaba_modpath_script_path = fullfile(jaaba_perframe_folder_path, 'SetUpJAABAPath.m') ;
 %   run(jaaba_modpath_script_path) ;    
+
+  % Run code to set the parpool location appropriately
+  set_parpool_job_storage_location()
 end
