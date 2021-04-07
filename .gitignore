@@ -2,3 +2,4 @@ analysis-test-folder/
 analysis-test-template/
 *.m~
 .playfmfrc.mat
+*.asv

@@ -9,9 +9,17 @@ settingsdir = '/groups/branson/home/robiea/Code_versioned/FlyDiscoAnalysis/setti
 
 
 %% parameters
-
+% FlyBubbeRGB
 % analysis_protocol = '20210219_flybubble_dickson_RGBGtACR1testing';
-analysis_protocol = '20210311_flybubble_dickson_RGBGtACR1';
+% analysis_protocol = '20210311_flybuthanksbble_dickson_RGBGtACR1';
+% expdirs = {'/groups/branson/bransonlab/alice/temp_bubbledata/singlecolormarkers/SmallOval/Green/pilot24nonLED_JHS_K_85321_GtACR1_RigC_20210317T214041'};
+
+% FlyBowlRGB
+% analysis_protocol = '20210329_flybubble_flybowloptoKatie_mingrig_flytracker'; % changed name to 20210329_flybubble_FlyBowlRGB_LED
+analysis_protocol = '20210329_flybubble_FlyBowlRGB_LED';
+% expdirs = {'/groups/branson/home/robiea/Projects_data/FlyDisco/KatieTestData/FlyBowlDisco_RGBonly_318/20210318T135921_rig1_flyBowl2__SS36564_CsChrim_KS_redonly_protocolRGB_0315_2'}
+% adjusted camera height
+expdirs = {'/groups/branson/home/robiea/Projects_data/FlyDisco/KatieTestData/FlyBowlDisco_RGBonly_401/20210401T132850_rig1_flyBowl2__aIPgSS1UASCsChrimson_KS_redonly_protocolRGB_0315_2'};
 
 
 datalocparamsfilestr = 'dataloc_params.txt';
@@ -23,21 +31,22 @@ dataloc_params = ReadParams(fullfile(settingsdir,analysis_protocol,datalocparams
 %large oval insert 1LO
 % expdirs = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/singlecolormarkers/pilot24RGB_JHS_K_85321_GtACR1_RigA_20210313T211624_BLUE'};
 % ragged insert 
-expdirs = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/singlecolormarkers_try2/pilot24RGB_JHS_K_85321_GtACR1_RigA_20210313T212914_BLUE-oval'};
-expis = [];
-platebowls = {};
+% expdirs = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/singlecolormarkers_try2/pilot24RGB_JHS_K_85321_GtACR1_RigA_20210313T212914_BLUE-oval'};
 
-for expi = 1:numel(expdirs),
-  expdir = expdirs{expi};
-  metadata = ReadMetadataFile(fullfile(expdir,dataloc_params.metadatafilestr));
-  platebowl = sprintf('%d%s',metadata.plate,metadata.bowl);
-  if ~ismember(platebowl,platebowls),
-    expis(end+1) = expi; %#ok<SAGROW>
-    platebowls{end+1} = platebowl; %#ok<SAGROW>
-  end
-end
+expis = 1;
+% platebowls = {};
 
-expi = expis(1);
+% for expi = 1:numel(expdirs),
+%   expdir = expdirs{expi};
+%   metadata = ReadMetadataFile(fullfile(expdir,dataloc_params.metadatafilestr));
+%   platebowl = sprintf('%d%s',metadata.plate,metadata.bowl);
+%   if ~ismember(platebowl,platebowls),
+%     expis(end+1) = expi; %#ok<SAGROW>
+%     platebowls{end+1} = platebowl; %#ok<SAGROW>
+%   end
+% end
+% 
+% expi = expis(1);
 % for ming (no plate)
 % expis = expi;
 %%
@@ -104,7 +113,7 @@ imagesc(template);
 axis image;
 
 
-imwrite(uint8(template),'RaggedCircle.png');
+imwrite(uint8(template),'RegistraionMark_FlyBowlLEDON.png');
 
 %% distance from the corner
 x = mean(xlim);

@@ -67,7 +67,11 @@ if isfield(registration_params,'bowlMarkerType'),
     else
         plateid = metadata.plate;
     end
-    i = find(strcmp(num2str(plateid), plateids));
+    if iscell(plateids)
+        i = find(strcmp(num2str(plateid), plateids));
+    else
+        i = find(str2double(plateid) == plateids,1);
+    end
     if isempty(i),
       error('bowlMarkerType not set for plate %s',plateid);
     end
@@ -91,11 +95,19 @@ if isfield(registration_params,'maxDistCornerFrac_BowlLabel') && ...
   else
     plateid = metadata.plate;
   end
-  i = find(strcmp(num2str(plateid), plateids));
+  if iscell(plateids)
+      i = find(strcmp(num2str(plateid), plateids));
+  else
+      i = find(str2double(plateid) == plateids,1);
+  end
   if isempty(i),
     error('maxDistCornerFrac_BowlLabel not set for plate %d',plateid);
   end
-  registration_params.maxDistCornerFrac_BowlLabel = str2num(cornerfracs{i});
+  if iscell(cornerfracs)
+      registration_params.maxDistCornerFrac_BowlLabel = str2double(cornerfracs{i});
+  else
+      registration_params.maxDistCornerFrac_BowlLabel = cornerfracs(i);
+  end
 end
 
 fnsignore = intersect(fieldnames(registration_params),...
@@ -241,14 +253,14 @@ if isfield(registration_params,'OptogeneticExp') ,
         % experiments
         if ~isempty(protocol)
             fps = 1/meddt;
-            secstoLEDpulse = protocol.delayTime(firstactiveStepNum) + ((protocol.duration(firstactiveStepNum)/1000-protocol.delayTime(firstactiveStepNum))/protocol.iteration(firstactiveStepNum));
+            secstoLEDpulse = protocol.delayTime(firstactiveStepNum) + protocol.pulsePeriodSP(firstactiveStepNum)*protocol.pulseNum(firstactiveStepNum)/1000;
             % sets end range in which to find LED on
             frametoLEDpulse = secstoLEDpulse*fps;
-            if protocol.pulseWidthSP(firstactiveStepNum) <= 1/fps*1000*2 %pulseWidth(ms) < 2 times sampling
+            if protocol.pulsePeriodSP(firstactiveStepNum)*protocol.pulseNum(firstactiveStepNum) <= 1/fps*1000*2 %pulseWidth(ms) < 2 times sampling
                 jump = 1;
             else
                 % in frames
-                jump = round(protocol.pulseWidthSP(firstactiveStepNum)/1000*fps/2);
+                jump = round(protocol.pulsePeriodSP(firstactiveStepNum)*protocol.pulseNum(firstactiveStepNum)/1000*fps/2);
             end
             
         else
@@ -373,20 +385,28 @@ if isfield(registration_params,'OptogeneticExp')
                 plateid = metadata.plate;
             end
             if iscell(plateids)
-                i = find(strcmp(num2str(plateid), plateids))
+                i = find(strcmp(num2str(plateid), plateids));
             else
-                i = find(plateid == plateids,1);
+                i = find(str2double(plateid) == plateids,1);
             end
             if isempty(i),
                 error('maxDistCornerFrac_LEDLabel not set for plate %d',plateid);
             end
-            registration_params.maxDistCornerFrac_LEDLabel = str2num(cornerfracs{i});
+            if iscell(cornerfracs)
+                registration_params.maxDistCornerFrac_BowlLabel = str2double(cornerfracs{i});
+            else
+                registration_params.maxDistCornerFrac_BowlLabel = cornerfracs(i);
+            end
+        else
+            
+            registration_params.maxDistCornerFrac_BowlLabel = registration_params.maxDistCornerFrac_LEDLabel;
+            
         end
         
         
         
         registration_params.bowlMarkerType = registration_params.LEDMarkerType;
-        registration_params.maxDistCornerFrac_BowlLabel = registration_params.maxDistCornerFrac_LEDLabel;
+       
         
         fnsignore = intersect(fieldnames(registration_params),...
             {'minFliesLoadedTime','maxFliesLoadedTime','extraBufferFliesLoadedTime','usemediandt','doTemporalRegistration','OptogeneticExp','LEDMarkerType','maxDistCornerFrac_LEDLabel'});

@@ -1,0 +1,6 @@
+min_num_flies,4
+min_num_males,0
+min_num_females,0
+max_num_flies,12
+required_files,automatic_checks_incoming_results.txt,flytracker-calibration.mat,movie-bg.mat,movie-feat.mat,movie-params.mat,movie-track.mat,movie_JAABA/trx.mat,ctrax_results_movie_*.mp4,registered_trx.mat,registrationdata.mat,registrationdata.txt,registrationimage.png,sexclassifier_diagnostics.txt,perframefeatures_info.mat,flydisco-analysis-log*.txt
+file_categories,automated_checks_incoming,tracking,tracking,tracking,tracking,tracking,tracking,tracking,results_movie,registration,registration,registration,registration,sexclassification,perframe,log

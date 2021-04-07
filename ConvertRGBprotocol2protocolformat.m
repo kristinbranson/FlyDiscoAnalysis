@@ -49,4 +49,6 @@ elseif isequal(countactiveLEDs', blue)
     ledcolor = 'b';
 end
 % new format saves duration in seconds
-protocol.duration = protocol.duration.*1000;
+% data collected before 3/31/21 have duration in seconds, post 3/30 will
+% updated to ms. 
+% protocol.duration = protocol.duration.*1000;
