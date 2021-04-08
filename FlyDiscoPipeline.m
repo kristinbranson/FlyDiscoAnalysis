@@ -29,9 +29,9 @@ analysis_protocol = ...
 % Read in the analysis protocol parameters from the analysis-protocol folder, if
 % it exists
 analysis_protocol_folder_path = fullfile(settingsdir, analysis_protocol) ;
-analysis_protocol_parameters_file_path = fullfile(analysis_protocol_folder_path, 'analysis-protocol-parameters.yaml') ;
+analysis_protocol_parameters_file_path = fullfile(analysis_protocol_folder_path, 'analysis-protocol-parameters.txt') ;
 if exist(analysis_protocol_parameters_file_path, 'file') ,
-    analysis_protocol_parameters = parse_simple_yaml_file(analysis_protocol_parameters_file_path) ;
+    analysis_protocol_parameters = ReadParams(analysis_protocol_parameters_file_path) ;
 else
     analysis_protocol_parameters = cell(1,0) ;
 end
@@ -127,58 +127,63 @@ datalocparamsfile = fullfile(settingsdir,analysis_protocol,datalocparamsfilestr)
 dataloc_params = ReadParams(datalocparamsfile);
 
 if ischar(forcecompute),
-  forcecompute = str2double(forcecompute) ~= 0;
+  forcecompute = str2logical(forcecompute) ;
 end
 
 if ischar(doautomaticchecksincoming),
-  doautomaticchecksincoming = str2double(doautomaticchecksincoming) ~= 0;
+  doautomaticchecksincoming = str2logical(doautomaticchecksincoming) ;
+end
+
+if ischar(doflytracking),
+  doflytracking = str2logical(doflytracking) ;
 end
 
 if ischar(doregistration),
-  doregistration = str2double(doregistration) ~= 0;
+  doregistration = str2logical(doregistration) ;
 end
 
 if ischar(doledonoffdetection),
-  doledonoffdetection = str2double(doledonoffdetection) ~= 0;
-end
-if ischar(dotrackwings),
-  dotrackwings = str2double(dotrackwings) ~= 0;
+  doledonoffdetection = str2logical(doledonoffdetection) ;
 end
 
 if ischar(dosexclassification),
-  dosexclassification = str2double(dosexclassification) ~= 0;
+  dosexclassification = str2logical(dosexclassification) ;
+end
+
+if ischar(dotrackwings),
+  dotrackwings = str2logical(dotrackwings) ;
 end
 
 if ischar(docomputeperframefeatures),
-  docomputeperframefeatures = str2double(docomputeperframefeatures) ~= 0;
+  docomputeperframefeatures = str2logical(docomputeperframefeatures) ;
 end
 
 if ischar(docomputehoghofperframefeatures),
-  docomputehoghofperframefeatures = str2double(docomputehoghofperframefeatures) ~= 0;
+  docomputehoghofperframefeatures = str2logical(docomputehoghofperframefeatures) ;
 end
 
 if ischar(dojaabadetect),
-  dojaabadetect = str2double(dojaabadetect) ~= 0;
+  dojaabadetect = str2logical(dojaabadetect) ;
 end
 
 if ischar(docomputeperframestats),
-  docomputeperframestats = str2double(docomputeperframestats) ~= 0;  %#ok<NASGU>
+  docomputeperframestats = str2logical(docomputeperframestats) ;  %#ok<NASGU>
 end
 
 if ischar(doplotperframestats),
-  doplotperframestats = str2double(doplotperframestats) ~= 0;  %#ok<NASGU>
+  doplotperframestats = str2logical(doplotperframestats) ;  %#ok<NASGU>
 end
 
 if ischar(domakectraxresultsmovie),
-  domakectraxresultsmovie = str2double(domakectraxresultsmovie) ~= 0;
+  domakectraxresultsmovie = str2logical(domakectraxresultsmovie) ;
 end
 
 if ischar(doextradiagnostics),
-  doextradiagnostics = str2double(doextradiagnostics) ~= 0;  %#ok<NASGU>
+  doextradiagnostics = str2logical(doextradiagnostics) ;  %#ok<NASGU>
 end
 
 if ischar(doautomaticcheckscomplete),
-  doautomaticcheckscomplete = str2double(doautomaticcheckscomplete) ~= 0;
+  doautomaticcheckscomplete = str2logical(doautomaticcheckscomplete) ;
 end
 
 % Print the settings values in use
