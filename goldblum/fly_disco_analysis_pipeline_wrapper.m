@@ -1,4 +1,14 @@
 function fly_disco_analysis_pipeline_wrapper(experiment_folder_path, settings_folder_path, overriding_analysis_parameters)
+    % Handle arguments
+    if ~exist('settings_folder_path', 'var') || isempty(settings_folder_path) ,
+        script_folder_path = fileparts(mfilename('fullpath')) ;
+        fly_disco_analysis_folder_path = fileparts(script_folder_path) ;
+        settings_folder_path = fullfile(fly_disco_analysis_folder_path, 'settings') ;
+    end
+    if ~exist('overriding_analysis_parameters', 'var') || isempty(overriding_analysis_parameters) ,
+        overriding_analysis_parameters = cell(1, 0) ;
+    end
+
     % Check for the lock file
     analysis_in_progress_file_path = fullfile(experiment_folder_path, 'ANALYSIS-IN-PROGRESS') ;
     if exist(analysis_in_progress_file_path, 'file') ,
