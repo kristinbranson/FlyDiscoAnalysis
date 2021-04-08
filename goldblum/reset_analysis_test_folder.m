@@ -9,7 +9,7 @@ function reset_analysis_test_folder()
     did_succeed = mkdir(test_experiment_folder_path) ;
     if ~did_succeed ,
         error('Unable to create folder %s', test_experiment_folder_path) ;
-    end    
+    end
     did_succeed = copyfile(template_test_experiment_folder_path, test_experiment_folder_path) ;
     if ~did_succeed ,
         error('Unable to copy %s to %s', template_test_experiment_folder_path, test_experiment_folder_path) ;
