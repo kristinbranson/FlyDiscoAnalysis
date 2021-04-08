@@ -78,24 +78,27 @@ if isfield(registration_params,'bowlMarkerType'),
 end
 
 % maxDistCornerFrac_BowlLabel might depend on bowl
-if isfield(registration_params,'maxDistCornerFrac_BowlLabel') && ...
-    numel(registration_params.maxDistCornerFrac_BowlLabel) > 1,
-  plateids = registration_params.maxDistCornerFrac_BowlLabel(1:2:end-1);
-  cornerfracs = registration_params.maxDistCornerFrac_BowlLabel(2:2:end);
-%   [metadata,success1] = parseExpDir(expdir);
-%   if ~success1 || ~isfield(metadata,'plate'),
-%     metadata = ReadMetadataFile(fullfile(expdir,dataloc_params.metadatafilestr));
-%   end
-  if isnumeric(metadata.plate),
-    plateid = num2str(metadata.plate);
+% Sometimes maxDistCornerFrac_BowlLabel is a non-scalar cellstring.  If so, we convert it
+% to a scalar double, by selecting out the element corresponding to
+% metadata.plate, and converting that to a double.
+if isfield(registration_params,'maxDistCornerFrac_BowlLabel') && numel(registration_params.maxDistCornerFrac_BowlLabel) > 1,
+  if isnumeric(registration_params.maxDistCornerFrac_BowlLabel) ,
+      maxDistCornerFrac_BowlLabel = arrayfun(@(x)({num2str(x)}), registration_params.maxDistCornerFrac_BowlLabel) ;
   else
-    plateid = metadata.plate;
+      maxDistCornerFrac_BowlLabel = registration_params.maxDistCornerFrac_BowlLabel ;
   end
-  i = find(strcmp(num2str(plateid), plateids));
-  if isempty(i),
-    error('maxDistCornerFrac_BowlLabel not set for plate %d',plateid);
+  if isnumeric(metadata.plate) ,
+    plateid = num2str(metadata.plate) ;
+  else
+    plateid = metadata.plate ;
   end
-  registration_params.maxDistCornerFrac_BowlLabel = str2num(cornerfracs{i});
+  plateids = maxDistCornerFrac_BowlLabel(1:2:end-1) ;
+  cornerfracs = maxDistCornerFrac_BowlLabel(2:2:end) ;
+  i = find(strcmp(plateid, plateids)) ;
+  if isempty(i) ,
+    error('maxDistCornerFrac_BowlLabel not set for plate %s', plateid);
+  end
+  registration_params.maxDistCornerFrac_BowlLabel = str2double(cornerfracs{i}) ;
 end
 
 fnsignore = intersect(fieldnames(registration_params),...
