@@ -84,8 +84,9 @@ default_analysis_parameters = ...
      'requiredfiles_automaticcheckscomplete',{'automaticcheckscompleteresultsfilestr'} } ;
      
 % Combine the default parameters with those from the analysis-protocol folder, giving precedence to the analysis-protocol folder ones 
-analysis_parameters = merge_name_value_lists(default_analysis_parameters, analysis_protocol_parameters) ;
-     
+intermediate_analysis_parameters = merge_name_value_lists(default_analysis_parameters, analysis_protocol_parameters) ;
+analysis_parameters = merge_name_value_lists(intermediate_analysis_parameters, varargin) ;  % command-line params override all
+
 % Assign the paramters to individual variables
 datalocparamsfilestr = lookup_in_name_value_list(analysis_parameters, 'datalocparamsfilestr') ;
 automaticchecksincoming_params = lookup_in_name_value_list(analysis_parameters, 'automaticchecksincoming_params') ;
