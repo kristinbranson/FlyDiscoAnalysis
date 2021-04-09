@@ -34,7 +34,7 @@ while true,
           trimmed_string_value = strtrim(string_value) ;
           if strcmp(trimmed_string_value, 'true') ,
               val = true ;
-          elseif strcmp(strtrim(val), 'false') ,
+          elseif strcmp(trimmed_string_value, 'false') ,
               val = false ;
           else
               val = string_value ;

@@ -13,8 +13,15 @@ success = false;
 msgs = {};
 stage = 'start';
 
+% Process varargin parameters
+if length(varargin)==1 && isstruct(varargin{1}) ,
+  argument_parameters = varargin{1} ;
+else
+  argument_parameters = struct_from_name_value_list(varargin) ;
+end
+
 % First, get the settingsdir
-settingsdir = lookup_in_name_value_list(varargin, 'settingsdir', '/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/settings') ;
+settingsdir = lookup_in_struct(argument_parameters, 'settingsdir', '/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/settings') ;
         
 % Read the experiment metadata to determine the analysis_protoocol
 % Also depends on what options exist in the settingsdir
@@ -23,21 +30,22 @@ analysis_protocol_from_experiment_metadata = analysis_protocol_from_metadata_fil
 
 % Allow the varargins to override the analysis_protocol
 analysis_protocol = ...
-    lookup_in_name_value_list(varargin,...
-                              'analysis_protocol', analysis_protocol_from_experiment_metadata) ;
+    lookup_in_struct(argument_parameters,...
+                     'analysis_protocol', ...
+                     analysis_protocol_from_experiment_metadata) ;
         
 % Read in the analysis protocol parameters from the analysis-protocol folder, if
 % it exists
 analysis_protocol_folder_path = fullfile(settingsdir, analysis_protocol) ;
 analysis_protocol_parameters_file_path = fullfile(analysis_protocol_folder_path, 'analysis-protocol-parameters.txt') ;
 if exist(analysis_protocol_parameters_file_path, 'file') ,
-    analysis_protocol_parameters = ReadParams(analysis_protocol_parameters_file_path) ;
+    analysis_protocol_parameters = ReadParams(analysis_protocol_parameters_file_path) ;  % a struct
 else
-    analysis_protocol_parameters = cell(1,0) ;
+    analysis_protocol_parameters = struct() ;
 end
 
 % Set the default analysis parameters
-default_analysis_parameters = ...
+default_analysis_parameters_as_list = ...
     {'datalocparamsfilestr','dataloc_params.txt',...
      'automaticchecksincoming_params',{},...
      'registration_params',{},...
@@ -49,7 +57,6 @@ default_analysis_parameters = ...
      'makectraxresultsmovie_params',{},...
      'extradiagnostics_params',{},...
      'automaticcheckscomplete_params',{},...
-     'forcecompute',true,...
      'doautomaticchecksincoming',true,...
      'doflytracking',true, ...
      'doregistration',true,...
@@ -82,115 +89,72 @@ default_analysis_parameters = ...
      'videodiagnosticsfilestr','videodiagnosticsmatfilestr','videodiagnosticsimagefilestr'},...
      'requiredfiles_analysisprotocol',{'analysis_protocol.txt'},...
      'requiredfiles_automaticcheckscomplete',{'automaticcheckscompleteresultsfilestr'} } ;
-     
+default_analysis_parameters = struct_from_name_value_list(default_analysis_parameters_as_list) ;
+   
 % Combine the default parameters with those from the analysis-protocol folder, giving precedence to the analysis-protocol folder ones 
-intermediate_analysis_parameters = merge_name_value_lists(default_analysis_parameters, analysis_protocol_parameters) ;
-analysis_parameters = merge_name_value_lists(intermediate_analysis_parameters, varargin) ;  % command-line params override all
+%intermediate_analysis_parameters = merge_name_value_lists(default_analysis_parameters, analysis_protocol_parameters) ;
+%analysis_parameters = merge_name_value_lists(intermediate_analysis_parameters, varargin) ;  % command-line params override all
+analysis_parameters = merge_structs(default_analysis_parameters, analysis_protocol_parameters, argument_parameters) ;
 
 % Assign the paramters to individual variables
-datalocparamsfilestr = lookup_in_name_value_list(analysis_parameters, 'datalocparamsfilestr') ;
-automaticchecksincoming_params = lookup_in_name_value_list(analysis_parameters, 'automaticchecksincoming_params') ;
-registration_params = lookup_in_name_value_list(analysis_parameters, 'registration_params') ;
-sexclassification_params = lookup_in_name_value_list(analysis_parameters, 'sexclassification_params') ;
-computeperframefeatures_params = lookup_in_name_value_list(analysis_parameters, 'computeperframefeatures_params') ;
-makectraxresultsmovie_params = lookup_in_name_value_list(analysis_parameters, 'makectraxresultsmovie_params') ;
-automaticcheckscomplete_params = lookup_in_name_value_list(analysis_parameters, 'automaticcheckscomplete_params') ;
-forcecompute = lookup_in_name_value_list(analysis_parameters, 'forcecompute') ;
-doautomaticchecksincoming = lookup_in_name_value_list(analysis_parameters, 'doautomaticchecksincoming') ;
-doflytracking = lookup_in_name_value_list(analysis_parameters, 'doflytracking') ;
-doregistration = lookup_in_name_value_list(analysis_parameters, 'doregistration') ;
-doledonoffdetection = lookup_in_name_value_list(analysis_parameters, 'doledonoffdetection') ;
-dosexclassification = lookup_in_name_value_list(analysis_parameters, 'dosexclassification') ;
-dotrackwings = lookup_in_name_value_list(analysis_parameters, 'dotrackwings') ;
-docomputeperframefeatures = lookup_in_name_value_list(analysis_parameters, 'docomputeperframefeatures') ;
-docomputehoghofperframefeatures = lookup_in_name_value_list(analysis_parameters, 'docomputehoghofperframefeatures') ;
-dojaabadetect = lookup_in_name_value_list(analysis_parameters, 'dojaabadetect') ;
-docomputeperframestats = lookup_in_name_value_list(analysis_parameters, 'docomputeperframestats') ;
-doplotperframestats = lookup_in_name_value_list(analysis_parameters, 'doplotperframestats') ;
-domakectraxresultsmovie = lookup_in_name_value_list(analysis_parameters, 'domakectraxresultsmovie') ;
-doextradiagnostics = lookup_in_name_value_list(analysis_parameters, 'doextradiagnostics') ;
-doanalysisprotocol = lookup_in_name_value_list(analysis_parameters, 'doanalysisprotocol') ; %#ok<NASGU>
-doautomaticcheckscomplete = lookup_in_name_value_list(analysis_parameters, 'doautomaticcheckscomplete') ;
-requiredfiles_automaticchecksincoming = lookup_in_name_value_list(analysis_parameters, 'requiredfiles_automaticchecksincoming') ;
-requiredfiles_flytracker = lookup_in_name_value_list(analysis_parameters, 'requiredfiles_flytracker') ;
-requiredfiles_registration = lookup_in_name_value_list(analysis_parameters, 'requiredfiles_registration') ;
-requiredfiles_ledonoffdetection = lookup_in_name_value_list(analysis_parameters, 'requiredfiles_ledonoffdetection') ;
-requiredfiles_sexclassification = lookup_in_name_value_list(analysis_parameters, 'requiredfiles_sexclassification') ;
-requiredfiles_wingtracking = lookup_in_name_value_list(analysis_parameters, 'requiredfiles_wingtracking') ;
-requiredfiles_computeperframefeatures = lookup_in_name_value_list(analysis_parameters, 'requiredfiles_computeperframefeatures') ;
-requiredfiles_computehoghofperframefeatures = lookup_in_name_value_list(analysis_parameters, 'requiredfiles_computehoghofperframefeatures') ;
-requiredfiles_makectraxresultsmovie = lookup_in_name_value_list(analysis_parameters, 'requiredfiles_makectraxresultsmovie') ;
-requiredfiles_automaticcheckscomplete = lookup_in_name_value_list(analysis_parameters, 'requiredfiles_automaticcheckscomplete') ;
+datalocparamsfilestr = lookup_in_struct(analysis_parameters, 'datalocparamsfilestr') ;
+automaticchecksincoming_params = lookup_in_struct(analysis_parameters, 'automaticchecksincoming_params') ;
+registration_params = lookup_in_struct(analysis_parameters, 'registration_params') ;
+sexclassification_params = lookup_in_struct(analysis_parameters, 'sexclassification_params') ;
+computeperframefeatures_params = lookup_in_struct(analysis_parameters, 'computeperframefeatures_params') ;
+makectraxresultsmovie_params = lookup_in_struct(analysis_parameters, 'makectraxresultsmovie_params') ;
+automaticcheckscomplete_params = lookup_in_struct(analysis_parameters, 'automaticcheckscomplete_params') ;
+doautomaticchecksincoming = lookup_in_struct(analysis_parameters, 'doautomaticchecksincoming') ;
+doflytracking = lookup_in_struct(analysis_parameters, 'doflytracking') ;
+doregistration = lookup_in_struct(analysis_parameters, 'doregistration') ;
+doledonoffdetection = lookup_in_struct(analysis_parameters, 'doledonoffdetection') ;
+dosexclassification = lookup_in_struct(analysis_parameters, 'dosexclassification') ;
+dotrackwings = lookup_in_struct(analysis_parameters, 'dotrackwings') ;
+docomputeperframefeatures = lookup_in_struct(analysis_parameters, 'docomputeperframefeatures') ;
+docomputehoghofperframefeatures = lookup_in_struct(analysis_parameters, 'docomputehoghofperframefeatures') ;
+dojaabadetect = lookup_in_struct(analysis_parameters, 'dojaabadetect') ;
+docomputeperframestats = lookup_in_struct(analysis_parameters, 'docomputeperframestats') ;
+doplotperframestats = lookup_in_struct(analysis_parameters, 'doplotperframestats') ;
+domakectraxresultsmovie = lookup_in_struct(analysis_parameters, 'domakectraxresultsmovie') ;
+doextradiagnostics = lookup_in_struct(analysis_parameters, 'doextradiagnostics') ;
+doanalysisprotocol = lookup_in_struct(analysis_parameters, 'doanalysisprotocol') ; 
+doautomaticcheckscomplete = lookup_in_struct(analysis_parameters, 'doautomaticcheckscomplete') ;
+requiredfiles_automaticchecksincoming = lookup_in_struct(analysis_parameters, 'requiredfiles_automaticchecksincoming') ;
+requiredfiles_flytracker = lookup_in_struct(analysis_parameters, 'requiredfiles_flytracker') ;
+requiredfiles_registration = lookup_in_struct(analysis_parameters, 'requiredfiles_registration') ;
+requiredfiles_ledonoffdetection = lookup_in_struct(analysis_parameters, 'requiredfiles_ledonoffdetection') ;
+requiredfiles_sexclassification = lookup_in_struct(analysis_parameters, 'requiredfiles_sexclassification') ;
+requiredfiles_wingtracking = lookup_in_struct(analysis_parameters, 'requiredfiles_wingtracking') ;
+requiredfiles_computeperframefeatures = lookup_in_struct(analysis_parameters, 'requiredfiles_computeperframefeatures') ;
+requiredfiles_computehoghofperframefeatures = lookup_in_struct(analysis_parameters, 'requiredfiles_computehoghofperframefeatures') ;
+requiredfiles_makectraxresultsmovie = lookup_in_struct(analysis_parameters, 'requiredfiles_makectraxresultsmovie') ;
+requiredfiles_automaticcheckscomplete = lookup_in_struct(analysis_parameters, 'requiredfiles_automaticcheckscomplete') ;
 
 % Read in the dataloc params         
 datalocparamsfile = fullfile(settingsdir,analysis_protocol,datalocparamsfilestr);
 dataloc_params = ReadParams(datalocparamsfile);
 
-if ischar(forcecompute),
-  forcecompute = str2logical(forcecompute) ;
-end
-
-if ischar(doautomaticchecksincoming),
-  doautomaticchecksincoming = str2logical(doautomaticchecksincoming) ;
-end
-
-if ischar(doflytracking),
-  doflytracking = str2logical(doflytracking) ;
-end
-
-if ischar(doregistration),
-  doregistration = str2logical(doregistration) ;
-end
-
-if ischar(doledonoffdetection),
-  doledonoffdetection = str2logical(doledonoffdetection) ;
-end
-
-if ischar(dosexclassification),
-  dosexclassification = str2logical(dosexclassification) ;
-end
-
-if ischar(dotrackwings),
-  dotrackwings = str2logical(dotrackwings) ;
-end
-
-if ischar(docomputeperframefeatures),
-  docomputeperframefeatures = str2logical(docomputeperframefeatures) ;
-end
-
-if ischar(docomputehoghofperframefeatures),
-  docomputehoghofperframefeatures = str2logical(docomputehoghofperframefeatures) ;
-end
-
-if ischar(dojaabadetect),
-  dojaabadetect = str2logical(dojaabadetect) ;
-end
-
-if ischar(docomputeperframestats),
-  docomputeperframestats = str2logical(docomputeperframestats) ;  %#ok<NASGU>
-end
-
-if ischar(doplotperframestats),
-  doplotperframestats = str2logical(doplotperframestats) ;  %#ok<NASGU>
-end
-
-if ischar(domakectraxresultsmovie),
-  domakectraxresultsmovie = str2logical(domakectraxresultsmovie) ;
-end
-
-if ischar(doextradiagnostics),
-  doextradiagnostics = str2logical(doextradiagnostics) ;  %#ok<NASGU>
-end
-
-if ischar(doautomaticcheckscomplete),
-  doautomaticcheckscomplete = str2logical(doautomaticcheckscomplete) ;
-end
+% Coerse all the do* variables to on/off/force
+doautomaticchecksincoming = coerce_to_on_off_force(doautomaticchecksincoming) ;
+doflytracking = coerce_to_on_off_force(doflytracking) ;
+doregistration = coerce_to_on_off_force(doregistration) ;
+doledonoffdetection = coerce_to_on_off_force(doledonoffdetection) ;
+dosexclassification = coerce_to_on_off_force(dosexclassification) ;
+dotrackwings = coerce_to_on_off_force(dotrackwings) ;
+docomputeperframefeatures = coerce_to_on_off_force(docomputeperframefeatures) ;
+docomputehoghofperframefeatures = coerce_to_on_off_force(docomputehoghofperframefeatures) ;
+dojaabadetect = coerce_to_on_off_force(dojaabadetect) ;
+docomputeperframestats = coerce_to_on_off_force(docomputeperframestats) ; %#ok<NASGU>
+doplotperframestats = coerce_to_on_off_force(doplotperframestats) ; %#ok<NASGU>
+domakectraxresultsmovie = coerce_to_on_off_force(domakectraxresultsmovie) ;
+doextradiagnostics = coerce_to_on_off_force(doextradiagnostics) ; %#ok<NASGU>
+doanalysisprotocol = coerce_to_on_off_force(doanalysisprotocol) ; %#ok<NASGU>
+doautomaticcheckscomplete = coerce_to_on_off_force(doautomaticcheckscomplete) ;
 
 % Print the settings values in use
 variable_names_to_print = ...
     { 'settingsdir', ...
       'analysis_protocol', ...
-      'forcecompute', ...
       'doautomaticchecksincoming', ...
       'doflytracking',  ...
       'doregistration', ...
@@ -243,7 +207,8 @@ end
 %% incoming checks
 stage = 'automaticchecks_incoming';
 
-if doautomaticchecksincoming,
+if is_on_or_force(doautomaticchecksincoming) ,
+  forcecompute = is_force(doautomaticchecksincoming) ;
   todo = CheckForMissingFiles(expdir,dataloc_params,requiredfiles_automaticchecksincoming);
   if forcecompute || todo,
     fprintf('Running incoming automatic checks...\n');
@@ -274,7 +239,8 @@ end
 
 %% Run FlyTracker
 stage = 'flytracker' ;
-if doflytracking ,
+if is_on_or_force(doflytracking) ,
+  forcecompute = is_force(doflytracking) ;
   todo = CheckForMissingFiles(expdir,dataloc_params,requiredfiles_flytracker) ;
   if forcecompute || todo ,    
     fprintf('Running FlyTracker...\n');      
@@ -296,7 +262,8 @@ end
 
 %% registration
 stage = 'registration';
-if doregistration,  
+if is_on_or_force(doregistration) ,  
+  forcecompute = is_force(doregistration) ;
   todo = CheckForMissingFiles(expdir,dataloc_params,requiredfiles_registration);
   if forcecompute || todo,
     fprintf('Registering tracks...\n');
@@ -321,7 +288,8 @@ end
 
 %% led indicator detection on/off
 stage = 'ledonoffdetection';
-if doledonoffdetection,
+if is_on_or_force(doledonoffdetection) ,
+  forcecompute = is_force(doledonoffdetection) ;
   todo = CheckForMissingFiles(expdir,dataloc_params,requiredfiles_ledonoffdetection);
   if forcecompute || todo, 
     fprintf('Detecting LED on/off transitions...\n');
@@ -343,7 +311,8 @@ end
 
 %% Wing tracking and choose orientations
 stage = 'trackwings';
-if dotrackwings,
+if is_on_or_force(dotrackwings) ,
+  forcecompute = is_force(dotrackwings) ;
   todo = CheckForMissingFiles(expdir,dataloc_params,requiredfiles_wingtracking);
   if forcecompute || todo,
     fprintf('Running wing tracking...\n');
@@ -362,12 +331,10 @@ if dotrackwings,
   end
 end
 
-%% sex classification 
-
+% sex classification 
 stage = 'sexclassification';
-
-if dosexclassification,
-  
+if is_on_or_force(dosexclassification) ,
+  forcecompute = is_force(dosexclassification) ;  
   todo = CheckForMissingFiles(expdir,dataloc_params,requiredfiles_sexclassification);
   if forcecompute || todo,    
     fprintf('Running sex classification...\n');
@@ -387,11 +354,10 @@ if dosexclassification,
   
 end
   
-%% compute locomotor and social per-frame features
-
+% compute locomotor and social per-frame features
 stage = 'computeperframefeatures';
-
-if docomputeperframefeatures,    
+if is_on_or_force(docomputeperframefeatures) ,    
+  forcecompute = is_force(docomputeperframefeatures) ;  
   if ismember('PERFRAMEMATFILES',requiredfiles_computeperframefeatures),
     % read in per-frame fns to compute
     i = find(strcmpi('perframefns',computeperframefeatures_params),1);
@@ -431,7 +397,8 @@ end
 
 stage = 'computehoghofperframefeatures';
 
-if docomputehoghofperframefeatures,
+if is_on_or_force(docomputehoghofperframefeatures) ,
+  forcecompute = is_force(docomputehoghofperframefeatures) ;
   requiredfiles_computehoghofperframefeatures = fullfile(dataloc_params.perframedir,requiredfiles_computehoghofperframefeatures);
   todo = CheckForMissingFiles(expdir,dataloc_params,requiredfiles_computehoghofperframefeatures);
   if forcecompute || todo,
@@ -458,18 +425,18 @@ if docomputehoghofperframefeatures,
   
 end
 
-%% behavior detection
-%stage = 'jaabadetect'; 
-if dojaabadetect,
+% behavior detection
+stage = 'jaabadetect';  %#ok<NASGU>
+if is_on_or_force(dojaabadetect),
+  forcecompute = is_force(dojaabadetect) ;  
   JAABADetectWrapper(expdir, settingsdir, analysis_protocol, forcecompute) ;
 end
 
     
-%% make results movie
-
+% make results movie
 stage = 'ctraxresultsmovie';
-
-if domakectraxresultsmovie,
+if is_on_or_force(domakectraxresultsmovie) ,
+  forcecompute = is_force(domakectraxresultsmovie) ;  
   
   i = find(strcmp('CTRAXRESULTSMOVIE',requiredfiles_makectraxresultsmovie),1);
   if ~isempty(i),
@@ -502,7 +469,8 @@ end
 
 stage = 'automaticchecks_complete';
 
-if doautomaticcheckscomplete,
+if is_on_or_force(doautomaticcheckscomplete) ,
+  forcecompute = is_force(doautomaticcheckscomplete) ;  
   todo = CheckForMissingFiles(expdir,dataloc_params,requiredfiles_automaticcheckscomplete);
   if forcecompute || todo,
     fprintf('Running completion automatic checks...\n');

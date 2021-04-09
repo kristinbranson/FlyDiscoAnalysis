@@ -1,12 +1,12 @@
-function fly_disco_analysis_pipeline_wrapper(experiment_folder_path, settings_folder_path, overriding_analysis_parameters)
+function fly_disco_analysis_pipeline_wrapper(experiment_folder_path, settings_folder_path, overriding_analysis_parameters_as_list)
     % Handle arguments
     if ~exist('settings_folder_path', 'var') || isempty(settings_folder_path) ,
         script_folder_path = fileparts(mfilename('fullpath')) ;
         fly_disco_analysis_folder_path = fileparts(script_folder_path) ;
         settings_folder_path = fullfile(fly_disco_analysis_folder_path, 'settings') ;
     end
-    if ~exist('overriding_analysis_parameters', 'var') || isempty(overriding_analysis_parameters) ,
-        overriding_analysis_parameters = cell(1, 0) ;
+    if ~exist('overriding_analysis_parameters', 'var') || isempty(overriding_analysis_parameters_as_list) ,
+        overriding_analysis_parameters_as_list = cell(1, 0) ;
     end
 
     % Check for the lock file
@@ -29,17 +29,19 @@ function fly_disco_analysis_pipeline_wrapper(experiment_folder_path, settings_fo
 %     stdout = system_with_error_handling(command_line) ;
 %     canonical_analysis_protocol_folder_path = strtrim(stdout) ;
 %     fprintf('Canonical path to analysis protocol folder is:\n  %s\n', canonical_analysis_protocol_folder_path) ;
-    
+
+    % Convert param list to a struct
+    overriding_analysis_parameters = struct_from_name_value_list(overriding_analysis_parameters_as_list) ;
+
     % Build up the parameters cell array
-    default_analysis_parameters = ...
-        {'settingsdir', settings_folder_path} ;
+    default_analysis_parameters = struct('settingsdir', {settings_folder_path}) ;
     
     % Combine the caller-supplied analysis parameters with the defaults       
-    analysis_parameters = merge_name_value_lists(default_analysis_parameters, overriding_analysis_parameters) ;
+    analysis_parameters = merge_structs(default_analysis_parameters, overriding_analysis_parameters) ;
     
     % Call the function to do the real work
     try
-        [success, msgs, stage] = FlyDiscoPipeline(experiment_folder_path, analysis_parameters{:}) ;
+        [success, msgs, stage] = FlyDiscoPipeline(experiment_folder_path, analysis_parameters) ;
     catch me
         % Whatever happens, want to write out one of the two ANALYSIS-* files
         fprintf('Encountered error in FlyDiscoPipeline():\n') ;
