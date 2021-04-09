@@ -15,16 +15,25 @@ stage = 'start';
 
 % First, get the settingsdir
 settingsdir = lookup_in_name_value_list(varargin, 'settingsdir', '/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/settings') ;
-        
-% Read the experiment metadata to determine the analysis_protoocol
-% Also depends on what options exist in the settingsdir
-metadata_file_path = determine_metadata_file_path(expdir) ;
-analysis_protocol_from_experiment_metadata = analysis_protocol_from_metadata_file(metadata_file_path, settingsdir) ;    
 
-% Allow the varargins to override the analysis_protocol
-analysis_protocol = ...
-    lookup_in_name_value_list(varargin,...
-                              'analysis_protocol', analysis_protocol_from_experiment_metadata) ;
+% Get the metadata file path
+metadata_file_path = determine_metadata_file_path(expdir) ;
+
+% See if analysis protocol was passed in
+try 
+    analysis_protocol = ...
+        lookup_in_name_value_list(varargin, 'analysis_protocol') ;
+catch me
+    if isequal(me.identifier, 'lookup_in_name_value_list:not_found') ,
+        % Read the experiment metadata to determine the analysis_protoocol
+        % Also depends on what options exist in the settingsdir
+        % Don't want to do this if analysis-protocol was specified in varargin,
+        % because sometimes metadata doesn't point to a valid folder.
+        analysis_protocol = analysis_protocol_from_metadata_file(metadata_file_path, settingsdir) ;
+    else
+        rethrow(me) ;
+    end
+end    
         
 % Read in the analysis protocol parameters from the analysis-protocol folder, if
 % it exists
