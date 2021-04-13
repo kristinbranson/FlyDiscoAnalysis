@@ -73,7 +73,7 @@ if ~isempty(entry_names) ,
 end
 
 % Run goldblum again, make sure nothing has changed
-goldblum(do_transfer_data_from_rigs, do_use_bqueue, do_actually_submit_jobs, [], per_lab_configuration) ;        
+goldblum(do_transfer_data_from_rigs, do_run_analysis, do_use_bqueue, do_actually_submit_jobs, [], per_lab_configuration) ;        
 
 % % Check that the expected files are present on dm11
 % example_experiments_folder_destination_path = fullfile(destination_folder_path, 'taylora', 'analysis-test-folder') ;
