@@ -15,5 +15,4 @@ nframes_beforeindicator,300
 nframes,1500
 subdecimationfactor,3
 figpos,1,1,1434,1024
-tempdatadir,/groups/branson/bransonlab/projects/olympiad/TempData_FlyBowlMakeCtraxResultsMovie
 nosubtitles,1

@@ -37,7 +37,8 @@ function remote_sync(source_user, source_host, source_path, dest_path)
 
     % throw an error if there were any failures
     if n_failed + n_dir_failed + n_dir_failed_to_list > 0 ,
-        error("There was at least one failure during the remote sync: %d file copies failed, %d directory creates failed, %d directories failed to list", ... 
+        error('remote_sync:did_fail', ...
+              'There was at least one failure during the remote sync: %d file copies failed, %d directory creates failed, %d directories failed to list', ... 
               n_failed, n_dir_failed, n_dir_failed_to_list) ;
     end
 end

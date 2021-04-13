@@ -1,4 +1,4 @@
-reset_goldblum_example_experiments_working_copy_folder() ;
+%reset_goldblum_example_experiments_working_copy_folder() ;
 
 this_script_file_path = mfilename('fullpath') ;
 this_script_folder_path = fileparts(this_script_file_path) ;
@@ -29,7 +29,8 @@ example_experiments_folder_path = ...
              'example-experiments-working-copy') ;        
      
 folder_name_from_experiment_index = simple_dir(example_experiments_folder_path) ;
-do_run_from_experiment_index = true(size(folder_name_from_experiment_index)) ;  % modify this to run a subset
+%do_run_from_experiment_index = true(size(folder_name_from_experiment_index)) ;  % modify this to run a subset
+do_run_from_experiment_index = logical([0 0 1 1]) ;  % modify this to run a subset
 
 experiment_count = length(folder_name_from_experiment_index) ;
 for experiment_index = 1 : experiment_count ,

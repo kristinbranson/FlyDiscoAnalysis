@@ -28,10 +28,9 @@ metadata_file_path = determine_metadata_file_path(expdir) ;
 
 % See if analysis protocol was passed in
 try 
-    analysis_protocol = ...
-        lookup_in_name_value_list(varargin, 'analysis_protocol') ;
+    analysis_protocol = argument_parameters.analysis_protocol ;
 catch me
-    if isequal(me.identifier, 'lookup_in_name_value_list:not_found') ,
+    if isequal(me.identifier, 'MATLAB:nonExistentField') ,
         % Read the experiment metadata to determine the analysis_protoocol
         % Also depends on what options exist in the settingsdir
         % Don't want to do this if analysis-protocol was specified in varargin,

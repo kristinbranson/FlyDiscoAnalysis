@@ -1,4 +1,4 @@
-function reset_goldblum_example_experiments_working_copy_folder()
+function working_copy_example_experiment_folder_path = reset_goldblum_example_experiments_working_copy_folder()
     this_script_path = mfilename('fullpath') ;
     this_folder_path = fileparts(this_script_path) ;
     read_only_example_experiment_folder_path = fullfile(this_folder_path, 'example-experiments-read-only') ;

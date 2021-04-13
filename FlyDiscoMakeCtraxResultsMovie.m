@@ -53,24 +53,21 @@ else
   ctraxresultsmovie_params = ReadParams(specificctraxresultsmovie_paramsfile);
   defaultparams = 0;
 end
-%defaulttempdatadir = '/groups/branson/bransonlab/projects/olympiad/TempData_FlyBowlMakeCtraxResultsMovie';
-defaulttempdatadir = '/groups/branson/bransonlab/adam/TempData_FlyBowlMakeCtraxResultsMovie';
-avifile = fullfile(ctraxresultsmovie_params.tempdatadir,[avifilestr,'_temp.avi']);
-mp4file = fullfile(expdir,[avifilestr,'.mp4']);
 
-if ~isfield(ctraxresultsmovie_params,'tempdatadir'),
-  ctraxresultsmovie_params.tempdatadir = defaulttempdatadir;
-elseif isunix
-  [status1,res] = unix(sprintf('echo %s',ctraxresultsmovie_params.tempdatadir));
-  if status1 == 0,
-    ctraxresultsmovie_params.tempdatadir = strtrim(res);
-  end
+% Sort out where the temporary data directory will be
+scratch_folder_path = get_scratch_folder_path() ;
+defaulttempdatadir = fullfile(scratch_folder_path, 'TempData_FlyBowlMakeCtraxResultsMovie') ;
+if isfield(ctraxresultsmovie_params,'tempdatadir') ,
+    tempdatadir = ctraxresultsmovie_params.tempdatadir ;
+else
+    tempdatadir = defaulttempdatadir ;
 end
 
-if ~exist(ctraxresultsmovie_params.tempdatadir,'dir'),
-  [success1,msg1] = mkdir(ctraxresultsmovie_params.tempdatadir);
+% Create the temporary data folder if it doesn't exist
+if ~exist(tempdatadir, 'dir') ,
+  [success1,msg1] = mkdir(tempdatadir);
   if ~success1,
-    error('Error making directory %s: %s',ctraxresultsmovie_params.tempdatadir,msg1);
+    error('Error making directory %s: %s',tempdatadir,msg1);
   end
 end
 
@@ -278,21 +275,21 @@ else
   load(ledprotocolfile);
   load(indicatorfile);
   if strcmp(metadata.assay,'FlyBubbleRGB') || strcmp(metadata.assay,'FlyBowlRGB')
-        if isfield(protocol,'Rintensity')
-            RGBprotocol = protocol;
-            clear protocol;
-            % test if RGBprotocol has only one active color
-            countactiveLEDs = [double(any(RGBprotocol.Rintensity));double(any(RGBprotocol.Gintensity));double(any(RGBprotocol.Bintensity))];
-            % check that there is 1 and only 1 color LED used in protocol
-            if sum(countactiveLEDs) == 0
-                error('ChR = 1 for LED protcol with no active LEDs')
-            elseif sum(countactiveLEDs) > 1
-                error('More than one active LED color in protocol. Not currently supported')
-            end
-            % call function that transforms new protocol to old protocol
-            [protocol,ledcolor] = ConvertRGBprotocol2protocolformat(RGBprotocol,countactiveLEDs);
+    if isfield(protocol,'Rintensity')
+        RGBprotocol = protocol;
+        clear protocol;
+        % test if RGBprotocol has only one active color
+        countactiveLEDs = [double(any(RGBprotocol.Rintensity));double(any(RGBprotocol.Gintensity));double(any(RGBprotocol.Bintensity))];
+        % check that there is 1 and only 1 color LED used in protocol
+        if sum(countactiveLEDs) == 0
+            error('ChR = 1 for LED protcol with no active LEDs')
+        elseif sum(countactiveLEDs) > 1
+            error('More than one active LED color in protocol. Not currently supported')
         end
+        % call function that transforms new protocol to old protocol
+        [protocol,ledcolor] = ConvertRGBprotocol2protocolformat(RGBprotocol,countactiveLEDs);
     end
+  end
   
   
   stimtimes = indicatorLED.starttimes(ctraxresultsmovie_params.indicatorframes);
@@ -350,13 +347,11 @@ else
 end
 
 
-%% create movie
-%temp_avi_path = [avifile,'-temp'] ;
-
-scratch_folder_path = get_scratch_folder_path() ;
+% create movie
+avi_file_path = fullfile(tempdatadir, [avifilestr, '_temp.avi']);
 temp_avi_path = [tempname(scratch_folder_path) '.avi'] ;
 [succeeded,~,~,height,width]= ...
-  make_ctrax_result_movie('moviename',moviefile,'trxname',trxfile,'aviname',avifile,...
+  make_ctrax_result_movie('moviename',moviefile,'trxname',trxfile,'aviname',avi_file_path,...
   'nzoomr',ctraxresultsmovie_params.nzoomr,'nzoomc',ctraxresultsmovie_params.nzoomc,...
   'boxradius',ctraxresultsmovie_params.boxradius,'taillength',ctraxresultsmovie_params.taillength,...
   'fps',ctraxresultsmovie_params.fps,...
@@ -377,7 +372,7 @@ if ishandle(1),
 end
 
 if ~succeeded,
-  error('Failed to create raw avi %s',avifile);
+  error('Failed to create raw avi %s',avi_file_path);
 end
 
 %% compress
@@ -392,8 +387,9 @@ newwidth = 4*ceil(width/4);
 %cmd = sprintf('mencoder %s -o %s -ovc xvid -xvidencopts fixed_quant=4 -vf scale=%d:%d,flip -sub %s -subfont-text-scale 2 -msglevel all=2',...
 %  avifile,tmpfile,newwidth,newheight,subtitlefile);
 
+mp4_file_path = fullfile(expdir, [avifilestr,'.mp4']) ;
 nowstr = datestr(now,'yyyymmddTHHMMSSFFF');
-passlogfile = sprintf('%s_%s',avifile,nowstr);
+passlogfile = sprintf('%s_%s',avi_file_path,nowstr);
 if isequal(get_distro_codename(), 'Ubuntu') && exist('/usr/bin/ffmpeg', 'file') ,
     ffmpeg_command = 'env -u LD_LIBRARY_PATH /usr/bin/ffmpeg' ;  
         % Use the local ffmpeg, to avoid fontconfig issues
@@ -403,9 +399,9 @@ else
     ffmpeg_command = '/misc/local/ffmpeg-4.3.1/bin/ffmpeg' ;
 end
 cmd = sprintf('%s -i %s -y -passlogfile %s -c:v h264 -pix_fmt yuv420p -s %dx%d -b:v 1600k -vf "subtitles=%s:force_style=''FontSize=10,FontName=Helvetica''" -pass 1 -f mp4 /dev/null',...
-  ffmpeg_command, avifile,passlogfile,newwidth,newheight,subtitlefile);
+  ffmpeg_command, avi_file_path,passlogfile,newwidth,newheight,subtitlefile);
 cmd2 = sprintf('%s -i %s -y -passlogfile %s -c:v h264 -pix_fmt yuv420p -s %dx%d -b:v 1600k -vf "subtitles=%s:force_style=''FontSize=10,FontName=Helvetica''" -pass 2 -f mp4 %s',...
-  ffmpeg_command, avifile,passlogfile,newwidth,newheight,subtitlefile,mp4file);
+  ffmpeg_command, avi_file_path,passlogfile,newwidth,newheight,subtitlefile,mp4_file_path);
 
 status = system(cmd);
 if status ~= 0,
@@ -417,7 +413,7 @@ if status ~= 0,
 %    tmpfile,xvidfile);
   fprintf('then\n');
   fprintf('%s\n',cmd2);
-  fprintf('then delete %s %s* %s\n',avifile,passlogfile,subtitlefile);
+  fprintf('then delete %s %s* %s\n',avi_file_path,passlogfile,subtitlefile);
   fprintf('*****\n');
 else
 %   cmd = sprintf('mencoder %s -o %s -ovc xvid -xvidencopts fixed_quant=4 -vf flip -msglevel all=2',...
@@ -428,11 +424,11 @@ else
     warning('ffmpeg second pass failed.');
     fprintf('Need to run:\n');
     fprintf('%s\n',cmd2);
-    fprintf('then delete %s %s* %s\n',avifile,passlogfile,subtitlefile);
+    fprintf('then delete %s %s* %s\n',avi_file_path,passlogfile,subtitlefile);
     fprintf('*****\n');    
   else
     %delete(tmpfile);
-    delete(avifile);
+    delete(avi_file_path);
     delete(subtitlefile);
     fname = [passlogfile '-*.log'];
     if isscalar(dir(fname))

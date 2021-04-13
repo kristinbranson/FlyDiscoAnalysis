@@ -34,7 +34,8 @@ function goldblum(do_transfer_data_from_rigs, do_run_analysis, do_use_bqueue, do
     data_folder_path_from_rig_index = configuration.data_folder_path_from_rig_index ;
     destination_folder = configuration.destination_folder ;    
     settings_folder_path = configuration.settings_folder_path ;
-    does_use_per_user_folders = configuration.does_use_per_user_folders ;
+    %does_use_per_user_folders = configuration.does_use_per_user_folders ;
+    to_process_folder_name = 'to-process' ;
     
 %     % Convert e.g. flybowl-ww1.hhmi.org to flybowl-ww1    
 %     short_host_name_from_rig_index = cellfun(@short_host_name_from_host_name, host_name_from_rig_index, 'UniformOutput', false) ;
@@ -66,21 +67,47 @@ function goldblum(do_transfer_data_from_rigs, do_run_analysis, do_use_bqueue, do
             lab_data_folder_path = lab_data_folder_path_from_rig_index{rig_index} ;
 
             try
-                remote_sync_and_verify_and_delete_contents(rig_user_name, rig_host_name, lab_data_folder_path, destination_folder, does_use_per_user_folders) ;
+                relative_path_from_experiment_folder_index = ...
+                    remote_sync_verify_and_delete_experiment_folders(rig_user_name, ...
+                                                                     rig_host_name, ...
+                                                                     lab_data_folder_path, ...
+                                                                     destination_folder, ...
+                                                                     to_process_folder_name) ;                
+                add_links_to_to_process_folder(destination_folder, to_process_folder_name, relative_path_from_experiment_folder_index) ;
             catch me 
                 fprintf('There was a problem doing the sync from %s:%s as %s to %s:\n', ...
                         rig_host_name, lab_data_folder_path, rig_user_name, destination_folder) ;
                 disp(me.getReport()) ;    
-            end
+            end                        
         end
     else
         fprintf('Skipping transfer of data from rigs.\n') ;
     end
     
-    % Run the analysis script on the destination folder
+    % Run the analysis script on links in the to-process folder
     if do_run_analysis ,
-        find_experiments_and_analyze(destination_folder, settings_folder_path, lab_head_last_name, ...
-                                     do_use_bqueue, do_actually_submit_jobs, analysis_parameters) ;
+        % Get the links from the to_process_folder_name folder
+        to_process_folder_path = fullfile(destination_folder, to_process_folder_name) ;
+        folder_name_from_experiment_index = simple_dir(to_process_folder_path) ;
+        folder_path_from_experiment_index = ...
+            cellfun(@(folder_name)(fullfile(to_process_folder_path, folder_name)), ...
+                                   folder_name_from_experiment_index, ...
+                                   'UniformOutput', false) ;        
+        do_force_analysis = false ;
+        analyze_experiment_folders(folder_path_from_experiment_index, settings_folder_path, lab_head_last_name, ...
+                                   do_force_analysis, do_use_bqueue, do_actually_submit_jobs, analysis_parameters)
+        
+        % Whether those succeeded or failed, remove the links from the
+        % to-process folder
+        experiment_folder_count = length(folder_path_from_experiment_index) ;
+        for i = 1 : experiment_folder_count ,
+            experiment_folder_path = folder_path_from_experiment_index{i} ; 
+            % experiment_folder_path is almost certainly a symlink, but check
+            % anyway
+            if is_symbolic_link(experiment_folder_path) ,
+                delete(experiment_folder_path) ;
+            end
+        end
     else
         fprintf('Skipping analysis.\n') ;
     end        
