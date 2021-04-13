@@ -1,4 +1,4 @@
-do_transfer_data_from_rigs = false ;
+do_transfer_data_from_rigs = true ;
 do_run_analysis = true ;
 do_use_bqueue = true ;
 do_actually_submit_jobs = true ;
@@ -65,7 +65,7 @@ for i = 1 : length(test_file_names) ,
     end
 end    
 
-% Check that the rig user folder is empty now
+% Check that the rig lab folder is empty now
 entry_names = ...
     list_remote_dir(rig_user_name, rig_host_name, rig_lab_data_folder_path) ;
 if ~isempty(entry_names) ,
@@ -75,16 +75,16 @@ end
 % Run goldblum again, make sure nothing has changed
 goldblum(do_transfer_data_from_rigs, do_use_bqueue, do_actually_submit_jobs, [], per_lab_configuration) ;        
 
-% Check that the expected files are present on dm11
-example_experiments_folder_destination_path = fullfile(destination_folder_path, 'taylora', 'analysis-test-folder') ;
-local_verify(example_experiments_folder_path, example_experiments_folder_destination_path) ;
+% % Check that the expected files are present on dm11
+% example_experiments_folder_destination_path = fullfile(destination_folder_path, 'taylora', 'analysis-test-folder') ;
+% local_verify(example_experiments_folder_path, example_experiments_folder_destination_path) ;
 
 % Check that some of the expected outputs were generated
 test_file_names = {'perframe' 'scores_AttemptedCopulation.mat' 'scoresBackup.mat' 'registered_trx.mat' 'wingtracking_results.mat'} ;
 for i = 1 : length(test_file_names) ,
     test_file_name = test_file_names{i} ;
     test_file_path = ...
-        fullfile(example_experiments_folder_destination_path, ...
+        fullfile(destination_folder_path, ...
                  'SS36564_20XUAS_CsChrimson_mVenus_attP18_flyBowlMing_20200227_Continuous_2min_5int_20200107_20200229T132141', ...
                  test_file_name) ;
     if ~exist(test_file_path, 'file') ,
@@ -92,7 +92,7 @@ for i = 1 : length(test_file_names) ,
     end
 end    
 
-% Check that the rig user folder is empty now
+% Check that the rig lab folder is empty now
 entry_names = ...
     list_remote_dir(rig_user_name, rig_host_name, rig_lab_data_folder_path) ;
 if ~isempty(entry_names) ,
