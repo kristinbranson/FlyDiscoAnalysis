@@ -18,6 +18,16 @@ function fly_disco_analysis_pipeline_wrapper(experiment_folder_path, settings_fo
     
     % If get here, create the lock file
     touch(analysis_in_progress_file_path) ;
+
+    % Delete any pre-existing success/failure files
+    analysis_successful_file_path = fullfile(experiment_folder_path, 'ANALYSIS-COMPLETED-SUCCESSFULLY') ;
+    if exist(analysis_successful_file_path, 'file') ,
+        delete(analysis_successful_file_path) ;
+    end
+    analysis_failed_file_path = fullfile(experiment_folder_path, 'ANALYSIS-FAILED') ;
+    if exist(analysis_failed_file_path, 'file') ,
+        delete(analysis_failed_file_path) ;
+    end   
     
 %     % Read the experiment metadata to determine the analysis_protoocol
 %     metadata_file_path = determine_metadata_file_path(experiment_folder_path) ;
