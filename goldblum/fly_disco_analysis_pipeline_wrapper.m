@@ -26,7 +26,7 @@ function fly_disco_analysis_pipeline_wrapper(experiment_folder_path, settings_fo
     dt = datetime('now') ;
     date_as_string = string(datetime(dt, 'Format', 'uuuu-MM-dd')) ;
     time_as_string = string(datetime(dt, 'Format', 'HH:mm:ss')) ;
-    header_string = sprintf('Running FlyDiscoPipeline on %s at %s', date_as_string, time_as_string) ;
+    header_string = sprintf('Running FlyDiscoPipeline() on %s at %s', date_as_string, time_as_string) ;
     asterisks_string = repmat('*', [1 length(header_string)]) ;
     fprintf('\n\n\n\n\n') ;
     fprintf('%s\n', asterisks_string) ;    
