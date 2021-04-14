@@ -1,4 +1,7 @@
 function fly_disco_analysis_pipeline_wrapper(experiment_folder_path, settings_folder_path, overriding_analysis_parameters_as_list)
+    % This is the function that is submitted by goldblum to the bqueue to run each
+    % experiment.
+  
     % Handle arguments
     if ~exist('settings_folder_path', 'var') || isempty(settings_folder_path) ,
         script_folder_path = fileparts(mfilename('fullpath')) ;
@@ -19,6 +22,17 @@ function fly_disco_analysis_pipeline_wrapper(experiment_folder_path, settings_fo
     % If get here, create the lock file
     touch(analysis_in_progress_file_path) ;
 
+    % Print the date to the stdout, so it gets logged
+    dt = datetime('now') ;
+    date_as_string = string(datetime(dt, 'Format', 'uuuu-MM-dd')) ;
+    time_as_string = string(datetime(dt, 'Format', 'HH:mm:ss')) ;
+    header_string = sprintf('Running FlyDiscoPipeline on %s at %s', date_as_string, time_as_string) ;
+    asterisks_string = repmat('*', [1 length(header_string)]) ;
+    fprintf('\n\n\n\n\n') ;
+    fprintf('%s\n', asterisks_string) ;    
+    fprintf('%s\n', header_string) ;
+    fprintf('%s\n\n', asterisks_string) ;    
+    
     % Delete any pre-existing success/failure files
     analysis_successful_file_path = fullfile(experiment_folder_path, 'ANALYSIS-COMPLETED-SUCCESSFULLY') ;
     if exist(analysis_successful_file_path, 'file') ,
@@ -27,7 +41,7 @@ function fly_disco_analysis_pipeline_wrapper(experiment_folder_path, settings_fo
     analysis_failed_file_path = fullfile(experiment_folder_path, 'ANALYSIS-FAILED') ;
     if exist(analysis_failed_file_path, 'file') ,
         delete(analysis_failed_file_path) ;
-    end   
+    end
     
 %     % Read the experiment metadata to determine the analysis_protoocol
 %     metadata_file_path = determine_metadata_file_path(experiment_folder_path) ;
