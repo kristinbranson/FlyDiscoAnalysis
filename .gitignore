@@ -2,3 +2,7 @@ analysis-test-folder/
 analysis-test-template/
 *.m~
 .playfmfrc.mat
+goldblum/example-experiments-read-only/
+goldblum/example-experiments-working-copy/
+goldblum/goldblum-test-destination-folder/
+
