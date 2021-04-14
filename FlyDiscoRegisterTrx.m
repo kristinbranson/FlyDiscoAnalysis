@@ -137,6 +137,19 @@ if ~succeeded,
   error('Could not load trajectories from file %s',ctraxfile);
 end
 
+% remove nans from flytracker outputs
+nids0 = numel(trx);
+if ~isfield(registration_params,'maxFlyTrackerNanInterpFrames'),
+  fprintf('maxFlyTrackerNanInterpFrames not set in registration_params, using default value.\n');
+  args = {};
+else
+  args = {'maxFlyTrackerNanInterpFrames',registration_params.maxFlyTrackerNanInterpFrames};
+end
+[trx,ninterpframes] = PostprocessFlyTracker(trx,args{:});
+fprintf('Removed nans from tracker output.\n');
+fprintf('Number of nans interpolated through: %d frames\n',ninterpframes);
+fprintf('Number of identities was %d, now %d\n',nids0,numel(trx));
+
 % frame rate
 if registration_params.usemediandt,
   tmp = diff(timestamps);
