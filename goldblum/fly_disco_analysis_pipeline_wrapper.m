@@ -43,17 +43,6 @@ function fly_disco_analysis_pipeline_wrapper(experiment_folder_path, settings_fo
         delete(analysis_failed_file_path) ;
     end
     
-%     % Read the experiment metadata to determine the analysis_protoocol
-%     metadata_file_path = determine_metadata_file_path(experiment_folder_path) ;
-%     analysis_protocol_folder_name = analysis_protocol_from_metadata_file(metadata_file_path, settings_folder_path) ;    
-%     fprintf('Analysis protocol is: %s\n', analysis_protocol_folder_name) ;
-%     analysis_protocol_folder_path = fullfile(settings_folder_path, analysis_protocol_folder_name) ;
-%     escaped_analysis_protocol_folder_path = escape_path_for_bash(analysis_protocol_folder_path) ;
-%     command_line = sprintf('realpath %s', escaped_analysis_protocol_folder_path) ;
-%     stdout = system_with_error_handling(command_line) ;
-%     canonical_analysis_protocol_folder_path = strtrim(stdout) ;
-%     fprintf('Canonical path to analysis protocol folder is:\n  %s\n', canonical_analysis_protocol_folder_path) ;
-
     % Convert param list to a struct
     overriding_analysis_parameters = struct_from_name_value_list(overriding_analysis_parameters_as_list) ;
 

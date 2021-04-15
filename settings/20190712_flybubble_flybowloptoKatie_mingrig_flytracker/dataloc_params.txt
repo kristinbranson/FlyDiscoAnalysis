@@ -4,6 +4,7 @@ linedatadir,/groups/sciserv/flyolympiad/Olympiad_Screen/fly_bowl/line_data
 configfilepattern,FlyBowlDataCaptureParams*.txt
 moviefilestr,movie.ufmf
 annfilestr,movie.ufmf.ann
+flytrackeroptionsstr,flytracker-options.txt
 flytrackerparentcalibrationstr,flytracker-parent-calibration.mat
 flytrackercalibrationstr,flytracker-calibration.mat
 flytrackertrackstr,movie-track.mat
