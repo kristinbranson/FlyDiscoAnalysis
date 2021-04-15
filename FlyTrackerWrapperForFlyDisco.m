@@ -5,8 +5,6 @@ function FlyTrackerWrapperForFlyDisco(expdir, settingsdir, analysis_protocol, da
   end    
     
   % Determine paths to needed files
-  flytracker_options_file_name = dataloc_params.flytrackeroptionsstr ;
-  flytracker_options_file_path = fullfile(settingsdir, analysis_protocol, flytracker_options_file_name) ;  
   flytracker_parent_calibration_file_name = dataloc_params.flytrackerparentcalibrationstr ;
   flytracker_parent_calibration_file_path = fullfile(settingsdir, analysis_protocol, flytracker_parent_calibration_file_name) ;
   flytracker_calibration_file_name = dataloc_params.flytrackercalibrationstr ;
@@ -26,11 +24,17 @@ function FlyTrackerWrapperForFlyDisco(expdir, settingsdir, analysis_protocol, da
   default_options.expdir_naming = true ;
   default_options.fr_sample = 200 ;
   
-  % Read the options file, if it exists
-  if exist(flytracker_options_file_path, 'file') ,
-    options_from_file = ReadParams(flytracker_options_file_path) ;
+  % Read the options file, if dataloc param specifies it, and it exists
+  if isfield(dataloc_params, 'flytrackeroptionsstr') ,
+    flytracker_options_file_name = dataloc_params.flytrackeroptionsstr ;
+    flytracker_options_file_path = fullfile(settingsdir, analysis_protocol, flytracker_options_file_name) ;    
+    if exist(flytracker_options_file_path, 'file') ,
+      options_from_file = ReadParams(flytracker_options_file_path) ;
+    else
+      options_from_file = struct() ;
+    end
   else
-    options_from_file = struct() ;
+      options_from_file = struct() ;
   end
   
   % Merge options
