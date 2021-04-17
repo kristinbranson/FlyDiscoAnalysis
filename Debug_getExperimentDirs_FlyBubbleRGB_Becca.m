@@ -4,11 +4,11 @@ addpath /groups/branson/home/robiea/Code_versioned/FlyDiscoAnalysis/JAABA/fileha
 addpath /groups/branson/home/robiea/Code_versioned/FlyDiscoAnalysis/JAABA/misc
 %% pull expdirs and load all metdata
 rootdatadir = '/groups/branson/bransonlab/flydisco_data';
-savefile = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_20210405_RigC';
+savefile = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_wk2';
 metadatafile = 'Metadata.xml';
 
 %inputs to getExperimentDirsFlyDisco: 'metadatafile','Metadata.xml','screen_type','*','line_name','*','date','*');
-[expdirstruct] = getExperimentDirsFlyDisco(rootdatadir,'screen_type','VNC*','date','20210405*','line_name','*RigC*');
+[expdirstruct] = getExperimentDirsFlyDisco(rootdatadir,'screen_type','VNC*','date','20210*');
 
 %% make csv file for all experiments
 fid = fopen([savefile,'.tsv'],'w');
