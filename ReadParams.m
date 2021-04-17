@@ -28,7 +28,17 @@ while true,
       val = str2double(valcell);
       if any(isnan(val)),
         if numel(valcell) == 1,
-          val = valcell{1};
+          string_value = valcell{1};
+          % Check if the string value represents a boolean.  If so, convert to
+          % boolean.
+          trimmed_string_value = strtrim(string_value) ;
+          if strcmp(trimmed_string_value, 'true') ,
+              val = true ;
+          elseif strcmp(trimmed_string_value, 'false') ,
+              val = false ;
+          else
+              val = string_value ;
+          end
         else
           val = valcell;
         end
@@ -36,8 +46,10 @@ while true,
     end
     params.(name) = val;
   catch ME,
-    warning('Unable to parse parameter line\n%s\nof %s:\n',s, ...
-            filename,getReport(ME));
+    warning('Unable to parse parameter line\n%s\nof %s:\n%s\n', ...
+            s, ...
+            filename, ...
+            getReport(ME)) ;
     continue;
   end
 

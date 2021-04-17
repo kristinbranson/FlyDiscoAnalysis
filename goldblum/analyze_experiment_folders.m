@@ -15,19 +15,11 @@ function analyze_experiment_folders(folder_path_from_experiment_index, settings_
         analysis_parameters = cell(1,0) ;
     end
 
-    % If do_force_analysis is true, clear any files indicating result of previous (or ongoing!) run
+    % If do_force_analysis is true, clear any files indicating ongoing run
     experiment_count = length(folder_path_from_experiment_index) ;
     if do_force_analysis ,
         for i = 1 : experiment_count ,
             experiment_folder_path = folder_path_from_experiment_index{i} ;
-            analysis_successful_file_path = fullfile(experiment_folder_path, 'ANALYSIS-COMPLETED-SUCCESSFULLY') ;
-            if exist(analysis_successful_file_path, 'file') ,
-                delete(analysis_successful_file_path) ;
-            end
-            analysis_failed_file_path = fullfile(experiment_folder_path, 'ANALYSIS-FAILED') ;
-            if exist(analysis_failed_file_path, 'file') ,
-                delete(analysis_failed_file_path) ;
-            end
             analysis_in_progress_file_path = fullfile(experiment_folder_path, 'ANALYSIS-IN-PROGRESS') ;
             if exist(analysis_in_progress_file_path, 'file') ,
                 delete(analysis_in_progress_file_path) ;
@@ -35,17 +27,16 @@ function analyze_experiment_folders(folder_path_from_experiment_index, settings_
         end
     end
     
-    % Figure out which experiments still need to be analyzed                                  
+    % We don't analyze experiments that are already being analyzed, ones where
+    % the experiment was aborted during data-taking
     is_to_be_analyzed_from_experiment_index = true(experiment_count, 1) ;
     for i = 1 : experiment_count ,
         experiment_folder_path = folder_path_from_experiment_index{i} ;
-        analysis_successful_file_path = fullfile(experiment_folder_path, 'ANALYSIS-COMPLETED-SUCCESSFULLY') ;
-        analysis_failed_file_path = fullfile(experiment_folder_path, 'ANALYSIS-FAILED') ;        
         analysis_in_progress_file_path = fullfile(experiment_folder_path, 'ANALYSIS-IN-PROGRESS') ;
         aborted_file_path = fullfile(experiment_folder_path, 'ABORTED') ;
-        is_to_be_analyzed_from_experiment_index(i) = ...
-            ~logical(exist(analysis_successful_file_path, 'file')) && ~logical(exist(analysis_failed_file_path, 'file')) && ...
-            ~logical(exist(analysis_in_progress_file_path, 'file')) && ~logical(exist(aborted_file_path, 'file')) ;
+        is_to_be_skipped = ...
+          exist(analysis_in_progress_file_path, 'file') || exist(aborted_file_path, 'file') ;
+        is_to_be_analyzed_from_experiment_index(i) = ~is_to_be_skipped ;
     end
 
     % Report how many experiments are left to be analyzed
@@ -65,10 +56,17 @@ function analyze_experiment_folders(folder_path_from_experiment_index, settings_
         for i = 1 : to_be_analyzed_experiment_count ,
             experiment_folder_path = folder_path_from_to_be_analyzed_experiment_index{i} ;
             [~, experiment_folder_name] = fileparts2(experiment_folder_path) ;
-            stdouterr_file_path = find_free_log_file_name(experiment_folder_path) ;       
-            bsub_options = sprintf('-P %s -J %s-flydisco-%s', lab_head_last_name, lab_head_last_name, experiment_folder_name) ;
+            % We use the options list to pass the stdout/stderr file, b/c the
+            % usual mechanism doesn't support appending.
+            stdouterr_file_path = fullfile(experiment_folder_path, 'flydisco-analysis-log.txt') ;
+            bsub_options = sprintf('-P %s -J %s-flydisco-%s -o %s -e %s', ...
+                                   lab_head_last_name, ...
+                                   lab_head_last_name, ...
+                                   experiment_folder_name, ...
+                                   stdouterr_file_path, ...
+                                   stdouterr_file_path) ;
             bqueue.enqueue(slots_per_job, ...
-                           stdouterr_file_path, ...
+                           [], ...
                            bsub_options, ...
                            @fly_disco_analysis_pipeline_wrapper, ...
                                experiment_folder_path, ...
