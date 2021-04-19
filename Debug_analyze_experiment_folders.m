@@ -23,7 +23,9 @@ settings_folder_path = '/groups/branson/home/robiea/Code_versioned/FlyDiscoAnaly
 % analysis_protocol = 'current_non_olympiad_dickson_VNC';
 % folder_path_from_experiment_index = {'/groups/branson/home/robiea/Projects_data/FlyDisco/TestSuite/FTtracked/FlyBubbleRGB/LED/VNC_JHS_K_85321_RigA_20210408T130721'};
 analysis_protocol =  '20210417_flybubble_LED';
-folder_path_from_experiment_index = {'/groups/branson/home/robiea/Projects_data/FlyDisco/TestSuite/FTtracked/FlyBubbleRGB/LED/VNC_JHS_K_85321_RigB_20210408T130659'};
+% folder_path_from_experiment_index = {'/groups/branson/home/robiea/Projects_data/FlyDisco/TestSuite/FTtracked/FlyBubbleRGB/LED/VNC_JHS_K_85321_RigB_20210408T130659'};
+% folder_path_from_experiment_index = {'/groups/branson/home/robiea/Projects_data/FlyDisco/TestSuite/FTtracked/FlyBubbleRGB/LED/VNC_JHS_K_85321_RigC_20210408T124720'};
+folder_path_from_experiment_index = {'/groups/branson/home/robiea/Projects_data/FlyDisco/TestSuite/FTtracked/FlyBubbleRGB/LED/VNC_JHS_K_85321_RigD_20210408T130906'};
 % whether or not to use fial/sucess flags
 do_force_analysis = true;    
 
