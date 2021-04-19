@@ -132,21 +132,33 @@ else
     end
     
     nsteps = numel(protocol.stepNum);
-    
+    % if there's only 1 step 
     if nsteps == 1,
       iter = protocol.iteration;
       n = ceil(iter/6);     % take every nth iteration of the stimulus
       indicatorframes = 1:n:iter;
-    elseif nsteps <= 3,
+    elseif nsteps <= 3,      
+      % assumes steps have more 2 or more iterations
+      if ~all([protocol.iteration] > 1)
+          error('Step with iteration < 2. User needs to make a specific ctrax results movie param file')
+      end
       indicatorframes = zeros(1,2*nsteps);
       for step = 1:nsteps,
         iter = protocol.iteration(step);
         if step==1,
           indicatorframes(1)=1;
           indicatorframes(2)=iter;
-        else
-          indicatorframes(2*step-1)=indicatorframes(2*step-2)+1;
-          indicatorframes(2*step)=indicatorframes(2*step-1);
+%         this logic doesn't work properly
+%         elseif                       
+%           indicatorframes(2*step-1)=indicatorframes(2*step-2)+1;
+%           indicatorframes(2*step)=indicatorframes(2*step-1);
+        elseif step == 2
+            indicatorframes(3) = indicatorframes(2)+1;
+            indicatorframes(4) = indicatorframes(2)+iter;
+        elseif step == 3
+            indicatorframes(5) = indicatorframes(4)+1;
+            indicatorframes(6) = indicatorframes(4)+iter;
+
         end        
       end
     else
@@ -185,16 +197,18 @@ else
     end
     
     ctraxresultsmovie_params.indicatorframes = indicatorframes;
-    firstframes_off = indicatorLED.startframe(indicatorframes) - ctraxresultsmovie_params.nframes_beforeindicator;    
+    firstframes_off = indicatorLED.startframe(indicatorframes) - ctraxresultsmovie_params.nframes_beforeindicator;  
+    % need to do this for specific files as well
     ctraxresultsmovie_params.nframes = ones(1,length(firstframes_off))*ctraxresultsmovie_params.nframes;
     endframes_off = firstframes_off + ctraxresultsmovie_params.nframes -1;
     firstframes = registration_params.start_frame + firstframes_off;
   else
     if exist(indicatorfile,'file')
-      load(indicatorfile)
+      load(indicatorfile);
       firstframes_off = indicatorLED.startframe(ctraxresultsmovie_params.indicatorframes) - ctraxresultsmovie_params.nframes_beforeindicator;
       endframes_off = firstframes_off + ctraxresultsmovie_params.nframes -1 ;
       firstframes = registration_params.start_frame + firstframes_off;
+      ctraxresultsmovie_params.nframes = ones(1,length(firstframes_off))*ctraxresultsmovie_params.nframes;
     end
   end
 end
@@ -310,6 +324,7 @@ else
     end
     
     step(i) = j;
+    % not sure this logic is good
     if protocol.pulseNum(j) > 1,
       freq(i) = 1/(protocol.pulsePeriodSP(j)/1000);
       stim_type{i} = ['Plsd ', num2str(freq(i)), 'Hz'];
@@ -362,6 +377,7 @@ temp_avi_path = [tempname(scratch_folder_path) '.avi'] ;
   'compression','none',...
   'useVideoWriter',true,...
   'titletext',false,...
+  'showtimestamps',true,...
   'avifileTempDataFile',temp_avi_path,...
   'dynamicflyselection',true,...
   'doshowsex',true);
