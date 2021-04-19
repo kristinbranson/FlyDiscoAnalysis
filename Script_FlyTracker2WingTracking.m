@@ -4,7 +4,7 @@ analysis_protocol = '20210329_flybubble_FlyBowlRGB_LED';
 dataloc_params = ReadParams(fullfile(FlyDiscodir,'settings',analysis_protocol,'dataloc_params.txt'));
 % dataloc_params.flytrackertrackstr = 'movie-track.mat';
 
-expdirs_train = {'/groups/branson/home/robiea/Projects_data/FlyDisco/KatieTestData/FlyBowlDisco_RGBonly_401/20210401T132850_rig1_flyBowl1__aIPgSS1UASCsChrimson_KS_redonly_protocolRGB_0315_2'};
+expdirs_train = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20210419_wingtrackingfeatures_testing/socialCsChr_GMR_72C11_AE_01_CsChrimson_RigD_20191114T172654'};
 
 for moviei = 1:numel(expdirs_train),
 
