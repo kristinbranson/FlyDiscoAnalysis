@@ -8,7 +8,7 @@ function fly_disco_analysis_pipeline_wrapper(experiment_folder_path, settings_fo
         fly_disco_analysis_folder_path = fileparts(script_folder_path) ;
         settings_folder_path = fullfile(fly_disco_analysis_folder_path, 'settings') ;
     end
-    if ~exist('overriding_analysis_parameters', 'var') || isempty(overriding_analysis_parameters_as_list) ,
+    if ~exist('overriding_analysis_parameters_as_list', 'var') || isempty(overriding_analysis_parameters_as_list) ,
         overriding_analysis_parameters_as_list = cell(1, 0) ;
     end
 
