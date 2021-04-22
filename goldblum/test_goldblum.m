@@ -26,7 +26,7 @@ per_lab_configuration.settings_folder_path = settings_folder_path ;
 
 % Delete the destination folder
 if exist(goldblum_destination_folder_path, 'file') ,
-    return_code = system_with_error_handling(sprintf('rm -rf %s', goldblum_destination_folder_path)) ;
+    return_code = system_from_list_with_error_handling({'rm', '-rf', goldblum_destination_folder_path}) ;
 end
 
 % Recopy the analysis test folder from the template
@@ -41,20 +41,20 @@ if do_transfer_data_from_rigs ,
     system_with_error_handling(command_line) ;
 else
     fprintf('Transfering data to the destination path...\n') ;
-    ensure_folder_exists(goldblum_destination_folder_path) ;  %#ok<UNRCH>
-    command_line = sprintf('cp -R %s/* %s', example_experiments_folder_path, goldblum_destination_folder_path) ;
-    system_with_error_handling(command_line) ;
+    ensure_folder_exists(fileparts(goldblum_destination_folder_path)) ;  %#ok<UNRCH>
+    command_line = {'cp', '-R', '-T', example_experiments_folder_path, goldblum_destination_folder_path} ;
+    system_from_list_with_error_handling(command_line) ;  
+      % Should make goldblum_destination_folder_path a clone of
+      % example_experiments_folder_path, since we use -T option
     
     % Add symlinks to the to-process folder so that they will actually get processed
     folder_path_from_experiment_index = find_experiment_folders(goldblum_destination_folder_path) ;
     to_process_folder_path = fullfile(goldblum_destination_folder_path, 'to-process') ;
-    escaped_to_process_folder_path = escape_string_for_bash(to_process_folder_path) ;
     ensure_folder_exists(to_process_folder_path) ;
     experiment_count = length(folder_path_from_experiment_index) ;
     for i = 1 : experiment_count ,
         experiment_folder_path = folder_path_from_experiment_index{i} ;
-        escaped_experiment_folder_path = escape_string_for_bash(experiment_folder_path) ;
-        command_line = sprintf('ln -s %s %s', escaped_experiment_folder_path, escaped_to_process_folder_path) ;
+        command_line = {'ln', '-s', experiment_folder_path, to_process_folder_path} ;
         system_with_error_handling(command_line) ;        
     end    
 end
