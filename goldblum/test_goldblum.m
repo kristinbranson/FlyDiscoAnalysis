@@ -66,10 +66,12 @@ for i = 1 : length(test_file_names) ,
 end    
 
 % Check that the rig lab folder is empty now
-entry_names = ...
-    list_remote_dir(rig_user_name, rig_host_name, rig_lab_data_folder_path) ;
-if ~isempty(entry_names) ,
-    error('Rig lab data folder %s:%s is not empty', rig_host_name, rig_lab_data_folder_path) ;
+if do_transfer_data_from_rigs ,
+    entry_names = ...
+        list_remote_dir(rig_user_name, rig_host_name, rig_lab_data_folder_path) ;  %#ok<UNRCH>
+    if ~isempty(entry_names) ,
+        error('Rig lab data folder %s:%s is not empty', rig_host_name, rig_lab_data_folder_path) ;
+    end
 end
 
 % Run goldblum again, make sure nothing has changed
