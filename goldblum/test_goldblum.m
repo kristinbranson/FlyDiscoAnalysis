@@ -55,7 +55,7 @@ else
     for i = 1 : experiment_count ,
         experiment_folder_path = folder_path_from_experiment_index{i} ;
         command_line = {'ln', '-s', experiment_folder_path, to_process_folder_path} ;
-        system_with_error_handling(command_line) ;        
+        system_from_list_with_error_handling(command_line) ;
     end    
 end
 
