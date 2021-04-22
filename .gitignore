@@ -8,3 +8,4 @@ goldblum/example-experiments-working-copy/
 example-experiments-read-only/
 example-experiments-working-copy/
 goldblum/goldblum-test-destination-folder/
+test_goldblum_run_*.out.txt
