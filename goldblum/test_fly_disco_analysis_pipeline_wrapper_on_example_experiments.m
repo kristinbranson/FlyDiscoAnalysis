@@ -26,16 +26,21 @@ analysis_parameters = ...
 example_experiments_folder_path = ...
     fullfile(this_script_folder_path, ...
              'example-experiments-working-copy') ;        
-     
-folder_name_from_experiment_index = simple_dir(example_experiments_folder_path) ;
-do_run_from_experiment_index = true(size(folder_name_from_experiment_index)) ;  % modify this to run a subset
 
-experiment_count = length(folder_name_from_experiment_index) ;
+folder_path_from_experiment_index = find_experiment_folders(example_experiments_folder_path) ;
+% folder_path_from_experiment_index = ...
+%     { '/groups/branson/bransonlab/taylora/flydisco/FlyDiscoAnalysis/goldblum/example-experiments-working-copy/FlyBowlOpto/SS36564_20XUAS_CsChrimson_mVenus_attP18_flyBowlMing_20200227_Continuous_2min_5int_20200107_20200229T132141', ... 
+%       '/groups/branson/bransonlab/taylora/flydisco/FlyDiscoAnalysis/goldblum/example-experiments-working-copy/FlyBowlOpto/emptysplit_20xUAS-ChrimsonRmVenusattp18_flyBowlMing_nopause_lengthofpersis_2min_10int_20191218T093239_2'   , ...
+%       '/groups/branson/bransonlab/taylora/flydisco/FlyDiscoAnalysis/goldblum/example-experiments-working-copy/FlyBubbleRGB/LED/locomotionGtACR1_24_EXT_VGLUT-GAL4_RigA_20210226T095136'                                              , ...
+%       '/groups/branson/bransonlab/taylora/flydisco/FlyDiscoAnalysis/goldblum/example-experiments-working-copy/FlyBubbleRGB/noLED/locomotionGtACR1_emptySplit24b_RigB_20210216T105603'                                                } ;
+do_run_from_experiment_index = true(size(folder_path_from_experiment_index)) ;  % modify this to run a subset
+
+experiment_count = length(folder_path_from_experiment_index) ;
 for experiment_index = 1 : experiment_count ,
     do_run = do_run_from_experiment_index(experiment_index) ;
     if do_run ,    
-        experiment_folder_name = folder_name_from_experiment_index{experiment_index} ;
-        experiment_folder_path = fullfile(example_experiments_folder_path, experiment_folder_name) ;         
+        experiment_folder_path = folder_path_from_experiment_index{experiment_index} ;
+        [~,experiment_folder_name] = fileparts2(experiment_folder_path) ;
 
         fprintf('\n\n\nRunning fly_disco_analysis_pipeline_wrapper() on %s ...\n', experiment_folder_name) ;
 
