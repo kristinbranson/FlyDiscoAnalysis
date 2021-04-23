@@ -89,23 +89,24 @@ function goldblum(do_transfer_data_from_rigs, do_run_analysis, do_use_bqueue, do
         % Get the links from the to_process_folder_name folder
         to_process_folder_path = fullfile(destination_folder, to_process_folder_name) ;
         folder_name_from_experiment_index = simple_dir(to_process_folder_path) ;
-        folder_path_from_experiment_index = ...
+        link_path_from_experiment_index = ...
             cellfun(@(folder_name)(fullfile(to_process_folder_path, folder_name)), ...
                                    folder_name_from_experiment_index, ...
-                                   'UniformOutput', false) ;        
+                                   'UniformOutput', false) ;
+        canonical_path_from_experiment_index = cellfun(@realpath, link_path_from_experiment_index, 'UniformOutput', false) ;
         do_force_analysis = false ;
-        analyze_experiment_folders(folder_path_from_experiment_index, settings_folder_path, lab_head_last_name, ...
+        analyze_experiment_folders(canonical_path_from_experiment_index, settings_folder_path, lab_head_last_name, ...
                                    do_force_analysis, do_use_bqueue, do_actually_submit_jobs, analysis_parameters)
         
         % Whether those succeeded or failed, remove the links from the
         % to-process folder
-        experiment_folder_count = length(folder_path_from_experiment_index) ;
+        experiment_folder_count = length(link_path_from_experiment_index) ;
         for i = 1 : experiment_folder_count ,
-            experiment_folder_path = folder_path_from_experiment_index{i} ; 
-            % experiment_folder_path is almost certainly a symlink, but check
+            experiment_folder_link_path = link_path_from_experiment_index{i} ; 
+            % experiment_folder_link_path is almost certainly a symlink, but check
             % anyway
-            if is_symbolic_link(experiment_folder_path) ,
-                delete(experiment_folder_path) ;
+            if is_symbolic_link(experiment_folder_link_path) ,
+                delete(experiment_folder_link_path) ;
             end
         end
     else

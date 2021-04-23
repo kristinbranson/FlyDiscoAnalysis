@@ -185,10 +185,7 @@ end
 fprintf('\n') ;
 
 % Print the canonical path to the analysis folder
-escaped_analysis_protocol_folder_path = escape_path_for_bash(analysis_protocol_folder_path) ;
-command_line = sprintf('realpath %s', escaped_analysis_protocol_folder_path) ;
-stdout = system_with_error_handling(command_line) ;
-canonical_analysis_protocol_folder_path = strtrim(stdout) ;
+canonical_analysis_protocol_folder_path = realpath(analysis_protocol_folder_path) ;
 fprintf('Canonical path to analysis protocol folder is:\n  %s\n\n', canonical_analysis_protocol_folder_path) ;
 
 %% check that experiment exists
