@@ -9,15 +9,15 @@ function turn_on_goldblum(hr, min)
     else
         hr = round(hr) ;
         if hr<0 || hr>23 ,
-            error('hr much be an integer between 0 and 23, inclusive') ;
+            error('hr must be an integer between 0 and 23, inclusive') ;
         end
     end
     if ~exist('min', 'var') || isempty(min) ,
         min = 0 ;
     else
         min = round(min) ;
-        if min<0 || min>23 ,
-            error('min much be an integer between 0 and 59, inclusive') ;
+        if min<0 || min>59 ,
+            error('min must be an integer between 0 and 59, inclusive') ;
         end
     end
     
