@@ -23,6 +23,7 @@ function FlyTrackerWrapperForFlyDisco(expdir, settingsdir, analysis_protocol, da
   default_options.force_calib = true ;
   default_options.expdir_naming = true ;
   default_options.fr_sample = 200 ;
+  default_options.n_flies_is_max = true;
   
   % Read the options file, if dataloc param specifies it, and it exists
   if isfield(dataloc_params, 'flytrackeroptionsstr') ,
