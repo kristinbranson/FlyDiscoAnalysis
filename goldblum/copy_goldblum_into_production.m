@@ -1,4 +1,4 @@
-function push_goldblum_into_production()
+function copy_goldblum_into_production()
     % Determine the FlyDiscoAnalysis folder path
     goldblum_folder_path = fileparts(mfilename('fullpath')) ;
     fda_folder_path = fileparts(goldblum_folder_path) ;
