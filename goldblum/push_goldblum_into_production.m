@@ -24,6 +24,8 @@ end
 function copy_to_single_user_account(user_name, fda_folder_path)
     % Copy the folder over
     host_name = 'login2' ;  % Why not?
+    fprintf('Copying into the %s user account...', user_name) ;
     remote_system_from_list_with_error_handling(user_name, host_name, {'rm', '-rf', 'FlyDiscoAnalysis'}) ;
     remote_system_from_list_with_error_handling(user_name, host_name, {'cp', '-R', '-T', fda_folder_path, 'FlyDiscoAnalysis'}) ;
+    fprintf('done.\n') ;
 end
