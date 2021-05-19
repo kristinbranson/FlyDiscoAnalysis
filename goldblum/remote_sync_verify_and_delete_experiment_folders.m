@@ -3,6 +3,14 @@ function result = remote_sync_verify_and_delete_experiment_folders(source_user_n
                                                                    source_root_absolute_path, ...
                                                                    dest_root_absolute_path, ...
                                                                    to_process_folder_name)
+    % Make sure the remote folder exists, return if not
+    does_folder_exist = does_remote_file_exist(source_user_name, source_host_name, source_root_absolute_path) ;
+    if ~does_folder_exist ,
+        fprintf('Folder %s does not exist on host %s, so not searching for experiment folders in it.\n', source_root_absolute_path, source_host_name) ;
+        result = cell(0,1) ;
+        return
+    end
+    
     % record the start time
     tic_id = tic() ;
         

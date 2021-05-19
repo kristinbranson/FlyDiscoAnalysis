@@ -34,7 +34,7 @@ classdef spinner_object < handle
         function print(self, varargin)
             % Want things printed during spinning to look nice
             fprintf('\b\n') ;  % Delete cursor, then newline
-            fprint(varargin{:}) ;  % print whatever
+            fprintf(varargin{:}) ;  % print whatever
             cursor = self.cursors_(self.cursor_index_) ;  % get the same cursor back
             fprintf('%s', cursor) ;  % write it again on its own line
         end    
