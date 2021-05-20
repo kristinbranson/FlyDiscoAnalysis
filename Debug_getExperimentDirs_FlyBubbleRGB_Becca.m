@@ -4,11 +4,21 @@ addpath /groups/branson/home/robiea/Code_versioned/FlyDiscoAnalysis/JAABA/fileha
 addpath /groups/branson/home/robiea/Code_versioned/FlyDiscoAnalysis/JAABA/misc
 %% pull expdirs and load all metdata
 rootdatadir = '/groups/branson/bransonlab/flydisco_data';
-savefile = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_ALL20210512';
+
 metadatafile = 'Metadata.xml';
 
-%inputs to getExperimentDirsFlyDisco: 'metadatafile','Metadata.xml','screen_type','*','line_name','*','date','*');
-[expdirstruct] = getExperimentDirsFlyDisco(rootdatadir,'screen_type','VNC*','date','20210405*');
+% %inputs to getExperimentDirsFlyDisco: 'metadatafile','Metadata.xml','screen_type','*','line_name','*','date','*');
+% [expdirstruct] = getExperimentDirsFlyDisco(rootdatadir,'screen_type','VNC*','date','20210405*');
+
+% updated inputs 'metadatafile','Metadata.xml','screen_type','*','line_name','*', ...
+%     'date','*','nflies',false,'autocheckin',false,'FlyDiscoAnalysisStatus', false);
+[expdirstruct] = getExperimentDirsFlyDisco(rootdatadir,'screen_type','VNC*','date','20210*',...
+    'nflies',true,'autocheckin',true,'FlyDiscoAnalysisStatus', true);
+
+%% make tsv 
+savefile = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_ALLbransonlabdir.csv';
+expdirtable = struct2table(expdirstruct);
+writetable(expdirtable,savefile,'Delimiter','tab');
 
 %% make csv file for all experiments
 fid = fopen([savefile,'.tsv'],'w');

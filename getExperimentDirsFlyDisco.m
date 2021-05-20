@@ -2,13 +2,17 @@ function [expdirstruct] = getExperimentDirsFlyDisco(rootdatadir,varargin)
 %rootdatadir - dir to be searched
 %datastructname - out data struct
 % limit search with screen_type, line or date (can truncate with *)
-
-
+% assuming standard names
+sxclfilestr = 'sexclassifier_diagnostics.txt';
+autochcksinfilestr = 'automatic_checks_incoming_results.txt';
+analysiscompletefilestr = 'ANALYSIS-COMPLETED-SUCCESSFULLY';
 % TODO 
 % add option to not return expdirs without Metadata file
 % add option to add autochecks incoming and completed
 % add option to check for aborted complete or failed files. 
-[metadatafile, screen_type,line_name,date] = myparse(varargin,'metadatafile','Metadata.xml','screen_type','*','line_name','*','date','*');
+[metadatafile, screen_type,line_name,date,nflies,autocheckin,FlyDiscoAnalysisStatus] = myparse(varargin,'metadatafile','Metadata.xml','screen_type','*','line_name','*', ...
+    'date','*','nflies',false,'autocheckin',false,'FlyDiscoAnalysisStatus', false);
+
 
 searchname = sprintf('%s%s%s',screen_type,line_name,date);
 %remove extra wildcards
@@ -21,6 +25,7 @@ tmp = dir(input);
 
 expdirstruct = [];
 for i = 1:numel(tmp)
+    i
     if ismember(tmp(i).name,{'.','..'})
         continue;
     end
@@ -36,6 +41,45 @@ for i = 1:numel(tmp)
     else
         tmpM.file_system_path = expdir;   
         tmpM.NoMetadata = true;
+    end
+    % add nflies
+    if nflies
+    sxclfile = fullfile(rootdatadir,expdir,sxclfilestr);
+    if exist(sxclfile,'file')
+        sex = ReadParams(sxclfile);
+        tmpM.nflies = sex.median_nflies;  
+    else 
+        tmpM.nflies = nan; 
+    end
+    end
+    
+    % add autochecks incoming
+    if autocheckin
+        try
+            autochcksinfile = fullfile(rootdatadir,expdir,autochcksinfilestr);
+            if exist(autochcksinfile,'file')
+                autochcksin = ReadParams(autochcksinfile);
+                tmpM.automated_pf_incoming = autochcksin.automated_pf;
+                if tmpM.automated_pf_incoming == 'F',
+                tmpM.automated_pf_incoming_category = autochcksin.automated_pf_category;
+                end
+                
+            else
+                tmpM.automated_pf_incoming = 'NaN';
+            end
+        catch
+            tmpM.automated_pf_incoming = 'could not load file';
+        end
+    end
+    
+    % add FlyDiscoAnalysisStatus
+    analysiscompletefile = fullfile(rootdatadir,expdir,analysiscompletefilestr);
+    if FlyDiscoAnalysisStatus
+    if exist(analysiscompletefile,'file')
+        tmpM.FlyDiscoAnalysisStatus = '1';
+    else 
+        tmpM.FlyDiscoAnalysisStatus = '0';
+    end
     end
     
     expdirstruct = structappend(expdirstruct,tmpM);   
