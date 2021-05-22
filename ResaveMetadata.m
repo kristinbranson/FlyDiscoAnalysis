@@ -1,12 +1,13 @@
 function [success] = ResaveMetadata(metadata,savefilename)
-
+% tested with structcompare
 
 success = true;
 
 % back up metadata file if it exists
+% keeps the orginal file's timestamps
 if exist(savefilename,'file'),
-  bakfilename = [savefilename,'.bak.bak'];
-  [success1,msg] = copyfile(savefilename,bakfilename);
+  bakfilename = [savefilename,'_',datestr(now, 'yyyymmddTHHMMSS'),'.bak'];
+  [success1,msg] = copyfile(savefilename,bakfilename,'f');
   if ~success1,
     sprintf(msg,'Error backing up metadatafile, aborting SaveMetaData','modal');
     success = false;
@@ -14,7 +15,9 @@ if exist(savefilename,'file'),
   end
 end
   
-% open metadata file for writing
+% open metadata file for writing 
+% fails silentely if savefilename is softlink without permissions !
+
 fid = fopen(savefilename,'w');
 if fid < 0,
   sprintf('Could not write to experiment metadata file %s',savefilename);
