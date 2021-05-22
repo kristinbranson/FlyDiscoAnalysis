@@ -12,15 +12,17 @@ metadatafile = 'Metadata.xml';
 
 % updated inputs 'metadatafile','Metadata.xml','screen_type','*','line_name','*', ...
 %     'date','*','nflies',false,'autocheckin',false,'FlyDiscoAnalysisStatus', false);
-[expdirstruct] = getExperimentDirsFlyDisco(rootdatadir,'screen_type','VNC*','date','20210*',...
+[expdirstruct] = getExperimentDirsFlyDisco(rootdatadir,'screen_type','VNC*','date','2021042*',...
     'nflies',true,'autocheckin',true,'FlyDiscoAnalysisStatus', true);
 
-%% make tsv 
-savefile = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_ALLbransonlabdir.csv';
+savefile = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_2021042_metadatachanges.csv';
+
+%% make tsv with ALL metadata fields
+
 expdirtable = struct2table(expdirstruct);
 writetable(expdirtable,savefile,'Delimiter','tab');
 
-%% make csv file for all experiments
+%% make csv file for all experiments (use for pulling data for metadata changes) 
 fid = fopen([savefile,'.tsv'],'w');
 
 fprintf(fid,'%s\t %s\t %s\t %s\t %s\t %s\t %s\t %s \n','expname','date','datetime','linename','experimentor','notes_tech','notes_behav','flag_redo');

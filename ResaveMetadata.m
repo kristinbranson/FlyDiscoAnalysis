@@ -7,12 +7,18 @@ success = true;
 % keeps the orginal file's timestamps
 if exist(savefilename,'file'),
   bakfilename = [savefilename,'_',datestr(now, 'yyyymmddTHHMMSS'),'.bak'];
-  [success1,msg] = copyfile(savefilename,bakfilename,'f');
+  [success1] = copyfile(savefilename,bakfilename,'f');
   if ~success1,
-    sprintf(msg,'Error backing up metadatafile, aborting SaveMetaData','modal');
+    fprintf('Error backing up metadatafile, aborting ResaveMetadata\n');
     success = false;
     return;
   end
+end
+
+if ~exist(bakfilename,'file')
+    sprintf('Error backing up metadatafile, aborting ResaveMetadata\n')
+    success = false;
+    return;
 end
   
 % open metadata file for writing 
