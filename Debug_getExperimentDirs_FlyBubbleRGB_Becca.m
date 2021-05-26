@@ -12,10 +12,10 @@ metadatafile = 'Metadata.xml';
 
 % updated inputs 'metadatafile','Metadata.xml','screen_type','*','line_name','*', ...
 %     'date','*','nflies',false,'autocheckin',false,'FlyDiscoAnalysisStatus', false);
-[expdirstruct] = getExperimentDirsFlyDisco(rootdatadir,'screen_type','VNC*','date','202105*',...
+[expdirstruct] = getExperimentDirsFlyDisco(rootdatadir,'screen_type','VNC*','date','20210*',...
     'nflies',true,'autocheckin',true,'FlyDiscoAnalysisStatus', true);
 
-savefile = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_202105_metadatachanges.csv';
+savefile = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_ALLdirsbransonlab_postmetadatafixes.csv';
 
 %% make tsv with ALL metadata fields
 
