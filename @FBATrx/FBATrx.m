@@ -90,6 +90,8 @@ classdef FBATrx < handle
     % units of per-frame properties
     units = struct;
 
+    %% stimulus indicator data
+    indicatorLED = {};
     
     %% sex classifier parameters
     sexclassifier_params = [];
@@ -235,6 +237,8 @@ classdef FBATrx < handle
       m_closestfly_nose2ellanglerange = regexp(fn,'^closestfly_nose2ell_angle_(\w+)to(\w+)$','tokens','once');
       m_nflies_close = regexp(fn,'^nflies_close_(.+)$','tokens','once');
       m_closestfly = regexp(fn,'^closestfly_(.*)$','tokens','once');
+      m_on = regexp(fn,'^stimon_?([\d_]*)$','tokens','once');
+      m_off = regexp(fn,'^stimoff_?([\d_]*)$','tokens','once');
       if ~isempty(m_magveldiff),
         [data,units] = compute_magveldiff(obj,n,m_magveldiff{1});
       elseif ~isempty(m_veltoward),
@@ -269,6 +273,30 @@ classdef FBATrx < handle
         % if debugging, don't save intermediate results
         funname = sprintf('compute_%s',fn);
         [data,units] = feval(funname,obj,n,~obj.DEBUG);
+      elseif ~isempty(m_on) || ~isempty(m_off),
+        if numel(obj.indicatorLED) < n || isempty(obj.indicatorLED{n}),
+          obj.LoadIndicatorDataFromFile(n);
+        end
+        if ~isempty(m_on),
+          mstim = m_on{1};
+          stimtype = 'on';
+        else
+          mstim = m_off{1};
+          stimtype = 'off';
+        end
+        stimnums = regexp(mstim,'(\d+)_?$?','tokens');
+        if isempty(stimnums),
+          % all
+          if strcmpi(stimtype,'off'),
+            stimnums = 1:numel(obj.indicatorLED{n}.startoff);
+          else
+            stimnums = 1:numel(obj.indicatorLED{n}.starton);
+          end
+        else
+          stimnums = str2double([stimnums{:}]);
+        end
+        assert(all(~isnan(stimnums)));
+        [data,units] = compute_stim(obj,n,stimtype,stimnums);        
       else
         funname = sprintf('compute_%s',fn);
         [data,units] = feval(funname,obj,n);
@@ -335,6 +363,8 @@ classdef FBATrx < handle
     ClearDataCache(obj,fn,ns)
     
     varargout = drawfly(obj,fly,t,varargin)
+    
+    LoadIndicatorDataFromFile(obj,n)
     
   end
   

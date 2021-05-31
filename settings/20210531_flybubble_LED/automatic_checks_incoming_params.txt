@@ -1,0 +1,7 @@
+min_seconds_fliesloaded,0
+max_seconds_fliesloaded,60
+min_ufmf_diagnostics_summary_nframes,50000
+control_line_names,pBDPGAL4U
+required_files,Metadata.xml,movie.ufmf,protocol.mat
+desired_files,FlyBowlDataCaptureParams_BIAS*.txt,cx__BARCODE.csv,Log.txt,QuickStats.png,QuickStats.txt,StimulusTimingLog.txt
+frame_rate,150
