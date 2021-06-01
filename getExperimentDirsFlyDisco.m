@@ -6,12 +6,13 @@ function [expdirstruct] = getExperimentDirsFlyDisco(rootdatadir,varargin)
 sxclfilestr = 'sexclassifier_diagnostics.txt';
 autochcksinfilestr = 'automatic_checks_incoming_results.txt';
 analysiscompletefilestr = 'ANALYSIS-COMPLETED-SUCCESSFULLY';
+moviefilestr = 'movie.ufmf';
 % TODO 
 % add option to not return expdirs without Metadata file
 % add option to add autochecks incoming and completed
 % add option to check for aborted complete or failed files. 
-[metadatafile, screen_type,line_name,date,nflies,autocheckin,FlyDiscoAnalysisStatus] = myparse(varargin,'metadatafile','Metadata.xml','screen_type','*','line_name','*', ...
-    'date','*','nflies',false,'autocheckin',false,'FlyDiscoAnalysisStatus', false);
+[metadatafile, screen_type,line_name,date,nflies,autocheckin,FlyDiscoAnalysisStatus,movielength] = myparse(varargin,'metadatafile','Metadata.xml','screen_type','*','line_name','*', ...
+    'date','*','nflies',false,'autocheckin',false,'FlyDiscoAnalysisStatus', false,'movielength',false);
 
 
 searchname = sprintf('%s%s%s',screen_type,line_name,date);
@@ -25,7 +26,6 @@ tmp = dir(input);
 
 expdirstruct = [];
 for i = 1:numel(tmp)
-    i
     if ismember(tmp(i).name,{'.','..'})
         continue;
     end
@@ -81,9 +81,19 @@ for i = 1:numel(tmp)
         tmpM.FlyDiscoAnalysisStatus = '0';
     end
     end
+    % add nframes
+    moviefile = fullfile(rootdatadir,expdir,moviefilestr);
+    if movielength
+        if exist(moviefile,'file')
+            [~,nframes] = get_readframe_fcn(moviefile);
+            tmpM.nframes = nframes;
+        else
+            tmpM.nframes = nan;
+        end
+    end
     
-    expdirstruct = structappend(expdirstruct,tmpM);   
-    
+    % compile struct 
+    expdirstruct = structappend(expdirstruct,tmpM);  
 end
 
     
