@@ -1,6 +1,8 @@
 function FlyDiscoComputePerFrameStats(expdir,varargin)
 
-if true,
+QUICKDEBUG = false;
+
+if QUICKDEBUG,
   global trx;
   warning('using global variable trx');
 end
@@ -42,7 +44,7 @@ if verbose,
   fprintf('Initializing trx...\n');
 end
 
-if true && ~isempty(trx),
+if QUICKDEBUG && ~isempty(trx),
   warning('using global variable trx');
 else
 trx = FBATrx('analysis_protocol',analysis_protocol,'settingsdir',settingsdir,...
