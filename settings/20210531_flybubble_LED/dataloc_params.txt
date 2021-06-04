@@ -7,7 +7,6 @@ annfilestr,movie.ufmf.ann
 flytrackerparentcalibrationstr,parent_calibration_bubble_dickson_VNC_20210413.mat
 flytrackercalibrationstr,flytracker-calibration.mat
 flytrackertrackstr,movie-track.mat
-flytrackerbgstr,movie-bg.mat
 flytrackeroptionsstr,flytracker-options.txt
 ctraxfilestr,movie_JAABA/trx.mat
 trxfilestr,registered_trx.mat

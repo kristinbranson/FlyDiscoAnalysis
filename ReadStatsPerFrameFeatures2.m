@@ -14,6 +14,10 @@ frameconditions = {};
 flyconditions = {};
 minZboth = {};
 minZfly = {};
+norm_frameconditions = {};
+norm_flyconditions = {};
+norm_minZboth = {};
+norm_minZfly = {};
 nstats = 0;
 
 while true,
@@ -30,8 +34,8 @@ while true,
 
   % should be: fieldname,frameconditionname,flyconditionname,minZ
   m = regexp(s,',','split');
-  if numel(m) ~= 5,
-    error('Stats params should be fieldname,frameconditionname,flyconditionname,minZboth,minZfly. Read:\n%s',s);
+  if numel(m) < 5,
+    error('Stats params should be fieldname,frameconditionname,flyconditionname,minZboth,minZfly,[norm_frameconditionname,norm_flyconditionname,norm_minZboth,norm_minZfly]. Read:\n%s',s);
   end
   
   nstats = nstats + 1;
@@ -50,8 +54,38 @@ while true,
   if minZboth{nstats} > minZfly{nstats},
     error('minZboth must be <= minZfly, Read: %s',s);
   end
+  norm_frameconditions{nstats} = ''; %#ok<AGROW>
+  norm_flyconditions{nstats} = ''; %#ok<AGROW>
+  norm_minZboth{nstats} = ''; %#ok<AGROW>
+  norm_minZfly{nstats} = ''; %#ok<AGROW>
+  if numel(m) > 5,
+    norm_frameconditions{nstats} = m{6}; %#ok<AGROW>
+    if numel(m) >= 7,
+      norm_flyconditions{nstats} = m{7}; %#ok<AGROW>
+    else
+      norm_flyconditions{nstats} = flyconditions{nstats}; %#ok<AGROW>
+    end
+    if numel(m) >= 8,
+      norm_minZboth{nstats} = str2double(m{8}); %#ok<AGROW>
+      if isnan(norm_minZboth{nstats}),
+        error('norm_minZboth is not a number: %s\n',m{8});
+      end
+    else
+      norm_minZboth{nstats} = minZboth{nstats}; %#ok<AGROW>
+    end
+    if numel(m) >= 9,
+      norm_minZfly{nstats} = str2double(m{9}); %#ok<AGROW>
+      if isnan(norm_minZfly{nstats}),
+        error('norm_minZfly is not a number: %s\n',m{9});
+      end
+    else
+      norm_minZfly{nstats} = minZfly{nstats};  %#ok<AGROW>
+    end
+  end
+
   
 end
 
-stats_params = struct('field',fields,'framecondition',frameconditions,'flycondition',flyconditions,'minZboth',minZboth,'minZfly',minZfly);
+stats_params = struct('field',fields,'framecondition',frameconditions,'flycondition',flyconditions,'minZboth',minZboth,'minZfly',minZfly,...
+  'norm_framecondition',norm_frameconditions,'norm_flycondition',norm_flyconditions,'norm_minZboth',norm_minZboth,'norm_minZfly',norm_minZfly);
 fclose(fid);

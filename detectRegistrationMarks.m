@@ -75,7 +75,7 @@ function registration = detectRegistrationMarks(varargin)
   'doTransposeImage',false,...
   'ledindicator',false,...
   'regXY',[]);
-annName = [] ;
+%annName = [] ;
 
 iscircle = ismember(method,{'circle','circle_manual'});
 
@@ -499,7 +499,6 @@ if ~isempty(imsavename) && ~ledindicator,
   
   % plot background image in jet colormap
   imagesc(bkgdImage,'parent',hax(1),[0,255]);
-  colormap(hax(1),'jet');
   axis(hax(1),'image');
   axis(hax(1),'xy');
   hold(hax(1),'on');
@@ -591,6 +590,7 @@ if ~isempty(imsavename) && ~ledindicator,
   axis(hax(2),'image');
   axis(hax(2),'xy');
   title(hax(2),'Registered bkgd image');
+  colormap(hfig,'jet');
 
   try
     if exist(imsavename,'file'),
@@ -622,7 +622,6 @@ if ~isempty(imsavename) && ledindicator,
    
   % plot background image in jet colormap
   imagesc(bkgdImage,'parent',hax(1),[0,1]);
-  colormap(hax(1),'jet');
   axis(hax(1),'image');
   axis(hax(1),'xy');
   hold(hax(1),'on');
@@ -653,7 +652,8 @@ if ~isempty(imsavename) && ledindicator,
   end
 
  title(hax(1),'Maxvalue image and LED detection');
- 
+ colormap(hfig,'jet');
+
   try
     if exist(imsavename,'file'),
       try

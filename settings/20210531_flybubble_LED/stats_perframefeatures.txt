@@ -1,0 +1,40 @@
+# <per-frame feature>,<frame condition name>,<fly condition name>,<min n. frames both valid>,<min n. frames fly valid>,[<norm per-frame feature>],[<norm frame condition name>],[<norm fly condition name>],[<norm min n. frames both valid>],[<norm min n. frames fly valid>]
+
+# The average of velmag in first 20% (6s) of first stimulus on period normalized by the average of velmag in the entire pre-stimulus period (30s)
+velmag_ctr,stimon1start,any,25,100,stimoff1
+
+# Difference in the average angular velocity while moving in first stimulus of each step (# 1,4, 7 in Ryo’s data) between the first 3 seconds of stimulus on (3 seconds out of 10) and the first 3 seconds of post stim period (3 of 30), normalized by the prestim baseline (10 seconds before 1st stimulus period). 
+absdphi,stimon1startmove,any,25,25,stimoff1move
+
+# Difference between post-stim forward distance (mean of positive forward velocity after the onset of stimulus, average of #1-3 and pre-stim forward distance (mean of positive forward velocity before the onset of stimulus, average of #1-3) for time window 500ms
+forward_vel,poststimweakp5,any,25,25,prestimweakp5
+# Response to the onset of stimulus in backward walking distance
+backward_vel,poststimweakp5,any,25,25,prestimweakp5
+forward_vel,poststimweak5,any,25,25,prestimweak5
+backward_vel,poststimweak5,any,25,25,prestimweak5
+forward_vel,poststimweak10,any,25,25,prestimweak10
+backward_vel,poststimweak10,any,25,25,prestimweak10
+
+forward_vel,poststimmidp5,any,25,25,prestimmidp5
+backward_vel,poststimmidp5,any,25,25,prestimmidp5
+forward_vel,poststimmid5,any,25,25,prestimmid5
+backward_vel,poststimmid5,any,25,25,prestimmid5
+forward_vel,poststimmid10,any,25,25,prestimmid10
+backward_vel,poststimmid10,any,25,25,prestimmid10
+
+forward_vel,poststimstrongp5,any,25,25,prestimstrongp5
+backward_vel,poststimstrongp5,any,25,25,prestimstrongp5
+forward_vel,poststimstrong5,any,25,25,prestimstrong5
+backward_vel,poststimstrong5,any,25,25,prestimstrong5
+forward_vel,poststimstrong10,any,25,25,prestimstrong10
+backward_vel,poststimstrong10,any,25,25,prestimstrong10
+
+absdtheta,poststimweakp5,any,25,25,prestimweakp5
+absdtheta,poststimweak5,any,25,25,prestimweak5
+absdtheta,poststimweak10,any,25,25,prestimweak10
+absdtheta,poststimmidp5,any,25,25,prestimmidp5
+absdtheta,poststimmid5,any,25,25,prestimmid5
+absdtheta,poststimmid10,any,25,25,prestimmid10
+absdtheta,poststimstrongp5,any,25,25,prestimstrongp5
+absdtheta,poststimstrong5,any,25,25,prestimstrong5
+absdtheta,poststimstrong10,any,25,25,prestimstrong10
