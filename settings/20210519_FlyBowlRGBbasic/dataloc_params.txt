@@ -4,9 +4,10 @@ linedatadir,/groups/sciserv/flyolympiad/Olympiad_Screen/fly_bowl/line_data
 configfilepattern,FlyBowlDataCaptureParams*.txt
 moviefilestr,movie.ufmf
 annfilestr,movie.ufmf.ann
-flytrackerparentcalibrationstr,flytracker-parent-calibration_20210329.mat
+flytrackerparentcalibrationstr,parent_calibration_bubble_FlyBowlRGB_LED_20210413.mat
 flytrackercalibrationstr,flytracker-calibration.mat
 flytrackertrackstr,movie-track.mat
+flytrackeroptionsstr,flytracker-options.txt
 ctraxfilestr,movie_JAABA/trx.mat
 trxfilestr,registered_trx.mat
 wingtrxfilestr,wingtracking_results.mat
