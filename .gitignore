@@ -11,4 +11,5 @@ goldblum/goldblum-test-destination-folder/
 test_goldblum_run_*.out.txt
 test-experiments-read-only/
 test-experiments-working/
+test_analyze_experiment_folders_run_*.out.txt
 
