@@ -40,7 +40,21 @@ end
 %% detect registration marks
 
 % name of annotation file
-annfile = fullfile(expdir,dataloc_params.annfilestr);
+%annfile = fullfile(expdir,dataloc_params.annfilestr);
+annfile = '';
+bg_mean = [];
+if isfield(dataloc_params,'flytrackerbgstr'),
+  try
+    flytrackerbgfile = fullfile(expdir,dataloc_params.flytrackerbgstr);
+    load(flytrackerbgfile,'bg');
+    bg_mean = 255*bg.bg_mean;
+    clear bg;
+  catch ME,
+    warning('Could not load background image from %s',flytrackerbgfile);
+    disp(getReport(ME));
+  end
+end
+    
 
 % name of movie file
 moviefile = fullfile(expdir,dataloc_params.moviefilestr);
@@ -120,7 +134,7 @@ if isfield(dataloc_params,'registrationimagefilestr'),
 end
 % detect
 try
-  registration_data = detectRegistrationMarks(registration_params_cell{:},'annName',annfile,'movieName',moviefile);
+  registration_data = detectRegistrationMarks(registration_params_cell{:},'bkgdImage',bg_mean,'movieName',moviefile);
 catch ME,
   fprintf('Error detecting registration marks:\n');
   fprintf(getReport(ME));
@@ -154,10 +168,13 @@ if ~isfield(registration_params,'maxFlyTrackerNanInterpFrames'),
 else
   args = {'maxFlyTrackerNanInterpFrames',registration_params.maxFlyTrackerNanInterpFrames};
 end
-[trx,ninterpframes] = PostprocessFlyTracker(trx,args{:});
+[trx,ninterpframes,newid2oldid] = PostprocessFlyTracker(trx,args{:});
 fprintf('Removed nans from tracker output.\n');
 fprintf('Number of nans interpolated through: %d frames\n',ninterpframes);
 fprintf('Number of identities was %d, now %d\n',nids0,numel(trx));
+
+registration_data.flytracker_nnanframes = ninterpframes;
+registration_data.flytracker_nids0 = nids0;
 
 % frame rate
 if registration_params.usemediandt,
@@ -435,7 +452,7 @@ if isfield(registration_params,'OptogeneticExp')
         
         % detect
         try
-            ledindicator_data = detectRegistrationMarks(registration_params_cell{:},'annName',annfile,'movieName',moviefile,'bkgdImage',im2double(im),'ledindicator',true,'regXY',registration_data.bowlMarkerPoints);
+            ledindicator_data = detectRegistrationMarks(registration_params_cell{:},'bkgdImage',bg_mean,'movieName',moviefile,'bkgdImage',im2double(im),'ledindicator',true,'regXY',registration_data.bowlMarkerPoints);
             
         catch ME,
             fprintf('Error detecting led indicator:\n');
@@ -607,6 +624,7 @@ if dotemporalreg,
       
     end
     trx(trxdelete) = []; 
+    newid2oldid(trxdelete) = [];
     
   end
   
@@ -645,6 +663,9 @@ end
 
 %% save params to mat file
 
+registration_data.newid2oldid = newid2oldid;
+registration_data.flytracker_nidsnew = numel(trx);
+
 registrationmatfile = fullfile(expdir,dataloc_params.registrationmatfilestr);
 tmp = rmfield(registration_data,'registerfn'); 
 %tmp.registrationinfo = registrationinfo;
@@ -679,7 +700,8 @@ try
   
   fnssave = {'offX','offY','offTheta','scale','bowlMarkerTheta','featureStrengths',...
     'circleCenterX','circleCenterY','circleRadius',...
-    'seconds_crop_start','seconds_crop_end','start_frame','end_frame'};
+    'seconds_crop_start','seconds_crop_end','start_frame','end_frame',...
+    'flytracker_nnanframes','flytracker_nids0','flytracker_nidsnew'};
   
   fnssave = intersect(fnssave,fieldnames(registration_data));
   for i = 1:numel(fnssave),

@@ -49,7 +49,7 @@ function analyze_experiment_folders(folder_path_from_experiment_index, settings_
 
     if do_use_bqueue ,
         maxiumum_slot_count = 400 ;
-        slots_per_job = 4 ;
+        slots_per_job = 2 ;
         bqueue = bqueue_type(do_actually_submit_jobs, maxiumum_slot_count) ;
 
         % Queue the jobs
