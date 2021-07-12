@@ -85,8 +85,12 @@ fprintf(fid,'flip_used="%d" ',metadata.flip_used);
 % wish list
 fprintf(fid,'wish_list="%d" ',metadata.wish_list);
 % robot stock copy. set this to unknown for now
-fprintf(fid,'robot_stock_copy="%d" ',metadata.robot_stock_copy);
-% count is set to 0 -- won't know this til after tracking
+if ischar(metadata.robot_stock_copy)
+ fprintf(fid,'robot_stock_copy="%s" ',metadata.robot_stock_copy);
+else
+ fprintf(fid,'robot_stock_copy="%d" ',metadata.robot_stock_copy);
+end
+    % count is set to 0 -- won't know this til after tracking
 fprintf(fid,'num_flies="0">\n');
 
 

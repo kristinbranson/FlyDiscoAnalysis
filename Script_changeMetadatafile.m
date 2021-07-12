@@ -3,7 +3,7 @@
 
 logfiledir = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/MetadataFixes';
 %%%CHANGE
-logfilename = 'expdirs_wk8_metachanges_logofauto.csv';
+logfilename = 'expdirs_wk9_metachanges_logofauto.csv';
 
 logfile = fullfile(logfiledir,logfilename);
 
@@ -12,7 +12,7 @@ fid2 = fopen(logfile,'a');
 
 %% explist 
 %%%CHANGE
-rootdatadir = '/groups/branson/bransonlab/flydisco_data';
+rootdatadir = '/groups/dickson/dicksonlab/flydisco_data';
 %testing - accidently did in reall data direct DATA NOT PROTECTED PROPERLY
 % explist = {'VNC_JHS_K_85321_RigA_20210322T164447'};
 % wk5
@@ -100,11 +100,55 @@ rootdatadir = '/groups/branson/bransonlab/flydisco_data';
 % 'VNC_JRC_SS60614_RigA_20210510T144747', ...
 % 'VNC_EXT_VGLUT-GAL4_RigA_20210510T145544', ...
 % 'VNC_YNA_K_162984_RigA_20210510T150352'};
-explist = {'VNC_JRC_SS70461_RigA_20210511T150909'};
+% explist = {'VNC_JRC_SS70461_RigA_20210511T150909'};
+%wk9 
+% explist = {'VNC_w1118_RigA_20210517T160548', ...
+% 'VNC_w1118_RigB_20210517T160504', ...
+% 'VNC_w1118_RigC_20210517T160718', ...
+% 'VNC_w1118_RigD_20210517T161012'};
+% explist = {'VNC_JRC_SS50974_RigD_20210519T151055'};
+% wk10
+% % chenn to arrudar
+% explist = {'VNC_JRC_SS50325_RigB_20210526T131511', ...
+% 'VNC_JRC_SS51006_RigB_20210526T133023', ...
+% 'VNC_JRC_SS51800_RigB_20210526T134822', ...
+% 'VNC_JRC_SS51827_RigB_20210526T135715', ...
+% 'VNC_JRC_SS53050_RigB_20210526T141102', ...
+% 'VNC_JRC_SS59153_RigB_20210526T142406', ...
+% 'VNC_JRC_SS59180_RigB_20210526T144330', ...
+% 'VNC_JRC_SS59225_RigB_20210526T145516'};
+% arrudar to chenn
+% explist = {'VNC_JRC_SS39347_RigA_20210524T131330', ...
+% 'VNC_JRC_SS50325_RigA_20210524T134333', ...
+% 'VNC_JRC_SS51006_RigA_20210524T135504', ...
+% 'VNC_JRC_SS51800_RigA_20210524T140426', ...
+% 'VNC_JRC_SS51827_RigA_20210524T141336', ...
+% 'VNC_JRC_SS53050_RigA_20210524T142133', ...
+% 'VNC_JRC_SS59153_RigA_20210524T144120', ...
+% 'VNC_JRC_SS59180_RigA_20210524T144924', ...
+% 'VNC_JRC_SS59225_RigA_20210524T145900', ...
+% 'VNC_JRC_SS60232_RigA_20210524T150825', ...
+% 'VNC_JRC_SS60236_RigA_20210524T151718', ...
+% 'VNC_JRC_SS60618_RigA_20210524T152614', ...
+% 'VNC_YNA_K_162984_RigA_20210524T153512', ...
+% 'VNC_EXT_VGLUT-GAL4_RigA_20210524T154402'};
+% change line name to JRC_SS53050
+% explist = {'VNC_JRC_SS51827_RigA_20210526T141149'};
+% change line name to JRC_SS66932
+% explist = {'VNC_JRC_SS68266_RigD_20210525T153528'};
+%change line name to JRC_SS67903
+% explist = {'VNC_JRC_SS67372_RigC_20210527T153618'};
+% robot stock copy errors in new metadata file char to num prob
+explist = {'VNC_EXT_VGLUT-GAL4_RigD_20210517T161012', ...
+'VNC_EXT_VGLUT-GAL4_RigC_20210517T160718', ...
+'VNC_EXT_VGLUT-GAL4_RigB_20210517T160504', ...
+'VNC_EXT_VGLUT-GAL4_RigA_20210517T160548'};
+
 for j = 1:numel(explist)
     % per experiment
     expdir = fullfile(rootdatadir,explist{j})
     metadatafilename = 'Metadata.xml';
+
     resavefilename = fullfile(expdir,metadatafilename);
     metadata = ReadMetadataFile(resavefilename);
     
@@ -112,6 +156,8 @@ for j = 1:numel(explist)
     % manual changes create struct
     changestruct = struct;
 %         changestruct.experimenter = 'chenn';
+% changestruct.experimenter = 'arrudar';
+%       changestruct.plate = '4a';
     % also need to change expdir and ctrax results movie name manually
     % mv oldname newname
     %     changestruct.line = 'JRC_SS43660';
@@ -122,7 +168,11 @@ for j = 1:numel(explist)
 %     changestruct.line = 'JRC59209';
 %     changestruct.line = 'JRC_SS57983';
 %     changestruct.line = 'JRC_SS59163';
-    changestruct.line = 'JRC_SS62883';
+%     changestruct.line = 'JRC_SS62883';
+    changestruct.line = 'EXT_VGLUT-GAL4';
+%     changestruct.line = 'JRC_SS53050';
+%     changestruct.line = 'JRC_SS66932';
+%     changestruct.line = 'JRC_SS67903';
     
     % replace metadata fields with changes
     fprintf(fid2,'%s, ',expdir);
