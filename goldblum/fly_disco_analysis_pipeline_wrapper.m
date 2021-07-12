@@ -85,6 +85,7 @@ function fly_disco_analysis_pipeline_wrapper(experiment_folder_path, settings_fo
     
     % Error out if failed
     if ~success ,
-        error('FlyDiscoPipeline() failed!') ;  % want to return a non-zero error code
+        [~,experiment_folder_name] = fileparts2(experiment_folder_path) ;
+        error('FlyDiscoPipeline() failed on experiment %s!', experiment_folder_name) ;  % want to return a non-zero error code
     end        
 end
