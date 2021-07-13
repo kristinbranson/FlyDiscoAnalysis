@@ -89,7 +89,7 @@ default_analysis_parameters_as_list = ...
      'requiredfiles_wingtracking',{'wingtrxfilestr'},...
      'requiredfiles_computeperframefeatures',{'perframedir', 'PERFRAMEMATFILES'},...
      'requiredfiles_computehoghofperframefeatures',{'hs_sup_01_01_1.mat','hf_01_01_1.mat'},...
-     'requiredfiles_computeperframestats',{'statsperframetxtfilestr','statsperframematfilestr','histperframetxtfilestr','histperframematfilestr'},...
+     'requiredfiles_computeperframestats',{'statsperframetxtfilestr','statsperframematfilestr'},...
      'requiredfiles_plotperframestats',{'figdir','ANALYSISPLOTS'},...
      'requiredfiles_makectraxresultsmovie',{'CTRAXRESULTSMOVIE'},...
      'requiredfiles_extradiagnostics',{'biasdiagnosticsimagefilestr','biasdiagnosticsfilestr','biasdiagnosticsmatfilestr',...
@@ -97,6 +97,9 @@ default_analysis_parameters_as_list = ...
      'videodiagnosticsfilestr','videodiagnosticsmatfilestr','videodiagnosticsimagefilestr'},...
      'requiredfiles_analysisprotocol',{'analysis_protocol.txt'},...
      'requiredfiles_automaticcheckscomplete',{'automaticcheckscompleteresultsfilestr'} } ;
+ 
+ %put back in when hist is ready
+ %      'requiredfiles_computeperframestats',{'statsperframetxtfilestr','statsperframematfilestr','histperframetxtfilestr','histperframematfilestr'},...
 default_analysis_parameters = struct_from_name_value_list(default_analysis_parameters_as_list) ;
    
 % Combine the default parameters with those from the analysis-protocol folder, giving precedence to the analysis-protocol folder ones 
@@ -132,6 +135,7 @@ requiredfiles_ledonoffdetection = lookup_in_struct(analysis_parameters, 'require
 requiredfiles_sexclassification = lookup_in_struct(analysis_parameters, 'requiredfiles_sexclassification') ;
 requiredfiles_wingtracking = lookup_in_struct(analysis_parameters, 'requiredfiles_wingtracking') ;
 requiredfiles_computeperframefeatures = lookup_in_struct(analysis_parameters, 'requiredfiles_computeperframefeatures') ;
+requiredfiles_computeperframestats = lookup_in_struct(analysis_parameters, 'requiredfiles_computeperframestats') ;
 requiredfiles_computehoghofperframefeatures = lookup_in_struct(analysis_parameters, 'requiredfiles_computehoghofperframefeatures') ;
 requiredfiles_makectraxresultsmovie = lookup_in_struct(analysis_parameters, 'requiredfiles_makectraxresultsmovie') ;
 requiredfiles_automaticcheckscomplete = lookup_in_struct(analysis_parameters, 'requiredfiles_automaticcheckscomplete') ;
@@ -334,7 +338,7 @@ if is_on_or_force(dotrackwings) ,
   end
 end
 
-% sex classification 
+%% sex classification 
 stage = 'sexclassification';
 if is_on_or_force(dosexclassification) ,
   forcecompute = is_force(dosexclassification) ;  
@@ -357,7 +361,7 @@ if is_on_or_force(dosexclassification) ,
   
 end
   
-% compute locomotor and social per-frame features
+%% compute locomotor and social per-frame features
 stage = 'computeperframefeatures';
 if is_on_or_force(docomputeperframefeatures) ,    
   forcecompute = is_force(docomputeperframefeatures) ;  
@@ -395,7 +399,31 @@ if is_on_or_force(docomputeperframefeatures) ,
   
 end
 
-%% computer hog hof per-frame features
+%% compute perframestats
+stage = 'computeperframestats';
+if is_on_or_force(docomputeperframestats)
+    forcecompute = is_force(docomputeperframestats);
+    
+  todo = CheckForMissingFiles(expdir,dataloc_params,requiredfiles_computeperframestats);
+  if forcecompute || todo,
+      fprintf('ComputePerFrameStats...\n');
+      FlyDiscoComputePerFrameStats(expdir,...
+        'settingsdir',settingsdir,'analysis_protocol',analysis_protocol,'docomputehists',false);
+  end
+  
+  % make sure computeperframestats files exist
+  [ismissingfile,missingfiles] = CheckForMissingFiles(expdir,dataloc_params,requiredfiles_computeperframestats);
+  if ismissingfile,
+    msgs = cellfun(@(x) sprintf('Missing computeperframestats file %s',x),missingfiles,'UniformOutput',false);
+    fprintf('ComputePerFrameStats failed:\n');
+    fprintf('%s\n',msgs{:});
+    return;
+  end
+  
+end
+
+
+%% compute hog hof per-frame features
 %flies_hoghof_hs_notaligned -- flow computed using Horn-Schunck. The current frame and next frame are not aligned in any way.
 
 stage = 'computehoghofperframefeatures';
@@ -428,15 +456,14 @@ if is_on_or_force(docomputehoghofperframefeatures) ,
   
 end
 
-% behavior detection
+%% behavior detection
 stage = 'jaabadetect';  %#ok<NASGU>
 if is_on_or_force(dojaabadetect),
   forcecompute = is_force(dojaabadetect) ;  
   JAABADetectWrapper(expdir, settingsdir, analysis_protocol, forcecompute) ;
 end
-
     
-% make results movie
+%% make results movie
 stage = 'ctraxresultsmovie';
 if is_on_or_force(domakectraxresultsmovie) ,
   forcecompute = is_force(domakectraxresultsmovie) ;  
