@@ -27,6 +27,22 @@ function goldblum(do_transfer_data_from_rigs, do_run_analysis, do_use_bqueue, do
         configuration = feval(configuration_function_name) ;
     end
     
+    % Want the start and end of a single goldblum run to be clear in the log
+    start_time_as_char = char(datetime('now','TimeZone','local','Format','y-MM-dd HH:mm Z')) ;
+    fprintf('\n') ;
+    fprintf('********************************************************************************\n') ;
+    fprintf('\n') ;
+    fprintf('Goldblum run starting at %s\n', start_time_as_char) ;
+    fprintf('\n') ;
+    fprintf('********************************************************************************\n') ;
+    fprintf('\n') ;
+    
+    % Get info about the state of the repo, output to stdout
+    this_script_path = mfilename('fullpath') ;
+    source_folder_path = fileparts(fileparts(this_script_path)) ;
+    git_report = get_git_report(source_folder_path) ;
+    fprintf('%s', git_report) ;
+    
     % Unpack the per-lab configuration file
     lab_head_last_name = configuration.lab_head_last_name ;
     host_name_from_rig_index = configuration.host_name_from_rig_index ;
@@ -111,5 +127,14 @@ function goldblum(do_transfer_data_from_rigs, do_run_analysis, do_use_bqueue, do
         end
     else
         fprintf('Skipping analysis.\n') ;
-    end        
+    end       
+    
+    % Want the start and end of a single goldblum run to be clear in the log
+    fprintf('\n') ;
+    fprintf('********************************************************************************\n') ;
+    fprintf('\n') ;
+    fprintf('Goldblum run started at %s is ending\n', start_time_as_char) ;
+    fprintf('\n') ;
+    fprintf('********************************************************************************\n') ;
+    fprintf('\n') ;    
 end
