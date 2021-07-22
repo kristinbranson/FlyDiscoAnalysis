@@ -269,6 +269,9 @@ end
 %% create subtitle file
 
 subtitlefile = fullfile(expdir,'subtitles.srt');
+if exist(subtitlefile,'file'),
+  delete(subtitlefile);
+end
 fid = fopen(subtitlefile,'w');
 dt = [0,ctraxresultsmovie_params.nframes];
 ts = cumsum(dt);
@@ -364,6 +367,9 @@ end
 
 % create movie
 avi_file_path = fullfile(tempdatadir, [avifilestr, '_temp.avi']);
+if exist(avi_file_path,'file'),
+  delete(avi_file_path);
+end
 temp_avi_path = [tempname(scratch_folder_path) '.avi'] ;
 [succeeded,~,~,height,width]= ...
   make_ctrax_result_movie('moviename',moviefile,'trxname',trxfile,'aviname',avi_file_path,...

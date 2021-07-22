@@ -1,12 +1,27 @@
-function isallowed = FrameConditionCheck(trx,fly,n,frameconditionparams)
+function [isallowed,h] = FrameConditionCheck(trx,fly,n,frameconditionparams,haxcurr)
+
+h = zeros(0,2);
+if ~exist('haxcurr','var'),
+  haxcurr = [];
+end
+if ~exist('colors','var'),
+  colors = [];
+end
 
 
 isallowed = true(1,n);
+
+if isempty(colors)
+  colors = lines(7);
+end
+colori = 1;
 
 for i = 1:2:numel(frameconditionparams)-1,
   
   param = strtrim(frameconditionparams{i});
   val = frameconditionparams{i+1};
+  
+  plotisstim = contains(param,'stim');
     
   % parse condition type
   m = regexp(param,'^(?<type>(min)|(max)|(equal)|(start)|(partm?[\d\.]+tom?[\d\.]+[sfp]))_(?<param>.+)$','names','once');
@@ -47,31 +62,42 @@ for i = 1:2:numel(frameconditionparams)-1,
   n1 = min(n,numel(trx(fly).(param1)));
   n2 = n-n1;
   if strcmpi(paramtype,'min'),
+
     if strcmp(param1,'timestamps'),
-      isallowed = isallowed & ...
-        [((trx(fly).timestamps(1:n1) - trx(fly).timestamps(1)) >= str2double(val)),false(1,n2)];
+      isallowedcurr = [((trx(fly).timestamps(1:n1) - trx(fly).timestamps(1)) >= str2double(val)),false(1,n2)];
     else
-      isallowed = isallowed & [trx(fly).(param1)(1:n1) >= str2double(val),false(1,n2)];
+      isallowedcurr = [trx(fly).(param1)(1:n1) >= str2double(val),false(1,n2)];
     end
+    isallowed = isallowed & isallowedcurr;
+
   elseif strcmpi(paramtype,'max'),
     if strcmp(param1,'timestamps'),
-      isallowed = isallowed & ...
-        [((trx(fly).timestamps(1:n1) - trx(fly).timestamps(1)) <= str2double(val)),false(1,n2)];
+      isallowedcurr = [((trx(fly).timestamps(1:n1) - trx(fly).timestamps(1)) <= str2double(val)),false(1,n2)];
     else
-      isallowed = isallowed & [trx(fly).(param1)(1:n1) <= str2double(val),false(1,n2)];
+      isallowedcurr = [trx(fly).(param1)(1:n1) <= str2double(val),false(1,n2)];
     end
+    isallowed = isallowed & isallowedcurr;
   elseif strcmpi(paramtype,'equal'),
-    isallowed = isallowed & [trx(fly).(param1)(1:n1) == str2double(val),false(1,n2)];
+    isallowedcurr = [trx(fly).(param1)(1:n1) == str2double(val),false(1,n2)];
+    isallowed = isallowed & isallowedcurr;
   elseif strcmpi(paramtype,'start'),
-    isallowedcurr = trx(fly).(param1)(1:n1) == str2double(val);
-    isallowed = isallowed & [false,isallowedcurr(2:n1)&~isallowedcurr(1:n1-1),false(1,n2)];
+    isallowedcurr1 = trx(fly).(param1)(1:n1) == str2double(val);
+    isallowedcurr = [false,isallowedcurr1(2:n1)&~isallowedcurr1(1:n1-1),false(1,n2)];
+    isallowed = isallowed & isallowedcurr;
   elseif strcmpi(paramtype,'end'),
-    isallowedcurr = trx(fly).(param1)(1:n1) == str2double(val);
-    isallowed = isallowed & [isallowedcurr(1:n1-1)&~isallowedcurr(2:n1),false(1,n2+1)];
+    isallowedcurr1 = trx(fly).(param1)(1:n1) == str2double(val);
+    isallowedcurr = [isallowedcurr1(1:n1-1)&~isallowedcurr1(2:n1),false(1,n2+1)];
+    isallowed = isallowed & isallowedcurr;
   elseif strcmpi(paramtype,'part'),
     isallowedcurr = trx(fly).(param1)(1:n1) == str2double(val);
     [t0s,t1s] = get_interval_ends(isallowedcurr);
     t1s = t1s-1;
+    
+    if ~isempty(haxcurr) && plotisstim,
+      n3 = numel(t0s);
+      ylim = get(haxcurr,'YLim');
+      h(colori,1) = patch(trx(fly).firstframe-1+[t0s(:),t1s(:),t1s(:),t0s(:),t0s(:)]',ylim(1+[zeros(n3,2),ones(n3,2),zeros(n3,1)])',colors(colori,:)*.3+.7,'LineStyle','none','Parent',haxcurr);
+    end
 
     if partparams.end == 0,
       signend = sign(partparams.start);
@@ -132,10 +158,22 @@ for i = 1:2:numel(frameconditionparams)-1,
   else
     valn = str2double(val);
     if isnan(valn),
-      isallowed = isallowed & [strcmp(trx(fly).(param1)(1:n1),val),false(1,n2)];
+      isallowedcurr = [strcmp(trx(fly).(param1)(1:n1),val),false(1,n2)];
     else
-      isallowed = isallowed & [trx(fly).(param1)(1:n1) == valn,false(1,n2)];
+      isallowedcurr = [trx(fly).(param1)(1:n1) == valn,false(1,n2)];
     end
+    isallowed = isallowed & isallowedcurr;
   end
+  if ~isempty(haxcurr) && plotisstim,
+    [t0s,t1s] = get_interval_ends(isallowedcurr); t1s = t1s-1;
+    n3 = numel(t0s);
+    ylim = get(haxcurr,'YLim');
+    h(colori,2) = patch(trx(fly).firstframe-1+[t0s(:),t1s(:),t1s(:),t0s(:),t0s(:)]',ylim(1+[zeros(n3,2),ones(n3,2),zeros(n3,1)])',colors(colori,:)*.5+.5,'LineStyle','none','Parent',haxcurr);
+    colori = colori + 1;
+    if colori > size(colors,1), colori = 1; end
+  end
+
   
 end
+
+h = h(:)';
