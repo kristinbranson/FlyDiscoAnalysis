@@ -3,7 +3,7 @@ function [success,msgs,iserror] = FlyDiscoAutomaticChecksComplete(expdir,varargi
 version = '0.1';
 timestamp = datestr(now,'yyyymmddTHHMMSS');
 
-try
+
 
 success = true;
 msgs = {};
@@ -24,21 +24,21 @@ datalocparamsfile = fullfile(settingsdir,analysis_protocol,datalocparamsfilestr)
 dataloc_params = ReadParams(datalocparamsfile);
 
 %% log file
-
-if isfield(dataloc_params,'automaticchecks_complete_logfilestr') && ~DEBUG,
-  logfile = fullfile(expdir,dataloc_params.automaticchecks_complete_logfilestr);
-  logfid = fopen(logfile,'a');
-  if logfid < 1,
-    warning('Could not open log file %s\n',logfile);
-    logfid = 1;
-  end
-else
-  logfid = 1;
-end
-
+% 
+% if isfield(dataloc_params,'automaticchecks_complete_logfilestr') && ~DEBUG,
+%   logfile = fullfile(expdir,dataloc_params.automaticchecks_complete_logfilestr);
+%   logfid = fopen(logfile,'a');
+%   if logfid < 1,
+%     warning('Could not open log file %s\n',logfile);
+%     logfid = 1;
+%   end
+% else
+%   logfid = 1;
+% end
+% 
 real_analysis_protocol = GetRealAnalysisProtocol(analysis_protocol,settingsdir);
-
-fprintf(logfid,'\n\n***\nRunning FlyDiscoAutomaticChecks_Complete version %s analysis_protocol %s (linked to %s) at %s\n',version,analysis_protocol,real_analysis_protocol,timestamp);
+% 
+% fprintf(logfid,'\n\n***\nRunning FlyDiscoAutomaticChecks_Complete version %s analysis_protocol %s (linked to %s) at %s\n',version,analysis_protocol,real_analysis_protocol,timestamp);
 
   
 %% more parameters
@@ -158,11 +158,13 @@ if isscreen,
   
 end
 
-%% check for Ctrax bugs: nan, inf in trajectories
+%% check for nan in flytracker data after postprocessing 
 
-ctraxfile = fullfile(expdir,dataloc_params.ctraxfilestr);
-if ~exist(ctraxfile,'file'),
-  msgs{end+1} = sprintf('Ctrax output mat file %s does not exist',ctraxfile);
+% using the wingtrxfilestr - this is output by perframe features and is the
+% last modification of data in the trx file in the pipeline
+wingtrxfile = fullfile(expdir,dataloc_params.wingtrxfilestr);
+if ~exist(wingtrxfile,'file'),
+  msgs{end+1} = sprintf('wingtracking_results mat file %s does not exist',wingtrxfile);
   success = false;
   iserror(category2idx.missing_tracking_files) = true;
 else
@@ -173,9 +175,9 @@ else
   %moviefile = fullfile(expdir,dataloc_params.moviefilestr);
   
   % load trajectories
-  [trx,~,succeeded,timestamps] = load_tracks(ctraxfile); %#ok<NASGU>
+  [trx,~,succeeded,timestamps] = load_tracks(wingtrxfile); %#ok<NASGU>
   if ~succeeded,
-    msgs{end+1} = sprintf('Could not load trajectories from file %s',ctraxfile);
+    msgs{end+1} = sprintf('Could not load trajectories from file %s',wingtrxfile);
     success = false;
     iserror(category2idx.completed_checks_other) = true;
   else
@@ -185,28 +187,37 @@ else
         isnan(trx(fly).y) | ...
         isnan(trx(fly).a) | ...
         isnan(trx(fly).b) | ...
-        isnan(trx(fly).theta);
+        isnan(trx(fly).theta) | ...
+        isnan(trx(fly).xwingl) | ...
+        isnan(trx(fly).ywingl) | ...
+        isnan(trx(fly).xwingr) | ...
+        isnan(trx(fly).ywingr) | ...
+        isnan(trx(fly).wing_anglel) | ...
+        isnan(trx(fly).wing_angler);    
+    
       if any(badidx),
         [starts,ends] = get_interval_ends(badidx);
         starts = starts - trx(fly).off;
         ends = ends - trx(fly).off;
-        msgs{end+1} = [sprintf('Trajectory %d has NaNs in frames',fly),sprintf(' %d-%d',[starts,ends]')]; %#ok<AGROW>
+        for se = 1:numel(starts)
+            msgs{end+1} = [sprintf('Trajectory %d has NaNs in frames',fly),sprintf(' %d-%d',[starts(se),ends(se)]')]; %#ok<AGROW>
+        end
         success = false;
         iserror(category2idx.flytracker_nans) = true;
       end
-      badidx = isinf(trx(fly).x) | ...
-        isinf(trx(fly).y) | ...
-        isinf(trx(fly).a) | ...
-        isinf(trx(fly).b) | ...
-        isinf(trx(fly).theta);
-      if any(badidx),
-        [starts,ends] = get_interval_ends(badidx);
-        starts = starts - trx(fly).off;
-        ends = ends - trx(fly).off;
-        msgs{end+1} = [sprintf('Trajectory %d has Infs in frames',fly),sprintf(' %d-%d',[starts,ends]')]; %#ok<AGROW>
-        success = false;
-        iserror(category2idx.ctrax_infinity_bug) = true;
-      end
+%       badidx = isinf(trx(fly).x) | ...
+%         isinf(trx(fly).y) | ...
+%         isinf(trx(fly).a) | ...
+%         isinf(trx(fly).b) | ...
+%         isinf(trx(fly).theta);
+%       if any(badidx),
+%         [starts,ends] = get_interval_ends(badidx);
+%         starts = starts - trx(fly).off;
+%         ends = ends - trx(fly).off;
+%         msgs{end+1} = [sprintf('Trajectory %d has Infs in frames',fly),sprintf(' %d-%d',[starts,ends]')]; %#ok<AGROW>
+%         success = false;
+%         iserror(category2idx.ctrax_infinity_bug) = true;
+%       end
       
     end
   end
@@ -277,7 +288,7 @@ end
 if exist(automatedchecksincomingfile,'file'),
   automatedchecks_incoming = ReadParams(automatedchecksincomingfile);
 else
-  fprintf(logfid,'Automated checks incoming file %s not find, assuming automated_pf incoming = U\n',automatedchecksincomingfile);
+  fprintf('Automated checks incoming file %s not find, assuming automated_pf incoming = U\n',automatedchecksincomingfile);
   automatedchecks_incoming = struct('automated_pf','U','notes_curation','');
 end
 
@@ -340,7 +351,7 @@ end
 %% save info to mat file
 
 filename = fullfile(expdir,dataloc_params.automaticcheckscompleteinfomatfilestr);
-fprintf(logfid,'Saving debug info to file %s...\n',filename);
+fprintf('Saving debug info to file %s...\n',filename);
 
 accinfo = struct;
 accinfo.paramsfile = paramsfile;
@@ -368,23 +379,14 @@ if ~DEBUG,
   end
 end
 
-catch ME,
-  msgs{end+1} = getReport(ME);
-  success = false;
-end
-
-
 %% print results to log file
 
-fprintf(logfid,'success = %d\n',success);
+fprintf('success = %d\n',success);
 if isempty(msgs),
-  fprintf(logfid,'No error or warning messages.\n');
+  fprintf('No error or warning messages.\n');
 else
-  fprintf(logfid,'Warning/error messages:\n');
-  fprintf(logfid,'%s\n',msgs{:});
+  fprintf('Warning/error messages:\n');
+  fprintf('%s\n',msgs{:});
 end
-fprintf(logfid,'Finished running FlyDiscoAutomaticChecks_Complete at %s.\n',datestr(now,'yyyymmddTHHMMSS'));
+fprintf('Finished running FlyDiscoAutomaticChecks_Complete at %s.\n',datestr(now,'yyyymmddTHHMMSS'));
 
-if logfid > 1,
-  fclose(logfid);
-end
