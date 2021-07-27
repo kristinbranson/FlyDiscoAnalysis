@@ -36,8 +36,8 @@ function turn_on_goldblum(hr, min)
     fly_disco_analysis_folder_path = fileparts(this_folder_path) ;
     escaped_fly_disco_analysis_folder_path = escape_string_for_bash(fly_disco_analysis_folder_path) ;    
     
-    goldblum_log_file_path = fullfile(destination_folder_path, 'goldblum.log') ;
-    escaped_goldblum_log_file_path = escape_string_for_bash(goldblum_log_file_path) ;
+    goldblum_meta_log_file_path = fullfile(destination_folder_path, 'goldblum-meta.log') ;
+    escaped_goldblum_meta_log_file_path = escape_string_for_bash(goldblum_meta_log_file_path) ;
     
     home_folder_path = getenv('HOME') ;
     bash_profile_path = fullfile(home_folder_path, '.bash_profile') ;
@@ -51,8 +51,8 @@ function turn_on_goldblum(hr, min)
                 escaped_bash_profile_path, ...
                 escaped_fly_disco_analysis_folder_path, ...
                 pi_last_name, ...
-                escaped_goldblum_log_file_path, ...
-                escaped_goldblum_log_file_path)  %#ok<NOPRT>
+                escaped_goldblum_meta_log_file_path, ...
+                escaped_goldblum_meta_log_file_path)  %#ok<NOPRT>
     escaped_core_command_line = escape_string_for_bash(core_command_line) ;
     
     hash_goldblum = '#GOLDBLUM' ;

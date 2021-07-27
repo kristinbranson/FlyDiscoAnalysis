@@ -1,19 +1,23 @@
 do_transfer_data_from_rigs = false ;
 do_run_analysis = true ;
 do_use_bqueue = true ;
-do_actually_submit_jobs = true ;
+do_actually_submit_jobs = false ;
 
 % Where does this script live?
 this_script_path = mfilename('fullpath') ;
 this_folder_path = fileparts(this_script_path) ;
 fly_disco_analysis_folder_path = fileparts(this_folder_path) ;
+flydisco_folder_path = fileparts(fly_disco_analysis_folder_path) ;
+root_example_experiments_folder_path = fullfile(flydisco_folder_path, 'example-experiments') ;
+read_only_example_experiments_folder_path = fullfile(root_example_experiments_folder_path, 'passing-test-suite-experiments-read-only') ;
+read_only_example_experiments_folder_path = fullfile(root_example_experiments_folder_path, 'no-experiments-read-only') ;
 
 % Specify the "per-lab" configuration here
 lab_head_last_name = 'scicompsoft' ;
 rig_host_name = 'arrowroot.hhmi.org' ;
 rig_user_name = 'bransonk' ;
 rig_data_folder_path = '/cygdrive/e/flydisco_data' ;
-goldblum_destination_folder_path = fullfile(this_folder_path, 'goldblum-test-destination-folder') ;
+goldblum_destination_folder_path = fullfile(root_example_experiments_folder_path, 'test-goldblum-destination-folder') ;
 settings_folder_path = fullfile(fly_disco_analysis_folder_path, 'settings') ;
 per_lab_configuration = struct() ;
 per_lab_configuration.lab_head_last_name = lab_head_last_name ;
@@ -31,7 +35,8 @@ end
 
 % Recopy the analysis test folder from the template
 fprintf('Resetting analysis test folder...\n') ;
-example_experiments_folder_path = reset_goldblum_example_experiments_working_copy_folder() ;
+example_experiments_folder_path = fullfile(root_example_experiments_folder_path, 'test-goldblum-example-experiments-folder') ;
+reset_goldblum_example_experiments_working_copy_folder(example_experiments_folder_path, read_only_example_experiments_folder_path) ;
 
 % Copy it to the rig computer (or just direct to the destination folder)
 rig_lab_data_folder_path = fullfile(rig_data_folder_path, lab_head_last_name) ;

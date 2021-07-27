@@ -14,5 +14,5 @@ test-experiments-working/
 test_analyze_experiment_folders_run_*.out.txt
 too-much-memory-example-experiments*
 test_analyze_experiment_folders_rubin_circa_2021_07_run_*.out.txt
-
-
+aborted-example-experiments-read-only/
+aborted-example-experiments
