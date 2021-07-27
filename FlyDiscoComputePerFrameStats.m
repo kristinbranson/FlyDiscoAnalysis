@@ -12,7 +12,7 @@ version = '0.1';
 special_cases = {'fractime','duration','boutfreq'};
 
 [analysis_protocol,settingsdir,datalocparamsfilestr,...
-  dorecompute,debug,verbose,docomputehists] = ...
+  dorecompute,debug,verbose,docomputehists,debugplot] = ...
   myparse(varargin,...
   'analysis_protocol','current',...
   'settingsdir','/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/settings',...
@@ -20,7 +20,8 @@ special_cases = {'fractime','duration','boutfreq'};
   'dorecompute',true,...
   'debug',false,...
   'verbose',true,...
-  'docomputehists',true); 
+  'docomputehists',true,...
+  'debugplot',0); 
 
 if ischar(docomputehists),
   docomputehists = str2double(docomputehists);
@@ -33,6 +34,9 @@ if ischar(debug),
 end
 if ischar(dorecompute),
   dorecompute = str2double(dorecompute);
+end
+if ischar(debugplot),
+  debugplot = str2double(debugplot);
 end
 
 if verbose,
@@ -119,84 +123,51 @@ else
 statsperfly = struct;
 statsperexp = struct;
 
-allfns = {};
+allfns = cell(1,numel(stats_perframefeatures));
+
+if debugplot > 0,
+  hfig = figure;
+  hax = createsubplots(2,debugplot,.05);
+  hax = reshape(hax,[2,debugplot]);
+  for i = 1:numel(hax),
+    hold(hax(i),'on');
+  end
+end  
 
 for i = 1:numel(stats_perframefeatures),
   
-  % which per-frame feature
-  field = stats_perframefeatures(i).field;
-
-  % which frames to analyze
-  frameconditionname = stats_perframefeatures(i).framecondition;
-  frameconditionparams = DecodeConditions(frameconditionname,frameconditiondict);
-    
-  % which flies to analyze
-  flyconditionname = stats_perframefeatures(i).flycondition;
-  flyconditionparams = DecodeConditions(flyconditionname,flyconditiondict);
-
-  isnorm = ~isempty(stats_perframefeatures(i).norm_framecondition);
-  if isnorm,
-    norm_frameconditionname = stats_perframefeatures(i).norm_framecondition;
-    norm_frameconditionparams = DecodeConditions(norm_frameconditionname,frameconditiondict);
-    norm_flyconditionname = stats_perframefeatures(i).norm_flycondition;
-    norm_flyconditionparams = DecodeConditions(norm_flyconditionname,flyconditiondict);    
-  end
-
-  
-  % is this a multi-frame feature?
-  % TODO: this only works on features that depend on at most pairs of frames
-  [~,fly] = max(trx.nframes);
-  if ismember(field,special_cases) || numel(trx(fly).(field)) < trx.nframes(fly),
-    % add in bounds on time between frames
-    if isfield(stats_params,'min_dt'),
-      flyconditionparams(end+1:end+2) = {'min_dt',num2str(stats_params.min_dt,10)};
-    end
-    if isfield(stats_params,'max_dt'),
-      flyconditionparams(end+1:end+2) = {'max_dt',num2str(stats_params.max_dt,10)};
-    end
-    if isnorm,
-      if isfield(stats_params,'min_dt'),
-        norm_flyconditionparams(end+1:end+2) = {'min_dt',num2str(stats_params.min_dt,10)};
-      end
-      if isfield(stats_params,'max_dt'),
-        norm_flyconditionparams(end+1:end+2) = {'max_dt',num2str(stats_params.max_dt,10)};
-      end
-    end
-  end
-  
-  % minimum number of frames to use this trajectory as a fly
-  minZboth = stats_perframefeatures(i).minZboth;
-  minZfly = stats_perframefeatures(i).minZfly;
-
-  if isnorm,
-    % minimum number of frames to use this trajectory as a fly
-    norm_minZboth = stats_perframefeatures(i).norm_minZboth;
-    norm_minZfly = stats_perframefeatures(i).norm_minZfly;
-  end
-
-  
-  % unique identifier for this computation, composed of field + conditions
-  fn = sprintf('%s_fly%s_frame%s',field,flyconditionname,frameconditionname);
-  if isnorm,
-    fn = sprintf('%s_norm_fly%s_frame%s',fn,norm_flyconditionname,norm_frameconditionname);
-  end
-  fullfn = fn;
-  if numel(fn) > 63,
-    fn = fn(1:61);
-    nprev = nnz(strcmp(allfns,fn));
-    allfns{end+1} = fn; %#ok<AGROW>
-    fn = [fn,num2str(nprev+1)]; %#ok<AGROW>
-  end
+  [fn,fullfn,field,flyconditionname,frameconditionname,frameconditionparams,...
+    flyconditionparams,minZboth,minZfly,...
+    isnorm,norm_flyconditionname,norm_frameconditionname,...
+    norm_frameconditionparams,norm_flyconditionparams,norm_minZboth,norm_minZfly] = ...
+    ParseStatParams(trx,stats_perframefeatures(i),allfns(1:i-1),special_cases,stats_params,...
+    frameconditiondict,flyconditiondict);
+  allfns{i} = fn;
   
   if verbose,
     fprintf('Computing stats for %s...\n',fn);
   end
   
-  [statsperflycurr,alldata,alldatanorm] = ComputeStat(trx,field,flyconditionname,frameconditionname,flyconditionparams,frameconditionparams,stats_params,special_cases);
+  if i <= debugplot,
+    haxcurr = hax(1,i);
+    haxcurrnorm = hax(2,i);
+  else
+    haxcurr = [];
+    haxcurrnorm = [];
+  end
+  
+  [statsperflycurr,alldata,alldatanorm] = ComputeStat(trx,field,flyconditionname,frameconditionname,flyconditionparams,frameconditionparams,stats_params,special_cases,haxcurr);
+  if ~isempty(haxcurr),
+    title(haxcurr,sprintf('%s fly=%s frame=%s',field,flyconditionname,frameconditionname),'interpreter','none');
+  end
+
   if isnorm,
-    [norm_statsperflycurr,norm_alldata,norm_alldatanorm] = ComputeStat(trx,field,norm_flyconditionname,norm_frameconditionname,norm_flyconditionparams,norm_frameconditionparams,stats_params,special_cases);
+    [norm_statsperflycurr,norm_alldata,norm_alldatanorm] = ComputeStat(trx,field,norm_flyconditionname,norm_frameconditionname,norm_flyconditionparams,norm_frameconditionparams,stats_params,special_cases,haxcurrnorm);
     statsperflycurr = ComputeNormStat(statsperflycurr,norm_statsperflycurr);
     statsperexpcurr = CombinePerFrameStats2(statsperflycurr,minZboth,minZfly,field,alldata,alldatanorm,norm_minZboth,norm_minZfly,norm_alldata,norm_alldatanorm);
+    if ~isempty(haxcurrnorm),
+      title(haxcurrnorm,sprintf('%s fly=%s frame=%s',field,norm_flyconditionname,norm_frameconditionname),'interpreter','none');
+    end
   else
     statsperexpcurr = CombinePerFrameStats2(statsperflycurr,minZboth,minZfly,field,alldata,alldatanorm);
   end
@@ -270,7 +241,7 @@ if docomputehists,
 
 
 histperframefeaturesfile = fullfile(trx.settingsdir,trx.analysis_protocol,trx.dataloc_params.histperframefeaturesfilestr);
-hist_perframefeatures = ReadHistPerFrameFeatures2(histperframefeaturesfile);
+hist_perframefeatures = ReadStatsPerFrameFeatures2(histperframefeaturesfile);
 % histparamsfile = fullfile(trx.settingsdir,trx.analysis_protocol,trx.dataloc_params.histparamsfilestr);
 % hist_params = ReadParams(histparamsfile);
 histperframebinsfile = fullfile(trx.settingsdir,trx.analysis_protocol,trx.dataloc_params.histperframebinsfilestr);
@@ -296,39 +267,17 @@ histperexp = struct;
 nbins_linear_default = [];
 nbins_log_default = [];
 
-for i = 1:numel(hist_perframefeatures),
-  % which per-frame feature
-  field = hist_perframefeatures(i).field;
+allhistfns = cell(1,numel(hist_perframefeatures));
 
-  % which frames to analyze
-  frameconditionname = hist_perframefeatures(i).framecondition;
-  frameconditionparams = DecodeConditions(frameconditionname,frameconditiondict);
-    
-  % which flies to analyze
-  flyconditionname = hist_perframefeatures(i).flycondition;
-  flyconditionparams = DecodeConditions(flyconditionname,flyconditiondict);
+for i = 1:numel(hist_perframefeatures),
   
-  % is this a multi-frame feature?
-  % TODO: this only works on features that depend on at most pairs of frames
-  [~,fly] = max(trx.nframes);
-  if ismember(field,special_cases) || numel(trx(fly).(field)) < trx.nframes(fly),
-    % add in bounds on time between frames
-    if isfield(stats_params,'min_dt'),
-      flyconditionparams(end+1:end+2) = {'min_dt',num2str(stats_params.min_dt,10)};
-    end
-    if isfield(stats_params,'max_dt'),
-      flyconditionparams(end+1:end+2) = {'max_dt',num2str(stats_params.max_dt,10)};
-    end
-  end
+  [fn,fullfn,field,flyconditionname,frameconditionname,frameconditionparams,...
+    flyconditionparams,minZboth,minZfly,isnorm] = ...
+    ParseStatParams(trx,hist_perframefeatures(i),allhistfns(1:i-1),special_cases,stats_params,...
+    frameconditiondict,flyconditiondict);
+  assert(~isnorm,'Normalization not implemented for histogram statistics');
+  allhistfns{i} = fullfn;
   
-  % minimum number of frames to use this trajectory as a fly
-  minZboth = hist_perframefeatures(i).minZboth;
-  minZfly = hist_perframefeatures(i).minZfly;
-    
-  fn = sprintf('%s_fly%s_frame%s',field,flyconditionname,frameconditionname);
-  if numel(fn) > 63,
-    fn = fn(1:63);
-  end
 
   if verbose,
     fprintf('Computing histograms for %s...\n',fn);
@@ -345,6 +294,7 @@ for i = 1:numel(hist_perframefeatures),
   else
     binfn = field;
   end
+  
   if ~isfield(bins,binfn),
     warning('Field %s missing from histogram bins',binfn);
     if isempty(nbins_linear_default),
@@ -437,32 +387,15 @@ for i = 1:numel(hist_perframefeatures),
     'Zfly',zeros(1,nflies));
 
   %alldata = [];
-  
+%   
+%   if isnorm,
+%     norm_statsperflycurr = ComputeStat(trx,field,norm_flyconditionname,norm_frameconditionname,norm_flyconditionparams,norm_frameconditionparams,stats_params,special_cases);
+%   end
+%   
   for fly = 1:nflies,
     
-    % current field data
-    if ~ismember(field,special_cases),
-      data = trx(fly).(field);
-      n = numel(data);
-    else
-      n = trx(fly).nframes;
-    end
-
-    % check that the fly matches the conditions in flyconditionparams
-    if strcmpi(flyconditionname,'any'),
-      doanalyze_fly = true(1,n);
-    else
-      doanalyze_fly = FrameConditionCheck(trx,fly,n,flyconditionparams);
-    end
-    
-    % choose frames that match the conditions in frameconditionparams
-    if strcmpi(frameconditionname,'any'),
-      doanalyze_frame = true(1,n);
-    else
-      doanalyze_frame = FrameConditionCheck(trx,fly,n,frameconditionparams);
-    end
-    
-    doanalyze = doanalyze_fly & doanalyze_frame;
+    [data,doanalyze,doanalyze_fly,n] = ...
+      ComputeDataFly(trx,fly,field,flyconditionname,frameconditionname,flyconditionparams,frameconditionparams,special_cases);
     
     % skip this trajectory if there aren't enough frames of data
     if nnz(doanalyze) < minZboth || nnz(doanalyze_fly) < minZfly,
@@ -480,8 +413,9 @@ for i = 1:numel(hist_perframefeatures),
       %alldata = [alldata,data(doanalyze)]; %#ok<AGROW>
     end
     
-
-
+%     if isnorm,
+%       data = data - norm_statsperflycurr.mean(fly);
+%     end
     
     % histogram
     [histperflycurr.frac_linear(:,fly),...
@@ -573,13 +507,93 @@ end
 
 %% close log
 
-fprintf(logfid,'Finished running FlyBowlComputePerFrameStats2 at %s.\n',datestr(now,'yyyymmddTHHMMSS'));
+fprintf(logfid,'Finished running FlyDiscoComputePerFrameStats2 at %s.\n',datestr(now,'yyyymmddTHHMMSS'));
 
 if logfid > 1,
   fclose(logfid);
 end
 
-function [statsperflycurr,alldata,alldatanorm] = ComputeStat(trx,field,flyconditionname,frameconditionname,flyconditionparams,frameconditionparams,stats_params,special_cases)
+function [fn,fullfn,field,flyconditionname,frameconditionname,frameconditionparams,...
+    flyconditionparams,minZboth,minZfly,...
+    isnorm,norm_flyconditionname,norm_frameconditionname,...
+    norm_frameconditionparams,norm_flyconditionparams,norm_minZboth,norm_minZfly] = ...
+  ParseStatParams(trx,param,allfns,special_cases,stats_params,frameconditiondict,flyconditiondict)
+
+% which per-frame feature
+field = param.field;
+
+% which frames to analyze
+frameconditionname = param.framecondition;
+frameconditionparams = DecodeConditions(frameconditionname,frameconditiondict);
+
+% which flies to analyze
+flyconditionname = param.flycondition;
+flyconditionparams = DecodeConditions(flyconditionname,flyconditiondict);
+
+isnorm = ~isempty(param.norm_framecondition);
+norm_flyconditionname = '';
+norm_frameconditionname = '';
+norm_frameconditionparams = [];
+norm_flyconditionparams = [];
+if isnorm,
+  norm_frameconditionname = param.norm_framecondition;
+  norm_frameconditionparams = DecodeConditions(norm_frameconditionname,frameconditiondict);
+  norm_flyconditionname = param.norm_flycondition;
+  norm_flyconditionparams = DecodeConditions(norm_flyconditionname,flyconditiondict);
+end
+
+
+% is this a multi-frame feature?
+% TODO: this only works on features that depend on at most pairs of frames
+[~,fly] = max(trx.nframes);
+if ismember(field,special_cases) || numel(trx(fly).(field)) < trx.nframes(fly),
+  % add in bounds on time between frames
+  if isfield(stats_params,'min_dt'),
+    flyconditionparams(end+1:end+2) = {'min_dt',num2str(stats_params.min_dt,10)};
+  end
+  if isfield(stats_params,'max_dt'),
+    flyconditionparams(end+1:end+2) = {'max_dt',num2str(stats_params.max_dt,10)};
+  end
+  if isnorm,
+    if isfield(stats_params,'min_dt'),
+      norm_flyconditionparams(end+1:end+2) = {'min_dt',num2str(stats_params.min_dt,10)};
+    end
+    if isfield(stats_params,'max_dt'),
+      norm_flyconditionparams(end+1:end+2) = {'max_dt',num2str(stats_params.max_dt,10)};
+    end
+  end
+end
+
+% minimum number of frames to use this trajectory as a fly
+minZboth = param.minZboth;
+minZfly = param.minZfly;
+
+norm_minZboth = [];
+norm_minZfly = [];
+if isnorm,
+  % minimum number of frames to use this trajectory as a fly
+  norm_minZboth = param.norm_minZboth;
+  norm_minZfly = param.norm_minZfly;
+end
+
+% unique identifier for this computation, composed of field + conditions
+fn = sprintf('%s_fly%s_frame%s',field,flyconditionname,frameconditionname);
+if isnorm,
+  fn = sprintf('%s_norm_fly%s_frame%s',fn,norm_flyconditionname,norm_frameconditionname);
+end
+fullfn = fn;
+if numel(fn) > 63,
+  fn = fn(1:61);
+  nprev = nnz(strcmp(allfns,fn));
+  fn = [fn,num2str(nprev+1)]; 
+end
+
+
+function [statsperflycurr,alldata,alldatanorm] = ComputeStat(trx,field,flyconditionname,frameconditionname,flyconditionparams,frameconditionparams,stats_params,special_cases,haxcurr)
+
+if ~exist('haxcurr','var'),
+  haxcurr = [];
+end
 
 nflies = trx.nflies;
 nprctiles = numel(stats_params.prctiles_compute);
@@ -600,31 +614,24 @@ else
   alldatanorm = [];
 end
 
+hcurr = [];
 for fly = 1:nflies,
   
-  if ismember(field,special_cases),
-    n = trx(fly).nframes;
+  if isempty(haxcurr) || fly~=1,
+    haxcurr1 = [];
   else
-    % current field data
-    data = trx(fly).(field);
-    n = numel(data);
+    haxcurr1 = haxcurr(fly);
   end
+  [data,doanalyze,doanalyze_fly,n,hcurr1] = ...
+    ComputeDataFly(trx,fly,field,flyconditionname,frameconditionname,...
+    flyconditionparams,frameconditionparams,special_cases,haxcurr1);
   
-  % check that the fly matches the conditions in flyconditionparams
-  if strcmpi(flyconditionname,'any'),
-    doanalyze_fly = true(1,n);
-  else
-    doanalyze_fly = FrameConditionCheck(trx,fly,n,flyconditionparams);
+  if ~isempty(haxcurr1),
+    hcurr = [hcurr,hcurr1]; %#ok<AGROW>
+    plot(haxcurr1,trx(fly).firstframe:trx(fly).firstframe+numel(data)-1,data,'k.');
+    plot(haxcurr1,trx(fly).firstframe - 1 + find(doanalyze&doanalyze_fly),data(doanalyze&doanalyze_fly),'.','Color',[0.4940    0.1840    0.5560]);
+    ylabel(haxcurr1,field,'interpreter','none');
   end
-  
-  
-  % choose frames that match the conditions in frameconditionparams
-  if strcmpi(frameconditionname,'any'),
-    doanalyze_frame = true(1,n);
-  else
-    doanalyze_frame = FrameConditionCheck(trx,fly,n,frameconditionparams);
-  end
-  doanalyze = doanalyze_fly & doanalyze_frame;
   
   if strcmp(field,'fractime'),
     statsperflycurr.mean(fly) = nnz(doanalyze) / nnz(doanalyze_fly);
@@ -670,6 +677,17 @@ for fly = 1:nflies,
 
 end
 
+if ~isempty(haxcurr),
+  for i = 1:numel(hcurr),
+    if ~ishandle(hcurr(i)) || hcurr(i) == 0, continue; end
+    haxcurr1 = get(hcurr(i),'Parent');
+    ylim = get(haxcurr1,'YLim');
+    ydata = get(hcurr(i),'YData');
+    n3 = numel(ydata)/5;
+    set(hcurr(i),'YData',ylim([zeros(n3,2),ones(n3,2),zeros(n3,1)]+1)');
+  end
+end
+
 function statsperflycurr = ComputeNormStat(statsperflycurr,norm_statsperflycurr)
 
 statsperflycurr.raw_mean = statsperflycurr.mean;
@@ -691,3 +709,32 @@ statsperflycurr.raw_Zfly = statsperflycurr.Zfly;
 statsperflycurr.norm_Zfly = norm_statsperflycurr.Zfly;
 statsperflycurr.Zfly = 1./(1./statsperflycurr.Zfly+1./statsperflycurr.norm_Zfly);
 
+function [data,doanalyze,doanalyze_fly,n,h] = ...
+  ComputeDataFly(trx,fly,field,flyconditionname,frameconditionname,flyconditionparams,frameconditionparams,special_cases,varargin)
+
+data = [];
+
+% current field data
+if ~ismember(field,special_cases),
+  data = trx(fly).(field);
+  n = numel(data);
+else
+  n = trx(fly).nframes;
+end
+
+% check that the fly matches the conditions in flyconditionparams
+if strcmpi(flyconditionname,'any') && isempty(flyconditionparams),
+  doanalyze_fly = true(1,n);
+else
+  doanalyze_fly = FrameConditionCheck(trx,fly,n,flyconditionparams);
+end
+
+% choose frames that match the conditions in frameconditionparams
+if strcmpi(frameconditionname,'any'),
+  doanalyze_frame = true(1,n);
+  h = [];
+else
+  [doanalyze_frame,h] = FrameConditionCheck(trx,fly,n,frameconditionparams,varargin{:});
+end
+
+doanalyze = doanalyze_fly & doanalyze_frame;
