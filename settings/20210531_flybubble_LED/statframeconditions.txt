@@ -1,5 +1,6 @@
 stimon1start,part0to6s_stimon_1,1
 stimoff1,equal_stimoff_1,1
+stimon,equal_stimon,1
 
 stimon1startmove,part0to3s_stimon_1_4_7,1,min_velmag_ctr,2
 stimoff1move,part0to3s_stimoff_2_5_8,1,min_velmag_ctr,2
