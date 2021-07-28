@@ -27,15 +27,13 @@ function analyze_experiment_folders(folder_path_from_experiment_index, settings_
         end
     end
     
-    % We don't analyze experiments that are already being analyzed, ones where
-    % the experiment was aborted during data-taking
+    % We don't analyze experiments that are already being analyzed
     is_to_be_analyzed_from_experiment_index = true(experiment_count, 1) ;
     for i = 1 : experiment_count ,
         experiment_folder_path = folder_path_from_experiment_index{i} ;
         analysis_in_progress_file_path = fullfile(experiment_folder_path, 'ANALYSIS-IN-PROGRESS') ;
-        aborted_file_path = fullfile(experiment_folder_path, 'ABORTED') ;
         is_to_be_skipped = ...
-          exist(analysis_in_progress_file_path, 'file') || exist(aborted_file_path, 'file') ;
+          exist(analysis_in_progress_file_path, 'file') ;
         is_to_be_analyzed_from_experiment_index(i) = ~is_to_be_skipped ;
     end
 
