@@ -282,7 +282,20 @@ if isfield(registration_params,'OptogeneticExp') ,
         
         % experiments
         if ~isempty(protocol)
-            fps = 1/meddt;
+            if registration_params.usemediandt                
+                fps = 1/meddt;
+            else
+                if isvarname('timestamps')
+                    fps = 1/median(diff(timestamps));
+                else
+                    [~,~,succeeded,timestamps] = load_tracks(ctraxfile,moviefile);
+                    if ~succeeded
+                        error('Could not load trajectories from file %s',ctraxfile);
+                    end
+                    fps = 1/median(diff(timestamps));                    
+                end
+            end
+            
             secstoLEDpulse = protocol.delayTime(firstactiveStepNum) + protocol.pulsePeriodSP(firstactiveStepNum)*protocol.pulseNum(firstactiveStepNum)/1000;
             % sets end range in which to find LED on
             frametoLEDpulse = secstoLEDpulse*fps;

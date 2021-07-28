@@ -3,15 +3,15 @@ function [success,msgs,iserror] = FlyDiscoAutomaticChecksComplete(expdir,varargi
 version = '0.1';
 timestamp = datestr(now,'yyyymmddTHHMMSS');
 
-% try
+
 
 success = true;
 msgs = {};
 
 [analysis_protocol,settingsdir,datalocparamsfilestr,DEBUG] = ...
   myparse(varargin,...
-  'analysis_protocol','current_bubble',...
-  'settingsdir','/groups/branson/home/robiea/Code_versioned/FlyBubbleAnalysis/settings',...
+  'analysis_protocol','current',...
+  'settingsdir','/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/settings',...
   'datalocparamsfilestr','dataloc_params.txt','debug',false);
 
 if ischar(DEBUG),
@@ -24,21 +24,23 @@ datalocparamsfile = fullfile(settingsdir,analysis_protocol,datalocparamsfilestr)
 dataloc_params = ReadParams(datalocparamsfile);
 
 %% log file
-
-if isfield(dataloc_params,'automaticchecks_complete_logfilestr') && ~DEBUG,
-  logfile = fullfile(expdir,dataloc_params.automaticchecks_complete_logfilestr);
-  logfid = fopen(logfile,'a');
-  if logfid < 1,
-    warning('Could not open log file %s\n',logfile);
-    logfid = 1;
-  end
-else
-  logfid = 1;
-end
-
+% 
+% if isfield(dataloc_params,'automaticchecks_complete_logfilestr') && ~DEBUG,
+%   logfile = fullfile(expdir,dataloc_params.automaticchecks_complete_logfilestr);
+%   logfid = fopen(logfile,'a');
+%   if logfid < 1,
+%     warning('Could not open log file %s\n',logfile);
+%     logfid = 1;
+%   end
+% else
+%   logfid = 1;
+% end
+% 
 real_analysis_protocol = GetRealAnalysisProtocol(analysis_protocol,settingsdir);
+% 
+% fprintf(logfid,'\n\n***\nRunning FlyDiscoAutomaticChecks_Complete version %s analysis_protocol %s (linked to %s) at %s\n',version,analysis_protocol,real_analysis_protocol,timestamp);
 
-fprintf(logfid,'\n\n***\nRunning FlyDiscoAutomaticChecksComplete version %s analysis_protocol %s (linked to %s) at %s\n',version,analysis_protocol,real_analysis_protocol,timestamp);
+  
 %% more parameters
 
 paramsfile = fullfile(settingsdir,analysis_protocol,dataloc_params.automaticcheckscompleteparamsfilestr);
@@ -51,12 +53,13 @@ outfile = fullfile(expdir,dataloc_params.automaticcheckscompleteresultsfilestr);
 categories = {...
   'missing_automated_checks_incoming_files',...
   'missing_tracking_files',...
-  'ctrax_infinity_bug',...
+  'flytracker_nans',...
   'missing_registration_files',...
+  'missing_optoregistration_files',...
   'missing_sexclassification_files',...
   'missing_wingtracking_files',...
+  'missing_perframefeatures_files',...
   'missing_perframestats_files',...
-  'bad_jaaba_scores',...
   'missing_extra_diagnostics_files',...
   'missing_results_movie_files',...
   'missing_other_analysis_files',...
@@ -73,21 +76,26 @@ iserror = false(1,numel(categories));
 if numel(check_params.required_files) ~= numel(check_params.file_categories),
   error('required_files and file_categories parameters do not match');
 end
+
 %% read metadata
 
 metadata = ReadMetadataFile(metadatafile);
+
 %% check for primary screen: some checks are only for screen data
 
-if ~isfield(metadata,'screen_type'),
-  success = false;
-  msgs{end+1} = 'screen_type not stored in Metadata file';
-  isscreen = false;
-else
-  isscreen = ~strcmpi(metadata.screen_type,'non_olympiad') && ...
-    ~strcmpi(metadata.screen_type,'non_production');
-end
-
-%% check number of flies
+% if ~isfield(metadata,'screen_type'),
+%   success = false;
+%   msgs{end+1} = 'screen_type not stored in Metadata file';
+%   isscreen = false;
+% else
+%   isscreen = ~strcmpi(metadata.screen_type,'non_olympiad') && ...
+%     ~strcmpi(metadata.screen_type,'non_production');
+% end
+% TODO change this as noted below 
+isscreen = true;
+%% check number of flies if flies nums included in autochecks 
+% TODO edit this to check if numflies values are included in
+% autocheckscomplete params. 
 
 if isscreen,
   
@@ -149,24 +157,27 @@ if isscreen,
   end
   
 end
-%% check for Ctrax bugs: nan, inf in trajectories
 
-ctraxfile = fullfile(expdir,dataloc_params.ctraxfilestr);
-if ~exist(ctraxfile,'file'),
-  msgs{end+1} = sprintf('Ctrax output mat file %s does not exist',ctraxfile);
+%% check for nan in flytracker data after postprocessing 
+
+% using the wingtrxfilestr - this is output by perframe features and is the
+% last modification of data in the trx file in the pipeline
+wingtrxfile = fullfile(expdir,dataloc_params.wingtrxfilestr);
+if ~exist(wingtrxfile,'file'),
+  msgs{end+1} = sprintf('wingtracking_results mat file %s does not exist',wingtrxfile);
   success = false;
   iserror(category2idx.missing_tracking_files) = true;
 else
   % name of annotation file
-  annfile = fullfile(expdir,dataloc_params.annfilestr);
+  %annfile = fullfile(expdir,dataloc_params.annfilestr);
   
   % name of movie file
-  moviefile = fullfile(expdir,dataloc_params.moviefilestr);
+  %moviefile = fullfile(expdir,dataloc_params.moviefilestr);
   
   % load trajectories
-  [trx,~,succeeded,timestamps] = load_tracks(ctraxfile,moviefile,'annname',annfile); %#ok<NASGU>
+  [trx,~,succeeded,timestamps] = load_tracks(wingtrxfile); %#ok<NASGU>
   if ~succeeded,
-    msgs{end+1} = sprintf('Could not load trajectories from file %s',ctraxfile);
+    msgs{end+1} = sprintf('Could not load trajectories from file %s',wingtrxfile);
     success = false;
     iserror(category2idx.completed_checks_other) = true;
   else
@@ -176,34 +187,44 @@ else
         isnan(trx(fly).y) | ...
         isnan(trx(fly).a) | ...
         isnan(trx(fly).b) | ...
-        isnan(trx(fly).theta);
+        isnan(trx(fly).theta) | ...
+        isnan(trx(fly).xwingl) | ...
+        isnan(trx(fly).ywingl) | ...
+        isnan(trx(fly).xwingr) | ...
+        isnan(trx(fly).ywingr) | ...
+        isnan(trx(fly).wing_anglel) | ...
+        isnan(trx(fly).wing_angler);    
+    
       if any(badidx),
         [starts,ends] = get_interval_ends(badidx);
         starts = starts - trx(fly).off;
         ends = ends - trx(fly).off;
-        msgs{end+1} = [sprintf('Trajectory %d has NaNs in frames',fly),sprintf(' %d-%d',[starts,ends]')]; %#ok<AGROW>
+        for se = 1:numel(starts)
+            msgs{end+1} = [sprintf('Trajectory %d has NaNs in frames',fly),sprintf(' %d-%d',[starts(se),ends(se)]')]; %#ok<AGROW>
+        end
         success = false;
-        iserror(category2idx.ctrax_infinity_bug) = true;
+        iserror(category2idx.flytracker_nans) = true;
       end
-      badidx = isinf(trx(fly).x) | ...
-        isinf(trx(fly).y) | ...
-        isinf(trx(fly).a) | ...
-        isinf(trx(fly).b) | ...
-        isinf(trx(fly).theta);
-      if any(badidx),
-        [starts,ends] = get_interval_ends(badidx);
-        starts = starts - trx(fly).off;
-        ends = ends - trx(fly).off;
-        msgs{end+1} = [sprintf('Trajectory %d has Infs in frames',fly),sprintf(' %d-%d',[starts,ends]')]; %#ok<AGROW>
-        success = false;
-        iserror(category2idx.ctrax_infinity_bug) = true;
-      end
+%       badidx = isinf(trx(fly).x) | ...
+%         isinf(trx(fly).y) | ...
+%         isinf(trx(fly).a) | ...
+%         isinf(trx(fly).b) | ...
+%         isinf(trx(fly).theta);
+%       if any(badidx),
+%         [starts,ends] = get_interval_ends(badidx);
+%         starts = starts - trx(fly).off;
+%         ends = ends - trx(fly).off;
+%         msgs{end+1} = [sprintf('Trajectory %d has Infs in frames',fly),sprintf(' %d-%d',[starts,ends]')]; %#ok<AGROW>
+%         success = false;
+%         iserror(category2idx.ctrax_infinity_bug) = true;
+%       end
       
     end
   end
 end
 
 %% check for missing files
+% add parsing for opto or not
 
 for i = 1:numel(check_params.required_files),
   fn = check_params.required_files{i};
@@ -219,32 +240,32 @@ for i = 1:numel(check_params.required_files),
     iserror(category2idx.(category)) = true;
   end
 end
+
 %% check for scores files
-
-try
-  if isfield(dataloc_params,'jaabadetectparamsfilestr'),
-    jaabadetectparams = ReadParams(fullfile(settingsdir,analysis_protocol,dataloc_params.jaabadetectparamsfilestr));
-    [issuccess_scores,msgs_scores] = CheckScores({expdir},fullfile(settingsdir,analysis_protocol,jaabadetectparams.classifierparamsfiles));
-    if any(~issuccess_scores),
-      msgcurr = sprintf('Bad JAABA scores files\n');
-      for i = 1:numel(msgs_scores),
-        if ~isempty(msgs_scores{i}),
-          msgcurr = [msgcurr,sprintf('%s\n',msgs_scores{i}{:})]; %#ok<AGROW>
-        end
-      end
-      msgs{end+1} = msgcurr;
-      success = false;
-      iserror(category2idx.bad_jaaba_scores) = true;
-    elseif ~isempty(msgs_scores),
-      msgs(end+1:end+numel(msgs_scores)) = msgs_scores;
-    end
-  end
-catch ME,
-  msgs{end+1} = sprintf('Error checking JAABA scores files: %s',getReport(ME));
-  success = false;
-  iserror(category2idx.completed_checks_other) = true;
-end
-
+% 
+% try
+%   if isfield(dataloc_params,'jaabadetectparamsfilestr'),
+%     jaabadetectparams = ReadParams(fullfile(settingsdir,analysis_protocol,dataloc_params.jaabadetectparamsfilestr));
+%     [issuccess_scores,msgs_scores] = CheckScores({expdir},fullfile(settingsdir,analysis_protocol,jaabadetectparams.classifierparamsfiles));
+%     if any(~issuccess_scores),
+%       msgcurr = sprintf('Bad JAABA scores files\n');
+%       for i = 1:numel(msgs_scores),
+%         if ~isempty(msgs_scores{i}),
+%           msgcurr = [msgcurr,sprintf('%s\n',msgs_scores{i}{:})]; %#ok<AGROW>
+%         end
+%       end
+%       msgs{end+1} = msgcurr;
+%       success = false;
+%       iserror(category2idx.bad_jaaba_scores) = true;
+%     elseif ~isempty(msgs_scores),
+%       msgs(end+1:end+numel(msgs_scores)) = msgs_scores;
+%     end
+%   end
+% catch ME,
+%   msgs{end+1} = sprintf('Error checking JAABA scores files: %s',getReport(ME));
+%   success = false;
+%   iserror(category2idx.completed_checks_other) = true;
+% end
 
 %% check for missing desired files
 
@@ -261,12 +282,13 @@ if isfield(check_params,'desired_files'),
     end
   end
 end
+
 %% output results to file, merging with automatedchecks incoming
 
 if exist(automatedchecksincomingfile,'file'),
   automatedchecks_incoming = ReadParams(automatedchecksincomingfile);
 else
-  fprintf(logfid,'Automated checks incoming file %s not find, assuming automated_pf incoming = U\n',automatedchecksincomingfile);
+  fprintf('Automated checks incoming file %s not find, assuming automated_pf incoming = U\n',automatedchecksincomingfile);
   automatedchecks_incoming = struct('automated_pf','U','notes_curation','');
 end
 
@@ -329,7 +351,7 @@ end
 %% save info to mat file
 
 filename = fullfile(expdir,dataloc_params.automaticcheckscompleteinfomatfilestr);
-fprintf(logfid,'Saving debug info to file %s...\n',filename);
+fprintf('Saving debug info to file %s...\n',filename);
 
 accinfo = struct;
 accinfo.paramsfile = paramsfile;
@@ -357,22 +379,14 @@ if ~DEBUG,
   end
 end
 
-% catch ME,
-%   msgs{end+1} = getReport(ME);
-%   success = false;
-% end
-
 %% print results to log file
 
-fprintf(logfid,'success = %d\n',success);
+fprintf('success = %d\n',success);
 if isempty(msgs),
-  fprintf(logfid,'No error or warning messages.\n');
+  fprintf('No error or warning messages.\n');
 else
-  fprintf(logfid,'Warning/error messages:\n');
-  fprintf(logfid,'%s\n',msgs{:});
+  fprintf('Warning/error messages:\n');
+  fprintf('%s\n',msgs{:});
 end
-fprintf(logfid,'Finished running FlyDiscoAutomaticChecksComplete at %s.\n',datestr(now,'yyyymmddTHHMMSS'));
+fprintf('Finished running FlyDiscoAutomaticChecks_Complete at %s.\n',datestr(now,'yyyymmddTHHMMSS'));
 
-if logfid > 1,
-  fclose(logfid);
-end
