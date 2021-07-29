@@ -24,23 +24,25 @@ analysis_parameters = cell(1,0) ;
 this_script_path = mfilename('fullpath') ;
 this_folder_path = fileparts(this_script_path) ;
 fly_disco_analysis_folder_path = fileparts(this_folder_path) ;
-settings_folder_path = fullfile(fly_disco_analysis_folder_path, 'settings') ;
-read_only_experiments_folder_path = fullfile(fly_disco_analysis_folder_path, 'aborted-example-experiments-read-only') ;
-working_experiments_folder_path = fullfile(fly_disco_analysis_folder_path, 'aborted-example-experiments') ;
+flydisco_folder_path = fileparts(fly_disco_analysis_folder_path) ;
+root_example_experiments_folder_path = fullfile(flydisco_folder_path, 'example-experiments') ;
+read_only_example_experiments_folder_path = fullfile(root_example_experiments_folder_path, 'aborted-example-experiments-read-only') ;
+working_example_experiments_folder_path = fullfile(root_example_experiments_folder_path, 'aborted-example-experiments') ;
 
 % Delete the destination folder
-if exist(working_experiments_folder_path, 'file') ,
-    return_code = system_from_list_with_error_handling({'rm', '-rf', working_experiments_folder_path}) ;
+if exist(working_example_experiments_folder_path, 'file') ,
+    return_code = system_from_list_with_error_handling({'rm', '-rf', working_example_experiments_folder_path}) ;
 end
 
 % Recopy the test folder from the template
 fprintf('Resetting working experiments folder...\n') ;
-reset_experiment_working_copies(working_experiments_folder_path, read_only_experiments_folder_path) ;
+reset_experiment_working_copies(working_example_experiments_folder_path, read_only_example_experiments_folder_path) ;
 
 % Find the experiments
-folder_path_from_experiment_index = find_experiment_folders(working_experiments_folder_path) ;
+folder_path_from_experiment_index = find_experiment_folders(working_example_experiments_folder_path) ;
 
 % Run the script under test
+settings_folder_path = fullfile(fly_disco_analysis_folder_path, 'settings') ;
 fprintf('Running analyze_experiment_folders...\n') ;
 analyze_experiment_folders(folder_path_from_experiment_index, settings_folder_path, lab_head_last_name, ...
                            do_force_analysis, do_use_bqueue, do_actually_submit_jobs, analysis_parameters)
