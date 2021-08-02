@@ -49,7 +49,7 @@ if isempty(traj),
   if ~exist(obj.trxfiles{n},'file'),
     error('Trajectory file %s does not exist',obj.trxfiles{n});
   end
-  traj = load_tracks(obj.trxfiles{n});
+  [traj,~,~,obj.movie_timestamps{n}] = load_tracks(obj.trxfiles{n});
 end
 
 % set movie properties when there is no movie

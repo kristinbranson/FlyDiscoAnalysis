@@ -1,7 +1,21 @@
 function LoadIndicatorDataFromFile(obj,n)
 
-id = load(fullfile(obj.expdirs{n},obj.dataloc_params.indicatordatafilestr));
 indicatorLED = struct;
+indicatorLED.starton = [];
+indicatorLED.endon = [];
+indicatorLED.startoff = [];
+indicatorLED.endoff = [];
+
+try
+  indicatordatafile = fullfile(obj.expdirs{n},obj.dataloc_params.indicatordatafilestr);
+  if ~exist(indicatordatafile,'file'),
+    return;
+  end
+  id = load(indicatordatafile);
+catch ME
+  warning(getReport(ME));
+  return;
+end
 indicatorLED.starton = id.indicatorLED.startframe;
 indicatorLED.endon = id.indicatorLED.endframe;
 if id.indicatorLED.StartEndStatus(1),

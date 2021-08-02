@@ -432,12 +432,14 @@ for i = 1:numel(hist_perframefeatures),
     % we will weight this trajectory by the fraction of frames analyzed
     histperflycurr.Zfly(fly) = nnz(doanalyze_fly);
     histperflycurr.fracframesanalyzed(fly) = nnz(doanalyze_fly) / n;
+    histperflycurr.name = fullfn
     
   end
 
   histperfly.(fn) = histperflycurr;
   % compute per-experiment hist
   histperexp.(fn) = CombinePerFrameHists2(histperflycurr,hist_perframefeatures(i).minZboth,hist_perframefeatures(i).minZfly);
+  histperexp.(fn).name = fullfn;
   idx = histperfly.(fn).Z > 0;
   nflies_fly = sum(histperfly.(fn).fracframesanalyzed(idx));
   nframes_per_fly = sum(histperfly.(fn).Z(idx)) / sum(nflies_fly);
