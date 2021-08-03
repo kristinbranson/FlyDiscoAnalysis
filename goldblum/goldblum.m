@@ -49,9 +49,6 @@ function goldblum(do_transfer_data_from_rigs, do_run_analysis, do_use_bqueue, do
     end
     goldblum_log_file_path = fullfile(goldblum_log_folder_path, goldblum_log_file_name) ;
     
-    % Open the log file
-    fprintf(nan, 'open', goldblum_log_file_path) ;
-        
     % Add a "banner" to the start of the log
     start_time_as_char = char(datetime('now','TimeZone','local','Format','y-MM-dd HH:mm Z')) ;
     fprintf('\n') ;
@@ -152,7 +149,4 @@ function goldblum(do_transfer_data_from_rigs, do_run_analysis, do_use_bqueue, do
     fprintf('\n') ;
     fprintf('********************************************************************************\n') ;
     fprintf('\n') ;    
-    
-    % Close the log file
-    fprintf(nan, 'close') ;    
 end
