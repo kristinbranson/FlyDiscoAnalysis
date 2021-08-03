@@ -25,13 +25,13 @@ end
 hfig = figure('Visible',visible);
 hax = axes('Position',[0,0,1,1],'Parent',hfig);
 
-if isempty(fliesplot),
-  if nfliesplot < trx.nflies,
-    fliesplot = round(linspace(1,trx.nflies,nfliesplot));
-  else
-    fliesplot = 1:trx.nflies;
-  end
-end
+% if isempty(fliesplot),
+%   if nfliesplot < trx.nflies,
+%     fliesplot = round(linspace(1,trx.nflies,nfliesplot));
+%   else
+%     fliesplot = 1:trx.nflies;
+%   end
+% end
 if isempty(ions),
   if isempty(nperiodsplot),
     nperiodsplot = non;
@@ -41,6 +41,15 @@ else
   nperiodsplot = numel(ions);
 end
 
+if isempty(fliesplot),
+  if nfliesplot < trx.nflies,
+    fliesplot = ChooseFliesPlot(trx,ind,ions,nfliesplot);
+    fliesplot = sort(fliesplot);
+    nfliesplot = numel(fliesplot);
+  else
+    fliesplot = 1:trx.nflies;
+  end
+end
 outfiles = cell(numel(ions),numel(fliesplot));
 for ioni = 1:numel(ions),
   ion = ions(ioni);

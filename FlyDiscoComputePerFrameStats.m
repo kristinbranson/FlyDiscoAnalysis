@@ -3,7 +3,7 @@ function FlyDiscoComputePerFrameStats(expdir,varargin)
 QUICKDEBUG = false;
 
 if QUICKDEBUG,
-  global trx;
+  global trx; %#ok<UNRCH,TLEV>
   warning('using global variable trx');
 end
 
@@ -48,7 +48,7 @@ if verbose,
   fprintf('Initializing trx...\n');
 end
 
-if QUICKDEBUG && ~isempty(trx),
+if QUICKDEBUG && ~isempty(trx), %#ok<NODEF>
   warning('using global variable trx');
 else
 trx = FBATrx('analysis_protocol',analysis_protocol,'settingsdir',settingsdir,...
@@ -107,13 +107,12 @@ stats_params = ReadParams(statsparamsfile);
 %% compute stats per fly
 
 nflies = trx.nflies;
-nprctiles = numel(stats_params.prctiles_compute);
 
 statstxtsavename = fullfile(expdir,trx.dataloc_params.statsperframetxtfilestr);
 statsmatsavename = fullfile(expdir,trx.dataloc_params.statsperframematfilestr);
 
 if ~dorecompute && exist(statstxtsavename,'file') && exist(statsmatsavename,'file'),
-  load(statsmatsavename);
+  load(statsmatsavename); %#ok<LOAD>
 else
 
 % open the text file for writing
@@ -127,7 +126,7 @@ allfns = cell(1,numel(stats_perframefeatures));
 
 if debugplot > 0,
   hfig = figure;
-  hax = createsubplots(2,debugplot,.05);
+  hax = createsubplots(2,debugplot,.05,hfig);
   hax = reshape(hax,[2,debugplot]);
   for i = 1:numel(hax),
     hold(hax(i),'on');
@@ -254,7 +253,7 @@ histtxtsavename = fullfile(expdir,trx.dataloc_params.histperframetxtfilestr);
 histmatsavename = fullfile(expdir,trx.dataloc_params.histperframematfilestr);
 
 if ~dorecompute && exist(histtxtsavename,'file') && exist(histmatsavename,'file'),
-  load(histmatsavename);
+  load(histmatsavename); %#ok<LOAD>
 else
 
 % open the text file for writing
@@ -362,8 +361,8 @@ for i = 1:numel(hist_perframefeatures),
     else
       edges_log = SelectHistEdges(nbins_log,lim,'log');
     end
-    edges_linear = [-inf,edges_linear,inf];
-    edges_log = [-inf,edges_log,inf];
+    edges_linear = [-inf,edges_linear,inf]; %#ok<AGROW>
+    edges_log = [-inf,edges_log,inf]; %#ok<AGROW>
     edges_linear(end-1) = edges_linear(end-1)*(1+1e-3);
     edges_log(end-1) = edges_log(end-1)*(1+1e-3);
     
@@ -432,7 +431,7 @@ for i = 1:numel(hist_perframefeatures),
     % we will weight this trajectory by the fraction of frames analyzed
     histperflycurr.Zfly(fly) = nnz(doanalyze_fly);
     histperflycurr.fracframesanalyzed(fly) = nnz(doanalyze_fly) / n;
-    histperflycurr.name = fullfn
+    histperflycurr.name = fullfn;
     
   end
 
@@ -455,7 +454,7 @@ end
 
 if ~debug,
   if exist(histmatsavename,'file'),
-    try
+    try %#ok<TRYNC>
       delete(histmatsavename);
     end
   end
@@ -617,12 +616,13 @@ else
 end
 
 hcurr = [];
+[~,longestfly] = max(trx.nframes);
 for fly = 1:nflies,
   
-  if isempty(haxcurr) || fly~=1,
+  if isempty(haxcurr) || fly~=longestfly,
     haxcurr1 = [];
   else
-    haxcurr1 = haxcurr(fly);
+    haxcurr1 = haxcurr;
   end
   [data,doanalyze,doanalyze_fly,n,hcurr1] = ...
     ComputeDataFly(trx,fly,field,flyconditionname,frameconditionname,...

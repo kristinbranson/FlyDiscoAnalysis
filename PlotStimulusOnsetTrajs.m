@@ -15,13 +15,14 @@ colors.stimwing = colors.stim*.4+.6;
 
 [nfliesplot,fliesplot,ions,nperiodsplot,hfig,...
   prestim,poststim,minboxwidth,boxborder,downsample,axwpx,...
-  visible] = ...
+  visible,maxnflies] = ...
   myparse_nocheck(varargin,'nfliesplot',[],...
   'fliesplot',[],'ions',[],'nperiodsplot',[],...
   'hfig',gobjects(0),...
   'prestim',.25,'poststim',1,...
   'minboxwidth',100,'boxborder',10,'downsample',30,'axwpx',200,...
-  'visible','on');
+  'visible','on',...
+  'maxnflies',inf);
 
 if ~isempty(fliesplot),
   nfliesplot = numel(fliesplot);
@@ -29,17 +30,11 @@ end
 if isempty(nfliesplot) || nfliesplot < 0,
   nfliesplot = trx.nflies;
 end
+nfliesplot = min(nfliesplot,maxnflies);
 
 ind = trx.getIndicatorLED(1);
 non = numel(ind.starton);
 
-if isempty(fliesplot),
-  if nfliesplot < trx.nflies,
-    fliesplot = round(linspace(1,trx.nflies,nfliesplot));
-  else
-    fliesplot = 1:trx.nflies;
-  end
-end
 if isempty(ions),
   if isempty(nperiodsplot) || nperiodsplot < 0,
     nperiodsplot = non;
@@ -47,6 +42,17 @@ if isempty(ions),
   ions = round(linspace(1,non,nperiodsplot));
 else
   nperiodsplot = numel(ions);
+end
+
+if isempty(fliesplot),
+  
+  if nfliesplot < trx.nflies,
+    fliesplot = ChooseFliesPlot(trx,ind,ions,nfliesplot);
+    fliesplot = sort(fliesplot);
+    nfliesplot = numel(fliesplot);
+  else
+    fliesplot = 1:trx.nflies;
+  end
 end
 
 if isempty(hfig) || ~ishandle(hfig),
@@ -71,6 +77,7 @@ haxs = reshape(haxs,[nfliesplot,nperiodsplot]);
 allax = [inf,-inf,inf,-inf];
 allts = nan(nperiodsplot,3);
 T0 = trx.movie_timestamps{1}(1);
+isdata = false(nfliesplot,nperiodsplot);
 for ioni = 1:numel(ions),
   ion = ions(ioni);
   % times to plot
@@ -93,16 +100,18 @@ for ioni = 1:numel(ions),
     
     fpre = max(trx(fly).firstframe,fpre1);
     fpost = min(trx(fly).endframe,fpost1);
-    
-    x = trx(fly).x(fpre:fpost);
-    y = trx(fly).y(fpre:fpost);
-    theta = trx(fly).theta(fpre:fpost);
-    a = trx(fly).a(fpre:fpost);
-    b = trx(fly).b(fpre:fpost);
-    xwingl = trx(fly).xwingl(fpre:fpost);
-    ywingl = trx(fly).ywingl(fpre:fpost);
-    xwingr = trx(fly).xwingr(fpre:fpost);
-    ywingr = trx(fly).ywingr(fpre:fpost);
+    ipre = fpre-trx(fly).firstframe+1;
+    ipost = fpost-trx(fly).firstframe+1;
+            
+    x = trx(fly).x(ipre:ipost);
+    y = trx(fly).y(ipre:ipost);
+    theta = trx(fly).theta(ipre:ipost);
+    a = trx(fly).a(ipre:ipost);
+    b = trx(fly).b(ipre:ipost);
+    xwingl = trx(fly).xwingl(ipre:ipost);
+    ywingl = trx(fly).ywingl(ipre:ipost);
+    xwingr = trx(fly).xwingr(ipre:ipost);
+    ywingr = trx(fly).ywingr(ipre:ipost);
     
     % rotate up
     theta0 = theta(f0-fpre+1);
@@ -174,11 +183,10 @@ for ioni = 1:numel(ions),
     
     allax([1,3]) = min(allax([1,3]),ax([1,3]));
     allax([2,4]) = max(allax([2,4]),ax([2,4]));
+    
+    isdata(fliesploti,ioni) = true;
+    
   end
-end
-set(haxs,'YDir','reverse','XTickLabel',{},'YTickLabel',{});
-for i = 1:numel(haxs),
-  axis(haxs(i),allax);
 end
 for flyi = 1:nfliesplot,
   fly = fliesplot(flyi);
@@ -189,5 +197,13 @@ for ioni = 1:nperiodsplot,
   title(haxs(1,ioni),sprintf('Period %d, %.1fs',ion,allts(ioni,2)));
 end
 
-plot(haxs(1,1),.9*allax(2)-[trx.pxpermm,0],.9*allax(3)+[0,0],'k-');
-text(haxs(1,1),.9*allax(2)-trx.pxpermm/2,.9*allax(3)+5,'1 mm','HorizontalAlignment','center','VerticalAlignment','top','FontSize',6);
+set(haxs,'YDir','reverse','XTickLabel',{},'YTickLabel',{});
+
+[flyi,ioni] = ind2sub([nfliesplot,nperiodsplot],find(isdata,1));
+plot(haxs(flyi,ioni),.9*allax(2)-[trx.pxpermm,0],.9*allax(3)+[0,0],'k-');
+text(haxs(flyi,ioni),.9*allax(2)-trx.pxpermm/2,.9*allax(3)+5,'1 mm','HorizontalAlignment','center','VerticalAlignment','top','FontSize',6);
+
+for i = 1:numel(haxs),
+  axis(haxs(i),'equal');
+  axis(haxs(i),allax);
+end

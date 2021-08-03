@@ -372,6 +372,8 @@ classdef FBATrx < handle
     
     LoadIndicatorDataFromFile(obj,n)
     
+    x = padgrab(fn,flies,padv,f0,f1);
+    
   end
   
   methods(Static)

@@ -55,6 +55,9 @@ fns = shortnames(idx);
 
 nfns = numel(fns);
 nflies = numel(statsperfly.(fns{1}).mean);
+for fni = 2:nfns,
+  assert(nflies == numel(statsperfly.(fns{fni}).mean));
+end
 
 %% collect data
 
@@ -71,14 +74,18 @@ for fni = 1:nfns,
   expmeans(fni) = statsperexp.(fn).meanmean;
   stdoverflies(fni) = statsperexp.(fn).stdmean;
   
-  goodidx = ~isnan(statsperfly.(fn).Z);
-  nflies = sum(statsperfly.(fn).fracframesanalyzed(goodidx));
-  nfliesanalyzed(fni) = nflies;
+  goodidx = ~isnan(statsperfly.(fn).Z) & ~isnan(statsperfly.(fn).fracframesanalyzed);
+  nfliesanalyzed(fni) = sum(statsperfly.(fn).fracframesanalyzed(goodidx));
+  assert(~isnan(nfliesanalyzed(fni)));
   
   flymeans(fni,:) = statsperfly.(fn).mean;
   flyweights(fni,:) = statsperfly.(fn).fracframesanalyzed / max(statsperfly.(fn).fracframesanalyzed);
   
 end
+
+ndatapts = sum(~isnan(flymeans),1);
+isdata = ndatapts > 0;
+flyweights(isnan(flymeans)) = 0;
 
 %% colors
 
@@ -91,12 +98,17 @@ hstd = gobjects(1,nfns);
 hflies = gobjects(1,nfns);
 miny = inf;
 maxy = -inf;
+nfliesplot = nnz(isdata);
+
 jittermag = .15;
+jitter = zeros(1,nflies);
+jitter(isdata) = linspace(-jittermag,jittermag,nfliesplot);
+
 for i = 1:nfns,
-  jitter = linspace(-jittermag,jittermag,numel(flymeans(i,:)));
-  hflies(i) = scatter(hax,i+jitter,flymeans(i,:)',8*flyweights(i,:)',colors{i},markers{i},'filled');
-  maxy = max(maxy,max(flymeans(i,:)));
-  miny = min(miny,min(flymeans(i,:)));
+  fliesplotcurr = ~isnan(flymeans(i,:)) & flyweights(i,:) > 0;
+  hflies(i) = scatter(hax,i+jitter(fliesplotcurr),flymeans(i,fliesplotcurr)',8*flyweights(i,fliesplotcurr)',colors{i},markers{i},'filled');
+  maxy = max(maxy,max(flymeans(i,isdata)));
+  miny = min(miny,min(flymeans(i,isdata)));
   h(i) = plot(hax,i,expmeans(i),markers{i},'color',colors{i},'markerfacecolor',colors{i});
   hstd(i) = plot(hax,[i,i],expmeans(i)+stdoverflies(i)*[-1,1],'-','color',colors{i});
   miny = min(miny,expmeans(i)-stdoverflies(i));
@@ -179,18 +191,18 @@ set(hax,'box','off');
 
 %% plot per-fly data
 if plotflies,
-  
-  assert(all(nflies==nflies(1)));
-  nflies = nflies(1);
-  flycolors = jet(nflies)*.7;
+
+  flycolors = jet(nfliesplot)*.7;
   hold(haxflies,'on');
-  jitter = linspace(-jittermag,jittermag,nflies);
-  hperfly = gobjects(nflies,1);
-  sperfly = cell(nflies,1);
-  for i = 1:nflies,
-    hperfly(i) = plot(haxflies,(1:nfns)+jitter(i),flymeans(:,i),'-','Color',flycolors(i,:));
-    scatter(haxflies,(1:nfns)+jitter(i),flymeans(:,i),20*flyweights(:,i),flycolors(i,:),'o','filled');
-    sperfly{i} = sprintf('Fly %d',i);
+  hperfly = gobjects(nfliesplot,1);
+  sperfly = cell(nfliesplot,1);
+  fliesplot = find(isdata);
+  for ii = 1:nfliesplot,
+    i = fliesplot(ii);
+    hperfly(ii) = plot(haxflies,(1:nfns)+jitter(i),flymeans(:,i),'-','Color',flycolors(ii,:));
+    idxdatacurr = find(~isnan(flymeans(:,i)) & ~isnan(flyweights(:,i)) & flyweights(:,i)>0);
+    scatter(haxflies,idxdatacurr+jitter(i),flymeans(idxdatacurr,i),20*flyweights(idxdatacurr,i),flycolors(ii,:),'o','filled');
+    sperfly{ii} = sprintf('Fly %d',i);
   end
   set(haxflies,'XLim',[0,nfns+1]);
   ylim = [miny-(maxy-miny)*.01,maxy+(maxy-miny)*.01];
