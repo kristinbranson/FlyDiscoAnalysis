@@ -20,9 +20,7 @@ else
 end
 
 % First, get the settingsdir
-
-settingsdir = lookup_in_struct(argument_parameters, 'settingsdir', '/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/settings') ;
-        
+settingsdir = lookup_in_struct(argument_parameters, 'settingsdir', '/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/settings') ;        
 
 % Get the metadata file path
 metadata_file_path = determine_metadata_file_path(expdir) ;

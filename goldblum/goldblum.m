@@ -37,18 +37,6 @@ function goldblum(do_transfer_data_from_rigs, do_run_analysis, do_use_bqueue, do
     %does_use_per_user_folders = configuration.does_use_per_user_folders ;
     to_process_folder_name = 'to-process' ;
 
-    % Determine the location of the goldblum log
-    goldblum_log_folder_path = fullfile(destination_folder, 'goldblum-logs') ;
-    ensure_folder_exists(goldblum_log_folder_path) ;
-    ideal_goldblum_log_file_name = ['goldblum-' char(datetime('now','TimeZone','local','Format','y-MM-dd')) '.log'] ;
-    ideal_goldblum_log_file_path = fullfile(goldblum_log_folder_path, ideal_goldblum_log_file_name) ;
-    if exist(ideal_goldblum_log_file_path, 'file') ,
-        goldblum_log_file_name = ['goldblum-' char(datetime('now','TimeZone','local','Format','y-MM-dd-HH:mm')) '.log'] ;
-    else
-        goldblum_log_file_name = ideal_goldblum_log_file_name ;
-    end
-    goldblum_log_file_path = fullfile(goldblum_log_folder_path, goldblum_log_file_name) ;
-    
     % Add a "banner" to the start of the log
     start_time_as_char = char(datetime('now','TimeZone','local','Format','y-MM-dd HH:mm Z')) ;
     fprintf('\n') ;
