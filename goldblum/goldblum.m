@@ -111,7 +111,7 @@ function goldblum(do_transfer_data_from_rigs, do_run_analysis, do_use_bqueue, do
                                    'UniformOutput', false) ;
         canonical_path_from_experiment_index = cellfun(@realpath, link_path_from_experiment_index, 'UniformOutput', false) ;
         do_force_analysis = false ;
-        analyze_experiment_folders(canonical_path_from_experiment_index, settings_folder_path, lab_head_last_name, ...
+        goldblum_analyze_experiment_folders(canonical_path_from_experiment_index, settings_folder_path, lab_head_last_name, ...
                                    do_force_analysis, do_use_bqueue, do_actually_submit_jobs, analysis_parameters)
         
         % Whether those succeeded or failed, remove the links from the

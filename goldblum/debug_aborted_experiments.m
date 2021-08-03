@@ -43,6 +43,6 @@ folder_path_from_experiment_index = find_experiment_folders(working_example_expe
 
 % Run the script under test
 settings_folder_path = fullfile(fly_disco_analysis_folder_path, 'settings') ;
-fprintf('Running analyze_experiment_folders...\n') ;
-analyze_experiment_folders(folder_path_from_experiment_index, settings_folder_path, lab_head_last_name, ...
+fprintf('Running goldblum_analyze_experiment_folders...\n') ;
+goldblum_analyze_experiment_folders(folder_path_from_experiment_index, settings_folder_path, lab_head_last_name, ...
                            do_force_analysis, do_use_bqueue, do_actually_submit_jobs, analysis_parameters)
