@@ -5,7 +5,7 @@ function [expdirstruct] = getExperimentDirsFlyDisco(rootdatadir,varargin)
 % assuming standard names
 sxclfilestr = 'sexclassifier_diagnostics.txt';
 autochcksinfilestr = 'automatic_checks_incoming_results.txt';
-analysiscompletefilestr = 'ANALYSIS-COMPLETED-SUCCESSFULLY';
+analysiscompletefilestr = 'ANALYSIS-COMPLETE';
 moviefilestr = 'movie.ufmf';
 % TODO 
 % add option to not return expdirs without Metadata file

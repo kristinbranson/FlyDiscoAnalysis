@@ -38,13 +38,13 @@ function fly_disco_analysis_pipeline_wrapper(experiment_folder_path, settings_fo
     if exist(analysis_errored_out_file_path, 'file') ,
         delete(analysis_errored_out_file_path) ;
     end
-    analysis_successful_file_path = fullfile(experiment_folder_path, 'ANALYSIS-COMPLETED-SUCCESSFULLY') ;
-    if exist(analysis_successful_file_path, 'file') ,
-        delete(analysis_successful_file_path) ;
+    analysis_complete_file_path = fullfile(experiment_folder_path, 'ANALYSIS-COMPLETE') ;
+    if exist(analysis_complete_file_path, 'file') ,
+        delete(analysis_complete_file_path) ;
     end
-    analysis_failed_file_path = fullfile(experiment_folder_path, 'ANALYSIS-FAILED') ;
-    if exist(analysis_failed_file_path, 'file') ,
-        delete(analysis_failed_file_path) ;
+    analysis_incomplete_file_path = fullfile(experiment_folder_path, 'ANALYSIS-INCOMPLETE') ;
+    if exist(analysis_incomplete_file_path, 'file') ,
+        delete(analysis_incomplete_file_path) ;
     end
     
     % Convert param list to a struct
@@ -76,11 +76,11 @@ function fly_disco_analysis_pipeline_wrapper(experiment_folder_path, settings_fo
         touch(analysis_errored_out_file_path) ;
     else        
         if success ,
-            analysis_successful_file_path = fullfile(experiment_folder_path, 'ANALYSIS-COMPLETED-SUCCESSFULLY') ;
-            touch(analysis_successful_file_path) ;
+            analysis_complete_file_path = fullfile(experiment_folder_path, 'ANALYSIS-COMPLETE') ;
+            touch(analysis_complete_file_path) ;
         else
-            analysis_failed_file_path = fullfile(experiment_folder_path, 'ANALYSIS-FAILED') ;
-            touch(analysis_failed_file_path) ;
+            analysis_incomplete_file_path = fullfile(experiment_folder_path, 'ANALYSIS-INCOMPLETE') ;
+            touch(analysis_incomplete_file_path) ;
             fprintf('FlyDiscoPipeline() encountered one or more problems at stage %s:\n', stage)
             for i = 1 : length(msgs) ,
                 msg = msgs{i} ;
@@ -94,7 +94,7 @@ function fly_disco_analysis_pipeline_wrapper(experiment_folder_path, settings_fo
         delete(analysis_in_progress_file_path) ;
     end
     
-    % Error out if FlyDiscoPipeline() errored out or failed
+    % Error out if FlyDiscoPipeline() errored out or returned success==false
     if did_pipeline_error_out || ~success ,
         [~,experiment_folder_name] = fileparts2(experiment_folder_path) ;
         error('FlyDiscoPipeline() errored out or failed on experiment %s!', experiment_folder_name) ;  % want to return a non-zero error code
