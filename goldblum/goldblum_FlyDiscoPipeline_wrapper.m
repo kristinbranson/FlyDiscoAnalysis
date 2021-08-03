@@ -1,4 +1,4 @@
-function fly_disco_analysis_pipeline_wrapper(experiment_folder_path, settings_folder_path, overriding_analysis_parameters_as_list)
+function goldblum_FlyDiscoPipeline_wrapper(experiment_folder_path, settings_folder_path, overriding_analysis_parameters_as_list)
     % This is the function that is submitted by goldblum to the bqueue to run each
     % experiment.
   
