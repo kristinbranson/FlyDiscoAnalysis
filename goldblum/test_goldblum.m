@@ -9,9 +9,10 @@ this_folder_path = fileparts(this_script_path) ;
 fly_disco_analysis_folder_path = fileparts(this_folder_path) ;
 flydisco_folder_path = fileparts(fly_disco_analysis_folder_path) ;
 root_example_experiments_folder_path = fullfile(flydisco_folder_path, 'example-experiments') ;
-read_only_example_experiments_folder_path = fullfile(root_example_experiments_folder_path, 'passing-test-suite-experiments-read-only') ;
+%read_only_example_experiments_folder_path = fullfile(root_example_experiments_folder_path, 'passing-test-suite-experiments-read-only') ;
 %read_only_example_experiments_folder_path = fullfile(root_example_experiments_folder_path, 'no-experiments-read-only') ;
 %read_only_example_experiments_folder_path = fullfile(root_example_experiments_folder_path, 'one-aborted-one-faulty-experiment-read-only') ;
+read_only_example_experiments_folder_path = '/groups/branson/bransonlab/flydisco_example_experiments_read_only' ;
 
 % Specify the "per-lab" configuration here
 lab_head_last_name = 'scicompsoft' ;
