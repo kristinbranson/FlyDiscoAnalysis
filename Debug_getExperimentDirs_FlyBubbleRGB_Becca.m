@@ -1,21 +1,35 @@
 %Deubg get all experiment directories 
 %% setup path
-addpath /groups/branson/home/robiea/Code_versioned/FlyDiscoAnalysis/JAABA/filehandling
-addpath /groups/branson/home/robiea/Code_versioned/FlyDiscoAnalysis/JAABA/misc
+% addpath /groups/branson/home/robiea/Code_versioned/FlyDiscoAnalysis/JAABA/filehandling
+% addpath /groups/branson/home/robiea/Code_versioned/FlyDiscoAnalysis/JAABA/misc
+modpath
 %% pull expdirs and load all metdata
-rootdatadir = '/groups/branson/bransonlab/flydisco_data';
-savefile = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_wk2';
+% rootdatadir = '/groups/branson/bransonlab/flydisco_data';
+rootdatadir = '/groups/dickson/dicksonlab/flydisco_data';
+
 metadatafile = 'Metadata.xml';
 
-%inputs to getExperimentDirsFlyDisco: 'metadatafile','Metadata.xml','screen_type','*','line_name','*','date','*');
-[expdirstruct] = getExperimentDirsFlyDisco(rootdatadir,'screen_type','VNC*','date','20210*');
+% %inputs to getExperimentDirsFlyDisco: 'metadatafile','Metadata.xml','screen_type','*','line_name','*','date','*');
+% [expdirstruct] = getExperimentDirsFlyDisco(rootdatadir,'screen_type','VNC*','date','20210405*');
 
-%% make csv file for all experiments
+% updated inputs 'metadatafile','Metadata.xml','screen_type','*','line_name','*', ...
+%     'date','*','nflies',false,'autocheckin',false,'FlyDiscoAnalysisStatus', false);
+[expdirstruct] = getExperimentDirsFlyDisco(rootdatadir,'screen_type','VNC*',...
+    'nflies',true,'autocheckin',true,'FlyDiscoAnalysisStatus', true,'movielength',true,'movielength',true,'date','202106*');
+
+savefile = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_redosJune.csv';
+
+%% make tsv with ALL metadata fields
+
+expdirtable = struct2table(expdirstruct);
+writetable(expdirtable,savefile,'Delimiter','tab');
+
+%% make csv file for all experiments (use for pulling data for metadata changes) 
 fid = fopen([savefile,'.tsv'],'w');
 
 fprintf(fid,'%s\t %s\t %s\t %s\t %s\t %s\t %s\t %s \n','expname','date','datetime','linename','experimentor','notes_tech','notes_behav','flag_redo');
 
-for i = 1:numel(expdirstruct)
+for i = 1:numel(expdirstruct)  
   [~,expname] = fileparts(expdirstruct(i).file_system_path);
   datestr = expdirstruct(i).date;
   datetimestr = expdirstruct(i).exp_datetime;

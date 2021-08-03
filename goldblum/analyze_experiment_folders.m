@@ -27,24 +27,22 @@ function analyze_experiment_folders(folder_path_from_experiment_index, settings_
         end
     end
     
-    % We don't analyze experiments that are already being analyzed, ones where
-    % the experiment was aborted during data-taking
+    % We don't analyze experiments that are already being analyzed
     is_to_be_analyzed_from_experiment_index = true(experiment_count, 1) ;
     for i = 1 : experiment_count ,
         experiment_folder_path = folder_path_from_experiment_index{i} ;
         analysis_in_progress_file_path = fullfile(experiment_folder_path, 'ANALYSIS-IN-PROGRESS') ;
-        aborted_file_path = fullfile(experiment_folder_path, 'ABORTED') ;
         is_to_be_skipped = ...
-          exist(analysis_in_progress_file_path, 'file') || exist(aborted_file_path, 'file') ;
+          exist(analysis_in_progress_file_path, 'file') ;
         is_to_be_analyzed_from_experiment_index(i) = ~is_to_be_skipped ;
     end
 
     % Report how many experiments are left to be analyzed
     folder_path_from_to_be_analyzed_experiment_index = folder_path_from_experiment_index(is_to_be_analyzed_from_experiment_index) ;
     to_be_analyzed_experiment_count = length(folder_path_from_to_be_analyzed_experiment_index) ;
-    fprintf('There are %d experiments that will be analyzed.\n', to_be_analyzed_experiment_count) ;
+    goldblum_log('There are %d experiments that will be analyzed.\n', to_be_analyzed_experiment_count) ;
     if to_be_analyzed_experiment_count > 0 ,
-        fprintf('Submitting these for analysis...\n') ;
+        goldblum_log('Submitting these for analysis...\n') ;
     end
 
     if do_use_bqueue ,
@@ -84,30 +82,30 @@ function analyze_experiment_folders(folder_path_from_experiment_index, settings_
         % Report on any failed runs
         if all(job_statuses==1) ,
             % All is well
-            fprintf('All jobs completed successfully.\n') ;
+            goldblum_log('All jobs completed successfully.\n') ;
         else
             % Print the folders that had errors
             had_error = (job_statuses==-1) ;
             folder_path_from_errored_experiment_index = folder_path_from_to_be_analyzed_experiment_index(had_error) ;
             if ~isempty(folder_path_from_errored_experiment_index) ,                
-                fprintf('The following experiment folders had errors:\n') ;
+                goldblum_log('The following experiment folders had errors:\n') ;
                 for i = 1 : length(folder_path_from_errored_experiment_index) ,
                     experiment_folder_path = folder_path_from_errored_experiment_index{i} ;
-                    fprintf('    %s\n', experiment_folder_path) ;
+                    goldblum_log('    %s\n', experiment_folder_path) ;
                 end
-                fprintf('\n') ;
+                goldblum_log('\n') ;
             end
             
             % Print the folders that did not finish
             did_not_finish = (job_statuses==0) ;
             folder_path_from_unfinished_experiment_index = folder_path_from_to_be_analyzed_experiment_index(did_not_finish) ;
             if ~isempty(folder_path_from_unfinished_experiment_index) ,                
-                fprintf('The following experiment folders did not finish processing in the alloted time:\n') ;
+                goldblum_log('The following experiment folders did not finish processing in the alloted time:\n') ;
                 for i = 1 : length(folder_path_from_unfinished_experiment_index) ,
                     experiment_folder_path = folder_path_from_unfinished_experiment_index{i} ;
-                    fprintf('    %s\n', experiment_folder_path) ;
+                    goldblum_log('    %s\n', experiment_folder_path) ;
                 end
-                fprintf('\n') ;
+                goldblum_log('\n') ;
             end
         end
     else
