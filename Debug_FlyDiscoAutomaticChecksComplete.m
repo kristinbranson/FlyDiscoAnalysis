@@ -38,7 +38,7 @@ expdirs = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20210
 '/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20210621_APTTracking/VNC_YNA_K_162984_RigC_20210604T152231', ...
 '/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20210621_APTTracking/VNC_YNA_K_162984_RigD_20210526T155055'};
 
-expdirs = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20210621_APTTracking/VNC_JRC_SS64175_RigB_20210518T145000'}
+% expdirs = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20210621_APTTracking/VNC_JRC_SS64175_RigB_20210518T145000'}
 %% 
 
 success = [];
