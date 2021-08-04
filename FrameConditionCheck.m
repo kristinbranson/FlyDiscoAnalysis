@@ -93,7 +93,7 @@ for i = 1:2:numel(frameconditionparams)-1,
     [t0s,t1s] = get_interval_ends(isallowedcurr);
     t1s = t1s-1;
     
-    if ~isempty(haxcurr) && plotisstim,
+    if ~isempty(haxcurr) && plotisstim && ~isempty(t0s),
       n3 = numel(t0s);
       ylim = get(haxcurr,'YLim');
       h(colori,1) = patch(trx(fly).firstframe-1+[t0s(:),t1s(:),t1s(:),t0s(:),t0s(:)]',ylim(1+[zeros(n3,2),ones(n3,2),zeros(n3,1)])',colors(colori,:)*.3+.7,'LineStyle','none','Parent',haxcurr);
@@ -164,7 +164,7 @@ for i = 1:2:numel(frameconditionparams)-1,
     end
     isallowed = isallowed & isallowedcurr;
   end
-  if ~isempty(haxcurr) && plotisstim,
+  if ~isempty(haxcurr) && plotisstim && any(isallowedcurr)
     [t0s,t1s] = get_interval_ends(isallowedcurr); t1s = t1s-1;
     n3 = numel(t0s);
     ylim = get(haxcurr,'YLim');

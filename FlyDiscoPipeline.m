@@ -219,15 +219,14 @@ if is_on_or_force(doautomaticchecksincoming) ,
   todo = CheckForMissingFiles(expdir,dataloc_params,requiredfiles_automaticchecksincoming);
   if forcecompute || todo,
     fprintf('Running incoming automatic checks...\n');
-
-    [success1,msgs] = FlyDiscoAutomaticChecksIncoming(expdir,...
-      'settingsdir',settingsdir,'analysis_protocol',analysis_protocol,...
-      automaticchecksincoming_params{:});
-
-    if ~success1,
+    [success_performing_incoming_checks, msgs] = ...
+      FlyDiscoAutomaticChecksIncoming(expdir,...
+                                      'settingsdir',settingsdir,'analysis_protocol',analysis_protocol,...
+                                      automaticchecksincoming_params{:});
+    if ~success_performing_incoming_checks,
       fprintf('Incoming automatic checks failed:\n');
       fprintf('%s\n',msgs{:});
-      return;
+      return
     end
   end
   
@@ -237,9 +236,8 @@ if is_on_or_force(doautomaticchecksincoming) ,
     msgs = cellfun(@(x) sprintf('Missing incoming automatic checks file %s',x),missingfiles,'UniformOutput',false);
     fprintf('Incoming automatic checks failed:\n');
     fprintf('%s\n',msgs{:});
-    return;
-  end
-  
+    return
+  end  
 end
 
 
