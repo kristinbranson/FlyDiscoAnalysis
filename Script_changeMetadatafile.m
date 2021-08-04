@@ -3,7 +3,7 @@
 
 logfiledir = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/MetadataFixes';
 %%%CHANGE
-logfilename = 'expdirs_wk12wk13wk14_metachanges_logofauto.csv';
+logfilename = 'expdirs_changescreen_typeforshortLEDprotocol_logofauto.csv';
 
 logfile = fullfile(logfiledir,logfilename);
 
@@ -12,7 +12,8 @@ fid2 = fopen(logfile,'a');
 
 %% explist 
 %%%CHANGE
-rootdatadir = '/groups/dickson/dicksonlab/flydisco_data';
+% rootdatadir = '/groups/dickson/dicksonlab/flydisco_data';
+
 %testing - accidently did in reall data direct DATA NOT PROTECTED PROPERLY
 % explist = {'VNC_JHS_K_85321_RigA_20210322T164447'};
 % wk5
@@ -145,16 +146,21 @@ rootdatadir = '/groups/dickson/dicksonlab/flydisco_data';
 % 'VNC_EXT_VGLUT-GAL4_RigA_20210517T160548'};
 % june reruns wk 12,13,14
 % change minegishir to arrudar 
-explist = {'VNC_JRC_SS31881_RigB_20210614T130008', ...
-'VNC_JRC_SS61813_RigB_20210614T130800', ...
-'VNC_JRC_SS25466_RigB_20210614T131609', ...
-'VNC_JRC_SS29662_RigB_20210614T132354', ...
-'VNC_JRC_SS29892_RigB_20210614T133248'};
+% explist = {'VNC_JRC_SS31881_RigB_20210614T130008', ...
+% 'VNC_JRC_SS61813_RigB_20210614T130800', ...
+% 'VNC_JRC_SS25466_RigB_20210614T131609', ...
+% 'VNC_JRC_SS29662_RigB_20210614T132354', ...
+% 'VNC_JRC_SS29892_RigB_20210614T133248'};
 
+% explist = textread('/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirlist_0212ledprotocol.txt','%s');
+explist = {'/groups/branson/bransonlab/flydisco_data/VNC_EXT_VGLUT-GAL4_RigB_20210323T132431', ...
+    '/groups/branson/bransonlab/flydisco_data/VNC_EXT_VGLUT-GAL4_RigC_20210323T132625', ...
+    '/groups/branson/bransonlab/flydisco_data/VNC_EXT_VGLUT-GAL4_RigD_20210323T132726'};
 
 for j = 1:numel(explist)
     % per experiment
-    expdir = fullfile(rootdatadir,explist{j})
+%     expdir = fullfile(rootdatadir,explist{j})
+    expdir = explist{j};
     metadatafilename = 'Metadata.xml';
 
     resavefilename = fullfile(expdir,metadatafilename);
@@ -164,7 +170,7 @@ for j = 1:numel(explist)
     % manual changes create struct
     changestruct = struct;
 %         changestruct.experimenter = 'chenn';
-changestruct.experimenter = 'arrudar';
+% changestruct.experimenter = 'arrudar';
 %       changestruct.plate = '4a';
     % also need to change expdir and ctrax results movie name manually
     % mv oldname newname
@@ -181,7 +187,8 @@ changestruct.experimenter = 'arrudar';
 %     changestruct.line = 'JRC_SS53050';
 %     changestruct.line = 'JRC_SS66932';
 %     changestruct.line = 'JRC_SS67903';
-    
+changestruct.screen_type = 'non_olympiad_dickson_led5secVNC';
+
     % replace metadata fields with changes
     fprintf(fid2,'%s, ',expdir);
     metadatafieldsTOBECHANGED = fieldnames(changestruct);

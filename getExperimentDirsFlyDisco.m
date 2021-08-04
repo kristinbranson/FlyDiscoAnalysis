@@ -33,7 +33,7 @@ for i = 1:numel(tmp)
     metadatafilestr = fullfile(rootdatadir,expdir,metadatafile);
     if exist(metadatafilestr,'file')
     tmpM = ReadMetadataFile(metadatafilestr);
-    tmpM.file_system_path = expdir;  
+    tmpM.file_system_path = fullfile(rootdatadir,expdir);  
     % add date
     daTe = tmpM.exp_datetime(1:8);
     tmpM.date = daTe;    

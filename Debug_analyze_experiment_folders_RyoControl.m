@@ -125,6 +125,8 @@ folder_path_from_experiment_index = {'/groups/branson/home/robiea/Projects_data/
 '/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20210621_APTTracking/VNC_YNA_K_162984_RigC_20210604T152231', ...
 '/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20210621_APTTracking/VNC_YNA_K_162984_RigD_20210526T155055'};
 
+folder_path_from_experiment_index = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20210621_APTTracking/VNC_JRC_SS42702_RigC_20210505T153129'};
+
 analysis_protocol = '20210531_flybubble_LED_ARtestingperframe';
 do_force_analysis = true;   
 

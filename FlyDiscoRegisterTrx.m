@@ -8,13 +8,13 @@ msgs = {};
 fns_notperframe = {'id','moviename','annname','firstframe','arena','off',...
   'nframes','endframe','matname','fps','pxpermm'};
 
-[analysis_protocol,settingsdir,registrationparamsfilestr,datalocparamsfilestr,dotemporalreg] = ...
+[analysis_protocol,settingsdir,registrationparamsfilestr,datalocparamsfilestr,dotemporalreg,dotemporalclipping] = ...
   myparse(varargin,...
   'analysis_protocol','current_bubble',...
   'settingsdir','/groups/branson/home/robiea/Code_versioned/FlyBubbleAnalysis/settings',...
   'registrationparamsfilestr','registration_params.txt',...
   'datalocparamsfilestr','dataloc_params.txt',...
-  'dotemporalreg',false);
+  'dotemporalreg',false,'dotemporalclipping',false);
 
 %% read in the data locations
 datalocparamsfile = fullfile(settingsdir,analysis_protocol,datalocparamsfilestr);
@@ -36,6 +36,10 @@ registration_params = ReadParams(registrationparamsfile);
 if isfield(registration_params,'doTemporalRegistration'),
   dotemporalreg = registration_params.doTemporalRegistration;
 end
+if isfield(registration_params,'doTemporalClipping')
+    dotemporalclipping = true;
+end
+
 
 %% detect registration marks
 
@@ -481,7 +485,7 @@ if isfield(registration_params,'OptogeneticExp')
         
     end
 end
-%% crop start and end of trajectories
+%% crop start and end of trajectories based on fly loaded time
 
 if dotemporalreg,
   
@@ -648,6 +652,13 @@ else
   fprintf('NOT applying temporal registration.\n');
   
 end
+%% crop beginning and end of movies based on values from registration params
+
+if dotemporalclipping
+    
+    
+end
+
 
 %% save registered trx to file
 
