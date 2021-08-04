@@ -1,11 +1,15 @@
 function [hfig,hfigfly] = PlotStimulusInterval(trx,field,ion,basename,varargin)
 
-defaultcolors = struct('stimbkgd',[0.9087 0.7695 0.7960],...
+defaultcolors = struct('stimbkgd',[0.927 0.8156 0.8368],...
   'stim',[0.6350 0.0780 0.1840],...
-  'off',[0 0 0]);
+  'off',[0 0 0],...
+  'stimstd',[0.8175 0.539 0.592],...
+  'offstd',[.7,.7,.7]...
+);
 
 % parse plotting parameters
-[hfig,hfigfly,visible,position,axposition,prestim,poststim,colors,ylim,plotflies,maxnflies] = ...
+[hfig,hfigfly,visible,position,axposition,prestim,poststim,colors,ylim,plotflies,...
+  maxnflies,plotstd] = ...
   myparse(varargin,'hfig',gobjects(1),...
   'hfigfly',gobjects(1),...
   'visible','on',...
@@ -16,7 +20,8 @@ defaultcolors = struct('stimbkgd',[0.9087 0.7695 0.7960],...
   'colors',defaultcolors,...
   'ylim',[],...
   'plotflies',true,...
-  'maxnflies',inf);
+  'maxnflies',inf,...
+  'plotstd',true);
 
 fns = setdiff(fieldnames(defaultcolors),fieldnames(colors));
 for i = 1:numel(fns),
@@ -48,7 +53,9 @@ end
 data = cat(1,data{:});
 meandata = nanmean(data,1);
 ndatafly = sum(~isnan(data),2);
-%stddata = nanstd(data,1,1);
+if plotstd,
+  stddata = nanstd(data,1,1);
+end
 
 if isempty(ylim),
   miny = min(data(:));
@@ -69,6 +76,21 @@ hax = axes('Position',axposition,'Parent',hfig,'YLim',ylim);
 
 patch(hax,[t0,t0,t1,t1,t0],ylim([1,2,2,1,1]),colors.stimbkgd,'LineStyle','none');
 hold(hax,'on');
+
+if plotstd,
+  ts = trx.movie_timestamps{1}(fpre:f0-1);
+  mu = meandata(1:f0-fpre);
+  sig = stddata(1:f0-fpre);
+  patch(hax,[ts,fliplr(ts)],[mu-sig,fliplr(mu+sig)],colors.offstd,'LineStyle','none');
+  ts = trx.movie_timestamps{1}(f1+1:fpost);
+  mu = meandata(f1-fpre+2:end);
+  sig = stddata(f1-fpre+2:end);
+  patch(hax,[ts,fliplr(ts)],[mu-sig,fliplr(mu+sig)],colors.offstd,'LineStyle','none');
+  ts = trx.movie_timestamps{1}(f0:f1);
+  mu = meandata(f0-fpre+1:f1-fpre+1);
+  sig = stddata(f0-fpre+1:f1-fpre+1);
+  patch(hax,[ts,fliplr(ts)],[mu-sig,fliplr(mu+sig)],colors.stimstd,'LineStyle','none');  
+end
 
 % hfly = plot(hax,trx.movie_timestamps{1}(fpre:fpost),data,'-','LineWidth',.5);
 % flycolors = linspace(.5,.75,nflies)'+[0,0,0];
