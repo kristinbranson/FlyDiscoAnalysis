@@ -1,4 +1,4 @@
-function goldblum_FlyDiscoPipeline_wrapper(experiment_folder_path, settings_folder_path, overriding_analysis_parameters_as_list)
+function goldblum_FlyDiscoPipeline_wrapper(experiment_folder_path, settings_folder_path, overriding_analysis_parameters_as_list, do_run_even_if_already_in_progress)
     % This is the function that is submitted by goldblum to the bqueue to run each
     % experiment.
   
@@ -11,12 +11,19 @@ function goldblum_FlyDiscoPipeline_wrapper(experiment_folder_path, settings_fold
     if ~exist('overriding_analysis_parameters_as_list', 'var') || isempty(overriding_analysis_parameters_as_list) ,
         overriding_analysis_parameters_as_list = cell(1, 0) ;
     end
+    if ~exist('do_run_even_if_already_in_progress', 'var') || isempty(do_run_even_if_already_in_progress) ,
+        do_run_even_if_already_in_progress = false ;
+    end
 
     % Check for the lock file
     analysis_in_progress_file_path = fullfile(experiment_folder_path, 'ANALYSIS-IN-PROGRESS') ;
-    if exist(analysis_in_progress_file_path, 'file') ,
-        error('Not going to run FlyDiscoPipeline() on experiment folder:\n\n  %s\n\nANALYSIS-IN-PROGRESS file is already present.\n', ...
-              experiment_folder_path) ;  % error() to return a non-zero error code
+    if do_run_even_if_already_in_progress ,
+        % Skip the check
+    else
+        if exist(analysis_in_progress_file_path, 'file') ,
+            error('Not going to run FlyDiscoPipeline() on experiment folder:\n\n  %s\n\nANALYSIS-IN-PROGRESS file is already present.\n', ...
+                experiment_folder_path) ;  % error() to return a non-zero error code
+        end
     end
     
     % If get here, create the lock file

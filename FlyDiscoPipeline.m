@@ -491,37 +491,37 @@ if is_on_or_force(domakectraxresultsmovie) ,
   
 end
 
-%% complete checks - moving to an independently launched step.
-% 
-% stage = 'automaticchecks_complete';
-% 
-% if is_on_or_force(doautomaticcheckscomplete) ,
-%   forcecompute = is_force(doautomaticcheckscomplete) ;  
-%   todo = CheckForMissingFiles(expdir,dataloc_params,requiredfiles_automaticcheckscomplete);
-%   if forcecompute || todo,
-%     fprintf('Running completion automatic checks...\n');
-%     [success1, msgs] = ...
-%       FlyDiscoAutomaticChecksComplete(expdir,...
-%                                         'settingsdir',settingsdir, ...
-%                                         'analysis_protocol',analysis_protocol,...
-%                                         automaticcheckscomplete_params{:});
-%     if ~success1,
-%       fprintf('Running completion automatic checks failed:\n');
-%       fprintf('%s\n',msgs{:});
-%       return;
-%     end
-%   end
-%   
-%   % make sure automatic checks files exist
-%   [ismissingfile,missingfiles] = CheckForMissingFiles(expdir,dataloc_params,requiredfiles_automaticcheckscomplete);
-%   if ismissingfile,
-%     msgs = cellfun(@(x) sprintf('Missing completion automatic checks file %s',x),missingfiles,'UniformOutput',false);
-%     fprintf('completion automatic checks failed:\n');
-%     fprintf('%s\n',msgs{:});
-%     return;
-%   end  
-% end
-% 
+%% automaticchecks_complete
+% We are going to do this here, if we get here in the normal run.  If we don't get here, goldblum() will cause FlyDiscoPipeline() to 
+% be run again, with all the other stages turned off.  -- ALT, 2021-08-05
+stage = 'automaticchecks_complete';
+if is_on_or_force(doautomaticcheckscomplete) ,
+  forcecompute = is_force(doautomaticcheckscomplete) ;  
+  todo = CheckForMissingFiles(expdir,dataloc_params,requiredfiles_automaticcheckscomplete);
+  if forcecompute || todo,
+    fprintf('Running completion automatic checks...\n');
+    [success1, msgs] = ...
+      FlyDiscoAutomaticChecksComplete(expdir,...
+                                        'settingsdir',settingsdir, ...
+                                        'analysis_protocol',analysis_protocol,...
+                                        automaticcheckscomplete_params{:});
+    if ~success1,
+      fprintf('Running completion automatic checks failed:\n');
+      fprintf('%s\n',msgs{:});
+      return;
+    end
+  end
+  
+  % make sure automatic checks files exist
+  [ismissingfile,missingfiles] = CheckForMissingFiles(expdir,dataloc_params,requiredfiles_automaticcheckscomplete);
+  if ismissingfile,
+    msgs = cellfun(@(x) sprintf('Missing completion automatic checks file %s',x),missingfiles,'UniformOutput',false);
+    fprintf('completion automatic checks failed:\n');
+    fprintf('%s\n',msgs{:});
+    return;
+  end  
+end
+
 
 
 %% If get here, analysis has completed successfully
