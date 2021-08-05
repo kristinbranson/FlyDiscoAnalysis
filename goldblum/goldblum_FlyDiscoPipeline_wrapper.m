@@ -101,9 +101,13 @@ function goldblum_FlyDiscoPipeline_wrapper(experiment_folder_path, settings_fold
         delete(analysis_in_progress_file_path) ;
     end
     
-    % Error out if FlyDiscoPipeline() errored out or returned success==false
-    if did_pipeline_error_out || ~success ,
+    % Error out if FlyDiscoPipeline() errored out or returned success==false, but
+    % distinguish between them in the log.
+    if did_pipeline_error_out ,
         [~,experiment_folder_name] = fileparts2(experiment_folder_path) ;
-        error('FlyDiscoPipeline() errored out or failed on experiment %s!', experiment_folder_name) ;  % want to return a non-zero error code
+        error('FlyDiscoPipeline() errored out on experiment %s!', experiment_folder_name) ;  % want to return a non-zero error code
+    elseif ~success ,
+        [~,experiment_folder_name] = fileparts2(experiment_folder_path) ;
+        error('FlyDiscoPipeline() returned success==false on experiment %s!', experiment_folder_name) ;  % want to return a non-zero error code        
     end        
 end
