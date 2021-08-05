@@ -10,7 +10,7 @@ logfile = fullfile(logfiledir,logfilename);
 % save changes to logfile
 fid2 = fopen(logfile,'a');
 
-%% explist 
+%% explist
 %%%CHANGE
 % rootdatadir = '/groups/dickson/dicksonlab/flydisco_data';
 
@@ -31,7 +31,7 @@ fid2 = fopen(logfile,'a');
 % 'VNC_JRC_SS64190_RigD_20210420T150349', ...
 % 'VNC_JRC_SS68333_RigD_20210420T151651', ...
 % 'VNC_YNA_K_162984_RigD_20210420T132759'};
-% wk4 
+% wk4
 % explist = {'VNC_JRC_SS42744_RigB_20210412T131256', ...
 % 'VNC_JRC_SS42744_RigD_20210412T131619', ...
 % 'VNC_JRC_SS42749_RigB_20210412T132453', ...
@@ -56,7 +56,7 @@ fid2 = fopen(logfile,'a');
 % 'VNC_JRC_SS44268_RigD_20210412T152629', ...
 % 'VNC_EXT_VGLUT-GAL4_RigB_20210412T153301', ...
 % 'VNC_EXT_VGLUT-GAL4_RigD_20210412T153627'};
-%wk1 
+%wk1
 % explist = {'VNC_JRC_SS33475_RigA_20210325T133313'};
 %wk4
 % explist = {'VNC_YNA_K_162984_RigD_20210412T140925'};
@@ -102,7 +102,7 @@ fid2 = fopen(logfile,'a');
 % 'VNC_EXT_VGLUT-GAL4_RigA_20210510T145544', ...
 % 'VNC_YNA_K_162984_RigA_20210510T150352'};
 % explist = {'VNC_JRC_SS70461_RigA_20210511T150909'};
-%wk9 
+%wk9
 % explist = {'VNC_w1118_RigA_20210517T160548', ...
 % 'VNC_w1118_RigB_20210517T160504', ...
 % 'VNC_w1118_RigC_20210517T160718', ...
@@ -145,33 +145,47 @@ fid2 = fopen(logfile,'a');
 % 'VNC_EXT_VGLUT-GAL4_RigB_20210517T160504', ...
 % 'VNC_EXT_VGLUT-GAL4_RigA_20210517T160548'};
 % june reruns wk 12,13,14
-% change minegishir to arrudar 
+% change minegishir to arrudar
 % explist = {'VNC_JRC_SS31881_RigB_20210614T130008', ...
 % 'VNC_JRC_SS61813_RigB_20210614T130800', ...
 % 'VNC_JRC_SS25466_RigB_20210614T131609', ...
 % 'VNC_JRC_SS29662_RigB_20210614T132354', ...
 % 'VNC_JRC_SS29892_RigB_20210614T133248'};
 
-% explist = textread('/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirlist_0212ledprotocol.txt','%s');
-explist = {'/groups/branson/bransonlab/flydisco_data/VNC_EXT_VGLUT-GAL4_RigB_20210323T132431', ...
-    '/groups/branson/bransonlab/flydisco_data/VNC_EXT_VGLUT-GAL4_RigC_20210323T132625', ...
-    '/groups/branson/bransonlab/flydisco_data/VNC_EXT_VGLUT-GAL4_RigD_20210323T132726'};
+% change screen_type for experiments with 0212 led protocol to 'non_olympiad_dickson_led5secVNC'
+% % explist = textread('/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirlist_0212ledprotocol.txt','%s');
 
+% fix experiments screen_type for expdirs where i had a type in the file
+% name (introduced a space when manually fixing expdir due to linename
+% changes) 
+% explist = {'/groups/branson/bransonlab/flydisco_data/VNC_EXT_VGLUT-GAL4_RigB_20210323T132431', ...
+%     '/groups/branson/bransonlab/flydisco_data/VNC_EXT_VGLUT-GAL4_RigC_20210323T132625', ...
+%     '/groups/branson/bransonlab/flydisco_data/VNC_EXT_VGLUT-GAL4_RigD_20210323T132726'};
+
+% redo experiments with bad metadata files after screen_type changed for
+% older led protocol - appending updates to the same csv file 
+expnamelist = textread('/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/malformedmetadataexplist_bransonlab.txt','%s');
+rootdatadir = '/groups/branson/bransonlab/flydisco_data';
+for k =1:numel(expnamelist)
+    explist{k} = fullfile(rootdatadir,expnamelist{k});
+end
+
+% values to change in metadata
 for j = 1:numel(explist)
     % per experiment
-%     expdir = fullfile(rootdatadir,explist{j})
+    %     expdir = fullfile(rootdatadir,explist{j})
     expdir = explist{j};
     metadatafilename = 'Metadata.xml';
-
+    
     resavefilename = fullfile(expdir,metadatafilename);
     metadata = ReadMetadataFile(resavefilename);
     
     %%%CHANGE
     % manual changes create struct
     changestruct = struct;
-%         changestruct.experimenter = 'chenn';
-% changestruct.experimenter = 'arrudar';
-%       changestruct.plate = '4a';
+    %         changestruct.experimenter = 'chenn';
+    % changestruct.experimenter = 'arrudar';
+    %       changestruct.plate = '4a';
     % also need to change expdir and ctrax results movie name manually
     % mv oldname newname
     %     changestruct.line = 'JRC_SS43660';
@@ -179,16 +193,16 @@ for j = 1:numel(explist)
     %     changestruct.line = 'EXT_VGLUT-GAL4';
     %     changestruct.line = 'JRC_SS36194';
     %     changestruct.line = 'YNA_K_162984';
-%     changestruct.line = 'JRC59209';
-%     changestruct.line = 'JRC_SS57983';
-%     changestruct.line = 'JRC_SS59163';
-%     changestruct.line = 'JRC_SS62883';
-%     changestruct.line = 'EXT_VGLUT-GAL4';
-%     changestruct.line = 'JRC_SS53050';
-%     changestruct.line = 'JRC_SS66932';
-%     changestruct.line = 'JRC_SS67903';
-changestruct.screen_type = 'non_olympiad_dickson_led5secVNC';
-
+    %     changestruct.line = 'JRC59209';
+    %     changestruct.line = 'JRC_SS57983';
+    %     changestruct.line = 'JRC_SS59163';
+    %     changestruct.line = 'JRC_SS62883';
+    %     changestruct.line = 'EXT_VGLUT-GAL4';
+    %     changestruct.line = 'JRC_SS53050';
+    %     changestruct.line = 'JRC_SS66932';
+    %     changestruct.line = 'JRC_SS67903';
+    changestruct.screen_type = 'non_olympiad_dickson_led5secVNC';
+    
     % replace metadata fields with changes
     fprintf(fid2,'%s, ',expdir);
     metadatafieldsTOBECHANGED = fieldnames(changestruct);
@@ -202,11 +216,14 @@ changestruct.screen_type = 'non_olympiad_dickson_led5secVNC';
             metadata.(metadatafieldsTOBECHANGED{i}) = changestruct.(metadatafieldsTOBECHANGED{i});
         end
     end
-    fprintf(fid2,'\n');
     
-    % resave metadata and backup   
+    
+    % resave metadata and backup
     [success] = ResaveMetadata(metadata,resavefilename);
-    
+    if ~success
+        fprintf(fid2,'failed to write readable metadata file');
+    end
+    fprintf(fid2,'\n');
 end
 
 fclose(fid2);
