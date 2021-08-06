@@ -33,14 +33,5 @@ params = ...
      'doautomaticcheckscomplete',false } ;
 
 % Call the function to do the real work
-[success, msgs, stage] = FlyDiscoPipeline(experiment_folder_path, params{:}) ;
+FlyDiscoPipeline(experiment_folder_path, params{:}) ;
 
-% Error out if not success
-if ~success ,
-    fprintf('FlyDiscoPipeline() encountered some problems(s), maybe at stage %s:\n', stage)
-    for i = 1 : length(msgs) ,
-        msg = msgs{i} ;
-        fprintf('%s\n', msg) ;
-    end
-    error('FlyDiscoPipeline() failed!') ;
-end

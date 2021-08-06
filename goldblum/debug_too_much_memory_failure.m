@@ -41,6 +41,6 @@ reset_experiment_working_copies(working_experiments_folder_path, read_only_exper
 folder_path_from_experiment_index = find_experiment_folders(working_experiments_folder_path) ;
 
 % Run the script under test
-fprintf('Running analyze_experiment_folders...\n') ;
-analyze_experiment_folders(folder_path_from_experiment_index, settings_folder_path, lab_head_last_name, ...
+fprintf('Running goldblum_analyze_experiment_folders...\n') ;
+goldblum_analyze_experiment_folders(folder_path_from_experiment_index, settings_folder_path, lab_head_last_name, ...
                            do_force_analysis, do_use_bqueue, do_actually_submit_jobs, analysis_parameters)

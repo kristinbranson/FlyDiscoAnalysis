@@ -42,18 +42,18 @@ for experiment_index = 1 : experiment_count ,
         fprintf('\n\n\nRunning FlyDiscoPipeline() on %s ...\n', experiment_folder_name) ;
 
         % Call the function to do the real work
-        [success, msgs, stage] = FlyDiscoPipeline(experiment_folder_path, analysis_parameters{:}) ;
+        FlyDiscoPipeline(experiment_folder_path, analysis_parameters{:}) ;
 
-        % Report success/failure
-        if success ,
-            fprintf('FlyDiscoPipeline() ran successfully on experiment %s !\n', experiment_folder_name) ;
-        else
-            summary_message = sprintf('FlyDiscoPipeline() encountered one or more problems at stage %s for experiment %s:\n', stage, experiment_folder_name) ;
-            for i = 1 : length(msgs) ,
-                this_msg = msgs{i} ;
-                fprintf('%s\n', this_msg) ;
-            end
-            error(summary_message) ;  %#ok<SPERR>
-        end
+%         % Report success/failure
+%         if success ,
+%             fprintf('FlyDiscoPipeline() ran successfully on experiment %s !\n', experiment_folder_name) ;
+%         else
+%             summary_message = sprintf('FlyDiscoPipeline() encountered one or more problems at stage %s for experiment %s:\n', stage, experiment_folder_name) ;
+%             for i = 1 : length(msgs) ,
+%                 this_msg = msgs{i} ;
+%                 fprintf('%s\n', this_msg) ;
+%             end
+%             error(summary_message) ;  %#ok<SPERR>
+%         end
     end
 end

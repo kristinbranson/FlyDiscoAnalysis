@@ -37,36 +37,21 @@ function goldblum(do_transfer_data_from_rigs, do_run_analysis, do_use_bqueue, do
     %does_use_per_user_folders = configuration.does_use_per_user_folders ;
     to_process_folder_name = 'to-process' ;
 
-    % Determine the location of the goldblum log
-    goldblum_log_folder_path = fullfile(destination_folder, 'goldblum-logs') ;
-    ensure_folder_exists(goldblum_log_folder_path) ;
-    ideal_goldblum_log_file_name = ['goldblum-' char(datetime('now','TimeZone','local','Format','y-MM-dd')) '.log'] ;
-    ideal_goldblum_log_file_path = fullfile(goldblum_log_folder_path, ideal_goldblum_log_file_name) ;
-    if exist(ideal_goldblum_log_file_path, 'file') ,
-        goldblum_log_file_name = ['goldblum-' char(datetime('now','TimeZone','local','Format','y-MM-dd-HH:mm')) '.log'] ;
-    else
-        goldblum_log_file_name = ideal_goldblum_log_file_name ;
-    end
-    goldblum_log_file_path = fullfile(goldblum_log_folder_path, goldblum_log_file_name) ;
-    
-    % Open the log file
-    goldblum_log(nan, 'open', goldblum_log_file_path) ;
-        
     % Add a "banner" to the start of the log
     start_time_as_char = char(datetime('now','TimeZone','local','Format','y-MM-dd HH:mm Z')) ;
-    goldblum_log('\n') ;
-    goldblum_log('********************************************************************************\n') ;
-    goldblum_log('\n') ;
-    goldblum_log('Goldblum run starting at %s\n', start_time_as_char) ;
-    goldblum_log('\n') ;
-    goldblum_log('********************************************************************************\n') ;
-    goldblum_log('\n') ;    
+    fprintf('\n') ;
+    fprintf('********************************************************************************\n') ;
+    fprintf('\n') ;
+    fprintf('Goldblum run starting at %s\n', start_time_as_char) ;
+    fprintf('\n') ;
+    fprintf('********************************************************************************\n') ;
+    fprintf('\n') ;    
 
     % Get info about the state of the repo, output to log
     this_script_path = mfilename('fullpath') ;
     source_folder_path = fileparts(fileparts(this_script_path)) ;
     git_report = get_git_report(source_folder_path) ;
-    goldblum_log('%s', git_report) ;
+    fprintf('%s', git_report) ;
     
 %     % Convert e.g. flybowl-ww1.hhmi.org to flybowl-ww1    
 %     short_host_name_from_rig_index = cellfun(@short_host_name_from_host_name, host_name_from_rig_index, 'UniformOutput', false) ;
@@ -106,13 +91,13 @@ function goldblum(do_transfer_data_from_rigs, do_run_analysis, do_use_bqueue, do
                                                                      to_process_folder_name) ;                
                 add_links_to_to_process_folder(destination_folder, to_process_folder_name, relative_path_from_experiment_folder_index) ;
             catch me 
-                goldblum_log('There was a problem doing the sync from %s:%s as %s to %s:\n', ...
+                fprintf('There was a problem doing the sync from %s:%s as %s to %s:\n', ...
                              rig_host_name, lab_data_folder_path, rig_user_name, destination_folder) ;
                 disp(me.getReport()) ;    
             end                        
         end
     else
-        goldblum_log('Skipping transfer of data from rigs.\n') ;
+        fprintf('Skipping transfer of data from rigs.\n') ;
     end
     
     % Run the analysis script on links in the to-process folder
@@ -126,8 +111,8 @@ function goldblum(do_transfer_data_from_rigs, do_run_analysis, do_use_bqueue, do
                                    'UniformOutput', false) ;
         canonical_path_from_experiment_index = cellfun(@realpath, link_path_from_experiment_index, 'UniformOutput', false) ;
         do_force_analysis = false ;
-        analyze_experiment_folders(canonical_path_from_experiment_index, settings_folder_path, lab_head_last_name, ...
-                                   do_force_analysis, do_use_bqueue, do_actually_submit_jobs, analysis_parameters)
+        goldblum_analyze_experiment_folders(canonical_path_from_experiment_index, settings_folder_path, lab_head_last_name, ...
+                                            do_force_analysis, do_use_bqueue, do_actually_submit_jobs, analysis_parameters)
         
         % Whether those succeeded or failed, remove the links from the
         % to-process folder
@@ -141,18 +126,15 @@ function goldblum(do_transfer_data_from_rigs, do_run_analysis, do_use_bqueue, do
             end
         end
     else
-        goldblum_log('Skipping analysis.\n') ;
+        fprintf('Skipping analysis.\n') ;
     end       
     
     % Want the start and end of a single goldblum run to be clear in the log
-    goldblum_log('\n') ;
-    goldblum_log('********************************************************************************\n') ;
-    goldblum_log('\n') ;
-    goldblum_log('Goldblum run started at %s is ending\n', start_time_as_char) ;
-    goldblum_log('\n') ;
-    goldblum_log('********************************************************************************\n') ;
-    goldblum_log('\n') ;    
-    
-    % Close the log file
-    goldblum_log(nan, 'close') ;    
+    fprintf('\n') ;
+    fprintf('********************************************************************************\n') ;
+    fprintf('\n') ;
+    fprintf('Goldblum run started at %s is ending\n', start_time_as_char) ;
+    fprintf('\n') ;
+    fprintf('********************************************************************************\n') ;
+    fprintf('\n') ;    
 end

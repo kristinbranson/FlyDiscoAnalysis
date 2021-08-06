@@ -42,12 +42,12 @@ for experiment_index = 1 : experiment_count ,
         experiment_folder_path = folder_path_from_experiment_index{experiment_index} ;
         [~,experiment_folder_name] = fileparts2(experiment_folder_path) ;
 
-        fprintf('\n\n\nRunning fly_disco_analysis_pipeline_wrapper() on %s ...\n', experiment_folder_name) ;
+        fprintf('\n\n\nRunning goldblum_FlyDiscoPipeline_wrapper() on %s ...\n', experiment_folder_name) ;
 
         % Call the function to do the real work
-        fly_disco_analysis_pipeline_wrapper(experiment_folder_path, settings_folder_path, analysis_parameters) ;
+        goldblum_FlyDiscoPipeline_wrapper(experiment_folder_path, settings_folder_path, analysis_parameters) ;
 
         % If get here, must have worked
-        fprintf('fly_disco_analysis_pipeline_wrapper() ran successfully on experiment %s !\n', experiment_folder_name) ;
+        fprintf('goldblum_FlyDiscoPipeline_wrapper() ran successfully on experiment %s !\n', experiment_folder_name) ;
     end
 end
