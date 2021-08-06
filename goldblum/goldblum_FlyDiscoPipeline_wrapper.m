@@ -62,34 +62,21 @@ function goldblum_FlyDiscoPipeline_wrapper(experiment_folder_path, settings_fold
     % Call the function to do the real work
     did_pipeline_error_out = false ;
     try
-        [success, msgs, stage] = FlyDiscoPipeline(experiment_folder_path, analysis_parameters) ;
+        FlyDiscoPipeline(experiment_folder_path, analysis_parameters) ;
     catch me
         % Whatever happens, want to write out one of the two ANALYSIS-* files
         fprintf('Encountered error in FlyDiscoPipeline():\n') ;
         fprintf('%s\n', me.getReport()) ;
         did_pipeline_error_out = true ;
-        success = false ;
-        msgs = {} ;
-        stage = '<unknown>' ;
     end
     
     % Deal with success or failure, or error
     if did_pipeline_error_out ,
-        analysis_errored_out_file_path = fullfile(experiment_folder_path, 'PIPELINE-ERRORED-OUT') ;
+        analysis_errored_out_file_path = fullfile(experiment_folder_path, 'PIPELINE-INCOMPLETE') ;
         touch(analysis_errored_out_file_path) ;
     else        
-        if success ,
-            analysis_complete_file_path = fullfile(experiment_folder_path, 'PIPELINE-COMPLETE') ;
-            touch(analysis_complete_file_path) ;
-        else
-            analysis_incomplete_file_path = fullfile(experiment_folder_path, 'PIPELINE-INCOMPLETE') ;
-            touch(analysis_incomplete_file_path) ;
-            fprintf('FlyDiscoPipeline() encountered one or more problems at stage %s:\n', stage)
-            for i = 1 : length(msgs) ,
-                msg = msgs{i} ;
-                fprintf('%s\n', msg) ;
-            end
-        end
+        analysis_complete_file_path = fullfile(experiment_folder_path, 'PIPELINE-COMPLETE') ;
+        touch(analysis_complete_file_path) ;
     end
     
     % Clear the lock file
@@ -102,8 +89,5 @@ function goldblum_FlyDiscoPipeline_wrapper(experiment_folder_path, settings_fold
     if did_pipeline_error_out ,
         [~,experiment_folder_name] = fileparts2(experiment_folder_path) ;
         error('FlyDiscoPipeline() errored out on experiment %s!', experiment_folder_name) ;  % want to return a non-zero error code
-    elseif ~success ,
-        [~,experiment_folder_name] = fileparts2(experiment_folder_path) ;
-        error('FlyDiscoPipeline() returned success==false on experiment %s!', experiment_folder_name) ;  % want to return a non-zero error code        
-    end        
+    end
 end

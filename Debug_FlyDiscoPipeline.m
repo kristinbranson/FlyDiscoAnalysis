@@ -117,5 +117,5 @@ explist = {'/groups/branson/home/robiea/Projects_data/FlyDisco/KatieTestData/Min
 
 for i = 1:numel(explist)
     expdir = explist{i};
-[success,msgs,stage] = FlyDiscoPipeline(expdir,params{:});
+    FlyDiscoPipeline(expdir,params{:});
 end

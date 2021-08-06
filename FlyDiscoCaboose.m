@@ -1,4 +1,4 @@
-function [success,msgs,stage] = FlyDiscoCaboose(expdir, varargin) 
+function FlyDiscoCaboose(expdir, varargin) 
 % Runs just the auto-checks-complete from the FlyDisco pipeline.
   
 % % Get info about the state of the repo, output to stdout
@@ -6,11 +6,6 @@ function [success,msgs,stage] = FlyDiscoCaboose(expdir, varargin)
 % source_folder_path = fileparts(this_script_path) ;
 % git_report = get_git_report(source_folder_path) ;
 % fprintf('%s', git_report) ;
-
-% Initialize the outputs
-success = false;
-msgs = {};
-stage = 'start';
 
 % Process varargin parameters
 if length(varargin)==1 && isstruct(varargin{1}) ,
@@ -178,7 +173,7 @@ variable_names_to_print = ...
       'doextradiagnostics', ...
       'doanalysisprotocol', ...
       'doautomaticcheckscomplete' }' ;
-fprintf('Settings values in FlyDiscoPipeline():\n') ;    
+fprintf('Settings values in FlyDiscoCaboose():\n') ;    
 for i = 1 : length(variable_names_to_print) ,
   variable_name = variable_names_to_print{i} ;
   value = eval(variable_name) ;
@@ -191,10 +186,10 @@ fprintf('\n') ;
 % fprintf('Canonical path to analysis protocol folder is:\n  %s\n\n', canonical_analysis_protocol_folder_path) ;
 
 %% check that experiment exists
+stage = 'start' ;
 if ~exist(expdir,'dir'),
   msgs = {sprintf('Experiment directory %s does not exist',expdir)};
-  fprintf('%s\n',msgs{:});
-  return;
+  flydisco_pipeline_error(stage, msgs) ;
 end
 
 
@@ -206,27 +201,18 @@ if is_on_or_force(doautomaticcheckscomplete) ,
   todo = CheckForMissingFiles(expdir,dataloc_params,requiredfiles_automaticcheckscomplete);
   if forcecompute || todo,
     fprintf('Running completion automatic checks...\n');
-    [success1, msgs] = ...
-      FlyDiscoAutomaticChecksComplete(expdir,...
-                                        'settingsdir',settingsdir, ...
-                                        'analysis_protocol',analysis_protocol,...
-                                        automaticcheckscomplete_params{:});
-    if ~success1,
-      fprintf('Running completion automatic checks failed:\n');
-      fprintf('%s\n',msgs{:});
-      return;
-    end
+    FlyDiscoAutomaticChecksComplete(expdir,...
+                                    'settingsdir',settingsdir, ...
+                                    'analysis_protocol',analysis_protocol,...
+                                    automaticcheckscomplete_params{:});
   end
   
   % make sure automatic checks files exist
   [ismissingfile,missingfiles] = CheckForMissingFiles(expdir,dataloc_params,requiredfiles_automaticcheckscomplete);
   if ismissingfile,
     msgs = cellfun(@(x) sprintf('Missing completion automatic checks file %s',x),missingfiles,'UniformOutput',false);
-    fprintf('completion automatic checks failed:\n');
-    fprintf('%s\n',msgs{:});
-    return;
+    flydisco_pipeline_error(stage, msgs) ;
   end  
 end
 
-success = true;
-
+end

@@ -45,7 +45,7 @@ function goldblum_FlyDiscoCaboose_wrapper(experiment_folder_path, settings_folde
     
     % Call the function to do the real work
     try
-        are_all_caboose_files_present = FlyDiscoCaboose(experiment_folder_path, analysis_parameters) ;
+        FlyDiscoCaboose(experiment_folder_path, analysis_parameters) ;
         did_caboose_error_out = false ;
     catch me
         % Whatever happens, want to write out one of the two ANALYSIS-* files
@@ -55,7 +55,7 @@ function goldblum_FlyDiscoCaboose_wrapper(experiment_folder_path, settings_folde
     end
 
     % Determine the outcome of the analysis
-    is_analysis_complete = did_pipeline_complete && ~did_caboose_error_out && are_all_caboose_files_present ;
+    is_analysis_complete = did_pipeline_complete && ~did_caboose_error_out ;
     did_analysis_error_out = did_pipeline_error_out || did_caboose_error_out ;
     is_analysis_incomplete = ~(is_analysis_complete || did_analysis_error_out) ;
     assert(sum(is_analysis_complete+did_analysis_error_out+is_analysis_incomplete)==1, ...
@@ -73,15 +73,9 @@ function goldblum_FlyDiscoCaboose_wrapper(experiment_folder_path, settings_folde
         touch(analysis_errored_out_file_path) ;
     end        
     
-    % Error out if FlyDiscoCaboose() errored out or returned success==false, but
-    % distinguish between them in the log.
+    % Error out if FlyDiscoCaboose() errored out.
     if did_caboose_error_out ,
         [~,experiment_folder_name] = fileparts2(experiment_folder_path) ;
         error('FlyDiscoCaboose() errored out on experiment %s!', experiment_folder_name) ;  % want to return a non-zero error code
     end        
-    if ~are_all_caboose_files_present ,
-        [~,experiment_folder_name] = fileparts2(experiment_folder_path) ;
-        error('FlyDiscoCaboose() indicates that not all auto-checks-complete files are present for experiment %s!', ...
-              experiment_folder_name) ;  % want to return a non-zero error code
-    end            
 end

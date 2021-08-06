@@ -1,4 +1,4 @@
-function [success,msgs,stage] = FlyDiscoPipeline(expdir, varargin)
+function FlyDiscoPipeline(expdir, varargin)
 % Runs the FlyDisco pipeline.
 
 % Get info about the state of the repo, output to stdout
@@ -6,11 +6,6 @@ this_script_path = mfilename('fullpath') ;
 source_folder_path = fileparts(this_script_path) ;
 git_report = get_git_report(source_folder_path) ;
 fprintf('%s', git_report) ;
-
-% Initialize the outputs
-success = false;
-msgs = {};
-stage = 'start';
 
 % Process varargin parameters
 if length(varargin)==1 && isstruct(varargin{1}) ,
@@ -152,7 +147,7 @@ dotrackwings = coerce_to_on_off_force(dotrackwings) ;
 docomputeperframefeatures = coerce_to_on_off_force(docomputeperframefeatures) ;
 docomputehoghofperframefeatures = coerce_to_on_off_force(docomputehoghofperframefeatures) ;
 dojaabadetect = coerce_to_on_off_force(dojaabadetect) ;
-docomputeperframestats = coerce_to_on_off_force(docomputeperframestats) ; %#ok<NASGU>
+docomputeperframestats = coerce_to_on_off_force(docomputeperframestats) ;
 doplotperframestats = coerce_to_on_off_force(doplotperframestats) ; %#ok<NASGU>
 domakectraxresultsmovie = coerce_to_on_off_force(domakectraxresultsmovie) ;
 doextradiagnostics = coerce_to_on_off_force(doextradiagnostics) ; %#ok<NASGU>
@@ -191,21 +186,9 @@ canonical_analysis_protocol_folder_path = realpath(analysis_protocol_folder_path
 fprintf('Canonical path to analysis protocol folder is:\n  %s\n\n', canonical_analysis_protocol_folder_path) ;
 
 %% check that experiment exists
-
-if ~exist(expdir,'dir'),
-  msgs = {sprintf('Experiment directory %s does not exist',expdir)};
-  fprintf('%s\n',msgs{:});
-  return;
+if ~exist(expdir, 'dir') ,
+  error('Experiment directory %s does not exist', expdir) ;
 end
-
-%% check for files required at start
-
-% [ismissingfile,missingfiles] = CheckForMissingFiles(expdir,dataloc_params,requiredfiles_start);
-% if ismissingfile,
-%   msgs = cellfun(@(x) sprintf('Missing start file %s',x),missingfiles,'UniformOutput',false);
-%   fprintf('%s\n',msgs{:});
-%   return;
-% end
 
 
 
@@ -222,19 +205,15 @@ if is_on_or_force(doautomaticchecksincoming) ,
                                       'settingsdir',settingsdir,'analysis_protocol',analysis_protocol,...
                                       automaticchecksincoming_params{:});
     if ~success_performing_incoming_checks,
-      fprintf('Incoming automatic checks failed:\n');
-      fprintf('%s\n',msgs{:});
-      return
+      flydisco_pipeline_error(stage, msgs) ;               
     end
   end
   
   % make sure automatic checks files exist
   [ismissingfile,missingfiles] = CheckForMissingFiles(expdir,dataloc_params,requiredfiles_automaticchecksincoming);
   if ismissingfile,
-    msgs = cellfun(@(x) sprintf('Missing incoming automatic checks file %s',x),missingfiles,'UniformOutput',false);
-    fprintf('Incoming automatic checks failed:\n');
-    fprintf('%s\n',msgs{:});
-    return
+    msgs = cellfun(@(x) sprintf('Missing incoming automatic checks file %s',x),missingfiles,'UniformOutput',false) ;
+    flydisco_pipeline_error(stage, msgs) ;               
   end  
 end
 
@@ -254,9 +233,7 @@ if is_on_or_force(doflytracking) ,
   [ismissingfile,missingfiles] = CheckForMissingFiles(expdir,dataloc_params,requiredfiles_flytracker);
   if ismissingfile,
     msgs = cellfun(@(x) sprintf('Missing FlyTracker file %s',x),missingfiles,'UniformOutput',false);
-    fprintf('FlyTracker failed:\n');
-    fprintf('%s\n',msgs{:});
-    return;
+    flydisco_pipeline_error(stage, msgs) ;
   end
   
 end
@@ -280,9 +257,7 @@ if is_on_or_force(doregistration) ,
   [ismissingfile,missingfiles] = CheckForMissingFiles(expdir,dataloc_params,requiredfiles_registration);
   if ismissingfile,
     msgs = cellfun(@(x) sprintf('Missing registration file %s',x),missingfiles,'UniformOutput',false);
-    fprintf('RegisterTrx failed:\n');
-    fprintf('%s\n',msgs{:});
-    return;
+    flydisco_pipeline_error(stage, msgs) ;
   end
   
 end
@@ -304,9 +279,7 @@ if is_on_or_force(doledonoffdetection) ,
   [ismissingfile,missingfiles] = CheckForMissingFiles(expdir,dataloc_params,requiredfiles_ledonoffdetection);
   if ismissingfile,
     msgs = cellfun(@(x) sprintf('Missing registration file %s',x),missingfiles,'UniformOutput',false);
-    fprintf('Detecting LED on/off transitions failed:\n');
-    fprintf('%s\n',msgs{:});
-    return;
+    flydisco_pipeline_error(stage, msgs) ;
   end
 end
 
@@ -328,9 +301,7 @@ if is_on_or_force(dotrackwings) ,
   [ismissingfile,missingfiles] = CheckForMissingFiles(expdir,dataloc_params,requiredfiles_wingtracking);
   if ismissingfile,
     msgs = cellfun(@(x) sprintf('Missing wing tracking file %s',x),missingfiles,'UniformOutput',false);
-    fprintf('Tracking wings failed:\n');
-    fprintf('%s\n',msgs{:});
-    return
+    flydisco_pipeline_error(stage, msgs) ;
   end
 end
 
@@ -350,9 +321,7 @@ if is_on_or_force(dosexclassification) ,
   [ismissingfile,missingfiles] = CheckForMissingFiles(expdir,dataloc_params,requiredfiles_sexclassification);
   if ismissingfile,
     msgs = cellfun(@(x) sprintf('Missing sex classification file %s',x),missingfiles,'UniformOutput',false);
-    fprintf('Sex classification failed:\n');
-    fprintf('%s\n',msgs{:});
-    return;
+    flydisco_pipeline_error(stage, msgs) ;
   end
   
 end
@@ -389,8 +358,7 @@ if is_on_or_force(docomputeperframefeatures) ,
   if ismissingfile,
     msgs = cellfun(@(x) sprintf('Missing per-frame features file %s',x),missingfiles,'UniformOutput',false);
     fprintf('Computing per-frame features failed:\n');
-    fprintf('%s\n',msgs{:});
-    return;
+    flydisco_pipeline_error(stage, msgs) ;
   end
   
 end
@@ -411,9 +379,7 @@ if is_on_or_force(docomputeperframestats)
   [ismissingfile,missingfiles] = CheckForMissingFiles(expdir,dataloc_params,requiredfiles_computeperframestats);
   if ismissingfile,
     msgs = cellfun(@(x) sprintf('Missing computeperframestats file %s',x),missingfiles,'UniformOutput',false);
-    fprintf('ComputePerFrameStats failed:\n');
-    fprintf('%s\n',msgs{:});
-    return;
+    flydisco_pipeline_error(stage, msgs) ;
   end
   
 end
@@ -445,9 +411,7 @@ if is_on_or_force(docomputehoghofperframefeatures) ,
   [ismissingfile,missingfiles] = CheckForMissingFiles(expdir,dataloc_params,requiredfiles_computeperframefeatures);
   if ismissingfile,
     msgs = cellfun(@(x) sprintf('Missing HOG/HOF per-frame features file %s',x),missingfiles,'UniformOutput',false);
-    fprintf('Computing HOG/HOF per-frame features failed:\n');
-    fprintf('%s\n',msgs{:});
-    return;
+    flydisco_pipeline_error(stage, msgs) ;
   end
   
 end
@@ -484,9 +448,7 @@ if is_on_or_force(domakectraxresultsmovie) ,
   [ismissingfile,missingfiles] = CheckForMissingFiles(expdir,dataloc_params,requiredfiles_makectraxresultsmovie);
   if ismissingfile,
     msgs = cellfun(@(x) sprintf('Missing Ctrax results movie file %s',x),missingfiles,'UniformOutput',false);
-    fprintf('Making Ctrax results movie failed:\n');
-    fprintf('%s\n',msgs{:});
-    return
+    flydisco_pipeline_error(stage, msgs) ;
   end
   
 end
@@ -500,25 +462,17 @@ if is_on_or_force(doautomaticcheckscomplete) ,
   todo = CheckForMissingFiles(expdir,dataloc_params,requiredfiles_automaticcheckscomplete);
   if forcecompute || todo,
     fprintf('Running completion automatic checks...\n');
-    [success1, msgs] = ...
-      FlyDiscoAutomaticChecksComplete(expdir,...
-                                        'settingsdir',settingsdir, ...
-                                        'analysis_protocol',analysis_protocol,...
-                                        automaticcheckscomplete_params{:});
-    if ~success1,
-      fprintf('Running completion automatic checks failed:\n');
-      fprintf('%s\n',msgs{:});
-      return;
-    end
+    FlyDiscoAutomaticChecksComplete(expdir,...
+                                    'settingsdir',settingsdir, ...
+                                    'analysis_protocol',analysis_protocol,...
+                                    automaticcheckscomplete_params{:});
   end
   
   % make sure automatic checks files exist
   [ismissingfile,missingfiles] = CheckForMissingFiles(expdir,dataloc_params,requiredfiles_automaticcheckscomplete);
   if ismissingfile,
     msgs = cellfun(@(x) sprintf('Missing completion automatic checks file %s',x),missingfiles,'UniformOutput',false);
-    fprintf('completion automatic checks failed:\n');
-    fprintf('%s\n',msgs{:});
-    return;
+    flydisco_pipeline_error(stage, msgs) ;
   end  
 end
 
@@ -526,5 +480,5 @@ end
 
 %% If get here, analysis has completed successfully
 fprintf('Analysis pipeline completed!\n');
-success = true;
 
+end
