@@ -1,4 +1,4 @@
-function goldblum_FlyDiscoPipeline_wrapper(experiment_folder_path, settings_folder_path, overriding_analysis_parameters_as_list, do_run_even_if_already_in_progress)
+function goldblum_FlyDiscoPipeline_wrapper(experiment_folder_path, settings_folder_path, overriding_analysis_parameters_as_list)
     % This is the function that is submitted by goldblum to the bqueue to run each
     % experiment.
   
@@ -11,19 +11,12 @@ function goldblum_FlyDiscoPipeline_wrapper(experiment_folder_path, settings_fold
     if ~exist('overriding_analysis_parameters_as_list', 'var') || isempty(overriding_analysis_parameters_as_list) ,
         overriding_analysis_parameters_as_list = cell(1, 0) ;
     end
-    if ~exist('do_run_even_if_already_in_progress', 'var') || isempty(do_run_even_if_already_in_progress) ,
-        do_run_even_if_already_in_progress = false ;
-    end
 
     % Check for the lock file
-    analysis_in_progress_file_path = fullfile(experiment_folder_path, 'ANALYSIS-IN-PROGRESS') ;
-    if do_run_even_if_already_in_progress ,
-        % Skip the check
-    else
-        if exist(analysis_in_progress_file_path, 'file') ,
-            error('Not going to run FlyDiscoPipeline() on experiment folder:\n\n  %s\n\nANALYSIS-IN-PROGRESS file is already present.\n', ...
-                experiment_folder_path) ;  % error() to return a non-zero error code
-        end
+    analysis_in_progress_file_path = fullfile(experiment_folder_path, 'PIPELINE-IN-PROGRESS') ;
+    if exist(analysis_in_progress_file_path, 'file') ,
+        error('Not going to run FlyDiscoPipeline() on experiment folder:\n\n  %s\n\PIPELINE-IN-PROGRESS file is already present.\n', ...
+            experiment_folder_path) ;  % error() to return a non-zero error code
     end
     
     % If get here, create the lock file
@@ -41,15 +34,15 @@ function goldblum_FlyDiscoPipeline_wrapper(experiment_folder_path, settings_fold
     fprintf('%s\n\n', asterisks_string) ;    
     
     % Delete any pre-existing success/failure files
-    analysis_errored_out_file_path = fullfile(experiment_folder_path, 'ANALYSIS-ERRORED-OUT') ;
+    analysis_errored_out_file_path = fullfile(experiment_folder_path, 'PIPELINE-ERRORED-OUT') ;
     if exist(analysis_errored_out_file_path, 'file') ,
         delete(analysis_errored_out_file_path) ;
     end
-    analysis_complete_file_path = fullfile(experiment_folder_path, 'ANALYSIS-COMPLETE') ;
+    analysis_complete_file_path = fullfile(experiment_folder_path, 'PIPELINE-COMPLETE') ;
     if exist(analysis_complete_file_path, 'file') ,
         delete(analysis_complete_file_path) ;
     end
-    analysis_incomplete_file_path = fullfile(experiment_folder_path, 'ANALYSIS-INCOMPLETE') ;
+    analysis_incomplete_file_path = fullfile(experiment_folder_path, 'PIPELINE-INCOMPLETE') ;
     if exist(analysis_incomplete_file_path, 'file') ,
         delete(analysis_incomplete_file_path) ;
     end
@@ -62,6 +55,9 @@ function goldblum_FlyDiscoPipeline_wrapper(experiment_folder_path, settings_fold
     
     % Combine the caller-supplied analysis parameters with the defaults       
     analysis_parameters = merge_structs(default_analysis_parameters, overriding_analysis_parameters) ;
+    
+    % Now turn off the auto-checks-complete, we do that separately in goldblum
+    analysis_parameters.doautomaticcheckscomplete = 'off' ;
     
     % Call the function to do the real work
     did_pipeline_error_out = false ;
@@ -79,14 +75,14 @@ function goldblum_FlyDiscoPipeline_wrapper(experiment_folder_path, settings_fold
     
     % Deal with success or failure, or error
     if did_pipeline_error_out ,
-        analysis_errored_out_file_path = fullfile(experiment_folder_path, 'ANALYSIS-ERRORED-OUT') ;
+        analysis_errored_out_file_path = fullfile(experiment_folder_path, 'PIPELINE-ERRORED-OUT') ;
         touch(analysis_errored_out_file_path) ;
     else        
         if success ,
-            analysis_complete_file_path = fullfile(experiment_folder_path, 'ANALYSIS-COMPLETE') ;
+            analysis_complete_file_path = fullfile(experiment_folder_path, 'PIPELINE-COMPLETE') ;
             touch(analysis_complete_file_path) ;
         else
-            analysis_incomplete_file_path = fullfile(experiment_folder_path, 'ANALYSIS-INCOMPLETE') ;
+            analysis_incomplete_file_path = fullfile(experiment_folder_path, 'PIPELINE-INCOMPLETE') ;
             touch(analysis_incomplete_file_path) ;
             fprintf('FlyDiscoPipeline() encountered one or more problems at stage %s:\n', stage)
             for i = 1 : length(msgs) ,

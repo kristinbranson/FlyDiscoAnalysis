@@ -1,6 +1,6 @@
 function [success,msgs,stage] = FlyDiscoPipeline(expdir, varargin)
 % Runs the FlyDisco pipeline.
-  
+
 % Get info about the state of the repo, output to stdout
 this_script_path = mfilename('fullpath') ;
 source_folder_path = fileparts(this_script_path) ;
@@ -492,8 +492,8 @@ if is_on_or_force(domakectraxresultsmovie) ,
 end
 
 %% automaticchecks_complete
-% We are going to do this here, if we get here in the normal run.  If we don't get here, goldblum() will cause FlyDiscoPipeline() to 
-% be run again, with all the other stages turned off.  -- ALT, 2021-08-05
+% This would normally be turned off for a goldblum run, and we'd run it in the
+% caboose stage.
 stage = 'automaticchecks_complete';
 if is_on_or_force(doautomaticcheckscomplete) ,
   forcecompute = is_force(doautomaticcheckscomplete) ;  

@@ -1,7 +1,7 @@
 function goldblum_analyze_experiment_folders(folder_path_from_experiment_index, settings_folder_path, lab_head_last_name, ...
                                              do_force_analysis, do_use_bqueue, do_actually_submit_jobs, analysis_parameters)
 
-    % Proces arguments                                
+    % Process arguments                                
     if ~exist('do_force_analysis', 'var') || isempty(do_force_analysis) ,
         do_force_analysis = false ;
     end
@@ -24,7 +24,7 @@ function goldblum_analyze_experiment_folders(folder_path_from_experiment_index, 
     if do_force_analysis ,
         for i = 1 : experiment_count ,
             experiment_folder_path = folder_path_from_experiment_index{i} ;
-            analysis_in_progress_file_path = fullfile(experiment_folder_path, 'ANALYSIS-IN-PROGRESS') ;
+            analysis_in_progress_file_path = fullfile(experiment_folder_path, 'PIPELINE-IN-PROGRESS') ;
             try
                 ensure_file_does_not_exist(analysis_in_progress_file_path) ;
             catch me
@@ -39,7 +39,7 @@ function goldblum_analyze_experiment_folders(folder_path_from_experiment_index, 
     is_to_be_analyzed_from_experiment_index = true(experiment_count, 1) ;
     for i = 1 : experiment_count ,
         experiment_folder_path = folder_path_from_experiment_index{i} ;
-        analysis_in_progress_file_path = fullfile(experiment_folder_path, 'ANALYSIS-IN-PROGRESS') ;
+        analysis_in_progress_file_path = fullfile(experiment_folder_path, 'PIPELINE-IN-PROGRESS') ;
         is_to_be_skipped = ...
           exist(analysis_in_progress_file_path, 'file') ;
         is_to_be_analyzed_from_experiment_index(i) = ~is_to_be_skipped ;
@@ -145,43 +145,19 @@ function goldblum_analyze_experiment_folders(folder_path_from_experiment_index, 
     %
     % "Caboose" phase
     %
-    
-    % If any experiments failed to finish or errored, run just the
-    % automatic-checks-complete stage on those
-    did_not_complete = (job_statuses~=+1) ;
-    did_not_complete_count = sum(did_not_complete) ;
-    if did_not_complete_count==0 ,
-        return
-    end
-    folder_path_from_did_not_complete_index = folder_path_from_to_be_analyzed_experiment_index(did_not_complete) ;    
-    
-    % Clear all the ANALYSIS-IN-PROGRESS files from these experiments, or else
-    % goldblum_FlyDiscoPipeline_wrapper() will refuse to run on the experiment.
-    for i = 1 : did_not_complete_count ,
-        experiment_folder_path = folder_path_from_did_not_complete_index{i} ;
-        analysis_in_progress_file_path = fullfile(experiment_folder_path, 'ANALYSIS-IN-PROGRESS') ;
-        try
-            ensure_file_does_not_exist(analysis_in_progress_file_path) ;
-        catch me
-            fprintf('Tried to delete the file %s (if it exists) during the caboose stage, but something went wrong.  Proceeding nevertheless.\n', ...
-                    analysis_in_progress_file_path) ;
-            fprintf('Here''s some information about what went wrong:\n') ;
-            fprintf('%s\n', me.getReport()) ;                
-        end
-    end    
-    
-    % Turn off all the stages except doautomaticcheckscomplete
+        
+    % Run the caboose jobs
     if do_use_bqueue ,
         bqueue = bqueue_type(do_actually_submit_jobs, maxiumum_slot_count) ;
 
         % Queue the jobs
-        for i = 1 : did_not_complete_count ,
-            experiment_folder_path = folder_path_from_did_not_complete_index{i} ;
+        for i = 1 : to_be_analyzed_experiment_count ,
+            experiment_folder_path = folder_path_from_to_be_analyzed_experiment_index{i} ;
             [~, experiment_folder_name] = fileparts2(experiment_folder_path) ;
             % We use the options list to pass the stdout/stderr file, b/c the
             % usual mechanism doesn't support appending.
             stdouterr_file_path = fullfile(experiment_folder_path, 'flydisco-analysis-log.txt') ;
-            bsub_options = sprintf('-P %s -J %s-flydisco-%s -o %s -e %s', ...
+            bsub_options = sprintf('-P %s -J %s-flydisco-caboose-%s -o %s -e %s', ...
                                    lab_head_last_name, ...
                                    lab_head_last_name, ...
                                    experiment_folder_name, ...
@@ -252,8 +228,7 @@ function goldblum_analyze_experiment_folders(folder_path_from_experiment_index, 
         job_statuses = nan(1, to_be_analyzed_experiment_count) ;
         for i = 1 : to_be_analyzed_experiment_count ,
             experiment_folder_path = folder_path_from_to_be_analyzed_experiment_index{i} ;
-            goldblum_FlyDiscoPipeline_wrapper(experiment_folder_path, settings_folder_path, final_caboose_analysis_parameters, ...
-                                              do_run_even_if_already_in_progress) ;
+            goldblum_FlyDiscoCaboose_wrapper(experiment_folder_path, settings_folder_path, analysis_parameters) ;
             job_statuses(i) = +1 ;  % Indicates completed sucessfully
         end
     end    
