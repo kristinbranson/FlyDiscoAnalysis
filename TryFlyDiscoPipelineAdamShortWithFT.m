@@ -74,4 +74,4 @@ expdir = ...
 % [success,msgs,stage] = FlyBubblePipeline(expdir,params{:});
 % end
 
-[success,msgs,stage] = FlyDiscoPipeline(expdir,params{:});
+FlyDiscoPipeline(expdir,params{:});

@@ -2,4 +2,4 @@ experiment_folder_path = '/groups/branson/bransonlab/flydisco_data/locomotionGtA
 settings_folder_path = '/groups/branson/bransonlab/taylora/flydisco/goldblum/FlyDiscoAnalysis/settings' ;
 do_run_analysis_in_debug_mode = false ;
 
-fly_disco_analysis_pipeline_wrapper(experiment_folder_path, settings_folder_path, do_run_analysis_in_debug_mode) ;
+goldblum_FlyDiscoPipeline_wrapper(experiment_folder_path, settings_folder_path, do_run_analysis_in_debug_mode) ;

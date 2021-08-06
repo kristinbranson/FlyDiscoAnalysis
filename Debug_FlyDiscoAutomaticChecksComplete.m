@@ -43,19 +43,16 @@ expdirs = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20210
 
 success = [];
 msg = {};
-iserror = {};
 
-errors_seen = [];
 for i = 1:numel(expdirs),
   expdir = expdirs{i};
   disp(expdir);
-  [success(i),msg{i},iserror{i}] = FlyDiscoAutomaticChecksComplete(expdir,params{:});
-  if ~success(i),
-    if any(~ismember(find(iserror{i},1),errors_seen)),
-      errors_seen = union(errors_seen,find(iserror{i},1));
-    end
+  try 
+      FlyDiscoAutomaticChecksComplete(expdir,params{:})
+      success(i) = false ;  %#ok<SAGROW>
+      msg{i} = '' ;  %#ok<SAGROW>
+  catch me
+      success(i) = false ;  %#ok<SAGROW>
+      msg{i} = me.getReport() ;  %#ok<SAGROW>
   end
 end
-
-
-
