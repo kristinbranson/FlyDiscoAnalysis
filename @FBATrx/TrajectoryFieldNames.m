@@ -22,4 +22,8 @@ fns = {
   'yspine'
   'xspine_mm'
   'yspine_mm'
+  'xwingl'
+  'ywingl'
+  'xwingr'
+  'ywingr'
   };

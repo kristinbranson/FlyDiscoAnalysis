@@ -52,6 +52,11 @@ histperframetxtfilestr,hist_perframe.txt
 histperframematfilestr,hist_perframe.mat
 figdir,analysis_plots
 histplotparamsfilestr,hist_plotparams.txt
+stimulusplotparamsfilestr,stimulus_plotparams.txt
+conditionplotparamsfilestr,condition_plotparams.txt
+statswebpagefilestr,stats.html
+stimulusvideoparamsfilestr,stimulus_videoparams.txt
+stimulusvideofilestr,activation
 combine_experimentsfilestr,experiments.txt
 ctraxresultsavifilestr,ctrax_results_movie
 jaabaresultsavifilestr,jaaba_socialresults_movie

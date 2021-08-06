@@ -119,6 +119,7 @@ classdef FBATrx < handle
     
     % number of frames in the video
     movie_nframes = [];
+    movie_timestamps = {};
     
     % image sizes
     nrs = [];
@@ -221,6 +222,13 @@ classdef FBATrx < handle
 %       
 %     end
 
+    function data = getIndicatorLED(obj,n)
+      if numel(obj.indicatorLED) < n || isempty(obj.indicatorLED{n}),
+        obj.LoadIndicatorDataFromFile(n);
+      end
+      data = obj.indicatorLED{n};
+    end
+
     function [data,units] = ComputePerFrameData(obj,fn,n)
       
       if obj.DEBUG,
@@ -274,9 +282,7 @@ classdef FBATrx < handle
         funname = sprintf('compute_%s',fn);
         [data,units] = feval(funname,obj,n,~obj.DEBUG);
       elseif ~isempty(m_on) || ~isempty(m_off),
-        if numel(obj.indicatorLED) < n || isempty(obj.indicatorLED{n}),
-          obj.LoadIndicatorDataFromFile(n);
-        end
+        ind = obj.getIndicatorLED(n);
         if ~isempty(m_on),
           mstim = m_on{1};
           stimtype = 'on';
@@ -288,9 +294,9 @@ classdef FBATrx < handle
         if isempty(stimnums),
           % all
           if strcmpi(stimtype,'off'),
-            stimnums = 1:numel(obj.indicatorLED{n}.startoff);
+            stimnums = 1:numel(ind.startoff);
           else
-            stimnums = 1:numel(obj.indicatorLED{n}.starton);
+            stimnums = 1:numel(ind.starton);
           end
         else
           stimnums = str2double([stimnums{:}]);
@@ -365,6 +371,8 @@ classdef FBATrx < handle
     varargout = drawfly(obj,fly,t,varargin)
     
     LoadIndicatorDataFromFile(obj,n)
+    
+    x = padgrab(fn,flies,padv,f0,f1);
     
   end
   
