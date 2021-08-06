@@ -7,12 +7,13 @@ sxclfilestr = 'sexclassifier_diagnostics.txt';
 autochcksinfilestr = 'automatic_checks_incoming_results.txt';
 analysiscompletefilestr = 'ANALYSIS-COMPLETED-SUCCESSFULLY';
 moviefilestr = 'movie.ufmf';
+trxfilestr = 'registered_trx.mat';
 % TODO 
 % add option to not return expdirs without Metadata file
 % add option to add autochecks incoming and completed
 % add option to check for aborted complete or failed files. 
-[metadatafile, screen_type,line_name,date,nflies,autocheckin,FlyDiscoAnalysisStatus,movielength] = myparse(varargin,'metadatafile','Metadata.xml','screen_type','*','line_name','*', ...
-    'date','*','nflies',false,'autocheckin',false,'FlyDiscoAnalysisStatus', false,'movielength',false);
+[metadatafile, screen_type,line_name,date,nflies,autocheckin,FlyDiscoAnalysisStatus,movielength,TrajNum] = myparse(varargin,'metadatafile','Metadata.xml','screen_type','*','line_name','*', ...
+    'date','*','nflies',false,'autocheckin',false,'FlyDiscoAnalysisStatus', false,'movielength',false,'TrajNum',false);
 
 
 searchname = sprintf('%s%s%s',screen_type,line_name,date);
@@ -32,7 +33,12 @@ for i = 1:numel(tmp)
     expdir = tmp(i).name;
     metadatafilestr = fullfile(rootdatadir,expdir,metadatafile);
     if exist(metadatafilestr,'file')
+        try
     tmpM = ReadMetadataFile(metadatafilestr);
+        catch
+        fprintf('%s failed ReadMetadataFile\n',expdir)
+        return
+        end
     tmpM.file_system_path = fullfile(rootdatadir,expdir);  
     % add date
     daTe = tmpM.exp_datetime(1:8);
@@ -85,11 +91,22 @@ for i = 1:numel(tmp)
     moviefile = fullfile(rootdatadir,expdir,moviefilestr);
     if movielength
         if exist(moviefile,'file')
-            [~,nframes] = get_readframe_fcn(moviefile);
+            headerinfo = ufmf_read_header(moviefile);
+            nframes = headerinfo.nframes;
             tmpM.nframes = nframes;
         else
             tmpM.nframes = nan;
         end
+    end
+    % add trajectory num
+    if TrajNum
+    trxfile = fullfile(rootdatadir,expdir,trxfilestr);
+    if exist(trxfile,'file')
+        load(trxfile,'trx');
+        tmpM.trajnum = numel(trx);
+    else
+        tmpM.trajnum = nan;
+    end
     end
     
     % compile struct 

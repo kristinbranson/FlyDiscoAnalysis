@@ -664,7 +664,7 @@ if dotemporaltruncation
     if ~isfield(Headerinfo,'timestamps'),
         error('No field timestamps in UFMF header');
     end
-    timestamps_header = headerinfo.timestamps;    %??? couldn't figure out where timestamps come from in load_tracks for movie_JAABA/trx.mat, do timestamps match offsets?
+    timestamps_header = headerinfo.timestamps;    %??? couldn't figure out where timestamps come from in load_tracks for movie_JAABA/trx.mat
     
       % how long is the video
   recordLengthCurr = timestamps_header(end);
@@ -773,14 +773,9 @@ if dotemporaltruncation
     
   end
   
-  fprintf('Applied temporal truncation.\n');
-    
-    
-    
-    
+  fprintf('Applied temporal truncation.\n');    
 else
     fprintf('NOT applying temporal truncation.\n')
-    
 end
 
 

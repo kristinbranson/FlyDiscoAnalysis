@@ -47,6 +47,7 @@ categories = {'flag_aborted_set_to_1',...
   'bad_video_timestamps',...
   'missing_capture_files',...
   'flag_redo_set_to_1',...
+  'flag_flies_dead_or_damaged',... 
   'fliesloaded_time_too_short',...
   'fliesloaded_time_too_long',...
   'shiftflytemp_time_too_long',...
@@ -110,6 +111,20 @@ if isfield(metadata,'flag_redo') && metadata.flag_redo ~= 0,
   success = false;
   msgs{end+1} = 'Redo flag set to 1.';
   iserror(category2idx.flag_redo_set_to_1) = true;
+end
+
+%% check for dead or damaged flies
+
+if isfield(metadata,'num_flies_damaged') && metadata.num_flies_damaged > 0,
+  success = false;
+  msgs{end+1} = 'Damaged flies > 0.';
+  iserror(category2idx.flag_flies_dead_or_damaged) = true;
+end
+
+if isfield(metadata,'num_flies_dead') && metadata.num_flies_dead > 0,
+  success = false;
+  msgs{end+1} = 'Dead flies > 0.';
+  iserror(category2idx.flag_flies_dead_or_damaged) = true;
 end
 
 %% check loading time

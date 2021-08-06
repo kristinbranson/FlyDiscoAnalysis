@@ -4,8 +4,8 @@
 % addpath /groups/branson/home/robiea/Code_versioned/FlyDiscoAnalysis/JAABA/misc
 modpath
 %% pull expdirs and load all metdata
-rootdatadir = '/groups/branson/bransonlab/flydisco_data';
-% rootdatadir = '/groups/dickson/dicksonlab/flydisco_data';
+% rootdatadir = '/groups/branson/bransonlab/flydisco_data';
+rootdatadir = '/groups/dickson/dicksonlab/flydisco_data';
 
 metadatafile = 'Metadata.xml';
 
@@ -15,9 +15,9 @@ metadatafile = 'Metadata.xml';
 % updated inputs 'metadatafile','Metadata.xml','screen_type','*','line_name','*', ...
 %     'date','*','nflies',false,'autocheckin',false,'FlyDiscoAnalysisStatus', false);
 [expdirstruct] = getExperimentDirsFlyDisco(rootdatadir,'screen_type','VNC*',...
-    'nflies',true,'autocheckin',true,'FlyDiscoAnalysisStatus', true,'movielength',true,'movielength',true);
+    'nflies',true,'autocheckin',true,'FlyDiscoAnalysisStatus', true,'movielength',true,'movielength',true,'TrajNum',true);
 
-savefile = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_metadata_VNC_bransonlab_20210729';
+savefile = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_metadata_VNC_dicksonlab_20210805';
 
 %% make tsv with ALL metadata fields
 
