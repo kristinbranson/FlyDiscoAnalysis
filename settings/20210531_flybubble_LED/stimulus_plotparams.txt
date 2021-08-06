@@ -1,6 +1,7 @@
 features,forward_vel,absdtheta
 prestim,10
 poststim,10
+plotstd,1
 ylim_prctile,1
 traj_prestim,.25
 traj_poststim,.25
