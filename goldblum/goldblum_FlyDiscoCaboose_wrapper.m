@@ -23,17 +23,6 @@ function goldblum_FlyDiscoCaboose_wrapper(experiment_folder_path, settings_folde
     fprintf('%s\n', header_string) ;
     fprintf('%s\n\n', asterisks_string) ;    
     
-    % Check for an already-existing pipeline file.
-    pipeline_errored_out_file_path = fullfile(experiment_folder_path, 'PIPELINE-ERRORED-OUT') ;
-    did_pipeline_error_out = logical(exist(pipeline_errored_out_file_path, 'file')) ;
-    ensure_file_does_not_exist(pipeline_errored_out_file_path) ;
-    pipeline_incomplete_file_path = fullfile(experiment_folder_path, 'PIPELINE-INCOMPLETE') ;
-    is_pipeline_incomplete = logical(exist(pipeline_incomplete_file_path, 'file')) ;
-    ensure_file_does_not_exist(pipeline_incomplete_file_path) ;
-    pipeline_complete_file_path = fullfile(experiment_folder_path, 'PIPELINE-COMPLETE') ;
-    did_pipeline_complete = logical(exist(pipeline_complete_file_path, 'file')) ;
-    ensure_file_does_not_exist(pipeline_complete_file_path) ;
-    
     % Convert param list to a struct
     overriding_analysis_parameters = struct_from_name_value_list(overriding_analysis_parameters_as_list) ;
 
@@ -44,38 +33,5 @@ function goldblum_FlyDiscoCaboose_wrapper(experiment_folder_path, settings_folde
     analysis_parameters = merge_structs(default_analysis_parameters, overriding_analysis_parameters) ;
     
     % Call the function to do the real work
-    try
-        FlyDiscoCaboose(experiment_folder_path, analysis_parameters) ;
-        did_caboose_error_out = false ;
-    catch me
-        % Whatever happens, want to write out one of the two ANALYSIS-* files
-        fprintf('Encountered error in FlyDiscoCaboose():\n') ;
-        fprintf('%s\n', me.getReport()) ;
-        did_caboose_error_out = true ;
-    end
-
-    % Determine the outcome of the analysis
-    is_analysis_complete = did_pipeline_complete && ~did_caboose_error_out ;
-    did_analysis_error_out = did_pipeline_error_out || did_caboose_error_out ;
-    is_analysis_incomplete = ~(is_analysis_complete || did_analysis_error_out) ;
-    assert(sum(is_analysis_complete+did_analysis_error_out+is_analysis_incomplete)==1, ...
-           'Internal error 42 in goldblum_FlyDiscoCaboose_wrapper()') ;
-    
-    % Output the final ANALYSIS* file
-    analysis_errored_out_file_path = fullfile(experiment_folder_path, 'ANALYSIS-ERRORED-OUT') ;
-    analysis_incomplete_file_path = fullfile(experiment_folder_path, 'ANALYSIS-INCOMPLETE') ;
-    analysis_complete_file_path = fullfile(experiment_folder_path, 'ANALYSIS-COMPLETE') ;    
-    if is_analysis_complete ,
-        touch(analysis_complete_file_path) ;
-    elseif is_analysis_incomplete ,
-        touch(analysis_incomplete_file_path) ;
-    elseif analysis_errored_out_file_path ,
-        touch(analysis_errored_out_file_path) ;
-    end        
-    
-    % Error out if FlyDiscoCaboose() errored out.
-    if did_caboose_error_out ,
-        [~,experiment_folder_name] = fileparts2(experiment_folder_path) ;
-        error('FlyDiscoCaboose() errored out on experiment %s!', experiment_folder_name) ;  % want to return a non-zero error code
-    end        
+    FlyDiscoCaboose(experiment_folder_path, analysis_parameters) ;
 end

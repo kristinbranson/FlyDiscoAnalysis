@@ -12,16 +12,6 @@ function goldblum_FlyDiscoPipeline_wrapper(experiment_folder_path, settings_fold
         overriding_analysis_parameters_as_list = cell(1, 0) ;
     end
 
-    % Check for the lock file
-    analysis_in_progress_file_path = fullfile(experiment_folder_path, 'PIPELINE-IN-PROGRESS') ;
-    if exist(analysis_in_progress_file_path, 'file') ,
-        error('Not going to run FlyDiscoPipeline() on experiment folder:\n\n  %s\n\PIPELINE-IN-PROGRESS file is already present.\n', ...
-            experiment_folder_path) ;  % error() to return a non-zero error code
-    end
-    
-    % If get here, create the lock file
-    touch(analysis_in_progress_file_path) ;
-
     % Print the date to the stdout, so it gets logged
     dt = datetime('now') ;
     date_as_string = string(datetime(dt, 'Format', 'uuuu-MM-dd')) ;
@@ -32,20 +22,6 @@ function goldblum_FlyDiscoPipeline_wrapper(experiment_folder_path, settings_fold
     fprintf('%s\n', asterisks_string) ;    
     fprintf('%s\n', header_string) ;
     fprintf('%s\n\n', asterisks_string) ;    
-    
-    % Delete any pre-existing success/failure files
-    analysis_errored_out_file_path = fullfile(experiment_folder_path, 'PIPELINE-ERRORED-OUT') ;
-    if exist(analysis_errored_out_file_path, 'file') ,
-        delete(analysis_errored_out_file_path) ;
-    end
-    analysis_complete_file_path = fullfile(experiment_folder_path, 'PIPELINE-COMPLETE') ;
-    if exist(analysis_complete_file_path, 'file') ,
-        delete(analysis_complete_file_path) ;
-    end
-    analysis_incomplete_file_path = fullfile(experiment_folder_path, 'PIPELINE-INCOMPLETE') ;
-    if exist(analysis_incomplete_file_path, 'file') ,
-        delete(analysis_incomplete_file_path) ;
-    end
     
     % Convert param list to a struct
     overriding_analysis_parameters = struct_from_name_value_list(overriding_analysis_parameters_as_list) ;
@@ -60,34 +36,5 @@ function goldblum_FlyDiscoPipeline_wrapper(experiment_folder_path, settings_fold
     analysis_parameters.doautomaticcheckscomplete = 'off' ;
     
     % Call the function to do the real work
-    did_pipeline_error_out = false ;
-    try
-        FlyDiscoPipeline(experiment_folder_path, analysis_parameters) ;
-    catch me
-        % Whatever happens, want to write out one of the two ANALYSIS-* files
-        fprintf('Encountered error in FlyDiscoPipeline():\n') ;
-        fprintf('%s\n', me.getReport()) ;
-        did_pipeline_error_out = true ;
-    end
-    
-    % Deal with success or failure, or error
-    if did_pipeline_error_out ,
-        analysis_errored_out_file_path = fullfile(experiment_folder_path, 'PIPELINE-INCOMPLETE') ;
-        touch(analysis_errored_out_file_path) ;
-    else        
-        analysis_complete_file_path = fullfile(experiment_folder_path, 'PIPELINE-COMPLETE') ;
-        touch(analysis_complete_file_path) ;
-    end
-    
-    % Clear the lock file
-    if exist(analysis_in_progress_file_path, 'file') ,
-        delete(analysis_in_progress_file_path) ;
-    end
-    
-    % Error out if FlyDiscoPipeline() errored out or returned success==false, but
-    % distinguish between them in the log.
-    if did_pipeline_error_out ,
-        [~,experiment_folder_name] = fileparts2(experiment_folder_path) ;
-        error('FlyDiscoPipeline() errored out on experiment %s!', experiment_folder_name) ;  % want to return a non-zero error code
-    end
+    FlyDiscoPipeline(experiment_folder_path, analysis_parameters) ;
 end
