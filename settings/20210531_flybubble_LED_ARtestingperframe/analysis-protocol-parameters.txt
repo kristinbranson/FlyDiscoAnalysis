@@ -1,0 +1,16 @@
+forcecompute,true
+doautomaticchecksincoming,true
+doflytracking,false
+doregistration,true
+doledonoffdetection,true
+dotrackwings,false
+dosexclassification,true
+docomputeperframefeatures,true
+docomputehoghofperframefeatures,false
+dojaabadetect,false
+docomputeperframestats,false
+doplotperframestats,false
+domakectraxresultsmovie,false
+doextradiagnostics,false
+doanalysisprotocol,false
+doautomaticcheckscomplete,true
