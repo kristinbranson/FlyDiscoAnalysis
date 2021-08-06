@@ -1,5 +1,5 @@
 function goldblum_analyze_experiment_folders(folder_path_from_experiment_index, settings_folder_path, lab_head_last_name, ...
-                                             do_force_analysis, do_use_bqueue, do_actually_submit_jobs, analysis_parameters)
+                                             do_force_analysis, do_use_bqueue, do_actually_submit_jobs, analysis_parameters_as_name_value_list)
 
     % Process arguments                                
     if ~exist('do_force_analysis', 'var') || isempty(do_force_analysis) ,
@@ -11,8 +11,8 @@ function goldblum_analyze_experiment_folders(folder_path_from_experiment_index, 
     if ~exist('do_actually_submit_jobs', 'var') || isempty(do_actually_submit_jobs) ,
         do_actually_submit_jobs = true ;
     end
-    if ~exist('analysis_parameters', 'var') || isempty(analysis_parameters) ,
-        analysis_parameters = cell(1,0) ;
+    if ~exist('analysis_parameters', 'var') || isempty(analysis_parameters_as_name_value_list) ,
+        analysis_parameters_as_name_value_list = cell(1,0) ;
     end
 
     % Specify bsub parameters
@@ -75,7 +75,7 @@ function goldblum_analyze_experiment_folders(folder_path_from_experiment_index, 
                            @goldblum_FlyDiscoPipeline_wrapper, ...
                                experiment_folder_path, ...
                                settings_folder_path, ...
-                               analysis_parameters) ;
+                               analysis_parameters_as_name_value_list) ;
         end
 
         % Actually run the jobs
@@ -134,7 +134,7 @@ function goldblum_analyze_experiment_folders(folder_path_from_experiment_index, 
         job_statuses = nan(1, experiment_count) ;
         for i = 1 : experiment_count ,
             experiment_folder_path = folder_path_from_experiment_index{i} ;
-            goldblum_FlyDiscoPipeline_wrapper(experiment_folder_path, settings_folder_path, analysis_parameters) ;
+            goldblum_FlyDiscoPipeline_wrapper(experiment_folder_path, settings_folder_path, analysis_parameters_as_name_value_list) ;
             job_statuses(i) = +1 ;  % Indicates completed sucessfully
         end
     end
@@ -145,6 +145,24 @@ function goldblum_analyze_experiment_folders(folder_path_from_experiment_index, 
     % "Caboose" phase
     %
         
+    % If the user has specified doautomaticcheckscomplete in analysis_parameters, honor that.
+    % Otherwise, default to turning it on.
+    try
+        lookup_in_name_value_list(analysis_parameters_as_name_value_list, 'doautomaticcheckscomplete') ;
+        % if get here, must be specified in analysis_parameters_as_name_value_list
+        caboose_analysis_parameters_as_name_value_list = analysis_parameters_as_name_value_list ;        
+    catch me ,
+        if strcmp(me.identifier, 'lookup_in_name_value_list:not_found') ,
+            % if get here, must be unspecified in analysis_parameters_as_name_value_list, so
+            % we set it
+            caboose_analysis_parameters_as_name_value_list = ...
+                merge_name_value_lists(analysis_parameters_as_name_value_list, ...
+                                       {'doautomaticcheckscomplete', 'on'}) ;
+        else
+            rethrow(me) ;
+        end
+    end
+    
     % Run the caboose jobs
     if do_use_bqueue ,
         bqueue = bqueue_type(do_actually_submit_jobs, maxiumum_slot_count) ;
@@ -168,7 +186,7 @@ function goldblum_analyze_experiment_folders(folder_path_from_experiment_index, 
                            @goldblum_FlyDiscoCaboose_wrapper, ...
                                experiment_folder_path, ...
                                settings_folder_path, ...
-                               analysis_parameters) ;
+                               caboose_analysis_parameters_as_name_value_list) ;
         end
 
         % Actually run the jobs
@@ -227,7 +245,7 @@ function goldblum_analyze_experiment_folders(folder_path_from_experiment_index, 
         job_statuses = nan(1, experiment_count) ;
         for i = 1 : experiment_count ,
             experiment_folder_path = folder_path_from_experiment_index{i} ;
-            goldblum_FlyDiscoCaboose_wrapper(experiment_folder_path, settings_folder_path, analysis_parameters) ;
+            goldblum_FlyDiscoCaboose_wrapper(experiment_folder_path, settings_folder_path, caboose_analysis_parameters_as_name_value_list) ;
             job_statuses(i) = +1 ;  % Indicates completed sucessfully
         end
     end    
