@@ -12,6 +12,8 @@ trxfilestr = 'registered_trx.mat';
 % add option to not return expdirs without Metadata file
 % add option to add autochecks incoming and completed
 % add option to check for aborted complete or failed files. 
+%%% screen_type from experiment name NOT accurate. change to expname, add
+%%% real screen_type filter
 [metadatafile, screen_type,line_name,date,nflies,autocheckin,FlyDiscoAnalysisStatus,movielength,TrajNum] = myparse(varargin,'metadatafile','Metadata.xml','screen_type','*','line_name','*', ...
     'date','*','nflies',false,'autocheckin',false,'FlyDiscoAnalysisStatus', false,'movielength',false,'TrajNum',false);
 

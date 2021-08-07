@@ -133,7 +133,7 @@ if isfield(registration_params,'maxDistCornerFrac_BowlLabel') && ...
 end
 
 fnsignore = intersect(fieldnames(registration_params),...
-  {'minFliesLoadedTime','maxFliesLoadedTime','extraBufferFliesLoadedTime','usemediandt','doTemporalRegistration','OptogeneticExp','LEDMarkerType','maxDistCornerFrac_LEDLabel','doTemporalTruncation'});
+  {'minFliesLoadedTime','maxFliesLoadedTime','extraBufferFliesLoadedTime','usemediandt','doTemporalRegistration','OptogeneticExp','LEDMarkerType','maxDistCornerFrac_LEDLabel','doTemporalTruncation','maxFlyTrackerNanInterpFrames'});
   
 registration_params_cell = struct2paramscell(rmfield(registration_params,fnsignore));
 % file to save image to
@@ -460,7 +460,7 @@ if isfield(registration_params,'OptogeneticExp')
        
         
         fnsignore = intersect(fieldnames(registration_params),...
-            {'minFliesLoadedTime','maxFliesLoadedTime','extraBufferFliesLoadedTime','usemediandt','doTemporalRegistration','OptogeneticExp','LEDMarkerType','maxDistCornerFrac_LEDLabel','doTemporalTruncation'});
+            {'minFliesLoadedTime','maxFliesLoadedTime','extraBufferFliesLoadedTime','usemediandt','doTemporalRegistration','OptogeneticExp','LEDMarkerType','maxDistCornerFrac_LEDLabel','doTemporalTruncation','maxFlyTrackerNanInterpFrames'});
         
         registration_params_cell = struct2paramscell(rmfield(registration_params,fnsignore));
         
@@ -773,7 +773,7 @@ if dotemporaltruncation
     
   end
   
-  fprintf('Applied temporal truncation.\n');    
+  fprintf('Applied temporal truncation. Data cropped to %s seconds. \n',timestamps_header(i1));    
 else
     fprintf('NOT applying temporal truncation.\n')
 end
