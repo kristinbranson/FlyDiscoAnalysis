@@ -91,7 +91,7 @@ folder_path_from_experiment_index = textread(filesavename,'%s');
 
 %for testing on first 5 experiments
 
-folder_path_from_experiment_index = folder_path_from_experiment_index(11:15);
+% folder_path_from_experiment_index = folder_path_from_experiment_index(11:15);
 
 
 %% delete pipeline files before rerunning pipeline
