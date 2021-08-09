@@ -4,19 +4,20 @@ version = '0.1';
 
 [analysis_protocol,settingsdir,datalocparamsfilestr,visible,DEBUG,...
   plotstats,plotstim,makestimvideos,plothist,...
-  plotflies,plotstimtrajs] = ...
+  plotflies,plotstimtrajs,verbose] = ...
   myparse(varargin,...
   'analysis_protocol','current',...
   'settingsdir','/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/settings',...
   'datalocparamsfilestr','dataloc_params.txt',...
   'visible','',...
   'debug',false,...
-  'plotstats',true,...
+  'plotstats',2,...
   'plotstim',[],...
   'makestimvideos',[],...
-  'plothist',true,...
+  'plothist',2,...
   'plotflies',true,...
-  'plotstimtrajs',true);
+  'plotstimtrajs',2,...
+  'verbose',1);
 
 if ischar(plotstats),
   plotstats = str2double(plotstats);
@@ -113,6 +114,11 @@ statfiles = {};
 statperflyfiles = {};
 
 if plotstats,
+  
+  if verbose > 0,
+    fprintf('Plotting mean stats...\n');
+  end
+  
   groups = fieldnames(stats_plotparams);
   statfiles = cell(size(groups));
   statperflyfiles = cell(size(groups));
@@ -120,15 +126,28 @@ if plotstats,
   for i = 1:numel(groups),
     group = groups{i};
     name = sprintf('%s, %s',basename,group);
-    %stathandles = PlotPerFrameStats(stats_plotparams.(group),statsperfly,statsperexp,controlstats,name,'visible',visible,'hfig',i);
-    %drawnow;
-    % plot a second time to get this to work on the cluster
+    
+    savename = sprintf('stats_%s.png',group);
+    relsavename = fullfile(dataloc_params.figdir,savename);
+    savename = fullfile(figdir,savename);
+    savename_fly = sprintf('stats_perfly_%s.png',group);
+    relsavename_fly = fullfile(dataloc_params.figdir,savename_fly);
+    savename_fly = fullfile(figdir,savename_fly);
+
+    if ~DEBUG && plotstats < 2 && exist(savename,'file') && ...
+        (~plotflies || exist(savename_fly,'file')),
+      statfiles{i} = relsavename;
+      if plotflies,
+        statperflyfiles{i} = relsavename_fly;
+      end
+      continue;
+    end
+    if verbose > 1,
+      fprintf('Plotting per-frame stats for group %s\n',group);
+    end
     stathandles = PlotPerFrameStatsGroup(stats_plotparams.(group),statsperfly,statsperexp,name,'visible',visible,'hfig',hfig,'hfigflies',hfigperfly,'plotparams',condition_plot_params,...
       'plotflies',plotflies);
     if ~DEBUG,
-      savename = sprintf('stats_%s.png',group);
-      relsavename = fullfile(dataloc_params.figdir,savename);
-      savename = fullfile(figdir,savename);
       if exist(savename,'file'),
         delete(savename);
       end
@@ -138,15 +157,12 @@ if plotstats,
       hfig = stathandles.hfig;
       
       if plotflies,
-        savename = sprintf('stats_perfly_%s.png',group);
-        relsavename = fullfile(dataloc_params.figdir,savename);
-        savename = fullfile(figdir,savename);
-        if exist(savename,'file'),
-          delete(savename);
+        if exist(savename_fly,'file'),
+          delete(savename_fly);
         end
         set(stathandles.hfigflies,'Units','pixels','Position',stathandles.position);
-        save2png(savename,stathandles.hfigflies);
-        statperflyfiles{i} = relsavename;
+        save2png(savename_fly,stathandles.hfigflies);
+        statperflyfiles{i} = relsavename_fly;
         hfigperfly = stathandles.hfigflies;
       end
       
@@ -181,16 +197,25 @@ if plotstim || makestimvideos,
   ind = trx.getIndicatorLED(1);
   non = numel(ind.starton);
   if non == 0,
-    plotstim = false;
-    makestimvideos = false;
+    plotstim = 0;
+    makestimvideos = 0;
   end
 end
 
 hfigperfly = [];
 
 if plotstim,
+  
+  if verbose > 0,
+    fprintf('Plotting per-frame features at stimulus onset...\n');
+  end
+  
   stimfiles = cell(non,numel(stimulus_plotparams.features));
   stimperflyfiles = cell(non,numel(stimulus_plotparams.features));
+  
+  ind = trx.getIndicatorLED(1);
+  ions = 1:numel(ind.starton);
+  fliesplot = ChooseFliesPlot(trx,ind,ions,stimulus_plotparams.maxnflies);
   
   for fi = 1:numel(stimulus_plotparams.features),
     field = stimulus_plotparams.features{fi};
@@ -202,13 +227,33 @@ if plotstim,
       ylim = prctile(data(~isnan(data)),[0,100]+[1,-1]*stimulus_plotparams.ylim_prctile);
     end
     for ion = 1:non,
+      
+      savename = sprintf('stimulus_%d_%s.png',ion,field);
+      relsavename = fullfile(dataloc_params.figdir,savename);
+      savename = fullfile(figdir,savename);
+      savename_fly = sprintf('stimulusperfly_%d_%s.png',ion,field);
+      relsavename_fly = fullfile(dataloc_params.figdir,savename_fly);
+      savename_fly = fullfile(figdir,savename_fly);
+      
+      if ~DEBUG && plotstim < 2 && exist(savename,'file') && ...
+          (~plotflies || exist(savename_fly,'file')),
+        stimfiles{ion,fi} = relsavename;
+        if plotflies,
+          stimperflyfiles{ion,fi} = relsavename_fly;
+        end
+        continue;
+      end
+      
+      if verbose > 1,
+        fprintf('Plotting per-frame features at stimulus onset, feature %s, interval %d',field,ion);
+      end
       [hfigcurr,hfigperflycurr] = PlotStimulusInterval(trx,field,ion,basename,...
         'visible',visible,'prestim',stimulus_plotparams.prestim,...
         'poststim',stimulus_plotparams.poststim,...
         'ylim',ylim,'plotflies',plotflies,...
         'hfig',hfig,...
         'hfigfly',hfigperfly,...
-        'maxnflies',stimulus_plotparams.maxnflies);
+        'fliesplot',fliesplot);
       
       if ~DEBUG,
         
@@ -255,34 +300,47 @@ end
 %% make plots of trajectories at start of stimuli for individual flies
 
 if plotstimtrajs,
-  [hfigcurr] = PlotStimulusOnsetTrajs(trx,...
-    'prestim',stimulus_plotparams.traj_prestim,'poststim',stimulus_plotparams.traj_poststim,...
-    'minboxwidth',stimulus_plotparams.traj_minboxwidth,'boxborder',stimulus_plotparams.traj_boxborder,...
-    'downsample',stimulus_plotparams.traj_downsample,...
-    'nfliesplot',stimulus_plotparams.traj_nfliesplot,...
-    'nperiodsplot',stimulus_plotparams.traj_nperiodsplot,...
-    'maxnflies',stimulus_plotparams.maxnflies,...
-    'plotstd',stimulus_plotparams.plotstd,...
-    'hfig',hfig,...
-    'visible',visible);
-  if ~DEBUG,
-    
-    if ishandle(hfigcurr),
-      savename = 'stimulus_traj.png';
-      relsavename = fullfile(dataloc_params.figdir,savename);
-      savename = fullfile(figdir,savename);
-      if exist(savename,'file'),
-        delete(savename);
-      end
+  
+  savename = 'stimulus_traj.png';
+  relsavename = fullfile(dataloc_params.figdir,savename);
+  savename = fullfile(figdir,savename);
+  
+  if verbose > 0,
+    fprintf('Plotting stimulus onset trajectories...\n');
+  end
+  
+  if ~DEBUG && plotstimtrajs < 2 && exist(savename,'file'),
+    stimtrajfile = relsavename;
+  else
+    [hfigcurr] = PlotStimulusOnsetTrajs(trx,...
+      'prestim',stimulus_plotparams.traj_prestim,'poststim',stimulus_plotparams.traj_poststim,...
+      'minboxwidth',stimulus_plotparams.traj_minboxwidth,'boxborder',stimulus_plotparams.traj_boxborder,...
+      'downsample',stimulus_plotparams.traj_downsample,...
+      'nfliesplot',stimulus_plotparams.traj_nfliesplot,...
+      'nperiodsplot',stimulus_plotparams.traj_nperiodsplot,...
+      'maxnflies',stimulus_plotparams.maxnflies,...
+      'plotstd',stimulus_plotparams.plotstd,...
+      'hfig',hfig,...
+      'visible',visible);
+    if ~DEBUG,
       
-      set(hfigcurr,'Units','pixels');
-      save2png(savename,hfigcurr);
-      stimtrajfile = relsavename;
-      hfig = hfigcurr;
-    else
-      warning('Could not save stimulus trajectory plot');
-    end
+      if ishandle(hfigcurr),
+        savename = 'stimulus_traj.png';
+        relsavename = fullfile(dataloc_params.figdir,savename);
+        savename = fullfile(figdir,savename);
+        if exist(savename,'file'),
+          delete(savename);
+        end
+        
+        set(hfigcurr,'Units','pixels');
+        save2png(savename,hfigcurr);
+        stimtrajfile = relsavename;
+        hfig = hfigcurr;
+      else
+        warning('Could not save stimulus trajectory plot');
+      end
     
+    end
   end
 else
   stimtrajfile = '';
@@ -294,6 +352,10 @@ ions = [];
 fliesplot = [];
 
 if makestimvideos,
+  
+  if verbose > 0,
+    fprintf('Making stimulus onset videos...\n');
+  end
   
   stimulusvideoparamsfile = fullfile(settingsdir,analysis_protocol,dataloc_params.stimulusvideoparamsfilestr);
   videoparams = ReadParams(stimulusvideoparamsfile);
@@ -312,7 +374,8 @@ if makestimvideos,
     'downsample',videoparams.downsample,...
     'nfliesplot',videoparams.nfliesplot,...
     'nperiodsplot',videoparams.nperiodsplot,...
-    'visible',visible);
+    'visible',visible,...
+    'force',makestimvideos>1);
   for i = 1:numel(videofiles),
     videofiles{i} = videofiles{i}(numel(expdir)+2:end);
   end
@@ -326,10 +389,27 @@ if plothist,
 
   ngroups = numel(hist_plot_params.groups);
   histfiles = cell(1,ngroups);
+  if verbose > 0,
+    fprintf('Plotting histograms...\n');
+  end
   
   for i = 1:ngroups,
   
     group = hist_plot_params.groups(i);
+    
+    savename = sprintf('hist_%s.png',group.name);
+    relsavename = fullfile(dataloc_params.figdir,savename);
+    savename = fullfile(figdir,savename);
+     
+    if ~DEBUG && plothist < 2 && exist(savename,'file'),
+      histfiles{i} = relsavename;
+      continue;
+    end
+    
+    if verbose > 1,
+      fprintf('Plotting histogram for group %s...\n',group);
+    end
+    
     [handles,didplot] = PlotPerFrameHistsGroup(group,hist_perframefeatures,...
       histperexp,histperfly,...
       bins,hist_plot_params,condition_plot_params,expname,...
@@ -357,6 +437,9 @@ end
 
 %% output summary webpage with all plots embedded
 if ~DEBUG,
+  if verbose > 0,
+    fprintf('Outputting summary webpage...\n');
+  end
   statswebpagefile = fullfile(expdir,dataloc_params.statswebpagefilestr);
   if exist(statswebpagefile,'file'),
     delete(statswebpagefile);
@@ -369,6 +452,9 @@ end
 
 %% save info to a mat file
 
+if verbose > 0,
+  fprintf('Saving debug info...\n');
+end
 filename = fullfile(expdir,dataloc_params.plotperframestatsinfomatfilestr);
 fprintf(logfid,'Saving debug info to file %s...\n',filename);
 ppfsinfo = struct;

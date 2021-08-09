@@ -9,7 +9,7 @@ defaultcolors = struct('stimbkgd',[0.927 0.8156 0.8368],...
 
 % parse plotting parameters
 [hfig,hfigfly,visible,position,axposition,prestim,poststim,colors,ylim,plotflies,...
-  maxnflies,plotstd] = ...
+  maxnflies,plotstd,fliesplot] = ...
   myparse(varargin,'hfig',gobjects(1),...
   'hfigfly',gobjects(1),...
   'visible','on',...
@@ -21,7 +21,8 @@ defaultcolors = struct('stimbkgd',[0.927 0.8156 0.8368],...
   'ylim',[],...
   'plotflies',true,...
   'maxnflies',inf,...
-  'plotstd',true);
+  'plotstd',true,...
+  'fliesplot',[]);
 
 fns = setdiff(fieldnames(defaultcolors),fieldnames(colors));
 for i = 1:numel(fns),
@@ -110,13 +111,17 @@ title(hax,{basename,sprintf('Stimulus period %d',ion)},'Interpreter','none');
 
 if plotflies,
   
-  nfliesreal = nnz(ndatafly);
-  nfliesplot = min(nfliesreal,maxnflies);
-  if nfliesplot < nfliesreal,
-    [~,order] = sort(ndatafly,1,'descend');
-    fliesplot = sort(order(1:nfliesplot));
+  if isempty(fliesplot),
+    nfliesreal = nnz(ndatafly);
+    nfliesplot = min(nfliesreal,maxnflies);
+    if nfliesplot < nfliesreal,
+      [~,order] = sort(ndatafly,1,'descend');
+      fliesplot = sort(order(1:nfliesplot));
+    else
+      fliesplot = find(ndatafly>0);
+    end
   else
-    fliesplot = find(ndatafly>0);
+    nfliesplot = numel(fliesplot);
   end
   % set up figure
   if isempty(hfigfly) || ~ishandle(hfigfly),

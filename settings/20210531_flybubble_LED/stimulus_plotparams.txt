@@ -3,8 +3,8 @@ prestim,10
 poststim,10
 plotstd,1
 ylim_prctile,1
-traj_prestim,.25
-traj_poststim,.25
+traj_prestim,2
+traj_poststim,2
 traj_minboxwidth,250
 traj_boxborder,5
 traj_downsample,30
