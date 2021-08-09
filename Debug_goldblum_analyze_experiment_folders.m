@@ -3,7 +3,7 @@
 % <Now in Matlab>
 %%
 modpath
-lab_head_last_name = 'branson' ;
+lab_head_last_name = 'dickson' ;
 do_use_bqueue = true ;    
 do_actually_submit_jobs = true ;  
 
@@ -56,12 +56,15 @@ analysis_parameters = {'analysis_protocol',analysis_protocol, ...
 % '/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20210806_testingcaboose/VNC_JRC_SS49220_RigB_20210421T143507'};
 
 % make explist of only experiment dirs with tracking and NOT aborted
-rootdatadir = '/groups/branson/bransonlab/flydisco_data'; 
-lab ='branson';
-% rootdatadir = '/groups/dickson/dicksonlab/flydisco_data';
-% lab = 'dickson';
+% rootdatadir = '/groups/branson/bransonlab/flydisco_data'; 
+% lab ='branson';
+% outdir4list = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline';
+
+rootdatadir = '/groups/dickson/dicksonlab/flydisco_data';
+lab = 'dickson';
+outdir4list ='/groups/dickson/dicksonlab/Alice';
+
 filesavestr = ['RERUNposttracking_explist_',lab,datestr(now,'yyyymmddTHHMMSS'),'.txt'];
-outdir4list = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline';
 filesavename = fullfile(outdir4list,filesavestr);
 fid = fopen(filesavename,'w');
 
@@ -91,7 +94,7 @@ folder_path_from_experiment_index = textread(filesavename,'%s');
 
 %for testing on first 5 experiments
 
-% folder_path_from_experiment_index = folder_path_from_experiment_index(11:15);
+% folder_path_from_experiment_index = folder_path_from_experiment_index(1:5);
 
 
 %% delete pipeline files before rerunning pipeline
