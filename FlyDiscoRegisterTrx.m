@@ -8,13 +8,13 @@ msgs = {};
 fns_notperframe = {'id','moviename','annname','firstframe','arena','off',...
   'nframes','endframe','matname','fps','pxpermm'};
 
-[analysis_protocol,settingsdir,registrationparamsfilestr,datalocparamsfilestr,dotemporalreg] = ...
+[analysis_protocol,settingsdir,registrationparamsfilestr,datalocparamsfilestr,dotemporalreg,dotemporaltruncation] = ...
   myparse(varargin,...
   'analysis_protocol','current_bubble',...
   'settingsdir','/groups/branson/home/robiea/Code_versioned/FlyBubbleAnalysis/settings',...
   'registrationparamsfilestr','registration_params.txt',...
   'datalocparamsfilestr','dataloc_params.txt',...
-  'dotemporalreg',false);
+  'dotemporalreg',false,'dotemporaltruncation',false);
 
 %% read in the data locations
 datalocparamsfile = fullfile(settingsdir,analysis_protocol,datalocparamsfilestr);
@@ -36,6 +36,14 @@ registration_params = ReadParams(registrationparamsfile);
 if isfield(registration_params,'doTemporalRegistration'),
   dotemporalreg = registration_params.doTemporalRegistration;
 end
+if isfield(registration_params,'doTemporalTruncation')
+    if registration_params.doTemporalTruncation > 0 
+        dotemporaltruncation = true;
+    else 
+        dotemporaltruncation = false;
+    end
+end
+
 
 %% detect registration marks
 
@@ -125,7 +133,7 @@ if isfield(registration_params,'maxDistCornerFrac_BowlLabel') && ...
 end
 
 fnsignore = intersect(fieldnames(registration_params),...
-  {'minFliesLoadedTime','maxFliesLoadedTime','extraBufferFliesLoadedTime','usemediandt','doTemporalRegistration','OptogeneticExp','LEDMarkerType','maxDistCornerFrac_LEDLabel'});
+  {'minFliesLoadedTime','maxFliesLoadedTime','extraBufferFliesLoadedTime','usemediandt','doTemporalRegistration','OptogeneticExp','LEDMarkerType','maxDistCornerFrac_LEDLabel','doTemporalTruncation','maxFlyTrackerNanInterpFrames'});
   
 registration_params_cell = struct2paramscell(rmfield(registration_params,fnsignore));
 % file to save image to
@@ -452,7 +460,7 @@ if isfield(registration_params,'OptogeneticExp')
        
         
         fnsignore = intersect(fieldnames(registration_params),...
-            {'minFliesLoadedTime','maxFliesLoadedTime','extraBufferFliesLoadedTime','usemediandt','doTemporalRegistration','OptogeneticExp','LEDMarkerType','maxDistCornerFrac_LEDLabel'});
+            {'minFliesLoadedTime','maxFliesLoadedTime','extraBufferFliesLoadedTime','usemediandt','doTemporalRegistration','OptogeneticExp','LEDMarkerType','maxDistCornerFrac_LEDLabel','doTemporalTruncation','maxFlyTrackerNanInterpFrames'});
         
         registration_params_cell = struct2paramscell(rmfield(registration_params,fnsignore));
         
@@ -481,7 +489,7 @@ if isfield(registration_params,'OptogeneticExp')
         
     end
 end
-%% crop start and end of trajectories
+%% crop start and end of trajectories based on fly loaded time
 
 if dotemporalreg,
   
@@ -648,6 +656,128 @@ else
   fprintf('NOT applying temporal registration.\n');
   
 end
+%% truncate end of movie based on value from registration params 
+
+if dotemporaltruncation    
+   
+    Headerinfo = ufmf_read_header(moviefile);
+    if ~isfield(Headerinfo,'timestamps'),
+        error('No field timestamps in UFMF header');
+    end
+    timestamps_header = headerinfo.timestamps;    %??? couldn't figure out where timestamps come from in load_tracks for movie_JAABA/trx.mat
+    
+      % how long is the video
+  recordLengthCurr = timestamps_header(end);
+  
+  % how long should the video be?
+  recordLengthIdeal = registration_params.doTemporalTruncation;
+  
+  % how much time should we crop from the end?
+  if recordLengthCurr < recordLengthIdeal,
+    warning('Cropped video is %f seconds long, shorter than ideal length %f seconds.',recordLengthCurr,recordLengthIdeal);
+    i1 = numel(timestamps_header);
+  else
+    i1 = find(timestamps_header >= recordLengthIdeal,1);
+    if isempty(i1),
+      warning('No timestamps occur after timeCropEnd = %f. Cannot crop end.',timestamps(i0)+recordLengthIdeal); %??? why warn and not error? 
+      i1 = numel(timestamps_header);
+    else
+        %??? couldn't figure out what this is checking for
+      if i1 > 1 && ...
+          (recordLengthIdeal - timestamps_header(i1-1)) < ...
+          (timestamps_header(i1) - recordLengthIdeal), 
+        i1 = i1 - 1;
+      end
+    end
+  end
+    %not cropping start
+    i0 = 1;
+    registration_data.seconds_crop_start = 0;
+    registration_data.start_frame = i0;
+    registration_data.seconds_crop_end = timestamps_header(end)-timestamps_header(i1);
+    registration_data.end_frame = i1;
+  
+  fns = setdiff(fieldnames(trx),fns_notperframe);
+  isperframe = true(1,numel(fns));
+  nperfn = nan(1,numel(fns));
+  if ~isempty(trx),
+    
+    for j = 1:numel(fns),
+      fn = fns{j};
+      for i = 1:numel(trx),
+        if ~isnumeric(trx(i).(fn)),
+          isperframe(j) = false;
+          break;
+        end
+        % check if fn has perframe data 
+        if i == 1,
+          ncurr = trx(i).nframes - numel(trx(i).(fn)); 
+        else
+          if trx(i).nframes - numel(trx(i).(fn)) ~= ncurr,
+            isperframe(j) = false;
+            break;
+          end
+        end
+      end
+      if all([trx.nframes]) == trx(1).nframes && ...
+          trx(1).nframes > 1 && numel(trx(1).(fn)) == 1,
+        isperframe(j) = false;
+      end
+      if isperframe(j),
+        nperfn(j) = ncurr;
+      end
+    end
+    
+    nperfn = nperfn(isperframe);
+    fns = fns(isperframe);
+    ncropright = ceil(nperfn/2);
+    ncropleft = nperfn - ncropright;
+    
+    trxdelete = false(1,numel(trx));
+    for i = 1:numel(trx),
+      if trx(i).firstframe > i1,
+        trxdelete(i) = true;
+        continue;
+      end
+      
+%       if trx(i).endframe < i0,
+%         trxdelete(i) = true;
+%         continue;
+%       end
+      
+      trx(i).nframes = min(i1,trx(i).endframe)-max(i0,trx(i).firstframe)+1;
+      
+      if trx(i).firstframe < i0,
+        off = i0 - trx(i).firstframe;
+        for j = 1:numel(fns),
+          fn = fns{j};
+          trx(i).(fn) = trx(i).(fn)(off+1+ncropleft(j):end);
+        end
+        trx(i).firstframe = i0;
+      end
+      
+      if trx(i).endframe > i1,
+        for j = 1:numel(fns),
+          fn = fns{j};
+          trx(i).(fn) = trx(i).(fn)(1:trx(i).nframes-nperfn(j));
+        end
+        trx(i).endframe = i1;
+      end
+      
+      
+      trx(i).off = -trx(i).firstframe + 1;
+      
+    end
+    trx(trxdelete) = []; 
+    newid2oldid(trxdelete) = [];
+    
+  end
+  
+  fprintf('Applied temporal truncation. Data cropped to %s seconds. \n',timestamps_header(i1));    
+else
+    fprintf('NOT applying temporal truncation.\n')
+end
+
 
 %% save registered trx to file
 
@@ -660,7 +790,7 @@ try
     delete(trxfile);
   end
   %registrationinfo = logger.runInfo;
-  save(trxfile,'trx','timestamps');
+  save(trxfile,'trx','timestamps'); %??? which timestamps should this be? Shouldn't it be truncated to match registration data? 
   didsave = true;
 catch ME
   warning('Could not save registered trx: %s',getReport(ME));

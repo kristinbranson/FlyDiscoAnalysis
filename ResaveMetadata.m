@@ -24,9 +24,14 @@ end
 % open metadata file for writing 
 % fails silentely if savefilename is softlink without permissions !
 
-fid = fopen(savefilename,'w');
+% make a temp metadatafile first and test whether it can be read before
+% overwriting original. 
+[a,b,c] = fileparts(savefilename);
+tmpsavefilename = fullfile(a,['TMP_',b,c]);
+
+fid = fopen(tmpsavefilename,'w');
 if fid < 0,
-  sprintf('Could not write to experiment metadata file %s',savefilename);
+  sprintf('Could not write to experiment metadata file %s, aborting ResaveMetadata ',tmpsavefilename);
   success = false;
   return;
 end
@@ -124,8 +129,19 @@ fprintf(fid,'/>\n');
 fprintf(fid,'    </flies>\n');
 fprintf(fid,'  </session>\n');
 % temperature and humidity measured from precon sensor
+if ischar(metadata.temperature)
+fprintf(fid,'  <environment temperature="%s" ',metadata.temperature);
+else
 fprintf(fid,'  <environment temperature="%f" ',metadata.temperature);
+end
+if ischar(metadata.humidity)
+fprintf(fid,'humidity="%s" />\n',metadata.humidity);    
+else
 fprintf(fid,'humidity="%f" />\n',metadata.humidity);
+end
+% 
+% fprintf(fid,'  <environment temperature="%f" ',metadata.temperature);
+% fprintf(fid,'humidity="%f" />\n',metadata.humidity);
 % notes entered
 % deal with multi-line notes
 fprintf(fid,'  <notes_behavioral>%s</notes_behavioral>\n',metadata.notes_behavioral);
@@ -148,6 +164,26 @@ fprintf(fid,'  <flag_legacy>0</flag_legacy>\n');
 fprintf(fid,'</experiment>\n');
 
 fclose(fid);
+
+try
+    ReadMetadataFile(tmpsavefilename);
+catch
+    fprintf('Malformed metadata file %s can not be read by ReadMetadataFile, aborting ResaveMetadata\n',tmpsavefilename);
+    success = false;
+    return;
+end
+
+
+  [success1] = copyfile(tmpsavefilename,savefilename,'f');
+  if ~success1,
+    fprintf('Error saving metadata file %s, aborting ResaveMetadata\n',savefilename);
+    success = false;
+    return;
+  end
+  delete(tmpsavefilename)
+end
+
+
 
 
 

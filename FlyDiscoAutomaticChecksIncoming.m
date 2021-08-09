@@ -47,6 +47,7 @@ categories = {'flag_aborted_set_to_1',...
   'bad_video_timestamps',...
   'missing_capture_files',...
   'flag_redo_set_to_1',...
+  'flag_flies_dead_or_damaged',... 
   'fliesloaded_time_too_short',...
   'fliesloaded_time_too_long',...
   'shiftflytemp_time_too_long',...
@@ -112,6 +113,20 @@ if isfield(metadata,'flag_redo') && metadata.flag_redo ~= 0,
   iserror(category2idx.flag_redo_set_to_1) = true;
 end
 
+%% check for dead or damaged flies
+
+if isfield(metadata,'num_flies_damaged') && metadata.num_flies_damaged > 0,
+  success = false;
+  msgs{end+1} = 'Damaged flies > 0.';
+  iserror(category2idx.flag_flies_dead_or_damaged) = true;
+end
+
+if isfield(metadata,'num_flies_dead') && metadata.num_flies_dead > 0,
+  success = false;
+  msgs{end+1} = 'Dead flies > 0.';
+  iserror(category2idx.flag_flies_dead_or_damaged) = true;
+end
+
 %% check loading time
 
 if isfield(metadata,'seconds_fliesloaded'),
@@ -158,36 +173,81 @@ end
 %% check video length
 
 headerinfo = [];
-if exist(moviefile,'file'),
-  try
-    headerinfo = ufmf_read_header(moviefile);
-    if ~isfield(headerinfo,'nframes'),
-      error('No field nframes in UFMF header');
-    end
-    nframes = headerinfo.nframes;
-     if exist(protocolfile,'file')
-      protocolinfo = load(protocolfile);
-      if ~isfield(protocolinfo.protocol,'duration')
-        error('No duration field in protocol file')
-      end
-      exptime = sum(protocolinfo.protocol.duration)/1000;
-      expframes = exptime/(1/check_params.frame_rate);
-      min_frames = expframes - (expframes*.05); % some buffer in short movie length
-      if nframes < min_frames,
+
+registrationparamsfile = fullfile(settingsdir,analysis_protocol,dataloc_params.registrationparamsfilestr);
+if ~exist(registrationparamsfile,'file'),
+    error('Registration params file %s does not exist',registrationparamsfile);
+end
+registration_params = ReadParams(registrationparamsfile);
+
+if exist(moviefile,'file')
+    try
+        headerinfo = ufmf_read_header(moviefile);
+        if ~isfield(registration_params,'OptogeneticExp')
+            error('No optogenetics flag in registration params')
+        end
+        % if optogenetic experiment
+        if registration_params.OptogeneticExp            
+            % if uses mediandt = unreliable timestamps
+            if registration_params.usemediandt
+                if ~isfield(headerinfo,'nframes'),
+                    error('No field nframes in UFMF header');
+                end
+                nframes = headerinfo.nframes;
+                movielength = nframes/check_params.frame_rate;
+            else % use timestamps
+                if ~isfield(headerinfo,'timestamps'),
+                    error('No field timestamps in UFMF header');
+                end
+                movielength = headerinfo.timestamps(end);
+            end
+            if exist(protocolfile,'file')  % protocol file is checked for below not writing error here if doesn't exist
+                protocolinfo = load(protocolfile);
+                if ~isfield(protocolinfo.protocol,'duration')
+                    error('No duration field in protocol file')
+                end
+                movielength_expected = sum(protocolinfo.protocol.duration)/1000;                
+                if isfield(check_params,'movie_length_delta_seconds')
+                    movielength_expected = movielength_expected  - check_params.movie_length_delta_seconds;
+                end
+                if movielength < movielength_expected
+                    success = false;
+                    msgs{end+1} = sprintf('Video duration is %d sec < %d sec the protocol duration.',movielength,movielength_expected);
+                    iserror(category2idx.short_video) = true;
+                end
+            end
+        elseif isfield(check_params,'min_movie_length_seconds') 
+            if ~isfield(headerinfo,'timestamps'),
+                error('No field timestamps in UFMF header');
+            end
+            movielength = headerinfo.timestamps(end);
+            
+            movielength_expected = check_params.min_movie_length_seconds;
+            
+            if movielength < movielength_expected
+                success = false;
+                msgs{end+1} = sprintf('Video duration is %d sec < %d sec min_movie_length.',movielength,movielength_expected);
+                iserror(category2idx.short_video) = true;
+            end
+        elseif isfield(check_params,'min_ufmf_diagnostics_summary_nframes')
+            if ~isfield(headerinfo,'nframes'),
+                error('No field nframes in UFMF header');
+            end
+            nframes = headerinfo.nframes;
+            
+            min_nframes = check_params.min_ufmf_diagnostics_summary_nframes;
+            
+            if nframes < min_nframes
+                success = false;
+                msgs{end+1} = sprintf('Video nframes is %d < %d the minium frame length.',nframes, min_nframes);
+                iserror(category2idx.short_video) = true;
+            end
+        end
+    catch ME,
         success = false;
-        msgs{end+1} = sprintf('Video contains %d < %d frames.',nframes,check_params.min_ufmf_diagnostics_summary_nframes);
-        iserror(category2idx.short_video) = true;
-      end
-     elseif nframes < check_params.min_ufmf_diagnostics_summary_nframes,
-      success = false;
-      msgs{end+1} = sprintf('Video contains %d < %d frames.',nframes,check_params.min_ufmf_diagnostics_summary_nframes);
-      iserror(category2idx.short_video) = true;
+        msgs{end+1} = sprintf('Error reading data from movie header: %s',getReport(ME,'extended','hyperlinks','off'));
+        iserror(category2idx.incoming_checks_other) = true;
     end
-  catch ME,
-    success = false;
-    msgs{end+1} = sprintf('Error reading nframes from movie header: %s',getReport(ME,'extended','hyperlinks','off'));
-    iserror(category2idx.incoming_checks_other) = true;    
-  end
 end
 
 %% check for bad timestamps
@@ -214,52 +274,52 @@ end
 
 if isscreen,
 
-%exp_datenum = datenum(metadata.exp_datetime,datetime_format);
-  
-if (~ismember(metadata.line,check_params.control_line_names) || ...
-    (exp_datenum >= min_barcode_expdatenum)) && ...
-    metadata.cross_barcode < 0,
-  success = false;
-  msgs{end+1} = 'Barcode = -1 and line_name indicates not control';
-  iserror(category2idx.no_barcode) = true;
-end
-
-%% check temperature
-% 
-% if ~exist(temperaturefile,'file'),
-%   warning('Temperature file %s does not exist',temperaturefile);
-% else
-%   try
-%     tempdata = importdata(temperaturefile,',');
-%   catch ME,
-%     warning('Error importing temperature stream: %s',getReport(ME));
-%   end
-%   if isempty(tempdata),
-%     warning('No temperature readings recorded.');
-%     temp = [];
-%   elseif size(tempdata,2) < 2,
-%     warning('Temperature data could not be read');
-%     temp = [];
-%   else
-%     temp = tempdata(:,2);
-%     if isempty(temp),
-%       warning('No temperature readings recorded.');
-%     else
-%       if max(temp) > check_params.max_temp,
-%         success = false;
-%         msgs{end+1} = sprintf('Max temperature = %f > %f.',max(temp),check_params.max_temp);
-%       end
-%       if numel(temp) < 2,
-%         warning('Only one temperature recorded.');
-%       else
-%         if max(temp) - min(temp) > check_params.max_tempdiff,
-%           success = false;
-%           msgs{end+1} = sprintf('Temperature change = %f > %f.',max(temp) - min(temp),check_params.max_tempdiff);
-%         end
-%       end
-%     end
-%   end
-% end
+    %exp_datenum = datenum(metadata.exp_datetime,datetime_format);
+    
+    if (~ismember(metadata.line,check_params.control_line_names) || ...
+            (exp_datenum >= min_barcode_expdatenum)) && ...
+            metadata.cross_barcode < 0,
+        success = false;
+        msgs{end+1} = 'Barcode = -1 and line_name indicates not control';
+        iserror(category2idx.no_barcode) = true;
+    end
+    
+    %% check temperature
+    %
+    % if ~exist(temperaturefile,'file'),
+    %   warning('Temperature file %s does not exist',temperaturefile);
+    % else
+    %   try
+    %     tempdata = importdata(temperaturefile,',');
+    %   catch ME,
+    %     warning('Error importing temperature stream: %s',getReport(ME));
+    %   end
+    %   if isempty(tempdata),
+    %     warning('No temperature readings recorded.');
+    %     temp = [];
+    %   elseif size(tempdata,2) < 2,
+    %     warning('Temperature data could not be read');
+    %     temp = [];
+    %   else
+    %     temp = tempdata(:,2);
+    %     if isempty(temp),
+    %       warning('No temperature readings recorded.');
+    %     else
+    %       if max(temp) > check_params.max_temp,
+    %         success = false;
+    %         msgs{end+1} = sprintf('Max temperature = %f > %f.',max(temp),check_params.max_temp);
+    %       end
+    %       if numel(temp) < 2,
+    %         warning('Only one temperature recorded.');
+    %       else
+    %         if max(temp) - min(temp) > check_params.max_tempdiff,
+    %           success = false;
+    %           msgs{end+1} = sprintf('Temperature change = %f > %f.',max(temp) - min(temp),check_params.max_tempdiff);
+    %         end
+    %       end
+    %     end
+    %   end
+    % end
 
 end
 
