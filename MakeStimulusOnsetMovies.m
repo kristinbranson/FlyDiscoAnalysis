@@ -1,9 +1,9 @@
 function [outfiles,ions,fliesplot] = MakeStimulusOnsetMovies(moviefile,trx,outfilebase,varargin)
 
-[nfliesplot,fliesplot,ions,nperiodsplot,visible,leftovers] = ...
+[nfliesplot,fliesplot,ions,nperiodsplot,visible,force,leftovers] = ...
   myparse_nocheck(varargin,'nfliesplot',[],...
   'fliesplot',[],'ions',[],'nperiodsplot',[],...
-  'visible','on');
+  'visible','on','force',false);
 
 if ~isempty(fliesplot),
   nfliesplot = numel(fliesplot);
@@ -57,6 +57,9 @@ for ioni = 1:numel(ions),
     fly = fliesplot(fliesploti);
     outfile = sprintf('%s_period%02d_fly%02d.gif',outfilebase,ion,fly);
     outfiles{ioni,fliesploti} = outfile;
+    if ~force && exist(outfile,'file'),
+      continue;
+    end
     MakeStimulusOnsetMovie(readframe,trx,outfile,ion,fly,ind,'hax',hax,leftovers{:});
   end
 end

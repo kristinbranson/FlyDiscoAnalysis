@@ -29,6 +29,18 @@ settingsdir = 'settings';
 % expdir = SymbolicCopyExperimentDirectory(expdir0,rootdir);
 expdir = 'testdata/VNC_JRC_SS50831_RigC_20210517T151218';
 
+% test data selected by Ryo
+%expdir0 = '/groups/branson/bransonlab/flydisco_data/VNC_EXT_VGLUT-GAL4_RigA_20210427T125905';
+%expdir0 = '/groups/branson/bransonlab/flydisco_data/VNC_JRC_SS68333_RigA_20210422T150926';
+expdir0 = '/groups/dickson/dicksonlab/flydisco_data/VNC_JRC_SS62014_RigD_20210525T133656';
+[~,expname] = fileparts(expdir0);
+expdir = SymbolicCopyExperimentDirectory(expdir0,rootdir);
+% results copied to 
+% /misc/public/Kristin2Disco/VNC_EXT_VGLUT-GAL4_RigA_20210427T125905/stats.html
+% /misc/public/Kristin2Disco/VNC_JRC_SS68333_RigA_20210422T150926/stats.html
+% /misc/public/Kristin2Disco/VNC_JRC_SS62014_RigD_20210525T133656/stats.html
+
+
 FlyDiscoRegisterTrx(expdir,'settingsdir',settingsdir,'analysis_protocol',analysis_protocol);
 FlyDiscoDectectIndicatorLedOnOff(expdir,'settingsdir',settingsdir,'analysis_protocol',analysis_protocol);
 FlyDiscoClassifySex(expdir,'settingsdir',settingsdir,'analysis_protocol',analysis_protocol);
