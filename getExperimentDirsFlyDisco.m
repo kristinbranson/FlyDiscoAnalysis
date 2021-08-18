@@ -5,7 +5,8 @@ function [expdirstruct] = getExperimentDirsFlyDisco(rootdatadir,varargin)
 % assuming standard names
 sxclfilestr = 'sexclassifier_diagnostics.txt';
 autochcksinfilestr = 'automatic_checks_incoming_results.txt';
-analysiscompletefilestr = 'ANALYSIS-COMPLETE';
+autochckscompfilestr = 'automatic_checks_complete_results.txt';
+
 moviefilestr = 'movie.ufmf';
 trxfilestr = 'registered_trx.mat';
 % TODO 
@@ -14,11 +15,11 @@ trxfilestr = 'registered_trx.mat';
 % add option to check for aborted complete or failed files. 
 %%% screen_type from experiment name NOT accurate. change to expname, add
 %%% real screen_type filter
-[metadatafile, screen_type,line_name,date,nflies,autocheckin,FlyDiscoAnalysisStatus,movielength,TrajNum] = myparse(varargin,'metadatafile','Metadata.xml','screen_type','*','line_name','*', ...
-    'date','*','nflies',false,'autocheckin',false,'FlyDiscoAnalysisStatus', false,'movielength',false,'TrajNum',false);
+[metadatafile, expdirname,line_name,date,nflies,autocheckin,movielength,TrajNum,autocheckcomplete] = myparse(varargin,'metadatafile','Metadata.xml','expdirname','*','line_name','*', ...
+    'date','*','nflies',false,'autocheckin',false,'movielength',false,'TrajNum',false,'autocheckcomplete',false);
 
 
-searchname = sprintf('%s%s%s',screen_type,line_name,date);
+searchname = sprintf('%s%s%s',expdirname,line_name,date);
 %remove extra wildcards
 searchname = strrep(searchname,'***','*');
 searchname = strrep(searchname,'**','*');
@@ -80,35 +81,58 @@ for i = 1:numel(tmp)
         end
     end
     
-    % add FlyDiscoAnalysisStatus
-    analysiscompletefile = fullfile(rootdatadir,expdir,analysiscompletefilestr);
-    if FlyDiscoAnalysisStatus
-    if exist(analysiscompletefile,'file')
-        tmpM.FlyDiscoAnalysisStatus = '1';
-    else 
-        tmpM.FlyDiscoAnalysisStatus = '0';
+    % add autochecks complete
+    if autocheckcomplete
+        try
+            autochckscompfile = fullfile(rootdatadir,expdir,autochckscompfilestr);
+            if exist(autochckscompfile,'file')
+                autochckscomplete = ReadParams(autochckscompfile);
+                tmpM.automated_pf = autochckscomplete.automated_pf;
+                if tmpM.automated_pf == 'F',
+                tmpM.automated_pf_category = autochckscomplete.automated_pf_category;
+                tmpM.notes_curation = autochckscomplete.notes_curation;
+                end
+                
+            else
+                tmpM.automated_pf = 'NaN';
+            end
+        catch
+            tmpM.automated_pf = 'could not load file';
+        end
     end
-    end
+    
+    
+%     % add FlyDiscoAnalysisStatus
+%     analysiscompletefile = fullfile(rootdatadir,expdir,analysiscompletefilestr);
+%     if FlyDiscoAnalysisStatus
+%     if exist(analysiscompletefile,'file')
+%         tmpM.FlyDiscoAnalysisStatus = '1';
+%     else 
+%         tmpM.FlyDiscoAnalysisStatus = '0';
+%     end
+%     end
     % add nframes
-    moviefile = fullfile(rootdatadir,expdir,moviefilestr);
     if movielength
-        if exist(moviefile,'file')
-            headerinfo = ufmf_read_header(moviefile);
-            nframes = headerinfo.nframes;
-            tmpM.nframes = nframes;
-        else
-            tmpM.nframes = nan;
+        moviefile = fullfile(rootdatadir,expdir,moviefilestr);
+        if movielength
+            if exist(moviefile,'file')
+                headerinfo = ufmf_read_header(moviefile);
+                nframes = headerinfo.nframes;
+                tmpM.nframes = nframes;
+            else
+                tmpM.nframes = nan;
+            end
         end
     end
     % add trajectory num
     if TrajNum
-    trxfile = fullfile(rootdatadir,expdir,trxfilestr);
-    if exist(trxfile,'file')
-        load(trxfile,'trx');
-        tmpM.trajnum = numel(trx);
-    else
-        tmpM.trajnum = nan;
-    end
+        trxfile = fullfile(rootdatadir,expdir,trxfilestr);
+        if exist(trxfile,'file')
+            load(trxfile,'trx');
+            tmpM.trajnum = numel(trx);
+        else
+            tmpM.trajnum = nan;
+        end
     end
     
     % compile struct 
