@@ -95,7 +95,8 @@ default_analysis_parameters_as_list = ...
  %      'requiredfiles_computeperframestats',{'statsperframetxtfilestr','statsperframematfilestr','histperframetxtfilestr','histperframematfilestr'},...
 default_analysis_parameters = struct_from_name_value_list(default_analysis_parameters_as_list) ;
    
-% Combine the default parameters with those from the analysis-protocol folder, giving precedence to the analysis-protocol folder ones 
+% Combine the default parameters with those from the analysis-protocol folder and those in the arguments
+% Precedence is: argument_parameters > analysis-protocol paramters > default parameters
 analysis_parameters = merge_structs(default_analysis_parameters, analysis_protocol_parameters, argument_parameters) ;
 
 % Assign the paramters to individual variables
