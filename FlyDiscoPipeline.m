@@ -93,7 +93,8 @@ default_analysis_parameters_as_list = ...
        
 default_analysis_parameters = struct_from_name_value_list(default_analysis_parameters_as_list) ;
    
-% Combine the default parameters with those from the analysis-protocol folder, giving precedence to the analysis-protocol folder ones 
+% Combine the default parameters with those from the analysis-protocol folder and those in the arguments
+% Precedence is: argument_parameters > analysis-protocol paramters > default parameters
 analysis_parameters = merge_structs(default_analysis_parameters, analysis_protocol_parameters, argument_parameters) ;
 
 % Assign the paramters to individual variables
@@ -213,6 +214,11 @@ if is_on_or_force(doautomaticchecksincoming) ,
     msgs = cellfun(@(x) sprintf('Missing incoming automatic checks file %s',x),missingfiles,'UniformOutput',false) ;
     flydisco_pipeline_error(stage, msgs) ;               
   end  
+  
+  % Make sure the file usually named automatic_checks_incoming_results.txt
+  % contains either "automated_pf,P" or "automated_pf,U", but not
+  % "automated_pf,F".
+  CheckACIResultsFileContents(expdir, dataloc_params, stage) ;  % If this returns without erroring, all is well
 end
 
 
