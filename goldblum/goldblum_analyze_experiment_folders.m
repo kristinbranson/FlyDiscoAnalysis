@@ -11,7 +11,7 @@ function goldblum_analyze_experiment_folders(folder_path_from_experiment_index, 
     if ~exist('do_actually_submit_jobs', 'var') || isempty(do_actually_submit_jobs) ,
         do_actually_submit_jobs = true ;
     end
-    if ~exist('analysis_parameters', 'var') && isempty(analysis_parameters_as_name_value_list) ,
+    if ~exist('analysis_parameters_as_name_value_list', 'var') || isempty(analysis_parameters_as_name_value_list) ,
         analysis_parameters_as_name_value_list = cell(1,0) ;
     end
 
