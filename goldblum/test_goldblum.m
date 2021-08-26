@@ -1,4 +1,4 @@
-do_transfer_data_from_rigs = false ;
+do_transfer_data_from_rigs = true ;
 do_run_analysis = true ;
 do_use_bqueue = true ;
 do_actually_submit_jobs = true ;
@@ -9,14 +9,14 @@ this_folder_path = fileparts(this_script_path) ;
 fly_disco_analysis_folder_path = fileparts(this_folder_path) ;
 flydisco_folder_path = fileparts(fly_disco_analysis_folder_path) ;
 root_example_experiments_folder_path = fullfile(flydisco_folder_path, 'example-experiments') ;
-%read_only_example_experiments_folder_path = fullfile(root_example_experiments_folder_path, 'passing-test-suite-experiments-read-only') ;
+read_only_example_experiments_folder_path = fullfile(root_example_experiments_folder_path, 'passing-test-suite-experiments-read-only') ;
 %read_only_example_experiments_folder_path = fullfile(root_example_experiments_folder_path, 'no-experiments-read-only') ;
 %read_only_example_experiments_folder_path = fullfile(root_example_experiments_folder_path, 'one-aborted-one-faulty-experiment-read-only') ;
-read_only_example_experiments_folder_path = '/groups/branson/bransonlab/flydisco_example_experiments_read_only' ;
+%read_only_example_experiments_folder_path = '/groups/branson/bransonlab/flydisco_example_experiments_read_only' ;
 
 % Specify the "per-lab" configuration here
 lab_head_last_name = 'scicompsoft' ;
-rig_host_name = 'arrowroot.hhmi.org' ;
+rig_host_name = 'beet.hhmi.org' ;
 rig_user_name = 'bransonk' ;
 rig_data_folder_path = '/cygdrive/e/flydisco_data' ;
 goldblum_destination_folder_path = fullfile(root_example_experiments_folder_path, 'test-goldblum-destination-folder') ;
