@@ -216,6 +216,11 @@ if is_on_or_force(doautomaticchecksincoming) ,
     msgs = cellfun(@(x) sprintf('Missing incoming automatic checks file %s',x),missingfiles,'UniformOutput',false) ;
     flydisco_pipeline_error(stage, msgs) ;               
   end  
+  
+  % Make sure the file usually named automatic_checks_incoming_results.txt
+  % contains either "automated_pf,P" or "automated_pf,U", but not
+  % "automated_pf,F".
+  CheckACIResultsFileContents(expdir, dataloc_params, stage) ;  % If this returns without erroring, all is well
 end
 
 
