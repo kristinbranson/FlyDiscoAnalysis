@@ -181,9 +181,9 @@ for i = 1 : length(variable_names_to_print) ,
 end 
 fprintf('\n') ;
 
-% % Print the canonical path to the analysis folder
-% canonical_analysis_protocol_folder_path = realpath(analysis_protocol_folder_path) ;
-% fprintf('Canonical path to analysis protocol folder is:\n  %s\n\n', canonical_analysis_protocol_folder_path) ;
+% Print the canonical path to the analysis folder
+canonical_analysis_protocol_folder_path = realpath(analysis_protocol_folder_path) ;
+fprintf('Canonical path to analysis protocol folder is:\n  %s\n\n', canonical_analysis_protocol_folder_path) ;
 
 %% check that experiment exists
 stage = 'start' ;
