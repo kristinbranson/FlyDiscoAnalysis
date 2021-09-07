@@ -1,4 +1,0 @@
-male,sex,M
-female,sex,F
-firsthalf,max_timestamps,394.999999
-secondhalf,min_timestamps,395
