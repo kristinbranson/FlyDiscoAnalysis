@@ -146,7 +146,11 @@ function goldblum_analyze_experiment_folders(folder_path_from_experiment_index, 
     %
         
     % If the user has specified doautomaticcheckscomplete in analysis_parameters, honor that.
-    % Otherwise, default to turning it on.
+    % Otherwise, default to turning it on.  (TODO: Do we really need a special case
+    % for this?  Seems baroque.  It's simpler to explain if FlyDiscoPipeline() and
+    % FlyDiscoCaboose() get the same parameters, but FDP runs (at most) everything except the
+    % completion auto-checks, and FDC runs (at most) just the completion
+    % auto-checks.  --ALT, 2021-09-09
     try
         lookup_in_name_value_list(analysis_parameters_as_name_value_list, 'doautomaticcheckscomplete') ;
         % if get here, must be specified in analysis_parameters_as_name_value_list
