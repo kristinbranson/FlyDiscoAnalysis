@@ -1,0 +1,3 @@
+classifierparamsfiles,JAABA_classifier_params.txt
+#classifierparamsfiles,JAABA_classifier_params1.txt,JAABA_classifier_params2.txt,JAABA_classifier_params3.txt,JAABA_classifier_params_wing.txt
+#jaabadir,jaabaclassifiers
