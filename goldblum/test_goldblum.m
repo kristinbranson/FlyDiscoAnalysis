@@ -84,7 +84,9 @@ local_verify(example_experiments_folder_path, goldblum_destination_folder_path) 
 
 % Check that some of the expected outputs were generated
 all_tests_passed_from_experiment_index = check_for_pipeline_output_files(relative_path_to_folder_from_experiment_index, goldblum_destination_folder_path) ;
-if ~all(all_tests_passed_from_experiment_index) ,
+if all(all_tests_passed_from_experiment_index) ,
+    fprintf('All experiment folder checks pass at 1st check, except those that were expected not to pass.\n') ;
+else
     relative_path_to_folder_from_failed_experiment_index = ...
         relative_path_to_folder_from_experiment_index(~all_tests_passed_from_experiment_index)   %#ok<NOPTS,NASGU>   
     error('Some experiments had problems at 1st check') ;
@@ -109,7 +111,9 @@ goldblum(do_transfer_data_from_rigs, do_run_analysis, do_use_bqueue, do_actually
 
 % Check that some of the expected outputs were generated
 all_tests_passed_from_experiment_index = check_for_pipeline_output_files(relative_path_to_folder_from_experiment_index, goldblum_destination_folder_path) ;
-if ~all(all_tests_passed_from_experiment_index) ,
+if all(all_tests_passed_from_experiment_index) ,
+    fprintf('All experimental folder checks pass at 2nd check, except those that were expected not to pass.\n') ;
+else
     relative_path_to_folder_from_failed_experiment_index = ...
         relative_path_to_folder_from_experiment_index(~all_tests_passed_from_experiment_index)  %#ok<NOPTS,NASGU>
     error('Some experiments had problems at 2nd check') ;
