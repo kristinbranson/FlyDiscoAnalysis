@@ -1,0 +1,16 @@
+forcecompute,true
+doautomaticchecksincoming,force
+doflytracking,off
+doregistration,on
+doledonoffdetection,on
+dotrackwings,off
+dosexclassification,on
+docomputeperframefeatures,on
+docomputehoghofperframefeatures,off
+dojaabadetect,off
+docomputeperframestats,off
+doplotperframestats,off
+domakectraxresultsmovie,off
+doextradiagnostics,off
+doanalysisprotocol,off
+doautomaticcheckscomplete,force
