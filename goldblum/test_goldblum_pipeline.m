@@ -1,4 +1,4 @@
-do_reset_destination_folder = false ;
+do_reset_destination_folder = true ;
 do_use_bqueue = true ;
 do_actually_submit_jobs = true ;
 
