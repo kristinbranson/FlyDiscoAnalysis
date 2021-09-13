@@ -1,4 +1,4 @@
-do_transfer_data_from_rigs = false ;
+do_transfer_data_from_rigs = true ;
 do_run_analysis = true ;
 do_use_bqueue = true ;
 do_actually_submit_jobs = true ;
@@ -9,14 +9,15 @@ this_folder_path = fileparts(this_script_path) ;
 fly_disco_analysis_folder_path = fileparts(this_folder_path) ;
 flydisco_folder_path = fileparts(fly_disco_analysis_folder_path) ;
 root_example_experiments_folder_path = fullfile(flydisco_folder_path, 'example-experiments') ;
-%read_only_example_experiments_folder_path = fullfile(root_example_experiments_folder_path, 'passing-test-suite-experiments-read-only') ;
+%read_only_example_experiments_folder_path = fullfile(root_example_experiments_folder_path, 'all-test-suite-experiments-read-only') ;
+read_only_example_experiments_folder_path = fullfile(root_example_experiments_folder_path, 'passing-test-suite-experiments-read-only') ;
 %read_only_example_experiments_folder_path = fullfile(root_example_experiments_folder_path, 'no-experiments-read-only') ;
 %read_only_example_experiments_folder_path = fullfile(root_example_experiments_folder_path, 'one-aborted-one-faulty-experiment-read-only') ;
-read_only_example_experiments_folder_path = '/groups/branson/bransonlab/flydisco_example_experiments_read_only' ;
+%read_only_example_experiments_folder_path = '/groups/branson/bransonlab/flydisco_example_experiments_read_only' ;
 
 % Specify the "per-lab" configuration here
 lab_head_last_name = 'scicompsoft' ;
-rig_host_name = 'arrowroot.hhmi.org' ;
+rig_host_name = 'beet.hhmi.org' ;
 rig_user_name = 'bransonk' ;
 rig_data_folder_path = '/cygdrive/e/flydisco_data' ;
 goldblum_destination_folder_path = fullfile(root_example_experiments_folder_path, 'test-goldblum-destination-folder') ;
@@ -29,6 +30,13 @@ per_lab_configuration.data_folder_path_from_rig_index = {rig_data_folder_path} ;
 per_lab_configuration.destination_folder = goldblum_destination_folder_path ;    
 per_lab_configuration.settings_folder_path = settings_folder_path ;
 %per_lab_configuration.does_use_per_user_folders = true ;
+
+% Get the relative paths of all the experiment folders
+absolute_path_to_read_only_folder_from_experiment_index = find_experiment_folders(read_only_example_experiments_folder_path) ;
+relative_path_to_folder_from_experiment_index = ...
+    cellfun(@(abs_path)(relpath(abs_path, read_only_example_experiments_folder_path)), ...
+            absolute_path_to_read_only_folder_from_experiment_index, ...
+            'UniformOutput', false) ;
 
 % Delete the destination folder
 if exist(goldblum_destination_folder_path, 'file') ,
@@ -71,60 +79,56 @@ analysis_parameters = { 'doautomaticcheckscomplete', 'on' } ;
 fprintf('Running goldblum...\n') ;
 goldblum(do_transfer_data_from_rigs, do_run_analysis, do_use_bqueue, do_actually_submit_jobs, analysis_parameters, per_lab_configuration) ;        
 
+% Check that the expected files are present on dm11
+local_verify(example_experiments_folder_path, goldblum_destination_folder_path) ;
+
+% Check that some of the expected outputs were generated
+all_tests_passed_from_experiment_index = check_for_pipeline_output_files(relative_path_to_folder_from_experiment_index, goldblum_destination_folder_path) ;
+if all(all_tests_passed_from_experiment_index) ,
+    fprintf('All experiment folder checks pass at 1st check, except those that were expected not to pass.\n') ;
+else
+    relative_path_to_folder_from_failed_experiment_index = ...
+        relative_path_to_folder_from_experiment_index(~all_tests_passed_from_experiment_index)   %#ok<NOPTS,NASGU>   
+    error('Some experiments had problems at 1st check') ;
+end
+
+% Check that the rig lab folder is empty now
+if do_transfer_data_from_rigs ,
+    relative_path_from_experiment_folder_index = ...
+        find_remote_experiment_folders(rig_user_name, rig_host_name, rig_lab_data_folder_path, 'to-process') ;
+    if ~isempty(relative_path_from_experiment_folder_index) ,
+        error('Rig lab data folder %s:%s seems to still contain %d experiments', ...
+              rig_host_name, rig_lab_data_folder_path, length(relative_path_from_experiment_folder_index)) ;
+    end
+end
+
+% Run goldblum again, make sure nothing has changed
+goldblum(do_transfer_data_from_rigs, do_run_analysis, do_use_bqueue, do_actually_submit_jobs, analysis_parameters, per_lab_configuration) ;        
+
 % % Check that the expected files are present on dm11
-% local_verify(example_experiments_folder_path, goldblum_destination_folder_path) ;
-% 
-% % Check that some of the expected outputs were generated
-% test_file_names = {'perframe' 'scores_AttemptedCopulation.mat' 'scoresBackup.mat' 'registered_trx.mat' 'wingtracking_results.mat'} ;
-% for i = 1 : length(test_file_names) ,
-%     test_file_name = test_file_names{i} ;
-%     test_file_path = ...
-%         fullfile(goldblum_destination_folder_path, ...
-%                  'SS36564_20XUAS_CsChrimson_mVenus_attP18_flyBowlMing_20200227_Continuous_2min_5int_20200107_20200229T132141', ...
-%                  test_file_name) ;
-%     if ~exist(test_file_path, 'file') ,
-%         error('No output file at %s', test_file_path) ;
-%     end
-% end    
-% 
-% % Check that the rig lab folder is empty now
-% if do_transfer_data_from_rigs ,
-%     entry_names = ...
-%         list_remote_dir(rig_user_name, rig_host_name, rig_lab_data_folder_path) ;  %#ok<UNRCH>
-%     if ~isempty(entry_names) ,
-%         error('Rig lab data folder %s:%s is not empty', rig_host_name, rig_lab_data_folder_path) ;
-%     end
-% end
-% 
-% % Run goldblum again, make sure nothing has changed
-% goldblum(do_transfer_data_from_rigs, do_run_analysis, do_use_bqueue, do_actually_submit_jobs, [], per_lab_configuration) ;        
-% 
-% % % Check that the expected files are present on dm11
-% % example_experiments_folder_destination_path = fullfile(destination_folder_path, 'taylora', 'analysis-test-folder') ;
-% % local_verify(example_experiments_folder_path, example_experiments_folder_destination_path) ;
-% 
-% % Check that some of the expected outputs were generated
-% test_file_names = {'perframe' 'scores_AttemptedCopulation.mat' 'scoresBackup.mat' 'registered_trx.mat' 'wingtracking_results.mat'} ;
-% for i = 1 : length(test_file_names) ,
-%     test_file_name = test_file_names{i} ;
-%     test_file_path = ...
-%         fullfile(goldblum_destination_folder_path, ...
-%                  'SS36564_20XUAS_CsChrimson_mVenus_attP18_flyBowlMing_20200227_Continuous_2min_5int_20200107_20200229T132141', ...
-%                  test_file_name) ;
-%     if ~exist(test_file_path, 'file') ,
-%         error('No output file at %s', test_file_path) ;
-%     end
-% end    
-% 
-% % Check that the rig lab folder is empty now
-% if do_transfer_data_from_rigs ,
-%     entry_names = ...
-%         list_remote_dir(rig_user_name, rig_host_name, rig_lab_data_folder_path) ;  %#ok<UNRCH>
-%     if ~isempty(entry_names) ,
-%         error('Remote user folder %s:%s is not empty', rig_host_name, rig_lab_data_folder_path) ;
-%     end
-% end
-% 
-% % If get here, all is well
-% [~, this_script_name] = fileparts(this_script_path) ;
-% fprintf('All tests in %s.m passed.\n', this_script_name) ;
+% example_experiments_folder_destination_path = fullfile(destination_folder_path, 'taylora', 'analysis-test-folder') ;
+% local_verify(example_experiments_folder_path, example_experiments_folder_destination_path) ;
+
+% Check that some of the expected outputs were generated
+all_tests_passed_from_experiment_index = check_for_pipeline_output_files(relative_path_to_folder_from_experiment_index, goldblum_destination_folder_path) ;
+if all(all_tests_passed_from_experiment_index) ,
+    fprintf('All experimental folder checks pass at 2nd check, except those that were expected not to pass.\n') ;
+else
+    relative_path_to_folder_from_failed_experiment_index = ...
+        relative_path_to_folder_from_experiment_index(~all_tests_passed_from_experiment_index)  %#ok<NOPTS,NASGU>
+    error('Some experiments had problems at 2nd check') ;
+end
+
+% Check that the rig lab folder is empty now
+if do_transfer_data_from_rigs ,
+    relative_path_from_experiment_folder_index = ...
+        find_remote_experiment_folders(rig_user_name, rig_host_name, rig_lab_data_folder_path, 'to-process') ;
+    if ~isempty(relative_path_from_experiment_folder_index) ,
+        error('Rig lab data folder %s:%s seems to still contain %d experiments', ...
+              rig_host_name, rig_lab_data_folder_path, length(relative_path_from_experiment_folder_index)) ;
+    end
+end
+
+% If get here, all is well
+[~, this_script_name] = fileparts(this_script_path) ;
+fprintf('All tests in %s.m passed.\n', this_script_name) ;

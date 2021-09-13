@@ -1,0 +1,35 @@
+# <per-frame feature>,<frame condition name>,<fly condition name>,<min n. frames both valid>,<min n. frames fly valid>,[<norm per-frame feature>],[<norm frame condition name>],[<norm fly condition name>],[<norm min n. frames both valid>],[<norm min n. frames fly valid>]
+
+# The average of velmag in first 20% (6s) of first stimulus on period normalized by the average of velmag in the entire pre-stimulus period (30s)
+
+velmag_ctr,stimon1start,any,25,100,stimoff1
+
+# The average of all stimulus periods normalized by the pre-stimulus period for the following: velmag; dcenter; dnose2ell; dell2nose; dnose2tail; anglesub; angleonclosestfly; ddcenter; ddnose2ell; absphidiff_nose2ell; absthetadiff_nose2ell; magveldiff_nose2ell; veltoward_nose2ell; nflies_close
+
+velmag,stimonall,any,25,100,stimoff1
+dcenter,stimonall,any,25,100,stimoff1
+dnose2ell,stimonall,any,25,100,stimoff1
+dell2nose,stimonall,any,25,100,stimoff1
+dnose2tail,stimonall,any,25,100,stimoff1
+anglesub,stimonall,any,25,100,stimoff1
+angleonclosestfly,stimonall,any,25,100,stimoff1
+ddcenter,stimonall,any,25,100,stimoff1
+ddnose2ell,stimonall,any,25,100,stimoff1
+absphidiff_nose2ell,stimonall,any,25,100,stimoff1
+absthetadiff_nose2ell,stimonall,any,25,100,stimoff1
+magveldiff_nose2ell,stimonall,any,25,100,stimoff1
+veltoward_nose2ell,stimonall,any,25,100,stimoff1
+nflies_close,stimonall,any,25,100,stimoff1
+
+# Difference in the dcenter for the first 10s of the stimulus off period and the last 10s of the stimulus off period normalized by pre-stimulus period
+
+dcenter,stimoff2start,any,25,100,stimoff2end
+
+
+# Difference in the dcenter for the average of the stimulus on periods and the first 10s of the first stimulus off period normalized by the pre-stimulus period
+
+dcenter,stimonall,any,25,100,stimoff2start
+
+# Difference in the nflies_close in the first 20% of the first 3 stimulus on periods and the beginning 20% of the second, third, and forth stimulus off periods each normalized by the pre-stimulus period
+
+nflies_close,stimon1startclose,any,25,25,stimoff1startclose

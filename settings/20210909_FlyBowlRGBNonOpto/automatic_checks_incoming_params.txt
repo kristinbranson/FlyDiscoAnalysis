@@ -1,0 +1,9 @@
+min_seconds_fliesloaded,0
+max_seconds_fliesloaded,400
+usemediandt = 600
+#for a 10 min long movie without stimulus
+control_line_names,pBDPGAL4U
+required_files,metaData.xml,movie.ufmf,protocol.mat
+desired_files,expFigure.jpg,expTimeStamp.txt
+required_fns,flag_aborted,flag_redo,seconds_fliesloaded,screen_type,line,cross_barcode
+frame_rate,30

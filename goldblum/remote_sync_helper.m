@@ -45,9 +45,6 @@ function [n_copied, n_failed, n_dir_failed, n_verified, n_dir_failed_to_list, ti
     for i = 1 : source_file_count ,
         file_name = source_file_names{i} ;
         source_file_path = fullfile(source_parent_path, file_name) ;
-%         if isequal(source_file_path, '/cygdrive/h/flydisco_data/rubin/taylora/analysis-test-folder/2020-01-07/SS36564_20XUAS_CsChrimson_mVenus_attP18_flyBowlMing_20200227_Continuous_2min_5int_20200107_20200229T132141/metaData.xml') ,
-%             nop() ;
-%         end
         dest_file_path = fullfile(dest_parent_path, file_name) ;
         spinner.spin() ;
         %print("  %s" % source_file)
