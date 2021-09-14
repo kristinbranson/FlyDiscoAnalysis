@@ -302,8 +302,23 @@ end
 if fid < 0,
   error('Could not open automatic checks results file %s for writing.',outfile);
 end
-if isempty(error_messages) && ~strcmpi(automatedchecks_incoming.automated_pf,'F'),
+if ~any(iserror) && ~strcmpi(automatedchecks_incoming.automated_pf,'F'),
   fprintf(fid,'automated_pf,P\n');
+  if ~isempty(error_messages)
+      fprintf(fid,'notes_curation,');
+      s = sprintf('%s\\n',error_messages{:});
+      s = s(1:end-2);
+      if isfield(automatedchecks_incoming,'notes_curation') && ...
+              ~isempty(automatedchecks_incoming.notes_curation),
+          if isempty(s),
+              s = automatedchecks_incoming.notes_curation;
+          else
+              s = [automatedchecks_incoming.notes_curation,'\n',s];
+          end
+      end
+      fprintf(fid,'%s\n',s);
+  end
+  
 else
   fprintf(fid,'automated_pf,F\n');
   fprintf(fid,'notes_curation,');
