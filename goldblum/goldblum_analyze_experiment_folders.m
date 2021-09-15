@@ -145,27 +145,27 @@ function goldblum_analyze_experiment_folders(folder_path_from_experiment_index, 
     % "Caboose" phase
     %
         
-    % If the user has specified doautomaticcheckscomplete in analysis_parameters, honor that.
-    % Otherwise, default to turning it on.  (TODO: Do we really need a special case
-    % for this?  Seems baroque.  It's simpler to explain if FlyDiscoPipeline() and
-    % FlyDiscoCaboose() get the same parameters, but FDP runs (at most) everything except the
-    % completion auto-checks, and FDC runs (at most) just the completion
-    % auto-checks.  --ALT, 2021-09-09
-    try
-        lookup_in_name_value_list(analysis_parameters_as_name_value_list, 'doautomaticcheckscomplete') ;
-        % if get here, must be specified in analysis_parameters_as_name_value_list
-        caboose_analysis_parameters_as_name_value_list = analysis_parameters_as_name_value_list ;        
-    catch me ,
-        if strcmp(me.identifier, 'lookup_in_name_value_list:not_found') ,
-            % if get here, must be unspecified in analysis_parameters_as_name_value_list, so
-            % we set it
-            caboose_analysis_parameters_as_name_value_list = ...
-                merge_name_value_lists(analysis_parameters_as_name_value_list, ...
-                                       {'doautomaticcheckscomplete', 'on'}) ;
-        else
-            rethrow(me) ;
-        end
-    end
+%     % If the user has specified doautomaticcheckscomplete in analysis_parameters, honor that.
+%     % Otherwise, default to turning it on.  (TODO: Do we really need a special case
+%     % for this?  Seems baroque.  It's simpler to explain if FlyDiscoPipeline() and
+%     % FlyDiscoCaboose() get the same parameters, but FDP runs (at most) everything except the
+%     % completion auto-checks, and FDC runs (at most) just the completion
+%     % auto-checks.  --ALT, 2021-09-09
+%     try
+%         lookup_in_name_value_list(analysis_parameters_as_name_value_list, 'doautomaticcheckscomplete') ;
+%         % if get here, must be specified in analysis_parameters_as_name_value_list
+%         caboose_analysis_parameters_as_name_value_list = analysis_parameters_as_name_value_list ;        
+%     catch me ,
+%         if strcmp(me.identifier, 'lookup_in_name_value_list:not_found') ,
+%             % if get here, must be unspecified in analysis_parameters_as_name_value_list, so
+%             % we set it
+%             caboose_analysis_parameters_as_name_value_list = ...
+%                 merge_name_value_lists(analysis_parameters_as_name_value_list, ...
+%                                        {'doautomaticcheckscomplete', 'on'}) ;
+%         else
+%             rethrow(me) ;
+%         end
+%     end
     
     % Run the caboose jobs
     if do_use_bqueue ,
