@@ -1,4 +1,4 @@
-do_transfer_data_from_rigs = false ;
+do_transfer_data_from_rigs = true ;
 do_run_analysis = true ;
 do_use_bqueue = true ;
 do_actually_submit_jobs = true ;
