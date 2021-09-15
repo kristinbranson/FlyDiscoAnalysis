@@ -5,14 +5,15 @@ timestamp = datestr(now,'yyyymmddTHHMMSS');
 
 
 
-%success = true;
-error_messages = {};
+success = true ;  % Reflects whether any ACC failures have been detected yet (missing *required* files count, missing *desired* files do not)
+error_or_warning_messages = {} ;  % Each message in this list is either an error message or a warning message
 
 [analysis_protocol,settingsdir,datalocparamsfilestr,DEBUG] = ...
   myparse(varargin,...
   'analysis_protocol','current',...
   'settingsdir','/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/settings',...
-  'datalocparamsfilestr','dataloc_params.txt','debug',false);
+  'datalocparamsfilestr','dataloc_params.txt',...
+  'debug',false);
 
 if ischar(DEBUG),
   DEBUG = str2double(DEBUG) ~= 0;
@@ -45,9 +46,9 @@ real_analysis_protocol = GetRealAnalysisProtocol(analysis_protocol,settingsdir);
 
 paramsfile = fullfile(settingsdir,analysis_protocol,dataloc_params.automaticcheckscompleteparamsfilestr);
 check_params = ReadParams(paramsfile);
-metadatafile = fullfile(expdir,dataloc_params.metadatafilestr);
+%metadatafile = fullfile(expdir,dataloc_params.metadatafilestr);
 automatedchecksincomingfile = fullfile(expdir,dataloc_params.automaticchecksincomingresultsfilestr);
-outfile = fullfile(expdir,dataloc_params.automaticcheckscompleteresultsfilestr);
+acc_text_output_file_path = fullfile(expdir,dataloc_params.automaticcheckscompleteresultsfilestr);
 
 % types of automated errors: order matters in this list
 categories = {...
@@ -80,7 +81,7 @@ end
 
 %% read metadata
 
-metadata = ReadMetadataFile(metadatafile);
+%metadata = ReadMetadataFile(metadatafile);
 
 %% check for primary screen: some checks are only for screen data
 
@@ -102,55 +103,55 @@ if isscreen,
   
   sexclassifierfile = fullfile(expdir,dataloc_params.sexclassifierdiagnosticsfilestr);
   if ~exist(sexclassifierfile,'file'),
-    error_messages{end+1} = sprintf('sex classifier diagnostics file %s does not exist',sexclassifierfile);
-    %success = false;
+    error_or_warning_messages{end+1} = sprintf('sex classifier diagnostics file %s does not exist',sexclassifierfile);
+    success = false;
     iserror(category2idx.missing_sexclassification_files) = true;
   else
     sexclassifier_diagnostics = ReadParams(sexclassifierfile);
     if ~isfield(sexclassifier_diagnostics,'mean_nflies'),
-      error_messages{end+1} = sprintf('sex classifier diagnostics file %s missing field mean_nflies',sexclassifierfile);
-      %success = false;
+      error_or_warning_messages{end+1} = sprintf('sex classifier diagnostics file %s missing field mean_nflies',sexclassifierfile);
+      success = false;
       iserror(category2idx.completed_checks_other) = true;
     else
       num_flies = round(sexclassifier_diagnostics.mean_nflies);
       if num_flies < check_params.min_num_flies,
-        error_messages{end+1} = sprintf('num_flies = round(%f) = %d < %d',...
+        error_or_warning_messages{end+1} = sprintf('num_flies = round(%f) = %d < %d',...
           sexclassifier_diagnostics.mean_nflies,num_flies,check_params.min_num_flies);
-        %success = false;
+        success = false;
         iserror(category2idx.bad_number_of_flies) = true;
       end
       if num_flies > check_params.max_num_flies,
-        error_messages{end+1} = sprintf('num_flies = round(%f) = %d > %d',...
+        error_or_warning_messages{end+1} = sprintf('num_flies = round(%f) = %d > %d',...
           sexclassifier_diagnostics.mean_nflies,num_flies,check_params.max_num_flies);
-        %success = false;
+        success = false;
         iserror(category2idx.bad_number_of_flies) = true;
       end
     end
     
     if ~isfield(sexclassifier_diagnostics,'mean_nfemales'),
-      error_messages{end+1} = sprintf('sex classifier diagnostics file %s missing field mean_nfemales',sexclassifierfile);
-      %success = false;
+      error_or_warning_messages{end+1} = sprintf('sex classifier diagnostics file %s missing field mean_nfemales',sexclassifierfile);
+      success = false;
       iserror(category2idx.completed_checks_other) = true;
     else
       num_females = round(sexclassifier_diagnostics.mean_nfemales);
       if num_females < check_params.min_num_females,
-        error_messages{end+1} = sprintf('num_females = round(%f) = %d < %d',...
+        error_or_warning_messages{end+1} = sprintf('num_females = round(%f) = %d < %d',...
           sexclassifier_diagnostics.mean_nfemales,num_females,check_params.min_num_females);
-        %success = false;
+        success = false;
         iserror(category2idx.bad_number_of_flies_per_sex) = true;
       end
     end
     
     if ~isfield(sexclassifier_diagnostics,'mean_nmales'),
-      error_messages{end+1} = sprintf('sex classifier diagnostics file %s missing field mean_nmales',sexclassifierfile);
-      %success = false;
+      error_or_warning_messages{end+1} = sprintf('sex classifier diagnostics file %s missing field mean_nmales',sexclassifierfile);
+      success = false;
       iserror(category2idx.completed_checks_other) = true;
     else
       num_males = round(sexclassifier_diagnostics.mean_nmales);
       if num_males < check_params.min_num_males,
-        error_messages{end+1} = sprintf('num_males = round(%f) = %d < %d',...
+        error_or_warning_messages{end+1} = sprintf('num_males = round(%f) = %d < %d',...
           sexclassifier_diagnostics.mean_nmales,num_males,check_params.min_num_males);
-        %success = false;
+        success = false;
         iserror(category2idx.bad_number_of_flies_per_sex) = true;
       end
     end
@@ -165,8 +166,8 @@ end
 % last modification of data in the trx file in the pipeline
 wingtrxfile = fullfile(expdir,dataloc_params.wingtrxfilestr);
 if ~exist(wingtrxfile,'file'),
-  error_messages{end+1} = sprintf('wingtracking_results mat file %s does not exist',wingtrxfile);
-  %success = false;
+  error_or_warning_messages{end+1} = sprintf('wingtracking_results mat file %s does not exist',wingtrxfile);
+  success = false;
   iserror(category2idx.missing_registration_files) = true;
 else
   % name of annotation file
@@ -176,10 +177,10 @@ else
   %moviefile = fullfile(expdir,dataloc_params.moviefilestr);
   
   % load trajectories
-  [trx,~,succeeded,timestamps] = load_tracks(wingtrxfile); %#ok<NASGU>
+  [trx,~,succeeded] = load_tracks(wingtrxfile) ;
   if ~succeeded,
-    error_messages{end+1} = sprintf('Could not load trajectories from file %s',wingtrxfile);
-    %success = false;
+    error_or_warning_messages{end+1} = sprintf('Could not load trajectories from file %s',wingtrxfile);
+    success = false;
     iserror(category2idx.completed_checks_other) = true;
   else
     
@@ -197,9 +198,9 @@ else
         starts = starts - trx(fly).off;
         ends = ends - trx(fly).off;
         for se = 1:numel(starts)
-            error_messages{end+1} = [sprintf('Trajectory %d has NaNs in frames',fly),sprintf(' %d-%d',[starts(se),ends(se)]')]; %#ok<AGROW>
+            error_or_warning_messages{end+1} = [sprintf('Trajectory %d has NaNs in frames',fly),sprintf(' %d-%d',[starts(se),ends(se)]')]; %#ok<AGROW>
         end
-        %success = false;
+        success = false;
         iserror(category2idx.flytracker_nans) = true;
       end
 %       badidx = isinf(trx(fly).x) | ...
@@ -231,8 +232,8 @@ for i = 1:numel(check_params.required_files),
     isfile = exist(fullfile(expdir,fn),'file');
   end
   if ~isfile,
-    error_messages{end+1} = sprintf('Missing file %s',fn); %#ok<AGROW>
-    %success = false;
+    error_or_warning_messages{end+1} = sprintf('Missing file %s',fn); %#ok<AGROW>
+    success = false;
     category = sprintf('missing_%s_files',check_params.file_categories{i});
     iserror(category2idx.(category)) = true;
   end
@@ -275,7 +276,9 @@ if isfield(check_params,'desired_files'),
       isfile = exist(fullfile(expdir,fn),'file');
     end
     if ~isfile,
-      error_messages{end+1} = sprintf('Missing desired file %s',fn); %#ok<AGROW>
+      error_or_warning_messages{end+1} = sprintf('Missing desired file %s',fn); %#ok<AGROW>
+      % not that we don't set success = false, b/c these are desired files, not
+      % required files
     end
   end
 end
@@ -292,21 +295,21 @@ end
 if DEBUG,
   fid = 1;
 else
-  if exist(outfile,'file'),
+  if exist(acc_text_output_file_path,'file'),
     try %#ok<TRYNC>
-      delete(outfile);
+      delete(acc_text_output_file_path);
     end
   end
-  fid = fopen(outfile,'w');
+  fid = fopen(acc_text_output_file_path,'w');
 end
 if fid < 0,
-  error('Could not open automatic checks results file %s for writing.',outfile);
+  error('Could not open automatic checks results file %s for writing.',acc_text_output_file_path);
 end
-if ~any(iserror) && ~strcmpi(automatedchecks_incoming.automated_pf,'F'),
+if success && ~strcmpi(automatedchecks_incoming.automated_pf,'F'),
   fprintf(fid,'automated_pf,P\n');
-  if ~isempty(error_messages)
+  if ~isempty(error_or_warning_messages)
       fprintf(fid,'notes_curation,');
-      s = sprintf('%s\\n',error_messages{:});
+      s = sprintf('%s\\n',error_or_warning_messages{:});
       s = s(1:end-2);
       if isfield(automatedchecks_incoming,'notes_curation') && ...
               ~isempty(automatedchecks_incoming.notes_curation),
@@ -318,11 +321,10 @@ if ~any(iserror) && ~strcmpi(automatedchecks_incoming.automated_pf,'F'),
       end
       fprintf(fid,'%s\n',s);
   end
-  
 else
   fprintf(fid,'automated_pf,F\n');
   fprintf(fid,'notes_curation,');
-  s = sprintf('%s\\n',error_messages{:});
+  s = sprintf('%s\\n',error_or_warning_messages{:});
   s = s(1:end-2);
   if isfield(automatedchecks_incoming,'notes_curation') && ...
       ~isempty(automatedchecks_incoming.notes_curation),
@@ -362,10 +364,10 @@ end
 
 %% save info to mat file
 
-filename = fullfile(expdir,dataloc_params.automaticcheckscompleteinfomatfilestr);
-fprintf('Saving debug info to file %s...\n',filename);
+acc_mat_output_file_path = fullfile(expdir,dataloc_params.automaticcheckscompleteinfomatfilestr);
+fprintf('Saving debug info to file %s...\n',acc_mat_output_file_path);
 
-accinfo = struct;
+accinfo = struct() ;
 accinfo.paramsfile = paramsfile;
 accinfo.check_params = check_params;
 accinfo.version = version;
@@ -374,20 +376,20 @@ accinfo.linked_analysis_protocol = real_analysis_protocol;
 accinfo.timestamp = timestamp;
 accinfo.iserror = iserror;
 accinfo.categories = categories;
-accinfo.msgs = error_messages;
+accinfo.msgs = error_or_warning_messages;
 accinfo.automatedchecks_incoming = automatedchecks_incoming;
-accinfo.success = isempty(error_messages) ;
+accinfo.success = success ;
 
 if ~DEBUG,
-  if exist(filename,'file'),
+  if exist(acc_mat_output_file_path,'file'),
     try %#ok<TRYNC>
-      delete(filename);
+      delete(acc_mat_output_file_path);
     end
   end
   try
-    save(filename,'-struct','accinfo');
+    save(acc_mat_output_file_path,'-struct','accinfo');
   catch ME,
-    warning('Could not save information to file %s: %s',filename,getReport(ME));
+    warning('Could not save information to file %s: %s',acc_mat_output_file_path,getReport(ME));
   end
 end
 
@@ -395,10 +397,15 @@ end
 
 %fprintf('success = %d\n',success);
 stage = 'automaticchecks_complete' ;
-if isempty(error_messages),
-  fprintf('%s: No error or warning messages.\n', stage);
+if success ,
+  if isempty(error_or_warning_messages) ,     
+    fprintf('%s: No error or warning messages.\n', stage);
+  else
+    fprintf('%s: No errors, but there were warnings:\n', stage);
+    fprintf('%s\n',error_or_warning_messages{:});      
+  end
 else
-  flydisco_pipeline_error(stage, error_messages) ;
+  flydisco_pipeline_error(stage, error_or_warning_messages) ;
   %fprintf('Warning/error messages:\n');
   %fprintf('%s\n',msgs{:});
 end
