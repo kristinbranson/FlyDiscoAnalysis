@@ -75,7 +75,8 @@ else
 end
 
 % Run goldblum
-analysis_parameters = { 'doautomaticcheckscomplete', 'on' } ;
+%analysis_parameters = { 'doautomaticcheckscomplete', 'on' } ;
+analysis_parameters = { } ;
 fprintf('Running goldblum...\n') ;
 goldblum(do_transfer_data_from_rigs, do_run_analysis, do_use_bqueue, do_actually_submit_jobs, analysis_parameters, per_lab_configuration) ;        
 
