@@ -201,6 +201,8 @@ function FlyDiscoPipeline(expdir, varargin)
         if ~do_run_core_pipeline ,
             fprintf('FlyDisco pipeline encountered issues with experiment during %s stage.  Skipping core pipeline stages.\n', stage);
         end
+    else
+        do_run_core_pipeline = true ;
     end
     
     
