@@ -17,7 +17,7 @@
 % 'none' for linux). 
 % 'figpos': position of figure
 % if any parameters are not given, the user will be prompted for these
-function [succeeded,aviname,figpos,height,width] = make_ctrax_result_movie(varargin)
+function [succeeded,aviname,figpos,height,width] = make_ctrax_result_movie_maybe_better(varargin)
 
 succeeded = false;
 defaults.boxradius = 1.5;
@@ -411,16 +411,21 @@ elseif size(colors,1) ~= nids,
   colors = colors(modrange(0:nids-1,size(colors,1))+1,:);
 end
 
-if ishandle(1),
-  close(1);
+% if ishandle(1),
+%   close(1);
+% end
+fig_name = 'the make_ctrax_result_movie() figure' ;
+fig = findobj(groot, 'Type', 'figure', 'Name', fig_name) ;
+if isempty(fig) ,
+    fig = figure('Name', fig_name) ;
 end
-figure(1);
-clf;
-hold on;
-hax = gca;
+clf(fig);
+hax = axes(fig) ;
+hold(hax,'on');
+%hax = gca;
 set(hax,'position',[0,0,1,1]);
-axis off;
-isdisplay = ispc || ~strcmpi(get(1,'XDisplay'),'nodisplay');
+axis(hax,'off');
+isdisplay = ispc || ~strcmpi(get(fig,'XDisplay'),'nodisplay');
 
 % corners of zoom boxes in plotted image coords
 x0 = nc+(0:nzoomc-1)*rowszoom+1;
@@ -452,7 +457,8 @@ for segi = 1:numel(firstframes),
   for frame = firstframe:endframe,
   %for frame = firstframe:firstframe+100-1,
     if mod(frame - firstframe,5) == 0,
-      fprintf('frame %d, write rate = %f s/fr\n',frame,toc/5);
+      %fprintf('frame %d, write rate = %f s/fr\n',frame,toc/5);
+      print_matlab_memory_usage() ;
       tic;
     end
     
@@ -539,7 +545,7 @@ for segi = 1:numel(firstframes),
           if frame == firstframes(1),
             himzoom(i,j) = image([x0(j),x1(j)],[y0(i),y1(i)],repmat(uint8(123),[boxradius*2+1,boxradius*2+1,3]));
           else
-            set(himzoom(i,j),'cdata',repmat(uint8(123),[boxradius*2+1,boxradius*2+1,3]));
+            set(himzodom(i,j),'cdata',repmat(uint8(123),[boxradius*2+1,boxradius*2+1,3]));
           end
           continue
         end
@@ -725,12 +731,12 @@ for segi = 1:numel(firstframes),
     
     if frame == firstframes(1),
       if ~isempty(figpos),
-        set(1,'Position',figpos);
+        set(fig,'Position',figpos);
       else
         input('Resize figure 1 to the desired size, hit enter when done.');
-        figpos = get(1,'Position');
+        figpos = get(fig,'Position');
       end
-      set(1,'visible','off');
+      %set(fig,'visible','off');
       if useVideoWriter,
         if strcmpi(compression,'None') || strcmpi(compression,'Uncompressed AVI'),
           profile = 'Uncompressed AVI';
@@ -745,7 +751,7 @@ for segi = 1:numel(firstframes),
         open(aviobj);
       else
         if isempty(avifileTempDataFile),
-          aviobj = avifile(aviname,'fps',fps,'quality',100,'compression',compression);  %#ok<REMFF1>
+          aviobj = avifile(aviname,'fps',fps,'quality',100,'compression',compression); 
         else
           aviobj = myavifile(aviname,'fps',fps,'quality',100,'compression',compression,...
             'TempDataFile',avifileTempDataFile); 
@@ -755,6 +761,9 @@ for segi = 1:numel(firstframes),
     end
     
     fr = getframe(hax);
+    %fr = struct() ;
+    %fr.cdata = uint8(randi(256, [428 600 3])-1) ;
+    %fr.colormap = [] ;
     if frame == firstframes(1),
       height = size(fr.cdata,1);
       width = size(fr.cdata,2);
@@ -795,8 +804,7 @@ for segi = 1:numel(firstframes),
     else
       aviobj = addframe(aviobj,fr);
     end
-    set(1,'Position',figpos);
-    
+    %set(fig,'Position',figpos);
   end
   
 end
