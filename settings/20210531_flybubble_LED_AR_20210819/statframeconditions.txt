@@ -1,7 +1,15 @@
+# normalization conditions
+prestim4sponta,partm10to0s_stimoff_4,1 # ERROR
+notstimend10,partm10to0s_stimoff_1_2_3_4_5_6_7_8_9_10,1
+notstimend10move,partm10to0s_stimoff_1_2_3_4_5_6_7_8_9_10,min_velmag_ctr,2
+notstimend10walk,partm10to0s_stimoff_1_2_3_4_5_6_7_8_9_10,min_velmag_ctr,2,max_velmag_ctr,45
+notstimend10nearfly,partm10to0s_stimoff_1_2_3_4_5_6_7_8_9_10,max_dcenter,6.5
+
+
 # during stim
-stimweakp5,part0to0.5s_stimon_1_2_3,1
-stimweak5,part0to5s_stimon_1_2_3,1
-stimweak10,part0to10s_stimon_1_2_3,1
+stimweakp5,part0to0.5s_stimon_1_2_3,1 #checked
+stimweak5,part0to5s_stimon_1_2_3,1 # checked
+stimweak10,part0to10s_stimon_1_2_3,1 # checked 
 stimmidp5,part0to0.5s_stimon_4_5_6,1
 stimmid5,part0to5s_stimon_4_5_6,1
 stimmid10,part0to10s_stimon_4_5_6,1
@@ -55,12 +63,7 @@ poststimweak15,part0to15s_stimoff_2_3_4,1
 poststimmid15,part0to15s_stimoff_5_6_7,1
 poststimstrong15,part0to15s_stimoff_8_9_10,1
 
-# normalization conditions
-prestim4sponta,partm10to0s_stimoff_4,1
-notstimend10,partm10to0s_stimoff_1_2_3_4_5_6_7_8_9_10
-notstimend10move,partm10to0s_stimoff_1_2_3_4_5_6_7_8_9_10,min_velmag_ctr,2
-notstimend10walk,partm10to0s_stimoff_1_2_3_4_5_6_7_8_9_10,min_velmag_ctr,2,max_velmag_ctr,45
-notstimend10nearfly,partm10to0s_stimoff_1_2_3_4_5_6_7_8_9_10,max_dcenter,6.5
+
 
 
 

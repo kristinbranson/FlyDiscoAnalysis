@@ -1,5 +1,17 @@
 # <per-frame feature>,<frame condition name>,<fly condition name>,<min n. frames both valid>,<min n. frames fly valid>,[<norm per-frame feature>],[<norm frame condition name>],[<norm fly condition name>],[<norm min n. frames both valid>],[<norm min n. frames fly valid>]
 
+# test zone - batches of 5
+
+backward_vel,notstimend10,any,25,25
+forward_vel,notstimend10,any,25,25
+
+backward_vel,stimmidp5,any,25,25
+absdtheta,stimmidp5,any,25,25,prestim4sponta
+absdtheta,stimmidp5,any,25,25
+
+
+
+
 # The average of velmag in first 20% (6s) of first stimulus on period normalized by the average of velmag in the entire pre-stimulus period (30s)
 velmag_ctr,stimon1start,any,25,100,stimoff1
 velmag_ctr,stimon1start,any,25,100
@@ -11,9 +23,6 @@ absdphi,stimon1startmove,any,25,25
 absdphi,stimoff1move,any,25,25
 
 # Difference between post-stim forward distance (mean of positive forward velocity after the onset of stimulus, average of #1-3 and pre-stim forward distance (mean of positive forward velocity before the onset of stimulus, average of #1-3) for time window 500ms
-forward_vel,stimweakp5,any,25,25,prestimweakp5
-forward_vel,stimweakp5,any,25,25
-forward_vel,prestimweakp5,any,25,25
 
 
 # Response to stimulus in walking distance forward or backward
@@ -21,30 +30,14 @@ forward_vel,prestimweakp5,any,25,25
 backward_vel,prestim4sponta,any,25,25
 forward_vel,prestim4sponta,any,25,25
 
+backward_vel,notstimend10,any,25,25
+forward_vel,notstimend10,any,25,25
 
-forward_vel,stimweakp5,any,25,25,prestim4sponta
-forward_vel,stimweakp5,any,25,25
 
-backward_vel,stimweakp5,any,25,25,prestim4sponta
-backward_vel,stimweakp5,any,25,25
 
-forward_vel,stimweak5,any,25,25,prestim4sponta
-forward_vel,stimweak5,any,25,25
 
-backward_vel,stimweak5,any,25,25,prestim4sponta
-backward_vel,stimweak5,any,25,25
 
-forward_vel,stimweak10,any,25,25,prestim4sponta
-forward_vel,stimweak10,any,25,25
 
-backward_vel,stimweak10,any,25,25,prestim4sponta
-backward_vel,stimweak10,any,25,25
-
-forward_vel,stimmidp5,any,25,25,prestim4sponta
-forward_vel,stimmidp5,any,25,25
-
-backward_vel,stimmidp5,any,25,25,prestim4sponta
-backward_vel,stimmidp5,any,25,25
 
 forward_vel,stimmid5,any,25,25,prestim4sponta
 forward_vel,stimmid5,any,25,25
@@ -76,17 +69,11 @@ forward_vel,stimstrong10,any,25,25
 backward_vel,stimstrong10,any,25,25,prestim4sponta
 backward_vel,stimstrong10,any,25,25
 
-absdtheta,stimweakp5,any,25,25,prestim4sponta
-absdtheta,stimweakp5,any,25,25
 
-absdtheta,stimweak5,any,25,25,prestim4sponta
-absdtheta,stimweak5,any,25,25
 
-absdtheta,stimweak10,any,25,25,prestim4sponta
-absdtheta,stimweak10,any,25,25
 
-absdtheta,stimmidp5,any,25,25,prestim4sponta
-absdtheta,stimmidp5,any,25,25
+
+
 
 absdtheta,stimmid5,any,25,25,prestim4sponta
 absdtheta,stimmid5,any,25,25
