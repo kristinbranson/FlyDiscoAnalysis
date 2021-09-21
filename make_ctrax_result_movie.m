@@ -17,7 +17,7 @@
 % 'none' for linux). 
 % 'figpos': position of figure
 % if any parameters are not given, the user will be prompted for these
-function [succeeded,aviname,figpos,height,width] = make_ctrax_result_movie_maybe_better(varargin)
+function [succeeded,aviname,figpos,height,width] = make_ctrax_result_movie(varargin)
 
 succeeded = false;
 defaults.boxradius = 1.5;
@@ -29,17 +29,14 @@ defaults.nzoomc = 3;
 defaults.compression = 'None';
 allowedcompressions = {'Indeo3', 'Indeo5', 'Cinepak', 'MSVC', 'RLE', 'None','Uncompressed AVI','Motion JPEG AVI'};
 useVideoWriter = exist('VideoWriter','file');
-mencoderoptions = '';
-mencoder_maxnframes = inf;
 [moviename,trxname,aviname,colors,zoomflies,nzoomr,nzoomc,boxradius,...
   taillength,fps,maxnframes,firstframes,compression,figpos,movietitle,...
-  useVideoWriter,mencoderoptions,mencoder_maxnframes,...
+  useVideoWriter,...
   avifileTempDataFile,titletext,showtimestamps,dynamicflyselection,...
   doshowsex,doplotwings,doflipud,dofliplr] = ...
   myparse(varargin,'moviename','','trxname','','aviname','','colors',[],'zoomflies',[],'nzoomr',nan,'nzoomc',nan,...
   'boxradius',nan,'taillength',nan,'fps',nan,'maxnframes',nan,'firstframes',[],'compression','',...
   'figpos',[],'movietitle','','useVideoWriter',useVideoWriter,...
-  'mencoderoptions',mencoderoptions,'mencoder_maxnframes',mencoder_maxnframes,...
   'avifileTempDataFile','',...
   'titletext',true,...
   'showtimestamps',false, ...
@@ -69,11 +66,11 @@ else
 end
 [readframe1,nframes,fid] = get_readframe_fcn(moviename);
 if doflipud && dofliplr,
-  readframe = @(x) flipdim(flipdim(readframe1(x),1),2);
+  readframe = @(x) fliplr(flipud(readframe1(x)));  %#ok<FLUDLR>
 elseif doflipud,
-  readframe = @(x) flipdim(readframe1(x),1);
+  readframe = @(x) flipud(readframe1(x));
 elseif dofliplr
-  readframe = @(x) flipdim(readframe1(x),2);
+  readframe = @(x) fliplr(readframe1(x));
 else
   readframe = readframe1;
 end
@@ -216,7 +213,7 @@ if ~isempty(prompts),
     failed = false;
     for i = 1:length(answers),
       if strcmp(prompts{i},compressionprompt)
-        j = strmatch(answers{i},allowedcompressions);
+        j = strmatch(answers{i},allowedcompressions);  %#ok<MATCH2>
         if isempty(j),
           uiwait(msgbox(sprintf('Illegal compressor: %s',answers{i})));
           failed = true;
@@ -224,7 +221,7 @@ if ~isempty(prompts),
         end
         compression = allowedcompressions{j};
         answers{i} = allowedcompressions{j};
-        defaultanswers{i} = compression;
+        defaultanswers{i} = compression; %#ok<AGROW>
         continue;
       end
       answers{i} = str2double(answers{i});
@@ -293,7 +290,7 @@ if ~isempty(prompts),
           firstframes = max(1,ceil(answers{i}));
           answers{i} = firstframes;
       end
-      defaultanswers{i} = num2str(answers{i});
+      defaultanswers{i} = num2str(answers{i}); %#ok<AGROW>
     end
     if failed,
       continue;
@@ -447,7 +444,7 @@ hzoom = zeros(nzoomr,nzoomc);
 hzoomwing = zeros(nzoomr,nzoomc);
 htextzoom = zeros(nzoomr,nzoomc);
 
-mencoder_nframes = 0;
+%mencoder_nframes = 0;
 tic;
 
 for segi = 1:numel(firstframes),
@@ -457,7 +454,7 @@ for segi = 1:numel(firstframes),
   for frame = firstframe:endframe,
   %for frame = firstframe:firstframe+100-1,
     if mod(frame - firstframe,5) == 0,
-      %fprintf('frame %d, write rate = %f s/fr\n',frame,toc/5);
+      fprintf('frame %d, write rate = %f s/fr\n',frame,toc/5);
       print_matlab_memory_usage() ;
       tic;
     end
@@ -733,7 +730,7 @@ for segi = 1:numel(firstframes),
       if ~isempty(figpos),
         set(fig,'Position',figpos);
       else
-        input('Resize figure 1 to the desired size, hit enter when done.');
+        input('Resize figure to the desired size, hit enter when done.');
         figpos = get(fig,'Position');
       end
       %set(fig,'visible','off');
