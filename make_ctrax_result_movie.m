@@ -542,7 +542,7 @@ for segi = 1:numel(firstframes),
           if frame == firstframes(1),
             himzoom(i,j) = image([x0(j),x1(j)],[y0(i),y1(i)],repmat(uint8(123),[boxradius*2+1,boxradius*2+1,3]));
           else
-            set(himzodom(i,j),'cdata',repmat(uint8(123),[boxradius*2+1,boxradius*2+1,3]));
+            set(himzoom(i,j),'cdata',repmat(uint8(123),[boxradius*2+1,boxradius*2+1,3]));
           end
           continue
         end
