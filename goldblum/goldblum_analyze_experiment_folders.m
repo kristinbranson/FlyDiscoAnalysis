@@ -1,10 +1,7 @@
 function goldblum_analyze_experiment_folders(folder_path_from_experiment_index, settings_folder_path, lab_head_last_name, ...
-                                             do_force_analysis, do_use_bqueue, do_actually_submit_jobs, analysis_parameters_as_name_value_list)
+                                             do_use_bqueue, do_actually_submit_jobs, analysis_parameters_as_name_value_list)
 
     % Process arguments                                
-    if ~exist('do_force_analysis', 'var') || isempty(do_force_analysis) ,
-        do_force_analysis = false ;
-    end
     if ~exist('do_use_bqueue', 'var') || isempty(do_use_bqueue) ,
         do_use_bqueue = true ;
     end

@@ -9,4 +9,3 @@ middleframes,-1,.5,-1
 endframes,-1,-1,1
 nframes,500,500,500
 figpos,1,1,1434,1024
-tempdatadir,/groups/branson/bransonlab/projects/olympiad/TempData_FlyBowlMakeCtraxResultsMovie

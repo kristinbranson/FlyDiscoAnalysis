@@ -1,4 +1,4 @@
-function FlyDiscoAutomaticChecksComplete(expdir,varargin)
+function success = FlyDiscoAutomaticChecksComplete(expdir,varargin)
 
 version = '0.1';
 timestamp = datestr(now,'yyyymmddTHHMMSS');
@@ -397,6 +397,7 @@ end
 
 %fprintf('success = %d\n',success);
 stage = 'automaticchecks_complete' ;
+fprintf('Stage %s success = %d\n', stage, success) ;
 if success ,
   if isempty(error_or_warning_messages) ,     
     fprintf('%s: No error or warning messages.\n', stage);
@@ -405,9 +406,9 @@ if success ,
     fprintf('%s\n',error_or_warning_messages{:});      
   end
 else
-  flydisco_pipeline_error(stage, error_or_warning_messages) ;
-  %fprintf('Warning/error messages:\n');
-  %fprintf('%s\n',msgs{:});
+  %flydisco_pipeline_error(stage, error_or_warning_messages) ;
+  fprintf('Warning/error messages:\n');
+  fprintf('%s\n',error_or_warning_messages{:});
 end
 fprintf('Finished running FlyDiscoAutomaticChecks_Complete at %s.\n',datestr(now,'yyyymmddTHHMMSS'));
 
