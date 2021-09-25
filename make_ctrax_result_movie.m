@@ -444,19 +444,23 @@ hzoom = zeros(nzoomr,nzoomc);
 hzoomwing = zeros(nzoomr,nzoomc);
 htextzoom = zeros(nzoomr,nzoomc);
 
-%mencoder_nframes = 0;
-tic;
-
+frame_count_per_fprintf = 100 ;
 for segi = 1:numel(firstframes),
   firstframe = firstframes(segi);
   endframe = endframes(segi);
+  fprintf('Adding frames from segment %d, frames %d-%d\n', segi, firstframe, endframe) ;
 
   for frame = firstframe:endframe,
-  %for frame = firstframe:firstframe+100-1,
-    if mod(frame - firstframe,5) == 0,
-      fprintf('frame %d, write rate = %f s/fr\n',frame,toc/5);
-      print_matlab_memory_usage() ;
-      tic;
+    if frame==firstframe ,
+        tic_id = tic() ;
+    else
+      if mod(frame - firstframe,frame_count_per_fprintf) == 0,
+          elapsed_time = toc(tic_id) ;  % seconds
+          frame_pace = elapsed_time/frame_count_per_fprintf ;
+          fprintf('Just wrote frame %d, write rate = %f s/fr\n',frame,frame_pace);
+          print_matlab_memory_usage() ;
+          tic_id = tic() ;
+      end
     end
     
     % relative frame
