@@ -165,6 +165,10 @@ function goldblum_analyze_experiment_folders(folder_path_from_experiment_index, 
 %         end
 %     end
     
+    if experiment_count > 0 ,
+        fprintf('Submitting %d experiments for caboose phase...\n', experiment_count) ;
+    end
+
     % Run the caboose jobs
     if do_use_bqueue ,
         caboose_bqueue = bqueue_type(do_actually_submit_jobs, maxiumum_slot_count, do_use_xvfb) ;
