@@ -5,8 +5,8 @@ rootdir = '/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/202108
 expdir = '/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20210820_testingperframe/VNC_EXT_VGLUT-GAL4_RigC_20210628T152511';
 % VNC_JRC_SS50051_RigD_20210426T151519
 
-analysis_protocol = '20210531_flybubble_LED';
-% analysis_protocol = '20210531_flybubble_LED_AR_20210819';
+% analysis_protocol = '20210531_flybubble_LED';
+analysis_protocol = '20210531_flybubble_LED_AR_20210819';
 settingsdir = 'settings';
 
 % find an experiment with poor tracking
@@ -47,7 +47,7 @@ settingsdir = 'settings';
 % FlyDiscoDectectIndicatorLedOnOff(expdir,'settingsdir',settingsdir,'analysis_protocol',analysis_protocol);
 % FlyDiscoClassifySex(expdir,'settingsdir',settingsdir,'analysis_protocol',analysis_protocol);
 % FlyDiscoComputePerFrameFeatures(expdir,'settingsdir',settingsdir,'analysis_protocol',analysis_protocol);
-FlyDiscoComputePerFrameStats(expdir,'settingsdir',settingsdir,'analysis_protocol',analysis_protocol,'docomputehists',true,'debugplot',5);
+FlyDiscoComputePerFrameStats(expdir,'settingsdir',settingsdir,'analysis_protocol',analysis_protocol,'docomputehists',true,'debugplot',6);
 FlyDiscoPlotPerFrameStats2(expdir,'settingsdir',settingsdir,'analysis_protocol',analysis_protocol,'debug',false);
 
 %%
