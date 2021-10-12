@@ -3,7 +3,7 @@
 
 logfiledir = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/MetadataFixes';
 %%%CHANGE
-logfilename = 'expdirs_changescreen_typeforshortLEDprotocol_logofauto.csv';
+logfilename = 'expdirs_changescreen_type4labnameerror_logofauto.csv';
 
 logfile = fullfile(logfiledir,logfilename);
 
@@ -164,11 +164,18 @@ fid2 = fopen(logfile,'a');
 
 % redo experiments with bad metadata files after screen_type changed for
 % older led protocol - appending updates to the same csv file 
-expnamelist = textread('/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/malformedmetadataexplist_bransonlab.txt','%s');
-rootdatadir = '/groups/branson/bransonlab/flydisco_data';
-for k =1:numel(expnamelist)
-    explist{k} = fullfile(rootdatadir,expnamelist{k});
-end
+
+% expnamelist = textread('/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/malformedmetadataexplist_bransonlab.txt','%s');
+% rootdatadir = '/groups/branson/bransonlab/flydisco_data';
+% for k =1:numel(expnamelist)
+%     explist{k} = fullfile(rootdatadir,expnamelist{k});
+% end
+
+% change lab and screen_type for 9/21-22 experiments recorded with
+% labname = branson and instead of dickson
+explist = textread('/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/MetadataFixes/expdirlist_wk_fix_labname.txt','%s');
+% test explist = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20210928_testscreen_typerename/VNC_EXT_VGLUT-GAL4_RigA_20210921T144604'};
+
 
 % values to change in metadata
 for j = 1:numel(explist)
@@ -201,7 +208,9 @@ for j = 1:numel(explist)
     %     changestruct.line = 'JRC_SS53050';
     %     changestruct.line = 'JRC_SS66932';
     %     changestruct.line = 'JRC_SS67903';
-    changestruct.screen_type = 'non_olympiad_dickson_led5secVNC';
+%     changestruct.screen_type = 'non_olympiad_dickson_led5secVNC';
+    changestruct.lab = 'dickson';
+    changestruct.screen_type = 'non_olympiad_dickson_VNC';
     
     % replace metadata fields with changes
     fprintf(fid2,'%s, ',expdir);
