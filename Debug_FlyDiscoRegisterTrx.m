@@ -17,12 +17,15 @@ settingsdir = '/groups/branson/home/robiea/Code_versioned/FlyDiscoAnalysis/setti
 
 % analysis_protocol = 'current_bubble';
 % analysis_protocol = 'current_non_olympiad_rubin_grooming';
-analysis_protocol = '20210531_flybubble_LED_ARtestingperframe';
+% analysis_protocol = '20210531_flybubble_LED_ARtestingperframe';
+analysis_protocol = '20211014_flybubbleRed_noChr';
 params = {'settingsdir',settingsdir,...
   'analysis_protocol',analysis_protocol};
 
 %% test expdir
-expdir = '/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20210802_testACI_movielength/VNC_JRC_SS65710_RigB_20210513T142817';
+% expdir = '/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20210802_testACI_movielength/VNC_JRC_SS65710_RigB_20210513T142817';
+% expdir = '/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20211014_testing_FlyBubbleRed/socialCsChr_GMR_72C11_AE_01_CsChrimson_RigD_20191114T172654';
+expdir = '/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20211014_testing_FlyBubbleRed/nochr_TrpApBDP_Unknown_RigB_20201216T160731';
 
 %% run once
 

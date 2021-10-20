@@ -3,7 +3,8 @@
 
 logfiledir = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/MetadataFixes';
 %%%CHANGE
-logfilename = 'expdirs_changescreen_type4labnameerror_logofauto.csv';
+% logfilename = 'expdirs_changescreen_type4labnameerror_logofauto.csv';
+logfilename = 'expdirs_wk15wk16wk17_metachanges_logofauto.csv';
 
 logfile = fullfile(logfiledir,logfilename);
 
@@ -173,10 +174,26 @@ fid2 = fopen(logfile,'a');
 
 % change lab and screen_type for 9/21-22 experiments recorded with
 % labname = branson and instead of dickson
-explist = textread('/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/MetadataFixes/expdirlist_wk_fix_labname.txt','%s');
+% explist = textread('/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/MetadataFixes/expdirlist_wk_fix_labname.txt','%s');
 % test explist = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20210928_testscreen_typerename/VNC_EXT_VGLUT-GAL4_RigA_20210921T144604'};
 
-
+% wk15wk16wk17 
+% change linename to YNA_K_162984 and plate to 4a
+% explist = {'/groups/branson/bransonlab/flydisco_data/VNC_JRC_SS33489_RigD_20210914T134829'};
+% change plate to 3a
+% explist = {'/groups/branson/bransonlab/flydisco_data/VNC_YNA_K_162984_RigC_20210914T124311'};
+% change plate to 4b
+% explist = {'/groups/branson/bransonlab/flydisco_data/VNC_JRC_SS72014_RigD_20210914T145116'};
+%change to plate 3a
+% explist = {'/groups/branson/bransonlab/flydisco_data/VNC_JRC_SS73851_RigB_20210915T152308'};
+%change to plate 2a
+% explist = {'/groups/branson/bransonlab/flydisco_data/VNC_JRC_SS73851_RigC_20210915T152151'};
+% change linename to JRC_SS31219
+% explist = {'/groups/branson/bransonlab/flydisco_data/VNC_JRC_SS34684_RigA_20210921T130550'};
+% change plate to 2b
+% explist = {'/groups/branson/bransonlab/flydisco_data/VNC_JRC_SS40173_RigB_20210928T132853'};
+% change plate to 1c
+explist = {'/groups/branson/bransonlab/flydisco_data/VNC_JRC_SS44225_RigA_20210928T134724'};
 % values to change in metadata
 for j = 1:numel(explist)
     % per experiment
@@ -192,7 +209,7 @@ for j = 1:numel(explist)
     changestruct = struct;
     %         changestruct.experimenter = 'chenn';
     % changestruct.experimenter = 'arrudar';
-    %       changestruct.plate = '4a';
+          changestruct.plate = '1c';
     % also need to change expdir and ctrax results movie name manually
     % mv oldname newname
     %     changestruct.line = 'JRC_SS43660';
@@ -209,8 +226,10 @@ for j = 1:numel(explist)
     %     changestruct.line = 'JRC_SS66932';
     %     changestruct.line = 'JRC_SS67903';
 %     changestruct.screen_type = 'non_olympiad_dickson_led5secVNC';
-    changestruct.lab = 'dickson';
-    changestruct.screen_type = 'non_olympiad_dickson_VNC';
+%     changestruct.lab = 'dickson';
+%     changestruct.screen_type = 'non_olympiad_dickson_VNC';
+%         changestruct.line = 'YNA_K_162984';
+%         changestruct.line = 'JRC_SS31219';
     
     % replace metadata fields with changes
     fprintf(fid2,'%s, ',expdir);
