@@ -130,8 +130,10 @@ for i = 1:numel(tmp)
         if exist(trxfile,'file')
             load(trxfile,'trx');
             tmpM.trajnum = numel(trx);
+            tmpM.pxpermm = trx(1).pxpermm;
         else
             tmpM.trajnum = nan;
+            tmpM.pxpermm = nan;
         end
     end
     
