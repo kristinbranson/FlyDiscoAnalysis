@@ -28,10 +28,12 @@ function relative_path_from_synched_experiment_index = ...
 
     % print an informative message
     aborted_experiment_folder_count = length(relative_path_from_aborted_experiment_folder_index) ;
-    if aborted_experiment_folder_count==1 ,
+    if aborted_experiment_folder_count==0 ,
+        % do nothing
+    elseif aborted_experiment_folder_count==1 ,
         fprintf('Deleting %d ABORTED experiment folder from\n  %s@%s:%s\n  ...\n', ...
                 aborted_experiment_folder_count, source_user_name, source_host_name, source_root_absolute_path) ;
-    else
+    else 
         fprintf('Deleting %d ABORTED experiment folders from\n  %s@%s:%s\n  ...\n', ...
                 aborted_experiment_folder_count, source_user_name, source_host_name, source_root_absolute_path) ;
     end
@@ -54,14 +56,18 @@ function relative_path_from_synched_experiment_index = ...
     % print the number of ABORTED experiment folders deleted
     deleted_aborted_experiment_folder_count = sum(double(did_delete_from_aborted_experiment_folder_index)) ;
     delete_error_count = aborted_experiment_folder_count - deleted_aborted_experiment_folder_count ;
-    fprintf("Of %d ABORTED experiment folders:\n", aborted_experiment_folder_count) ;
-    fprintf("  %d deleted\n", deleted_aborted_experiment_folder_count) ;
-    fprintf("  %d failed to delete\n", delete_error_count) ;
+    if aborted_experiment_folder_count > 0 , 
+        fprintf("Of %d ABORTED experiment folders:\n", aborted_experiment_folder_count) ;
+        fprintf("  %d deleted\n", deleted_aborted_experiment_folder_count) ;
+        fprintf("  %d failed to delete\n", delete_error_count) ;
+    end
     
     % print an informative message
     unaborted_experiment_folder_count = length(relative_path_from_unaborted_experiment_folder_index) ;
-    fprintf('Synching %d experiment folders from\n  %s@%s:%s\n  into\n  %s\n  ...\n', ...
-            unaborted_experiment_folder_count, source_user_name, source_host_name, source_root_absolute_path, dest_root_absolute_path) ;
+    if unaborted_experiment_folder_count > 0 ,
+        fprintf('Synching %d experiment folders from\n  %s@%s:%s\n  into\n  %s\n  ...\n', ...
+                unaborted_experiment_folder_count, source_user_name, source_host_name, source_root_absolute_path, dest_root_absolute_path) ;
+    end
 
     % Sync each experiment folder in turn
     did_synch_from_unaborted_experiment_folder_index = false(unaborted_experiment_folder_count, 1) ;
@@ -85,9 +91,11 @@ function relative_path_from_synched_experiment_index = ...
     % print the number of experiment folders copied
     synched_experiment_folder_count = sum(double(did_synch_from_unaborted_experiment_folder_index)) ;
     synch_error_count = unaborted_experiment_folder_count - synched_experiment_folder_count ;
-    fprintf("Of %d unaborted experiment folders:\n", unaborted_experiment_folder_count) ;
-    fprintf("  %d synched and verified\n", synched_experiment_folder_count) ;
-    fprintf("  %d failed to synch or verify\n", synch_error_count) ;
+    if unaborted_experiment_folder_count > 0 ,
+        fprintf("Of %d unaborted experiment folders:\n", unaborted_experiment_folder_count) ;
+        fprintf("  %d synched and verified\n", synched_experiment_folder_count) ;
+        fprintf("  %d failed to synch or verify\n", synch_error_count) ;
+    end
     
     % Delete each synched experiment folder in turn
     relative_path_from_synched_experiment_index = relative_path_from_unaborted_experiment_folder_index(did_synch_from_unaborted_experiment_folder_index) ;
@@ -111,9 +119,11 @@ function relative_path_from_synched_experiment_index = ...
     % print the number of experiment folders copied
     deleted_experiment_folder_count = sum(double(did_delete_from_synched_experiment_index)) ;
     delete_error_count = synched_experiment_folder_count - deleted_experiment_folder_count ;
-    fprintf("Of %d synched experiment folders:\n", synched_experiment_folder_count) ;
-    fprintf("  %d deleted\n", deleted_experiment_folder_count) ;
-    fprintf("  %d failed to delete\n", delete_error_count) ;
+    if synched_experiment_folder_count > 0 ,
+        fprintf("Of %d synched experiment folders:\n", synched_experiment_folder_count) ;
+        fprintf("  %d deleted\n", deleted_experiment_folder_count) ;
+        fprintf("  %d failed to delete\n", delete_error_count) ;
+    end
 
     % print the elapsed time
     elapsed_time = toc(tic_id) ;

@@ -15,6 +15,7 @@ function goldblum_analyze_experiment_folders(folder_path_from_experiment_index, 
     % Specify bsub parameters
     maxiumum_slot_count = 400 ;
     slots_per_job = 4 ;
+    do_use_xvfb = true ;  % Matlab on linux leaks memory when you call getframe() without an X11 server
     
 %     % If do_force_analysis is true, clear any files indicating ongoing run
 %     experiment_count = length(folder_path_from_experiment_index) ;
@@ -51,7 +52,7 @@ function goldblum_analyze_experiment_folders(folder_path_from_experiment_index, 
 
     % Run goldblum_FlyDiscoPipeline_wrapper() on all experiments
     if do_use_bqueue ,
-        bqueue = bqueue_type(do_actually_submit_jobs, maxiumum_slot_count) ;
+        bqueue = bqueue_type(do_actually_submit_jobs, maxiumum_slot_count, do_use_xvfb) ;
 
         % Queue the jobs
         for i = 1 : experiment_count ,
@@ -164,9 +165,13 @@ function goldblum_analyze_experiment_folders(folder_path_from_experiment_index, 
 %         end
 %     end
     
+    if experiment_count > 0 ,
+        fprintf('Submitting %d experiments for caboose phase...\n', experiment_count) ;
+    end
+
     % Run the caboose jobs
     if do_use_bqueue ,
-        caboose_bqueue = bqueue_type(do_actually_submit_jobs, maxiumum_slot_count) ;
+        caboose_bqueue = bqueue_type(do_actually_submit_jobs, maxiumum_slot_count, do_use_xvfb) ;
 
         % Queue the jobs
         for i = 1 : experiment_count ,
