@@ -1,4 +1,4 @@
-doautomaticchecksincoming,force
+doautomaticchecksincoming,false
 doflytracking,true
 doregistration,true
 doledonoffdetection,true
@@ -6,7 +6,7 @@ dotrackwings,true
 dosexclassification,true
 docomputeperframefeatures,true
 docomputehoghofperframefeatures,false
-dojaabadetect,true
+dojaabadetect,false
 docomputeperframestats,false
 doplotperframestats,false
 domakectraxresultsmovie,false
