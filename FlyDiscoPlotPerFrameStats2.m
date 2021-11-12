@@ -56,7 +56,7 @@ end
 timestamp = datestr(now,'yyyymmddTHHMMSS');
 real_analysis_protocol = GetRealAnalysisProtocol(analysis_protocol,settingsdir);
 
-fprintf(logfid,'\n\n***\nRunning FlyBowlPlotPerFrameStats2 version %s analysis_protocol %s (linked to %s) at %s\n',version,analysis_protocol,real_analysis_protocol,timestamp);
+fprintf(logfid,'\n\n***\nRunning FlyDiscoPlotPerFrameStats2 version %s analysis_protocol %s (linked to %s) at %s\n',version,analysis_protocol,real_analysis_protocol,timestamp);
 
 %% load experiment data
 

@@ -112,8 +112,8 @@ if ~commonregistrationparams.OptogeneticExp,
   firstframes = registration_params.start_frame + firstframes_off;
 else
   if defaultparams,
-    load(indicatorfile)
-    load(ledprotocolfile)
+    load(indicatorfile, 'indicatorLED') ;
+    load(ledprotocolfile, 'protocol') ;
     if strcmp(metadata.assay,'FlyBubbleRGB') || strcmp(metadata.assay,'FlyBowlRGB')
         if isfield(protocol,'Rintensity')
             RGBprotocol = protocol;

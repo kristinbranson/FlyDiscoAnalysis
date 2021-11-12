@@ -1,10 +1,7 @@
 function goldblum_analyze_experiment_folders(folder_path_from_experiment_index, settings_folder_path, lab_head_last_name, ...
-                                             do_force_analysis, do_use_bqueue, do_actually_submit_jobs, analysis_parameters_as_name_value_list)
+                                             do_use_bqueue, do_actually_submit_jobs, analysis_parameters_as_name_value_list)
 
     % Process arguments                                
-    if ~exist('do_force_analysis', 'var') || isempty(do_force_analysis) ,
-        do_force_analysis = false ;
-    end
     if ~exist('do_use_bqueue', 'var') || isempty(do_use_bqueue) ,
         do_use_bqueue = true ;
     end
@@ -18,6 +15,7 @@ function goldblum_analyze_experiment_folders(folder_path_from_experiment_index, 
     % Specify bsub parameters
     maxiumum_slot_count = 400 ;
     slots_per_job = 4 ;
+    do_use_xvfb = true ;  % Matlab on linux leaks memory when you call getframe() without an X11 server
     
 %     % If do_force_analysis is true, clear any files indicating ongoing run
 %     experiment_count = length(folder_path_from_experiment_index) ;
@@ -54,7 +52,7 @@ function goldblum_analyze_experiment_folders(folder_path_from_experiment_index, 
 
     % Run goldblum_FlyDiscoPipeline_wrapper() on all experiments
     if do_use_bqueue ,
-        bqueue = bqueue_type(do_actually_submit_jobs, maxiumum_slot_count) ;
+        bqueue = bqueue_type(do_actually_submit_jobs, maxiumum_slot_count, do_use_xvfb) ;
 
         % Queue the jobs
         for i = 1 : experiment_count ,
@@ -145,27 +143,35 @@ function goldblum_analyze_experiment_folders(folder_path_from_experiment_index, 
     % "Caboose" phase
     %
         
-    % If the user has specified doautomaticcheckscomplete in analysis_parameters, honor that.
-    % Otherwise, default to turning it on.
-    try
-        lookup_in_name_value_list(analysis_parameters_as_name_value_list, 'doautomaticcheckscomplete') ;
-        % if get here, must be specified in analysis_parameters_as_name_value_list
-        caboose_analysis_parameters_as_name_value_list = analysis_parameters_as_name_value_list ;        
-    catch me ,
-        if strcmp(me.identifier, 'lookup_in_name_value_list:not_found') ,
-            % if get here, must be unspecified in analysis_parameters_as_name_value_list, so
-            % we set it
-            caboose_analysis_parameters_as_name_value_list = ...
-                merge_name_value_lists(analysis_parameters_as_name_value_list, ...
-                                       {'doautomaticcheckscomplete', 'on'}) ;
-        else
-            rethrow(me) ;
-        end
-    end
+%     % If the user has specified doautomaticcheckscomplete in analysis_parameters, honor that.
+%     % Otherwise, default to turning it on.  (TODO: Do we really need a special case
+%     % for this?  Seems baroque.  It's simpler to explain if FlyDiscoPipeline() and
+%     % FlyDiscoCaboose() get the same parameters, but FDP runs (at most) everything except the
+%     % completion auto-checks, and FDC runs (at most) just the completion
+%     % auto-checks.  --ALT, 2021-09-09
+%     try
+%         lookup_in_name_value_list(analysis_parameters_as_name_value_list, 'doautomaticcheckscomplete') ;
+%         % if get here, must be specified in analysis_parameters_as_name_value_list
+%         caboose_analysis_parameters_as_name_value_list = analysis_parameters_as_name_value_list ;        
+%     catch me ,
+%         if strcmp(me.identifier, 'lookup_in_name_value_list:not_found') ,
+%             % if get here, must be unspecified in analysis_parameters_as_name_value_list, so
+%             % we set it
+%             caboose_analysis_parameters_as_name_value_list = ...
+%                 merge_name_value_lists(analysis_parameters_as_name_value_list, ...
+%                                        {'doautomaticcheckscomplete', 'on'}) ;
+%         else
+%             rethrow(me) ;
+%         end
+%     end
     
+    if experiment_count > 0 ,
+        fprintf('Submitting %d experiments for caboose phase...\n', experiment_count) ;
+    end
+
     % Run the caboose jobs
     if do_use_bqueue ,
-        caboose_bqueue = bqueue_type(do_actually_submit_jobs, maxiumum_slot_count) ;
+        caboose_bqueue = bqueue_type(do_actually_submit_jobs, maxiumum_slot_count, do_use_xvfb) ;
 
         % Queue the jobs
         for i = 1 : experiment_count ,
@@ -186,7 +192,7 @@ function goldblum_analyze_experiment_folders(folder_path_from_experiment_index, 
                                    @goldblum_FlyDiscoCaboose_wrapper, ...
                                         experiment_folder_path, ...
                                         settings_folder_path, ...
-                                        caboose_analysis_parameters_as_name_value_list) ;
+                                        analysis_parameters_as_name_value_list) ;
         end
 
         % Actually run the jobs
