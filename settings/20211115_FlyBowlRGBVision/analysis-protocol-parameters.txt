@@ -1,0 +1,16 @@
+doautomaticchecksincoming,force
+doflytracking,true
+doregistration,true
+doledonoffdetection,true
+dotrackwings,false
+dosexclassification,true
+docomputeperframefeatures,true
+docomputehoghofperframefeatures,false
+dojaabadetect,false
+docomputeperframestats,false
+doplotperframestats,false
+domakectraxresultsmovie,true
+doextradiagnostics,false
+doanalysisprotocol,false
+doautomaticcheckscomplete,force
+
