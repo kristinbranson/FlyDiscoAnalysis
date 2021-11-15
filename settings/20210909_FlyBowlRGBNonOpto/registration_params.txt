@@ -18,6 +18,6 @@ nBowlMarkers,1
 bowlMarkerType,RegistraionMark_FlyBowlRGB2.png
 minTemplateFeatureStrength,-0.5
 usemediandt,0
-OptogeneticExp,1
+OptogeneticExp,0
 maxDistCornerFrac_LEDLabel,.15
 LEDMarkerType,LEDIndicatorON_FlyBowlRGB.png
