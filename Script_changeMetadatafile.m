@@ -4,7 +4,7 @@
 logfiledir = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/MetadataFixes';
 %%%CHANGE
 % logfilename = 'expdirs_changescreen_type4labnameerror_logofauto.csv';
-logfilename = 'expdirs_wk15wk16wk17_metachanges_logofauto.csv';
+logfilename = 'Katie_20211014expdirs_metachanges_logofauto.csv';
 
 logfile = fullfile(logfiledir,logfilename);
 
@@ -193,14 +193,29 @@ fid2 = fopen(logfile,'a');
 % change plate to 2b
 % explist = {'/groups/branson/bransonlab/flydisco_data/VNC_JRC_SS40173_RigB_20210928T132853'};
 % change plate to 1c
-explist = {'/groups/branson/bransonlab/flydisco_data/VNC_JRC_SS44225_RigA_20210928T134724'};
+% explist = {'/groups/branson/bransonlab/flydisco_data/VNC_JRC_SS44225_RigA_20210928T134724'};
+
+% wk18wk19wk20wk21
+% change experimenter
+% explist = {'/groups/branson/bransonlab/flydisco_data/VNC_JRC_SS48638_RigC_20211021T130143', ...
+%     '/groups/branson/bransonlab/flydisco_data/VNC_JRC_SS48722_RigC_20211021T131511'};
+% change line name 
+% explist = {'/groups/branson/bransonlab/flydisco_data/VNC_JRC_SS33510_RigA_20211028T131939'};
+
+%fixes Katie's load time erros 20211014 (couldn't fix because metaData file
+%i format is different  - used this to make backups only. 
+% explist = {'/groups/rubin/data0/rubinlab/flydisco_data/schretterc/20211014T094326_rig1_flyBowl1__20XUASCsChrimsonattp18_SSempty_20210923_redonly3times10AND30',...
+%     '/groups/rubin/data0/rubinlab/flydisco_data/schretterc/20211014T094326_rig1_flyBowl2__20XUASCsChrimsonattp18_SSempty_20210923_redonly3times10AND30', ...
+%     '/groups/rubin/data0/rubinlab/flydisco_data/schretterc/20211014T094326_rig1_flyBowl3__20XUASCsChrimsonattp18_norpAempty_20210923_redonly3times10AND30', ...
+%     '/groups/rubin/data0/rubinlab/flydisco_data/schretterc/20211014T094326_rig1_flyBowl4__20XUASCsChrimsonattp18_norpAempty_20210923_redonly3times10AND30'};
+
 % values to change in metadata
 for j = 1:numel(explist)
     % per experiment
     %     expdir = fullfile(rootdatadir,explist{j})
     expdir = explist{j};
     metadatafilename = 'Metadata.xml';
-    
+%     metadatafilename = 'metaData.xml';
     resavefilename = fullfile(expdir,metadatafilename);
     metadata = ReadMetadataFile(resavefilename);
     
@@ -208,8 +223,8 @@ for j = 1:numel(explist)
     % manual changes create struct
     changestruct = struct;
     %         changestruct.experimenter = 'chenn';
-    % changestruct.experimenter = 'arrudar';
-          changestruct.plate = '1c';
+%     changestruct.experimenter = 'arrudar';
+%           changestruct.plate = '1c';
     % also need to change expdir and ctrax results movie name manually
     % mv oldname newname
     %     changestruct.line = 'JRC_SS43660';
@@ -230,7 +245,8 @@ for j = 1:numel(explist)
 %     changestruct.screen_type = 'non_olympiad_dickson_VNC';
 %         changestruct.line = 'YNA_K_162984';
 %         changestruct.line = 'JRC_SS31219';
-    
+% changestruct.line = 'JRC_SS43651';
+    changestruct.seconds_fliesloaded = '200';
     % replace metadata fields with changes
     fprintf(fid2,'%s, ',expdir);
     metadatafieldsTOBECHANGED = fieldnames(changestruct);

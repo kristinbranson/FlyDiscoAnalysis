@@ -1,12 +1,31 @@
 # <per-frame feature>,<frame condition name>,<fly condition name>,<min n. frames both valid>,<min n. frames fly valid>,[<norm per-frame feature>],[<norm frame condition name>],[<norm fly condition name>],[<norm min n. frames both valid>],[<norm min n. frames fly valid>]
 
-# test zone - batches of 5
+# test zone - batches of 6
 
 
-forward_vel,poststimweak5,any,25,25
-forward_vel,prestimweak5,any,25,25
-forward_vel,poststimmid5,any,25,25
-forward_vel,prestimmid5,any,25,25
-forward_vel,poststimstrong5,any,25,25
-forward_vel,prestimstrong5,any,25,25
+# forward_vel
+forward_vel,stimweakp5,any,25,25
+forward_vel,stimweak5,any,25,25
+forward_vel,stimweak10,any,25,25
+forward_vel,stimmidp5,any,25,25
+forward_vel,stimmid5,any,25,25
+forward_vel,stimmid10,any,25,25
+forward_vel,stimstrongp5,any,25,25
+forward_vel,stimstrong5,any,25,25
+forward_vel,stimstrong10,any,25,25
+
+# backward_vel
+# absdtheta
+# absdv_cor
+# dcenter
+# min_wing_angle
+# absdphi
+
+
+
+
+
+
+
+
 

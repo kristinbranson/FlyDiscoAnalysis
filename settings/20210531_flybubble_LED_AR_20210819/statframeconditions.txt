@@ -1,11 +1,13 @@
-poststimweak5,part0to5s_stimon_1_2_3,1
-prestimweak5,partm5to0s_stimoff_1_2_3,1
-
-poststimmid5,part0to5s_stimon_4_5_6,1
-prestimmid5,partm5to0s_stimoff_4_5_6,1
-
-poststimstrong5,part0to5s_stimon_7_8_9,1
-prestimstrong5,partm5to0s_stimoff_7_8_9,1
+# during stim
+stimweakp5,part0to0.5s_stimon_1_2_3,1 #checked
+stimweak5,part0to5s_stimon_1_2_3,1 # checked
+stimweak10,part0to10s_stimon_1_2_3,1 # checked 
+stimmidp5,part0to0.5s_stimon_4_5_6,1
+stimmid5,part0to5s_stimon_4_5_6,1
+stimmid10,part0to10s_stimon_4_5_6,1
+stimstrongp5,part0to0.5s_stimon_7_8_9,1
+stimstrong5,part0to5s_stimon_7_8_9,1
+stimstrong10,part0to10s_stimon_7_8_9,1
 
 
 nearwall,max_dist2wall,15
