@@ -1,27 +1,24 @@
-function FlyDiscoAutomaticChecksIncoming(expdir, stage, varargin)
-  % This function will throw an error if one of the must-pass incoming checks fails.
-  % (E.g. it will not error if the only issues are that some merely-desired files
-  % are missing.)
-  % But even if a must-pass check fails, it will do its darndest to output the files usually
-  % named automatic_checks_incoming_results.txt and automatic_checks_incoming_info.mat before erroring.
-  % So a non-error return from this function indicates that all the must-pass
-  % incoming checks passed.
+function FlyDiscoAutomaticChecksIncoming(expdir, stage, varargin)  %#ok<INUSL>
+  % This function's job is to produce the output the files usually
+  % named automatic_checks_incoming_results.txt and automatic_checks_incoming_info.mat.
+  % If it can't do that, it might error.  If it detects problems with the incoming
+  % data that indicate that the pipeline should not proceed, it signals this by 
+  % writing 'automated_pf,F' to the text output file, and something similar to the
+  % .mat output file, but will still exit without erroring.
   
   version = '0.2.1';
   
-  success = true;
+  do_continue_pipeline = true;
   msgs = {};
   
   datetime_format = 'yyyymmddTHHMMSS';
   
-  [analysis_protocol,settingsdir,datalocparamsfilestr,DEBUG,min_barcode_expdatestr] = ...
+  [analysis_protocol,settingsdir,datalocparamsfilestr,min_barcode_expdatestr] = ...
     myparse(varargin,...
     'analysis_protocol','current_bubble',...
     'settingsdir', '/groups/branson/home/robiea/Code_versioned/FlyBubbleAnalysis/settings',...
     'datalocparamsfilestr','dataloc_params.txt',...
-    'debug',false,...
-    'min_barcode_expdatestr','20110301T000000',...
-    'logfid',[]);
+    'min_barcode_expdatestr','20110301T000000');
   min_barcode_expdatenum = datenum(min_barcode_expdatestr,datetime_format);
   
   %% parameters
@@ -70,7 +67,7 @@ function FlyDiscoAutomaticChecksIncoming(expdir, stage, varargin)
     [~,expname] = fileparts(expdir);
     if ~isempty(regexp(expname,'notstarted','once')),
       iserror(category2idx.missing_video) = true;
-      success = false;
+      do_continue_pipeline = false;
       msgs{end+1} = 'Capture not started';
     end
     
@@ -78,7 +75,7 @@ function FlyDiscoAutomaticChecksIncoming(expdir, stage, varargin)
     
     ismetadata = exist(metadatafile,'file');
     if ~ismetadata,
-      success = false;
+      do_continue_pipeline = false;
       msgs{end+1} = 'Missing Metadata.xml file';
       iserror(category2idx.missing_metadata_file) = true;
       metadata = struct;
@@ -87,7 +84,7 @@ function FlyDiscoAutomaticChecksIncoming(expdir, stage, varargin)
         metadata = ReadMetadataFile(metadatafile);
       catch %#ok<CTCH>
         msgs{end+1} = 'Error reading Metadata file';
-        success = false;
+        do_continue_pipeline = false;
       end
     end
     
@@ -101,7 +98,7 @@ function FlyDiscoAutomaticChecksIncoming(expdir, stage, varargin)
     end
     ismissingfn = ~ismember(required_fns,fieldnames(metadata));
     if any(ismissingfn),
-      success = false;
+      do_continue_pipeline = false;
       msgs{end+1} = ['Missing metadata fields:',sprintf(' %s',required_fns{ismissingfn})];
       iserror(category2idx.missing_metadata_fields) = true;
     end
@@ -109,13 +106,13 @@ function FlyDiscoAutomaticChecksIncoming(expdir, stage, varargin)
     %% check for flags
     
     if isfield(metadata,'flag_aborted') && metadata.flag_aborted ~= 0,
-      success = false;
+      do_continue_pipeline = false;
       msgs{end+1} = 'Experiment aborted.';
       iserror(category2idx.flag_aborted_set_to_1) = true;
     end
     
     if isfield(metadata,'flag_redo') && metadata.flag_redo ~= 0,
-      success = false;
+      do_continue_pipeline = false;
       msgs{end+1} = 'Redo flag set to 1.';
       iserror(category2idx.flag_redo_set_to_1) = true;
     end
@@ -123,13 +120,13 @@ function FlyDiscoAutomaticChecksIncoming(expdir, stage, varargin)
     %% check for dead or damaged flies
     
     if isfield(metadata,'num_flies_damaged') && metadata.num_flies_damaged > 0,
-      success = false;
+      do_continue_pipeline = false;
       msgs{end+1} = 'Damaged flies > 0.';
       iserror(category2idx.flag_flies_dead_or_damaged) = true;
     end
     
     if isfield(metadata,'num_flies_dead') && metadata.num_flies_dead > 0,
-      success = false;
+      do_continue_pipeline = false;
       msgs{end+1} = 'Dead flies > 0.';
       iserror(category2idx.flag_flies_dead_or_damaged) = true;
     end
@@ -138,12 +135,12 @@ function FlyDiscoAutomaticChecksIncoming(expdir, stage, varargin)
     
     if isfield(metadata,'seconds_fliesloaded'),
       if metadata.seconds_fliesloaded < check_params.min_seconds_fliesloaded,
-        success = false;
+        do_continue_pipeline = false;
         msgs{end+1} = sprintf('Load time = %f < %f seconds.',metadata.seconds_fliesloaded,check_params.min_seconds_fliesloaded);
         iserror(category2idx.fliesloaded_time_too_short) = true;
       end
       if metadata.seconds_fliesloaded > check_params.max_seconds_fliesloaded,
-        success = false;
+        do_continue_pipeline = false;
         msgs{end+1} = sprintf('Load time = %f > %f seconds.',metadata.seconds_fliesloaded,check_params.max_seconds_fliesloaded);
         iserror(category2idx.fliesloaded_time_too_long) = true;
       end
@@ -218,7 +215,7 @@ function FlyDiscoAutomaticChecksIncoming(expdir, stage, varargin)
               movielength_expected = movielength_expected  - check_params.movie_length_delta_seconds;
             end
             if movielength < movielength_expected
-              success = false;
+              do_continue_pipeline = false;
               msgs{end+1} = sprintf('Video duration is %d sec < %d sec the protocol duration.',movielength,movielength_expected);
               iserror(category2idx.short_video) = true;
             end
@@ -232,7 +229,7 @@ function FlyDiscoAutomaticChecksIncoming(expdir, stage, varargin)
           movielength_expected = check_params.min_movie_length_seconds;
           
           if movielength < movielength_expected
-            success = false;
+            do_continue_pipeline = false;
             msgs{end+1} = sprintf('Video duration is %d sec < %d sec min_movie_length.',movielength,movielength_expected);
             iserror(category2idx.short_video) = true;
           end
@@ -245,13 +242,13 @@ function FlyDiscoAutomaticChecksIncoming(expdir, stage, varargin)
           min_nframes = check_params.min_ufmf_diagnostics_summary_nframes;
           
           if nframes < min_nframes
-            success = false;
+            do_continue_pipeline = false;
             msgs{end+1} = sprintf('Video nframes is %d < %d the minium frame length.',nframes, min_nframes);
             iserror(category2idx.short_video) = true;
           end
         end
       catch ME,
-        success = false;
+        do_continue_pipeline = false;
         msgs{end+1} = sprintf('Error reading data from movie header: %s',getReport(ME,'extended','hyperlinks','off'));
         iserror(category2idx.incoming_checks_other) = true;
       end
@@ -263,13 +260,13 @@ function FlyDiscoAutomaticChecksIncoming(expdir, stage, varargin)
       
       if ~isfield(headerinfo,'timestamps'),
         msgs{end+1} = 'No field timestamps in UFMF header';
-        success = false;
+        do_continue_pipeline = false;
         iserror(category2idx.incoming_checks_other) = true;
       else
         dt = diff(headerinfo.timestamps);
         nneg = nnz(dt <= 0);
         if nneg > 0,
-          success = false;
+          do_continue_pipeline = false;
           msgs{end+1} = sprintf('%d frames in movie with non-increasing timestamps',nneg);
           iserror(category2idx.bad_video_timestamps) = true;
         end
@@ -286,7 +283,7 @@ function FlyDiscoAutomaticChecksIncoming(expdir, stage, varargin)
       if (~ismember(metadata.line,check_params.control_line_names) || ...
           (exp_datenum >= min_barcode_expdatenum)) && ...
           metadata.cross_barcode < 0,
-        success = false;
+        do_continue_pipeline = false;
         msgs{end+1} = 'Barcode = -1 and line_name indicates not control';
         iserror(category2idx.no_barcode) = true;
       end
@@ -361,7 +358,7 @@ function FlyDiscoAutomaticChecksIncoming(expdir, stage, varargin)
       end
       if ~isfile,
         msgs{end+1} = sprintf('Missing file %s',fn); %#ok<AGROW>
-        success = false;
+        do_continue_pipeline = false;
         iserror(category2idx.missing_capture_files) = true;
       end
     end
@@ -382,56 +379,42 @@ function FlyDiscoAutomaticChecksIncoming(expdir, stage, varargin)
       end
     end
     
-    %% output results to file
-    
-    if DEBUG,
-      fid = 1;
+    %% output results to text file
+    % First just rite text-file contents to a string
+    if do_continue_pipeline ,
+      text_output_file_as_string = sprintf('automated_pf,U\n');
     else
-      if exist(outfile,'file'),
-        try
-          delete(outfile);
-        catch ME,
-          warning('FlyBubbleAutomaticChecksIncoming:output',...
-            'Could not delete file %s:\n %s',outfile,getReport(ME));
-        end
-      end
-      fid = fopen(outfile,'w');
-    end
-    if fid < 0,
-      warning('FlyBubbleAutomaticChecksIncoming:output',...
-        'Could not open automatic checks results file %s for writing, just printing to stdout.',outfile);
-      fid = 1;
-    end
-    if success,
-      fprintf(fid,'automated_pf,U\n');
-    else
-      fprintf(fid,'automated_pf,F\n');
+      text_output_file_as_string = sprintf('automated_pf,F\n');
       i = find(iserror,1);
       if isempty(i),
         s = 'incoming_checks_other';
       else
         s = categories{i};
       end
-      fprintf(fid,'automated_pf_category,%s\n',s);
+      text_output_file_as_string = horzcat(text_output_file_as_string,sprintf('automated_pf_category,%s\n',s)) ;
     end
     if ~isempty(msgs),
-      fprintf(fid,'notes_curation,');
+      text_output_file_as_string = horzcat(text_output_file_as_string,'notes_curation,') ;
       s = sprintf('%s\\n',msgs{:});
-      s = s(1:end-2);
-      fprintf(fid,'%s\n',s);
+      text_output_file_as_string = horzcat(text_output_file_as_string,s) ;
     end
-    % runInfo = logger.runInfo;
-    % fprintf(fid,'version,%s\n',version);
-    % fprintf(fid,'timestamp,%s\n',runInfo.timestamp);
-    % fprintf(fid,'analysis_protocol,%s\n',runInfo.analysis_protocol);
-    % fprintf(fid,'linked_analysis_protocol,%s\n',runInfo.linked_analysis_protocol);
-    
-    if ~DEBUG && fid > 1,
-      fclose(fid);
+    % Now write the text-file-as-string to the file
+    if exist(outfile,'file'),
+      try
+        delete(outfile);
+      catch ME,
+        warning('FlyBubbleAutomaticChecksIncoming:output',...
+          'Could not delete pre-existing file %s:\n %s',outfile,getReport(ME));
+      end
     end
-    
+    try
+      write_string_to_text_file(outfile, text_output_file_as_string) ;
+    catch ME,
+      warning('FlyBubbleAutomaticChecksIncoming:output',...
+              'Could not write file %s:\n %s',outfile,getReport(ME));
+    end        
   catch ME,
-    success = false;
+    do_continue_pipeline = false;
     msgs = {getReport(ME)};
   end
   
@@ -448,7 +431,7 @@ function FlyDiscoAutomaticChecksIncoming(expdir, stage, varargin)
   aciinfo.iserror = iserror;
   aciinfo.categories = categories;
   aciinfo.msgs = msgs;
-  aciinfo.success = success;
+  aciinfo.success = do_continue_pipeline;
   
   if exist(filename,'file'),
     try %#ok<TRYNC>
@@ -463,7 +446,7 @@ function FlyDiscoAutomaticChecksIncoming(expdir, stage, varargin)
   end  
   
   % Print success/failure and messages to stdout
-  fprintf('success = %d\n',success);
+  fprintf('success = %d\n',do_continue_pipeline);
   if isempty(msgs),
     fprintf('No error or warning messages.\n');
   else
@@ -472,9 +455,9 @@ function FlyDiscoAutomaticChecksIncoming(expdir, stage, varargin)
   end
   %logger.close();
   
-  % If not successful, throw an error to stop the pipeline
-  if ~success ,
-    flydisco_pipeline_error(stage, msgs) ;
-  end
+%   % If not successful, throw an error to stop the pipeline
+%   if ~success ,
+%     flydisco_pipeline_error(stage, msgs) ;
+%   end
 end
 

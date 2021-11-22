@@ -1,7 +1,8 @@
 function [data,units] = compute_stim(trx,n,stimtype,stimnums)
 
 ind = false(1,trx.movie_nframes(n));
-for i = 1:numel(stimnums),
+for ii = 1:numel(stimnums),
+  i = stimnums(ii);
   if strcmpi(stimtype,'on'),
     t0 = trx.indicatorLED{n}.starton(i);
     t1 = trx.indicatorLED{n}.endon(i);

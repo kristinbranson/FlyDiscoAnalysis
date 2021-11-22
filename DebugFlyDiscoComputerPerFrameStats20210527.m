@@ -5,7 +5,9 @@ rootdir = 'testdata';
 % test data during development of code, 20210802
 expdir = 'testdata/VNC_JRC_SS46706_RigA_20210512T132556';
 analysis_protocol = '20210531_flybubble_LED';
+analysis_protocol = '20210531_flybubble_LED_AR_20210819';
 settingsdir = 'settings';
+settingsdir = '/groups/branson/home/robiea/Code_versioned/FlyDiscoAnalysis/settings';
 
 % find an experiment with poor tracking
 % vncexpdirs = mydir('/groups/dickson/dicksonlab/flydisco_data','isdir',true);
@@ -33,6 +35,8 @@ expdir = 'testdata/VNC_JRC_SS50831_RigC_20210517T151218';
 %expdir0 = '/groups/branson/bransonlab/flydisco_data/VNC_EXT_VGLUT-GAL4_RigA_20210427T125905';
 %expdir0 = '/groups/branson/bransonlab/flydisco_data/VNC_JRC_SS68333_RigA_20210422T150926';
 expdir0 = '/groups/dickson/dicksonlab/flydisco_data/VNC_JRC_SS62014_RigD_20210525T133656';
+expdir0 = '/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20210820_testingperframe/VNC_EXT_VGLUT-GAL4_RigC_20210628T152511';
+
 [~,expname] = fileparts(expdir0);
 expdir = SymbolicCopyExperimentDirectory(expdir0,rootdir);
 % results copied to 

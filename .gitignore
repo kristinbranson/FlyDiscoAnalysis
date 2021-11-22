@@ -8,11 +8,9 @@ goldblum/example-experiments-working-copy/
 example-experiments-read-only/
 example-experiments-working-copy/
 goldblum/goldblum-test-destination-folder/
-test_goldblum_run_*.out.txt
 test-experiments-read-only/
 test-experiments-working/
-test_analyze_experiment_folders_run_*.out.txt
 too-much-memory-example-experiments*
-test_analyze_experiment_folders_rubin_circa_2021_07_run_*.out.txt
 aborted-example-experiments-read-only/
 aborted-example-experiments
+*.out.txt

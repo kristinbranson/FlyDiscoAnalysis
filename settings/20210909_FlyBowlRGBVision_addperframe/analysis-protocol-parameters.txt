@@ -1,5 +1,4 @@
-forcecompute,false
-doautomaticchecksincoming,true
+doautomaticchecksincoming,force
 doflytracking,true
 doregistration,true
 doledonoffdetection,true
@@ -13,4 +12,5 @@ doplotperframestats,false
 domakectraxresultsmovie,true
 doextradiagnostics,false
 doanalysisprotocol,false
-doautomaticcheckscomplete,false
+doautomaticcheckscomplete,force
+

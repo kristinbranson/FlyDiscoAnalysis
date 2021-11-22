@@ -29,17 +29,14 @@ defaults.nzoomc = 3;
 defaults.compression = 'None';
 allowedcompressions = {'Indeo3', 'Indeo5', 'Cinepak', 'MSVC', 'RLE', 'None','Uncompressed AVI','Motion JPEG AVI'};
 useVideoWriter = exist('VideoWriter','file');
-mencoderoptions = '';
-mencoder_maxnframes = inf;
 [moviename,trxname,aviname,colors,zoomflies,nzoomr,nzoomc,boxradius,...
   taillength,fps,maxnframes,firstframes,compression,figpos,movietitle,...
-  useVideoWriter,mencoderoptions,mencoder_maxnframes,...
+  useVideoWriter,...
   avifileTempDataFile,titletext,showtimestamps,dynamicflyselection,...
   doshowsex,doplotwings,doflipud,dofliplr] = ...
   myparse(varargin,'moviename','','trxname','','aviname','','colors',[],'zoomflies',[],'nzoomr',nan,'nzoomc',nan,...
   'boxradius',nan,'taillength',nan,'fps',nan,'maxnframes',nan,'firstframes',[],'compression','',...
   'figpos',[],'movietitle','','useVideoWriter',useVideoWriter,...
-  'mencoderoptions',mencoderoptions,'mencoder_maxnframes',mencoder_maxnframes,...
   'avifileTempDataFile','',...
   'titletext',true,...
   'showtimestamps',false, ...
@@ -69,11 +66,11 @@ else
 end
 [readframe1,nframes,fid] = get_readframe_fcn(moviename);
 if doflipud && dofliplr,
-  readframe = @(x) flipdim(flipdim(readframe1(x),1),2);
+  readframe = @(x) fliplr(flipud(readframe1(x)));  %#ok<FLUDLR>
 elseif doflipud,
-  readframe = @(x) flipdim(readframe1(x),1);
+  readframe = @(x) flipud(readframe1(x));
 elseif dofliplr
-  readframe = @(x) flipdim(readframe1(x),2);
+  readframe = @(x) fliplr(readframe1(x));
 else
   readframe = readframe1;
 end
@@ -216,7 +213,7 @@ if ~isempty(prompts),
     failed = false;
     for i = 1:length(answers),
       if strcmp(prompts{i},compressionprompt)
-        j = strmatch(answers{i},allowedcompressions);
+        j = strmatch(answers{i},allowedcompressions);  %#ok<MATCH2>
         if isempty(j),
           uiwait(msgbox(sprintf('Illegal compressor: %s',answers{i})));
           failed = true;
@@ -224,7 +221,7 @@ if ~isempty(prompts),
         end
         compression = allowedcompressions{j};
         answers{i} = allowedcompressions{j};
-        defaultanswers{i} = compression;
+        defaultanswers{i} = compression; %#ok<AGROW>
         continue;
       end
       answers{i} = str2double(answers{i});
@@ -293,7 +290,7 @@ if ~isempty(prompts),
           firstframes = max(1,ceil(answers{i}));
           answers{i} = firstframes;
       end
-      defaultanswers{i} = num2str(answers{i});
+      defaultanswers{i} = num2str(answers{i}); %#ok<AGROW>
     end
     if failed,
       continue;
@@ -411,16 +408,21 @@ elseif size(colors,1) ~= nids,
   colors = colors(modrange(0:nids-1,size(colors,1))+1,:);
 end
 
-if ishandle(1),
-  close(1);
+% if ishandle(1),
+%   close(1);
+% end
+fig_name = 'the make_ctrax_result_movie() figure' ;
+fig = findobj(groot, 'Type', 'figure', 'Name', fig_name) ;
+if isempty(fig) ,
+    fig = figure('Name', fig_name) ;
 end
-figure(1);
-clf;
-hold on;
-hax = gca;
+clf(fig);
+hax = axes(fig) ;
+hold(hax,'on');
+%hax = gca;
 set(hax,'position',[0,0,1,1]);
-axis off;
-isdisplay = ispc || ~strcmpi(get(1,'XDisplay'),'nodisplay');
+axis(hax,'off');
+isdisplay = ispc || ~strcmpi(get(fig,'XDisplay'),'nodisplay');
 
 % corners of zoom boxes in plotted image coords
 x0 = nc+(0:nzoomc-1)*rowszoom+1;
@@ -442,18 +444,23 @@ hzoom = zeros(nzoomr,nzoomc);
 hzoomwing = zeros(nzoomr,nzoomc);
 htextzoom = zeros(nzoomr,nzoomc);
 
-mencoder_nframes = 0;
-tic;
-
+frame_count_per_fprintf = 100 ;
 for segi = 1:numel(firstframes),
   firstframe = firstframes(segi);
   endframe = endframes(segi);
+  fprintf('Adding frames from segment %d, frames %d-%d\n', segi, firstframe, endframe) ;
 
   for frame = firstframe:endframe,
-  %for frame = firstframe:firstframe+100-1,
-    if mod(frame - firstframe,5) == 0,
-      fprintf('frame %d, write rate = %f s/fr\n',frame,toc/5);
-      tic;
+    if frame==firstframe ,
+        tic_id = tic() ;
+    else
+      if mod(frame - firstframe,frame_count_per_fprintf) == 0,
+          elapsed_time = toc(tic_id) ;  % seconds
+          frame_pace = elapsed_time/frame_count_per_fprintf ;
+          fprintf('Just wrote frame %d, write rate = %f s/fr\n',frame,frame_pace);
+          print_matlab_memory_usage() ;
+          tic_id = tic() ;
+      end
     end
     
     % relative frame
@@ -725,12 +732,12 @@ for segi = 1:numel(firstframes),
     
     if frame == firstframes(1),
       if ~isempty(figpos),
-        set(1,'Position',figpos);
+        set(fig,'Position',figpos);
       else
-        input('Resize figure 1 to the desired size, hit enter when done.');
-        figpos = get(1,'Position');
+        input('Resize figure to the desired size, hit enter when done.');
+        figpos = get(fig,'Position');
       end
-      set(1,'visible','off');
+      %set(fig,'visible','off');
       if useVideoWriter,
         if strcmpi(compression,'None') || strcmpi(compression,'Uncompressed AVI'),
           profile = 'Uncompressed AVI';
@@ -745,7 +752,7 @@ for segi = 1:numel(firstframes),
         open(aviobj);
       else
         if isempty(avifileTempDataFile),
-          aviobj = avifile(aviname,'fps',fps,'quality',100,'compression',compression);  %#ok<REMFF1>
+          aviobj = avifile(aviname,'fps',fps,'quality',100,'compression',compression); 
         else
           aviobj = myavifile(aviname,'fps',fps,'quality',100,'compression',compression,...
             'TempDataFile',avifileTempDataFile); 
@@ -755,6 +762,9 @@ for segi = 1:numel(firstframes),
     end
     
     fr = getframe(hax);
+    %fr = struct() ;
+    %fr.cdata = uint8(randi(256, [428 600 3])-1) ;
+    %fr.colormap = [] ;
     if frame == firstframes(1),
       height = size(fr.cdata,1);
       width = size(fr.cdata,2);
@@ -795,8 +805,7 @@ for segi = 1:numel(firstframes),
     else
       aviobj = addframe(aviobj,fr);
     end
-    set(1,'Position',figpos);
-    
+    %set(fig,'Position',figpos);
   end
   
 end

@@ -11,6 +11,7 @@ flydisco_folder_path = fileparts(fly_disco_analysis_folder_path) ;
 root_example_experiments_folder_path = fullfile(flydisco_folder_path, 'example-experiments') ;
 %read_only_example_experiments_folder_path = fullfile(root_example_experiments_folder_path, 'all-test-suite-experiments-read-only') ;
 read_only_example_experiments_folder_path = fullfile(root_example_experiments_folder_path, 'passing-test-suite-experiments-read-only') ;
+%read_only_example_experiments_folder_path = fullfile(root_example_experiments_folder_path, 'passing-test-suite-experiments-with-tracking-read-only') ;
 %read_only_example_experiments_folder_path = fullfile(root_example_experiments_folder_path, 'no-experiments-read-only') ;
 %read_only_example_experiments_folder_path = fullfile(root_example_experiments_folder_path, 'one-aborted-one-faulty-experiment-read-only') ;
 %read_only_example_experiments_folder_path = '/groups/branson/bransonlab/flydisco_example_experiments_read_only' ;
@@ -43,21 +44,21 @@ if exist(goldblum_destination_folder_path, 'file') ,
     return_code = system_from_list_with_error_handling({'rm', '-rf', goldblum_destination_folder_path}) ;
 end
 
-% Recopy the analysis test folder from the template
-fprintf('Resetting analysis test folder...\n') ;
-example_experiments_folder_path = fullfile(root_example_experiments_folder_path, 'test-goldblum-example-experiments-folder') ;
-reset_goldblum_example_experiments_working_copy_folder(example_experiments_folder_path, read_only_example_experiments_folder_path) ;
+% % Recopy the analysis test folder from the template
+% fprintf('Resetting analysis test folder...\n') ;
+% read_only_example_experiments_folder_path = fullfile(root_example_experiments_folder_path, 'test-goldblum-example-experiments-folder') ;
+% reset_goldblum_example_experiments_working_copy_folder(read_only_example_experiments_folder_path, read_only_example_experiments_folder_path) ;
 
 % Copy it to the rig computer (or just direct to the destination folder)
 rig_lab_data_folder_path = fullfile(rig_data_folder_path, lab_head_last_name) ;
 if do_transfer_data_from_rigs ,
     fprintf('Transfering data to the rig computer...\n') ;  %#ok<UNRCH>
-    command_line = sprintf('scp -B -r %s/* %s@%s:%s', example_experiments_folder_path, rig_user_name, rig_host_name, rig_lab_data_folder_path) ; %#ok<UNRCH>
+    command_line = sprintf('scp -B -r %s/* %s@%s:%s', read_only_example_experiments_folder_path, rig_user_name, rig_host_name, rig_lab_data_folder_path) ; %#ok<UNRCH>
     system_with_error_handling(command_line) ;
 else
     fprintf('Transfering data to the destination path...\n') ;
     ensure_folder_exists(fileparts(goldblum_destination_folder_path)) ;  %#ok<UNRCH>
-    command_line = {'cp', '-R', '-T', example_experiments_folder_path, goldblum_destination_folder_path} ;
+    command_line = {'cp', '-R', '-T', read_only_example_experiments_folder_path, goldblum_destination_folder_path} ;
     system_from_list_with_error_handling(command_line) ;  
       % Should make goldblum_destination_folder_path a clone of
       % example_experiments_folder_path, since we use -T option
@@ -75,12 +76,13 @@ else
 end
 
 % Run goldblum
-analysis_parameters = { 'doautomaticcheckscomplete', 'on' } ;
+%analysis_parameters = { 'doautomaticcheckscomplete', 'on' } ;
+analysis_parameters = { } ;
 fprintf('Running goldblum...\n') ;
 goldblum(do_transfer_data_from_rigs, do_run_analysis, do_use_bqueue, do_actually_submit_jobs, analysis_parameters, per_lab_configuration) ;        
 
 % Check that the expected files are present on dm11
-local_verify(example_experiments_folder_path, goldblum_destination_folder_path) ;
+local_verify(read_only_example_experiments_folder_path, goldblum_destination_folder_path) ;
 
 % Check that some of the expected outputs were generated
 all_tests_passed_from_experiment_index = check_for_pipeline_output_files(relative_path_to_folder_from_experiment_index, goldblum_destination_folder_path) ;

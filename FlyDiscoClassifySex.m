@@ -7,12 +7,14 @@ version = '0.2';
   settingsdir,...
   datalocparamsfilestr,...
   outdir,...
-  dosave] = myparse(varargin,...
+  dosave,...
+  override_gender] = myparse(varargin,...
   'analysis_protocol','current_bubble',...
   'settingsdir','/groups/branson/home/robiea/Code_versioned/FlyBubbleAnalysis/settings',...
   'datalocparamsfilestr','dataloc_params.txt',...
   'outdir',[],...
-  'dosave',true);
+  'dosave',true,...
+  'override_gender','');
 
 fprintf('Classifying sex for %s\n',expdir);
 
@@ -79,6 +81,9 @@ end
 % read gender
 metadatafile = fullfile(expdir,dataloc_params.metadatafilestr);
 metadata = ReadMetadataFile(metadatafile);
+if ~isempty(override_gender),
+  metadata.gender = override_gender;
+end
 
 % Fix possible metadata error
 if isfield(metadata, 'gender') && strcmpi(metadata.gender, 'both') ,
@@ -314,18 +319,19 @@ if dosave,
       %tmp.sexclassifierinfo = sexclassifierinfo;
       save(trxfileout,'-struct','tmp');
     end
-  catch %#ok<CTCH>
-%     try
-%       tmp = load(trxfile);
-%       %delete(trxfile); % AL20150913 now have trxfileout
-%       tmp.trx = trx;
+  catch
+    try
+      tmp = load(trxfile);
+      trxfilebak = [trxfileout,'.bak'];
+      unix(sprintf('mv %s %s',trxfileout,trxfilebak));
+      tmp.trx = trx;
 %       tmp.sexclassifierinfo = sexclassifierinfo;
-%       save(trxfileout,'-struct','tmp');
-%     catch ME,
+      save(trxfileout,'-struct','tmp');
+    catch ME,
       warning('FlyDiscoClassifySex:save',...
         'Could not save to file %s: %s',trxfileout,getReport(ME));
       fprintf('Could not save to file %s: %s',trxfileout,getReport(ME));
-%     end
+    end
   end
 end
 
