@@ -1,4 +1,4 @@
-features,forward_vel,absdtheta
+features,forward_vel,backward_vel,absdtheta,absdv_cor,dcenter,min_wing_angle
 prestim,10
 poststim,10
 plotstd,1

@@ -1,13 +1,37 @@
 # during stim
-stimweakp5,part0to0.5s_stimon_1_2_3,1 #checked
-stimweak5,part0to5s_stimon_1_2_3,1 # checked
-stimweak10,part0to10s_stimon_1_2_3,1 # checked 
+stimweakp5,part0to0.5s_stimon_1_2_3,1
+stimweak5,part0to5s_stimon_1_2_3,1
+stimweak10,part0to10s_stimon_1_2_3,1
 stimmidp5,part0to0.5s_stimon_4_5_6,1
 stimmid5,part0to5s_stimon_4_5_6,1
 stimmid10,part0to10s_stimon_4_5_6,1
 stimstrongp5,part0to0.5s_stimon_7_8_9,1
 stimstrong5,part0to5s_stimon_7_8_9,1
 stimstrong10,part0to10s_stimon_7_8_9,1
+
+# pre stim
+prestimweakp5,partm.5to0s_stimoff_1_2_3,1
+prestimweak5,partm5to0s_stimoff_1_2_3,1
+prestimweak10,partm10to0s_stimoff_1_2_3,1
+prestimmidp5,partm.5to0s_stimoff_4_5_6,1
+prestimmid5,partm5to0s_stimoff_4_5_6,1
+prestimmid10,partm10to0s_stimoff_4_5_6,1
+prestimstrongp5,partm.5to0s_stimoff_7_8_9,1
+prestimstrong5,partm5to0s_stimoff_7_8_9,1
+prestimstrong10,partm10to0s_stimoff_7_8_9,1
+
+stimonweak,equal_stimon_1_2_3,1
+stimonmid,equal_stimon_4_5_6,1
+stimonstrong,equal_stimon_7_8_9,1
+stimon,equal_stimon_1_2_3_4_5_6_7_8_9,1
+stimoffweak,equal_stimoff_1_2_3,1
+stimoffmid,equal_stimoff_4_5_6,1
+stimoffstrong,equal_stimoff_7_8_9,1
+stimoff,equal_stimoff_1_2_3_4_5_6_7_8_9_10,1
+
+
+moving,min_velmag_ctr,2
+notjumping,max_velmag_ctr,45
 
 
 nearwall,max_dist2wall,15

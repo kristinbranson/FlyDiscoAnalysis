@@ -2,3 +2,7 @@
 
 dnose2ell,nearwall_stimonstrong,any,25,100
 dnose2ell,nearwall_stimoffstrong,any,25,100
+velmag_ctr,moving_notjumping_stimoff,any,25,25
+velmag_ctr,moving_notjumping_stimon,any,25,25
+velmag_ctr,stimoff,any,25,25
+velmag_ctr,stimon,any,25,25

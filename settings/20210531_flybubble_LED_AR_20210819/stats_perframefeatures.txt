@@ -1,9 +1,128 @@
 # <per-frame feature>,<frame condition name>,<fly condition name>,<min n. frames both valid>,<min n. frames fly valid>,[<norm per-frame feature>],[<norm frame condition name>],[<norm fly condition name>],[<norm min n. frames both valid>],[<norm min n. frames fly valid>]
 
-# test zone - batches of 6
+# test zone - batches of 9
+# stim wing behavior min_wing_angle
+min_wing_angle,prestimweakp5,any,25,25
+min_wing_angle,prestimweak5,any,25,25
+min_wing_angle,prestimweak10,any,25,25
+min_wing_angle,prestimmidp5,any,25,25
+min_wing_angle,prestimmid5,any,25,25
+min_wing_angle,prestimmid10,any,25,25
+min_wing_angle,prestimstrongp5,any,25,25
+min_wing_angle,prestimstrong5,any,25,25
+min_wing_angle,prestimstrong10,any,25,25
 
+# prestim social dcenter
+dcenter,prestimweakp5,any,25,25
+dcenter,prestimweak5,any,25,25
+dcenter,prestimweak10,any,25,25
+dcenter,prestimmidp5,any,25,25
+dcenter,prestimmid5,any,25,25
+dcenter,prestimmid10,any,25,25
+dcenter,prestimstrongp5,any,25,25
+dcenter,prestimstrong5,any,25,25
+dcenter,prestimstrong10,any,25,25
 
-# forward_vel
+# prestim sideways velocity absdv_cor
+absdv_cor,prestimweakp5,any,25,25
+absdv_cor,prestimweak5,any,25,25
+absdv_cor,prestimweak10,any,25,25
+absdv_cor,prestimmidp5,any,25,25
+absdv_cor,prestimmid5,any,25,25
+absdv_cor,prestimmid10,any,25,25
+absdv_cor,prestimstrongp5,any,25,25
+absdv_cor,prestimstrong5,any,25,25
+absdv_cor,prestimstrong10,any,25,25
+
+# prestim turning absdtheta
+absdtheta,prestimweakp5,any,25,25
+absdtheta,prestimweak5,any,25,25
+absdtheta,prestimweak10,any,25,25
+absdtheta,prestimmidp5,any,25,25
+absdtheta,prestimmid5,any,25,25
+absdtheta,prestimmid10,any,25,25
+absdtheta,prestimstrongp5,any,25,25
+absdtheta,prestimstrong5,any,25,25
+absdtheta,prestimstrong10,any,25,25
+
+# prestim backward_vel
+backward_vel,prestimweakp5,any,25,25
+backward_vel,prestimweak5,any,25,25
+backward_vel,prestimweak10,any,25,25
+backward_vel,prestimmidp5,any,25,25
+backward_vel,prestimmid5,any,25,25
+backward_vel,prestimmid10,any,25,25
+backward_vel,prestimstrongp5,any,25,25
+backward_vel,prestimstrong5,any,25,25
+backward_vel,prestimstrong10,any,25,25
+
+# prestim forward_vel
+forward_vel,prestimweakp5,any,25,25
+forward_vel,prestimweak5,any,25,25
+forward_vel,prestimweak10,any,25,25
+forward_vel,prestimmidp5,any,25,25
+forward_vel,prestimmid5,any,25,25
+forward_vel,prestimmid10,any,25,25
+forward_vel,prestimstrongp5,any,25,25
+forward_vel,prestimstrong5,any,25,25
+forward_vel,prestimstrong10,any,25,25
+
+# stim wing behavior min_wing_angle
+min_wing_angle,stimweakp5,any,25,25
+min_wing_angle,stimweak5,any,25,25
+min_wing_angle,stimweak10,any,25,25
+min_wing_angle,stimmidp5,any,25,25
+min_wing_angle,stimmid5,any,25,25
+min_wing_angle,stimmid10,any,25,25
+min_wing_angle,stimstrongp5,any,25,25
+min_wing_angle,stimstrong5,any,25,25
+min_wing_angle,stimstrong10,any,25,25
+
+# stim social
+dcenter,stimweakp5,any,25,25
+dcenter,stimweak5,any,25,25
+dcenter,stimweak10,any,25,25
+dcenter,stimmidp5,any,25,25
+dcenter,stimmid5,any,25,25
+dcenter,stimmid10,any,25,25
+dcenter,stimstrongp5,any,25,25
+dcenter,stimstrong5,any,25,25
+dcenter,stimstrong10,any,25,25
+
+# stim sideways velocity
+absdv_cor,stimweakp5,any,25,25
+absdv_cor,stimweak5,any,25,25
+absdv_cor,stimweak10,any,25,25
+absdv_cor,stimmidp5,any,25,25
+absdv_cor,stimmid5,any,25,25
+absdv_cor,stimmid10,any,25,25
+absdv_cor,stimstrongp5,any,25,25
+absdv_cor,stimstrong5,any,25,25
+absdv_cor,stimstrong10,any,25,25
+
+# stim turning
+absdtheta,stimweakp5,any,25,25
+absdtheta,stimweak5,any,25,25
+absdtheta,stimweak10,any,25,25
+absdtheta,stimmidp5,any,25,25
+absdtheta,stimmid5,any,25,25
+absdtheta,stimmid10,any,25,25
+absdtheta,stimstrongp5,any,25,25
+absdtheta,stimstrong5,any,25,25
+absdtheta,stimstrong10,any,25,25
+
+# stim backward_vel
+backward_vel,stimweakp5,any,25,25
+backward_vel,stimweak5,any,25,25
+backward_vel,stimweak10,any,25,25
+backward_vel,stimmidp5,any,25,25
+backward_vel,stimmid5,any,25,25
+backward_vel,stimmid10,any,25,25
+backward_vel,stimstrongp5,any,25,25
+backward_vel,stimstrong5,any,25,25
+backward_vel,stimstrong10,any,25,25
+
+# stim forward_vel
 forward_vel,stimweakp5,any,25,25
 forward_vel,stimweak5,any,25,25
 forward_vel,stimweak10,any,25,25
@@ -14,12 +133,12 @@ forward_vel,stimstrongp5,any,25,25
 forward_vel,stimstrong5,any,25,25
 forward_vel,stimstrong10,any,25,25
 
-# backward_vel
-# absdtheta
-# absdv_cor
-# dcenter
-# min_wing_angle
-# absdphi
+
+
+
+
+
+
 
 
 
