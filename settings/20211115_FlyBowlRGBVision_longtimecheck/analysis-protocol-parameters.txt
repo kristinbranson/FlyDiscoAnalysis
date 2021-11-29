@@ -1,8 +1,7 @@
-forcecompute,false
-doautomaticchecksincoming,true
+doautomaticchecksincoming,force
 doflytracking,true
 doregistration,true
-doledonoffdetection,false
+doledonoffdetection,true
 dotrackwings,false
 dosexclassification,true
 docomputeperframefeatures,true
@@ -10,7 +9,8 @@ docomputehoghofperframefeatures,false
 dojaabadetect,false
 docomputeperframestats,false
 doplotperframestats,false
-domakectraxresultsmovie,false
+domakectraxresultsmovie,true
 doextradiagnostics,false
 doanalysisprotocol,false
-doautomaticcheckscomplete,false
+doautomaticcheckscomplete,force
+

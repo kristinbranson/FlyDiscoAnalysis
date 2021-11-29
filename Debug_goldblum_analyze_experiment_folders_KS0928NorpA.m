@@ -15,7 +15,7 @@ settings_folder_path = '/groups/rubin/home/schretterc/Documents/FlyDiscoAnalysis
 % do_force_analysis = true; 
 %analysis_parameters = {'analysis_protocol',analysis_protocol};
 %%%%
-%analysis_protocol = '20210909_FlyBowlRGBVision_addperframe';
+analysis_protocol = '20210909_FlyBowlRGBVision_addperframe';
 do_force_analysis = true;   
 analysis_parameters = {'doautomaticchecksincoming','on', ...
     'doflytracking','on', ...
