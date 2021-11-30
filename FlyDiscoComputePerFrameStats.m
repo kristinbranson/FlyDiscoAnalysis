@@ -119,6 +119,37 @@ else
 % statstxtfid = fopen(statstxtsavename,'w');
 % fclose(statstxtfid);
 
+
+% delete data we should recompute
+if exist(statstxtsavename,'file'),
+  try
+    fprintf('Deleting file %s...\n',statstxtsavename);
+    delete(statstxtsavename);
+  catch
+    warning('Could not delete file %s',statstxtsavename);
+  end
+end
+if exist(statsmatsavename,'file'),
+  try
+    fprintf('Deleting file %s...\n',statsmatsavename);
+    delete(statsmatsavename);
+  catch
+    warning('Could not delete file %s',statsmatsavename);
+  end
+end
+perframefiles = dir(fullfile(expdir,trx.dataloc_params.perframefnsfilestr,'stim*.mat'));
+perframefiles = {perframefiles.name};
+perframefiles(cellfun(@isempty,regexp(perframefiles,'^stim((on)|(off))(_\d+)+\.mat','once'))) = [];
+for i = 1:numel(perframefiles),
+  try
+    pff = fullfile(expdir,trx.dataloc_params.perframefnsfilestr,perframefiles{i});
+    fprintf('Deleting file %s...\n',pff);
+    delete(pff);
+  catch
+    warning('Could not delete file %s',pff);
+  end
+end
+
 statsperfly = struct;
 statsperexp = struct;
 
