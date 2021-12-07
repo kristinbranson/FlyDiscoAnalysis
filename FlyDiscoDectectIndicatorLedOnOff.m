@@ -188,6 +188,37 @@ end
 
 %% reconstruct protocol
 
+%% compare detected steps to number of stimuli in protocol
+%load protocol file and convert RGB to single led 
+
+if isfield(dataloc_params,'ledprotocolfilestr')
+    if exist(fullfile(expdir,dataloc_params.ledprotocolfilestr),'file')
+        load(fullfile(expdir,dataloc_params.ledprotocolfilestr),'protocol')
+        if strcmp(metadata.assay,'FlyBubbleRGB') || strcmp(metadata.assay,'FlyBowlRGB')
+            if isfield(protocol,'Rintensity')
+                RGBprotocol = protocol;
+                clear protocol;
+                % test if RGBprotocol has only one active color
+                countactiveLEDs = [double(any(RGBprotocol.Rintensity));double(any(RGBprotocol.Gintensity));double(any(RGBprotocol.Bintensity))];
+                % check that there is 1 and only 1 color LED used in protocol
+                if sum(countactiveLEDs) == 0
+                    error('ChR = 1 for LED protcol with no active LEDs')
+                elseif sum(countactiveLEDs) > 1
+                    error('More than one active LED color in protocol. Not currently supported')
+                end
+                % call function that transforms new protocol to old protocol
+                [protocol,~] = ConvertRGBprotocol2protocolformat(RGBprotocol,countactiveLEDs);
+            end
+        end
+    end
+end
+
+stimcount_expected  = sum(protocol.iteration);
+stimcount_detection = max(numel(indicatorLED.startframe),numel(indicatorLED.endframe));
+
+indicatorLED.detectionnumMatchesprotocol = stimcount_expected == stimcount_detection;
+
+
 %% save indicator data to mat file
 indicatordatamatfile = fullfile(expdir,dataloc_params.indicatordatafilestr);
 

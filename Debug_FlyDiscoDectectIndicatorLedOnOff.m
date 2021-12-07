@@ -20,7 +20,8 @@ expdir = '/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/2021101
 % analysis_protocol = 'current_bubble';
 % analysis_protocol = '20160415_flybubble_non_optogenetic';
 % analysis_protocol = 'current_bubble';
-analysis_protcol = '20211014_flybubbleRed_LED';
+% analysis_protcol = '20211014_flybubbleRed_LED';
+analysis_protocol = '20210531_flybubble_LED_AR_20210819';
 params = {'settingsdir',settingsdir,...
   'analysis_protocol',analysis_protocol};
 

@@ -55,6 +55,7 @@ categories = {...
   'missing_automated_checks_incoming_files',...
   'missing_tracking_files',...
   'flytracker_nans',...
+  'ledstimulus_error',...
   'missing_registration_files',...
   'missing_optoregistration_files',...
   'missing_sexclassification_files',...
@@ -220,7 +221,68 @@ else
     end
   end
 end
+%% check for LED detection/protocol mismatch
+% ledstimulus_error
+% need to check if its an optogenetic experiment
+registrationparamsfile = fullfile(settingsdir,analysis_protocol,dataloc_params.registrationparamsfilestr);
+if ~exist(registrationparamsfile,'file')
+    error('Registration params file %s does not exist',registrationparamsfile);
+end
 
+registration_params = ReadParams(registrationparamsfile);
+
+if isfield(registration_params,'OptogeneticExp')
+    if registration_params.OptogeneticExp
+        indicatordatafile = fullfile(expdir,dataloc_params.indicatordatafilestr);
+        if ~exist(indicatordatafile,'file'),
+            error_or_warning_messages{end+1} = sprintf('indicatordata mat file %s does not exist',indicatordatafile);
+            success = false;
+            iserror(category2idx.missing_optoregistration_files) = true;
+        else
+            load(indicatordatafile,'indicatorLED');
+            if ~isfield(indicatorLED,'detectionnumMatchesprotocol')
+                if isfield(dataloc_params,'ledprotocolfilestr')
+                    if exist(fullfile(expdir,dataloc_params.ledprotocolfilestr),'file')
+                        load(fullfile(expdir,dataloc_params.ledprotocolfilestr),'protocol')
+                        if strcmp(metadata.assay,'FlyBubbleRGB') || strcmp(metadata.assay,'FlyBowlRGB')
+                            if isfield(protocol,'Rintensity')
+                                RGBprotocol = protocol;
+                                clear protocol;
+                                % test if RGBprotocol has only one active color
+                                countactiveLEDs = [double(any(RGBprotocol.Rintensity));double(any(RGBprotocol.Gintensity));double(any(RGBprotocol.Bintensity))];
+                                % check that there is 1 and only 1 color LED used in protocol
+                                if sum(countactiveLEDs) == 0
+                                    error('ChR = 1 for LED protcol with no active LEDs')
+                                elseif sum(countactiveLEDs) > 1
+                                    error('More than one active LED color in protocol. Not currently supported')
+                                end
+                                % call function that transforms new protocol to old protocol
+                                [protocol,~] = ConvertRGBprotocol2protocolformat(RGBprotocol,countactiveLEDs);
+                            end
+                        end
+                    end
+                end
+                
+                stimcount_expected  = sum(protocol.iteration);
+                stimcount_detection = max(numel(indicatorLED.startframe),numel(indicatorLED.endframe));
+                
+                indicatorLED.detectionnumMatchesprotocol = stimcount_expected == stimcount_detection;
+                if ~indicatorLED.detectionnumMatchesprotocol
+                    error_or_warning_messages{end+1} = sprintf('Detected number of LED stimuli does not match protocol file');
+                    success = false;
+                    iserror(category2idx.ledstimulus_error) = true;               
+                end
+                
+            else 
+                if ~indicatorLED.detectionnumMatchesprotocol
+                    error_or_warning_messages{end+1} = sprintf('Detected number of LED stimuli does not match protocol file');
+                    success = false;
+                    iserror(category2idx.ledstimulus_error) = true;               
+                end
+            end
+        end
+    end
+end
 %% check for missing files
 % add parsing for opto or not
 
