@@ -29,7 +29,7 @@ for i = 1:numel(unique_nalive),
   else
     % all flies with nalive == nalivecurr
     sortbycurr = sortby(idxcurr);
-    [~,~,idxselect] = furthestfirst(sortbycurr',nfliesplot-nselected,'start',[]);
+    [~,~,idxselect] = furthestfirst(sortbycurr',nfliesplot-nselected,'start','mean');
     fliesplot(nselected+1:end) = sort(idxcurr(idxselect));
     break;
   end
