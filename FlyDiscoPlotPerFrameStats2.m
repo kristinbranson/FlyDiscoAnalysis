@@ -463,7 +463,9 @@ ppfsinfo.params.stats_plotparams = stats_plotparams;
 ppfsinfo.params.stimulus_plotparams = stimulus_plotparams;
 ppfsinfo.params.hist_plot_params = hist_plot_params;
 ppfsinfo.params.condition_plot_params = condition_plot_params;
-ppfsinfo.params.videoparams = videoparams;
+if makestimvideos,
+    ppfsinfo.params.videoparams = videoparams;
+end
 
 ppfsinfo.statsmatsavename = statsmatsavename;
 if plothist,

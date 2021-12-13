@@ -1,0 +1,18 @@
+# output movie fps
+fps,30
+nzoomr,5
+nzoomc,4
+boxradius,20
+taillength,25
+#first, middle, endfrmaes not used for optovideos
+firstframes,0
+middleframes,0
+endframes,0
+# which of indicatorLEd.startframes to show
+indicatorframes,1,3
+nframes_beforeindicator,0
+# total frames shown including nframes_beforeindicator
+nframes,1350
+subdecimationfactor,3
+figpos,1,1,1434,1024
+tempdatadir,/groups/rubin/home/schretterc/Documents/FlyBowl_MingBowlTests/20xUAS-ChrimsonRmVenusattp18_SS36564_flyBowlMing_20200227_Continuous_2min_5int_20200107_20200807T081147

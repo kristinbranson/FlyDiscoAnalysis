@@ -53,7 +53,8 @@ analysis_parameters = {'analysis_protocol',analysis_protocol, ...
 
 %% make explist
 % running as bransonlab 
-folder_path_from_experiment_index = {'/groups/rubin/home/schretterc/Documents/FlyDiscoAnalysis_ExptsToAnalyze_Test/2021-11-11/20211111T100306_rig1_flyBowl1__Orco2_Orco2_20211001_nonopto'};
+folder_path_from_experiment_index = {'/groups/rubin/home/schretterc/Documents/KS_DataFromRigs/FlyBowlRGB/FlyBowl_NonOpto/20211208/20211208T094405_rig1_flyBowl3__CantonS_CantonS_20211001_nonopto'};
+
 % '/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20210806_testingcaboose/VNC_JRC_SS49220_RigB_20210421T143507'};
 
 % make explist of only experiment dirs with tracking and NOT aborted
