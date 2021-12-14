@@ -16,14 +16,14 @@ read_only_example_experiments_folder_path = fullfile(root_example_experiments_fo
 %read_only_example_experiments_folder_path = '/groups/branson/bransonlab/flydisco_example_experiments_read_only' ;
 
 % Specify the "per-lab" configuration here
-lab_head_last_name = 'scicompsoft' ;
+cluster_billing_account_name = 'scicompsoft' ;
 rig_host_name = 'beet.hhmi.org' ;
 rig_user_name = 'bransonk' ;
-rig_data_folder_path = '/cygdrive/e/flydisco_data' ;
+rig_data_folder_path = '/cygdrive/e/flydisco_data/scicompsoft' ;
 goldblum_destination_folder_path = fullfile(root_example_experiments_folder_path, 'test-goldblum-destination-folder') ;
 settings_folder_path = fullfile(fly_disco_analysis_folder_path, 'settings') ;
 per_lab_configuration = struct() ;
-per_lab_configuration.lab_head_last_name = lab_head_last_name ;
+per_lab_configuration.cluster_billing_account_name = cluster_billing_account_name ;
 per_lab_configuration.host_name_from_rig_index = {rig_host_name} ;
 per_lab_configuration.rig_user_name_from_rig_index = {rig_user_name} ;
 per_lab_configuration.data_folder_path_from_rig_index = {rig_data_folder_path} ;
@@ -50,7 +50,7 @@ if do_reset_destination_folder ,
     % reset_goldblum_example_experiments_working_copy_folder(read_only_example_experiments_folder_path, read_only_example_experiments_folder_path) ;
 
     % Copy to the destination folder
-    rig_lab_data_folder_path = fullfile(rig_data_folder_path, lab_head_last_name) ;
+    rig_lab_data_folder_path = rig_data_folder_path ;
     fprintf('Transfering data to the destination path...\n') ;
     ensure_folder_exists(fileparts(goldblum_destination_folder_path)) ;  %#ok<UNRCH>
     command_line = {'cp', '-R', '-T', read_only_example_experiments_folder_path, goldblum_destination_folder_path} ;

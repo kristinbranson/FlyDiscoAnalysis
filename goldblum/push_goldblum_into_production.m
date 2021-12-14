@@ -9,11 +9,14 @@ function push_goldblum_into_production()
     % Do Branson Lab instance
     copy_to_single_user_account('bransonlab', fda_folder_path) ;
     
-    % % Do Dickson Lab instance
-    % copy_to_single_user_account('dicksonlab', fda_folder_path) ;
-    
     % Do Rubin Lab instance
     copy_to_single_user_account('rubinlab', fda_folder_path) ;
+
+    % Do PTR instance
+    copy_to_single_user_account('projtechreslab', fda_folder_path) ;
+
+    % Do GENIE instance
+    copy_to_single_user_account('geniegeneric', fda_folder_path) ;
 
     % If get here, everything went well
     fprintf('Successfully copied %s into all the *lab user accounts\n', fda_folder_path) ;

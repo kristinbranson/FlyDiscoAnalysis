@@ -15,7 +15,7 @@ this_folder_path = fileparts(this_script_path) ;
 analysis_test_template_folder_path = fullfile(this_folder_path, 'analysis-test-template') ;
 
 % This stuff goes into the per-lab configuration that goldblum uses
-lab_head_last_name = 'scicompsoft' ;
+cluster_billing_account_name = 'scicompsoft' ;
 remote_host_name = 'beet.hhmi.org' ;
 remote_host_name_from_rig_index = { remote_host_name } ;
 remote_user_name = 'bransonk' ;
@@ -28,7 +28,7 @@ does_use_per_user_folders = false ;
 
 % Specify the "per-lab" configuration here
 per_lab_configuration = struct() ;
-per_lab_configuration.lab_head_last_name = lab_head_last_name ;
+per_lab_configuration.cluster_billing_account_name = cluster_billing_account_name ;
 per_lab_configuration.host_name_from_rig_index = remote_host_name_from_rig_index ;
 per_lab_configuration.rig_user_name_from_rig_index = rig_user_name_from_rig_index ;
 per_lab_configuration.data_folder_path_from_rig_index = data_folder_path_from_rig_index ;
@@ -42,7 +42,7 @@ if exist(destination_folder_path, 'file') ,
 end
 
 % Delete the remote lab data folder
-remote_experiments_folder_path = fullfile(remote_data_root_folder_path, lab_head_last_name) ;
+remote_experiments_folder_path = remote_data_root_folder_path ;
 escaped_remote_experiments_folder_path = escape_path_for_bash(remote_experiments_folder_path) ;
 command_line = sprintf('ssh %s@%s rm -rf %s', remote_user_name, remote_host_name, escaped_remote_experiments_folder_path) ;
 system_with_error_handling(command_line) ;
