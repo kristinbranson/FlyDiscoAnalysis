@@ -1,4 +1,10 @@
 function goldblum(do_transfer_data_from_rigs, do_run_analysis, do_use_bqueue, do_actually_submit_jobs, analysis_parameters, configuration)
+    %GOLDBLUM Transfer FlyDisco experiment folders from rig computers and analyze them.
+    %   goldblum() transfers FlyDisco experiment folders from the specified rig
+    %   computers and analyzes them on an LSF cluster.  What rig computers to
+    %   searched, and a variety of other settings, are determined from the username of
+    %   the user running goldblum().    
+    
     % Deal with arguments
     if ~exist('do_transfer_data_from_rigs', 'var') || isempty(do_transfer_data_from_rigs) ,
         do_transfer_data_from_rigs = true ;
