@@ -1,4 +1,4 @@
-function result = scicompsoft_configuration()
+function result = taylora_configuration()
     result = struct() ;
     result.cluster_billing_account_name = 'scicompsoft' ;
     result.host_name_from_rig_index = {'flybowl-ww1.hhmi.org'} ;
