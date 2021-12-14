@@ -24,12 +24,7 @@ function goldblum(do_transfer_data_from_rigs, do_run_analysis, do_use_bqueue, do
     if ~exist('configuration', 'var') || isempty(configuration) ,
         % Load the per-lab configuration file
         user_name = get_user_name() ;
-        index_of_ell_in_lab = regexp(user_name, 'lab$', 'once') ;
-        if isempty(index_of_ell_in_lab) ,
-            error('No per-lab configuration specified, and username "%s" does not seem to be a shared lab user', user_name) ;
-        end
-        pi_last_name = user_name(1:index_of_ell_in_lab-1) ;
-        configuration_function_name = sprintf('%s_configuration', pi_last_name) ;
+        configuration_function_name = sprintf('%s_configuration', user_name) ;
         configuration = feval(configuration_function_name) ;
     end
     
