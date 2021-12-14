@@ -34,7 +34,7 @@ function goldblum(do_transfer_data_from_rigs, do_run_analysis, do_use_bqueue, do
     end
     
     % Unpack the per-lab configuration file
-    lab_head_last_name = configuration.lab_head_last_name ;
+    cluster_billing_account_name = configuration.cluster_billing_account_name ;
     host_name_from_rig_index = configuration.host_name_from_rig_index ;
     rig_user_name_from_rig_index = configuration.rig_user_name_from_rig_index ;
     data_folder_path_from_rig_index = configuration.data_folder_path_from_rig_index ;
@@ -68,12 +68,6 @@ function goldblum(do_transfer_data_from_rigs, do_run_analysis, do_use_bqueue, do
 %                 short_host_name_from_rig_index, ...
 %                 'UniformOutput', false) ;
     
-    % The data for. e.g. the Branson lab, will be in <rig_data_folder_path>/branson
-    lab_data_folder_path_from_rig_index = ...
-        cellfun(@(data_folder_path)(fullfile(data_folder_path, lab_head_last_name)), ...
-                data_folder_path_from_rig_index, ...
-                'UniformOutput', false) ;
-    
     % % Get the full path to the Python script that copies data from the rig machines
     % this_script_path = mfilename('fullpath') ;
     % this_folder_path = fileparts(this_script_path) ;
@@ -86,7 +80,7 @@ function goldblum(do_transfer_data_from_rigs, do_run_analysis, do_use_bqueue, do
         for rig_index = 1 : rig_count ,
             rig_host_name = host_name_from_rig_index{rig_index} ;
             rig_user_name = rig_user_name_from_rig_index{rig_index} ;
-            lab_data_folder_path = lab_data_folder_path_from_rig_index{rig_index} ;
+            lab_data_folder_path = data_folder_path_from_rig_index{rig_index} ;
 
             try
                 relative_path_from_synched_experiment_folder_index = ...
@@ -116,7 +110,7 @@ function goldblum(do_transfer_data_from_rigs, do_run_analysis, do_use_bqueue, do
                                    folder_name_from_experiment_index, ...
                                    'UniformOutput', false) ;
         canonical_path_from_experiment_index = cellfun(@realpath, link_path_from_experiment_index, 'UniformOutput', false) ;
-        goldblum_analyze_experiment_folders(canonical_path_from_experiment_index, settings_folder_path, lab_head_last_name, ...
+        goldblum_analyze_experiment_folders(canonical_path_from_experiment_index, settings_folder_path, cluster_billing_account_name, ...
                                             do_use_bqueue, do_actually_submit_jobs, analysis_parameters)
         
         % Whether those succeeded or failed, remove the links from the

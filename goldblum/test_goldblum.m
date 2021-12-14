@@ -17,14 +17,14 @@ read_only_example_experiments_folder_path = fullfile(root_example_experiments_fo
 %read_only_example_experiments_folder_path = '/groups/branson/bransonlab/flydisco_example_experiments_read_only' ;
 
 % Specify the "per-lab" configuration here
-lab_head_last_name = 'scicompsoft' ;
+cluster_billing_account_name = 'scicompsoft' ;
 rig_host_name = 'beet.hhmi.org' ;
 rig_user_name = 'bransonk' ;
-rig_data_folder_path = '/cygdrive/e/flydisco_data' ;
+rig_data_folder_path = '/cygdrive/e/flydisco_data/scicompsoft' ;
 goldblum_destination_folder_path = fullfile(root_example_experiments_folder_path, 'test-goldblum-destination-folder') ;
 settings_folder_path = fullfile(fly_disco_analysis_folder_path, 'settings') ;
 per_lab_configuration = struct() ;
-per_lab_configuration.lab_head_last_name = lab_head_last_name ;
+per_lab_configuration.cluster_billing_account_name = cluster_billing_account_name ;
 per_lab_configuration.host_name_from_rig_index = {rig_host_name} ;
 per_lab_configuration.rig_user_name_from_rig_index = {rig_user_name} ;
 per_lab_configuration.data_folder_path_from_rig_index = {rig_data_folder_path} ;
@@ -50,10 +50,9 @@ end
 % reset_goldblum_example_experiments_working_copy_folder(read_only_example_experiments_folder_path, read_only_example_experiments_folder_path) ;
 
 % Copy it to the rig computer (or just direct to the destination folder)
-rig_lab_data_folder_path = fullfile(rig_data_folder_path, lab_head_last_name) ;
 if do_transfer_data_from_rigs ,
     fprintf('Transfering data to the rig computer...\n') ;  %#ok<UNRCH>
-    command_line = sprintf('scp -B -r %s/* %s@%s:%s', read_only_example_experiments_folder_path, rig_user_name, rig_host_name, rig_lab_data_folder_path) ; %#ok<UNRCH>
+    command_line = sprintf('scp -B -r %s/* %s@%s:%s', read_only_example_experiments_folder_path, rig_user_name, rig_host_name, rig_data_folder_path) ; %#ok<UNRCH>
     system_with_error_handling(command_line) ;
 else
     fprintf('Transfering data to the destination path...\n') ;
@@ -97,10 +96,10 @@ end
 % Check that the rig lab folder is empty now
 if do_transfer_data_from_rigs ,
     relative_path_from_experiment_folder_index = ...
-        find_remote_experiment_folders(rig_user_name, rig_host_name, rig_lab_data_folder_path, 'to-process') ;
+        find_remote_experiment_folders(rig_user_name, rig_host_name, rig_data_folder_path, 'to-process') ;
     if ~isempty(relative_path_from_experiment_folder_index) ,
         error('Rig lab data folder %s:%s seems to still contain %d experiments', ...
-              rig_host_name, rig_lab_data_folder_path, length(relative_path_from_experiment_folder_index)) ;
+              rig_host_name, rig_data_folder_path, length(relative_path_from_experiment_folder_index)) ;
     end
 end
 
@@ -124,10 +123,10 @@ end
 % Check that the rig lab folder is empty now
 if do_transfer_data_from_rigs ,
     relative_path_from_experiment_folder_index = ...
-        find_remote_experiment_folders(rig_user_name, rig_host_name, rig_lab_data_folder_path, 'to-process') ;
+        find_remote_experiment_folders(rig_user_name, rig_host_name, rig_data_folder_path, 'to-process') ;
     if ~isempty(relative_path_from_experiment_folder_index) ,
         error('Rig lab data folder %s:%s seems to still contain %d experiments', ...
-              rig_host_name, rig_lab_data_folder_path, length(relative_path_from_experiment_folder_index)) ;
+              rig_host_name, rig_data_folder_path, length(relative_path_from_experiment_folder_index)) ;
     end
 end
 

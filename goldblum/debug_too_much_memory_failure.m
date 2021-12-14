@@ -1,6 +1,6 @@
 do_use_bqueue = false ;
 do_actually_submit_jobs = true ;
-lab_head_last_name = 'branson' ;  % used for billing the jobs
+cluster_billing_account_name = 'branson' ;  % used for billing the jobs
 do_force_analysis = false ;
 analysis_parameters = cell(1,0) ;
 % analysis_parameters = ...
@@ -42,5 +42,5 @@ folder_path_from_experiment_index = find_experiment_folders(working_experiments_
 
 % Run the script under test
 fprintf('Running goldblum_analyze_experiment_folders...\n') ;
-goldblum_analyze_experiment_folders(folder_path_from_experiment_index, settings_folder_path, lab_head_last_name, ...
+goldblum_analyze_experiment_folders(folder_path_from_experiment_index, settings_folder_path, cluster_billing_account_name, ...
                            do_force_analysis, do_use_bqueue, do_actually_submit_jobs, analysis_parameters)
