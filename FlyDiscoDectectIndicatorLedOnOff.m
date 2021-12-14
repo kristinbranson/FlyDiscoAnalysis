@@ -19,18 +19,18 @@ timestamp = datestr(now,'yyyymmddTHHMMSS');
 datalocparamsfile = fullfile(settingsdir,analysis_protocol,datalocparamsfilestr);
 dataloc_params = ReadParams(datalocparamsfile);
 
-if isfield(dataloc_params,'indicator_logfilestr'),
-  logfile = fullfile(expdir,dataloc_params.indicator_logfilestr);
-  logfid = fopen(logfile,'a');
-  if logfid < 1,
-    warning('Could not open log file %s\n',logfile);
-    logfid = 1;
-  end
-else
-  logfid = 1;
-end
+% if isfield(dataloc_params,'indicator_logfilestr'),
+%   logfile = fullfile(expdir,dataloc_params.indicator_logfilestr);
+%   logfid = fopen(logfile,'a');
+%   if logfid < 1,
+%     warning('Could not open log file %s\n',logfile);
+%     logfid = 1;
+%   end
+% else
+%   logfid = 1;
+% end
 
-fprintf(logfid,'\n\n***\nRunning FlyDiscoDectectIndicatorLedOnOff version %s analysis_protocol %s at %s\n',version,analysis_protocol,timestamp);
+% fprintf('\n***\nRunning FlyDiscoDectectIndicatorLedOnOff version %s analysis_protocol %s at %s\n',version,analysis_protocol,timestamp);
 %% read in indicator params
 
 indicatorparamsfile = fullfile(settingsdir,analysis_protocol,dataloc_params.indicatorparamsfilestr);
@@ -51,10 +51,10 @@ registration_params = ReadParams(registrationparamsfile);
 if isfield(registration_params,'OptogeneticExp')
   if registration_params.OptogeneticExp
     DoLEDdetection = true;
-    fprintf(logfid,'\n Optogenetic flag set to: %1.0f, running indicator detection',registration_params.OptogeneticExp);
+    fprintf('Optogenetic flag set to: %1.0f, running indicator detection\n',registration_params.OptogeneticExp);
   else
     DoLEDdetection = false;
-    fprintf(logfid,'\n Optogenetic flag set to: %1.0f, skipping indicator detection',registration_params.OptogeneticExp)
+    fprintf('Optogenetic flag set to: %1.0f, skipping indicator detection\n',registration_params.OptogeneticExp);
   end
 else
   error('Registration params optogenetic flag %s does not exist',registrationparamsfile);
@@ -161,7 +161,7 @@ if DoLEDdetection
         indicatordigital(indicatorLED.startframe(i):indicatorLED.endframe(j)-1) = 1;
       end
     else
-      fprintf(logfid,'\n Error creating indicatordigital');
+      fprintf('Error creating indicatordigital');
       msgs{end+1} = 'Error creating indicatordigital' ;
     end
     
@@ -171,8 +171,8 @@ if DoLEDdetection
     indicatordata.indicatorLED = indicatorLED;
   catch exception
     imagediff = max(meanimage)-min(meanimage);
-    fprintf(logfid, '\n Error calculating indicator on-off: Error identifier was "%s", error message was "%s"', exception.identifier, exception.message) ;
-    fprintf(logfid, '\n Possibly relevant: meanimage value is small: %g', imagediff) ;
+    fprintf( 'Error calculating indicator on-off: Error identifier was "%s", error message was "%s"', exception.identifier, exception.message) ;
+    fprintf( 'Possibly relevant: meanimage value is small: %g', imagediff) ;
     success = false ;
     msgs{end+1} = 'Error calculating indicator LED on-off' ;
     return
@@ -194,20 +194,23 @@ end
 if isfield(dataloc_params,'ledprotocolfilestr')
     if exist(fullfile(expdir,dataloc_params.ledprotocolfilestr),'file')
         load(fullfile(expdir,dataloc_params.ledprotocolfilestr),'protocol')
-        if strcmp(metadata.assay,'FlyBubbleRGB') || strcmp(metadata.assay,'FlyBowlRGB')
-            if isfield(protocol,'Rintensity')
-                RGBprotocol = protocol;
-                clear protocol;
-                % test if RGBprotocol has only one active color
-                countactiveLEDs = [double(any(RGBprotocol.Rintensity));double(any(RGBprotocol.Gintensity));double(any(RGBprotocol.Bintensity))];
-                % check that there is 1 and only 1 color LED used in protocol
-                if sum(countactiveLEDs) == 0
-                    error('ChR = 1 for LED protcol with no active LEDs')
-                elseif sum(countactiveLEDs) > 1
-                    error('More than one active LED color in protocol. Not currently supported')
+        if exist(fullfile(expdir, dataloc_params.metadatafilestr),'file')
+            metadata = ReadMetadataFile(fullfile(expdir, dataloc_params.metadatafilestr));
+            if strcmp(metadata.assay,'FlyBubbleRGB') || strcmp(metadata.assay,'FlyBowlRGB')
+                if isfield(protocol,'Rintensity')
+                    RGBprotocol = protocol;
+                    clear protocol;
+                    % test if RGBprotocol has only one active color
+                    countactiveLEDs = [double(any(RGBprotocol.Rintensity));double(any(RGBprotocol.Gintensity));double(any(RGBprotocol.Bintensity))];
+                    % check that there is 1 and only 1 color LED used in protocol
+                    if sum(countactiveLEDs) == 0
+                        error('ChR = 1 for LED protcol with no active LEDs')
+                    elseif sum(countactiveLEDs) > 1
+                        error('More than one active LED color in protocol. Not currently supported')
+                    end
+                    % call function that transforms new protocol to old protocol
+                    [protocol,~] = ConvertRGBprotocol2protocolformat(RGBprotocol,countactiveLEDs);
                 end
-                % call function that transforms new protocol to old protocol
-                [protocol,~] = ConvertRGBprotocol2protocolformat(RGBprotocol,countactiveLEDs);
             end
         end
     end
@@ -217,7 +220,7 @@ stimcount_expected  = sum(protocol.iteration);
 stimcount_detection = max(numel(indicatorLED.startframe),numel(indicatorLED.endframe));
 
 indicatorLED.detectionnumMatchesprotocol = stimcount_expected == stimcount_detection;
-
+indicatordata.indicatorLED = indicatorLED;
 
 %% save indicator data to mat file
 indicatordatamatfile = fullfile(expdir,dataloc_params.indicatordatafilestr);
@@ -236,17 +239,17 @@ catch ME
 end
 
 if didsave,
-  fprintf(logfid,'\n Saved indicator data to file %s\n',indicatordatamatfile);
+  fprintf('Saved indicator data to file %s\n',indicatordatamatfile);
 else
-  fprintf(logfid,'\n Could not save indicator data to mat file:\n%s\n',getReport(ME));
+  fprintf('Could not save indicator data to mat file:\n%s\n',getReport(ME));
 end
 %% close log
 
-fprintf(logfid,'\n Finished running FlyBowlRegisterTrx at %s.\n',datestr(now,'yyyymmddTHHMMSS'));
+% fprintf('Finished running FlyDiscoDetectIndicatorLedOnOff at %s.\n',datestr(now,'yyyymmddTHHMMSS'));
 
-if logfid > 1,
-  fclose(logfid);
-end
+% if logfid > 1,
+%   fclose(logfid);
+% end
 
 %% close figures
 

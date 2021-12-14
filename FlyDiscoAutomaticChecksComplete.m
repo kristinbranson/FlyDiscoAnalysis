@@ -46,7 +46,7 @@ real_analysis_protocol = GetRealAnalysisProtocol(analysis_protocol,settingsdir);
 
 paramsfile = fullfile(settingsdir,analysis_protocol,dataloc_params.automaticcheckscompleteparamsfilestr);
 check_params = ReadParams(paramsfile);
-%metadatafile = fullfile(expdir,dataloc_params.metadatafilestr);
+metadatafile = fullfile(expdir,dataloc_params.metadatafilestr);
 automatedchecksincomingfile = fullfile(expdir,dataloc_params.automaticchecksincomingresultsfilestr);
 acc_text_output_file_path = fullfile(expdir,dataloc_params.automaticcheckscompleteresultsfilestr);
 
@@ -82,7 +82,7 @@ end
 
 %% read metadata
 
-%metadata = ReadMetadataFile(metadatafile);
+metadata = ReadMetadataFile(metadatafile);
 
 %% check for primary screen: some checks are only for screen data
 
@@ -267,6 +267,25 @@ if isfield(registration_params,'OptogeneticExp')
                 stimcount_detection = max(numel(indicatorLED.startframe),numel(indicatorLED.endframe));
                 
                 indicatorLED.detectionnumMatchesprotocol = stimcount_expected == stimcount_detection;
+                % save indicator data to mat file
+                indicatordatamatfile = fullfile(expdir,dataloc_params.indicatordatafilestr);                
+                didsave = false;
+                try                   
+                    save(indicatordatamatfile,'-append','indicatorLED');
+                    didsave = true;
+                catch ME
+                    warning('Could not resave indicator data to mat file: %s',getReport(ME));
+                    success = false;
+                    msgs{end+1} = ['Could not resave indicator data to mat file: %s',getReport(ME)];
+                end
+                
+                if didsave,
+                    fprintf('Resaved indicator data to file %s\n',indicatordatamatfile);
+                else
+                    fprintf('Could not resave indicator data to mat file:\n%s\n',getReport(ME));
+                end
+                
+                
                 if ~indicatorLED.detectionnumMatchesprotocol
                     error_or_warning_messages{end+1} = sprintf('Detected number of LED stimuli does not match protocol file');
                     success = false;
