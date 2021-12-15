@@ -1,9 +1,9 @@
-function result = rubin_configuration()
+function result = rubinlab_configuration()
     result = struct() ;
-    result.lab_head_last_name = 'rubin' ;
+    result.cluster_billing_account_name = 'rubin' ;
     result.host_name_from_rig_index = {'flybowl-ww1.hhmi.org', 'flybowl-ww3.hhmi.org'} ;
     result.rig_user_name_from_rig_index = {'labadmin', 'labadmin'} ;
-    result.data_folder_path_from_rig_index = {'/cygdrive/h/flydisco_data', '/cygdrive/e/flydisco_data'} ;
+    result.data_folder_path_from_rig_index = {'/cygdrive/h/flydisco_data/rubin', '/cygdrive/e/flydisco_data/rubin'} ;
     result.destination_folder = '/groups/rubin/data0/rubinlab/flydisco_data' ;
     this_folder_path = fileparts(mfilename('fullpath')) ;
     flydisco_analysis_path = fileparts(this_folder_path) ;

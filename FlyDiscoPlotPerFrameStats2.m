@@ -1,3 +1,46 @@
+% FlyDiscoPlotPerFrameStats2(expdir,varargin)
+% Optional arguments:
+% plotstats: Whether to plot mean stats. 
+%     0 -> Do not plot
+%     1 -> Plot if files do not exist
+%     2 -> Replot whether or not files exist
+% Default value 2. 
+% plotstim: Whether to plot stimulus onset time series intervals
+%     0 -> Do not plot
+%     1 -> Plot if files do not exist
+%     2 -> Replot whether or not files exist
+%     [] -> 0 if no indicator file, 2 if indicator file
+% Default value [].
+% plotstimtrajs: Whether to plot stimulus onset trajectories
+%     0 -> Do not plot
+%     1 -> Plot if files do not exist
+%     2 -> Replot whether or not files exist
+%     [] -> 0 if no indicator file, 2 if indicator file
+% Default value [].
+% plothist: Whether to plot histograms of statistics
+%     0 -> Do not plot
+%     1 -> Plot if files do not exist
+%     2 -> Replot whether or not files exist
+% Default value 2.
+% makestimvideos: Whether to make gifs of stimulus onset periods. 
+%     0 -> Do not plot
+%     1 -> Plot if files don't exist
+%     2 -> Replot whether or not files exist. 
+%     [] -> Inherit value from plotstimtrajs
+% Default value [].
+% plotflies: Whether to plot per-fly mean statistics. Only relevant if
+% plotstats > 0. Binary false/true value. 
+% Default value true.
+% analysis_protocol: Default = 'current'
+% settingsdir: Default = '/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/settings'
+% datalocparamsfilestr: Default = 'dataloc_params.txt'
+% visible: Whether to show the figures while plotting. If empty, then this
+% is true when debug parameter is true and false otherwise. Default value
+% ''.
+% debug: Whether to just plot everything (true) or to save plots to
+% files. 
+% verbose: 0-2 value indicating how much to print to stdout. Default = 1.
+
 function FlyDiscoPlotPerFrameStats2(expdir,varargin)
 
 version = '0.1';
@@ -16,15 +59,13 @@ version = '0.1';
   'makestimvideos',[],...
   'plothist',2,...
   'plotflies',true,...
-  'plotstimtrajs',2,...
+  'plotstimtrajs',[],...
   'verbose',1);
 
 if ischar(plotstats),
   plotstats = str2double(plotstats);
   if isnan(plotstats),
-    plotstats= true;
-  else
-    plotstats= plotstats ~= 0;
+    plotstats= 2;
   end
 end
 if isempty(visible),
@@ -176,9 +217,25 @@ end
 if isempty(plotstim),
   if isfield(dataloc_params,'indicatordatafilestr'),
     indicatordatafile = fullfile(expdir,dataloc_params.indicatordatafilestr);
-    plotstim = exist(indicatordatafile,'file');
+    if exist(indicatordatafile,'file'),
+      plotstim = 2;
+    else
+      plotstim = 0;
+    end
   else
-    plotstim = false;
+    plotstim = 0;
+  end
+end
+if isempty(plotstimtrajs),
+  if isfield(dataloc_params,'indicatordatafilestr'),
+    indicatordatafile = fullfile(expdir,dataloc_params.indicatordatafilestr);
+    if exist(indicatordatafile,'file'),
+      plotstimtrajs = 2;
+    else
+      plotstimtrajs = 0;
+    end
+  else
+    plotstimtrajs = 0;
   end
 end
 if isempty(makestimvideos),
@@ -186,7 +243,7 @@ if isempty(makestimvideos),
 end
 
 stimfiles = {};
-if plotstim || makestimvideos,
+if plotstim > 0 || makestimvideos > 0,
   trx = FBATrx('analysis_protocol',analysis_protocol,'settingsdir',settingsdir,...
     'datalocparamsfilestr',datalocparamsfilestr,...
     'maxdatacached',2^30);
@@ -204,7 +261,7 @@ end
 
 hfigperfly = [];
 
-if plotstim,
+if plotstim > 0,
   
   if verbose > 0,
     fprintf('Plotting per-frame features at stimulus onset...\n');
@@ -299,7 +356,7 @@ end
 
 %% make plots of trajectories at start of stimuli for individual flies
 
-if plotstimtrajs,
+if plotstimtrajs > 0,
   
   savename = 'stimulus_traj.png';
   relsavename = fullfile(dataloc_params.figdir,savename);

@@ -3,7 +3,7 @@
 % <Now in Matlab>
 %%
 modpath
-lab_head_last_name = 'branson' ;
+cluster_billing_account_name = 'branson' ;
 do_use_bqueue = true ;    
 do_actually_submit_jobs = true ;  
 
@@ -66,5 +66,5 @@ analysis_parameters = {'analysis_protocol',analysis_protocol, ...
 
 %% run analysis
 
-goldblum_analyze_experiment_folders(folder_path_from_experiment_index, settings_folder_path, lab_head_last_name, ...
+goldblum_analyze_experiment_folders(folder_path_from_experiment_index, settings_folder_path, cluster_billing_account_name, ...
                            do_force_analysis, do_use_bqueue, do_actually_submit_jobs, analysis_parameters) ;
