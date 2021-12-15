@@ -1,6 +1,17 @@
 # <per-frame feature>,<frame condition name>,<fly condition name>,<min n. frames both valid>,<min n. frames fly valid>,[<norm per-frame feature>],[<norm frame condition name>],[<norm fly condition name>],[<norm min n. frames both valid>],[<norm min n. frames fly valid>]
 
 # test zone - batches of 9
+# stim forward_vel > 0
+forward_vel,stimweakp5movingf,any,25,25
+forward_vel,stimweak5movingf,any,25,25
+forward_vel,stimweak10movingf,any,25,25
+forward_vel,stimmidp5movingf,any,25,25
+forward_vel,stimmid5movingf,any,25,25
+forward_vel,stimmid10movingf,any,25,25
+forward_vel,stimstrongp5movingf,any,25,25
+forward_vel,stimstrong5movingf,any,25,25
+forward_vel,stimstrong10movingf,any,25,25
+
 # stim wing behavior min_wing_angle
 min_wing_angle,prestimweakp5,any,25,25
 min_wing_angle,prestimweak5,any,25,25
