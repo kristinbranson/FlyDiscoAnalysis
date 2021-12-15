@@ -1,4 +1,4 @@
-function push_goldblum_into_production()
+function push_goldblum_into_production_for_testing()
     % Determine the FlyDiscoAnalysis folder path
     goldblum_folder_path = fileparts(mfilename('fullpath')) ;
     fda_folder_path = fileparts(goldblum_folder_path) ;
@@ -6,11 +6,11 @@ function push_goldblum_into_production()
     % Make sure there are no uncommitted changes
     error_if_uncommited_changes(fda_folder_path) ;
     
-    % Do Branson Lab instance
-    copy_to_single_user_account('bransonlab', fda_folder_path) ;
-    
-    % Do Rubin Lab instance
-    copy_to_single_user_account('rubinlab', fda_folder_path) ;
+%     % Do Branson Lab instance
+%     copy_to_single_user_account('bransonlab', fda_folder_path) ;
+%     
+%     % Do Rubin Lab instance
+%     copy_to_single_user_account('rubinlab', fda_folder_path) ;
 
     % Do PTR instance
     copy_to_single_user_account('projtechreslab', fda_folder_path) ;
