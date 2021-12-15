@@ -22,13 +22,9 @@ function turn_on_goldblum(hr, min)
     end
     
     user_name = get_user_name() ;
-    index_of_ell_in_lab = regexp(user_name, 'lab$', 'once') ;
-    if isempty(index_of_ell_in_lab) ,
-        error('No per-lab configuration specified, and username "%s" does not seem to be a shared lab user', user_name) ;
-    end
-    pi_last_name = user_name(1:index_of_ell_in_lab-1) ;
-    configuration_function_name = sprintf('%s_configuration', pi_last_name) ;
+    configuration_function_name = sprintf('%s_configuration', user_name) ;
     configuration = feval(configuration_function_name) ;
+    cluster_billing_account_name = configuration.cluster_billing_account_name ;
     
     destination_folder_path = configuration.destination_folder ;
     escaped_destination_folder_path = escape_string_for_bash(destination_folder_path) ;
@@ -59,7 +55,7 @@ function turn_on_goldblum(hr, min)
                 escaped_launcher_script_path, ...
                 escaped_bash_profile_path, ...
                 escaped_fly_disco_analysis_folder_path, ...
-                pi_last_name, ...
+                cluster_billing_account_name, ...
                 escaped_goldblum_logs_folder_path)  %#ok<NOPRT>
 
 %     core_command_line = ...
