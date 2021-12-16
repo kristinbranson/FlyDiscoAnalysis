@@ -4,10 +4,10 @@ do_run_analysis_in_debug_mode = true ;
 
 % Specify the "per-lab" configuration here
 per_lab_configuration = struct() ;
-per_lab_configuration.lab_head_last_name = 'scicompsoft' ;
+per_lab_configuration.cluster_billing_account_name = 'scicompsoft' ;
 per_lab_configuration.host_name_from_rig_index = {'flybowl-ww1.hhmi.org', 'flybowl-ww3.hhmi.org'} ;
 per_lab_configuration.rig_user_name_from_rig_index = {'labadmin', 'labadmin'} ;
-per_lab_configuration.data_folder_path_from_rig_index = {'/cygdrive/h/flydisco_data' '/cygdrive/e/flydisco_data'} ;
+per_lab_configuration.data_folder_path_from_rig_index = {'/cygdrive/h/flydisco_data/scicompsoft' '/cygdrive/e/flydisco_data/scicompsoft'} ;
 per_lab_configuration.destination_folder = '/groups/branson/bransonlab/taylora/flydisco/goldblum/goldblum-test-destination-folder' ;    
 per_lab_configuration.settings_folder_path = '/groups/branson/bransonlab/taylora/flydisco/goldblum/FlyDiscoAnalysis/settings' ;
 per_lab_configuration.does_use_per_user_folders = true ;

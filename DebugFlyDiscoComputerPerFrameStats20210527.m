@@ -49,8 +49,9 @@ FlyDiscoRegisterTrx(expdir,'settingsdir',settingsdir,'analysis_protocol',analysi
 FlyDiscoDectectIndicatorLedOnOff(expdir,'settingsdir',settingsdir,'analysis_protocol',analysis_protocol);
 FlyDiscoClassifySex(expdir,'settingsdir',settingsdir,'analysis_protocol',analysis_protocol);
 FlyDiscoComputePerFrameFeatures(expdir,'settingsdir',settingsdir,'analysis_protocol',analysis_protocol);
-FlyDiscoComputePerFrameStats(expdir,'settingsdir',settingsdir,'analysis_protocol',analysis_protocol,'docomputehists',true,'debugplot',5);
-FlyDiscoPlotPerFrameStats2(expdir,'settingsdir',settingsdir,'analysis_protocol',analysis_protocol,'debug',false);
+FlyDiscoComputePerFrameStats(expdir,'settingsdir',settingsdir,'analysis_protocol',analysis_protocol,'docomputehists',true,'debugplot',5,'dorecompute',true);
+FlyDiscoPlotPerFrameStats2(expdir,'settingsdir',settingsdir,'analysis_protocol',analysis_protocol,'debug',false,...
+  'plotstats',2,'plotstim',2,'makestimvideos',2,'plothist',2,'plotflies',true,'plotstimtrajs',2);
 
 %%
 

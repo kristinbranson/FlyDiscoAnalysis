@@ -15,7 +15,7 @@ this_folder_path = fileparts(this_script_path) ;
 analysis_test_template_folder_path = fullfile(this_folder_path, 'analysis-test-template') ;
 
 % This stuff goes into the per-lab configuration that goldblum uses
-lab_head_last_name = 'branson' ;
+cluster_billing_account_name = 'branson' ;
 remote_host_name = 'beet.hhmi.org' ;
 remote_host_name_from_rig_index = { remote_host_name } ;
 remote_user_name = 'bransonk' ;
@@ -28,7 +28,7 @@ does_use_per_user_folders = false ;
 
 % Specify the "per-lab" configuration here
 per_lab_configuration = struct() ;
-per_lab_configuration.lab_head_last_name = lab_head_last_name ;
+per_lab_configuration.cluster_billing_account_name = cluster_billing_account_name ;
 per_lab_configuration.host_name_from_rig_index = remote_host_name_from_rig_index ;
 per_lab_configuration.rig_user_name_from_rig_index = rig_user_name_from_rig_index ;
 per_lab_configuration.data_folder_path_from_rig_index = data_folder_path_from_rig_index ;
