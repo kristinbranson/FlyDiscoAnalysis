@@ -246,7 +246,13 @@ Goldblum for the Davis Lab, one would:
     Note that the cron job launches Goldblum using the `goldblum/goldblum_launcher.sh` Bash script,
     which then launches Matlab and runs then `goldblum()` function within Matlab.
 
-16. If you want to turn Goldblum off, do this:
+16. Make sure the folder for the Goldblum logs exists by doing:
+    ```
+    mkdir -p /groups/davis/davislab/flydisco_data/goldblum-logs
+    ```
+    (You *have* to do this as the `davislab` user.)
+
+17. If you want to turn Goldblum off, do this:
     ```
     /misc/local/matlab-2019a/bin/matlab -singleCompThread -nodisplay -batch 'modpath; turn_off_goldblum()'
     ```
