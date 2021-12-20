@@ -1,6 +1,6 @@
-min_num_flies,8
+min_num_flies,6
 min_num_males,0
-min_num_females,8
+min_num_females,1
 max_num_flies,30
 required_files,flytracker-calibration.mat,movie-bg.mat,movie-feat.mat,movie-params.mat,movie-track.mat,/movie_JAABA/perframe,/movie_JAABA/trx.mat,perframefeatures_info.mat,wingtracking_results.mat,registered_trx.mat,registrationdata.mat,registrationdata.txt,registrationimage.png,indicatordata.mat,ledregistrationimage.png
 file_categories,tracking,tracking,tracking,tracking,tracking,tracking,tracking,perframefeatures,perframefeatures,registration,registration,registration,registration,optoregistration,optoregistration

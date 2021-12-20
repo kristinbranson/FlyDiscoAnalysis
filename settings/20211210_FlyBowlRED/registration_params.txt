@@ -15,7 +15,7 @@ maxDistCornerFrac_BowlLabel,.1
 featureRadius,11
 bowlMarkerPairTheta_true,2.3
 nBowlMarkers,1
-bowlMarkerType,RegistraionMark_FlyBowlRGB2.png
+bowlMarkerType,CircleTemplate_FlyBowlMing.png
 minTemplateFeatureStrength,-0.5
 usemediandt,0
 OptogeneticExp,1

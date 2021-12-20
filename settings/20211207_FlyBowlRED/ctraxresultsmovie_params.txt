@@ -7,8 +7,8 @@ fps,30
 firstframes,0,.5,-1
 middleframes,-1,.5,-1
 endframes,-1,-1,1
-indicatorframes,1,3,6,8
-nframes_beforeindicator,30
+indicatorframes,1,3,6
+nframes_beforeindicator,150
 nframes,400
 subdecimationfactor,3
 figpos,1,1,1434,1024
