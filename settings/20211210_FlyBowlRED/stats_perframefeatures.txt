@@ -1,0 +1,235 @@
+# <per-frame feature>,<frame condition name>,<fly condition name>,<min n. frames both valid>,<min n. frames fly valid>,[<norm per-frame feature>],[<norm frame condition name>],[<norm fly condition name>],[<norm min n. frames both valid>],[<norm min n. frames fly valid>]
+
+# The average of velmag in first 20% (6s) of first stimulus on period normalized by the average of velmag in the entire pre-stimulus period (30s)
+
+velmag_ctr,stimon1start,any,25,100,stimoff1
+
+
+# Need to check if have sex classification running - Metadata will give that (needs to be f) and then will use gender (perframe = sex.mat files and look at these)***
+
+# Difference in the average angular velocity while moving in first stimulus of each step (# 1,4, 7 in Ryo’s data) between the first 3 seconds of stimulus on (3 seconds out of 10) and the first 3 seconds of post stim period (3 of 30), normalized by the prestim baseline (10 seconds before 1st stimulus period). 
+
+#absdphi,stimon1startmove,any,25,25,stimoff1move
+
+
+# Difference in the dcenter for the first 10s of the stimulus off period and the last 10s of the stimulus off period normalized by pre-stimulus period
+
+dcenter,stimoff2start,any,25,100,stimoff2end
+
+
+# Difference in the dcenter for the average of the stimulus on periods and the first 10s of the first stimulus off period normalized by the pre-stimulus period
+
+dcenter,stimonall,any,25,100,stimoff2start
+
+
+# Difference in the nflies_close in the first 20% of the first 3 stimulus on periods and the beginning 20% of the second, third, and forth stimulus off periods each normalized by the pre-stimulus period
+
+nflies_close,stimon1startclose,any,25,25,stimoff1startclose 
+
+
+# The average of all stimulus periods normalized by the pre-stimulus period for the following: velmag; dcenter; dnose2ell; dell2nose; dnose2tail; anglesub; angleonclosestfly; ddcenter; ddnose2ell; absphidiff_nose2ell; absthetadiff_nose2ell; magveldiff_nose2ell; veltoward_nose2ell; nflies_close
+
+velmag,stimonall,any,25,100,stimoff1
+dcenter,stimonall,any,25,100,stimoff1
+dnose2ell,stimonall,any,25,100,stimoff1
+dell2nose,stimonall,any,25,100,stimoff1
+dnose2tail,stimonall,any,25,100,stimoff1
+anglesub,stimonall,any,25,100,stimoff1
+angleonclosestfly,stimonall,any,25,100,stimoff1
+ddcenter,stimonall,any,25,100,stimoff1
+ddnose2ell,stimonall,any,25,100,stimoff1
+absphidiff_nose2ell,stimonall,any,25,100,stimoff1
+absthetadiff_nose2ell,stimonall,any,25,100,stimoff1
+magveldiff_nose2ell,stimonall,any,25,100,stimoff1
+veltoward_nose2ell,stimonall,any,25,100,stimoff1
+nflies_close,stimonall,any,25,100,stimoff1
+
+# The average of all low stimulus periods normalized by the pre-stimulus period for the following key perframe features:
+velmag,stimonlow,any,25,100,stimoff1
+dcenter,stimonlow,any,25,100,stimoff1
+dnose2ell,stimonlow,any,25,100,stimoff1
+dell2nose,stimonlow,any,25,100,stimoff1
+dnose2tail,stimonlow,any,25,100,stimoff1
+anglesub,stimonlow,any,25,100,stimoff1
+angleonclosestfly,stimonlow,any,25,100,stimoff1
+ddcenter,stimonlow,any,25,100,stimoff1
+ddnose2ell,stimonlow,any,25,100,stimoff1
+absphidiff_nose2ell,stimonlow,any,25,100,stimoff1
+absthetadiff_nose2ell,stimonlow,any,25,100,stimoff1
+magveldiff_nose2ell,stimonlow,any,25,100,stimoff1
+veltoward_nose2ell,stimonlow,any,25,100,stimoff1
+nflies_close,stimonlow,any,25,100,stimoff1
+
+# The average of all high stimulus periods normalized by the pre-stimulus period for the following key perframe features:
+velmag,stimonhigh,any,25,100,stimoff1
+dcenter,stimonhigh,any,25,100,stimoff1
+dnose2ell,stimonhigh,any,25,100,stimoff1
+dell2nose,stimonhigh,any,25,100,stimoff1
+dnose2tail,stimonhigh,any,25,100,stimoff1
+anglesub,stimonhigh,any,25,100,stimoff1
+angleonclosestfly,stimonhigh,any,25,100,stimoff1
+ddcenter,stimonhigh,any,25,100,stimoff1
+ddnose2ell,stimonhigh,any,25,100,stimoff1
+absphidiff_nose2ell,stimonhigh,any,25,100,stimoff1
+absthetadiff_nose2ell,stimonhigh,any,25,100,stimoff1
+magveldiff_nose2ell,stimonhigh,any,25,100,stimoff1
+veltoward_nose2ell,stimonhigh,any,25,100,stimoff1
+nflies_close,stimonhigh,any,25,100,stimoff1
+  
+# The average of the first 10 s of the stimulus off period following the low stimulus normalized by the pre-stimulus period for the following key perframe features:
+velmag,stimoff2startlow,any,25,100,stimoff1
+dcenter,stimoff2startlow,any,25,100,stimoff1
+dnose2ell,stimoff2startlow,any,25,100,stimoff1
+dell2nose,stimoff2startlow,any,25,100,stimoff1
+dnose2tail,stimoff2startlow,any,25,100,stimoff1
+anglesub,stimoff2startlow,any,25,100,stimoff1
+angleonclosestfly,stimoff2startlow,any,25,100,stimoff1
+ddcenter,stimoff2startlow,any,25,100,stimoff1
+ddnose2ell,stimoff2startlow,any,25,100,stimoff1
+absphidiff_nose2ell,stimoff2startlow,any,25,100,stimoff1
+absthetadiff_nose2ell,stimoff2startlow,any,25,100,stimoff1
+magveldiff_nose2ell,stimoff2startlow,any,25,100,stimoff1
+veltoward_nose2ell,stimoff2startlow,any,25,100,stimoff1
+nflies_close,stimoff2startlow,any,25,100,stimoff1
+
+
+# The average of the first 10 s of the stimulus off period following the high stimulus normalized by the pre-stimulus period for the following key perframe features: 
+velmag,stimoff2starthigh,any,25,100,stimoff1
+dcenter,stimoff2starthigh,any,25,100,stimoff1
+dnose2ell,stimoff2starthigh,any,25,100,stimoff1
+dell2nose,stimoff2starthigh,any,25,100,stimoff1
+dnose2tail,stimoff2starthigh,any,25,100,stimoff1
+anglesub,stimoff2starthigh,any,25,100,stimoff1
+angleonclosestfly,stimoff2starthigh,any,25,100,stimoff1
+ddcenter,stimoff2starthigh,any,25,100,stimoff1
+ddnose2ell,stimoff2starthigh,any,25,100,stimoff1
+absphidiff_nose2ell,stimoff2starthigh,any,25,100,stimoff1
+absthetadiff_nose2ell,stimoff2starthigh,any,25,100,stimoff1
+magveldiff_nose2ell,stimoff2starthigh,any,25,100,stimoff1
+veltoward_nose2ell,stimoff2starthigh,any,25,100,stimoff1
+nflies_close,stimoff2starthigh,any,25,100,stimoff1
+
+
+#Currently Not Working - do not know why
+# The average change in orientation if the flies are moving and other flies are close by during the first stimulus on period normalized by the pre-stimulus period 
+
+#dtheta,stimon1moveclose,any,25,100,stimoff1  
+
+# The average change in orientation if the flies are not moving and other flies are close by during the first stimulus on period normalized by the pre-stimulus period 
+
+#dtheta,stimon1notmoveclose,any,25,100,stimoff1
+
+
+#Added from Current - Motion
+
+velmag_ctr,stimonall,any,25,100,stimoff1
+velmag_nose,stimonall,any,25,100,stimoff1
+velmag_tail,stimonall,any,25,100,stimoff1
+du_ctr,stimonall,any,25,100,stimoff1
+du_cor,stimonall,any,25,100,stimoff1
+du_tail,stimonall,any,25,100,stimoff1
+dv_ctr,stimonall,any,25,100,stimoff1
+dv_cor,stimonall,any,25,100,stimoff1
+dv_tail,stimonall,any,25,100,stimoff1
+absdv_cor,stimonall,any,25,100,stimoff1
+phisideways,stimonall,any,25,100,stimoff1
+yaw,move,stimonall,any,25,100,stimoff1
+absyaw,stimonall,any,25,100,stimoff1
+accmag,stimonall,any,25,100,stimoff1
+
+
+velmag_ctr,nearwall,stimonall,any,25,100,stimoff1
+du_ctr,nearwall,stimonall,any,25,100,stimoff1
+absdv_cor,nearwall,stimonall,any,25,100,stimoff1
+
+velmag_ctr,nearfly,stimonall,any,25,100,stimoff1
+du_ctr,nearfly,stimonall,any,25,100,stimoff1
+absdv_cor,nearfly,stimonall,any,25,100,stimoff1
+
+velmag_ctr,notnearfly_notnearwall,stimonall,any,25,100,stimoff1
+du_ctr,notnearfly_notnearwall,stimonall,any,25,100,stimoff1
+absdv_cor,notnearfly_notnearwall,stimonall,any,25,100,stimoff1
+
+
+#Added from Current - change in orientation
+
+dtheta,stimonall,any,25,100,stimoff1
+dphi,move,stimonall,any,25,100,stimoff1
+absdtheta,stimonall,any,25,100,stimoff1
+abssmoothdtheta,stimonall,any,25,100,stimoff1
+corfrac_maj,stimonall,any,25,100,stimoff1
+absdtheta,nearwall,stimonall,any,25,100,stimoff1
+
+#Added from Current - social
+
+dnose2ell_angle_min30to30,stimonall,any,25,100,stimoff1
+dnose2ell_angle_min20to20,stimonall,any,25,100,stimoff1
+dnose2ell_angle_30tomin30,stimonall,any,25,100,stimoff1
+ddell2nose,nearfly,stimonall,any,25,100,stimoff1
+danglesub,nearfly,stimonall,any,25,100,stimoff1
+
+dcenter,nearwall,stimonall,any,25,100,stimoff1
+dnose2ell,nearwall,stimonall,any,25,100,stimoff1
+nflies_close,nearwall,stimonall,any,25,100,stimoff1
+
+
+#Added from Current - relative social
+
+absanglefrom1to2_nose2ell,stimonall,any,25,100,stimoff1
+
+angleonclosestfly,nearfly,stimonall,any,25,100,stimoff1
+
+veltoward_nose2ell,nearfly,stimonall,any,25,100,stimoff1
+
+magveldiff_nose2ell,nearfly,stimonall,any,25,100,stimoff1
+
+
+#Added from Current - based off of wall
+
+dist2wall,stimonall,any,25,100,stimoff1
+dist2wall,move,stimonall,any,25,100,stimoff1
+absangle2wall,nearwall,stimonall,any,25,100,stimoff1
+ddist2wall,nearwall,stimonall,any,25,100,stimoff1
+dangle2wall,nearwall,stimonall,any,25,100,stimoff1
+absdangle2wall,nearwall,stimonall,any,25,100,stimoff1
+
+
+#Added from Current - appearance
+
+area,stimonall,any,25,100,stimoff1
+a_mm,stimonall,any,25,100,stimoff1
+b_mm,stimonall,any,25,100,stimoff1
+ecc,stimonall,any,25,100,stimoff1
+
+#Added from Current - change in appearance
+
+da,stimonall,any,25,100,stimoff1
+db,stimonall,any,25,100,stimoff1
+darea,stimonall,any,25,100,stimoff1
+decc,stimonall,any,25,100,stimoff1
+
+#Added from Current - position
+
+arena_angle,stimonall,any,25,100,stimoff1
+phi,stimonall,any,25,100,stimoff1
+x_mm,stimonall,any,25,100,stimoff1
+y_mm,stimonall,any,25,100,stimoff1
+theta_mm,stimonall,any,25,100,stimoff1
+
+
+#Added from Current - fractime per behavior **Will add these back once done with JAABA classifiers
+
+
+# bout frequency per behavior
+
+
+# bout duration per behavior
+
+#Currently Not Working - do not know why
+# The average change in orientation if the flies are moving and other flies are close by during the first stimulus on period normalized by the pre-stimulus period 
+
+#dtheta,stimon1moveclose,any,25,100,stimoff1  
+
+# The average change in orientation if the flies are not moving and other flies are close by during the first stimulus on period normalized by the pre-stimulus period 
+
+#dtheta,stimon1notmoveclose,any,25,100,stimoff1
