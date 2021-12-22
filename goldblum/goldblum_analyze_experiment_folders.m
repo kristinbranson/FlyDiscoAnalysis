@@ -251,7 +251,7 @@ function goldblum_analyze_experiment_folders(folder_path_from_experiment_index, 
         job_statuses = nan(1, experiment_count) ;
         for i = 1 : experiment_count ,
             experiment_folder_path = folder_path_from_experiment_index{i} ;
-            goldblum_FlyDiscoCaboose_wrapper(experiment_folder_path, settings_folder_path, caboose_analysis_parameters_as_name_value_list) ;
+            goldblum_FlyDiscoCaboose_wrapper(experiment_folder_path, settings_folder_path, analysis_parameters_as_name_value_list) ;
             job_statuses(i) = +1 ;  % Indicates completed sucessfully
         end
     end    

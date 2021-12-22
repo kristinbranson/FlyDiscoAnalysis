@@ -99,7 +99,7 @@ function FlyDiscoAutomaticChecksIncoming(expdir, stage, varargin)  %#ok<INUSL>
     ismissingfn = ~ismember(required_fns,fieldnames(metadata));
     if any(ismissingfn),
       do_continue_pipeline = false;
-      msgs{end+1} = ['Missing metadata fields:',sprintf(' %s',required_fns{ismissingfn})];
+      msgs{end+1} = ['Missing required metadata fields:',sprintf(' %s',required_fns{ismissingfn})];
       iserror(category2idx.missing_metadata_fields) = true;
     end
     
