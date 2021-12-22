@@ -104,3 +104,4 @@ wingtrackingparamsfilestr,WingTrackingParameters.txt
 jaabadetectinfomatfilestr,jaabadetect_info.mat
 statsplotparamsfilestr,stats_plotparams.txt
 plotperframestatsinfomatfilestr,plotperframestats_info.mat
+apttrkfilestr,apt.trk
