@@ -15,4 +15,3 @@ nframes_beforeindicator,150
 nframes,400
 subdecimationfactor,3
 figpos,1,1,1434,1022
-tempdatadir,/groups/rubin/home/schretterc/Documents/FlyBowl_MingBowlTests/20xUAS-ChrimsonRmVenusattp18_SS36564_flyBowlMing_20200227_Continuous_2min_5int_20200107_20200807T081147
