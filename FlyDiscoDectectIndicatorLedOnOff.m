@@ -7,13 +7,11 @@ msgs = [];
 version = '0.3';
 timestamp = datestr(now,'yyyymmddTHHMMSS');
 
-[analysis_protocol,settingsdir,datalocparamsfilestr,registrationparamsfilestr,registrationmatfilestr] = ...
+[analysis_protocol,settingsdir,datalocparamsfilestr] = ...
   myparse(varargin,...
   'analysis_protocol','current_bubble',...
-  'settingsdir','/groups/branson/home/robiea/Code_versioned/FlyBubbleAnalysis/settings',...
-  'datalocparamsfilestr','dataloc_params.txt',...
-  'registrationparamsfilestr','registration_params.txt',...
-  'registrationmatfilestr','registrationdata.mat');
+  'settingsdir', internal_settings_folder_path(), ...
+  'datalocparamsfilestr','dataloc_params.txt');
 
 %% read in the data locations
 datalocparamsfile = fullfile(settingsdir,analysis_protocol,datalocparamsfilestr);
@@ -32,7 +30,7 @@ logfid = 1 ;
 %   logfid = 1;
 % end
 
-fprintf(logfid,'\n\n***\nRunning FlyDiscoDectectIndicatorLedOnOff version %s analysis_protocol %s at %s\n',version,analysis_protocol,timestamp);
+fprintf(logfid,'\n\n***\nRunning %s version %s analysis_protocol %s at %s\n',mfileame(), version, analysis_protocol, timestamp) ;
 %% read in indicator params
 
 indicatorparamsfile = fullfile(settingsdir,analysis_protocol,dataloc_params.indicatorparamsfilestr);
@@ -75,7 +73,7 @@ if DoLEDdetection
   % name of movie file
   moviefile = fullfile(expdir,dataloc_params.moviefilestr);
   ledwindowr = indicator_params.indicatorwindowr;
-  [readfcn,nframes,fid,headerinfo] = get_readframe_fcn(moviefile);
+  [readfcn,~,fid,headerinfo] = get_readframe_fcn(moviefile);
   x = max(1,ledIndicatorPoints(1)-ledwindowr);
   y = max(1,ledIndicatorPoints(2)-ledwindowr);
   height = min(ledwindowr*2,headerinfo.nr-y);
@@ -90,7 +88,7 @@ if DoLEDdetection
     im = tmp(y:y+height,x:x+width);
     maximage(i) = max(im(:));
     meanimage(i) = mean(im(:));
-    if (mod(i,1000) == 0);
+    if (mod(i,1000) == 0) ,
       disp(round((i/headerinfo.nframes)*100))
     end
     
@@ -122,7 +120,7 @@ if DoLEDdetection
     %find the start of light pulses
     onpulsecount = 0;
     for i = pad+1:(numel(thresholdimage)-pad)
-      if (thresholdimage(i) == 1) && (mean(thresholdimage(i-pad:i-1)) == 0);
+      if (thresholdimage(i) == 1) && (mean(thresholdimage(i-pad:i-1)) == 0) ,
         onpulsecount = onpulsecount+1;
         indicatorLED.startframe(onpulsecount) = i-pad;
       end
@@ -130,7 +128,7 @@ if DoLEDdetection
     %find the end of light pulses
     offpulsecount = 0;
     for i = pad+1:numel(thresholdimage)-pad
-      if (thresholdimage(i) == 0) && thresholdimage(i-1) == 1 && (mean(thresholdimage(i+1:i+pad)) == 0);
+      if (thresholdimage(i) == 0) && thresholdimage(i-1) == 1 && (mean(thresholdimage(i+1:i+pad)) == 0) ,
         offpulsecount = offpulsecount+1;
         indicatorLED.endframe(offpulsecount) = i-pad;
       end
