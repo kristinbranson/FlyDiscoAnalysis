@@ -19,16 +19,18 @@ timestamp = datestr(now,'yyyymmddTHHMMSS');
 datalocparamsfile = fullfile(settingsdir,analysis_protocol,datalocparamsfilestr);
 dataloc_params = ReadParams(datalocparamsfile);
 
-if isfield(dataloc_params,'indicator_logfilestr'),
-  logfile = fullfile(expdir,dataloc_params.indicator_logfilestr);
-  logfid = fopen(logfile,'a');
-  if logfid < 1,
-    warning('Could not open log file %s\n',logfile);
-    logfid = 1;
-  end
-else
-  logfid = 1;
-end
+% Ignore the indicator log file parameter, just log to stdout
+logfid = 1 ;
+% if isfield(dataloc_params,'indicator_logfilestr'),
+%   logfile = fullfile(expdir,dataloc_params.indicator_logfilestr);
+%   logfid = fopen(logfile,'a');
+%   if logfid < 1,
+%     warning('Could not open log file %s\n',logfile);
+%     logfid = 1;
+%   end
+% else
+%   logfid = 1;
+% end
 
 fprintf(logfid,'\n\n***\nRunning FlyDiscoDectectIndicatorLedOnOff version %s analysis_protocol %s at %s\n',version,analysis_protocol,timestamp);
 %% read in indicator params
@@ -211,7 +213,7 @@ else
 end
 %% close log
 
-fprintf(logfid,'\n Finished running FlyBowlRegisterTrx at %s.\n',datestr(now,'yyyymmddTHHMMSS'));
+fprintf(logfid,'\n Finished running %s at %s.\n',mfilename(), datestr(now,'yyyymmddTHHMMSS'));
 
 if logfid > 1,
   fclose(logfid);
