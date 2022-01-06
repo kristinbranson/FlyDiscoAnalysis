@@ -1,0 +1,33 @@
+function FlyDiscoPipelineStage(expdir, ...
+                               stage_name, ...
+                               do_run_stage, ...
+                               dataloc_params, ...
+                               required_files_for_stage, ...
+                               settingsdir, ...
+                               analysis_protocol_name, ...
+                               stage_function_name, ...
+                               stage_additional_arguments)
+                           
+    % General function for running 'typical' pipeline stage
+    if is_on_or_force(do_run_stage) ,
+        forcecompute = is_force(do_run_stage) ;
+        analysis_protocol_folder_path = fullfile(settingsdir, analysis_protocol_name) ;
+        required_files_for_stage = ...
+            FlyDiscoReplaceRequiredFilePlaceholders(required_files_for_stage, stage_name, expdir, analysis_protocol_folder_path, ...
+                                                    dataloc_params, stage_additional_arguments) ;
+        todo = CheckForMissingFiles(expdir,dataloc_params,required_files_for_stage);
+        if forcecompute || todo,
+            fprintf('Calling %s()...\n', stage_function_name);
+            feval(stage_function_name, expdir, 'settingsdir', settingsdir, 'analysis_protocol', analysis_protocol_name, stage_additional_arguments{:}) ;
+            fprintf('Memory usage after %s():\n', stage_function_name) ;
+            print_matlab_memory_usage() ;
+        end
+
+        % make sure output files exist
+        [ismissingfile, missingfiles] = CheckForMissingFiles(expdir,dataloc_params,required_files_for_stage) ;
+        if ismissingfile ,
+            msgs = cellfun(@(file_name)(sprintf('Missing %s file %s', stage_name, file_name)), missingfiles, 'UniformOutput', false) ;
+            flydisco_pipeline_error(stage_name, msgs) ;
+        end
+    end
+end

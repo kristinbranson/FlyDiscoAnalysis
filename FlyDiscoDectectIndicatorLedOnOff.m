@@ -30,7 +30,7 @@ logfid = 1 ;
 %   logfid = 1;
 % end
 
-fprintf(logfid,'\n\n***\nRunning %s version %s analysis_protocol %s at %s\n',mfileame(), version, analysis_protocol, timestamp) ;
+fprintf(logfid,'\n\n***\nRunning %s version %s analysis_protocol %s at %s\n',mfilename(), version, analysis_protocol, timestamp) ;
 %% read in indicator params
 
 indicatorparamsfile = fullfile(settingsdir,analysis_protocol,dataloc_params.indicatorparamsfilestr);
