@@ -1,11 +1,13 @@
 % make results movies
 function FlyDiscoMakeAPTResultsMovie(expdir,varargin)
 
-[analysis_protocol,settingsdir,datalocparamsfilestr,override_datalocparams,override_ctraxparams,apttrk] = ...
+[analysis_protocol,settingsdir,datalocparamsfilestr,override_datalocparams,override_ctraxparams,apttrk,...
+  hidemovietype,nintervals,hidebackgroundextra] = ...
   myparse(varargin,...
   'analysis_protocol','20150915_flybubble_centralcomplex',...
   'settingsdir','/groups/branson/home/robiea/Code_versioned/FlyBubbleAnalysis/settings',...
-  'datalocparamsfilestr','dataloc_params.txt','override_datalocparams',struct,'override_ctraxparams',struct,'apttrk',[]);
+  'datalocparamsfilestr','dataloc_params.txt','override_datalocparams',struct,'override_ctraxparams',struct,'apttrk',[],...
+  'hidemovietype',false,'nintervals',[],'hidebackgroundextra',.05);
 
 %% locations of parameters
 
@@ -37,11 +39,11 @@ commonregistrationparams = ReadParams(commonregistrationparamsfile);
 if commonregistrationparams.OptogeneticExp,
   datestrpattern = '20\d{6}';
   match = regexp(metadata.led_protocol,datestrpattern);
+  assert(numel(match)==1);
   
   ledprotocoldatestr = metadata.led_protocol(match:match+7);
-%   ledprotocolfile = fullfile(expdir,'protocol.mat');
+  %   ledprotocolfile = fullfile(expdir,'protocol.mat');
   ledprotocolfile = fullfile(expdir,dataloc_params.ledprotocolfilestr);
-  
 end
 
 %% ctrax=apt movie parameters
@@ -212,7 +214,7 @@ else
     ctraxresultsmovie_params.indicatorframes = indicatorframes;
     firstframes_off = indicatorLED.startframe(indicatorframes) - ctraxresultsmovie_params.nframes_beforeindicator;  
     % need to do this for specific files as well
-    ctraxresultsmovie_params.nframes = ones(1,length(firstframes_off))*ctraxresultsmovie_params.nframes;
+    ctraxresultsmovie_params.nframes = ones(1,length(firstframes_off))*ctraxresultsmovie_params.nframes(1);
     endframes_off = firstframes_off + ctraxresultsmovie_params.nframes -1;
     firstframes = registration_params.start_frame + firstframes_off;
   else
@@ -224,6 +226,13 @@ else
       ctraxresultsmovie_params.nframes = ones(1,length(firstframes_off))*ctraxresultsmovie_params.nframes;
     end
   end
+end
+nframesplot = endframes_off - firstframes_off + 1;
+
+if hidemovietype && ~isempty(nintervals) && numel(firstframes) > nintervals,
+  intervalidxkeep = round(linspace(1,numel(firstframes),nintervals));
+  firstframes = firstframes(intervalidxkeep);
+  nframesplot = nframesplot(intervalidxkeep);
 end
 
 %% option to not specify nzoomr, nzoomc
@@ -278,104 +287,127 @@ end
 
 %% create subtitle file
 
-subtitlefile = fullfile(expdir,'subtitles.srt');
-if exist(subtitlefile,'file'),
-  delete(subtitlefile);
-end
-fid = fopen(subtitlefile,'w');
-dt = [0,ctraxresultsmovie_params.nframes];
-ts = cumsum(dt);
-
-if ~commonregistrationparams.OptogeneticExp,
-  for i = 1:numel(dt)-1,
-    fprintf(fid,'%d\n',i);
-    fprintf(fid,'%s --> %s\n',...
-     datestr(ts(i)/ctraxresultsmovie_params.fps/(3600*24),'HH:MM:SS,FFF'),...
-     datestr((ts(i+1)-1)/ctraxresultsmovie_params.fps/(3600*24),'HH:MM:SS,FFF'));
-    fprintf(fid,'%s, fr %d-%d\n\n',basename,...
-     firstframes_off(i)+1,...
-     endframes_off(i)+1);
+if ~hidemovietype,
+  subtitlefile = fullfile(expdir,'subtitles.srt');
+  if exist(subtitlefile,'file'),
+    delete(subtitlefile);
   end
-  fclose(fid);
-else
+  fid = fopen(subtitlefile,'w');
+  dt = [0,ctraxresultsmovie_params.nframes];
+  ts = cumsum(dt);
+  
+  if ~commonregistrationparams.OptogeneticExp,
+    for i = 1:numel(dt)-1,
+      fprintf(fid,'%d\n',i);
+      fprintf(fid,'%s --> %s\n',...
+        datestr(ts(i)/ctraxresultsmovie_params.fps/(3600*24),'HH:MM:SS,FFF'),...
+        datestr((ts(i+1)-1)/ctraxresultsmovie_params.fps/(3600*24),'HH:MM:SS,FFF'));
+      fprintf(fid,'%s, fr %d-%d\n\n',basename,...
+        firstframes_off(i)+1,...
+        endframes_off(i)+1);
+    end
+    fclose(fid);
+  else
     
-  load(ledprotocolfile);
-  load(indicatorfile);
-  if strcmp(metadata.assay,'FlyBubbleRGB') || strcmp(metadata.assay,'FlyBowlRGB')
-    if isfield(protocol,'Rintensity')
+    load(ledprotocolfile);
+    load(indicatorfile);
+    if strcmp(metadata.assay,'FlyBubbleRGB') || strcmp(metadata.assay,'FlyBowlRGB')
+      if isfield(protocol,'Rintensity')
         RGBprotocol = protocol;
         clear protocol;
         % test if RGBprotocol has only one active color
         countactiveLEDs = [double(any(RGBprotocol.Rintensity));double(any(RGBprotocol.Gintensity));double(any(RGBprotocol.Bintensity))];
         % check that there is 1 and only 1 color LED used in protocol
         if sum(countactiveLEDs) == 0
-            error('ChR = 1 for LED protcol with no active LEDs')
+          error('ChR = 1 for LED protcol with no active LEDs')
         elseif sum(countactiveLEDs) > 1
-            error('More than one active LED color in protocol. Not currently supported')
+          error('More than one active LED color in protocol. Not currently supported')
         end
         % call function that transforms new protocol to old protocol
         [protocol,ledcolor] = ConvertRGBprotocol2protocolformat(RGBprotocol,countactiveLEDs);
-    end
-  end
-  
-  
-  stimtimes = indicatorLED.starttimes(ctraxresultsmovie_params.indicatorframes);
-    
-  j = 1;
-  t = protocol.duration(j)/1000;
-  
-  step = zeros(1,length(stimtimes));
-  freq = zeros(1,length(stimtimes));
-  intensity = zeros(1,length(stimtimes));
-  dutycycle = zeros(1,length(stimtimes));
-  duration = zeros(1,length(stimtimes));
-  
-  for i = 1:length(stimtimes),
-    while stimtimes(i) > t
-      j = j+1;
-      t = t + protocol.duration(j)/1000;
+      end
     end
     
-    step(i) = j;
-    % not sure this logic is good
-    if protocol.pulseNum(j) > 1,
-      freq(i) = 1/(protocol.pulsePeriodSP(j)/1000);
-      stim_type{i} = ['Plsd ', num2str(freq(i)), 'Hz'];
-    else
-      stim_type{i} = 'Cnst';
+    
+    stimtimes = indicatorLED.starttimes(ctraxresultsmovie_params.indicatorframes);
+    
+    j = 1;
+    t = protocol.duration(j)/1000;
+    
+    step = zeros(1,length(stimtimes));
+    freq = zeros(1,length(stimtimes));
+    intensity = zeros(1,length(stimtimes));
+    dutycycle = zeros(1,length(stimtimes));
+    duration = zeros(1,length(stimtimes));
+    
+    for i = 1:length(stimtimes),
+      while stimtimes(i) > t
+        j = j+1;
+        t = t + protocol.duration(j)/1000;
+      end
+      
+      step(i) = j;
+      % not sure this logic is good
+      if protocol.pulseNum(j) > 1,
+        freq(i) = 1/(protocol.pulsePeriodSP(j)/1000);
+        stim_type{i} = ['Plsd ', num2str(freq(i)), 'Hz'];
+      else
+        stim_type{i} = 'Cnst';
+      end
+      
+      intensity(i) = protocol.intensity(j);
+      dutycycle(i) = (protocol.pulseWidthSP(j)/protocol.pulsePeriodSP(j))*100;
+      duration(i) = protocol.pulseNum(j)*protocol.pulsePeriodSP(j);
+      
     end
     
-    intensity(i) = protocol.intensity(j);
-    dutycycle(i) = (protocol.pulseWidthSP(j)/protocol.pulsePeriodSP(j))*100;
-    duration(i) = protocol.pulseNum(j)*protocol.pulsePeriodSP(j);
-    
-  end
-    
-  for k = 1:numel(dt)-1,
-    fprintf(fid,'%d\n',k);
-    
-    t_start = ts(k)/ctraxresultsmovie_params.fps/(3600*24);
-    t_end = (ts(k) + (ts(k+1)-1-ts(k))/ctraxresultsmovie_params.subdecimationfactor)/ ...
+    for k = 1:numel(dt)-1,
+      fprintf(fid,'%d\n',k);
+      
+      t_start = ts(k)/ctraxresultsmovie_params.fps/(3600*24);
+      t_end = (ts(k) + (ts(k+1)-1-ts(k))/ctraxresultsmovie_params.subdecimationfactor)/ ...
         ctraxresultsmovie_params.fps/(3600*24);
-     
-    fprintf(fid,'%s --> %s\n',...
-     datestr(t_start,'HH:MM:SS,FFF'),...
-     datestr(t_end,'HH:MM:SS,FFF'));
-    fprintf(fid,'%s\n%s %s %s %s %s %s\n\n',basename,...
-     ['Step ', num2str(step(k))],...     
-     ['(Stim ', num2str(ctraxresultsmovie_params.indicatorframes(k)),'/', ...
-       num2str(numel(indicatorLED.starttimes)),'):'],...
-     stim_type{k},...
-     ['(',num2str(dutycycle(k)),'% on)'],...
-     ['at ',num2str(intensity(k)), '% intensity'],...
-     ['for ',num2str(duration(k)), ' ms']);
-     
+      
+      fprintf(fid,'%s --> %s\n',...
+        datestr(t_start,'HH:MM:SS,FFF'),...
+        datestr(t_end,'HH:MM:SS,FFF'));
+      fprintf(fid,'%s\n%s %s %s %s %s %s\n\n',basename,...
+        ['Step ', num2str(step(k))],...
+        ['(Stim ', num2str(ctraxresultsmovie_params.indicatorframes(k)),'/', ...
+        num2str(numel(indicatorLED.starttimes)),'):'],...
+        stim_type{k},...
+        ['(',num2str(dutycycle(k)),'% on)'],...
+        ['at ',num2str(intensity(k)), '% intensity'],...
+        ['for ',num2str(duration(k)), ' ms']);
+      
+    end
+    fclose(fid);
   end
-  fclose(fid);
+else
+  subtitlefile = '';
+end
+
+%% mask to hide identifying information from movie
+
+if hidemovietype,
+  
+  rd = load(fullfile(expdir,dataloc_params.registrationmatfilestr));
+  [readframe,~,fid] = get_readframe_fcn(moviefile);
+  im = readframe(1);
+  [nr,nc,~] = size(im);
+  if fid > 1,
+    fclose(fid);
+  end
+
+  [xgrid,ygrid] = meshgrid(1:nc,1:nr);
+  dcenter = sqrt((xgrid-rd.circleCenterX).^2 + (ygrid-rd.circleCenterY).^2)./rd.circleRadius;
+  dohide = dcenter >= 1+hidebackgroundextra;
+  
 end
 
 
-% create movie
+
+%% create movie
 avi_file_path = fullfile(tempdatadir, [avifilestr, '_temp.avi']);
 if exist(avi_file_path,'file'),
   delete(avi_file_path);
@@ -386,7 +418,7 @@ temp_avi_path = [tempname(scratch_folder_path) '.avi'] ;
   'nzoomr',ctraxresultsmovie_params.nzoomr,'nzoomc',ctraxresultsmovie_params.nzoomc,...
   'boxradius',ctraxresultsmovie_params.boxradius,'taillength',ctraxresultsmovie_params.taillength,...
   'fps',ctraxresultsmovie_params.fps,...
-  'maxnframes',ctraxresultsmovie_params.nframes,...
+  'maxnframes',nframesplot,...
   'firstframes',firstframes,...
   'figpos',ctraxresultsmovie_params.figpos,...
   'movietitle',basename,...
@@ -396,7 +428,10 @@ temp_avi_path = [tempname(scratch_folder_path) '.avi'] ;
   'showtimestamps',true,...
   'avifileTempDataFile',temp_avi_path,...
   'dynamicflyselection',true,...
-  'doshowsex',true);
+  'doshowsex',~hidemovietype,...
+  'hidemovietype',hidemovietype,...
+  'hidemask',dohide,...
+  'hidemaskvalue',0);
 %'fps',ctraxresultsmovie_params.fps,...
     %'maxnframes',+ctraxresultsmovie_params.nframes,...
 if ishandle(1),
@@ -430,10 +465,15 @@ if isequal(get_distro_codename(), 'Ubuntu') && exist('/usr/bin/ffmpeg', 'file') 
 else
     ffmpeg_command = '/misc/local/ffmpeg-4.3.1/bin/ffmpeg' ;
 end
-cmd = sprintf('%s -i %s -y -passlogfile %s -c:v h264 -pix_fmt yuv420p -s %dx%d -b:v 1600k -vf "subtitles=%s:force_style=''FontSize=10,FontName=Helvetica''" -pass 1 -f mp4 /dev/null',...
-  ffmpeg_command, avi_file_path,passlogfile,newwidth,newheight,subtitlefile);
-cmd2 = sprintf('%s -i %s -y -passlogfile %s -c:v h264 -pix_fmt yuv420p -s %dx%d -b:v 1600k -vf "subtitles=%s:force_style=''FontSize=10,FontName=Helvetica''" -pass 2 -f mp4 %s',...
-  ffmpeg_command, avi_file_path,passlogfile,newwidth,newheight,subtitlefile,mp4_file_path);
+if hidemovietype,
+  subtitlestr = '';
+else
+  subtitlestr = sprintf(' -vf "subtitles=%s:force_style=''FontSize=10,FontName=Helvetica''"',subtitlefile);
+end
+cmd = sprintf('%s -i %s -y -passlogfile %s -c:v h264 -pix_fmt yuv420p -s %dx%d -b:v 1600k%s -pass 1 -f mp4 /dev/null',...
+  ffmpeg_command, avi_file_path,passlogfile,newwidth,newheight,subtitlestr);
+cmd2 = sprintf('%s -i %s -y -passlogfile %s -c:v h264 -pix_fmt yuv420p -s %dx%d -b:v 1600k%s -pass 2 -f mp4 %s',...
+  ffmpeg_command, avi_file_path,passlogfile,newwidth,newheight,subtitlestr,mp4_file_path);
 
 status = system(cmd);
 if status ~= 0,
@@ -461,7 +501,7 @@ else
   else
     %delete(tmpfile);
     delete(avi_file_path);
-    delete(subtitlefile);
+    if ~hidemovietype, delete(subtitlefile); end
     fname = [passlogfile '-*.log'];
     if isscalar(dir(fname))
       delete(fname);
