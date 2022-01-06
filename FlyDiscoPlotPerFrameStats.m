@@ -1,4 +1,4 @@
-% FlyDiscoPlotPerFrameStats2(expdir,varargin)
+% FlyDiscoPlotPerFrameStats(expdir,varargin)
 % Optional arguments:
 % is_stage_forced: Whether the whole stage has been forced (usually used in the
 %   context of FlyDiscoPipeline())
@@ -48,7 +48,7 @@
 % files. 
 % verbose: 0-2 value indicating how much to print to stdout. Default = 1.
 
-function FlyDiscoPlotPerFrameStats2(expdir,varargin)
+function FlyDiscoPlotPerFrameStats(expdir,varargin)
 
 version = '0.1';
 

@@ -434,7 +434,7 @@ function FlyDiscoPipeline(expdir, varargin)
         
         %% Make per-frame statistics plots, culminating in stats.html, which shows all of them
         stage = 'plotperframestats' ;
-        stage_function_name = 'FlyDiscoPlotPerFrameStats2' ;
+        stage_function_name = 'FlyDiscoPlotPerFrameStats' ;
         FlyDiscoPipelineStage(...
             expdir, stage, doplotperframestats, dataloc_params, requiredfiles_plotperframestats, settingsdir, analysis_protocol, ...
             stage_function_name, plotperframestats_params) ;
