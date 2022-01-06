@@ -1,5 +1,12 @@
 % FlyDiscoPlotPerFrameStats2(expdir,varargin)
 % Optional arguments:
+% is_stage_forced: Whether the whole stage has been forced (usually used in the
+%   context of FlyDiscoPipeline())
+%     false -> The stage has not been forced, so leave pre-existing outputs in
+%              place
+%     true -> The stage *has* been forced, so delete any pre-existing HTML
+%             output file and the output folder before running anything
+% Default value: false
 % plotstats: Whether to plot mean stats. 
 %     0 -> Do not plot
 %     1 -> Plot if files do not exist
@@ -46,7 +53,7 @@ function FlyDiscoPlotPerFrameStats2(expdir,varargin)
 version = '0.1';
 
 [analysis_protocol,settingsdir,datalocparamsfilestr,visible,DEBUG,...
-  plotstats,plotstim,makestimvideos,plothist,...
+  is_stage_forced,plotstats,plotstim,makestimvideos,plothist,...
   plotflies,plotstimtrajs,verbose] = ...
   myparse(varargin,...
   'analysis_protocol','current',...
@@ -54,6 +61,7 @@ version = '0.1';
   'datalocparamsfilestr','dataloc_params.txt',...
   'visible','',...
   'debug',false,...
+  'is_stage_forced', false, ...
   'plotstats',2,...
   'plotstim',[],...
   'makestimvideos',[],...
@@ -81,18 +89,27 @@ end
 datalocparamsfile = fullfile(settingsdir,analysis_protocol,datalocparamsfilestr);
 dataloc_params = ReadParams(datalocparamsfile);
 
-%% log file
+% Paths to outputs
+figdir = fullfile(expdir, dataloc_params.figdir) ;
+statswebpagefile = fullfile(expdir,dataloc_params.statswebpagefilestr);
 
-if isfield(dataloc_params,'plotperframestats_logfilestr') && ~DEBUG,
-  logfile = fullfile(expdir,dataloc_params.plotperframestats_logfilestr);
-  logfid = fopen(logfile,'a');
-  if logfid < 1,
-    warning('Could not open log file %s\n',logfile);
-    logfid = 1;
-  end
-else
-  logfid = 1;
+% If we're forcing everything, delete the outputs before we do anything else
+if is_stage_forced ,
+    ensure_file_or_folder_does_not_exist(figdir) ;
+    ensure_file_does_not_exist(statswebpagefile) ;
 end
+
+% log file is always stdout
+% if isfield(dataloc_params,'plotperframestats_logfilestr') && ~DEBUG,
+%   logfile = fullfile(expdir,dataloc_params.plotperframestats_logfilestr);
+%   logfid = fopen(logfile,'a');
+%   if logfid < 1,
+%     warning('Could not open log file %s\n',logfile);
+%     logfid = 1;
+%   end
+% else
+logfid = 1;
+% end
 
 timestamp = datestr(now,'yyyymmddTHHMMSS');
 real_analysis_protocol = GetRealAnalysisProtocol(analysis_protocol,settingsdir);
@@ -109,7 +126,6 @@ if plothist,
 end
 
 %% create the plot directory if it does not exist
-figdir = fullfile(expdir,dataloc_params.figdir);
 if ~DEBUG && ~exist(figdir,'file'),
   [status,msg] = mkdir(figdir);
   if ~status,
@@ -497,7 +513,6 @@ if ~DEBUG,
   if verbose > 0,
     fprintf('Outputting summary webpage...\n');
   end
-  statswebpagefile = fullfile(expdir,dataloc_params.statswebpagefilestr);
   if exist(statswebpagefile,'file'),
     delete(statswebpagefile);
   end
