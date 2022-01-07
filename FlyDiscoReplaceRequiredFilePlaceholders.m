@@ -16,7 +16,7 @@ function required_files_for_stage = ...
     required_files_for_stage = required_files_for_stage_with_placeholders ;
 
     % Handle CTRAXRESULTSMOVIE for stage 'ctraxresultsmovie'
-    if strcmp(stage_name, 'ctraxresultsmovie') ,
+    if strcmp(stage_name, 'makectraxresultsmovie') ,
         i = find(strcmp('CTRAXRESULTSMOVIE',required_files_for_stage),1);
         if ~isempty(i),
             [~,basename] = fileparts(expdir);
