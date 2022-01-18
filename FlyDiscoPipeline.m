@@ -17,7 +17,9 @@ function FlyDiscoPipeline(expdir, varargin)
     %
     %   FlyDiscoPipeline(expdir, 'settingsdir', settingsdir) looks in the given
     %   settingsdir for analysis-protocol folders, rather than the default settings/
-    %   folder described above.
+    %   folder described above. settingsdir is the path to the root directory
+    %   containing all the per-project settings directory. The default is 
+    %   'FlyDiscoPipeline/settings'. 
     %
     %   FlyDiscoPipeline(expdir, 'analysis_protocol', analysis_protocol) uses the
     %   analysis-protocol folder specified instead of the analysis-protocol folder
@@ -30,41 +32,54 @@ function FlyDiscoPipeline(expdir, varargin)
     %   are:
     %
     %       automaticchecksincoming
-    %           Makes sure all the raw experiment files are present.
+    %           Makes sure all the raw experiment files are present. 
+    %           Default: 'force'. 
     %       flytracking
     %           Tracks the flies in the video, computing x,y coordinates and heading
     %           angle for each in each frame.
+    %           Default: 'on'. 
     %       registration
     %           Determines where the boundaries of the chamber are, and where each
     %           fly is relative to those boundaries.  Also converts fly positions in
     %           pixels to positions in millimeters, relative to the center of the
     %           chamber.
+    %           Default: 'on'. 
     %       ledonoffdetection
     %           Determines when each LED turns on and off.
+    %           Default: 'on'. 
     %       sexclassification
     %           Determines the sex of each fly.
+    %           Default: 'on'. 
     %       computeperframefeatures
     %           Computes a set of per-frame features for each fly, specified by the
     %           analysis-protocol file.  These may include things like the fly's
     %           velocity and acceleration in each frame.
+    %           Default: 'on'. 
     %       computeperframestats
     %           Compute statistics of the per-frame features across all frames of
     %           the video.
+    %           Default: 'off'. 
     %       computehoghofperframefeatures
     %           Compute Histogram-of-Oriented-Gradient (HOG) features for each
-    %           frame, for each fly.  Also HOF features.
+    %           frame, for each fly.  Also HOF features. Not tested, makes large files
+    %           Default: 'off'. 
     %       jaabadetect
     %           Use JAABA to classify the behavior of each fly in each frame
     %           according to a set of classes.
+    %           Default: 'on'. 
     %       plotperframestats
     %           Make histograms and other plots of the per-frame features across
     %           frames.
+    %           Default: 'off'. 
     %       makectraxresultsmovie
     %           Make a .mp4 movie summarizing the results of the tracking.  (The
     %           CTRAX in the name is vestigial---CTRAX is not used anymore.)
+    %           Default: 'on'. 
     %       automaticcheckscomplete
     %           Perform a set of final checks that the analysis of the experiment
     %           has been completed successfully.
+    %           Default: 'force'. 
+    %   Default values are specified in FlyDiscoPipelineDefaultAnalysisParameters.m. 
     %
     %   FlyDiscoPipeline(expdir, 'doautomaticchecksincoming', offonforce), where
     %   offonforce is either 'off', 'on', or 'force', specifies whether or not to run the
