@@ -166,7 +166,7 @@ if plotstats,
     
   for i = 1:numel(groups),
     group = groups{i};
-    name = sprintf('%s, %s',basename,group);
+    name = sprintf('%s, %s',group,basename);
     
     savename = sprintf('stats_%s.png',group);
     relsavename = fullfile(dataloc_params.figdir,savename);
@@ -243,6 +243,7 @@ if isempty(makestimvideos),
 end
 
 stimfiles = {};
+stimperflyfiles = {};
 if plotstim > 0 || makestimvideos > 0,
   trx = FBATrx('analysis_protocol',analysis_protocol,'settingsdir',settingsdir,...
     'datalocparamsfilestr',datalocparamsfilestr,...

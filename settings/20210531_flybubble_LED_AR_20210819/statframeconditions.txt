@@ -31,30 +31,30 @@ stimoff,equal_stimoff_1_2_3_4_5_6_7_8_9_10,1
 
 
 # during stim velmag > 0
-stimweakp5movingf,part0to0.5s_stimon_1_2_3,1,min_forward_vel,.001
-stimweak5movingf,part0to5s_stimon_1_2_3,1,min_forward_vel,.001
-stimweak10movingf,part0to10s_stimon_1_2_3,1,min_forward_vel,.001
-stimmidp5movingf,part0to0.5s_stimon_4_5_6,1,min_forward_vel,.001
-stimmid5movingf,part0to5s_stimon_4_5_6,1,min_forward_vel,.001
-stimmid10movingf,part0to10s_stimon_4_5_6,1,min_forward_vel,.001
-stimstrongp5movingf,part0to0.5s_stimon_7_8_9,1,min_forward_vel,.001
-stimstrong5movingf,part0to5s_stimon_7_8_9,1,min_forward_vel,.001
-stimstrong10movingf,part0to10s_stimon_7_8_9,1,min_forward_vel,.001
+#stimweakp5movingf,part0to0.5s_stimon_1_2_3,1,min_forward_vel,.001
+#stimweak5movingf,part0to5s_stimon_1_2_3,1,min_forward_vel,.001
+#stimweak10movingf,part0to10s_stimon_1_2_3,1,min_forward_vel,.001
+#stimmidp5movingf,part0to0.5s_stimon_4_5_6,1,min_forward_vel,.001
+#stimmid5movingf,part0to5s_stimon_4_5_6,1,min_forward_vel,.001
+#stimmid10movingf,part0to10s_stimon_4_5_6,1,min_forward_vel,.001
+#stimstrongp5movingf,part0to0.5s_stimon_7_8_9,1,min_forward_vel,.001
+#stimstrong5movingf,part0to5s_stimon_7_8_9,1,min_forward_vel,.001
+#stimstrong10movingf,part0to10s_stimon_7_8_9,1,min_forward_vel,.001
 
 # during stim velmag < 0
-stimweakp5movingf,part0to0.5s_stimon_1_2_3,1,max_backward_vel,-.001
-stimweak5movingf,part0to5s_stimon_1_2_3,1,max_backward_vel,-.001
-stimweak10movingf,part0to10s_stimon_1_2_3,1,max_backward_vel,-.001
-stimmidp5movingf,part0to0.5s_stimon_4_5_6,1,max_backward_vel,-.001
-stimmid5movingf,part0to5s_stimon_4_5_6,1,max_backward_vel,-.001
-stimmid10movingf,part0to10s_stimon_4_5_6,1,max_backward_vel,-.001
-stimstrongp5movingf,part0to0.5s_stimon_7_8_9,1,max_backward_vel,-.001
-stimstrong5movingf,part0to5s_stimon_7_8_9,1,max_backward_vel,-.001
-stimstrong10movingf,part0to10s_stimon_7_8_9,1,max_backward_vel,-.001
+#stimweakp5movingf,part0to0.5s_stimon_1_2_3,1,max_backward_vel,-.001
+#stimweak5movingf,part0to5s_stimon_1_2_3,1,max_backward_vel,-.001
+#stimweak10movingf,part0to10s_stimon_1_2_3,1,max_backward_vel,-.001
+#stimmidp5movingf,part0to0.5s_stimon_4_5_6,1,max_backward_vel,-.001
+#stimmid5movingf,part0to5s_stimon_4_5_6,1,max_backward_vel,-.001
+#stimmid10movingf,part0to10s_stimon_4_5_6,1,max_backward_vel,-.001
+#stimstrongp5movingf,part0to0.5s_stimon_7_8_9,1,max_backward_vel,-.001
+#stimstrong5movingf,part0to5s_stimon_7_8_9,1,max_backward_vel,-.001
+#stimstrong10movingf,part0to10s_stimon_7_8_9,1,max_backward_vel,-.001
 
 
-#movingf,min_velmag_ctr,.001
-#movingb,max_velmag_ctr,-.001
+movingf2,min_forward_vel,.001
+movingb2,max_backward_vel,-.001
 moving,min_velmag_ctr,2
 notjumping,max_velmag_ctr,45
 

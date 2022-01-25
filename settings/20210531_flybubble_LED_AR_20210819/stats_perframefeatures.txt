@@ -1,16 +1,52 @@
 # <per-frame feature>,<frame condition name>,<fly condition name>,<min n. frames both valid>,<min n. frames fly valid>,[<norm per-frame feature>],[<norm frame condition name>],[<norm fly condition name>],[<norm min n. frames both valid>],[<norm min n. frames fly valid>]
 
 # test zone - batches of 9
+
+
 # stim forward_vel > 0
-forward_vel,stimweakp5movingf,any,25,25
-forward_vel,stimweak5movingf,any,25,25
-forward_vel,stimweak10movingf,any,25,25
-forward_vel,stimmidp5movingf,any,25,25
-forward_vel,stimmid5movingf,any,25,25
-forward_vel,stimmid10movingf,any,25,25
-forward_vel,stimstrongp5movingf,any,25,25
-forward_vel,stimstrong5movingf,any,25,25
-forward_vel,stimstrong10movingf,any,25,25
+forward_vel,stimweakp5_movingf2,any,25,25
+forward_vel,stimweak5_movingf2,any,25,25
+forward_vel,stimweak10_movingf2,any,25,25
+forward_vel,stimmidp5_movingf2,any,25,25
+forward_vel,stimmid5_movingf2,any,25,25
+forward_vel,stimmid10_movingf2,any,25,25
+forward_vel,stimstrongp5_movingf2,any,25,25
+forward_vel,stimstrong5_movingf2,any,25,25
+forward_vel,stimstrong10_movingf2,any,25,25
+
+# prestim forward_vel > 0 
+forward_vel,prestimweakp5_movingf2,any,25,25
+forward_vel,prestimweak5_movingf2,any,25,25
+forward_vel,prestimweak10_movingf2,any,25,25
+forward_vel,prestimmidp5_movingf2,any,25,25
+forward_vel,prestimmid5_movingf2,any,25,25
+forward_vel,prestimmid10_movingf2,any,25,25
+forward_vel,prestimstrongp5_movingf2,any,25,25
+forward_vel,prestimstrong5_movingf2,any,25,25
+forward_vel,prestimstrong10_movingf2,any,25,25
+
+# stim backward_vel > 0
+backward_vel,stimweakp5_movingb2,any,25,25
+backward_vel,stimweak5_movingb2,any,25,25
+backward_vel,stimweak10_movingb2,any,25,25
+backward_vel,stimmidp5_movingb2,any,25,25
+backward_vel,stimmid5_movingb2,any,25,25
+backward_vel,stimmid10_movingb2,any,25,25
+backward_vel,stimstrongp5_movingb2,any,25,25
+backward_vel,stimstrong5_movingb2,any,25,25
+backward_vel,stimstrong10_movingb2,any,25,25
+
+# prestim backward_vel > 0 
+backward_vel,prestimweakp5_movingb2,any,25,25
+backward_vel,prestimweak5_movingb2,any,25,25
+backward_vel,prestimweak10_movingb2,any,25,25
+backward_vel,prestimmidp5_movingb2,any,25,25
+backward_vel,prestimmid5_movingb2,any,25,25
+backward_vel,prestimmid10_movingb2,any,25,25
+backward_vel,prestimstrongp5_movingb2,any,25,25
+backward_vel,prestimstrong5_movingb2,any,25,25
+backward_vel,prestimstrong10_movingb2,any,25,25
+
 
 # stim wing behavior min_wing_angle
 min_wing_angle,prestimweakp5,any,25,25
