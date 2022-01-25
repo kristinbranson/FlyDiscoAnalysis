@@ -244,7 +244,9 @@ Goldblum for the Davis Lab, one would:
     /misc/local/matlab-2019a/bin/matlab -singleCompThread -nodisplay -batch 'modpath; turn_on_goldblum()'
     ```
     This will add a line to the `davislab` user crontab to launch goldblum at 10 PM every night. 
-    # How do you modify the time?
+    <!---
+    How do you modify the time?
+    --->
     
     (You may get a message like:
     ```
