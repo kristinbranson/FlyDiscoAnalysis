@@ -1,14 +1,27 @@
 function FlyDiscoPipeline(expdir, varargin)
     %FlyDiscoPipeline  Runs the FlyDisco pipeline.
     %   FlyDiscoPipeline(expdir) runs the FlyDisco pipeline on the experiment folder
-    %   expdir.  The analysis protocol to be used, including what FlyDisco stages to
+    %   expdir.  The "analysis protocol" to be used, including what FlyDisco stages to
     %   run, is determined from the screen_type field in the the experiment
-    %   metadata stored in the file metadata.xml (case insensitive) within the
-    %   experiment folder.  
+    %   metadata.  For example, one possible screen_type is 'FlyBowlRGBbasic'.
+    %   The experiment metadata is stored in the file metadata.xml (case
+    %   insensitive) within the experiment folder.
     %
-    %   The screen_type is interpreted as the name of a folder within the settings/
-    %   folder, called the "analysis-protocol folder".  The settings/ folder is
-    %   itself in the same folder as the FlyDiscoPipeline.m source code file.
+    %   An analysis protocol is specified by the files within a folder called an
+    %   "analysis-protocol folder".  These files specify parameters to be used for
+    %   each stage of the analysis, such as what the minimum and maximum number of
+    %   flies can be, and what the shape of the arena is.  A number of
+    %   analysis-protocol folders are provided in the software repository that
+    %   contains the source code for FlyDiscoPipeline(), within a folder named
+    %   "settings" at the top level of the repository.  The screen_type of the
+    %   experiment is used to determine which analysis-protocol folder is used to
+    %   analyze that experiment.  First, a folder named 'current_'+screen_type is
+    %   checked for (where "+" here represents concatenation).  If present, that
+    %   folder is used as the analysis-protocol folder.  If absent, a folder with
+    %   the same name as the screen_type is checked for, and used if present.  For
+    %   instance, one analysis-protocol folder is named 'current_FlyBowlRGBbasic'.
+    %   (Which as of this writing is actually a symbolic link to an
+    %   analysis-protocol folder named '20210913_FlyBowlRGBbasic'.)
     %
     %   The expdir is the only required input to FlyDiscoPipeline.  Addtional
     %   optional arguments are supported as name-value pairs.  Any combination of
@@ -18,8 +31,7 @@ function FlyDiscoPipeline(expdir, varargin)
     %   FlyDiscoPipeline(expdir, 'settingsdir', settingsdir) looks in the given
     %   settingsdir for analysis-protocol folders, rather than the default settings/
     %   folder described above. settingsdir is the path to the root directory
-    %   containing all the per-project settings directory. The default is 
-    %   'FlyDiscoPipeline/settings'. 
+    %   containing all the analysis-protocol folders.
     %
     %   FlyDiscoPipeline(expdir, 'analysis_protocol', analysis_protocol) uses the
     %   analysis-protocol folder specified instead of the analysis-protocol folder
@@ -91,6 +103,9 @@ function FlyDiscoPipeline(expdir, varargin)
     %   All other stages can be turned on/off (or forced) in a similar fashion.  The
     %   name of the relevant parameter is always 'do' followed by the stage name.
     %
+    %   (All text below this point documents rarely-used features, and can be safely
+    %   ignored unless you are an advanced user.)
+    %
     %   FlyDiscoPipeline(expdir, 'automaticchecksincoming_params', params) passes
     %   the given params (typically a cell array of name-value pairs) to the
     %   automaticchecksincoming stage, which is implemented by the function
@@ -161,6 +176,11 @@ function FlyDiscoPipeline(expdir, varargin)
     % FlyDiscoPipelineDefaultAnalysisParameters().  Finally, any of these values can
     % in turn be overridden by providing a name-value pair in the argument list to
     % FlyDiscoPipeline().
+    %
+    % It should be noted that not all parameters of all stages can be set in this
+    % way.  Some parameters are determined by the files in the analysis-protocol
+    % folder, and cannot easily be changed without modifying the analysis-protcol
+    % folder.
     
 
     % Get info about the state of the repo, output to stdout
