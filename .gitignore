@@ -14,3 +14,4 @@ too-much-memory-example-experiments*
 aborted-example-experiments-read-only/
 aborted-example-experiments
 *.out.txt
+.DS_Store

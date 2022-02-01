@@ -25,6 +25,15 @@ folder on `dm11`, and then they are subsequently analyzed on the
 Janelia cluster using analysis settings determined by the contents of
 the `metadata.xml` folder.
 
+Whether a folder is considered an experiment folder is decided by a point system.
+Each of the following is worth a point:
+
+1.  If the folder contains a file named `movie.ufmf` or `movie.avi` (case-insensitive).
+2.  If the folder contains a file named `metadata.xml` (case-insensitive).
+3.  If the folder contains a file names `ABORTED` (case-sensitive).
+
+If a folder scores two points or more, it is considered an experiment folder.
+
 Goldblum is part of the FlyDiscoAnalysis project, the source code for
 which lives at
 ```
@@ -44,25 +53,50 @@ FlyDiscoPipeline.m
 within the source repository.  See the documentation within that file
 for more details.
 
+Folders of Goldblum
+-------------------
+
+Each Goldblum instance copies experiments from a set of rig computers to a
+destination folder, typically named `flydisco_data` somewhere under
+`/groups/<lab_head_name>` on the dm11 file system.  Within this folder, Goldblum
+creates a folder named `goldblum-logs`.  For each run of Goldblum, a file is
+created which records the Goldbum log for that run.  These files have names like
+`goldblum-2021-01-09.log`.  These files will contain error messages if something
+goes wrong with a Goldblum run.  It's also a good idea to check these files occasionally to 
+make sure Goldblum is running correctly.
+
+Another folder worth knowing about is the `to-process` folder, also within 
+the `flydisco_data` folder.  After an experiment folder is transferred from 
+one of the rig computers, a symbolic link is created within the `to-process` 
+folder.  This link points to the just-transfered experiment folder.  When Goldblum
+finishes transfering experiments from the rig computers, it uses the contents of
+the `to-process` folder to determine what experiment folders need to be
+analyzed.  Note that if you manually create a symbolic link to an experiment folder 
+in the `to-process` folder, that experiment will get analyzed just as if it had been 
+transfered by Goldblum.  This is often useful for reanalyzing experiment folders when 
+something fixable goes wrong with the original attempt at analysis.
+
+
 How to set up Goldblum for a new lab
 ------------------------------------
 
 Suppose a new lab head joined Janelia, named Gina Davis.  To set up
 Goldblum for the Davis Lab, one would:
 
-1.  On each rig machine you want to transfer data off of, install Cygwin and the Cygwin ssh server.
-    We currently use Cygwin 1.7.1, which is super old, but a more recent version of Cygwin should
-    also work.
+1.  On each rig machine you want to transfer data off of, install Cygwin and the
+    Cygwin ssh server. We currently use Cygwin 1.7.1, which is super old, but a
+    more recent version of Cygwin should also work.
 
 2.  Have SciComp Systems create a `davislab` user.
 
-3.  Have SciComp Systems add your personal public RSA key to the list of authorized keys
-    for the account.  You may need to create these if you don't have one already.    
-    This will enable you to login as `davislab` on `submit.int.janelia.org`
-    without entering a password. For instance, when logged in as yourself, you should be allowed to
-    run `ssh davislab@submit.int.janelia.org`/
+3.  Have SciComp Systems add your personal public RSA key to the list of
+    authorized keys for the account.  You may need to create these if you don't
+    have one already.  This will enable you to login as `davislab` on
+    `submit.int.janelia.org` without entering a password. For instance, when
+    logged in as yourself, you should be allowed to run `ssh davislab@submit.int.janelia.org`.
 
-4.  Create an RSA keypair for the `davislab` account using `ssh-keygen`.  Leave the passphrase empty.
+4.  Create an RSA keypair for the `davislab` account using `ssh-keygen`.  Leave
+    the passphrase empty.
 
 5.  On your local macOS or Linux machine, which is logged into your normal account, start a terminal and do:
     ```
@@ -105,10 +139,10 @@ Goldblum for the Davis Lab, one would:
         result.does_use_per_user_folders = false ;
     end
     ```    
-    The `lab_head_last_name` field is used for two things: it
-    determines what lab is billed for the analysis job on the cluster,
-    and it determines what folder on each rig is searched for
-    experiments (see below).
+    The `lab_head_last_name` field is used for two things: it determines what
+    lab is billed for the analysis job on the cluster, and it determines what
+    folder on each rig is searched for experiments (see the description of
+    `data_folder_path_from_rig_index` below).
 
     The `host_name_from_rig_index` field determines the host name of
     each rig that will have experiments transfered off of it and analyzed.
@@ -122,9 +156,11 @@ Goldblum for the Davis Lab, one would:
     key to the `authorized_keys` file is usually done using the
     `ssh-copy-id` command.
 
-    The `data_folder_path_from_rig_index` specifies, for each rig
-    machine, the folder where Goldblum will look for experiment
-    folders.
+    The `data_folder_path_from_rig_index` specifies, for each rig machine, the
+    folder where Goldblum will look for experiment folders.  Within this folder,
+    Goldblum expects to find a folder with the same name as the
+    `lab_head_last_name`, and this `lab_head_last_name` folder is searched for
+    experiment folders.
 
     The `settings_folder_path` field specifies where Goldblum will
     look for analysis settings folders.  Leave this alone unless you
@@ -228,7 +264,7 @@ Goldblum for the Davis Lab, one would:
     Behind the scenes, this will use `scp` to copy your `FlyDiscoAnalysis` folder to
     each of the `bransonlab`, `rubinlab`, and `davislab` accounts.
 
-12. Back at the macOS/Linux terminal, do:
+12. Back at the macOS/Linux terminal (logged in as your normal user account), do:
     ```
     ssh davislab@submit.int.janelia.org
     ```
@@ -243,11 +279,11 @@ Goldblum for the Davis Lab, one would:
     ```
     /misc/local/matlab-2019a/bin/matlab -singleCompThread -nodisplay -batch 'modpath; turn_on_goldblum()'
     ```
-    This will add a line to the `davislab` user crontab to launch goldblum at 10 PM every night. 
-    <!---
-    How do you modify the time?
-    --->
-    
+    This will add a line to the `davislab` user crontab to launch Goldblum at
+    10&nbsp;PM every night.  To instead run Goldblum at, say, 11:45&nbsp;PM, do:
+    ```
+    /misc/local/matlab-2019a/bin/matlab -singleCompThread -nodisplay -batch 'modpath; turn_on_goldblum(23,45)'
+    ```    
     (You may get a message like:
     ```
     There was a problem during execution of the set_parpool_job_storage_location() function:
