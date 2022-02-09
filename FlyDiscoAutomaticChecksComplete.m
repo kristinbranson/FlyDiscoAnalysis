@@ -410,6 +410,6 @@ else
   fprintf('Warning/error messages:\n');
   fprintf('%s\n',error_or_warning_messages{:});
 end
-fprintf('Finished running FlyDiscoAutomaticChecks_Complete at %s.\n',datestr(now,'yyyymmddTHHMMSS'));
+fprintf('Finished running FlyDiscoAutomaticChecksComplete at %s.\n',datestr(now,'yyyymmddTHHMMSS'));
 
 end

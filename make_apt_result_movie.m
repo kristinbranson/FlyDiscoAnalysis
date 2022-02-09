@@ -42,7 +42,8 @@ useVideoWriter = exist('VideoWriter','file');
   taillength,fps,maxnframes,firstframes,compression,figpos,movietitle,...
   useVideoWriter,headlandmark,taillandmark,...
   avifileTempDataFile,titletext,showtimestamps,dynamicflyselection,...
-  doshowsex,doplotapttail,doplotcentertail,doplotwings,doflipud,dofliplr] = ...
+  doshowsex,doplotapttail,doplotcentertail,doplotwings,doflipud,dofliplr,...
+  hidemovietype,hidemask,hidemaskvalue] = ...
   myparse(varargin,'moviename','','aptname','','trxname','','aviname','','colors',[],'zoomflies',[],'nzoomr',nan,'nzoomc',nan,...
   'boxradius',nan,'taillength',nan,'fps',nan,'maxnframes',nan,'firstframes',[],'compression','',...
   'figpos',[],'movietitle','','useVideoWriter',useVideoWriter,...
@@ -55,7 +56,10 @@ useVideoWriter = exist('VideoWriter','file');
   'doplotapttail',true,...
   'doplotcentertail',false,...
   'doplotwings',true,...
-  'flipud',false,'fliplr',false);
+  'flipud',false,'fliplr',false,...
+  'hidemovietype',false,...
+  'hidemask',[],...
+  'hidemaskvalue',0);
 
 if ~ischar(compression),
   compression = '';
@@ -409,6 +413,9 @@ end
 endframes = min(nframes,firstframes+maxnframes-1);
 im = readframe(firstframes(1));
 [nr,nc,ncolors] = size(im);
+if ~isempty(hidemask),
+  hidemask = repmat(hidemask,[1,1,ncolors]);
+end
 
 % choose some random flies to zoom in on
 nzoom = nzoomr*nzoomc;
@@ -558,11 +565,15 @@ if ~istrx,
 end
 
 frame_count_per_fprintf = 100 ;
+firstframeref = 1;
 for segi = 1:numel(firstframes),
   firstframe = firstframes(segi);
   endframe = endframes(segi);
   fprintf('Adding frames from segment %d, frames %d-%d\n', segi, firstframe, endframe) ;
-
+  if hidemovietype,
+    firstframeref = firstframe;
+  end
+  
   for frame = firstframe:endframe,
     if frame==firstframe ,
         tic_id = tic() ;
@@ -583,6 +594,10 @@ for segi = 1:numel(firstframes),
     
     % draw the unzoomed image
     im = uint8(readframe(frame));
+    if ~isempty(hidemask),
+      im(hidemask) = hidemaskvalue;
+    end
+
     if ncolors == 1,
       im = repmat(im,[1,1,3]);
     end
@@ -596,26 +611,29 @@ for segi = 1:numel(firstframes),
     end
     
     % draw frame number text box
-    framestr = sprintf('Frame %d,frame',frame);
-    if istimestamps,
-      framestr = [framestr,sprintf(',t = %.2f s',timestamps(frame)-timestamps(1))];
-    end
-    if ~isempty(movietitle),
-      framestr = {framestr,movietitle}; %#ok<AGROW>
-    end
+%     framestr = sprintf('Frame %d,frame',frame);
+%     if istimestamps,
+%       framestr = [framestr,sprintf(',t = %.2f s',timestamps(frame)-timestamps(1))];
+%     end
+%     if ~isempty(movietitle),
+%       framestr = {framestr,movietitle}; %#ok<AGROW>
+%     end
     % text doesn't show up in no display mode
     if titletext && isdisplay1,
       if frame == firstframes(1),
-        htext = text(.5,.5,framestr,'Parent',hax,'BackgroundColor','w','Color','g','VerticalAlignment','bottom','interpreter','none');
+        htext = text(.5,.5,movietitle,'Parent',hax,'BackgroundColor','w','Color','g','VerticalAlignment','bottom','interpreter','none');
       else
-        set(htext,'String',framestr);
+        set(htext,'String',movietitle);
       end
     end
     % draw frame number text box
     if istimestamps,
-      timestampstr = sprintf('%.2f s',timestamps(frame)-timestamps(1));
+      timestampstr = sprintf('%.2f s',timestamps(frame)-timestamps(firstframeref));
     else
-      timestampstr = sprintf('Fr %d',frame);
+      timestampstr = sprintf('Fr %d',frame-firstframeref+1);
+    end
+    if hidemovietype,
+      timestampstr = sprintf('Interval %d, %s',segi,timestampstr);
     end
 %     if ~isempty(movietitle),
 %       timestampstr = {timestampstr,movietitle}; %#ok<AGROW>
@@ -623,7 +641,7 @@ for segi = 1:numel(firstframes),
     % text doesn't show up in no display mode
     if showtimestamps && isdisplay1,
       if frame == firstframes(1),
-        htext = text(.5,hax.YLim(2)-(hax.YLim(2)/15),timestampstr,'Parent',hax,'BackgroundColor','k','Color','w','VerticalAlignment','bottom','interpreter','none');
+        htext = text(10,hax.YLim(2)-10,timestampstr,'Parent',hax,'BackgroundColor','k','Color','w','VerticalAlignment','top','interpreter','none','HorizontalAlignment','left');
       else
         set(htext,'String',timestampstr);
       end
@@ -705,7 +723,7 @@ for segi = 1:numel(firstframes),
             'ydata',trx(fly).y(i0:idx(fly)));
         end
         if doplotapttail,
-          frame0 = max(1,frame-taillength);
+          frame0 = max(apttrk.startframes(fly),frame-taillength);
           taillengthcurr = frame-frame0+1;
           [haspredtail,xytail] = apttrk.getPTrkFT(frame0:frame,fly);
           xytail(:,:,~haspredtail) = nan;

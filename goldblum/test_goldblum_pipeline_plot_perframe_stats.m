@@ -1,5 +1,5 @@
 do_reset_destination_folder = true ;
-do_use_bqueue = true ;
+do_use_bqueue = false ;
 do_actually_submit_jobs = true ;
 
 % Where does this script live?
@@ -8,13 +8,7 @@ this_folder_path = fileparts(this_script_path) ;
 fly_disco_analysis_folder_path = fileparts(this_folder_path) ;
 flydisco_folder_path = fileparts(fly_disco_analysis_folder_path) ;
 root_example_experiments_folder_path = fullfile(flydisco_folder_path, 'example-experiments') ;
-%read_only_example_experiments_folder_path = fullfile(root_example_experiments_folder_path, 'all-test-suite-experiments-read-only') ;
-%read_only_example_experiments_folder_path = fullfile(root_example_experiments_folder_path, 'passing-test-suite-experiments-with-tracking-read-only') ;
-read_only_example_experiments_folder_path = fullfile(root_example_experiments_folder_path, 'single-red-experiment-read-only') ;
-%read_only_example_experiments_folder_path = fullfile(root_example_experiments_folder_path, 'passing-test-suite-experiments-read-only') ;
-%read_only_example_experiments_folder_path = fullfile(root_example_experiments_folder_path, 'no-experiments-read-only') ;
-%read_only_example_experiments_folder_path = fullfile(root_example_experiments_folder_path, 'one-aborted-one-faulty-experiment-read-only') ;
-%read_only_example_experiments_folder_path = '/groups/branson/bransonlab/flydisco_example_experiments_read_only' ;
+read_only_example_experiments_folder_path = fullfile(root_example_experiments_folder_path, 'single-passing-test-suite-experiment-with-tracking-read-only') ;
 
 % Specify the "per-lab" configuration here
 cluster_billing_account_name = 'scicompsoft' ;
@@ -76,7 +70,8 @@ for i = 1 : experiment_count ,
 end
 
 % Run goldblum
-analysis_parameters = { 'doautomaticcheckscomplete', 'on' } ;
+%analysis_parameters = { 'docomputeperframestats', 'on', 'doplotperframestats', 'on', 'plotperframestats_params', {'plothist', 2} } ;
+analysis_parameters = { 'docomputeperframestats', 'on', 'doplotperframestats', 'on'} ;
 fprintf('Running goldblum...\n') ;
 do_transfer_data_from_rigs = false ;
 do_run_analysis = true ;
