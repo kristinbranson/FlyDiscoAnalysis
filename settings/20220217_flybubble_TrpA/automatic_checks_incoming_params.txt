@@ -1,7 +1,7 @@
 min_seconds_fliesloaded,0
 max_seconds_fliesloaded,30
 # for optogenetic experiment: min movie length = protocol duration - movie_length_delta_seconds
-usemediandt = 600
+min_ufmf_diagnostics_summary_nframes,20000
 #ONLY for non optogenetic experiments, registration params: usemediandt = 0
 #min_movie_length_seconds, 390
 #for backward compatibility with unreliable timestamps, registrationparams,usemediandt = 1 (baslers)
