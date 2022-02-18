@@ -52,7 +52,7 @@ analysis_parameters = {'doautomaticchecksincoming','off', ...
 
 %% make explist
 % running as bransonlab 
-folder_path_from_experiment_index = {'/groups/rubin/home/schretterc/Documents/Bubble_220215/CsChr53_JRC_SS36564_RigA_20220215T084712'};
+folder_path_from_experiment_index = {'/groups/rubin/home/schretterc/Documents/Bubble_220215/TrpAFemale2_GMR_72C11_vk5_RigA_20220216T090844'};
 % '/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20210806_testingcaboose/VNC_JRC_SS49220_RigB_20210421T143507'};
 
 % make explist of only experiment dirs with tracking and NOT aborted
