@@ -53,6 +53,10 @@ else
   ctraxresultsmovie_params = ReadParams(specificctraxresultsmovie_paramsfile);
   defaultparams = 0;
 end
+% These are things we might want to modify locally later, but don't want to
+% modify ctraxresultsmovie_params itself
+local_indicatorframes = ctraxresultsmovie_params.indicatorframes ;
+local_nframes = ctraxresultsmovie_params.nframes ;
 
 % Sort out where the temporary data directory will be
 scratch_folder_path = get_scratch_folder_path() ;
@@ -104,11 +108,11 @@ if ~commonregistrationparams.OptogeneticExp,
   endframes_off(ctraxresultsmovie_params.endframes < 0) = nan;
   idx = ~isnan(middleframes_off);
   firstframes_off(idx) = ...
-   min(nframes-1,max(0,middleframes_off(idx) - ceil(ctraxresultsmovie_params.nframes(idx)/2)));
+   min(nframes-1,max(0,middleframes_off(idx) - ceil(local_nframes(idx)/2)));
   idx = ~isnan(endframes_off);
   firstframes_off(idx) = ...
-   min(nframes-1,max(0,endframes_off(idx) - ctraxresultsmovie_params.nframes(idx)));
-  endframes_off = firstframes_off + ctraxresultsmovie_params.nframes - 1;
+   min(nframes-1,max(0,endframes_off(idx) - local_nframes(idx)));
+  endframes_off = firstframes_off + local_nframes - 1;
   firstframes = registration_params.start_frame + firstframes_off;
 else
   if defaultparams,
@@ -196,19 +200,26 @@ else
       end
     end
     
-    ctraxresultsmovie_params.indicatorframes = indicatorframes;
+    local_indicatorframes = indicatorframes;
     firstframes_off = indicatorLED.startframe(indicatorframes) - ctraxresultsmovie_params.nframes_beforeindicator;  
     % need to do this for specific files as well
-    ctraxresultsmovie_params.nframes = ones(1,length(firstframes_off))*ctraxresultsmovie_params.nframes;
-    endframes_off = firstframes_off + ctraxresultsmovie_params.nframes -1;
+    local_nframes = ones(1,length(firstframes_off))*local_nframes;
+    endframes_off = firstframes_off + local_nframes -1;
     firstframes = registration_params.start_frame + firstframes_off;
   else
     if exist(indicatorfile,'file')
-      load(indicatorfile);
-      firstframes_off = indicatorLED.startframe(ctraxresultsmovie_params.indicatorframes) - ctraxresultsmovie_params.nframes_beforeindicator;
-      endframes_off = firstframes_off + ctraxresultsmovie_params.nframes -1 ;
+      indicatorstruct = load(indicatorfile) ;
+      indicatorLED = indicatorstruct.indicatorLED ;
+      is_local_indicatorframes_valid = (local_indicatorframes <= length(indicatorLED.startframe)) ;
+      if ~all(is_local_indicatorframes_valid) ,
+          warning('The largest value in local_indicatorframes (%d) is too big for indicatorLED.startframe (length = %d).  Trimming...', ...
+                  max(local_indicatorframes), length(indicatorLED.startframe)) ;
+          local_indicatorframes = local_indicatorframes(is_local_indicatorframes_valid) ;   
+      end
+      firstframes_off = indicatorLED.startframe(local_indicatorframes) - ctraxresultsmovie_params.nframes_beforeindicator;
+      endframes_off = firstframes_off + local_nframes -1 ;
       firstframes = registration_params.start_frame + firstframes_off;
-      ctraxresultsmovie_params.nframes = ones(1,length(firstframes_off))*ctraxresultsmovie_params.nframes;
+      local_nframes = ones(1,length(firstframes_off))*local_nframes;
     end
   end
 end
@@ -273,7 +284,7 @@ if exist(subtitlefile,'file'),
   delete(subtitlefile);
 end
 fid = fopen(subtitlefile,'w');
-dt = [0,ctraxresultsmovie_params.nframes];
+dt = [0,local_nframes];
 ts = cumsum(dt);
 
 if ~commonregistrationparams.OptogeneticExp,
@@ -309,7 +320,7 @@ else
   end
   
   
-  stimtimes = indicatorLED.starttimes(ctraxresultsmovie_params.indicatorframes);
+  stimtimes = indicatorLED.starttimes(local_indicatorframes);
     
   j = 1;
   t = protocol.duration(j)/1000;
@@ -353,7 +364,7 @@ else
      datestr(t_end,'HH:MM:SS,FFF'));
     fprintf(fid,'%s\n%s %s %s %s %s %s\n\n',basename,...
      ['Step ', num2str(step(k))],...     
-     ['(Stim ', num2str(ctraxresultsmovie_params.indicatorframes(k)),'/', ...
+     ['(Stim ', num2str(local_indicatorframes(k)),'/', ...
        num2str(numel(indicatorLED.starttimes)),'):'],...
      stim_type{k},...
      ['(',num2str(dutycycle(k)),'% on)'],...
@@ -376,7 +387,7 @@ temp_avi_path = [tempname(scratch_folder_path) '.avi'] ;
   'nzoomr',ctraxresultsmovie_params.nzoomr,'nzoomc',ctraxresultsmovie_params.nzoomc,...
   'boxradius',ctraxresultsmovie_params.boxradius,'taillength',ctraxresultsmovie_params.taillength,...
   'fps',ctraxresultsmovie_params.fps,...
-  'maxnframes',ctraxresultsmovie_params.nframes,...
+  'maxnframes',local_nframes,...
   'firstframes',firstframes,...
   'figpos',ctraxresultsmovie_params.figpos,...
   'movietitle',basename,...
@@ -388,7 +399,7 @@ temp_avi_path = [tempname(scratch_folder_path) '.avi'] ;
   'dynamicflyselection',true,...
   'doshowsex',true);
 %'fps',ctraxresultsmovie_params.fps,...
-    %'maxnframes',+ctraxresultsmovie_params.nframes,...
+    %'maxnframes',+ctraxresultsmovie_params_nframes,...
 if ishandle(1),
   close(1);
 end
