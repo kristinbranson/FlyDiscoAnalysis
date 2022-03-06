@@ -220,7 +220,7 @@ else
       firstframes_off = indicatorLED.startframe(local_indicatorframes) - ctraxresultsmovie_params.nframes_beforeindicator;
       endframes_off = firstframes_off + local_nframes -1 ;
       firstframes = registration_params.start_frame + firstframes_off;
-      local_nframes = ones(1,length(firstframes_off))*local_nframes;
+      local_nframes = ones(1,length(firstframes_off)).*local_nframes;
     end
   end
 end
