@@ -105,7 +105,7 @@ analysis_parameters = {'analysis_protocol',analysis_protocol, ...
 % folder_path_from_experiment_index = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20210913_testingNorpA/CsChr_JHS_K_85321_RigA_20210903T085205'};
 
 % run pipeline for jaaba file conversion
-folder_path_from_experiment_index = {'/groups/branson/home/robiea/Projects_data/JAABA/Data_FlyBubble/FlyTracker/cx_JHS_K_85321_CsChr_RigD_20150909T163219_tmp'};git add
+folder_path_from_experiment_index = {'/groups/branson/home/robiea/Projects_data/JAABA/Data_FlyBubble/FlyTracker/cx_JHS_K_85321_CsChr_RigD_20150909T163219_tmp'};
 
 %% delete pipeline files before rerunning pipeline
 % 
