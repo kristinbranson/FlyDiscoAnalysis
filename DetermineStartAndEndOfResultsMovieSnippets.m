@@ -75,12 +75,13 @@ function [firstframes, firstframes_off, endframes_off, nframes, indicatorframes]
         endframes_off(ctraxresultsmovie_params.endframes < 0) = nan;
         idx = ~isnan(middleframes_off);
         firstframes_off(idx) = ...
-            min(tracked_frame_count-1,max(0,middleframes_off(idx) - ceil(tracked_frame_count(idx)/2)));
+            min(tracked_frame_count-1,max(0,middleframes_off(idx) - ceil(input_nframes(idx)/2)));
         idx = ~isnan(endframes_off);
         firstframes_off(idx) = ...
-            min(tracked_frame_count-1,max(0,endframes_off(idx) - tracked_frame_count(idx)));
-        nframes = endframes_off - firstframes_off + 1 ;
+            min(tracked_frame_count-1,max(0,endframes_off(idx) - input_nframes(idx)));
         indicatorframes = input_indicatorframes ;  % TODO: Is this right?
+        % nframes?
+        endframes_off = firstframes_off + input_nframes - 1;
     end
     firstframes = registration_params.start_frame + firstframes_off;
 end  % function
