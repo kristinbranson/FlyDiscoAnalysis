@@ -1,5 +1,5 @@
-% make results movies
 function FlyDiscoMakeCtraxResultsMovie(expdir,varargin)
+% make results movies
 
 [analysis_protocol,settingsdir,datalocparamsfilestr] = ...
   myparse(varargin,...
@@ -40,18 +40,18 @@ end
 defaultctraxresultsmovieparamsfile = fullfile(settingsdir,analysis_protocol,dataloc_params.ctraxresultsmovieparamsfilestr);
 if commonregistrationparams.OptogeneticExp,
   specificctraxresultsmovie_paramsfile = fullfile(settingsdir,analysis_protocol,['ctraxresultsmovie_params_',ledprotocoldatestr,'.txt']);
-  defaultparams = 1;
   if exist(specificctraxresultsmovie_paramsfile,'file'),
     ctraxresultsmovie_params = ReadParams(specificctraxresultsmovie_paramsfile);
-    defaultparams = 0;
+    is_using_default_ctrax_results_movie_params = 0 ;
   else
     ctraxresultsmovie_params = ReadParams(defaultctraxresultsmovieparamsfile);
+    is_using_default_ctrax_results_movie_params = 1 ;
   end
 else
-%  ctraxresultsmovie_params_nonoptogenetic.txt doesn't exist as far as I can tell   
+  %  ctraxresultsmovie_params_nonoptogenetic.txt doesn't exist as far as I can tell
   specificctraxresultsmovie_paramsfile = fullfile(settingsdir,analysis_protocol,'ctraxresultsmovie_params_nonoptogenetic.txt');
   ctraxresultsmovie_params = ReadParams(specificctraxresultsmovie_paramsfile);
-  defaultparams = 0;
+  is_using_default_ctrax_results_movie_params = nan ;  % want an error if we ever try to use this in an if statement
 end
 
 % Sort out where the temporary data directory will be
@@ -110,7 +110,7 @@ initial_indicatorframes = ctraxresultsmovie_params.indicatorframes ;
 initial_nframes = ctraxresultsmovie_params.nframes ;
 [firstframes, firstframes_off, endframes_off, nframes, indicatorframes] = ...
     DetermineStartAndEndOfResultsMovieSnippets(commonregistrationparams, registration_params, ctraxresultsmovie_params, initial_nframes, ...
-                                               initial_indicatorframes, defaultparams, indicatorstruct, ledprotocolstruct, metadata) ;
+                                               initial_indicatorframes, is_using_default_ctrax_results_movie_params, indicatorstruct, ledprotocolstruct, metadata) ;
 
                                            
 %% option to not specify nzoomr, nzoomc

@@ -1,7 +1,7 @@
 function [firstframes, firstframes_off, endframes_off, nframes, indicatorframes] = ...
         DetermineStartAndEndOfResultsMovieSnippets(commonregistrationparams, registration_params, ctraxresultsmovie_params, ...
                                                    input_nframes, input_indicatorframes, ...
-                                                   do_use_default_parameters, indicator_file_contents, ledprotocol_file_contents, metadata)
+                                                   is_using_default_ctrax_results_movie_params, indicator_file_contents, ledprotocol_file_contents, metadata)
 
     %DetermineStartAndEndOfResultsMovieSnippets  Use information from various
     %sources to determine which frames to use for each snippet included in the
@@ -29,8 +29,8 @@ function [firstframes, firstframes_off, endframes_off, nframes, indicatorframes]
     %          within the sequence of stimuli.)
     
     if commonregistrationparams.OptogeneticExp ,
-        % if an optogenetic experiment, I guess?  -- ALT, 2022-03-16
-        if do_use_default_parameters,
+        % if an optogenetic experiment
+        if is_using_default_ctrax_results_movie_params,
             % Figure out the protocol given the metadata, LED protocol file contents
             protocol = determine_protocol(metadata, ledprotocol_file_contents) ;
             
@@ -39,13 +39,6 @@ function [firstframes, firstframes_off, endframes_off, nframes, indicatorframes]
             
             indicatorLED = indicator_file_contents.indicatorLED ;            
             firstframes_off = indicatorLED.startframe(indicatorframes) - ctraxresultsmovie_params.nframes_beforeindicator ;
-            % need to do this for specific files as well
-            % Promote nframes to a vector if necessary
-            if isvector(firstframes_off) && isscalar(input_nframes) ,
-                nframes = repmat(input_nframes, size(firstframes_off)) ;
-            else
-                nframes = input_nframes ;
-            end
         else
             % if do_use_default_parameters is false
             if isempty(indicator_file_contents) ,
@@ -62,31 +55,32 @@ function [firstframes, firstframes_off, endframes_off, nframes, indicatorframes]
                     indicatorframes = indicatorframes(is_local_indicatorframes_valid) ;
                 end
                 firstframes_off = indicatorLED.startframe(indicatorframes) - ctraxresultsmovie_params.nframes_beforeindicator;
-                % Promote nframes to a vector if necessary
-                if isvector(firstframes_off) && isscalar(input_nframes) ,
-                    nframes = repmat(input_nframes, size(firstframes_off)) ;
-                else
-                    nframes = input_nframes ;
-                end
             end
         end
+        % Promote nframes to a vector if necessary
+        if isvector(firstframes_off) && isscalar(input_nframes) ,
+            nframes = repmat(input_nframes, size(firstframes_off)) ;
+        else
+            nframes = input_nframes ;
+        end
+        endframes_off = firstframes_off + nframes - 1 ;
     else
-        % If not an optogenetic experiment, I guess -- ALT, 2022-03-16
-        nframes = registration_params.end_frame-registration_params.start_frame + 1;
-        firstframes_off = min(max(0,round(ctraxresultsmovie_params.firstframes*nframes)),nframes-1);
+        % If not an optogenetic experiment
+        tracked_frame_count = registration_params.end_frame-registration_params.start_frame + 1;
+        firstframes_off = min(max(0,round(ctraxresultsmovie_params.firstframes*tracked_frame_count)),tracked_frame_count-1);
         firstframes_off(ctraxresultsmovie_params.firstframes < 0) = nan;
-        middleframes_off = round(ctraxresultsmovie_params.middleframes*nframes);
+        middleframes_off = round(ctraxresultsmovie_params.middleframes*tracked_frame_count);
         middleframes_off(ctraxresultsmovie_params.middleframes < 0) = nan;
-        endframes_off = round(ctraxresultsmovie_params.endframes*nframes);
+        endframes_off = round(ctraxresultsmovie_params.endframes*tracked_frame_count);
         endframes_off(ctraxresultsmovie_params.endframes < 0) = nan;
         idx = ~isnan(middleframes_off);
         firstframes_off(idx) = ...
-            min(nframes-1,max(0,middleframes_off(idx) - ceil(nframes(idx)/2)));
+            min(tracked_frame_count-1,max(0,middleframes_off(idx) - ceil(tracked_frame_count(idx)/2)));
         idx = ~isnan(endframes_off);
         firstframes_off(idx) = ...
-            min(nframes-1,max(0,endframes_off(idx) - nframes(idx)));
-        indicatorframes = input_indicatorframes ;  % This seems wrong...  Shouldn't this be reshape(1:length(nframes),size(nframes)) in this case ?
+            min(tracked_frame_count-1,max(0,endframes_off(idx) - tracked_frame_count(idx)));
+        nframes = endframes_off - firstframes_off + 1 ;
+        indicatorframes = input_indicatorframes ;  % TODO: Is this right?
     end
-    endframes_off = firstframes_off + nframes - 1 ;
     firstframes = registration_params.start_frame + firstframes_off;
 end  % function
