@@ -79,9 +79,9 @@ function [firstframes, firstframes_off, endframes_off, nframes, indicatorframes]
         idx = ~isnan(endframes_off);
         firstframes_off(idx) = ...
             min(tracked_frame_count-1,max(0,endframes_off(idx) - input_nframes(idx)));
-        indicatorframes = input_indicatorframes ;  % TODO: Is this right?
-        % nframes?
         endframes_off = firstframes_off + input_nframes - 1;
+        indicatorframes = input_indicatorframes ;  % TODO: Is this right?
+        nframes = input_nframes ;
     end
     firstframes = registration_params.start_frame + firstframes_off;
 end  % function
