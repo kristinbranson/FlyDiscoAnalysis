@@ -44,7 +44,7 @@ useVideoWriter = exist('VideoWriter','file');
   avifileTempDataFile,titletext,showtimestamps,dynamicflyselection,...
   doshowsex,doplotapttail,doplotcentertail,doplotwings,doflipud,dofliplr,...
   hidemovietype,hidemask,hidemaskvalue] = ...
-  myparse(varargin,'moviename','','aptname','','trxname','','aviname','','colors',[],'zoomflies',[],'nzoomr',nan,'nzoomc',nan,...
+  myparse(varargin,'moviename','','aptname','','trxname',nan,'aviname','','colors',[],'zoomflies',[],'nzoomr',nan,'nzoomc',nan,...
   'boxradius',nan,'taillength',nan,'fps',nan,'maxnframes',nan,'firstframes',[],'compression','',...
   'figpos',[],'movietitle','','useVideoWriter',useVideoWriter,...
   'headlandmark',[],'taillandmark',[],...
@@ -124,7 +124,7 @@ else
 end
 ntgts = apttrk.ntlts;
 
-if ~ischar(trxname) || isempty(trxname) || ~exist(trxname,'file'),
+if isnan(trxname),
   fprintf('Choose mat file containing flies'' Ctrax/FlyTracker trajectories corresponding to movie %s\n',moviename);
   [~,ext] = splitext(moviename);
   trxname = [moviename(1:end-length(ext)+1),'mat'];
@@ -965,7 +965,7 @@ end
   
 fprintf('Finishing AVI...\n');
 
-if useVideoWriter,
+if exist('aviobj','var') && useVideoWriter,
   close(aviobj);
 else
   aviobj = close(aviobj); %#ok<NASGU>
