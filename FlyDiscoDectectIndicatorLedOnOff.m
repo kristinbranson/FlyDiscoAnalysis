@@ -107,7 +107,7 @@ if DoLEDdetection
   % Offtime can't be less than pad+1 or it will fail.
   
   try
-    IRthreshold = max(meanimage)-min(meanimage)/2;
+    IRthreshold = (max(meanimage)+min(meanimage))/2 ;
     % pad need to be more than 1/2 duty cycle / sampling frequency
     pad = indicator_params.pad;
     indicatorLED = [];
@@ -179,7 +179,8 @@ if DoLEDdetection
   end
   
 end
-%% plot figure
+
+% %% plot figure
 % figure, plot(meanimage)
 % hold on, plot(indicatorLED.startframe,meanimage(indicatorLED.startframe),'rx')
 % hold on, plot(indicatorLED.endframe,meanimage(indicatorLED.endframe),'gx')
