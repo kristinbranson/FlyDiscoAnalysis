@@ -27,11 +27,25 @@ regdata = load(fullfile(expdir,dataloc_params.registrationmatfilestr));
 %% detect registration markers
 
 [readframe,nframes,fid,headerinfo] = get_readframe_fcn(moviefile);
+
+
+if isfield(regdata,'start_frame'),
+  T0 = regdata.start_frame;
+else
+  T0 = 1;
+end
+if isfield(regdata,'end_frame'),
+  T1 = regdata.end_frame;
+else
+  T1 = nframes;
+end
+nframes = T1-T0+1;
+
 if nframes/framespersample > nsamples,
-  t0s = unique(round(linspace(1,nframes-framespersample,nsamples)));
+  t0s = unique(round(linspace(T0,T1-framespersample,nsamples)));
   t1s = t0s+framespersample-1;
 else
-  t0s = 1:nframespersample:nframes-nframespersample+1;
+  t0s = T0:framespersample:T1-framespersample+1;
   t1s = t0s+framespersample-1;
 end
 nsamples = numel(t0s);
