@@ -1,6 +1,5 @@
 function [firstframes, firstframes_off, endframes_off, nframes, indicatorframes] = ...
         DetermineStartAndEndOfResultsMovieSnippets(commonregistrationparams, registration_params, ctraxresultsmovie_params, ...
-                                                   input_nframes, input_indicatorframes, ...
                                                    is_using_default_ctrax_results_movie_params, indicator_file_contents, ledprotocol_file_contents, metadata)
 
     %DetermineStartAndEndOfResultsMovieSnippets  Use information from various
@@ -28,6 +27,9 @@ function [firstframes, firstframes_off, endframes_off, nframes, indicatorframes]
     %          snippet.  (Not the frame index, the index of the stimulus itself
     %          within the sequence of stimuli.)
     
+    indicatorframes_from_params = ctraxresultsmovie_params.indicatorframes ;
+    nframes_from_params = ctraxresultsmovie_params.nframes ;
+    
     if commonregistrationparams.OptogeneticExp ,
         % if an optogenetic experiment
         if is_using_default_ctrax_results_movie_params,
@@ -45,7 +47,7 @@ function [firstframes, firstframes_off, endframes_off, nframes, indicatorframes]
                 error('In %s(), do_use_default_parameters is false, but indicator_file_contents is empty.  This combination is not currently supported.', ...
                       mfilename()) ;
             else
-                indicatorframes = input_indicatorframes ;
+                indicatorframes = indicatorframes_from_params ;
                 indicatorLED = indicator_file_contents.indicatorLED ;
                 is_local_indicatorframes_valid = (indicatorframes <= length(indicatorLED.startframe)) ;
                 if ~all(is_local_indicatorframes_valid) ,
@@ -58,30 +60,47 @@ function [firstframes, firstframes_off, endframes_off, nframes, indicatorframes]
             end
         end
         % Promote nframes to a vector if necessary
-        if isvector(firstframes_off) && isscalar(input_nframes) ,
-            nframes = repmat(input_nframes, size(firstframes_off)) ;
+        if isvector(firstframes_off) && isscalar(nframes_from_params) ,
+            nframes = repmat(nframes_from_params, size(firstframes_off)) ;
         else
-            nframes = input_nframes ;
+            nframes = nframes_from_params ;
         end
         endframes_off = firstframes_off + nframes - 1 ;
     else
-        % If not an optogenetic experiment
-        tracked_frame_count = registration_params.end_frame-registration_params.start_frame + 1;
-        firstframes_off = min(max(0,round(ctraxresultsmovie_params.firstframes*tracked_frame_count)),tracked_frame_count-1);
-        firstframes_off(ctraxresultsmovie_params.firstframes < 0) = nan;
-        middleframes_off = round(ctraxresultsmovie_params.middleframes*tracked_frame_count);
-        middleframes_off(ctraxresultsmovie_params.middleframes < 0) = nan;
-        endframes_off = round(ctraxresultsmovie_params.endframes*tracked_frame_count);
-        endframes_off(ctraxresultsmovie_params.endframes < 0) = nan;
-        idx = ~isnan(middleframes_off);
-        firstframes_off(idx) = ...
-            min(tracked_frame_count-1,max(0,middleframes_off(idx) - ceil(input_nframes(idx)/2)));
-        idx = ~isnan(endframes_off);
-        firstframes_off(idx) = ...
-            min(tracked_frame_count-1,max(0,endframes_off(idx) - input_nframes(idx)));
-        endframes_off = firstframes_off + input_nframes - 1;
-        indicatorframes = input_indicatorframes ;  % TODO: Is this right?
-        nframes = input_nframes ;
+        % If not an optogenetic experiment        
+        % In this case, nframes_from_params should be the same size as
+        % ctraxresultsmovie_params.firstframes, and their common length is the snippet
+        % count.        
+        tracked_frame_count = registration_params.end_frame - registration_params.start_frame + 1;
+        % We define the "normalized position" within the tracked frames to be a number
+        % on the interval [0,1], where 0 means the first frame, and 1 means the last
+        % frame, and 0.5 means the middle frame.  You get the idea.
+        firstframes_from_params = ctraxresultsmovie_params.firstframes ;  % e.g. [ 0 -1 -1 ]
+          % firstframes_from_params(i) is the normalized position of snippet i, if snippet
+          % i is to be a start-anchored snippet.  Otherwise, firstframes_from_params(i) is
+          % -1.  A "start-anchored" snippet is one where the given normalized position
+          % specifies where the snippet should *start*.
+        middleframes_from_params = ctraxresultsmovie_params.middleframes ;  % e.g. [ -1 0.5 -1 ] 
+          % middleframes_from_params(i) is the normalized position of snippet i, if snippet
+          % i is to be a middle-anchored snippet.  Otherwise, middleframes_from_params(i) is
+          % -1.  A "middle-anchored" snippet is one where the given normalized position
+          % specifies where the middle of the snippet should be.
+        endframes_from_params = ctraxresultsmovie_params.endframes ;  % e.g. [ -1 -1 1 ] 
+          % endframes_from_params(i) is the normalized position of snippet i, if snippet
+          % i is to be a end-anchored snippet.  Otherwise, endframes_from_params(i) is
+          % -1.  An "end-anchored" snippet is one where the given normalized position
+          % specifies where the snippet should *end*.        
+        unbounded_firstframes_off = ...
+            fifelse(firstframes_from_params >= 0, round(endframes_from_params*tracked_frame_count), ...
+                    middleframes_from_params >= 0, round(middleframes_from_params*tracked_frame_count - nframes_from_params/2), ...
+                    endframes_from_params >= 0, round(endframes_from_params*tracked_frame_count - nframes_from_params), ...
+                    nan(size(firstframes_from_params))) ;
+        firstframes_off = bound(unbounded_firstframes_off, 0, tracked_frame_count-1) ;             
+        endframes_off = firstframes_off + nframes_from_params - 1 ;
+        indicatorframes = indicatorframes_from_params ;  
+            % indicatorframes is not used for non-optogenetic experiments, so doesn't really
+            % matter what we return here.
+        nframes = nframes_from_params ;
     end
     firstframes = registration_params.start_frame + firstframes_off;
 end  % function
