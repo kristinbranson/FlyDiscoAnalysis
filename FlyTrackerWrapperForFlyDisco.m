@@ -22,7 +22,7 @@ function FlyTrackerWrapperForFlyDisco(expdir, settingsdir, analysis_protocol, da
   default_options.save_seg    = false ;
   default_options.force_calib = true ;
   default_options.expdir_naming = true ;
-  %default_options.fr_sample = 200 ;
+  default_options.fr_samp = 200 ;  % Max number of frames to use when computing background model
   default_options.n_flies_is_max = true;
   
   % Read the options file, if dataloc param specifies it, and it exists
