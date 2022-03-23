@@ -71,23 +71,30 @@ if ~exist(tempdatadir, 'dir') ,
   end
 end
 
+
+% Read the trx file if if exists
+if exist(trxfile, 'file') ,
+  trxfilestruct = load(trxfile) ;
+  trx = trxfilestruct.trx ;
+end
+
 %% read start and end of cropped trajectories
 
 registrationtxtfile = fullfile(expdir,dataloc_params.registrationtxtfilestr);
 if ~exist(registrationtxtfile,'file'),
-  load(trxfile,'trx');
+  %load(trxfile,'trx');
   registration_params.end_frame = max([trx.endframe]);
   registration_params.start_frame = min([trx.firstframe]);
 else
   registration_params = ReadParams(registrationtxtfile);
   if ~isfield(registration_params,'end_frame'),
-    load(trxfile,'trx');
+    %load(trxfile,'trx');
     registration_params.end_frame = max([trx.endframe]);
   end
   if ~isfield(registration_params,'start_frame'),
-    if ~exist('trx','var'),
-      load(trxfile,'trx');
-    end
+%     if ~exist('trx','var'),
+%       load(trxfile,'trx');
+%     end
     registration_params.start_frame = min([trx.firstframe]);
   end
 end
@@ -105,167 +112,27 @@ else
 end
 
 
-%% determine start and end frames of snippets
-initial_indicatorframes = ctraxresultsmovie_params.indicatorframes ;
-initial_nframes = ctraxresultsmovie_params.nframes ;
+
+% determine start and end frames of snippets
 [firstframes, firstframes_off, endframes_off, nframes, indicatorframes] = ...
     DetermineStartAndEndOfResultsMovieSnippets(commonregistrationparams, registration_params, ctraxresultsmovie_params, ...
-                                               initial_nframes, initial_indicatorframes, ...
                                                is_using_default_ctrax_results_movie_params, indicatorstruct, ledprotocolstruct, metadata) ;
 
                                            
-%% option to not specify nzoomr, nzoomc
-if ischar(ctraxresultsmovie_params.nzoomr) || ischar(ctraxresultsmovie_params.nzoomc),
-  
-  % figure out number of flies
-  load(trxfile,'trx');
-  
-  firstframe = min([trx.firstframe]);
-  endframe = max([trx.endframe]);
-  trxnframes = endframe-firstframe+1;
-  nflies = zeros(1,trxnframes);
-  for i = 1:numel(trx),
-    j0 = trx(i).firstframe-firstframe+1;
-    j1 = trx(i).endframe-firstframe+1;
-    nflies(j0:j1) = nflies(j0:j1)+1;
-  end
-  mediannflies = median(nflies);
+% Determine the layout of the results movie frame
+[final_nzoomr, final_nzoomc, final_figpos] = ...
+    determine_results_movie_figure_layout(ctraxresultsmovie_params, trx) ;
 
-  if isnumeric(ctraxresultsmovie_params.nzoomr),
-    nzoomr = ctraxresultsmovie_params.nzoomr;
-    nzoomc = round(mediannflies/nzoomr);
-  elseif isnumeric(ctraxresultsmovie_params.nzoomc),
-    nzoomc = ctraxresultsmovie_params.nzoomc;
-    nzoomr = round(mediannflies/nzoomc);
-  else
-    nzoomr = ceil(sqrt(mediannflies));
-    nzoomc = round(mediannflies/nzoomr);
-  end
-  ctraxresultsmovie_params.nzoomr = nzoomr;
-  ctraxresultsmovie_params.nzoomc = nzoomc;
-  
-  if iscell(ctraxresultsmovie_params.figpos),  
-    [readframe,~,fid] = get_readframe_fcn(moviefile);
-    im = readframe(1);
-    [nr,nc,~] = size(im);
     
-    rowszoom = floor(nr/nzoomr);
-    imsize = [nr,nc+rowszoom*nzoomc];
-    figpos = str2double(ctraxresultsmovie_params.figpos);
-    if isnan(figpos(3)),
-      figpos(3) = figpos(4)*imsize(2)/imsize(1);
-    elseif isnan(figpos(4)),
-      figpos(4) = figpos(3)*imsize(1)/imsize(2);
-    end
-    ctraxresultsmovie_params.figpos = figpos;
     
-    if fid > 1,
-      fclose(fid);
-    end
-  end
-  
-end
-
-%% create subtitle file
-
-subtitlefile = fullfile(expdir,'subtitles.srt');
-if exist(subtitlefile,'file'),
-  delete(subtitlefile);
-end
-fid = fopen(subtitlefile,'w');
-dt = [0,nframes];
-ts = cumsum(dt);
-
-if ~commonregistrationparams.OptogeneticExp,
-  for i = 1:numel(dt)-1,
-    fprintf(fid,'%d\n',i);
-    fprintf(fid,'%s --> %s\n',...
-     datestr(ts(i)/ctraxresultsmovie_params.fps/(3600*24),'HH:MM:SS,FFF'),...
-     datestr((ts(i+1)-1)/ctraxresultsmovie_params.fps/(3600*24),'HH:MM:SS,FFF'));
-    fprintf(fid,'%s, fr %d-%d\n\n',basename,...
-     firstframes_off(i)+1,...
-     endframes_off(i)+1);
-  end
-  fclose(fid);
-else
-    
-  load(ledprotocolfile);
-  load(indicatorfile);
-  if strcmp(metadata.assay,'FlyBubbleRGB') || strcmp(metadata.assay,'FlyBowlRGB')
-    if isfield(protocol,'Rintensity')
-        RGBprotocol = protocol;
-        clear protocol;
-        % test if RGBprotocol has only one active color
-        countactiveLEDs = [double(any(RGBprotocol.Rintensity));double(any(RGBprotocol.Gintensity));double(any(RGBprotocol.Bintensity))];
-        % check that there is 1 and only 1 color LED used in protocol
-        if sum(countactiveLEDs) == 0
-            error('ChR = 1 for LED protcol with no active LEDs')
-        elseif sum(countactiveLEDs) > 1
-            error('More than one active LED color in protocol. Not currently supported')
-        end
-        % call function that transforms new protocol to old protocol
-        [protocol,ledcolor] = ConvertRGBprotocol2protocolformat(RGBprotocol,countactiveLEDs);
-    end
-  end
-  
-  
-  stimtimes = indicatorLED.starttimes(indicatorframes);
-    
-  j = 1;
-  t = protocol.duration(j)/1000;
-  
-  step = zeros(1,length(stimtimes));
-  freq = zeros(1,length(stimtimes));
-  intensity = zeros(1,length(stimtimes));
-  dutycycle = zeros(1,length(stimtimes));
-  duration = zeros(1,length(stimtimes));
-  
-  for i = 1:length(stimtimes),
-    while stimtimes(i) > t
-      j = j+1;
-      t = t + protocol.duration(j)/1000;
-    end
-    
-    step(i) = j;
-    % not sure this logic is good
-    if protocol.pulseNum(j) > 1,
-      freq(i) = 1/(protocol.pulsePeriodSP(j)/1000);
-      stim_type{i} = ['Plsd ', num2str(freq(i)), 'Hz'];
-    else
-      stim_type{i} = 'Cnst';
-    end
-    
-    intensity(i) = protocol.intensity(j);
-    dutycycle(i) = (protocol.pulseWidthSP(j)/protocol.pulsePeriodSP(j))*100;
-    duration(i) = protocol.pulseNum(j)*protocol.pulsePeriodSP(j);
-    
-  end
-    
-  for k = 1:numel(dt)-1,
-    fprintf(fid,'%d\n',k);
-    
-    t_start = ts(k)/ctraxresultsmovie_params.fps/(3600*24);
-    t_end = (ts(k) + (ts(k+1)-1-ts(k))/ctraxresultsmovie_params.subdecimationfactor)/ ...
-        ctraxresultsmovie_params.fps/(3600*24);
-     
-    fprintf(fid,'%s --> %s\n',...
-     datestr(t_start,'HH:MM:SS,FFF'),...
-     datestr(t_end,'HH:MM:SS,FFF'));
-    fprintf(fid,'%s\n%s %s %s %s %s %s\n\n',basename,...
-     ['Step ', num2str(step(k))],...     
-     ['(Stim ', num2str(indicatorframes(k)),'/', ...
-       num2str(numel(indicatorLED.starttimes)),'):'],...
-     stim_type{k},...
-     ['(',num2str(dutycycle(k)),'% on)'],...
-     ['at ',num2str(intensity(k)), '% intensity'],...
-     ['for ',num2str(duration(k)), ' ms']);
-     
-  end
-  fclose(fid);
-end
+% create subtitle file
+subtitlefile = ...
+    write_subtitle_file(expdir, nframes, commonregistrationparams, ctraxresultsmovie_params, basename, firstframes_off, endframes_off, ...
+                        metadata, ledprotocolstruct, indicatorstruct, indicatorframes) ;
 
 
-% create movie
+                
+% Create results movie
 avi_file_path = fullfile(tempdatadir, [avifilestr, '_temp.avi']);
 if exist(avi_file_path,'file'),
   delete(avi_file_path);
@@ -273,12 +140,12 @@ end
 temp_avi_path = [tempname(scratch_folder_path) '.avi'] ;
 [succeeded,~,~,height,width]= ...
   make_ctrax_result_movie('moviename',moviefile,'trxname',trxfile,'aviname',avi_file_path,...
-  'nzoomr',ctraxresultsmovie_params.nzoomr,'nzoomc',ctraxresultsmovie_params.nzoomc,...
+  'nzoomr',final_nzoomr,'nzoomc',final_nzoomc,...
   'boxradius',ctraxresultsmovie_params.boxradius,'taillength',ctraxresultsmovie_params.taillength,...
   'fps',ctraxresultsmovie_params.fps,...
   'maxnframes',nframes,...
   'firstframes',firstframes,...
-  'figpos',ctraxresultsmovie_params.figpos,...
+  'figpos',final_figpos,...
   'movietitle',basename,...
   'compression','none',...
   'useVideoWriter',true,...
@@ -297,7 +164,7 @@ if ~succeeded,
   error('Failed to create raw avi %s',avi_file_path);
 end
 
-%% compress
+% compress
 
 %tmpfile = [xvidfile,'.tmp'];
 newheight = 4*ceil(height/4);
