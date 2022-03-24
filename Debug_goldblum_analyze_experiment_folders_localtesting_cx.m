@@ -105,8 +105,10 @@ analysis_parameters = {'analysis_protocol',analysis_protocol, ...
 % folder_path_from_experiment_index = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20210913_testingNorpA/CsChr_JHS_K_85321_RigA_20210903T085205'};
 
 % run pipeline for jaaba file conversion
-folder_path_from_experiment_index = {'/groups/branson/home/robiea/Projects_data/JAABA/Data_FlyBubble/FlyTracker/cx_JHS_K_85321_CsChr_RigD_20150909T163219_tmp'};
-
+% folder_path_from_experiment_index = {'/groups/branson/home/robiea/Projects_data/JAABA/Data_FlyBubble/FlyTracker/cx_JHS_K_85321_CsChr_RigD_20150909T163219_tmp'};
+folder_path_from_experiment_index = {'/groups/branson/home/robiea/Projects_data/JAABA/Data_FlyBubble/FlyTracker/cx_GMR_SS00030_CsChr_RigC_20150826T144616',...
+'/groups/branson/home/robiea/Projects_data/JAABA/Data_FlyBubble/FlyTracker/cx_GMR_SS00038_CsChr_RigB_20150729T150617'};
+% folder_path_from_experiment_index = {'/groups/branson/home/robiea/Projects_data/JAABA/Data_FlyBubble/FlyTracker/cx_GMR_SS00168_CsChr_RigD_20150909T111218'};
 %% delete pipeline files before rerunning pipeline
 % 
 % todeletefiles = {'automatic_checks_complete_info.mat',...
