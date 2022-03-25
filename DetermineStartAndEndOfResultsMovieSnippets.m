@@ -27,10 +27,11 @@ function [firstframes, firstframes_off, endframes_off, nframes, indicatorframes]
     %          snippet.  (Not the frame index, the index of the stimulus itself
     %          within the sequence of stimuli.)
     
-    indicatorframes_from_params = ctraxresultsmovie_params.indicatorframes ;
+    
     nframes_from_params = ctraxresultsmovie_params.nframes ;
     
     if commonregistrationparams.OptogeneticExp ,
+        indicatorframes_from_params = ctraxresultsmovie_params.indicatorframes ;
         % if an optogenetic experiment
         if is_using_default_ctrax_results_movie_params,
             % Figure out the protocol given the metadata, LED protocol file contents
@@ -97,7 +98,7 @@ function [firstframes, firstframes_off, endframes_off, nframes, indicatorframes]
                     nan(size(firstframes_from_params))) ;
         firstframes_off = bound(unbounded_firstframes_off, 0, tracked_frame_count-1) ;             
         endframes_off = firstframes_off + nframes_from_params - 1 ;
-        indicatorframes = indicatorframes_from_params ;  
+        indicatorframes = [] ;  
             % indicatorframes is not used for non-optogenetic experiments, so doesn't really
             % matter what we return here.
         nframes = nframes_from_params ;

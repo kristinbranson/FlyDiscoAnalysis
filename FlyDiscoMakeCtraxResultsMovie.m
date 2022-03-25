@@ -100,12 +100,12 @@ else
 end
 
 % Read a couple of files if they exist
-if exist(indicatorfile, 'file') ,
+if commonregistrationparams.OptogeneticExp
   indicatorstruct = load(indicatorfile) ;
 else
   indicatorstruct = struct([]) ;
 end
-if exist(ledprotocolfile, 'file') ,
+if commonregistrationparams.OptogeneticExp
   ledprotocolstruct = load(ledprotocolfile) ;
 else
   ledprotocolstruct = struct([]) ;
