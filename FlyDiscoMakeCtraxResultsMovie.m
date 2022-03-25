@@ -19,7 +19,6 @@ moviefile = fullfile(expdir,dataloc_params.moviefilestr);
 trxfile = fullfile(expdir,dataloc_params.trxfilestr);
 avifilestr = sprintf('%s_%s',dataloc_params.ctraxresultsavifilestr,basename);
 %xvidfile = fullfile(expdir,[avifilestr,'.avi']);
-indicatorfile = fullfile(expdir,dataloc_params.indicatordatafilestr);
 % metadatafile = fullfile(expdir,'Metadata.xml');
 metadatafile = fullfile(expdir,dataloc_params.metadatafilestr);
 metadata = ReadMetadataFile(metadatafile);
@@ -27,13 +26,15 @@ metadata = ReadMetadataFile(metadatafile);
 commonregistrationparamsfile = fullfile(settingsdir,analysis_protocol,dataloc_params.registrationparamsfilestr);
 commonregistrationparams = ReadParams(commonregistrationparamsfile);
 if commonregistrationparams.OptogeneticExp,
+  indicatorfile = fullfile(expdir,dataloc_params.indicatordatafilestr);
   datestrpattern = '20\d{6}';
-  match = regexp(metadata.led_protocol,datestrpattern);
-  
+  match = regexp(metadata.led_protocol,datestrpattern);  
   ledprotocoldatestr = metadata.led_protocol(match:match+7);
-%   ledprotocolfile = fullfile(expdir,'protocol.mat');
   ledprotocolfile = fullfile(expdir,dataloc_params.ledprotocolfilestr);
-  
+else
+  % non-optogenetic experiments don't have these things
+  indicatorfile = [] ;
+  ledprotocolfile = [] ;  
 end
 
 %% ctrax movie parameters
@@ -99,13 +100,13 @@ else
   end
 end
 
-% Read a couple of files if they exist
-if commonregistrationparams.OptogeneticExp
+% Read a couple of files if this is an optogenetic experiment
+if commonregistrationparams.OptogeneticExp ,
   indicatorstruct = load(indicatorfile) ;
 else
   indicatorstruct = struct([]) ;
 end
-if commonregistrationparams.OptogeneticExp
+if commonregistrationparams.OptogeneticExp ,
   ledprotocolstruct = load(ledprotocolfile) ;
 else
   ledprotocolstruct = struct([]) ;

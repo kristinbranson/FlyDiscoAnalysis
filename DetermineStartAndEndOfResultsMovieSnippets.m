@@ -22,17 +22,17 @@ function [firstframes, firstframes_off, endframes_off, nframes, indicatorframes]
     %          relative to registration_params.start_frame.
     %      nframes(snippet_index) gives the number of frames in the indicated
     %          snippet.  It will always be the case that 
-    %          endframes_off == firstframes_off + nframes - 1.
+    %          endframes_off == firstframes_off + nframes - 1.    
     %      indicatorframes(snippet_index) gives the simulus index of the indicated
-    %          snippet.  (Not the frame index, the index of the stimulus itself
-    %          within the sequence of stimuli.)
-    
+    %          snippet for optogenetic experiments.  (Not the frame index, the index
+    %          of the stimulus itself within the sequence of stimuli.)  For
+    %          non-optogenetic experiments, always set to [].
     
     nframes_from_params = ctraxresultsmovie_params.nframes ;
     
     if commonregistrationparams.OptogeneticExp ,
-        indicatorframes_from_params = ctraxresultsmovie_params.indicatorframes ;
         % if an optogenetic experiment
+        indicatorframes_from_params = ctraxresultsmovie_params.indicatorframes ;
         if is_using_default_ctrax_results_movie_params,
             % Figure out the protocol given the metadata, LED protocol file contents
             protocol = determine_protocol(metadata, ledprotocol_file_contents) ;
