@@ -39,7 +39,7 @@ dataloc_params = ReadParams(datalocparamsfile);
 % 
 real_analysis_protocol = GetRealAnalysisProtocol(analysis_protocol,settingsdir);
 % 
-% fprintf(logfid,'\n\n***\nRunning FlyDiscoAutomaticChecks_Complete version %s analysis_protocol %s (linked to %s) at %s\n',version,analysis_protocol,real_analysis_protocol,timestamp);
+fprintf('\n\n***\nRunning FlyDiscoAutomaticChecks_Complete version %s analysis_protocol %s (linked to %s) at %s\n',version,analysis_protocol,real_analysis_protocol,timestamp);
 
   
 %% more parameters
