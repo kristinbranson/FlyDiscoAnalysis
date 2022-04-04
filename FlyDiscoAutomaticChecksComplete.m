@@ -269,9 +269,9 @@ if isfield(registration_params,'OptogeneticExp')
                 % add to output data struct
                 indicatorLED.detectionnumMatchesprotocol = stimcount_expected == stimcount_detection;
                 % save indicator data to mat file
-                indicatordatamatfile = fullfile(expdir,dataloc_params.indicatordatafilestr);                
+                indicatordatamatfile = fullfile(expdir,dataloc_params.indicatordatafilestr);             
                 didsave = false;
-                try                   
+                try
                     save(indicatordatamatfile,'-append','indicatorLED');
                     didsave = true;
                 catch ME
@@ -283,17 +283,17 @@ if isfield(registration_params,'OptogeneticExp')
                     fprintf('Resaved indicator data to file %s\n',indicatordatamatfile);
                 else
                     fprintf('Could not resave indicator data to mat file:\n%s\n',getReport(ME));
-                end               
+                end
                 if ~indicatorLED.detectionnumMatchesprotocol
                     error_or_warning_messages{end+1} = sprintf('Detected number of LED stimuli does not match protocol file');
                     success = false;
-                    iserror(category2idx.ledstimulus_error) = true;               
-                end 
-            else 
+                    iserror(category2idx.ledstimulus_error) = true;
+                end
+            else
                 if ~indicatorLED.detectionnumMatchesprotocol
                     error_or_warning_messages{end+1} = sprintf('Detected number of LED stimuli does not match protocol file');
                     success = false;
-                    iserror(category2idx.ledstimulus_error) = true;               
+                    iserror(category2idx.ledstimulus_error) = true;
                 end
             end
         end
