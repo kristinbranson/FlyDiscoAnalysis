@@ -660,11 +660,11 @@ end
 
 if dotemporaltruncation    
    
-    Headerinfo = ufmf_read_header(moviefile);
-    if ~isfield(Headerinfo,'timestamps'),
+    headerInfo_local = ufmf_read_header(moviefile);
+    if ~isfield(headerInfo_local,'timestamps'),
         error('No field timestamps in UFMF header');
     end
-    timestamps_header = headerinfo.timestamps;    %??? couldn't figure out where timestamps come from in load_tracks for movie_JAABA/trx.mat
+    timestamps_header = headerInfo_local.timestamps;    %??? couldn't figure out where timestamps come from in load_tracks for movie_JAABA/trx.mat
     
       % how long is the video
   recordLengthCurr = timestamps_header(end);

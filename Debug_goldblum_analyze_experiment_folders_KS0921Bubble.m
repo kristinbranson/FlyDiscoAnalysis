@@ -9,17 +9,17 @@ do_actually_submit_jobs = false ;
 
 %% set params                                  
 %settings_folder_path = '/groups/branson/home/robiea/Code_versioned/FlyDiscoAnalysis/settings' ;
-settings_folder_path = '/groups/rubin/home/schretterc/Documents/FlyDiscoAnalysis/FlyDiscoAnalysis/settings' ;
+settings_folder_path = '/groups/rubin/home/schretterc/Documents/FlyDiscoAnalysis/FlyDiscoAnalysis-new/settings' ;
 %%%% this didn't work run with default settings dir based on screen_type
 % analysis_protocol = '20210806_flybubble_LED_analysisparams';
 % do_force_analysis = true; 
 % analysis_parameters = {'analysis_protocol',analysis_protocol};
 %%%%
-%analysis_protocol = '20210909_FlyBowlRGBVision_addperframe';
+analysis_protocol = '20210806_flybubble_LED';
 do_force_analysis = true;   
 analysis_parameters = {'analysis_protocol',analysis_protocol, ... 
     'doautomaticchecksincoming','off',...
-    'doflytracking','off', ...
+    'doflytracking','on', ...
     'doregistration','off',...
     'doledonoffdetection','off',...
     'dosexclassification','off',...
@@ -53,7 +53,7 @@ analysis_parameters = {'analysis_protocol',analysis_protocol, ...
 
 %% make explist
 % running as bransonlab 
-folder_path_from_experiment_index = {'/groups/rubin/home/schretterc/Documents/FlyDiscoAnalysis_ExptsToAnalyze_Test/20210805T082425_rig1_flyBowl2__20XUASCsChrimsonattp18_SS36564_KS_redonly10to30same_protocolRGB_061221'};
+folder_path_from_experiment_index = {'/groups/rubin/home/schretterc/Documents/Bubble_220215/CsChr53_JRC_SS36564_RigA_20220215T084712'};
 % '/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20210806_testingcaboose/VNC_JRC_SS49220_RigB_20210421T143507'};
 
 % make explist of only experiment dirs with tracking and NOT aborted
@@ -184,4 +184,4 @@ folder_path_from_experiment_index = folder_path_from_experiment_index(1);
 %% run analysis
 % 
 goldblum_analyze_experiment_folders(folder_path_from_experiment_index, settings_folder_path, lab_head_last_name, ...
-                           do_force_analysis, do_use_bqueue, do_actually_submit_jobs, analysis_parameters) ;
+                           do_use_bqueue, do_actually_submit_jobs, analysis_parameters) ;

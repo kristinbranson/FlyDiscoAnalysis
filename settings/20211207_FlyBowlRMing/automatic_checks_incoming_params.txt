@@ -1,0 +1,4 @@
+control_line_names,pBDPGAL4U
+required_files,metaData.xml,movie.ufmf,protocol.mat
+desired_files,expTimeStamp.txt,expNotes.xml
+frame_rate,30

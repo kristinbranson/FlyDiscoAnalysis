@@ -2,7 +2,7 @@ Goldblum
 ========
 
 Goldblum is a Matlab program that collects FlyDisco experiments off of
-a set of rig computers and analyzes.  It is intended to be run
+a set of rig computers and analyzes them.  It is intended to be run
 automatically on a schedule, typically once a day, at night after data
 collection for the day has concluded.
 
@@ -25,6 +25,15 @@ folder on `dm11`, and then they are subsequently analyzed on the
 Janelia cluster using analysis settings determined by the contents of
 the `metadata.xml` folder.
 
+Whether a folder is considered an experiment folder is decided by a point system.
+Each of the following is worth a point:
+
+1.  If the folder contains a file named `movie.ufmf` or `movie.avi` (case-insensitive).
+2.  If the folder contains a file named `metadata.xml` (case-insensitive).
+3.  If the folder contains a file names `ABORTED` (case-sensitive).
+
+If a folder scores two points or more, it is considered an experiment folder.
+
 Goldblum is part of the FlyDiscoAnalysis project, the source code for
 which lives at
 ```
@@ -34,8 +43,8 @@ Goldblum is implemented by the file
 ```
 goldblum/goldblum.m
 ```
-within the source repository.  See the documentation within that file
-for more details.
+within the source repository.  This is the function that is run by the
+cron job. See the documentation within that file for more details.
 
 The core analysis pipeline is implemented by the file
 ```
@@ -44,6 +53,28 @@ FlyDiscoPipeline.m
 within the source repository.  See the documentation within that file
 for more details.
 
+Folders of Goldblum
+-------------------
+
+Each Goldblum instance copies experiments from a set of rig computers to a
+destination folder, typically named `flydisco_data` somewhere under
+`/groups/<lab_head_name>` on the dm11 file system.  Within this folder, Goldblum
+creates a folder named `goldblum-logs`.  For each run of Goldblum, a file is
+created which records the Goldbum log for that run.  These files have names like
+`goldblum-2021-01-09.log`.  These files will contain error messages if something
+goes wrong with a Goldblum run.  It's also a good idea to check these files occasionally to 
+make sure Goldblum is running correctly.
+
+Another folder worth knowing about is the `to-process` folder, also within 
+the `flydisco_data` folder.  After an experiment folder is transferred from 
+one of the rig computers, a symbolic link is created within the `to-process` 
+folder.  This link points to the just-transfered experiment folder.  When Goldblum
+finishes transfering experiments from the rig computers, it uses the contents of
+the `to-process` folder to determine what experiment folders need to be
+analyzed.  Note that if you manually create a symbolic link to an experiment folder 
+in the `to-process` folder, that experiment will get analyzed just as if it had been 
+transfered by Goldblum.  This is often useful for reanalyzing experiment folders when 
+something fixable goes wrong with the original attempt at analysis.
 
 
 How to set up Goldblum for a new lab
@@ -52,26 +83,29 @@ How to set up Goldblum for a new lab
 Suppose a new lab head joined Janelia, named Gina Davis.  To set up
 Goldblum for the Davis Lab, one would:
 
-1.  On each rig machine you want to transfer data off of, install Cygwin and the Cygwin ssh server.
-    We currently use Cygwin 1.7.1, which is super old, but a more recent version of Cygwin should
-    also work.
+1.  On each rig machine you want to transfer data off of, install Cygwin and the
+    Cygwin ssh server. We currently use Cygwin 1.7.1, which is super old, but a
+    more recent version of Cygwin should also work.
 
 2.  Have SciComp Systems create a `davislab` user.
 
-3.  Have SciComp Systems add your public RSA key to the list of authorized keys
-    for the account.  This will enable you to login as `davislab` on `submit.int.janelia.org`
-    without entering a password.
+3.  Have SciComp Systems add your personal public RSA key to the list of
+    authorized keys for the account.  You may need to create these if you don't
+    have one already.  This will enable you to login as `davislab` on
+    `submit.int.janelia.org` without entering a password. For instance, when
+    logged in as yourself, you should be allowed to run `ssh davislab@submit.int.janelia.org`.
 
-4.  Create an RSA keypair for the `davislab` account using `ssh-keygen`.  Leave the passphrase empty.
+4.  Create an RSA keypair for the `davislab` account using `ssh-keygen`.  Leave
+    the passphrase empty.
 
-5.  On your local macOS or Linux machine, which logged into your normal account, start a terminal and do:
+5.  On your local macOS or Linux machine, which is logged into your normal account, start a terminal and do:
     ```
     git clone https://github.com/JaneliaSciComp/FlyDiscoAnalysis
     cd FlyDiscoAnalysis
     git submodule update
     ```
     This will create a folder named `FlyDiscoAnalysis` with the FlyDiscoAnalysis source code in it,
-    including Goldblum.
+    including Goldblum. 
 
 6.  In your local repo, there is a file named `goldblum/branson_configuration.m`.  This file looks
     something like this:
@@ -105,10 +139,10 @@ Goldblum for the Davis Lab, one would:
         result.does_use_per_user_folders = false ;
     end
     ```    
-    The `lab_head_last_name` field is used for two things: it
-    determines what lab is billed for the analysis job on the cluster,
-    and it determines what folder on each rig is searched for
-    experiments (see below).
+    The `lab_head_last_name` field is used for two things: it determines what
+    lab is billed for the analysis job on the cluster, and it determines what
+    folder on each rig is searched for experiments (see the description of
+    `data_folder_path_from_rig_index` below).
 
     The `host_name_from_rig_index` field determines the host name of
     each rig that will have experiments transfered off of it and analyzed.
@@ -122,9 +156,11 @@ Goldblum for the Davis Lab, one would:
     key to the `authorized_keys` file is usually done using the
     `ssh-copy-id` command.
 
-    The `data_folder_path_from_rig_index` specifies, for each rig
-    machine, the folder where Goldblum will look for experiment
-    folders.
+    The `data_folder_path_from_rig_index` specifies, for each rig machine, the
+    folder where Goldblum will look for experiment folders.  Within this folder,
+    Goldblum expects to find a folder with the same name as the
+    `lab_head_last_name`, and this `lab_head_last_name` folder is searched for
+    experiment folders.
 
     The `settings_folder_path` field specifies where Goldblum will
     look for analysis settings folders.  Leave this alone unless you
@@ -177,7 +213,9 @@ Goldblum for the Davis Lab, one would:
         fprintf('Successfully copied %s into all the *lab user accounts\n', fda_folder_path) ;
     end
     ```
-    Add a line for the Davis Lab.  Afterwards, the text should look something like this:
+    If you are an administrator, and want to update many lab's code, you want to have many labs
+    listed in this file. Add a line for the Davis Lab.  Afterwards, the text should look
+    something like this:
     ```
     function push_goldblum_into_production()
         % Determine the FlyDiscoAnalysis folder path
@@ -200,6 +238,24 @@ Goldblum for the Davis Lab, one would:
         fprintf('Successfully copied %s into all the *lab user accounts\n', fda_folder_path) ;
     end
     ```
+    If you just want to update code for your own lab, make a copy of this function with only
+    you lab in it, and run. The text should look something like this:
+    ```
+    function push_goldblum_into_production_davis()
+        % Determine the FlyDiscoAnalysis folder path
+        goldblum_folder_path = fileparts(mfilename('fullpath')) ;
+        fda_folder_path = fileparts(goldblum_folder_path) ;
+
+        % Make sure there are no uncommitted changes
+        error_if_uncommited_changes(fda_folder_path) ;
+
+        % Do Davis Lab instance
+        copy_to_single_user_account('davislab', fda_folder_path) ;
+
+        % If get here, everything went well
+        fprintf('Successfully copied %s into all the *lab user accounts\n', fda_folder_path) ;
+    end
+    ```
 
 11. At the Matlab command line, do:
     ```
@@ -208,7 +264,7 @@ Goldblum for the Davis Lab, one would:
     Behind the scenes, this will use `scp` to copy your `FlyDiscoAnalysis` folder to
     each of the `bransonlab`, `rubinlab`, and `davislab` accounts.
 
-12. Back at the macOS/Linux terminal, do:
+12. Back at the macOS/Linux terminal (logged in as your normal user account), do:
     ```
     ssh davislab@submit.int.janelia.org
     ```
@@ -223,8 +279,11 @@ Goldblum for the Davis Lab, one would:
     ```
     /misc/local/matlab-2019a/bin/matlab -singleCompThread -nodisplay -batch 'modpath; turn_on_goldblum()'
     ```
-    This will add a line to the `davislab` user crontab to launch goldblum at 10 PM every night.
-
+    This will add a line to the `davislab` user crontab to launch Goldblum at
+    10&nbsp;PM every night.  To instead run Goldblum at, say, 11:45&nbsp;PM, do:
+    ```
+    /misc/local/matlab-2019a/bin/matlab -singleCompThread -nodisplay -batch 'modpath; turn_on_goldblum(23,45)'
+    ```    
     (You may get a message like:
     ```
     There was a problem during execution of the set_parpool_job_storage_location() function:
@@ -246,7 +305,13 @@ Goldblum for the Davis Lab, one would:
     Note that the cron job launches Goldblum using the `goldblum/goldblum_launcher.sh` Bash script,
     which then launches Matlab and runs then `goldblum()` function within Matlab.
 
-16. If you want to turn Goldblum off, do this:
+16. Make sure the folder for the Goldblum logs exists by doing:
+    ```
+    mkdir -p /groups/davis/davislab/flydisco_data/goldblum-logs
+    ```
+    (You *have* to do this as the `davislab` user.)
+
+17. If you want to turn Goldblum off, do this:
     ```
     /misc/local/matlab-2019a/bin/matlab -singleCompThread -nodisplay -batch 'modpath; turn_off_goldblum()'
     ```
@@ -258,6 +323,3 @@ Goldblum for the Davis Lab, one would:
     Permission denied
     ```
     but this is normal, and you can ignore it.)
-
-
-

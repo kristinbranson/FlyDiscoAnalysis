@@ -262,10 +262,11 @@ if isfield(registration_params,'OptogeneticExp')
                         end
                     end
                 end
-                
+                % check if detect stim count matches stim count from
+                % protocol
                 stimcount_expected  = sum(protocol.iteration);
                 stimcount_detection = max(numel(indicatorLED.startframe),numel(indicatorLED.endframe));
-                
+                % add to output data struct
                 indicatorLED.detectionnumMatchesprotocol = stimcount_expected == stimcount_detection;
                 % save indicator data to mat file
                 indicatordatamatfile = fullfile(expdir,dataloc_params.indicatordatafilestr);                
@@ -278,20 +279,16 @@ if isfield(registration_params,'OptogeneticExp')
                     success = false;
                     msgs{end+1} = ['Could not resave indicator data to mat file: %s',getReport(ME)];
                 end
-                
                 if didsave,
                     fprintf('Resaved indicator data to file %s\n',indicatordatamatfile);
                 else
                     fprintf('Could not resave indicator data to mat file:\n%s\n',getReport(ME));
-                end
-                
-                
+                end               
                 if ~indicatorLED.detectionnumMatchesprotocol
                     error_or_warning_messages{end+1} = sprintf('Detected number of LED stimuli does not match protocol file');
                     success = false;
                     iserror(category2idx.ledstimulus_error) = true;               
-                end
-                
+                end 
             else 
                 if ~indicatorLED.detectionnumMatchesprotocol
                     error_or_warning_messages{end+1} = sprintf('Detected number of LED stimuli does not match protocol file');
@@ -491,6 +488,6 @@ else
   fprintf('Warning/error messages:\n');
   fprintf('%s\n',error_or_warning_messages{:});
 end
-fprintf('Finished running FlyDiscoAutomaticChecks_Complete at %s.\n',datestr(now,'yyyymmddTHHMMSS'));
+fprintf('Finished running FlyDiscoAutomaticChecksComplete at %s.\n',datestr(now,'yyyymmddTHHMMSS'));
 
 end
