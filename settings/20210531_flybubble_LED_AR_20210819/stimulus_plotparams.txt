@@ -11,3 +11,4 @@ traj_downsample,30
 traj_nfliesplot,-1
 traj_nperiodsplot,-1
 maxnflies,12
+stimcolor,green

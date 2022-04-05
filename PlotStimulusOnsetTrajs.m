@@ -4,25 +4,28 @@ trxlw = 1;
 winglw = .5;
 bodylw = 1;
 
-colors.off = [0,0,0];
-colors.stim = [0.6350    0.0780    0.1840];
-colors.offtrx = colors.off*.7+.3;
-colors.stimtrx = colors.stim*.7+.3;
-colors.offbody = colors.off;
-colors.stimbody = colors.stim;
-colors.offwing = colors.off*.4+.6;
-colors.stimwing = colors.stim*.4+.6;
+defaultcolors.off = [0,0,0];
+defaultcolors.stim = [0.6350    0.0780    0.1840];
+
 
 [nfliesplot,fliesplot,ions,nperiodsplot,hfig,...
   prestim,poststim,minboxwidth,boxborder,downsample,axwpx,...
-  visible,maxnflies] = ...
+  visible,maxnflies,colors] = ...
   myparse_nocheck(varargin,'nfliesplot',[],...
   'fliesplot',[],'ions',[],'nperiodsplot',[],...
   'hfig',gobjects(0),...
   'prestim',.25,'poststim',1,...
   'minboxwidth',100,'boxborder',10,'downsample',30,'axwpx',200,...
   'visible','on',...
-  'maxnflies',inf);
+  'maxnflies',inf,...
+  'colors',defaultcolors);
+
+colors.offtrx = colors.off*.7+.3;
+colors.stimtrx = colors.stim*.7+.3;
+colors.offbody = colors.off;
+colors.stimbody = colors.stim;
+colors.offwing = colors.off*.4+.6;
+colors.stimwing = colors.stim*.4+.6;
 
 if ~isempty(fliesplot),
   nfliesplot = numel(fliesplot);

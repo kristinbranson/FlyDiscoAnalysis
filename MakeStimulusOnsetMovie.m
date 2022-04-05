@@ -3,15 +3,15 @@ function MakeStimulusOnsetMovie(readframe,trx,outfile,ion,fly,ind,varargin)
 winglw = 1;
 bodylw = 2;
 trxlw = .5;
-colors.off = [0,0,0];
-colors.stim = [0.6350    0.0780    0.1840];
+defaultcolors.off = [0,0,0];
+deafaultcolors.stim = [0.6350    0.0780    0.1840];
 
 [hax,prestim,poststim,minboxwidth,boxborder,...
-  interp,fillvalues,DEBUG,downsample] = ...
+  interp,fillvalues,DEBUG,downsample,colors] = ...
   myparse(varargin,'hax',[],'prestim',.25,'poststim',1,...
   'minboxwidth',100,'boxborder',10,...
   'interp','bilinear','fillvalues',0,...
-  'debug',false,'downsample',1);
+  'debug',false,'downsample',1,'colors',defaultcolors);
 
 if isempty(hax),
   hfig = figure;

@@ -1,7 +1,7 @@
 modpath
 
 
-rootdir = '/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20210820_testingperframe';
+% rootdir = '/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20210820_testingperframe';
 % explist = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20210820_testingperframe/VNC_EXT_VGLUT-GAL4_RigC_20210628T152511'};
 % VNC_JRC_SS50051_RigD_20210426T151519
 % explist = {'/groups/branson/bransonlab/alice/20211124_testingperframestats/VNC_EXT_VGLUT-GAL4_RigA_20210427T125905',...
@@ -57,7 +57,7 @@ expdir = explist{i};
 % FlyDiscoComputePerFrameFeatures(expdir,'settingsdir',settingsdir,'analysis_protocol',analysis_protocol);
 FlyDiscoComputePerFrameStats(expdir,'settingsdir',settingsdir,'analysis_protocol',analysis_protocol,'dorecompute',false,'docomputehists',true,'debugplot',9); % 
 % FlyDiscoPlotPerFrameStats2(expdir,'settingsdir',settingsdir,'analysis_protocol',analysis_protocol,'debug',false);
-FlyDiscoPlotPerFrameStats2(expdir,'settingsdir',settingsdir,'analysis_protocol',analysis_protocol,'debug',false,'makestimvideos',1,'plotstim',1,'plothist',0,'plotflies',true,'plotstimtrajs',0);
+FlyDiscoPlotPerFrameStats(expdir,'settingsdir',settingsdir,'analysis_protocol',analysis_protocol,'debug',false,'makestimvideos',1,'plotstim',1,'plothist',1,'plotflies',true,'plotstimtrajs',1);
 end
 %%
 
