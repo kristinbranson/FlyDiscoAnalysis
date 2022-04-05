@@ -2,6 +2,50 @@
 
 # test zone - batches of 9
 
+# velmag_ctr
+velmag_ctr,stimweakp5,any,25,25
+velmag_ctr,stimweak5,any,25,25
+velmag_ctr,stimweak10,any,25,25
+velmag_ctr,stimmidp5,any,25,25
+velmag_ctr,stimmid5,any,25,25
+velmag_ctr,stimmid10,any,25,25
+velmag_ctr,stimstrongp5,any,25,25
+velmag_ctr,stimstrong5,any,25,25
+velmag_ctr,stimstrong10,any,25,25
+
+# prestim arena velmag_ctr
+velmag_ctr,prestimweakp5,any,25,25
+velmag_ctr,prestimweak5,any,25,25
+velmag_ctr,prestimweak10,any,25,25
+velmag_ctr,prestimmidp5,any,25,25
+velmag_ctr,prestimmid5,any,25,25
+velmag_ctr,prestimmid10,any,25,25
+velmag_ctr,prestimstrongp5,any,25,25
+velmag_ctr,prestimstrong5,any,25,25
+velmag_ctr,prestimstrong10,any,25,25
+
+
+# stim arena dist2wall
+dist2wall,stimweakp5,any,25,25
+dist2wall,stimweak5,any,25,25
+dist2wall,stimweak10,any,25,25
+dist2wall,stimmidp5,any,25,25
+dist2wall,stimmid5,any,25,25
+dist2wall,stimmid10,any,25,25
+dist2wall,stimstrongp5,any,25,25
+dist2wall,stimstrong5,any,25,25
+dist2wall,stimstrong10,any,25,25
+
+# prestim arena dist2wall
+dist2wall,prestimweakp5,any,25,25
+dist2wall,prestimweak5,any,25,25
+dist2wall,prestimweak10,any,25,25
+dist2wall,prestimmidp5,any,25,25
+dist2wall,prestimmid5,any,25,25
+dist2wall,prestimmid10,any,25,25
+dist2wall,prestimstrongp5,any,25,25
+dist2wall,prestimstrong5,any,25,25
+dist2wall,prestimstrong10,any,25,25
 
 # stim forward_vel > 0
 forward_vel,stimweakp5_movingf2,any,25,25
