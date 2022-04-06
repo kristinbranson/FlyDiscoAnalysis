@@ -1,7 +1,7 @@
 % This isn't a proper test b/c it doesn't check whether anything worked
 
 do_use_bqueue = true ;
-do_actually_submit_jobs = false ;
+do_actually_submit_jobs = true ;
 cluster_billing_account_name = 'branson' ;  % used for billing the jobs
 do_force_analysis = false ;
 analysis_parameters = cell(1,0) ;
@@ -27,8 +27,8 @@ this_script_path = mfilename('fullpath') ;
 this_folder_path = fileparts(this_script_path) ;
 fly_disco_analysis_folder_path = fileparts(this_folder_path) ;
 settings_folder_path = fullfile(fly_disco_analysis_folder_path, 'settings') ;
-read_only_experiments_folder_path = fullfile(fly_disco_analysis_folder_path, 'example-experiments', 'single-dickson-2021-06-28-experiment-read-only') ;
-working_experiments_folder_path = fullfile(fly_disco_analysis_folder_path, 'example-experiments', 'single-dickson-2021-06-28-experiment') ;
+read_only_experiments_folder_path = fullfile(fly_disco_analysis_folder_path, 'example-experiments', 'passing-test-suite-experiments-read-only') ;
+working_experiments_folder_path = fullfile(fly_disco_analysis_folder_path, 'example-experiments', 'passing-test-suite-experiments') ;
 
 % Delete the destination folder
 if exist(working_experiments_folder_path, 'file') ,
