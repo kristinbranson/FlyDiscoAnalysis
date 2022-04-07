@@ -173,10 +173,10 @@ set(hax,'XTick',1:nfns,'XTickLabel',typestrs);
 if ~arefields,
   hy = ylabel(hax,fields{1},'Interpreter','none');
 end
-hti = title(hax,sprintf('Mean, std over flies for %s',basename),'Interpreter','none');
+hti = title(hax,sprintf('Mean, std over flies for %s',basename),'Interpreter','none','FontSize',8);
 
 %% rotate ticks
-hx = rotateticklabel(hax,90);
+hx = rotateticklabel(hax,45);
 % make sure the ticks don't overlap the x-axis
 ex = get(hx(1),'Extent');
 y1 = ex(2)+ex(4);
@@ -188,7 +188,7 @@ for i = 1:numel(hx),
 end
 set(hx,'Interpreter','none');
 set(hax,'box','off');
-
+set(hx,'FontSize',6)
 %% plot per-fly data
 if plotflies,
 
@@ -208,7 +208,7 @@ if plotflies,
   ylim = [miny-(maxy-miny)*.01,maxy+(maxy-miny)*.01];
   set(haxflies,'YLim',ylim);
   set(haxflies,'XTick',1:nfns,'XTickLabel',typestrs);
-  hx = rotateticklabel(haxflies,90);
+  hx = rotateticklabel(haxflies,45);
   % make sure the ticks don't overlap the x-axis
   ex = get(hx(1),'Extent');
   y1 = ex(2)+ex(4);
@@ -219,11 +219,14 @@ if plotflies,
     set(hx(i),'Position',pos,'color',colors{i});
   end
   set(hx,'Interpreter','none');
+  set(hx,'FontSize',6)
   set(haxflies,'box','off');
   if ~arefields,
     hy = ylabel(haxflies,fields{1},'Interpreter','none');
+  else 
+      hy = [];
   end
-  hti = title(haxflies,sprintf('Mean per fly %s',basename),'Interpreter','none');
+  hti = title(haxflies,sprintf('Mean per fly %s',basename),'Interpreter','none','FontSize',8);
   legend(hperfly,sperfly);
   
 end

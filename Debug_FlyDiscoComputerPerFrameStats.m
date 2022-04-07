@@ -14,7 +14,8 @@ modpath
 explist = {'/groups/branson/bransonlab/alice/20211124_testingperframestats/VNC_JRC_SS71988_RigA_20210914T143410'};
 
 % analysis_protocol = '20210531_flybubble_LED';
-analysis_protocol = '20210531_flybubble_LED_AR_20210819';
+% analysis_protocol = '20210531_flybubble_LED_AR_20210819';
+analysis_protocol = '20210531_flybubble_LED_AR_20220405';
 settingsdir = 'settings';
 
 % find an experiment with poor tracking
@@ -55,7 +56,7 @@ expdir = explist{i};
 % FlyDiscoDectectIndicatorLedOnOff(expdir,'settingsdir',settingsdir,'analysis_protocol',analysis_protocol);
 % FlyDiscoClassifySex(expdir,'settingsdir',settingsdir,'analysis_protocol',analysis_protocol);
 % FlyDiscoComputePerFrameFeatures(expdir,'settingsdir',settingsdir,'analysis_protocol',analysis_protocol);
-FlyDiscoComputePerFrameStats(expdir,'settingsdir',settingsdir,'analysis_protocol',analysis_protocol,'dorecompute',false,'docomputehists',true,'debugplot',9); % 
+FlyDiscoComputePerFrameStats(expdir,'settingsdir',settingsdir,'analysis_protocol',analysis_protocol,'dorecompute',true,'docomputehists',false,'debugplot',9); % 
 % FlyDiscoPlotPerFrameStats2(expdir,'settingsdir',settingsdir,'analysis_protocol',analysis_protocol,'debug',false);
 FlyDiscoPlotPerFrameStats(expdir,'settingsdir',settingsdir,'analysis_protocol',analysis_protocol,'debug',false,'makestimvideos',1,'plotstim',1,'plothist',1,'plotflies',true,'plotstimtrajs',1);
 end

@@ -3,7 +3,8 @@ modpath
 
 %% set parameters
 settingsdir = '/groups/branson/home/robiea/Code_versioned/FlyDiscoAnalysis/settings';
-analysis_protocol = '20210531_flybubble_LED_AR_20210819';
+% analysis_protocol = '20210531_flybubble_LED_AR_20210819';
+analysis_protocol = '20220406_flybubble_LED';
 params = {'settingsdir',settingsdir,...
   'analysis_protocol',analysis_protocol};
 

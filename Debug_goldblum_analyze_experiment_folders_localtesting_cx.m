@@ -17,7 +17,9 @@ settings_folder_path = '/groups/branson/home/robiea/Code_versioned/FlyDiscoAnaly
 %%%%
 % analysis_protocol = '20211014_flybubbleRed_LED';
 % analysis_protocol = '20220217_flybubble_TrpA';
-analysis_protocol = '20220217_flybubble_TrpA_Male';
+% analysis_protocol = '20220217_flybubble_TrpA_Male';
+analysis_protocol = '20220406_flybubble_LED';
+
 analysis_parameters = {'analysis_protocol',analysis_protocol};
 
 % analysis_parameters = {'analysis_protocol',analysis_protocol, ... 
@@ -55,52 +57,52 @@ analysis_parameters = {'analysis_protocol',analysis_protocol};
 %     'doautomaticcheckscomplete','force'};
 
 %% make explist
-% running as bransonlab 
-% folder_path_from_experiment_index = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20210806_testingcaboose/VNC_JRC_SS49220_RigB_20210419T144428', ...
-% '/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20210806_testingcaboose/VNC_JRC_SS49220_RigB_20210421T143507'};
+ % running as bransonlab 
+% % folder_path_from_experiment_index = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20210806_testingcaboose/VNC_JRC_SS49220_RigB_20210419T144428', ...
+% % '/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20210806_testingcaboose/VNC_JRC_SS49220_RigB_20210421T143507'};
 
 % make explist of only experiment dirs with tracking and NOT aborted
-% rootdatadir = '/groups/branson/bransonlab/flydisco_data'; 
-% lab ='branson';
-% outdir4list = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline';
+rootdatadir = '/groups/branson/bransonlab/flydisco_data'; 
+lab ='branson';
+outdir4list = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline';
 
-% rootdatadir = '/groups/dickson/dicksonlab/flydisco_data';
-% lab = 'dickson';
-% outdir4list ='/groups/dickson/dicksonlab/Alice';
-% 
-% filesavestr = ['RERUNposttracking_explist_',lab,datestr(now,'yyyymmddTHHMMSS'),'.txt'];
-% filesavename = fullfile(outdir4list,filesavestr);
-% fid = fopen(filesavename,'w');
-% 
-% trackerfilestr = 'movie-track.mat';
-% metadatafile = 'Metadata.xml';
-% screen_type = 'non_olympiad_dickson_VNC';
-% 
-% % pull all the data with VNC* screen_type 
-% % bransonlab
-% 
-% 
-% 
-% [expdirstruct] = getExperimentDirsFlyDisco(rootdatadir,'screen_type','VNC*');
-% metadata = expdirstruct;
-% 
-% % changed to NO tracking files for running expdirs that didn't process at
-% % all
-% for i = 1:numel(metadata)
-%     expdir = metadata(i).file_system_path;    
-%     trackerfile = fullfile(expdir,trackerfilestr);
-%     abortedfile = fullfile(expdir,'ABORTED');    
-%     if ~exist(trackerfile,'file') && ~exist(abortedfile,'file') && strcmp(metadata(i).screen_type,screen_type)
-%         fprintf(fid,'%s\n',expdir);
-%     end
-% end
-% 
-% 
-% folder_path_from_experiment_index = textread(filesavename,'%s');
+% % rootdatadir = '/groups/dickson/dicksonlab/flydisco_data';
+% % lab = 'dickson';
+% % outdir4list ='/groups/dickson/dicksonlab/Alice';
+
+filesavestr = ['RERUNautochecks_explist_',lab,datestr(now,'yyyymmddTHHMMSS'),'.txt'];
+filesavename = fullfile(outdir4list,filesavestr);
+fid = fopen(filesavename,'w');
+
+trackerfilestr = 'movie-track.mat';
+metadatafile = 'Metadata.xml';
+screen_type = 'non_olympiad_dickson_VNC';
+
+% pull all the data with VNC* screen_type 
+% bransonlab
+
+
+
+[expdirstruct] = getExperimentDirsFlyDisco(rootdatadir,'screen_type','VNC*');
+metadata = expdirstruct;
+
+% changed to NO tracking files for running expdirs that didn't process at
+% all
+for i = 1:numel(metadata)
+    expdir = metadata(i).file_system_path;    
+    trackerfile = fullfile(expdir,trackerfilestr);
+    abortedfile = fullfile(expdir,'ABORTED');    
+    if ~exist(trackerfile,'file') && ~exist(abortedfile,'file') && strcmp(metadata(i).screen_type,screen_type)
+        fprintf(fid,'%s\n',expdir);
+    end
+end
+
+
+folder_path_from_experiment_index = textread(filesavename,'%s');
 
 %for testing on first 5 experiments
 
-% folder_path_from_experiment_index = folder_path_from_experiment_index(1);
+folder_path_from_experiment_index = folder_path_from_experiment_index(1:5);
 %% load explist for rerunning caboose
 % folder_path_from_experiment_index = textread('/groups/dickson/dicksonlab/Alice/RERUNposttracking_explist_dickson20210809T141224.txt','%s');
 % folder_path_from_experiment_index = folder_path_from_experiment_index(1);
@@ -115,7 +117,11 @@ analysis_parameters = {'analysis_protocol',analysis_protocol};
 
 % folder_path_from_experiment_index = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/test_20220217_flybubble_TrpA/TrpAFemale2_GMR_72C11_vk5_RigA_20220216T090844'};
 % folder_path_from_experiment_index = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/test_20220217_flybubble_TrpA/TrpAFemale2_GMR_Eb5_vk5_RigB_20220216T085536',...
-folder_path_from_experiment_index = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/test_20220217_flybubble_TrpA/TrpAMale2_GMR_71G01_JK73A_RigB_20220216T074837'};
+% folder_path_from_experiment_index = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/test_20220217_flybubble_TrpA/TrpAMale2_GMR_71G01_JK73A_RigB_20220216T074837'};
+% folder_path_from_experiment_index = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/test_20220406_flybubble_LED/VNC_JHS_K_85321_RigB_20210408T130659',...
+% '/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/test_20220406_flybubble_LED/VNC_JRC_SS52094_RigA_20210602T144112',...
+% '/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/test_20220406_flybubble_LED/VNC_JRC_SS74036_RigB_20211014T154825'};
+
 %% delete pipeline files before rerunning pipeline
 % 
 % todeletefiles = {'automatic_checks_complete_info.mat',...
