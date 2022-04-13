@@ -169,7 +169,7 @@ wingtrxfile = fullfile(expdir,dataloc_params.wingtrxfilestr);
 if ~exist(wingtrxfile,'file'),
   error_or_warning_messages{end+1} = sprintf('wingtracking_results mat file %s does not exist',wingtrxfile);
   success = false;
-  iserror(category2idx.missing_registration_files) = true;
+  iserror(category2idx.missing_perframefeatures_files) = true;
 else
   % name of annotation file
   %annfile = fullfile(expdir,dataloc_params.annfilestr);

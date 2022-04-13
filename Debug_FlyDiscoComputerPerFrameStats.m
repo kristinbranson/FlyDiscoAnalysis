@@ -11,7 +11,8 @@ modpath
 % '/groups/branson/bransonlab/alice/20211124_testingperframestats/VNC_JRC_SS68333_RigA_20210422T150926',...
 % '/groups/branson/bransonlab/alice/20211124_testingperframestats/VNC_JRC_SS71988_RigA_20210914T143410',...
 % '/groups/branson/bransonlab/alice/20211124_testingperframestats/VNC_YNA_K_162984_RigC_20210526T155035'};
-explist = {'/groups/branson/bransonlab/alice/20211124_testingperframestats/VNC_JRC_SS71988_RigA_20210914T143410'};
+% explist = {'/groups/branson/bransonlab/alice/20211124_testingperframestats/VNC_JRC_SS71988_RigA_20210914T143410'};
+explist = {'/groups/branson/bransonlab/alice/20211124_testingperframestats/VNC_EXT_VGLUT-GAL4_RigA_20210427T125905'};
 
 % analysis_protocol = '20210531_flybubble_LED';
 % analysis_protocol = '20210531_flybubble_LED_AR_20210819';
@@ -56,7 +57,7 @@ expdir = explist{i};
 % FlyDiscoDectectIndicatorLedOnOff(expdir,'settingsdir',settingsdir,'analysis_protocol',analysis_protocol);
 % FlyDiscoClassifySex(expdir,'settingsdir',settingsdir,'analysis_protocol',analysis_protocol);
 % FlyDiscoComputePerFrameFeatures(expdir,'settingsdir',settingsdir,'analysis_protocol',analysis_protocol);
-FlyDiscoComputePerFrameStats(expdir,'settingsdir',settingsdir,'analysis_protocol',analysis_protocol,'dorecompute',true,'docomputehists',false,'debugplot',9); % 
+FlyDiscoComputePerFrameStats(expdir,'settingsdir',settingsdir,'analysis_protocol',analysis_protocol,'dorecompute',true,'docomputehists',false,'debugplot',3); % 
 % FlyDiscoPlotPerFrameStats2(expdir,'settingsdir',settingsdir,'analysis_protocol',analysis_protocol,'debug',false);
 FlyDiscoPlotPerFrameStats(expdir,'settingsdir',settingsdir,'analysis_protocol',analysis_protocol,'debug',false,'makestimvideos',1,'plotstim',1,'plothist',1,'plotflies',true,'plotstimtrajs',1);
 end

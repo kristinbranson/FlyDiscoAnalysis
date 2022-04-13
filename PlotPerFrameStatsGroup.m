@@ -45,10 +45,29 @@ end
 
 fns = stats_perframefeatures;
 
-m = regexp(fns,'^(.*)_fly(.*)_frame(.*)$','once','tokens');
-fields = cellfun(@(x) x{1},m,'UniformOutput',false);
-flyconditions = cellfun(@(x) x{2},m,'UniformOutput',false);
-frameconditions = cellfun(@(x) x{3},m,'UniformOutput',false);
+isnorm = ~cellfun(@isempty,regexp(fns,'fly.*frame.*(_norm_).*fly.*frame','once','start'));
+fields = cell(1,numel(fns));
+flyconditions = cell(1,numel(fns));
+frameconditions = cell(1,numel(fns));
+normflyconditions = cell(1,numel(fns));
+normframeconditions = cell(1,numel(fns));
+for i = 1:numel(fns),
+  if ~isnorm(i),
+    m = regexp(fns{i},'^(?<field>.*)_fly(?<fly>.*)_frame(?<frame>.*)$','once','names');
+    fields{i} = m.field;
+    flyconditions{i} = m.fly;
+    frameconditions{i} = m.frame;
+    normflyconditions{i} = '';
+    normframeconditions{i} = '';
+  else
+    m = regexp(fns{i},'^(?<field>.*)_fly(?<fly>.*)_frame(?<frame>.*)_norm_fly(?<normfly>.*)_frame(?<normframe>.*).*$','once','names');
+    fields{i} = m.field;
+    flyconditions{i} = m.fly;
+    frameconditions{i} = m.frame;    
+    normflyconditions{i} = m.normfly;
+    normframeconditions{i} = m.normframe;    
+  end
+end
 [ism,idx] = ismember(fns,fullnames);
 assert(all(ism));
 fns = shortnames(idx);

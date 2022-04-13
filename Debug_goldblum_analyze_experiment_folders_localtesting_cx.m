@@ -92,7 +92,7 @@ for i = 1:numel(metadata)
     expdir = metadata(i).file_system_path;    
     trackerfile = fullfile(expdir,trackerfilestr);
     abortedfile = fullfile(expdir,'ABORTED');    
-    if ~exist(trackerfile,'file') && ~exist(abortedfile,'file') && strcmp(metadata(i).screen_type,screen_type)
+    if exist(trackerfile,'file') && ~exist(abortedfile,'file') && strcmp(metadata(i).screen_type,screen_type)
         fprintf(fid,'%s\n',expdir);
     end
 end
@@ -121,7 +121,7 @@ folder_path_from_experiment_index = folder_path_from_experiment_index(1:5);
 % folder_path_from_experiment_index = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/test_20220406_flybubble_LED/VNC_JHS_K_85321_RigB_20210408T130659',...
 % '/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/test_20220406_flybubble_LED/VNC_JRC_SS52094_RigA_20210602T144112',...
 % '/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/test_20220406_flybubble_LED/VNC_JRC_SS74036_RigB_20211014T154825'};
-
+folder_path_from_experiment_index = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/test_20220406_flybubble_LED/VNC_JRC_SS73769_RigD_20211007T150906'};
 %% delete pipeline files before rerunning pipeline
 % 
 % todeletefiles = {'automatic_checks_complete_info.mat',...
