@@ -29,6 +29,7 @@ function modpath()
   % Add FlyBowlAnalysis subfolders that are not their own projects
   addpath(fullfile(path_to_this_folder, 'simplewing')) ;
   addpath(fullfile(path_to_this_folder, 'hmm')) ;  
+  addpath(fullfile(path_to_this_folder, 'filehandling')) ;  
   
   % Finally, add this folder itself
   addpath(path_to_this_folder) ;  % do this so that we don't have to stay in this folder
