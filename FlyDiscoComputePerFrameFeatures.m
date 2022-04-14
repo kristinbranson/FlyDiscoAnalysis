@@ -84,6 +84,7 @@ if trx.perframe_params.isflytracker,
       'datalocparamsfilestr',datalocparamsfilestr,...
       'settingsdir',settingsdir,...
       'perframe_params',trx.perframe_params);
+    fprintf('Done running FlyTracker2WingTracking.\n');
   end
 end
 
