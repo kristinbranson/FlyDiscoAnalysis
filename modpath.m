@@ -30,6 +30,7 @@ function modpath()
   addpath(fullfile(path_to_this_folder, 'simplewing')) ;
   addpath(fullfile(path_to_this_folder, 'hmm')) ;  
   addpath(fullfile(path_to_this_folder, 'filehandling')) ;  
+  addpath(fullfile(path_to_this_folder, 'perframe')) ;
   
   % Finally, add this folder itself
   addpath(path_to_this_folder) ;  % do this so that we don't have to stay in this folder
