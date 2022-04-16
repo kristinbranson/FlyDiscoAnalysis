@@ -6,11 +6,11 @@ function JAABADetectWrapper(expdir, settingsdir, analysis_protocol, forcecompute
   jabfiles = read_one_file_name_per_line(jaabaclassifierparamsfilestrs) ;
   fprintf('Running JAABADetect...\n');
   
-  % JAABADetect needs to add things to the path, and those things mess up the rest
-  % of the FlyDiscoAnalysis code, so we'll restore the path when JAABADetect() is
-  % done
-  saved_path = path() ;
-  cleaner = onCleanup(@()(path(saved_path))) ;  % restore the path on exit, whether normally or via exception
+%   % JAABADetect needs to add things to the path, and those things mess up the rest
+%   % of the FlyDiscoAnalysis code, so we'll restore the path when JAABADetect() is
+%   % done
+%   saved_path = path() ;
+%   cleaner = onCleanup(@()(path(saved_path))) ;  % restore the path on exit, whether normally or via exception
 
   % Actually call JAABADetect()
   % For reasons that are unclear to me, the otherwise-useless try/catch
