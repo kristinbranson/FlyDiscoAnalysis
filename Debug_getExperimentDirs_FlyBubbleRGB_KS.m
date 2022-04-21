@@ -13,8 +13,8 @@ rootdatadir = '/groups/branson/bransonlab/flydisco_data';
 % rootdatadir = '/groups/branson/bransonlab/from_tier2/fly_bubble/bubble_data';
 % savefile = '/groups/branson/home/robiea/Projects_data/FlyBubble/metadata_ANY_bubble_data_20211008';
 
-savefile = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/';
-[expdirstruct] = getExperimentDirsFlyDisco(rootdatadir,'metadatafile','Metadata.xml','expdirname','VNC','autocheckin',true,'autocheckcomplete',true);
+savefile = '/groups/rubin/home/schretterc/Documents/FlyDiscoAnalysis/FlyDiscoAnalysis_0422/FlyDiscoAnalysis/TrpAforReprocessing.mat';
+[expdirstruct] = getExperimentDirsFlyDisco(rootdatadir,'metadatafile','Metadata.xml','expdirname','TrpA');
 
 
 % %inputs to getExperimentDirsFlyDisco: 'metadatafile','Metadata.xml','expdirname','*','line_name','*', ...
@@ -29,7 +29,7 @@ savefile = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/
 
 
 %% select on expdirs with certain led protocol
-idx = strcmp({expdirstruct.screen_type},'non_olympiad_dickson_VNC');
+idx = strcmp({expdirstruct.screen_type},'non_olympiad_rubin_TrpAFemale3');
 expdirstruct= expdirstruct(idx);
 
 
@@ -76,11 +76,11 @@ for i = 1:numel(expdirstruct)
   experimenter = expdirstruct(i).experimenter;
   notestech = expdirstruct(i).notes_technical;
   notesbeh = expdirstruct(i).notes_behavioral;
-  autopf = expdirstruct(i).automated_pf;
+%   autopf = expdirstruct(i).automated_pf;
 
 
 %   notes = experiments_eddison(i).notes_curation;
-  fprintf(fid,'%s\t %s\t %s\t %s\t %s\t %s\t %s\t %s \n',expname, datestr,datetimestr,linename,experimenter,notestech,notesbeh,autopf);
+  fprintf(fid,'%s\t %s\t %s\t %s\t %s\t %s\t %s\t %s \n',expname, datestr,datetimestr,linename,experimenter,notestech,notesbeh);
 end
 
 fclose(fid);
