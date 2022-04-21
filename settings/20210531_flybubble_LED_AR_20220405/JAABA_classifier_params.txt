@@ -1,0 +1,2 @@
+/groups/branson/home/bransonlab/JAABAProjectFiles/FlyBubble/moving.jab
+/groups/branson/home/bransonlab/JAABAProjectFiles/FlyBubble/NotTracking.jab
