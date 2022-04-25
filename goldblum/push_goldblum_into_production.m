@@ -22,7 +22,7 @@ function push_goldblum_into_production(account_name_from_lab_index)
             account_name_from_lab_index) ;
 
     % If get here, everything went well
-    fprintf('Successfully copied %s into all the *lab user accounts\n', fda_folder_path) ;
+    fprintf('Successfully copied %s into all the specified user accounts\n', fda_folder_path) ;
 end
 
 
