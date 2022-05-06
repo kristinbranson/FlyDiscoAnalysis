@@ -255,7 +255,7 @@ if isfield(registration_params,'OptogeneticExp')
         if isfield(dataloc_params,'ledprotocolfilestr')
             if exist(fullfile(expdir,dataloc_params.ledprotocolfilestr),'file')
                 load(fullfile(expdir,dataloc_params.ledprotocolfilestr),'protocol')
-                if strcmp(metadata.assay,'FlyBubbleRGB') || strcmp(metadata.assay,'FlyBowlRGB')                    
+                if isExperiemntRGB(metadata)                    
                     if isfield(protocol,'Rintensity')
                         RGBprotocol = protocol;
                         clear protocol;

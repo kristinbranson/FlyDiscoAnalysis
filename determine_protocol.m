@@ -1,7 +1,7 @@
 function protocol = determine_protocol(metadata, ledprotocol_file_contents)
     % Examine the metadata and the contents of the LED protocol file to determine
     % the protocol.
-    if strcmp(metadata.assay,'FlyBubbleRGB') || strcmp(metadata.assay,'FlyBowlRGB') ,
+    if isExperiemntRGB(metadata)
         maybeRGBprotocol = ledprotocol_file_contents.protocol ;
         if isfield(maybeRGBprotocol,'Rintensity')
             RGBprotocol =  maybeRGBprotocol ;

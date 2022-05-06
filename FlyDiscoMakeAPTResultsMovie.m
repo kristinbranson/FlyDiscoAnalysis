@@ -142,7 +142,7 @@ else
   if defaultparams,
     load(indicatorfile, 'indicatorLED') ;
     load(ledprotocolfile, 'protocol') ;
-    if strcmp(metadata.assay,'FlyBubbleRGB') || strcmp(metadata.assay,'FlyBowlRGB')
+    if isExperiemntRGB(metadata)
         if isfield(protocol,'Rintensity')
             RGBprotocol = protocol;
             clear protocol;
@@ -324,7 +324,7 @@ if ~hidemovietype,
     
     load(ledprotocolfile);
     load(indicatorfile);
-    if strcmp(metadata.assay,'FlyBubbleRGB') || strcmp(metadata.assay,'FlyBowlRGB')
+    if isExperiemntRGB(metadata)
       if isfield(protocol,'Rintensity')
         RGBprotocol = protocol;
         clear protocol;
