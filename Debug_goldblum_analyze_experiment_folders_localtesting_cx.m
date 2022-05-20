@@ -17,7 +17,8 @@ settings_folder_path = '/groups/branson/home/robiea/Code_versioned/FlyDiscoAnaly
 %%%%
 % analysis_protocol = '20211014_flybubbleRed_LED';
 % analysis_protocol = '20220217_flybubble_TrpA';
-analysis_protocol = '20220217_flybubble_TrpA_Male';
+% analysis_protocol = '20220217_flybubble_TrpA_Male';
+analysis_protocol = '20220517_flybubble_LED';
 analysis_parameters = {'analysis_protocol',analysis_protocol};
 
 % analysis_parameters = {'analysis_protocol',analysis_protocol, ... 
@@ -115,7 +116,10 @@ analysis_parameters = {'analysis_protocol',analysis_protocol};
 
 % folder_path_from_experiment_index = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/test_20220217_flybubble_TrpA/TrpAFemale2_GMR_72C11_vk5_RigA_20220216T090844'};
 % folder_path_from_experiment_index = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/test_20220217_flybubble_TrpA/TrpAFemale2_GMR_Eb5_vk5_RigB_20220216T085536',...
-folder_path_from_experiment_index = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/test_20220217_flybubble_TrpA/TrpAMale2_GMR_71G01_JK73A_RigB_20220216T074837'};
+% folder_path_from_experiment_index = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/test_20220217_flybubble_TrpA/TrpAMale2_GMR_71G01_JK73A_RigB_20220216T074837'};
+%test movie params for 20220414 LED protocol
+folder_path_from_experiment_index = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/test_20220517_flybubble_VNC2_testmovieparams/VNC2_EXT_VGLUT-GAL4_RigA_20220511T094028',...
+'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/test_20220517_flybubble_VNC2_testmovieparams/VNC2_YNA_K_162984_RigD_20220511T103822'};
 %% delete pipeline files before rerunning pipeline
 % 
 % todeletefiles = {'automatic_checks_complete_info.mat',...
@@ -196,10 +200,10 @@ folder_path_from_experiment_index = {'/groups/branson/home/robiea/Projects_data/
 
 
 %% run analysis
-
+% SELECTED analysis_parameters
 goldblum_analyze_experiment_folders(folder_path_from_experiment_index, settings_folder_path, cluster_billing_account_name, ...
     do_use_bqueue, do_actually_submit_jobs, analysis_parameters) ;
 
-% %%
+% DEFAULT analysis_parameters
 % goldblum_analyze_experiment_folders(folder_path_from_experiment_index, settings_folder_path, cluster_billing_account_name, ...
 %     do_use_bqueue, do_actually_submit_jobs) ;
