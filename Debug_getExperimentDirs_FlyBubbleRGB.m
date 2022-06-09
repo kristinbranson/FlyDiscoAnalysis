@@ -7,14 +7,14 @@ modpath
 % %% pull expdirs and load all metdata
 rootdatadir = '/groups/branson/bransonlab/flydisco_data';
 
-% savefile = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_wk15wk16wk17_metadatachanges';
-% [expdirstruct] = getExperimentDirsFlyDisco(rootdatadir,'metadatafile','Metadata.xml','expdirname','VNC','date','202109*','autocheckin',true,'autocheckcomplete',true);
+savefile = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_wk23_metadatachanges';
+[expdirstruct] = getExperimentDirsFlyDisco(rootdatadir,'metadatafile','Metadata.xml','expdirname','VNC','date','202204*','autocheckin',true,'autocheckcomplete',true);
 
 % rootdatadir = '/groups/branson/bransonlab/from_tier2/fly_bubble/bubble_data';
 % savefile = '/groups/branson/home/robiea/Projects_data/FlyBubble/metadata_ANY_bubble_data_20211008';
 
-savefile = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/';
-[expdirstruct] = getExperimentDirsFlyDisco(rootdatadir,'metadatafile','Metadata.xml','expdirname','VNC','autocheckin',true,'autocheckcomplete',true);
+% savefile = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/';
+% [expdirstruct] = getExperimentDirsFlyDisco(rootdatadir,'metadatafile','Metadata.xml','expdirname','VNC','autocheckin',true,'autocheckcomplete',true);
 
 
 % %inputs to getExperimentDirsFlyDisco: 'metadatafile','Metadata.xml','expdirname','*','line_name','*', ...
@@ -29,7 +29,8 @@ savefile = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/
 
 
 %% select on expdirs with certain led protocol
-idx = strcmp({expdirstruct.screen_type},'non_olympiad_dickson_VNC');
+% idx = strcmp({expdirstruct.screen_type},'non_olympiad_dickson_VNC');
+idx = strcmp({expdirstruct.screen_type},'non_olympiad_dickson_VNC2');
 expdirstruct= expdirstruct(idx);
 
 
@@ -66,7 +67,7 @@ fclose(fid);
 %% make csv file for all experiments (use for pulling data for metadata changes) with autochecks
 fid = fopen([savefile,'.tsv'],'w');
 
-fprintf(fid,'%s\t %s\t %s\t %s\t %s\t %s\t %s\t %s \n','expname','date','datetime','linename','experimentor','notes_tech','notes_behav','automated_pf');
+fprintf(fid,'%s\t %s\t %s\t %s\t %s\t %s\t %s\t %s\t %s \n','expname','date','datetime','linename','experimentor','gender','notes_tech','notes_behav','automated_pf');
 
 for i = 1:numel(expdirstruct)  
   [~,expname] = fileparts(expdirstruct(i).file_system_path);
@@ -74,13 +75,14 @@ for i = 1:numel(expdirstruct)
   datetimestr = expdirstruct(i).exp_datetime;
   linename = expdirstruct(i).line;
   experimenter = expdirstruct(i).experimenter;
+  gender = expdirstruct(i).gender;
   notestech = expdirstruct(i).notes_technical;
   notesbeh = expdirstruct(i).notes_behavioral;
   autopf = expdirstruct(i).automated_pf;
 
 
 %   notes = experiments_eddison(i).notes_curation;
-  fprintf(fid,'%s\t %s\t %s\t %s\t %s\t %s\t %s\t %s \n',expname, datestr,datetimestr,linename,experimenter,notestech,notesbeh,autopf);
+  fprintf(fid,'%s\t %s\t %s\t %s\t %s\t %s\t %s\t %s\t %s \n',expname, datestr,datetimestr,linename,experimenter,gender,notestech,notesbeh,autopf);
 end
 
 fclose(fid);

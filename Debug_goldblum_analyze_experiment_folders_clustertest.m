@@ -5,8 +5,8 @@
 modpath
 % lab_head_last_name = 'branson' ;
 cluster_billing_account_name = 'branson';
-do_use_bqueue = false ;    
-do_actually_submit_jobs = false ;  
+do_use_bqueue = true ;    
+do_actually_submit_jobs = true ;  
 
 %% set params                                  
 settings_folder_path = '/groups/branson/home/robiea/Code_versioned/FlyDiscoAnalysis/settings' ;
@@ -120,7 +120,8 @@ settings_folder_path = '/groups/branson/home/robiea/Code_versioned/FlyDiscoAnaly
 %test movie params for 20220414 LED protocol
 % folder_path_from_experiment_index = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/test_20220517_flybubble_VNC2_testmovieparams/VNC2_EXT_VGLUT-GAL4_RigA_20220511T094028',...
 % '/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/test_20220517_flybubble_VNC2_testmovieparams/VNC2_YNA_K_162984_RigD_20220511T103822'};
-folder_path_from_experiment_index = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/test_20220517_flybubble_VNC2_testmovieparams/VNC2_EXT_VGLUT-GAL4_RigA_20220511T094028'};
+% folder_path_from_experiment_index = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/test_20220517_flybubble_VNC2_testmovieparams/VNC2_EXT_VGLUT-GAL4_RigA_20220511T094028'};
+folder_path_from_experiment_index = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/test_20220517_flybubble_VNC2_testmovieparams/VNC2_YNA_K_162984_RigD_20220511T103822'};
 %% delete pipeline files before rerunning pipeline
 % 
 % todeletefiles = {'automatic_checks_complete_info.mat',...

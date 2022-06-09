@@ -118,92 +118,21 @@ analysis_parameters = {'analysis_protocol',analysis_protocol};
 % folder_path_from_experiment_index = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/test_20220217_flybubble_TrpA/TrpAFemale2_GMR_Eb5_vk5_RigB_20220216T085536',...
 % folder_path_from_experiment_index = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/test_20220217_flybubble_TrpA/TrpAMale2_GMR_71G01_JK73A_RigB_20220216T074837'};
 %test movie params for 20220414 LED protocol
-folder_path_from_experiment_index = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/test_20220517_flybubble_VNC2_testmovieparams/VNC2_EXT_VGLUT-GAL4_RigA_20220511T094028',...
-'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/test_20220517_flybubble_VNC2_testmovieparams/VNC2_YNA_K_162984_RigD_20220511T103822'};
+% folder_path_from_experiment_index = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/test_20220517_flybubble_VNC2_testmovieparams/VNC2_EXT_VGLUT-GAL4_RigA_20220511T094028',...
+% '/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/test_20220517_flybubble_VNC2_testmovieparams/VNC2_YNA_K_162984_RigD_20220511T103822'};
+% test rerun 6/9/2022 gender wrong
+folder_path_from_experiment_index = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/test_20220608_testpipelinefiledeletion/VNC2_JRC_SS83407_RigB_20220419T092554'};
+
 %% delete pipeline files before rerunning pipeline
-% 
-% todeletefiles = {'automatic_checks_complete_info.mat',...
-% 'automatic_checks_complete_results.txt',...
-% 'automatic_checks_incoming_info.mat',...
-% 'automatic_checks_incoming_results.txt',...
-% 'indicatordata.mat',...
-% 'indicator_log.txt',...
-% 'ledregistrationimage.png',...
-% 'perframefeatures_info.mat',...
-% 'registered_trx.mat',...
-% 'registrationdata.mat',...
-% 'registrationdata.txt',...
-% 'registrationimage.png',...
-% 'sexclassifier.mat',...
-% 'sexclassifier_diagnostics.txt',...
-% 'wingtracking_results.mat'};
-% 
-% todeletewildcard = {'ANALYSIS*',...
-%     'ctrax_results_movie_*.mp4'};
-% 
-% todeletedir = {'/perframe'};
-% 
-% for i = 1:numel(folder_path_from_experiment_index)
-%     expdir = folder_path_from_experiment_index{i};
-%     % delete files
-%     for j = 1:numel(todeletefiles)
-%         filestr = fullfile(expdir,todeletefiles{j});
-%         if exist(filestr,'file')
-%             delete(filestr)
-%             if exist(filestr,'file')
-%                 fprintf('not deleted %s\n',filestr)
-%                 return
-%             end
-%         end
-%     end
-%     %remove dirs
-%     for j = 1:numel(todeletedir)
-%         dirstr = fullfile(expdir,todeletedir{j});
-%         
-%         if exist(dirstr,'dir')
-%             filelist = dir(dirstr);
-%             for k = 3:numel(filelist)
-%                 filestr = fullfile(expdir,todeletedir{j},filelist(k).name);
-%                 
-%                 if exist(filestr,'file')
-%                     delete(filestr)
-%                     if exist(filestr,'file')
-%                         fprintf('not deleted %s\n',filestr)
-%                         return
-%                     end
-%                 end
-%             end
-%             
-%             rmdir(dirstr);
-%             if exist(dirstr,'file')
-%                 fprintf('not deleted %s\n',dirstr)
-%                 return
-%             end
-%         end
-%     end
-%     % delete files with variable names
-%     for j = 1:numel(todeletewildcard)
-%         filelist = dir(fullfile(expdir,todeletewildcard{j}));
-%         for k = 1:numel(filelist)
-%             filestr = fullfile(expdir,filelist(k).name);
-%             if exist(filestr,'file')
-%                 delete(filestr)
-%                 if exist(filestr,'file')
-%                     fprintf('not deleted %s\n',filestr)
-%                     return
-%                 end
-%             end
-%         end
-%     end
-%     
-% end
+% use CleanOutExpDirs or 
+CleanOutExpDirs_leavetracking(folder_path_from_experiment_index)
 
 
 %% run analysis
 % SELECTED analysis_parameters
-goldblum_analyze_experiment_folders(folder_path_from_experiment_index, settings_folder_path, cluster_billing_account_name, ...
-    do_use_bqueue, do_actually_submit_jobs, analysis_parameters) ;
+% goldblum_analyze_experiment_folders(folder_path_from_experiment_index, settings_folder_path, cluster_billing_account_name, ...
+%     do_use_bqueue, do_actually_submit_jobs, analysis_parameters) ;
 
 % DEFAULT analysis_parameters
-% goldblum_analyze_experiment_folders(folder_path_from_experiment_index, settings_folder_path, cluster_billing_account_name, ...
-%     do_use_bqueue, do_actually_submit_jobs) ;
+goldblum_analyze_experiment_folders(folder_path_from_experiment_index, settings_folder_path, cluster_billing_account_name, ...
+    do_use_bqueue, do_actually_submit_jobs) ;

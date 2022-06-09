@@ -3,7 +3,7 @@
 
 logfiledir = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/MetadataFixes';
 %%%CHANGE
-logfilename = 'expdirs_changescreen_typeforshortLEDprotocol_logofauto.csv';
+logfilename = 'expdirs_changescreen_wk23_logofauto.csv';
 
 logfile = fullfile(logfiledir,logfilename);
 
@@ -151,6 +151,31 @@ fid2 = fopen(logfile,'a');
 % 'VNC_JRC_SS25466_RigB_20210614T131609', ...
 % 'VNC_JRC_SS29662_RigB_20210614T132354', ...
 % 'VNC_JRC_SS29892_RigB_20210614T133248'};
+% 2022 screening
+%wk23 change gender
+explist = {'VNC2_JRC_SS83407_RigB_20220419T092554',...
+'VNC2_JRC_SS83407_RigC_20220419T092709',...
+'VNC2_JRC_SS83407_RigD_20220419T092834',...
+'VNC2_JRC_SS80084_RigA_20220419T093328',...
+'VNC2_JRC_SS80084_RigB_20220419T093446',...
+'VNC2_JRC_SS80084_RigC_20220419T093600',...
+'VNC2_JRC_SS80084_RigD_20220419T093720',...
+'VNC2_JRC_SS91980_RigA_20220419T094055',...
+'VNC2_JRC_SS91980_RigB_20220419T094244',...
+'VNC2_JRC_SS91980_RigC_20220419T094458',...
+'VNC2_JRC_SS91980_RigD_20220419T094624',...
+'VNC2_EXT_VGLUT-GAL4_RigA_20220419T094935',...
+'VNC2_EXT_VGLUT-GAL4_RigB_20220419T095045',...
+'VNC2_EXT_VGLUT-GAL4_RigC_20220419T095222',...
+'VNC2_EXT_VGLUT-GAL4_RigD_20220419T095418',...
+'VNC2_JRC_SS90380_RigB_20220419T095853',...
+'VNC2_JRC_SS90380_RigC_20220419T100024',...
+'VNC2_JRC_SS90380_RigD_20220419T100216',...
+'VNC2_JRC_SS90380_RigA_20220419T100514',...
+'VNC2_JRC_SS91891_RigA_20220419T102044',...
+'VNC2_JRC_SS92103_RigA_20220419T102951'};
+    
+
 
 % change screen_type for experiments with 0212 led protocol to 'non_olympiad_dickson_led5secVNC'
 % % explist = textread('/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirlist_0212ledprotocol.txt','%s');
@@ -164,17 +189,17 @@ fid2 = fopen(logfile,'a');
 
 % redo experiments with bad metadata files after screen_type changed for
 % older led protocol - appending updates to the same csv file 
-expnamelist = textread('/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/malformedmetadataexplist_bransonlab.txt','%s');
+% expnamelist = textread('/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/malformedmetadataexplist_bransonlab.txt','%s');
 rootdatadir = '/groups/branson/bransonlab/flydisco_data';
-for k =1:numel(expnamelist)
-    explist{k} = fullfile(rootdatadir,expnamelist{k});
-end
+% for k =1:numel(expnamelist)
+%     explist{k} = fullfile(rootdatadir,expnamelist{k});
+% end
 
 % values to change in metadata
 for j = 1:numel(explist)
     % per experiment
-    %     expdir = fullfile(rootdatadir,explist{j})
-    expdir = explist{j};
+         expdir = fullfile(rootdatadir,explist{j})
+%     expdir = explist{j};
     metadatafilename = 'Metadata.xml';
     
     resavefilename = fullfile(expdir,metadatafilename);
@@ -201,8 +226,8 @@ for j = 1:numel(explist)
     %     changestruct.line = 'JRC_SS53050';
     %     changestruct.line = 'JRC_SS66932';
     %     changestruct.line = 'JRC_SS67903';
-    changestruct.screen_type = 'non_olympiad_dickson_led5secVNC';
-    
+%     changestruct.screen_type = 'non_olympiad_dickson_led5secVNC';
+    changestruct.gender = 'b';
     % replace metadata fields with changes
     fprintf(fid2,'%s, ',expdir);
     metadatafieldsTOBECHANGED = fieldnames(changestruct);
