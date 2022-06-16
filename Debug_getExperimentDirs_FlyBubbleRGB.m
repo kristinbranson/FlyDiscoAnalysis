@@ -7,8 +7,8 @@ modpath
 % %% pull expdirs and load all metdata
 rootdatadir = '/groups/branson/bransonlab/flydisco_data';
 
-savefile = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_wk23_metadatachanges';
-[expdirstruct] = getExperimentDirsFlyDisco(rootdatadir,'metadatafile','Metadata.xml','expdirname','VNC','date','202204*','autocheckin',true,'autocheckcomplete',true);
+savefile = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_VNC2_20220611';
+[expdirstruct] = getExperimentDirsFlyDisco(rootdatadir,'metadatafile','Metadata.xml','expdirname','VNC','date','20220*','autocheckin',true,'autocheckcomplete',true);
 
 % rootdatadir = '/groups/branson/bransonlab/from_tier2/fly_bubble/bubble_data';
 % savefile = '/groups/branson/home/robiea/Projects_data/FlyBubble/metadata_ANY_bubble_data_20211008';
