@@ -23,20 +23,6 @@ fprintf(fid,'<html>\n<title>%s</title>\n<body>\n',basename);
 
 fprintf(fid,'<h1>%s</h1>\n',basename);
 
-% move hist to begining AR 
-ishist = ~isempty(histfiles) && ~all(cellfun(@isempty,histfiles));
-if ishist,
-  fprintf(fid,'<a id="hist"><h2>Histograms</h2></a>\n');
-  fprintf(fid,'<center><table width="50%%">\n');
-  for i = 1:numel(histfiles),
-    name = histfiles{i};
-    if isempty(name),
-      continue;
-    end
-    fprintf(fid,'<tr><td><a id="hist_%s" href="%s"><img src="%s" width="100%%"></a></td></tr>\n',histgroups{i},name,name);
-  end
-  fprintf(fid,'</table>\n');
-end
 
 
 isstatfile = ~isempty(statfiles) && ~all(cellfun(@isempty,statfiles(:)));
@@ -118,19 +104,19 @@ if ~isempty(stimtrajfile),
 end
 
 
-% ishist = ~isempty(histfiles) && ~all(cellfun(@isempty,histfiles));
-% if ishist,
-%   fprintf(fid,'<a id="hist"><h2>Histograms</h2></a>\n');
-%   fprintf(fid,'<center><table width="50%%">\n');
-%   for i = 1:numel(histfiles),
-%     name = histfiles{i};
-%     if isempty(name),
-%       continue;
-%     end
-%     fprintf(fid,'<tr><td><a id="hist_%s" href="%s"><img src="%s" width="100%%"></a></td></tr>\n',histgroups{i},name,name);
-%   end
-%   fprintf(fid,'</table>\n');
-% end
+ishist = ~isempty(histfiles) && ~all(cellfun(@isempty,histfiles));
+if ishist,
+  fprintf(fid,'<a id="hist"><h2>Histograms</h2></a>\n');
+  fprintf(fid,'<center><table width="50%%">\n');
+  for i = 1:numel(histfiles),
+    name = histfiles{i};
+    if isempty(name),
+      continue;
+    end
+    fprintf(fid,'<tr><td><a id="hist_%s" href="%s"><img src="%s" width="100%%"></a></td></tr>\n',histgroups{i},name,name);
+  end
+  fprintf(fid,'</table>\n');
+end
 
 if ~isempty(vidfiles),
   fprintf(fid,'<a id="stim"><h2>Stimulation onset videos</h2></a>\n');
