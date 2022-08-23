@@ -18,8 +18,8 @@ settings_folder_path = '/groups/branson/home/robiea/Code_versioned/FlyDiscoAnaly
 % analysis_protocol = '20211014_flybubbleRed_LED';
 % analysis_protocol = '20220217_flybubble_TrpA';
 % analysis_protocol = '20220217_flybubble_TrpA_Male';
-analysis_protocol = '20220517_flybubble_LED';
-analysis_parameters = {'analysis_protocol',analysis_protocol};
+% analysis_protocol = '20220517_flybubble_LED';
+% analysis_parameters = {'analysis_protocol',analysis_protocol};
 
 % analysis_parameters = {'analysis_protocol',analysis_protocol, ... 
 %     'doautomaticchecksincoming','force',...
@@ -121,11 +121,11 @@ analysis_parameters = {'analysis_protocol',analysis_protocol};
 % folder_path_from_experiment_index = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/test_20220517_flybubble_VNC2_testmovieparams/VNC2_EXT_VGLUT-GAL4_RigA_20220511T094028',...
 % '/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/test_20220517_flybubble_VNC2_testmovieparams/VNC2_YNA_K_162984_RigD_20220511T103822'};
 % test rerun 6/9/2022 gender wrong
-folder_path_from_experiment_index = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/test_20220608_testpipelinefiledeletion/VNC2_JRC_SS83407_RigB_20220419T092554'};
-
+% folder_path_from_experiment_index = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/test_20220608_testpipelinefiledeletion/VNC2_JRC_SS83407_RigB_20220419T092554'};
+folder_path_from_experiment_index = {'/groups/branson/bransonlab/alice/temp_bubbledata/amprecovery_20220822/AmpRec_1T3short_RigA_20220823T120624'};
 %% delete pipeline files before rerunning pipeline
 % use CleanOutExpDirs or 
-CleanOutExpDirs_leavetracking(folder_path_from_experiment_index)
+% CleanOutExpDirs_leavetracking(folder_path_from_experiment_index)
 
 
 %% run analysis
