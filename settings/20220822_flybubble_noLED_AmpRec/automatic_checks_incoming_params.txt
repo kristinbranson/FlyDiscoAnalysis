@@ -8,5 +8,5 @@ movie_length_delta_seconds,10
 #min_ufmf_diagnostics_summary_nframes,50000
 control_line_names,pBDPGAL4U
 required_files,Metadata.xml,movie.ufmf
-desired_files,FlyBowlDataCaptureParams_BIAS*.txt,Log.txt,QuickStats.png,QuickStats.txt,StimulusTimingLog.txt
+desired_files,FlyBowlDataCaptureParams_BIAS*.txt,Log.txt,QuickStats.png,QuickStats.txt
 frame_rate,150
