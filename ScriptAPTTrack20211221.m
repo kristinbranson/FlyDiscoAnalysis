@@ -32,7 +32,7 @@ save(apttrkinfofile,'-struct','aptinfo');
 %% data to track
 
 rootdatadir = '/groups/branson/bransonlab/flydisco_data';
-totrackfile = 'APT_requestlist_20220712.csv';
+totrackfile = '/groups/branson/home/bransonk/behavioranalysis/code/FlyDiscoAnalysis/APT_requestlist_20220712.csv';
 totrack = importdata(totrackfile);
 expnames = totrack;
 
