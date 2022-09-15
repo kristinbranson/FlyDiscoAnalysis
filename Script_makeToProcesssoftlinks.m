@@ -1,5 +1,5 @@
 % make softlinks in the flydisco/to-process folder
-% need to run as bransonlab
+%% %%%%% need to run as bransonlab %%%%%%
 %% make list
 %Katie
 % load /groups/branson/home/robiea/Projects_data/Katie/TrpAforReprocessing.mat
@@ -31,7 +31,8 @@
 % explist{i} = fullfile(rootdatadir,expnamelist{i});
 % end
 %reprocess AmpRec with settingdirectory erros 20220824
-explist = textread('/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/explist_AmpRec_reprocess','%s');
+% explist = textread('/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/explist_AmpRec_reprocess','%s');
+explist = textread('/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/explist_AmpRec_reprocess_20220825','%s');
 
 %%
 toprocessdir =  '/groups/branson/bransonlab/flydisco_data/to-process';

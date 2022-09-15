@@ -7,8 +7,11 @@ modpath
 % %% pull expdirs and load all metdata
 rootdatadir = '/groups/branson/bransonlab/flydisco_data';
 
-savefile = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_VNC2_20220611';
-[expdirstruct] = getExperimentDirsFlyDisco(rootdatadir,'metadatafile','Metadata.xml','expdirname','VNC','date','20220*','autocheckin',true,'autocheckcomplete',true);
+% savefile = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_AmpRec';
+% [expdirstruct] = getExperimentDirsFlyDisco(rootdatadir,'metadatafile','Metadata.xml','expdirname','AmpRec','date','202208*','autocheckin',true,'autocheckcomplete',true);
+
+savefile = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_VNC2_20220915';
+[expdirstruct] = getExperimentDirsFlyDisco(rootdatadir,'metadatafile','Metadata.xml','expdirname','VNC*','autocheckin',true,'autocheckcomplete',true);
 
 % rootdatadir = '/groups/branson/bransonlab/from_tier2/fly_bubble/bubble_data';
 % savefile = '/groups/branson/home/robiea/Projects_data/FlyBubble/metadata_ANY_bubble_data_20211008';
@@ -31,7 +34,13 @@ savefile = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/
 %% select on expdirs with certain led protocol
 % idx = strcmp({expdirstruct.screen_type},'non_olympiad_dickson_VNC');
 idx = strcmp({expdirstruct.screen_type},'non_olympiad_dickson_VNC2');
-expdirstruct= expdirstruct(idx);
+expdirstruct = expdirstruct(idx);
+
+%% both screentypes for VNC
+idx1 = strcmp({expdirstruct.screen_type},'non_olympiad_dickson_VNC');
+idx2 = strcmp({expdirstruct.screen_type},'non_olympiad_dickson_VNC2');
+idxall = idx1 + idx2;
+expdirstruct = expdirstruct(logical(idxall));
 
 
 %% make tsv with ALL metadata fields
@@ -85,4 +94,44 @@ for i = 1:numel(expdirstruct)
   fprintf(fid,'%s\t %s\t %s\t %s\t %s\t %s\t %s\t %s\t %s \n',expname, datestr,datetimestr,linename,experimenter,gender,notestech,notesbeh,autopf);
 end
 
+fclose(fid);
+
+%% make experiment list for VNC and VNC2 with only autochecks = p  
+expdirstructOG = expdirstruct;
+
+% screen_type VNC2
+idx = strcmp({expdirstruct.screen_type},'non_olympiad_dickson_VNC2');
+expdirstruct = expdirstruct(idx);
+
+pidx = find([expdirstruct.automated_pf] == 'P');
+
+explist = {expdirstruct(pidx).file_system_path};
+save([savefile,'_VNC2pass.mat'],'explist')
+
+% screen_type VNC
+expdirstruct = expdirstructOG;
+idx = strcmp({expdirstruct.screen_type},'non_olympiad_dickson_VNC');
+expdirstruct = expdirstruct(idx);
+
+pidx = find([expdirstruct.automated_pf] == 'P');
+
+explist = {expdirstruct(pidx).file_system_path};
+save([savefile,'_VNCpass.mat'],'explist')
+
+% all list
+expdirstruct = expdirstructOG;
+idx1 = strcmp({expdirstruct.screen_type},'non_olympiad_dickson_VNC');
+idx2 = strcmp({expdirstruct.screen_type},'non_olympiad_dickson_VNC2');
+idxall = idx1 + idx2;
+expdirstruct = expdirstruct(logical(idxall));
+pidx = find([expdirstruct.automated_pf] == 'P');
+
+explist = {expdirstruct(pidx).file_system_path};
+save([savefile,'_VNCallpass.mat'],'explist');
+
+savefiletext = [savefile,'_VNCallpass.txt'];
+fid = fopen(savefiletext,'w');
+for i = 1:numel(explist)
+    fprintf(fid,'%s\n',explist{i});
+end
 fclose(fid);
