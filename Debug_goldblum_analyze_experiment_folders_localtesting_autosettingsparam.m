@@ -124,6 +124,7 @@ settings_folder_path = '/groups/branson/home/robiea/Code_versioned/FlyDiscoAnaly
 % folder_path_from_experiment_index = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/test_20220608_testpipelinefiledeletion/VNC2_JRC_SS83407_RigB_20220419T092554'};
 % folder_path_from_experiment_index = {'/groups/branson/bransonlab/alice/temp_bubbledata/amprecovery_20220822/AmpRec_1T3short_RigA_20220823T120624'};
 % folder_path_from_experiment_index = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20220825_testingAmpRec/AmpRec_1T1short_RigB_20220824T103538'};
+folder_path_from_experiment_index = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20220913_testingJAABA/VNC2_JRC_SS83065_RigA_20220531T104126'};
 
 %% delete pipeline files before rerunning pipeline
 % use CleanOutExpDirs or 
