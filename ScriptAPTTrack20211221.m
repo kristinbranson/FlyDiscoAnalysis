@@ -60,7 +60,7 @@ datalocparamsfilestr = 'dataloc_params.txt';
 
 load(apttrkinfofile);
 
-assert(exist(apttracker.cache,'dir')>0);
+assert(exist(apttracker.cache,'dir')>sshcmd0);
 assert(exist(apttracker.model,'file')>0);
 assert(exist(apttracker.strippedlblfile,'file')>0);
 assert(exist(apttracker.trackconfigfile,'file')>0);

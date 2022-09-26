@@ -105,3 +105,7 @@ jaabadetectinfomatfilestr,jaabadetect_info.mat
 statsplotparamsfilestr,stats_plotparams.txt
 plotperframestatsinfomatfilestr,plotperframestats_info.mat
 apttrkfilestr,apt.trk
+aptparamsfilestr,apt_params.txt
+aptlogfilestr,apt_log.txt
+aptbsublogfilestr,apt_bsub_log.txt
+apterrfilestr,apt_error.txt
