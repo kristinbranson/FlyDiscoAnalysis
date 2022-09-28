@@ -54,7 +54,7 @@ set(hfigsample,'Units','pixels','Position',[100,100,1144,1144]);
 hfigxy = figure(124);
 set(hfigxy,'Units','pixels','Position',[100,100,1800,700]);
 maxvel = 10;
-for expi = 21:nexps,
+for expi = 1:20,
 %   if isnan(jobid(expi)),
 %     continue;
 %   end
@@ -74,9 +74,7 @@ for expi = 21:nexps,
   else
     continue;
   end
-  if exist(testoutdir,'dir'),
-    continue;
-  else
+  if ~exist(testoutdir,'dir'),
     mkdir(testoutdir);
   end
   [readframe,~,fid] = get_readframe_fcn(movfile);
