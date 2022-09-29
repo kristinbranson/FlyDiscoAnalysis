@@ -181,7 +181,11 @@ function FlyDiscoPipeline(expdir, varargin)
     % way.  Some parameters are determined by the files in the analysis-protocol
     % folder, and cannot easily be changed without modifying the analysis-protcol
     % folder.
+
     
+    % Report the Matlab version
+    matlab_ver_string = version() ;
+    fprintf('Matlab version:\n%s\n\n', matlab_ver_string) ;
 
     % Get info about the state of the repo, output to stdout
     this_script_path = mfilename('fullpath') ;
