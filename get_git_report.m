@@ -11,7 +11,7 @@ function breadcrumb_string = get_git_report(source_repo_folder_path)
     
     % Check if this is even a git repo
     if ~logical(exist(fullfile(source_repo_folder_path, '.git'), 'dir')) ,
-        breadcrumb_string = sprintf('Source repo:\n%s\n\n[This is not a git repository!  This will likely lead to tears eventually!]\n\n', ...
+        breadcrumb_string = sprintf('Source repo:\n%s\n\nCommit hash:\n[This is not a git repository!  This will likely lead to tears eventually!]\n\n', ...
                                     source_repo_folder_path) ;
         return
     end

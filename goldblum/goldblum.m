@@ -62,7 +62,7 @@ function goldblum(do_transfer_data_from_rigs, do_run_analysis, do_use_bqueue, do
     % If the settings folder is not part of the FDA repo, print a report about it
     internal_settings_folder_path = fullfile(source_folder_path, 'settings') ;
     canonical_settings_folder_path = realpath(settings_folder_path) ;
-    fprintf('FlyDiscoAnalysis repository state:\n')
+    fprintf('"settings/" folder repository state:\n')
     if strcmp(canonical_settings_folder_path, internal_settings_folder_path) ,
         fprintf('(Using internal settings folder)\n\n\n')
     else
