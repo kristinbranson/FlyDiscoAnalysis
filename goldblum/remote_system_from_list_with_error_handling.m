@@ -12,7 +12,7 @@ function stdout = remote_system_from_list_with_error_handling(user_name, host_na
     remote_command_line = space_out(escaped_remote_command_line_as_list) ;
 
     % Command line
-    command_line_as_list = {'ssh', '-l', user_name, host_name, remote_command_line} ; 
+    command_line_as_list = {'ssh', '-o', 'BatchMode=yes', '-l', user_name, host_name, remote_command_line} ; 
     
     % Actually run the command
     stdout = system_from_list_with_error_handling(command_line_as_list) ;
