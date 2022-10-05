@@ -7,3 +7,6 @@ changed VNC_barcode to VNC2__barcode in incoming checks
 
 20220913
 added jab classifiers
+
+202201005
+added parameters for APT tracking
