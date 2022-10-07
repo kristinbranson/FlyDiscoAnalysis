@@ -762,50 +762,18 @@ for segi = 1:numel(firstframes),
     end
     
     fr = getframe(hax);
-    %fr = struct() ;
-    %fr.cdata = uint8(randi(256, [428 600 3])-1) ;
-    %fr.colormap = [] ;
     if frame == firstframes(1),
       height = size(fr.cdata,1);
       width = size(fr.cdata,2);
-%       fr = getframe_invisible(hax);
-%       [height,width,~] = size(fr);
       fprintf('Size of frame is %d x %d\n',height,width);
-%       gfdata = getframe_initialize(hax);
-%       [fr,height,width] = getframe_invisible_nocheck(gfdata,[height,width],false,false);
-% 
-%       height = ceil(height/4)*4;
-%       width = ceil(width/4)*4;
-%       fr = getframe_invisible(hax,[height,width]);
     else
-      height1 = size(fr.cdata,1);
-      width1 = size(fr.cdata,2);
-      if height1 < height,
-        dheight1 = floor((height-height1)/2);
-        dheight2 = (height-height1)-dheight1;
-        fr.cdata = fr.cdata(dheight1:end-dheight2,:,:);
-      elseif height1 > height,
-        dheight1 = floor((height1-height)/2);
-        dheight2 = (height1-height)-dheight1;
-        fr.cdata = cat(1,zeros([dheight1,width1,3],class(fr.cdata)),fr.cdata,zeros([dheight2,width1,3],class(fr.cdata)));
-      end
-      if width1 < width,
-        dwidth1 = floor((width-width1)/2);
-        dwidth2 = (width-width1)-dwidth1;
-        fr.cdata = fr.cdata(:,dwidth1:end-dwidth2,:);
-      elseif width1 > width,
-        dwidth1 = floor((width1-width)/2);
-        dwidth2 = (width1-width)-dwidth1;
-        fr.cdata = cat(2,zeros([height,dwidth1,3],class(fr.cdata)),fr.cdata,zeros([height,dwidth2,3],class(fr.cdata)));
-      end
-      %fr = getframe_invisible_nocheck(gfdata,[height,width],false);
+      fr.cdata = tweak_rgb_image_size(fr.cdata, height, width) ;  % sometimes subsequent frames aren't quite the right size.
     end
     if useVideoWriter,
       writeVideo(aviobj,fr);
     else
       aviobj = addframe(aviobj,fr);
     end
-    %set(fig,'Position',figpos);
   end
   
 end
@@ -826,3 +794,8 @@ fprintf('Cleanup...\n');
 %getframe_cleanup(gfdata);
 
 succeeded = true;
+
+end
+
+
+
