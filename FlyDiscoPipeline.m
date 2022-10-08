@@ -324,11 +324,11 @@ function FlyDiscoPipeline(expdir, varargin)
     fprintf('\n') ;
     
     % Print the canonical path to the analysis folder
-    canonical_analysis_protocol_folder_path = realpath(absolute_path(analysis_protocol_folder_path)) ;
+    canonical_analysis_protocol_folder_path = realpath(absolute_filename(analysis_protocol_folder_path)) ;
     fprintf('Canonical path to analysis protocol folder is:\n  %s\n\n', canonical_analysis_protocol_folder_path) ;
     
     % Print the canonical path to the experiment folder
-    canonical_experiment_folder_path = realpath(absolute_path(expdir)) ;
+    canonical_experiment_folder_path = realpath(absolute_filename(expdir)) ;
     fprintf('Canonical path to experiment folder is:\n  %s\n\n', canonical_experiment_folder_path) ;
     
     %% check that experiment exists
