@@ -112,7 +112,7 @@ def transfero_FlyDiscoPipeline_wrapper_wrapper(raw_experiment_folder_path):
             "modpath; options = cell(1, 0); transfero_FlyDiscoPipeline_wrapper('%s', options)" % \
                 experiment_folder_path
         #print("Matlab command line is: %s" % matlab_command_line)
-        command_line_as_list = ['/misc/local/matlab-2019a/bin/matlab', '-batch', matlab_command_line]
+        command_line_as_list = ['/usr/bin/xvfb-run', '-d', '/misc/local/matlab-2019a/bin/matlab', '-batch', matlab_command_line]
         #print("Subprocess command line as list is: %s" % repr(command_line_as_list))        
         sys.stdout.flush()  # Flush stdout output now, so it comes before an stdout output of the subprocess
         run_subprocess_live(command_line_as_list)
