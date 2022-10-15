@@ -23,7 +23,7 @@ function transfero_FlyDiscoPipeline_wrapper(experiment_folder_path, overriding_a
     rig_user_name_from_rig_index = configuration.rig_user_name_from_rig_index ;
     data_folder_path_from_rig_index = configuration.data_folder_path_from_rig_index ;
     destination_folder = configuration.destination_folder ;    
-    settings_folder_path = configuration.settings_folder_path ;
+    settings_folder_path = configuration.settings_folder_path
     %does_use_per_user_folders = configuration.does_use_per_user_folders ;
     to_process_folder_name = 'to-process' ;
 
@@ -48,7 +48,7 @@ function transfero_FlyDiscoPipeline_wrapper(experiment_folder_path, overriding_a
     analysis_parameters_with_overrides = merge_structs(default_analysis_parameters, overriding_analysis_parameters) ;
 
     % Now turn off the auto-checks-complete, we do that separately, afterwards
-    analysis_paramters = analysis_parameters_with_overrides
+    analysis_parameters = analysis_parameters_with_overrides ;
     analysis_parameters.doautomaticcheckscomplete = 'off' ;
     
     % Call the function to do the real work
