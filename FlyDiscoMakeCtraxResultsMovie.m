@@ -1,10 +1,15 @@
 function FlyDiscoMakeCtraxResultsMovie(expdir,varargin)
 % make results movies
 
+% The default settings folder is "settings" within this folder
+this_source_file_path = mfilename('fullpath') ;
+fda_folder_path = fileparts(this_source_file_path) ;
+default_settings_folder_path = fullfile(fda_folder_path, 'settings') ;
+
 [analysis_protocol,settingsdir,datalocparamsfilestr] = ...
   myparse(varargin,...
   'analysis_protocol','20150915_flybubble_centralcomplex',...
-  'settingsdir','/groups/branson/home/robiea/Code_versioned/FlyBubbleAnalysis/settings',...
+  'settingsdir',default_settings_folder_path,...
   'datalocparamsfilestr','dataloc_params.txt');
 
 %% locations of parameters
