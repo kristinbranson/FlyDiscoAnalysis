@@ -201,7 +201,7 @@ function FlyDiscoPipeline(expdir, varargin)
     end
     
     % First, get the settingsdir
-    settingsdir = lookup_in_struct(argument_parameters, 'settingsdir', internal_settings_folder_path()) ;
+    settingsdir = lookup_in_struct(argument_parameters, 'settingsdir', default_settings_folder_path()) ;
     
     % Get the metadata file path
     metadata_file_path = determine_metadata_file_path(expdir) ;
