@@ -4,9 +4,7 @@ function goldblum_FlyDiscoCaboose_wrapper(experiment_folder_path, settings_folde
   
     % Handle arguments
     if ~exist('settings_folder_path', 'var') || isempty(settings_folder_path) ,
-        script_folder_path = fileparts(mfilename('fullpath')) ;
-        fly_disco_analysis_folder_path = fileparts(script_folder_path) ;
-        settings_folder_path = fullfile(fly_disco_analysis_folder_path, 'settings') ;
+        settings_folder_path = default_settings_folder_path() ;
     end
     if ~exist('overriding_analysis_parameters_as_list', 'var') || isempty(overriding_analysis_parameters_as_list) ,
         overriding_analysis_parameters_as_list = cell(1, 0) ;
