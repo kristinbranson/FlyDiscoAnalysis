@@ -42,7 +42,7 @@ reset_experiment_working_copies(working_example_experiments_folder_path, read_on
 folder_path_from_experiment_index = find_experiment_folders(working_example_experiments_folder_path) ;
 
 % Run the script under test
-settings_folder_path = fullfile(fly_disco_analysis_folder_path, 'settings') ;
+settings_folder_path = fullfile(fly_disco_analysis_folder_path, 'settings-internal') ;
 fprintf('Running goldblum_analyze_experiment_folders...\n') ;
 goldblum_analyze_experiment_folders(folder_path_from_experiment_index, settings_folder_path, cluster_billing_account_name, ...
                            do_force_analysis, do_use_bqueue, do_actually_submit_jobs, analysis_parameters)

@@ -7,6 +7,6 @@ function result = projtechreslab_configuration()
     result.destination_folder = '/groups/projtechres/projtechres/flydisco_data' ;
     this_folder_path = fileparts(mfilename('fullpath')) ;
     flydisco_analysis_path = fileparts(this_folder_path) ;
-    result.settings_folder_path = fullfile(flydisco_analysis_path, 'settings') ;
+    result.settings_folder_path = fullfile(flydisco_analysis_path, 'settings-internal') ;
     result.does_have_per_user_folders = true ;
 end

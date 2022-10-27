@@ -26,7 +26,7 @@ analysis_parameters = cell(1,0) ;
 this_script_path = mfilename('fullpath') ;
 this_folder_path = fileparts(this_script_path) ;
 fly_disco_analysis_folder_path = fileparts(this_folder_path) ;
-settings_folder_path = fullfile(fly_disco_analysis_folder_path, 'settings') ;
+settings_folder_path = fullfile(fly_disco_analysis_folder_path, 'settings-internal') ;
 read_only_experiments_folder_path = fullfile(fly_disco_analysis_folder_path, 'test-experiments-read-only', 'circa-2021-07-rubin-experiments') ;
 working_experiments_folder_path = fullfile(fly_disco_analysis_folder_path, 'test-experiments-working') ;
 

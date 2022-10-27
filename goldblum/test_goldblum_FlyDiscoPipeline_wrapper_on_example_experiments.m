@@ -4,7 +4,7 @@ this_script_file_path = mfilename('fullpath') ;
 this_script_folder_path = fileparts(this_script_file_path) ;
 fly_disco_analysis_folder_path = fileparts(this_script_folder_path) ;
 
-settings_folder_path = fullfile(fly_disco_analysis_folder_path, 'settings') ;
+settings_folder_path = fullfile(fly_disco_analysis_folder_path, 'settings-internal') ;
 
 analysis_parameters = ...
         {'doautomaticchecksincoming',true,...
