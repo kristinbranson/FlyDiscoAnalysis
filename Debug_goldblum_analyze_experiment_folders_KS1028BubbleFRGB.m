@@ -3,20 +3,21 @@
 % <Now in Matlab>
 %%
 modpath
-lab_head_last_name = 'rubin' ;
+% lab_head_last_name = 'rubin' ;
+cluster_billing_account_name = 'rubin';
 do_use_bqueue = false ;    
-do_actually_submit_jobs = false ;  
+do_actually_submit_jobs = false ;
 
 %% set params                                  
 %settings_folder_path = '/groups/branson/home/robiea/Code_versioned/FlyDiscoAnalysis/settings' ;
-settings_folder_path = '/groups/rubin/home/schretterc/Documents/FlyDiscoAnalysis/FlyDiscoSettings_1022/RubinFlyDiscoSettings/settings' ;
+settings_folder_path = '/groups/rubin/home/schretterc/Documents/FlyDiscoAnalysis/FlyDiscoAnalysis_1022/FlyDiscoAnalysis/settings/RubinFlyDiscoSettings/settings' ;
 %%%% this didn't work run with default settings dir based on screen_type
 % analysis_protocol = '20210806_flybubble_LED_analysisparams';
 % do_force_analysis = true; 
 % analysis_parameters = {'analysis_protocol',analysis_protocol};
 %%%%
 analysis_protocol = '20221029_BubblefRGB_GtAg';
-do_force_analysis = true;   
+% do_force_analysis = true;   
 analysis_parameters = {'analysis_protocol',analysis_protocol, ... 
     'doautomaticchecksincoming','off',...
     'doflytracking','on', ...
@@ -53,7 +54,7 @@ analysis_parameters = {'analysis_protocol',analysis_protocol, ...
 
 %% make explist
 % running as bransonlab 
-folder_path_from_experiment_index = {'/groups/rubin/home/schretterc/Documents/NewFlyBubbleFRGB_1022/20221027T101739_rig1_flyBubble1_rubin_rubin_20220830_shortAgg'};
+% folder_path_from_experiment_index = {'/groups/rubin/home/schretterc/Documents/NewFlyBubbleFRGB_1022/20221027T101739_rig1_flyBubble1_rubin_rubin_20220830_shortAgg'};
 % '/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20210806_testingcaboose/VNC_JRC_SS49220_RigB_20210421T143507'};
 
 % make explist of only experiment dirs with tracking and NOT aborted
@@ -101,7 +102,8 @@ folder_path_from_experiment_index = {'/groups/rubin/home/schretterc/Documents/Ne
 %% load explist for rerunning caboose
 %folder_path_from_experiment_index = textread('/groups/dickson/dicksonlab/Alice/RERUNposttracking_explist_dickson20210809T141224.txt','%s');
 %experiment_folder_path = '/groups/rubin/home/schretterc/Documents/FlyDiscoAnalysis_ExptsToAnalyze_Test/20210819T085737_rig1_flyBowl3__20XUASCsChrimsonattp18_SS36564_KS_redonly3times10AND30_080521';
-folder_path_from_experiment_index = folder_path_from_experiment_index(1);
+% folder_path_from_experiment_index = folder_path_from_experiment_index(1);
+folder_path_from_experiment_index = {'/groups/rubin/home/schretterc/Documents/NewFlyBubbleFRGB_1022/20221027T101739_rig1_flyBubble1_rubin_rubin_20220830_shortAgg'};
 %% delete pipeline files before rerunning pipeline
 % 
 % todeletefiles = {'automatic_checks_complete_info.mat',...
@@ -182,6 +184,10 @@ folder_path_from_experiment_index = folder_path_from_experiment_index(1);
 
 
 %% run analysis
-% 
-goldblum_analyze_experiment_folders(folder_path_from_experiment_index, settings_folder_path, lab_head_last_name, ...
-                           do_use_bqueue, do_actually_submit_jobs, analysis_parameters) ;
+% SELECTED analysis_parameters
+goldblum_analyze_experiment_folders(folder_path_from_experiment_index, settings_folder_path, cluster_billing_account_name, ...
+     do_use_bqueue, do_actually_submit_jobs, analysis_parameters) ;
+
+% DEFAULT analysis_parameters
+%goldblum_analyze_experiment_folders(folder_path_from_experiment_index, settings_folder_path, cluster_billing_account_name, ...
+%    do_use_bqueue, do_actually_submit_jobs) ;
