@@ -1,0 +1,88 @@
+# condition,color,marker
+fly:any,frame:prestimweakp5,.35 .35 .35,o
+fly:any,frame:stimweakp5,0.4007   0.7628    0.4696,o
+fly:any,frame:prestimweak5,.35 .35 .35,o
+fly:any,frame:stimweak5,0.4007   0.7628    0.4696,o
+fly:any,frame:prestimweak10,.3 .3 .3,o
+fly:any,frame:stimweak10,0.4007   0.7628    0.4696,o
+fly:any,frame:prestimmidp5,.2 .2 .2,o
+fly:any,frame:stimmidp5,0.2007   0.67    0.2696,o
+fly:any,frame:prestimmid5,.2 .2 .2,o
+fly:any,frame:stimmid5,0.2007   0.67    0.2696,o
+fly:any,frame:prestimmid10,.15 .15 .15,o
+fly:any,frame:stimmid10,0.2007   0.67    0.2696,o
+fly:any,frame:prestimstrongp5,.05 .05 .05,o
+fly:any,frame:stimstrongp5,0.04007   0.48    0.04696,o
+fly:any,frame:prestimstrong5,.05 .05 .05,o
+fly:any,frame:stimstrong5,0.04007   0.48    0.04696,o
+fly:any,frame:prestimstrong10,0 0 0,o
+fly:any,frame:stimstrong10,0.04007   0.48    0.04696,o
+
+# condition,color,marker
+fly:any,frame:prestimweakp5movingf,.35 .35 .35,o
+fly:any,frame:stimweakp5movingf,0.4007   0.7628    0.4696,o
+fly:any,frame:prestimweak5movingf,.35 .35 .35,o
+fly:any,frame:stimweak5movingf,0.4007   0.7628    0.4696,o
+fly:any,frame:prestimweak10movingf,.3 .3 .3,o
+fly:any,frame:stimweak10movingf,0.4007   0.7628    0.4696,o
+fly:any,frame:prestimmidp5movingf,.2 .2 .2,o
+fly:any,frame:stimmidp5movingf,0.2007   0.67    0.2696,o
+fly:any,frame:prestimmid5movingf,.2 .2 .2,o
+fly:any,frame:stimmid5movingf,0.2007   0.67    0.2696,o
+fly:any,frame:prestimmid10movingf,.15 .15 .15,o
+fly:any,frame:stimmid10movingf,0.2007   0.67    0.2696,o
+fly:any,frame:prestimstrongp5movingf,.05 .05 .05,o
+fly:any,frame:stimstrongp5movingf,0.04007   0.48    0.04696,o
+fly:any,frame:prestimstrong5movingf,.05 .05 .05,o
+fly:any,frame:stimstrong5movingf,0.04007   0.48    0.04696,o
+fly:any,frame:prestimstrong10movingf,0 0 0,o
+fly:any,frame:stimstrong10movingf,0.04007   0.48    0.04696,o
+
+# condition,color,marker
+fly:any,frame:prestimweakp5_movingf2,.35 .35 .35,o
+fly:any,frame:stimweakp5_movingf2,0.4007   0.7628    0.4696,o
+fly:any,frame:prestimweak5_movingf2,.35 .35 .35,o
+fly:any,frame:stimweak5_movingf2,0.4007   0.7628    0.4696,o
+fly:any,frame:prestimweak10_movingf2,.3 .3 .3,o
+fly:any,frame:stimweak10_movingf2,0.4007   0.7628    0.4696,o
+fly:any,frame:prestimmidp5_movingf2,.2 .2 .2,o
+fly:any,frame:stimmidp5_movingf2,0.2007   0.67    0.2696,o
+fly:any,frame:prestimmid5_movingf2,.2 .2 .2,o
+fly:any,frame:stimmid5_movingf2,0.2007   0.67    0.2696,o
+fly:any,frame:prestimmid10_movingf2,.15 .15 .15,o
+fly:any,frame:stimmid10_movingf2,0.2007   0.67    0.2696,o
+fly:any,frame:prestimstrongp5_movingf2,.05 .05 .05,o
+fly:any,frame:stimstrongp5_movingf2,0.04007   0.48    0.04696,o
+fly:any,frame:prestimstrong5_movingf2,.05 .05 .05,o
+fly:any,frame:stimstrong5_movingf2,0.04007   0.48    0.04696,o
+fly:any,frame:prestimstrong10_movingf2,0 0 0,o
+fly:any,frame:stimstrong10_movingf2,0.04007   0.48    0.04696,o
+
+# condition,color,marker
+fly:any,frame:prestimweakp5_movingb2,.35 .35 .35,o
+fly:any,frame:stimweakp5_movingb2,0.4007   0.7628    0.4696,o
+fly:any,frame:prestimweak5_movingb2,.35 .35 .35,o
+fly:any,frame:stimweak5_movingb2,0.4007   0.7628    0.4696,o
+fly:any,frame:prestimweak10_movingb2,.3 .3 .3,o
+fly:any,frame:stimweak10_movingb2,0.4007   0.7628    0.4696,o
+fly:any,frame:prestimmidp5_movingb2,.2 .2 .2,o
+fly:any,frame:stimmidp5_movingb2,0.2007   0.67    0.2696,o
+fly:any,frame:prestimmid5_movingb2,.2 .2 .2,o
+fly:any,frame:stimmid5_movingb2,0.2007   0.67    0.2696,o
+fly:any,frame:prestimmid10_movingb2,.15 .15 .15,o
+fly:any,frame:stimmid10_movingb2,0.2007   0.67    0.2696,o
+fly:any,frame:prestimstrongp5_movingb2,.05 .05 .05,o
+fly:any,frame:stimstrongp5_movingb2,0.04007   0.48    0.04696,o
+fly:any,frame:prestimstrong5_movingb2,.05 .05 .05,o
+fly:any,frame:stimstrong5_movingb2,0.04007   0.48    0.04696,o
+fly:any,frame:prestimstrong10_movingb2,0 0 0,o
+fly:any,frame:stimstrong10_movingb2,0.04007   0.48    0.04696,o
+
+fly:any,frame:nearwall_stimoffstrong,0 0 0,o
+fly:any,frame:nearwall_stimonstrong,0.04007   0.48    0.04696,o
+
+# used for histograms 
+fly:any,frame:stimoff,0 0 0,o
+fly:any,frame:stimon,0.04007   0.48    0.04696,o
+fly:any,frame:moving_notjumping_stimoff,.5 .5 .5,o
+fly:any,frame:moving_notjumping_stimon,0.2007   0.77    0.2696,o

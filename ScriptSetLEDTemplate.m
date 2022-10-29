@@ -1,8 +1,8 @@
 %% set up paths
-    
-addpath /groups/branson/home/bransonk/tracking/code/JCtrax/misc;
-addpath /groups/branson/home/bransonk/tracking/code/JCtrax/filehandling;
-addpath /groups/branson/bransonlab/projects/olympiad/SAGE/MATLABInterface/Trunk;
+    modpath
+% addpath /groups/branson/home/bransonk/tracking/code/JCtrax/misc;
+% addpath /groups/branson/home/bransonk/tracking/code/JCtrax/filehandling;
+% addpath /groups/branson/bransonlab/projects/olympiad/SAGE/MATLABInterface/Trunk;
 % settingsdir = '/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/settings';
 % settingsdir = '/groups/branson/home/robiea/Code_versioned/FlyBubbleAnalysis/settings/';
 settingsdir = '/groups/branson/home/robiea/Code_versioned/FlyDiscoAnalysis/settings/';
@@ -16,12 +16,13 @@ settingsdir = '/groups/branson/home/robiea/Code_versioned/FlyDiscoAnalysis/setti
 
 % FlyBowlRGB
 % analysis_protocol = '20210329_flybubble_flybowloptoKatie_mingrig_flytracker'; % changed name to 20210329_flybubble_FlyBowlRGB_LED
-analysis_protocol = '20210329_flybubble_FlyBowlRGB_LED';
+% analysis_protocol = '20210329_flybubble_FlyBowlRGB_LED';
+analysis_protocol = '20220622_flybubbleRed_MBL';
 % expdirs = {'/groups/branson/home/robiea/Projects_data/FlyDisco/KatieTestData/FlyBowlDisco_RGBonly_318/20210318T135921_rig1_flyBowl2__SS36564_CsChrim_KS_redonly_protocolRGB_0315_2'}
 % adjusted camera height
-expdirs = {'/groups/branson/home/robiea/Projects_data/FlyDisco/KatieTestData/FlyBowlDisco_RGBonly_401/20210401T132850_rig1_flyBowl2__aIPgSS1UASCsChrimson_KS_redonly_protocolRGB_0315_2'};
-
-
+% expdirs = {'/groups/branson/home/robiea/Projects_data/FlyDisco/KatieTestData/FlyBowlDisco_RGBonly_401/20210401T132850_rig1_flyBowl2__aIPgSS1UASCsChrimson_KS_redonly_protocolRGB_0315_2'};
+% expdirs = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20220617_testingFlyBubbleRed/CsChrSocial3_P1a_Unknown_RigF_20220616T153431'};
+expdirs = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20220622_testingFlyBubbleRedMBLhardware/CsChrSocial3_TK_RigF_20220622T173359'};
 datalocparamsfilestr = 'dataloc_params.txt';
 dataloc_params = ReadParams(fullfile(settingsdir,analysis_protocol,datalocparamsfilestr));
 
@@ -113,7 +114,7 @@ imagesc(template);
 axis image;
 
 
-imwrite(uint8(template),'RegistraionMark_FlyBowlLEDON.png');
+imwrite(uint8(template),'RegistrationMark_FlyBubbleRed.png');
 
 %% distance from the corner
 x = mean(xlim);

@@ -5,13 +5,18 @@ msgs = {};
 
 %version = '0.2';
 
+% The default settings folder is "settings" within this folder
+this_source_file_path = mfilename('fullpath') ;
+fda_folder_path = fileparts(this_source_file_path) ;
+default_settings_folder_path = fullfile(fda_folder_path, 'settings') ;
+
 fns_notperframe = {'id','moviename','annname','firstframe','arena','off',...
   'nframes','endframe','matname','fps','pxpermm'};
 
 [analysis_protocol,settingsdir,registrationparamsfilestr,datalocparamsfilestr,dotemporalreg,dotemporaltruncation] = ...
   myparse(varargin,...
   'analysis_protocol','current_bubble',...
-  'settingsdir','/groups/branson/home/robiea/Code_versioned/FlyBubbleAnalysis/settings',...
+  'settingsdir',default_settings_folder_path,...
   'registrationparamsfilestr','registration_params.txt',...
   'datalocparamsfilestr','dataloc_params.txt',...
   'dotemporalreg',false,'dotemporaltruncation',false);
@@ -255,7 +260,7 @@ if isfield(registration_params,'OptogeneticExp')
         if isfield(dataloc_params,'ledprotocolfilestr')
             if exist(fullfile(expdir,dataloc_params.ledprotocolfilestr),'file')
                 load(fullfile(expdir,dataloc_params.ledprotocolfilestr),'protocol')
-                if strcmp(metadata.assay,'FlyBubbleRGB') || strcmp(metadata.assay,'FlyBowlRGB')                    
+                if isExperiemntRGB(metadata)                    
                     if isfield(protocol,'Rintensity')
                         RGBprotocol = protocol;
                         clear protocol;
@@ -577,6 +582,7 @@ if dotemporalreg,
   fns = setdiff(fieldnames(trx),fns_notperframe);
   isperframe = true(1,numel(fns));
   nperfn = nan(1,numel(fns));
+  ndelete = 0;
   if ~isempty(trx),
     
     for j = 1:numel(fns),
@@ -646,10 +652,11 @@ if dotemporalreg,
     end
     trx(trxdelete) = []; 
     newid2oldid(trxdelete) = [];
+    ndelete = nnz(trxdelete);
     
   end
   
-  fprintf('Applied temporal registration.\n');
+  fprintf('Applied temporal registration, deleted %d trajectories.\n',ndelete);
   
 else
   
@@ -659,14 +666,16 @@ end
 %% truncate end of movie based on value from registration params 
 
 if dotemporaltruncation    
-   
-    Headerinfo = ufmf_read_header(moviefile);
-    if ~isfield(Headerinfo,'timestamps'),
-        error('No field timestamps in UFMF header');
-    end
-    timestamps_header = headerinfo.timestamps;    %??? couldn't figure out where timestamps come from in load_tracks for movie_JAABA/trx.mat
+  
+  ndelete = 0;
+  
+  headerInfo_local = ufmf_read_header(moviefile);
+  if ~isfield(headerInfo_local,'timestamps'),
+    error('No field timestamps in UFMF header');
+  end
+  timestamps_header = headerInfo_local.timestamps;    %??? couldn't figure out where timestamps come from in load_tracks for movie_JAABA/trx.mat
     
-      % how long is the video
+  % how long is the video
   recordLengthCurr = timestamps_header(end);
   
   % how long should the video be?
@@ -682,7 +691,7 @@ if dotemporaltruncation
       warning('No timestamps occur after timeCropEnd = %f. Cannot crop end.',timestamps(i0)+recordLengthIdeal); %??? why warn and not error? 
       i1 = numel(timestamps_header);
     else
-        %??? couldn't figure out what this is checking for
+      %??? couldn't figure out what this is checking for
       if i1 > 1 && ...
           (recordLengthIdeal - timestamps_header(i1-1)) < ...
           (timestamps_header(i1) - recordLengthIdeal), 
@@ -770,12 +779,13 @@ if dotemporaltruncation
     end
     trx(trxdelete) = []; 
     newid2oldid(trxdelete) = [];
+    ndelete = nnz(trxdelete);
     
   end
   
-  fprintf('Applied temporal truncation. Data cropped to %s seconds. \n',timestamps_header(i1));    
+  fprintf('Applied temporal truncation. Data cropped to %f seconds. Deleted %d trajectories.\n',timestamps_header(i1),ndelete);
 else
-    fprintf('NOT applying temporal truncation.\n')
+  fprintf('NOT applying temporal truncation.\n')
 end
 
 

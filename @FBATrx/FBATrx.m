@@ -57,7 +57,7 @@ classdef FBATrx < handle
     
     %% parameters of data locations
     
-    settingsdir = '/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/settings';
+    settingsdir = fullfile(fileparts(fileparts(mfilename('fullpath'))), 'settings') ;
     
     analysis_protocol = 'current';
     
@@ -248,17 +248,17 @@ classdef FBATrx < handle
       m_on = regexp(fn,'^stimon_?([\d_]*)$','tokens','once');
       m_off = regexp(fn,'^stimoff_?([\d_]*)$','tokens','once');
       if ~isempty(m_magveldiff),
-        [data,units] = compute_magveldiff(obj,n,m_magveldiff{1});
+        [data,units] = fba_compute_magveldiff(obj,n,m_magveldiff{1});
       elseif ~isempty(m_veltoward),
-        [data,units] = compute_veltoward(obj,n,m_veltoward{1});
+        [data,units] = fba_compute_veltoward(obj,n,m_veltoward{1});
       elseif ~isempty(m_absthetadiff),
-        [data,units] = compute_absthetadiff(obj,n,m_absthetadiff{1});
+        [data,units] = fba_compute_absthetadiff(obj,n,m_absthetadiff{1});
       elseif ~isempty(m_absphidiff),
-        [data,units] = compute_absphidiff(obj,n,m_absphidiff{1});
+        [data,units] = fba_compute_absphidiff(obj,n,m_absphidiff{1});
       elseif ~isempty(m_anglefrom1to2),
-        [data,units] = compute_anglefrom1to2(obj,n,m_anglefrom1to2{1});
+        [data,units] = fba_compute_anglefrom1to2(obj,n,m_anglefrom1to2{1});
       elseif ~isempty(m_absanglefrom1to2),
-        [data,units] = compute_absanglefrom1to2(obj,n,m_absanglefrom1to2{1});
+        [data,units] = fba_compute_absanglefrom1to2(obj,n,m_absanglefrom1to2{1});
       elseif ~isempty(m_dnose2ellanglerange),
         m_dnose2ellanglerange = strrep(m_dnose2ellanglerange,'min','-');
         v = str2double(m_dnose2ellanglerange);
@@ -266,7 +266,7 @@ classdef FBATrx < handle
           error('anglerange must be something like min30to30');
         end
         v = v*pi/180;
-        [data,units] = compute_dnose2ell_anglerange(obj,n,v,~obj.DEBUG);
+        [data,units] = fba_compute_dnose2ell_anglerange(obj,n,v,~obj.DEBUG);
       elseif ~isempty(m_closestfly_nose2ellanglerange),
         m_closestfly_nose2ellanglerange = strrep(m_closestfly_nose2ellanglerange,'min','-');
         v = str2double(m_closestfly_nose2ellanglerange);
@@ -274,12 +274,12 @@ classdef FBATrx < handle
           error('anglerange must be something like min30to30');
         end
         v = v*pi/180;        
-        [data,units] = compute_closestfly_nose2ell_anglerange(obj,n,v,~obj.DEBUG);
+        [data,units] = fba_compute_closestfly_nose2ell_anglerange(obj,n,v,~obj.DEBUG);
       elseif ~isempty(m_nflies_close),
-        [data,units] = compute_nflies_close(obj,n,str2double(m_nflies_close{1}));
+        [data,units] = fba_compute_nflies_close(obj,n,str2double(m_nflies_close{1}));
       elseif ~isempty(m_closestfly),
         % if debugging, don't save intermediate results
-        funname = sprintf('compute_%s',fn);
+        funname = sprintf('fba_compute_%s',fn);
         [data,units] = feval(funname,obj,n,~obj.DEBUG);
       elseif ~isempty(m_on) || ~isempty(m_off),
         ind = obj.getIndicatorLED(n);
@@ -302,9 +302,9 @@ classdef FBATrx < handle
           stimnums = str2double([stimnums{:}]);
         end
         assert(all(~isnan(stimnums)));
-        [data,units] = compute_stim(obj,n,stimtype,stimnums);        
+        [data,units] = fba_compute_stim(obj,n,stimtype,stimnums);        
       else
-        funname = sprintf('compute_%s',fn);
+        funname = sprintf('fba_compute_%s',fn);
         [data,units] = feval(funname,obj,n);
       end
       filename = obj.GetPerFrameFile(fn,n);

@@ -1,4 +1,4 @@
-do_reset_destination_folder = false ;
+do_reset_destination_folder = true ;
 do_use_bqueue = false ;
 do_actually_submit_jobs = true ;
 
@@ -8,7 +8,7 @@ this_folder_path = fileparts(this_script_path) ;
 fly_disco_analysis_folder_path = fileparts(this_folder_path) ;
 flydisco_folder_path = fileparts(fly_disco_analysis_folder_path) ;
 root_example_experiments_folder_path = fullfile(flydisco_folder_path, 'example-experiments') ;
-read_only_example_experiments_folder_path = fullfile(root_example_experiments_folder_path, 'single-passing-test-suite-experiment-with-tracking-read-only') ;
+read_only_example_experiments_folder_path = fullfile(root_example_experiments_folder_path, 'single-passing-test-suite-experiment-read-only') ;
 
 % Specify the "per-lab" configuration here
 cluster_billing_account_name = 'scicompsoft' ;

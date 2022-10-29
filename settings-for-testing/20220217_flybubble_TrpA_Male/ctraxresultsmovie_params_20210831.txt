@@ -1,0 +1,14 @@
+#output movie fps
+fps,30
+nzoomr,5
+nzoomc,2
+boxradius,50
+taillength,25
+firstframes,0,.5,-1
+middleframes,-1,.5,-1
+endframes,-1,-1,1
+indicatorframes,1,4
+nframes_beforeindicator,150
+nframes,4650
+subdecimationfactor,3
+figpos,1,1,600,428

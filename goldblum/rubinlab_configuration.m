@@ -8,5 +8,6 @@ function result = rubinlab_configuration()
     this_folder_path = fileparts(mfilename('fullpath')) ;
     flydisco_analysis_path = fileparts(this_folder_path) ;
     result.settings_folder_path = fullfile(flydisco_analysis_path, 'settings') ;
+    result.settings_folder_path = '/groups/rubin/home/rubinlabuser/settings' ;
     result.does_have_per_user_folders = true ;
 end

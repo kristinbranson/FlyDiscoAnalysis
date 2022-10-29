@@ -1,7 +1,7 @@
 % This isn't a proper test b/c it doesn't check whether anything worked
 
 do_use_bqueue = true ;
-do_actually_submit_jobs = false ;
+do_actually_submit_jobs = true ;
 cluster_billing_account_name = 'branson' ;  % used for billing the jobs
 do_force_analysis = false ;
 analysis_parameters = cell(1,0) ;
@@ -27,8 +27,9 @@ this_script_path = mfilename('fullpath') ;
 this_folder_path = fileparts(this_script_path) ;
 fly_disco_analysis_folder_path = fileparts(this_folder_path) ;
 settings_folder_path = fullfile(fly_disco_analysis_folder_path, 'settings') ;
-read_only_experiments_folder_path = fullfile(fly_disco_analysis_folder_path, 'example-experiments', 'single-dickson-2021-06-28-experiment-read-only') ;
-working_experiments_folder_path = fullfile(fly_disco_analysis_folder_path, 'example-experiments', 'single-dickson-2021-06-28-experiment') ;
+fly_disco_folder_path = fileparts(fly_disco_analysis_folder_path) ;
+read_only_experiments_folder_path = fullfile(fly_disco_folder_path, 'example-experiments', 'passing-test-suite-experiments-read-only') ;
+working_experiments_folder_path = fullfile(fly_disco_folder_path, 'example-experiments', 'passing-test-suite-experiments') ;
 
 % Delete the destination folder
 if exist(working_experiments_folder_path, 'file') ,
@@ -45,4 +46,4 @@ folder_path_from_experiment_index = find_experiment_folders(working_experiments_
 % Run the script under test
 fprintf('Running goldblum_analyze_experiment_folders...\n') ;
 goldblum_analyze_experiment_folders(folder_path_from_experiment_index, settings_folder_path, cluster_billing_account_name, ...
-                                    do_force_analysis, do_use_bqueue, do_actually_submit_jobs, analysis_parameters)
+                                    do_use_bqueue, do_actually_submit_jobs, analysis_parameters)

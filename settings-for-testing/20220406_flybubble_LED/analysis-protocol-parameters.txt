@@ -1,0 +1,13 @@
+doautomaticchecksincoming,force
+doflytracking,off
+doregistration,off
+doledonoffdetection,off
+dotrackwings,off
+dosexclassification,off
+docomputeperframefeatures,off
+docomputeperframestats,off
+docomputehoghofperframefeatures,off
+dojaabadetect,off
+doplotperframestats,off
+domakectraxresultsmovie,off
+doautomaticcheckscomplete,force

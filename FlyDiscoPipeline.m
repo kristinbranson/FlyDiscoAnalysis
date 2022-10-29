@@ -181,7 +181,11 @@ function FlyDiscoPipeline(expdir, varargin)
     % way.  Some parameters are determined by the files in the analysis-protocol
     % folder, and cannot easily be changed without modifying the analysis-protcol
     % folder.
+
     
+    % Report the Matlab version
+    matlab_ver_string = version() ;
+    fprintf('Matlab version:\n%s\n\n', matlab_ver_string) ;
 
     % Get info about the state of the repo, output to stdout
     this_script_path = mfilename('fullpath') ;
@@ -320,11 +324,11 @@ function FlyDiscoPipeline(expdir, varargin)
     fprintf('\n') ;
     
     % Print the canonical path to the analysis folder
-    canonical_analysis_protocol_folder_path = realpath(absolute_path(analysis_protocol_folder_path)) ;
+    canonical_analysis_protocol_folder_path = realpath(absolute_filename(analysis_protocol_folder_path)) ;
     fprintf('Canonical path to analysis protocol folder is:\n  %s\n\n', canonical_analysis_protocol_folder_path) ;
     
     % Print the canonical path to the experiment folder
-    canonical_experiment_folder_path = realpath(absolute_path(expdir)) ;
+    canonical_experiment_folder_path = realpath(absolute_filename(expdir)) ;
     fprintf('Canonical path to experiment folder is:\n  %s\n\n', canonical_experiment_folder_path) ;
     
     %% check that experiment exists

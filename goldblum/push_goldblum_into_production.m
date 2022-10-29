@@ -1,4 +1,15 @@
-function push_goldblum_into_production()
+function push_goldblum_into_production(account_name_from_lab_index)
+    % Deal with arguments
+    if ~exist('account_name_from_lab_index', 'var') || isempty(account_name_from_lab_index) ,
+        % If no arg, do all labs
+        account_name_from_lab_index = { 'bransonlab', 'rubinlab', 'projtechreslab', 'geniegeneric' } ;
+    end
+    
+    % If char arg, convert to cellstring
+    if ischar(account_name_from_lab_index) ,
+        account_name_from_lab_index = { account_name_from_lab_index } ;
+    end
+    
     % Determine the FlyDiscoAnalysis folder path
     goldblum_folder_path = fileparts(mfilename('fullpath')) ;
     fda_folder_path = fileparts(goldblum_folder_path) ;
@@ -6,20 +17,12 @@ function push_goldblum_into_production()
     % Make sure there are no uncommitted changes
     error_if_uncommited_changes(fda_folder_path) ;
     
-    % Do Branson Lab instance
-    copy_to_single_user_account('bransonlab', fda_folder_path) ;
-    
-    % Do Rubin Lab instance
-    copy_to_single_user_account('rubinlab', fda_folder_path) ;
-
-    % Do PTR instance
-    copy_to_single_user_account('projtechreslab', fda_folder_path) ;
-
-    % Do GENIE instance
-    copy_to_single_user_account('geniegeneric', fda_folder_path) ;
+    % Do each lab
+    cellfun(@(account_name)(copy_to_single_user_account(account_name, fda_folder_path)), ...
+            account_name_from_lab_index) ;
 
     % If get here, everything went well
-    fprintf('Successfully copied %s into all the *lab user accounts\n', fda_folder_path) ;
+    fprintf('Successfully copied %s into all the specified user accounts\n', fda_folder_path) ;
 end
 
 

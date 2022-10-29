@@ -1,0 +1,34 @@
+# <per-frame feature>,<frame condition name>,<fly condition name>,<min n. frames both valid>,<min n. frames fly valid>
+
+#dnose2ell,nearwall_stimonstrong,any,25,100
+#dnose2ell,nearwall_stimoffstrong,any,25,100
+
+# velmag_ctr
+velmag_ctr,moving_notjumping_stimoff,any,25,25
+velmag_ctr,moving_notjumping_stimon,any,25,25
+velmag_ctr,stimoff,any,25,25
+velmag_ctr,stimon,any,25,25
+
+# phisideways
+phisideways,moving_notjumping_stimoff,any,25,25
+phisideways,moving_notjumping_stimon,any,25,25
+phisideways,stimoff,any,25,25
+phisideways,stimon,any,25,25
+
+# absdtheta
+absdtheta,moving_notjumping_stimoff,any,25,25
+absdtheta,moving_notjumping_stimon,any,25,25
+absdtheta,stimoff,any,25,25
+absdtheta,stimon,any,25,25
+
+# dcenter
+dcenter,moving_notjumping_stimoff,any,25,25
+dcenter,moving_notjumping_stimon,any,25,25
+dcenter,stimoff,any,25,25
+dcenter,stimon,any,25,25
+
+# dist2wall
+dist2wall,moving_notjumping_stimoff,any,25,25
+dist2wall,moving_notjumping_stimon,any,25,25
+dist2wall,stimoff,any,25,25
+dist2wall,stimon,any,25,25

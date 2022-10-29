@@ -1,13 +1,19 @@
 % make results movies
 function FlyDiscoMakeAPTResultsMovie(expdir,varargin)
 
+% The default settings folder is "settings" within this folder
+this_source_file_path = mfilename('fullpath') ;
+fda_folder_path = fileparts(this_source_file_path) ;
+default_settings_folder_path = fullfile(fda_folder_path, 'settings') ;
+
 [analysis_protocol,settingsdir,datalocparamsfilestr,override_datalocparams,override_ctraxparams,apttrk,...
-  hidemovietype,nintervals,hidebackgroundextra] = ...
+  hidemovietype,nintervals,hidebackgroundextra,outexpdir,ignoretrxfile,headlandmark,taillandmark,addsubtitles] = ...
   myparse(varargin,...
   'analysis_protocol','20150915_flybubble_centralcomplex',...
-  'settingsdir','/groups/branson/home/robiea/Code_versioned/FlyBubbleAnalysis/settings',...
+  'settingsdir',default_settings_folder_path,...
   'datalocparamsfilestr','dataloc_params.txt','override_datalocparams',struct,'override_ctraxparams',struct,'apttrk',[],...
-  'hidemovietype',false,'nintervals',[],'hidebackgroundextra',.05);
+  'hidemovietype',false,'nintervals',[],'hidebackgroundextra',.05,...
+  'outexpdir','','ignoretrxfile',false,'headlandmark',nan,'taillandmark',nan);
 
 %% locations of parameters
 
@@ -21,12 +27,24 @@ end
 
 %% location of data
 
+if isempty(outexpdir),
+  outexpdir = expdir;
+end
+
 [~,basename,~] = fileparts(expdir);
 moviefile = fullfile(expdir,dataloc_params.moviefilestr);
-apttrkfile = fullfile(expdir,dataloc_params.apttrkfilestr);
+if isfield(override_datalocparams,'apttrkfile'),
+  apttrkfile = override_datalocparams.apttrkfile;
+else
+  apttrkfile = fullfile(expdir,dataloc_params.apttrkfilestr);
+end
 assert(exist(apttrkfile,'file')>0);
-trxfile = fullfile(expdir,dataloc_params.trxfilestr);
-assert(exist(trxfile,'file')>0);
+if ignoretrxfile,
+  trxfile = '';
+else
+  trxfile = fullfile(expdir,dataloc_params.trxfilestr);
+  assert(exist(trxfile,'file')>0);
+end
 avifilestr = sprintf('%s_%s',dataloc_params.aptresultsavefilestr,basename);
 %xvidfile = fullfile(expdir,[avifilestr,'.avi']);
 indicatorfile = fullfile(expdir,dataloc_params.indicatordatafilestr);
@@ -129,7 +147,7 @@ else
   if defaultparams,
     load(indicatorfile, 'indicatorLED') ;
     load(ledprotocolfile, 'protocol') ;
-    if strcmp(metadata.assay,'FlyBubbleRGB') || strcmp(metadata.assay,'FlyBowlRGB')
+    if isExperiemntRGB(metadata)
         if isfield(protocol,'Rintensity')
             RGBprotocol = protocol;
             clear protocol;
@@ -288,7 +306,7 @@ end
 %% create subtitle file
 
 if ~hidemovietype,
-  subtitlefile = fullfile(expdir,'subtitles.srt');
+  subtitlefile = fullfile(outexpdir,'subtitles.srt');
   if exist(subtitlefile,'file'),
     delete(subtitlefile);
   end
@@ -311,7 +329,7 @@ if ~hidemovietype,
     
     load(ledprotocolfile);
     load(indicatorfile);
-    if strcmp(metadata.assay,'FlyBubbleRGB') || strcmp(metadata.assay,'FlyBowlRGB')
+    if isExperiemntRGB(metadata)
       if isfield(protocol,'Rintensity')
         RGBprotocol = protocol;
         clear protocol;
@@ -365,7 +383,7 @@ if ~hidemovietype,
       fprintf(fid,'%d\n',k);
       
       t_start = ts(k)/ctraxresultsmovie_params.fps/(3600*24);
-      t_end = (ts(k) + (ts(k+1)-1-ts(k))/ctraxresultsmovie_params.subdecimationfactor)/ ...
+      t_end = (ts(k) + min(ctraxresultsmovie_params.fps,(ts(k+1)-1-ts(k))/ctraxresultsmovie_params.subdecimationfactor))/ ...
         ctraxresultsmovie_params.fps/(3600*24);
       
       fprintf(fid,'%s --> %s\n',...
@@ -402,7 +420,8 @@ if hidemovietype,
   [xgrid,ygrid] = meshgrid(1:nc,1:nr);
   dcenter = sqrt((xgrid-rd.circleCenterX).^2 + (ygrid-rd.circleCenterY).^2)./rd.circleRadius;
   dohide = dcenter >= 1+hidebackgroundextra;
-  
+else
+  dohide = [];  
 end
 
 
@@ -431,7 +450,9 @@ temp_avi_path = [tempname(scratch_folder_path) '.avi'] ;
   'doshowsex',~hidemovietype,...
   'hidemovietype',hidemovietype,...
   'hidemask',dohide,...
-  'hidemaskvalue',0);
+  'hidemaskvalue',0,...
+  'headlandmark',headlandmark,...
+  'taillandmark',taillandmark);
 %'fps',ctraxresultsmovie_params.fps,...
     %'maxnframes',+ctraxresultsmovie_params.nframes,...
 if ishandle(1),
@@ -454,7 +475,8 @@ newwidth = 4*ceil(width/4);
 %cmd = sprintf('mencoder %s -o %s -ovc xvid -xvidencopts fixed_quant=4 -vf scale=%d:%d,flip -sub %s -subfont-text-scale 2 -msglevel all=2',...
 %  avifile,tmpfile,newwidth,newheight,subtitlefile);
 
-mp4_file_path = fullfile(expdir, [avifilestr,'.mp4']) ;
+mp4_file_path = fullfile(outexpdir, [avifilestr,'.mp4']) ;
+
 nowstr = datestr(now,'yyyymmddTHHMMSSFFF');
 passlogfile = sprintf('%s_%s',avi_file_path,nowstr);
 if isequal(get_distro_codename(), 'Ubuntu') && exist('/usr/bin/ffmpeg', 'file') ,

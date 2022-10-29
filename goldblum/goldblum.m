@@ -48,11 +48,27 @@ function goldblum(do_transfer_data_from_rigs, do_run_analysis, do_use_bqueue, do
     fprintf('********************************************************************************\n') ;
     fprintf('\n') ;    
 
+    % Report the Matlab version
+    matlab_ver_string = version() ;
+    fprintf('Matlab version:\n%s\n\n', matlab_ver_string) ;
+    
     % Get info about the state of the repo, output to log
+    fprintf('FlyDiscoAnalysis repository state:\n')
     this_script_path = mfilename('fullpath') ;
-    source_folder_path = fileparts(fileparts(this_script_path)) ;
+    source_folder_path = realpath(fileparts(fileparts(this_script_path))) ;
     git_report = get_git_report(source_folder_path) ;
     fprintf('%s', git_report) ;
+
+    % If the settings folder is not part of the FDA repo, print a report about it
+    internal_settings_folder_path = fullfile(source_folder_path, 'settings') ;
+    canonical_settings_folder_path = realpath(settings_folder_path) ;
+    fprintf('"settings/" folder repository state:\n')
+    if strcmp(canonical_settings_folder_path, internal_settings_folder_path) ,
+        fprintf('(Using internal settings folder)\n\n\n')
+    else
+        settings_git_report = get_git_report(settings_folder_path) ;
+        fprintf('%s', settings_git_report) ;        
+    end
     
 %     % Convert e.g. flybowl-ww1.hhmi.org to flybowl-ww1    
 %     short_host_name_from_rig_index = cellfun(@short_host_name_from_host_name, host_name_from_rig_index, 'UniformOutput', false) ;
@@ -87,7 +103,7 @@ function goldblum(do_transfer_data_from_rigs, do_run_analysis, do_use_bqueue, do
                 add_links_to_to_process_folder(destination_folder, to_process_folder_name, relative_path_from_synched_experiment_folder_index) ;
             catch me 
                 fprintf('There was a problem doing the sync from %s:%s as %s to %s:\n', ...
-                             rig_host_name, lab_data_folder_path, rig_user_name, destination_folder) ;
+                        rig_host_name, lab_data_folder_path, rig_user_name, destination_folder) ;
                 disp(me.getReport()) ;    
             end                        
         end

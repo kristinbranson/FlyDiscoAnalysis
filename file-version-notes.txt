@@ -1,0 +1,90 @@
+As of this commit:
+
+commit b3817c9236595837a0d1bd657a877ad3ea1bda13 (HEAD -> single-namespace)
+Author: Adam L. Taylor <adamlyletaylor@gmail.com>
+Date:   Fri Apr 15 21:54:15 2022 -0400
+
+    Changes so we set up the path once, then leave it alone
+
+-- 
+
+The versions of these files provided by JAABA and FlyTracker are identical:
+
+ufmf_read_frame.m 
+ufmf_read_mean.m 
+angledist.m
+argmax.m
+argmin.m
+dtypechar2matlabclass.m
+modrange.m
+myparse.m (FlyTracker provides twice also, both identical)
+myparse_nocheck.m
+
+--
+
+JAABA provides two versions of uigetdir2.m (JAABA/filehandling/uigetdir2.m and JAABA/misc/uigetdir2.m),
+not clear which one is 'right'.
+
+--
+
+JAABA provides two version of SelectHistEdges.m, but they are identical.
+
+--
+
+JAABA provides JAABA/misc/findjobj.m and JAABA/perframe/findjobj.m.  The perframe one is a more recent version,
+but don't want to touch JAABA, so leaving alone.
+
+--
+
+JAABA provides JAABA/misc/myfileparts.m and JAABA/perframe/myfileparts.m, which are different. 
+Don't want to touch JAABA, so leaving alone.
+
+--
+
+JAABA provides JAABA/spaceTime/pdollarOF/checkNumArgs.m and JAABA/spaceTime/toolbox/matlab/checkNumArgs.m,
+which differ only in the comments.
+
+--
+
+JAABA provides JAABA/spaceTime/pdollarOF/convnFast.m and JAABA/spaceTime/toolbox/images/convnFast.m, 
+which differ somewhat.  Left alone.
+
+--
+
+JAABA/spaceTime/pdollarOF/filterGauss.m and JAABA/spaceTime/toolbox/filters/filterGauss.m differ only in the comments.
+
+--
+
+JAABA/spaceTime/pdollarOF/gaussSmooth.m and JAABA/spaceTime/toolbox/images/gaussSmooth.m differ slightly.
+Left alone.
+
+--
+
+JAABA/spaceTime/pdollarOF/im.m and JAABA/spaceTime/toolbox/images/im.m differ somewhat.
+Left alone.
+
+--
+
+JAABA/spaceTime/pdollarOF/localSum.m and JAABA/spaceTime/toolbox/images/localSum.m differ somewhat.
+Left alone.
+
+--
+
+FlyDiscoAnalysis and JAABA provide different versions of these, but we want to use the FlyDiscoAnalysis versions:
+
+ReadParams.m
+fif.m
+SetUpJAABAPath.m
+ufmf_read_header.m
+
+--
+
+JAABA and FlyTracker both provide a version of ufmf_read_header.m.  The JAABA version returns one extra field in the returned
+header struct.  But we override this function anyway, so we don't care.
+
+
+
+
+
+
+

@@ -1,8 +1,17 @@
-function outfilenames = SaveFigLotsOfWays(hfig,basename)
+function outfilenames = SaveFigLotsOfWays(hfig,basename,formats)
 
-formats = {'fig','png','pdf','svg'};
+if nargin < 3,
+  formats = {'fig','png','pdf','svg'};
+end
 [path,basename] = myfileparts(basename);
 
+if exist('savefig1')
+  savefigfun = @savefig1;
+elseif exist('savefig_pa')
+  savefigfun = @savefig_pa;
+else
+  savefigfun = @savefig;
+end
 
 outfilenames = {};
 if ismember('svg',formats),
@@ -26,12 +35,16 @@ if ismember('fig',formats),
 end
 formats = setdiff(formats,{'fig'});
 
+if isequal(class(hfig),'matlab.ui.Figure'),
+  hfig = hfig.Number;
+end
+
 tmpbasename = regexprep(basename,'[^a-zA-Z_0-9]','_');
 for i = 1:numel(formats),
   filename = [basename,'.',formats{i}];
   tmpfilename = [tmpbasename,'.',formats{i}];
   try
-    savefig(tmpfilename,hfig,formats{i});
+    savefigfun(tmpfilename,hfig,formats{i});
     if ~isempty(path),
       movefile(tmpfilename,fullfile(path,filename));
     end
