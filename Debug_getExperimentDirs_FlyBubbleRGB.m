@@ -10,8 +10,11 @@ rootdatadir = '/groups/branson/bransonlab/flydisco_data';
 % savefile = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_AmpRec';
 % [expdirstruct] = getExperimentDirsFlyDisco(rootdatadir,'metadatafile','Metadata.xml','expdirname','AmpRec','date','202208*','autocheckin',true,'autocheckcomplete',true);
 
-savefile = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_VNC2_20220915';
+savefile = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_VNC2_20221028';
 [expdirstruct] = getExperimentDirsFlyDisco(rootdatadir,'metadatafile','Metadata.xml','expdirname','VNC*','autocheckin',true,'autocheckcomplete',true);
+
+% savefile = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_VNC2_20220915';
+% [expdirstruct] = getExperimentDirsFlyDisco(rootdatadir,'metadatafile','Metadata.xml','expdirname','VNC*','autocheckin',true,'autocheckcomplete',true);
 
 % rootdatadir = '/groups/branson/bransonlab/from_tier2/fly_bubble/bubble_data';
 % savefile = '/groups/branson/home/robiea/Projects_data/FlyBubble/metadata_ANY_bubble_data_20211008';
@@ -42,7 +45,11 @@ idx2 = strcmp({expdirstruct.screen_type},'non_olympiad_dickson_VNC2');
 idxall = idx1 + idx2;
 expdirstruct = expdirstruct(logical(idxall));
 
-
+%% find experiments more recent than target date
+startdate = datenum('20220915T000000','yyyymmddTHHMMSS');
+dates = datenum({expdirstruct.exp_datetime},'yyyymmddTHHMMSS');
+idxd = find(dates > startdate);
+expdirstruct = expdirstruct(idxd);
 %% make tsv with ALL metadata fields
 savefilecsv = [savefile,'.csv'];
 expdirtable = struct2table(expdirstruct);
