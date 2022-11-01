@@ -220,7 +220,7 @@ function FlyDiscoPipeline(expdir, varargin)
     if strcmp(canonical_settings_folder_path, internal_settings_folder_path) ,
         fprintf('(Using internal settings folder)\n\n\n')
     else
-        settings_git_report = get_git_report(settings_folder_path) ;
+        settings_git_report = get_git_report(settingsdir) ;
         fprintf('%s', settings_git_report) ;        
     end
 
