@@ -5,7 +5,7 @@ this_script_path = mfilename('fullpath') ;
 this_folder_path = fileparts(this_script_path) ;
 fly_disco_analysis_folder_path = fileparts(this_folder_path) ;
 fly_disco_folder_path = fileparts(fly_disco_analysis_folder_path) ;
-%settings_folder_path = fullfile(fly_disco_analysis_folder_path, 'settings') ;
+%settings_folder_path = fullfile(fly_disco_analysis_folder_path, 'settings-internal') ;
 read_only_experiments_folder_path = fullfile(fly_disco_folder_path, 'example-experiments', 'single-robie-experiment-2022-03-06-with-links-read-only') ;
 working_experiments_folder_path = fullfile(fly_disco_folder_path, 'example-experiments', 'single-robie-experiment-2022-03-06-with-links') ;
 

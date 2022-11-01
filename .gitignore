@@ -15,3 +15,4 @@ aborted-example-experiments-read-only/
 aborted-example-experiments
 *.out.txt
 .DS_Store
+settings

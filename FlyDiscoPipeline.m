@@ -10,28 +10,37 @@ function FlyDiscoPipeline(expdir, varargin)
     %   An analysis protocol is specified by the files within a folder called an
     %   "analysis-protocol folder".  These files specify parameters to be used for
     %   each stage of the analysis, such as what the minimum and maximum number of
-    %   flies can be, and what the shape of the arena is.  A number of
+    %   flies can be, and what the shape of the arena is.  (A number of
     %   analysis-protocol folders are provided in the software repository that
     %   contains the source code for FlyDiscoPipeline(), within a folder named
-    %   "settings" at the top level of the repository.  The screen_type of the
-    %   experiment is used to determine which analysis-protocol folder is used to
-    %   analyze that experiment.  First, a folder named 'current_'+screen_type is
-    %   checked for (where "+" here represents concatenation).  If present, that
-    %   folder is used as the analysis-protocol folder.  If absent, a folder with
-    %   the same name as the screen_type is checked for, and used if present.  For
-    %   instance, one analysis-protocol folder is named 'current_FlyBowlRGBbasic'.
-    %   (Which as of this writing is actually a symbolic link to an
-    %   analysis-protocol folder named '20210913_FlyBowlRGBbasic'.)
+    %   "settings-for-testing" at the top level of the repository.)  The screen_type
+    %   of the experiment is used to determine which analysis-protocol folder is
+    %   used to analyze that experiment.  First, a folder named
+    %   'current_'+screen_type is checked for (where "+" here represents
+    %   concatenation).  If present, that folder is used as the analysis-protocol
+    %   folder.  If absent, a folder with the same name as the screen_type is
+    %   checked for, and used if present.  For instance, one analysis-protocol
+    %   folder is named 'current_FlyBowlRGBbasic'. (Which as of this writing is
+    %   actually a symbolic link to an analysis-protocol folder named
+    %   '20210913_FlyBowlRGBbasic'.)
     %
     %   The expdir is the only required input to FlyDiscoPipeline.  Addtional
     %   optional arguments are supported as name-value pairs.  Any combination of
     %   these name-value pairs is generally permitted, and their order does not
     %   matter.
     %
+    %   The folder that is checked for analysis-protocol folders is called a
+    %   "settings" folder.  The default settings folder is named "settings"
+    %   (predictably), and is a sibling to the FlyDiscoPipeline.m source code file.
+    %   Note, however, that no "settings/" folder is included in the source
+    %   respository.  This is to prevent unintended usage of the wrong settings/
+    %   folder.  If convenient, a softlink named "settings" can be created that
+    %   points to settings-for-testing/, which *is* included in the source
+    %   repository.
+    %
     %   FlyDiscoPipeline(expdir, 'settingsdir', settingsdir) looks in the given
-    %   settingsdir for analysis-protocol folders, rather than the default settings/
-    %   folder described above. settingsdir is the path to the root directory
-    %   containing all the analysis-protocol folders.
+    %   settingsdir for analysis-protocol folders, rather than the default settings
+    %   folder described above. 
     %
     %   FlyDiscoPipeline(expdir, 'analysis_protocol', analysis_protocol) uses the
     %   analysis-protocol folder specified instead of the analysis-protocol folder
@@ -201,7 +210,7 @@ function FlyDiscoPipeline(expdir, varargin)
     end
     
     % First, get the settingsdir
-    settingsdir = lookup_in_struct(argument_parameters, 'settingsdir', internal_settings_folder_path()) ;
+    settingsdir = lookup_in_struct(argument_parameters, 'settingsdir', default_settings_folder_path()) ;
     
     % Get the metadata file path
     metadata_file_path = determine_metadata_file_path(expdir) ;
@@ -324,11 +333,11 @@ function FlyDiscoPipeline(expdir, varargin)
     fprintf('\n') ;
     
     % Print the canonical path to the analysis folder
-    canonical_analysis_protocol_folder_path = realpath(absolute_path(analysis_protocol_folder_path)) ;
+    canonical_analysis_protocol_folder_path = realpath(absolute_filename(analysis_protocol_folder_path)) ;
     fprintf('Canonical path to analysis protocol folder is:\n  %s\n\n', canonical_analysis_protocol_folder_path) ;
     
     % Print the canonical path to the experiment folder
-    canonical_experiment_folder_path = realpath(absolute_path(expdir)) ;
+    canonical_experiment_folder_path = realpath(absolute_filename(expdir)) ;
     fprintf('Canonical path to experiment folder is:\n  %s\n\n', canonical_experiment_folder_path) ;
     
     %% check that experiment exists

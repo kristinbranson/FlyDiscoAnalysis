@@ -1,4 +1,4 @@
-do_reset_destination_folder = false ;
+do_reset_destination_folder = true ;
 do_use_bqueue = false ;
 do_actually_submit_jobs = true ;
 
@@ -8,7 +8,7 @@ this_folder_path = fileparts(this_script_path) ;
 fly_disco_analysis_folder_path = fileparts(this_folder_path) ;
 flydisco_folder_path = fileparts(fly_disco_analysis_folder_path) ;
 root_example_experiments_folder_path = fullfile(flydisco_folder_path, 'example-experiments') ;
-read_only_example_experiments_folder_path = fullfile(root_example_experiments_folder_path, 'single-passing-test-suite-experiment-with-tracking-read-only') ;
+read_only_example_experiments_folder_path = fullfile(root_example_experiments_folder_path, 'single-passing-test-suite-experiment-read-only') ;
 
 % Specify the "per-lab" configuration here
 cluster_billing_account_name = 'scicompsoft' ;
@@ -16,7 +16,7 @@ rig_host_name = 'beet.hhmi.org' ;
 rig_user_name = 'bransonk' ;
 rig_data_folder_path = '/cygdrive/e/flydisco_data/scicompsoft' ;
 goldblum_destination_folder_path = fullfile(root_example_experiments_folder_path, 'test-goldblum-destination-folder') ;
-settings_folder_path = fullfile(fly_disco_analysis_folder_path, 'settings') ;
+settings_folder_path = fullfile(fly_disco_analysis_folder_path, 'settings-internal') ;
 per_lab_configuration = struct() ;
 per_lab_configuration.cluster_billing_account_name = cluster_billing_account_name ;
 per_lab_configuration.host_name_from_rig_index = {rig_host_name} ;

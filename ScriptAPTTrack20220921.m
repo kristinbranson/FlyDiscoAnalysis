@@ -33,7 +33,10 @@ end
 jobresult = nan(nexps,1);
 lsf_status = cell(nexps,1);
 idx = 21:nexps;
-[jobresult(idx),lsf_status(idx)] = get_bsub_job_status(jobid(idx),sshhost);
+[jobresultcurr,lsf_statuscurr] = get_bsub_job_status(jobid(idx),sshhost);
+idx1 = ~isnan(jobresultcurr);
+jobresult(idx(idx1)) = jobresultcurr(idx1);
+lsf_status(idx(idx1)) = lsf_statuscurr(idx1);
 
 %% plot status
 
@@ -54,7 +57,8 @@ set(hfigsample,'Units','pixels','Position',[100,100,1144,1144]);
 hfigxy = figure(124);
 set(hfigxy,'Units','pixels','Position',[100,100,1800,700]);
 maxvel = 10;
-for expi = 1:20,
+trkfileexists = false(nexps,1);
+for expi = 1:nexps,
 %   if isnan(jobid(expi)),
 %     continue;
 %   end
@@ -63,6 +67,7 @@ for expi = 1:20,
   testoutdir = fullfile(roottestoutdir,expname);
   movfile = fullfile(expdir,'movie.ufmf');
   trkfile = fullfile(expdir,'apt.trk');
+  trkfileexists(expi) = exist(trkfile,'file') > 0;
   parttrkfile = [trkfile,'.part'];
 
   if exist(trkfile,'file'),

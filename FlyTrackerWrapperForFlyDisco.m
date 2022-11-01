@@ -8,7 +8,6 @@ function FlyTrackerWrapperForFlyDisco(expdir, settingsdir, analysis_protocol, da
   flytracker_parent_calibration_file_name = dataloc_params.flytrackerparentcalibrationstr ;
   flytracker_parent_calibration_file_path = fullfile(settingsdir, analysis_protocol, flytracker_parent_calibration_file_name) ;
   flytracker_calibration_file_name = dataloc_params.flytrackercalibrationstr ;
-  flytracker_calibration_file_path = fullfile(expdir, flytracker_calibration_file_name) ;
   video_file_name = dataloc_params.moviefilestr ;
   video_file_path = fullfile(expdir, video_file_name) ;
 
@@ -43,8 +42,8 @@ function FlyTrackerWrapperForFlyDisco(expdir, settingsdir, analysis_protocol, da
   
   % Override certain options, since we get those directly from arguments or
   % dataloc_params
-  options.f_parent_calib = flytracker_parent_calibration_file_path ;  
-  options.force_tracking = do_force_tracking ;
+  %options.f_parent_calib = flytracker_parent_calibration_file_path ;  
+  options.do_recompute_tracking = do_force_tracking ;
   
   % Get the arena radius from the registration parameters, and stuff it into the
   % options. (tracker() is such that this value will override any value in the parent calibration).
@@ -55,5 +54,5 @@ function FlyTrackerWrapperForFlyDisco(expdir, settingsdir, analysis_protocol, da
   options.arena_r_mm = arena_r_mm ;
   
   % Run the tracker proper
-  tracker([], options, flytracker_calibration_file_path, video_file_path) ;
+  fda_batch_track_single_video(expdir, video_file_path, flytracker_parent_calibration_file_path, options, flytracker_calibration_file_name)  
 end
