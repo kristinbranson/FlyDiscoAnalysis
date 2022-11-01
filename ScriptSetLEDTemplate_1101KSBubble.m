@@ -1,36 +1,37 @@
 %% set up paths
-%     
+    modpath
 % addpath /groups/branson/home/bransonk/tracking/code/JCtrax/misc;
 % addpath /groups/branson/home/bransonk/tracking/code/JCtrax/filehandling;
 % addpath /groups/branson/bransonlab/projects/olympiad/SAGE/MATLABInterface/Trunk;
-modpath
 % settingsdir = '/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/settings';
 % settingsdir = '/groups/branson/home/robiea/Code_versioned/FlyBubbleAnalysis/settings/';
 settingsdir = '/groups/rubin/home/schretterc/Documents/FlyDiscoAnalysis/FlyDiscoAnalysis_1022/FlyDiscoAnalysis/settings/RubinFlyDiscoSettings/settings/';
 
 
 %% parameters
+% FlyBubblefRGB
+analysis_protocol = '20221029_BubblefRGB_GtAg';
+expdirs = {'/groups/rubin/home/schretterc/Documents/NewFlyBubbleFRGB_1022/20221027T101739_rig1_flyBubble1_rubin_rubin_20220830_shortAgg'};
+datalocparamsfilestr = 'dataloc_params.txt';
+dataloc_params = ReadParams(fullfile(settingsdir,analysis_protocol,datalocparamsfilestr));
+
+
 % FlyBubbeRGB
 % analysis_protocol = '20210219_flybubble_dickson_RGBGtACR1testing';
 % analysis_protocol = '20210311_flybuthanksbble_dickson_RGBGtACR1';
 % expdirs = {'/groups/branson/bransonlab/alice/temp_bubbledata/singlecolormarkers/SmallOval/Green/pilot24nonLED_JHS_K_85321_GtACR1_RigC_20210317T214041'};
 
 % FlyBowlRGB
-% analysis_protocol = '20210329_flybubble_flybowloptoKatie_mingrig_flytracker'; % changed name to 20210329_flybubble_FlyBowlRGB_LED
-% analysis_protocol = '20220512_BowlFRGB_GenieTen';
-% expdirs = {'/groups/branson/home/robiea/Projects_data/FlyDisco/KatieTestData/FlyBowlDisco_RGBonly_318/20210318T135921_rig1_flyBowl2__SS36564_CsChrim_KS_redonly_protocolRGB_0315_2'}
-% adjusted camera height
-% expdirs = {'/groups/rubin/home/schretterc/Documents/FlyBowl_MingBowlTests/050322_newsetup/20220517T155332_rig1_flyBowl1_BB_lexOrCD2_fru_2135003_20220506_GenieTen'};
-
-% FlyBubbleFRGB
-% analysis_protocol = '20210329_flybubble_flybowloptoKatie_mingrig_flytracker'; % changed name to 20210329_flybubble_FlyBowlRGB_LED
-analysis_protocol = '20221029_BubblefRGB_GtAg';
-% expdirs = {'/groups/branson/home/robiea/Projects_data/FlyDisco/KatieTestData/FlyBowlDisco_RGBonly_318/20210318T135921_rig1_flyBowl2__SS36564_CsChrim_KS_redonly_protocolRGB_0315_2'}
-% adjusted camera height
-expdirs = {'/groups/rubin/home/schretterc/Documents/NewFlyBubbleFRGB_1022/20221027T101739_rig1_flyBubble1_rubin_rubin_20220830_shortAgg'};
-
-datalocparamsfilestr = 'dataloc_params.txt';
-dataloc_params = ReadParams(fullfile(settingsdir,analysis_protocol,datalocparamsfilestr));
+% % analysis_protocol = '20210329_flybubble_flybowloptoKatie_mingrig_flytracker'; % changed name to 20210329_flybubble_FlyBowlRGB_LED
+% % analysis_protocol = '20210329_flybubble_FlyBowlRGB_LED';
+% analysis_protocol = '20220622_flybubbleRed_MBL';
+% % expdirs = {'/groups/branson/home/robiea/Projects_data/FlyDisco/KatieTestData/FlyBowlDisco_RGBonly_318/20210318T135921_rig1_flyBowl2__SS36564_CsChrim_KS_redonly_protocolRGB_0315_2'}
+% % adjusted camera height
+% % expdirs = {'/groups/branson/home/robiea/Projects_data/FlyDisco/KatieTestData/FlyBowlDisco_RGBonly_401/20210401T132850_rig1_flyBowl2__aIPgSS1UASCsChrimson_KS_redonly_protocolRGB_0315_2'};
+% % expdirs = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20220617_testingFlyBubbleRed/CsChrSocial3_P1a_Unknown_RigF_20220616T153431'};
+% expdirs = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20220622_testingFlyBubbleRedMBLhardware/CsChrSocial3_TK_RigF_20220622T173359'};
+% datalocparamsfilestr = 'dataloc_params.txt';
+% dataloc_params = ReadParams(fullfile(settingsdir,analysis_protocol,datalocparamsfilestr));
 
 % expdirs = importdata(expfile);
 % expdirs(cellfun(@isempty,expdirs)) = [];
@@ -120,7 +121,7 @@ imagesc(template);
 axis image;
 
 
-imwrite(uint8(template),'LEDon_FlyBubbleFRGB.png');
+imwrite(uint8(template),'RegistrationMark_FlyBubblefRGB.png');
 
 %% distance from the corner
 x = mean(xlim);
@@ -133,4 +134,4 @@ imr = min(nr,nc);
 
 dcornerfrac = dcorner / imr
 
-% maxDistCornerFrac_BowlLabel = .17;
+maxDistCornerFrac_BowlLabel = .134;
