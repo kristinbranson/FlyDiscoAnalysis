@@ -196,12 +196,13 @@ function FlyDiscoPipeline(expdir, varargin)
     matlab_ver_string = version() ;
     fprintf('Matlab version:\n%s\n\n', matlab_ver_string) ;
 
-    % Get info about the state of the repo, output to stdout
+    % Get info about the state of the repo, output to log
+    fprintf('FlyDiscoAnalysis repository state:\n')
     this_script_path = mfilename('fullpath') ;
     source_folder_path = fileparts(this_script_path) ;
     git_report = get_git_report(source_folder_path) ;
     fprintf('%s', git_report) ;
-    
+
     % Process varargin parameters
     if length(varargin)==1 && isstruct(varargin{1}) ,
         argument_parameters = varargin{1} ;
@@ -211,7 +212,18 @@ function FlyDiscoPipeline(expdir, varargin)
     
     % First, get the settingsdir
     settingsdir = lookup_in_struct(argument_parameters, 'settingsdir', default_settings_folder_path()) ;
-    
+
+    % If the settings folder is not part of the FDA repo, print a report about it
+    internal_settings_folder_path = fullfile(source_folder_path, 'settings-internal') ;
+    canonical_settings_folder_path = realpath(settingsdir) ;
+    fprintf('Settings folder repository state:\n')
+    if strcmp(canonical_settings_folder_path, internal_settings_folder_path) ,
+        fprintf('(Using internal settings folder)\n\n\n')
+    else
+        settings_git_report = get_git_report(settings_folder_path) ;
+        fprintf('%s', settings_git_report) ;        
+    end
+
     % Get the metadata file path
     metadata_file_path = determine_metadata_file_path(expdir) ;
     

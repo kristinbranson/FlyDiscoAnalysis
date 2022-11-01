@@ -87,7 +87,7 @@ def get_git_report(source_repo_folder_path) :
 
 
 
-def transfero_FlyDiscoPipeline_wrapper_wrapper(raw_experiment_folder_path, user_name_for_configuration_purposes):
+def transfero_FlyDiscoPipeline_wrapper_wrapper(raw_experiment_folder_path):
     experiment_folder_path = os.path.realpath(os.path.abspath(raw_experiment_folder_path))
 
     # Find the matlab code
@@ -99,14 +99,18 @@ def transfero_FlyDiscoPipeline_wrapper_wrapper(raw_experiment_folder_path, user_
     #for name, value in os.environ.items():
     #    print("%s: %s" % (name, value))
     #print('')
-            
+        
+    # Output the git report for this folder
+    git_report = get_git_report(this_script_folder_path) 
+    print(git_report) 
+    
     # Flush stdout output now, so it comes before an stdout output of the subprocess
     sys.stdout.flush()
 
     with cd(this_script_folder_path) as _ :
         matlab_command_line = \
-            "modpath; options = cell(1, 0); transfero_FlyDiscoPipeline_wrapper('%s', '%s', options)" % \
-                (experiment_folder_path, user_name_for_configuration_purposes)
+            "modpath; options = cell(1, 0); transfero_FlyDiscoPipeline_wrapper('%s', 'rubinlab', options)" % \
+                experiment_folder_path
         #print("Matlab command line is: %s" % matlab_command_line)
         command_line_as_list = ['/usr/bin/xvfb-run', '-d', '/misc/local/matlab-2019a/bin/matlab', '-batch', matlab_command_line]
         #print("Subprocess command line as list is: %s" % repr(command_line_as_list))        
@@ -116,7 +120,7 @@ def transfero_FlyDiscoPipeline_wrapper_wrapper(raw_experiment_folder_path, user_
 
 
 if __name__ == "__main__":
-    if len(sys.argv)==3 :
-        transfero_FlyDiscoPipeline_wrapper_wrapper(sys.argv[1], sys.argv[2])
+    if len(sys.argv)==2 :
+        transfero_FlyDiscoPipeline_wrapper_wrapper(sys.argv[1])
     else:
-        raise RuntimeError('Need exactly two arguments')
+        raise RuntimeError('Need exactly one argument')
