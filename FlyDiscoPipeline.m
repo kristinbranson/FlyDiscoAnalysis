@@ -10,28 +10,37 @@ function FlyDiscoPipeline(expdir, varargin)
     %   An analysis protocol is specified by the files within a folder called an
     %   "analysis-protocol folder".  These files specify parameters to be used for
     %   each stage of the analysis, such as what the minimum and maximum number of
-    %   flies can be, and what the shape of the arena is.  A number of
+    %   flies can be, and what the shape of the arena is.  (A number of
     %   analysis-protocol folders are provided in the software repository that
     %   contains the source code for FlyDiscoPipeline(), within a folder named
-    %   "settings" at the top level of the repository.  The screen_type of the
-    %   experiment is used to determine which analysis-protocol folder is used to
-    %   analyze that experiment.  First, a folder named 'current_'+screen_type is
-    %   checked for (where "+" here represents concatenation).  If present, that
-    %   folder is used as the analysis-protocol folder.  If absent, a folder with
-    %   the same name as the screen_type is checked for, and used if present.  For
-    %   instance, one analysis-protocol folder is named 'current_FlyBowlRGBbasic'.
-    %   (Which as of this writing is actually a symbolic link to an
-    %   analysis-protocol folder named '20210913_FlyBowlRGBbasic'.)
+    %   "settings-for-testing" at the top level of the repository.)  The screen_type
+    %   of the experiment is used to determine which analysis-protocol folder is
+    %   used to analyze that experiment.  First, a folder named
+    %   'current_'+screen_type is checked for (where "+" here represents
+    %   concatenation).  If present, that folder is used as the analysis-protocol
+    %   folder.  If absent, a folder with the same name as the screen_type is
+    %   checked for, and used if present.  For instance, one analysis-protocol
+    %   folder is named 'current_FlyBowlRGBbasic'. (Which as of this writing is
+    %   actually a symbolic link to an analysis-protocol folder named
+    %   '20210913_FlyBowlRGBbasic'.)
     %
     %   The expdir is the only required input to FlyDiscoPipeline.  Addtional
     %   optional arguments are supported as name-value pairs.  Any combination of
     %   these name-value pairs is generally permitted, and their order does not
     %   matter.
     %
+    %   The folder that is checked for analysis-protocol folders is called a
+    %   "settings" folder.  The default settings folder is named "settings"
+    %   (predictably), and is a sibling to the FlyDiscoPipeline.m source code file.
+    %   Note, however, that no "settings/" folder is included in the source
+    %   respository.  This is to prevent unintended usage of the wrong settings/
+    %   folder.  If convenient, a softlink named "settings" can be created that
+    %   points to settings-for-testing/, which *is* included in the source
+    %   repository.
+    %
     %   FlyDiscoPipeline(expdir, 'settingsdir', settingsdir) looks in the given
-    %   settingsdir for analysis-protocol folders, rather than the default settings/
-    %   folder described above. settingsdir is the path to the root directory
-    %   containing all the analysis-protocol folders.
+    %   settingsdir for analysis-protocol folders, rather than the default settings
+    %   folder described above. 
     %
     %   FlyDiscoPipeline(expdir, 'analysis_protocol', analysis_protocol) uses the
     %   analysis-protocol folder specified instead of the analysis-protocol folder
@@ -187,12 +196,13 @@ function FlyDiscoPipeline(expdir, varargin)
     matlab_ver_string = version() ;
     fprintf('Matlab version:\n%s\n\n', matlab_ver_string) ;
 
-    % Get info about the state of the repo, output to stdout
+    % Get info about the state of the repo, output to log
+    fprintf('FlyDiscoAnalysis repository state:\n')
     this_script_path = mfilename('fullpath') ;
     source_folder_path = fileparts(this_script_path) ;
     git_report = get_git_report(source_folder_path) ;
     fprintf('%s', git_report) ;
-    
+
     % Process varargin parameters
     if length(varargin)==1 && isstruct(varargin{1}) ,
         argument_parameters = varargin{1} ;
@@ -201,8 +211,19 @@ function FlyDiscoPipeline(expdir, varargin)
     end
     
     % First, get the settingsdir
-    settingsdir = lookup_in_struct(argument_parameters, 'settingsdir', internal_settings_folder_path()) ;
-    
+    settingsdir = lookup_in_struct(argument_parameters, 'settingsdir', default_settings_folder_path()) ;
+
+    % If the settings folder is not part of the FDA repo, print a report about it
+    internal_settings_folder_path = fullfile(source_folder_path, 'settings-internal') ;
+    canonical_settings_folder_path = realpath(settingsdir) ;
+    fprintf('Settings folder repository state:\n')
+    if strcmp(canonical_settings_folder_path, internal_settings_folder_path) ,
+        fprintf('(Using internal settings folder)\n\n\n')
+    else
+        settings_git_report = get_git_report(settingsdir) ;
+        fprintf('%s', settings_git_report) ;        
+    end
+
     % Get the metadata file path
     metadata_file_path = determine_metadata_file_path(expdir) ;
     

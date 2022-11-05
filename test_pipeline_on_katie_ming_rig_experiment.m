@@ -4,7 +4,7 @@ reset_test_experiment_folder(experiment_name);
 this_script_file_path = mfilename('fullpath') ;
 this_script_folder_path = fileparts(this_script_file_path) ;
 experiment_folder_path = fullfile(this_script_folder_path, 'analysis-test-folder', experiment_name) ;
-settings_folder_path = fullfile(this_script_folder_path, 'settings') ;
+settings_folder_path = fullfile(this_script_folder_path, 'settings-internal') ;
 
 % Read the experiment metadata to determine the analysis_protoocol
 metadata_file_path = determine_metadata_file_path(experiment_folder_path) ;
