@@ -3,7 +3,7 @@
 
 logfiledir = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/MetadataFixes';
 %%%CHANGE
-logfilename = 'expdirs_wk29_metadatachanges_logofauto.csv';
+logfilename = 'expdirs_wk40_metadatachanges_logofauto.csv';
 
 logfile = fullfile(logfiledir,logfilename);
 
@@ -229,10 +229,17 @@ fid2 = fopen(logfile,'a');
 % 'VNC2_JRC_SS79336_RigC_20220526T100256',...
 % 'VNC2_JRC_SS79336_RigD_20220526T100320'}
 %wk 29 line_name change SS89292
-explist = {'VNC2_JRC_SS84623_RigC_20220602T111440'};
-%wk 30
-explist = {};
-
+% explist = {'VNC2_JRC_SS84623_RigC_20220602T111440'};
+%wk 32 plate change to 4d
+% explist = {'VNC2_JRC_SS90436_RigD_20220721T110447'};
+%wk 38 line name error should be JRC_SS71988
+% explist = {'VNC2_JRC_SS88580_RigA_20220922T115517'};
+% line name error - should be SS50887
+% explist = {'VNC2_JRC_SS71988_RigC_2022092 2T120929'};
+% wk 39 line name error should be SS96599
+% explist = {'VNC2_JRC_SS90044_RigD_20220927T115344'}; 
+% wk 40experimenter boonek
+explist = textread('/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/wk40_experimentermetadatafix.txt','%s');
 % change screen_type for experiments with 0212 led protocol to 'non_olympiad_dickson_led5secVNC'
 % % explist = textread('/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirlist_0212ledprotocol.txt','%s');
 
@@ -246,6 +253,7 @@ explist = {};
 % redo experiments with bad metadata files after screen_type changed for
 % older led protocol - appending updates to the same csv file 
 % expnamelist = textread('/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/malformedmetadataexplist_bransonlab.txt','%s');
+%% 
 rootdatadir = '/groups/branson/bransonlab/flydisco_data';
 % for k =1:numel(expnamelist)
 %     explist{k} = fullfile(rootdatadir,expnamelist{k});
@@ -266,7 +274,8 @@ for j = 1:numel(explist)
     changestruct = struct;
     %         changestruct.experimenter = 'chenn';
 %     changestruct.experimenter = 'arrudar';
-    %       changestruct.plate = '4a';
+changestruct.experimenter = 'boonek';
+%           changestruct.plate = '4d';
     % also need to change expdir and ctrax results movie name manually
     % mv oldname newname
     %     changestruct.line = 'JRC_SS43660';
@@ -282,8 +291,12 @@ for j = 1:numel(explist)
     %     changestruct.line = 'JRC_SS53050';
     %     changestruct.line = 'JRC_SS66932';
     %     changestruct.line = 'JRC_SS67903';
+%     changestruct.line = 'JRC_SS71988';
+%         changestruct.line = ' JRC_SS96599';
+
+%     changestruct.line = 'JRC_SS50887';
 %     changestruct.line = 'JRC_SS74689';
-    changestruct.line = 'JRC_SS89292';
+%     changestruct.line = 'JRC_SS89292';
 %     changestruct.screen_type = 'non_olympiad_dickson_led5secVNC';
 %     changestruct.gender = 'b';
 % changestruct.notes_technical = 'used mouth pipette';

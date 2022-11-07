@@ -653,12 +653,21 @@ explist = {'/groups/branson/bransonlab/flydisco_data/NorpA_JHS_K_85321_RigB_2021
   plot(xs(idx))
   
 %% explore metadata 
-load /groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_VNC_20220406.mat
+% load /groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_VNC_20220406.mat
+load /groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_VNCall_20221102.mat
 % /groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_VNC_20220406.csv
+
+% restrict to VNC and VNC2 ( also contains non_olympiad_dickson_led5secVNC)
+expdirstruct = metadata;
+idx1 = strcmp({expdirstruct.screen_type},'non_olympiad_dickson_VNC');
+idx2 = strcmp({expdirstruct.screen_type},'non_olympiad_dickson_VNC2');
+idxall = idx1 + idx2;
+expdirstruct = expdirstruct(logical(idxall));
 
 [a,b,c] = unique({metadata.automated_pf});
 passnum = numel(find(c == 2)); %3155
 failnum = numel(find(c==1));%182
+% nannum = numel(find(c==2));
 
 metadata_fail = metadata(c==1);
 [aa,bb,cc] = unique({metadata_fail.automated_pf_category})
@@ -667,6 +676,12 @@ metadata_fail = metadata(c==1);
 
 [d, id] = findgroups({metadata_fail.automated_pf_category});
 counts = histcounts(d)
+%% line counts 20221103
+% [a,b,c] = unique({metadata.line});
+[a,b,c] = unique({metadata.automated_pf});
+metadata_pass = (metadata( c==2));
+[d, id] = findgroups({metadata_pass.line});
+counts = histcounts(d,numel(id))
 
 %% reprocessing for Katie
 load /groups/branson/home/robiea/Projects_data/Katie/TrpAforReprocessing.mat
