@@ -8,6 +8,6 @@ function result = bransonlab_configuration()
     %this_folder_path = fileparts(mfilename('fullpath')) ;
     %flydisco_analysis_path = fileparts(this_folder_path) ;
     %result.settings_folder_path = fullfile(flydisco_analysis_path, 'settings') ;
-    result.settings_folder_path = '/groups/branson/home/bransonlab/settings' ;
+    result.settings_folder_path = '/groups/branson/home/bransonlab/BransonFlyDiscoSettings/settings' ;
     result.does_use_per_user_folders = false ;
 end
