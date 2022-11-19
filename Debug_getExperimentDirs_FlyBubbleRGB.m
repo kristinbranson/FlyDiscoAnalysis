@@ -7,11 +7,21 @@ modpath
 % %% pull expdirs and load all metdata
 rootdatadir = '/groups/branson/bransonlab/flydisco_data';
 
+% %inputs to getExperimentDirsFlyDisco: 'metadatafile','Metadata.xml','expdirname','*','line_name','*', ...
+%     'date','*','nflies',false,'autocheckin',false,'movielength',false,'TrajNum',false,'autocheckcomplete',false);
+
+savefile = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_allflydisco';
+[expdirstruct] = getExperimentDirsFlyDisco(rootdatadir,'metadatafile','Metadata.xml','movielength',true,'TrajNum',true,'autocheckin',true,'autocheckcomplete',true);
+
+% savefile = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_VNC_week1';
+% [expdirstruct] = getExperimentDirsFlyDisco(rootdatadir,'metadatafile','Metadata.xml','expdirname','VNC','date','202103*','autocheckin',true,'autocheckcomplete',true);
+
+
 % savefile = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_AmpRec';
 % [expdirstruct] = getExperimentDirsFlyDisco(rootdatadir,'metadatafile','Metadata.xml','expdirname','AmpRec','date','202208*','autocheckin',true,'autocheckcomplete',true);
 
-savefile = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_VNC2_20221028';
-[expdirstruct] = getExperimentDirsFlyDisco(rootdatadir,'metadatafile','Metadata.xml','expdirname','VNC*','autocheckin',true,'autocheckcomplete',true);
+% savefile = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_VNCall_20221102';
+% [expdirstruct] = getExperimentDirsFlyDisco(rootdatadir,'metadatafile','Metadata.xml','expdirname','VNC*','autocheckin',true,'autocheckcomplete',true);
 
 % savefile = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_VNC2_20220915';
 % [expdirstruct] = getExperimentDirsFlyDisco(rootdatadir,'metadatafile','Metadata.xml','expdirname','VNC*','autocheckin',true,'autocheckcomplete',true);
@@ -23,8 +33,6 @@ savefile = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/
 % [expdirstruct] = getExperimentDirsFlyDisco(rootdatadir,'metadatafile','Metadata.xml','expdirname','VNC','autocheckin',true,'autocheckcomplete',true);
 
 
-% %inputs to getExperimentDirsFlyDisco: 'metadatafile','Metadata.xml','expdirname','*','line_name','*', ...
-%     'date','*','nflies',false,'autocheckin',false,'movielength',false,'TrajNum',false,'autocheckcomplete',false);
 
 % [expdirstruct] = getExperimentDirsFlyDisco(rootdatadir,varagin);
 
@@ -40,15 +48,22 @@ idx = strcmp({expdirstruct.screen_type},'non_olympiad_dickson_VNC2');
 expdirstruct = expdirstruct(idx);
 
 %% both screentypes for VNC
+% expdirstruct = metadata;
 idx1 = strcmp({expdirstruct.screen_type},'non_olympiad_dickson_VNC');
 idx2 = strcmp({expdirstruct.screen_type},'non_olympiad_dickson_VNC2');
-idxall = idx1 + idx2;
-expdirstruct = expdirstruct(logical(idxall));
+idx3 = strcmp({expdirstruct.screen_type},'non_olympiad_dickson_led5secVNC');
+idxall = idx1 + idx2 + idx3;
+expdirstruct2 = expdirstruct(logical(idxall));
 
 %% find experiments more recent than target date
-startdate = datenum('20220915T000000','yyyymmddTHHMMSS');
+startdate = datenum('20210328T000000','yyyymmddTHHMMSS');
 dates = datenum({expdirstruct.exp_datetime},'yyyymmddTHHMMSS');
 idxd = find(dates > startdate);
+expdirstruct = expdirstruct(idxd);
+%% find experiments older than target date
+startdate = datenum('20210328T000000','yyyymmddTHHMMSS');
+dates = datenum({expdirstruct.exp_datetime},'yyyymmddTHHMMSS');
+idxd = find(dates < startdate);
 expdirstruct = expdirstruct(idxd);
 %% make tsv with ALL metadata fields
 savefilecsv = [savefile,'.csv'];

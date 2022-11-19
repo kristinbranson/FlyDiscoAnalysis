@@ -653,12 +653,21 @@ explist = {'/groups/branson/bransonlab/flydisco_data/NorpA_JHS_K_85321_RigB_2021
   plot(xs(idx))
   
 %% explore metadata 
-load /groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_VNC_20220406.mat
+% load /groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_VNC_20220406.mat
+load /groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_VNCall_20221102.mat
 % /groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_VNC_20220406.csv
+
+% restrict to VNC and VNC2 ( also contains non_olympiad_dickson_led5secVNC)
+expdirstruct = metadata;
+idx1 = strcmp({expdirstruct.screen_type},'non_olympiad_dickson_VNC');
+idx2 = strcmp({expdirstruct.screen_type},'non_olympiad_dickson_VNC2');
+idxall = idx1 + idx2;
+expdirstruct = expdirstruct(logical(idxall));
 
 [a,b,c] = unique({metadata.automated_pf});
 passnum = numel(find(c == 2)); %3155
 failnum = numel(find(c==1));%182
+% nannum = numel(find(c==2));
 
 metadata_fail = metadata(c==1);
 [aa,bb,cc] = unique({metadata_fail.automated_pf_category})
@@ -667,6 +676,12 @@ metadata_fail = metadata(c==1);
 
 [d, id] = findgroups({metadata_fail.automated_pf_category});
 counts = histcounts(d)
+%% line counts 20221103
+% [a,b,c] = unique({metadata.line});
+[a,b,c] = unique({metadata.automated_pf});
+metadata_pass = (metadata( c==2));
+[d, id] = findgroups({metadata_pass.line});
+counts = histcounts(d,numel(id))
 
 %% reprocessing for Katie
 load /groups/branson/home/robiea/Projects_data/Katie/TrpAforReprocessing.mat
@@ -860,3 +875,86 @@ for i = 1:numel(explist)
 %     cmd = sprintf('ln -s %s %s', expdir, outdir);
     system(cmd)
 end
+%% add manual_failure to VNC expdir data pull
+load /groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/allVNC_20221116.mat
+savefile = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/allVNC_20221116_addedManualFail';
+for i= 1:numel(expdirstruct2)
+    failfile = fullfile(expdirstruct2(i).file_system_path,'manual_fail.txt');
+    if exist(failfile,'file')
+        expdirstruct2(i).manual_fail = 'F';
+        manual_fail_category = textread(failfile,'%s','delimiter','\n');
+        expdirstruct2(i).manual_fail_category = manual_fail_category;
+%         fprintf('%s\n',failfile)
+    end
+end
+save(savefile,'expdirstruct2');
+%% print out tsv
+load /groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/allVNC_20221116_addedManualFail.mat
+savefile = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/allVNC_20221116_addedManualFail';
+
+expdirstruct = expdirstruct2;
+fid = fopen([savefile,'.tsv'],'w');
+
+fprintf(fid,'%s\t %s\t %s\t %s\t  %s\t  %s\t %s\t %s\t %s\t %s\t %s \n','expname','date','datetime','linename','trajnum','notes_tech','notes_behav','automated_pf','auto_pf_category','manual_fail','manual_fail_category');
+
+for i = 1:numel(expdirstruct)  
+  [~,expname] = fileparts(expdirstruct(i).file_system_path);
+  datestr = expdirstruct(i).date;
+  datetimestr = expdirstruct(i).exp_datetime;
+  linename = expdirstruct(i).line;
+  trajnum = expdirstruct(i).trajnum;
+  notestech = expdirstruct(i).notes_technical;
+  notesbeh = expdirstruct(i).notes_behavioral;
+  autopf = expdirstruct(i).automated_pf;
+  autopfcat = expdirstruct(i).automated_pf_category;
+  manf = expdirstruct(i).manual_fail;
+  manfcat = cell2str(expdirstruct(i).manual_fail_category);
+
+
+%   notes = experiments_eddison(i).notes_curation;
+  fprintf(fid,'%s\t %s\t %s\t %s\t  %d\t  %s\t %s\t %s\t %s\t %s\t %s \n',expname, datestr,datetimestr,linename,trajnum,notestech,notesbeh,autopf,autopfcat,manf,manfcat);
+end
+
+fclose(fid);
+%% look at tracking for trajectory number 12+ 
+explist = textread('/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/hightrajnum_explist.txt','%s');
+rootdatadir = '/groups/branson/bransonlab/flydisco_data';
+
+for i = 1:numel(explist)
+    if exist(fullfile(rootdatadir,explist{i},'manual_fail.txt'),'file')
+        i
+        disp('manual fail')
+        continue
+    elseif exist(fullfile(rootdatadir,explist{i},'automatic_checks_complete_results.txt'),'file')
+        autochecks = ReadParams(fullfile(rootdatadir,explist{i},'automatic_checks_complete_results.txt'));
+        if autochecks.automated_pf == 'F'||strcmp(autochecks.automated_pf,'NaN')
+            i
+            disp('auto fail')
+            continue
+        elseif isempty(dir(fullfile(rootdatadir,explist{i},'*.mp4')))
+            i
+            disp(explist{i})
+            playfmf('filename',fullfile(rootdatadir,explist{i},'movie.ufmf'))
+            uiwait
+        else
+            i
+            moviename = dir(fullfile(rootdatadir,explist{i},'*.mp4'));
+            disp(fullfile(rootdatadir,explist{i},moviename.name))
+            implay(fullfile(rootdatadir,explist{i},moviename.name))
+            uiwait
+        end
+    elseif isempty(dir(fullfile(rootdatadir,explist{i},'*.mp4')))
+        i
+        disp(explist{i})
+        playfmf('filename',fullfile(rootdatadir,explist{i},'movie.ufmf'))
+        uiwait
+    else
+        i
+        moviename = dir(fullfile(rootdatadir,explist{i},'*.mp4'));
+        disp(fullfile(rootdatadir,explist{i},moviename.name))
+        implay(fullfile(rootdatadir,explist{i},moviename.name))
+        uiwait
+    end
+
+end
+
