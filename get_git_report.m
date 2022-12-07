@@ -16,15 +16,20 @@ function breadcrumb_string = get_git_report(source_repo_folder_path)
         return
     end
     
+    % Get the git status
+    [return_code, git_status] = system('env GIT_SSL_NO_VERIFY=true GIT_TERMINAL_PROMPT=0 git status') ;    
+    if return_code ~= 0 ,
+        breadcrumb_string = sprintf('Source repo:\n%s\n\nCommit hash:\n["git status" failed!  If this is not a git repository, it will likely lead to tears eventually!]\n\n', ...
+                                    source_repo_folder_path) ;
+        return
+    end
+    
     % Get the git hash
     stdout = system_with_error_handling('env GIT_SSL_NO_VERIFY=true GIT_TERMINAL_PROMPT=0 git rev-parse --verify HEAD') ;
     commit_hash = strtrim(stdout) ;
 
     % Get the git remote report
     git_remote_report = system_with_error_handling('env GIT_SSL_NO_VERIFY=true GIT_TERMINAL_PROMPT=0 git remote -v') ;    
-    
-    % Get the git status
-    git_status = system_with_error_handling('env GIT_SSL_NO_VERIFY=true GIT_TERMINAL_PROMPT=0 git status') ;    
     
     % Get the recent git log
     git_log = system_with_error_handling('env GIT_SSL_NO_VERIFY=true GIT_TERMINAL_PROMPT=0 git log --graph --oneline --max-count 10 | cat') ;
