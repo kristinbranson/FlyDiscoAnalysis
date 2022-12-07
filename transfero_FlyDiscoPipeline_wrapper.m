@@ -6,7 +6,7 @@ function transfero_FlyDiscoPipeline_wrapper(experiment_folder_path, user_name_fo
     if ~exist('overriding_analysis_parameters_as_list', 'var') || isempty(overriding_analysis_parameters_as_list) ,
         overriding_analysis_parameters_as_list = cell(1, 0) ;
     end
-    if ~exist('do_try', 'var') || is_empty(do_try) ,
+    if ~exist('do_try', 'var') || isempty(do_try) ,
         % true means to wrap the main call to FlyDiscoPipeline in a try-catch clause
         % setting this to false is useful when debugging
         do_try = true ;
