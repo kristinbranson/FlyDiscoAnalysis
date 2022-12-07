@@ -52,12 +52,12 @@ function transfero_FlyDiscoPipeline_wrapper(experiment_folder_path, user_name_fo
     analysis_parameters.doautomaticcheckscomplete = 'off' ;
     
     % Call the function to do the real work
+    main_pipeline_exception_maybe = [] ;
     if do_try ,
         try
             FlyDiscoPipeline(experiment_folder_path, analysis_parameters) ;
-        catch me ,
-            fprintf('There was an uncaught error while running the pipeline:\n')
-            fprintf('%s\n', me.getReport()) ;            
+        catch pipeline_exception ,
+            main_pipeline_exception_maybe = pipeline_exception ;
         end
     else
         FlyDiscoPipeline(experiment_folder_path, analysis_parameters) ;
@@ -96,4 +96,11 @@ function transfero_FlyDiscoPipeline_wrapper(experiment_folder_path, user_name_fo
     
     % Call the function to do the real work
     FlyDiscoPipeline(experiment_folder_path, caboose_analysis_parameters) ;
+    
+    % If there was an exception thrown during the main pipeline, rethrow it so that
+    % we exit with an error return code when running in batch mode.
+    if ~isempty(main_pipeline_exception_maybe) ,
+        main_pipeline_exception = main_pipeline_exception_maybe(1) ;
+        rethrow(main_pipeline_exception) ;
+    end
 end
