@@ -1,6 +1,6 @@
 function transfero_FlyDiscoPipeline_wrapper(experiment_folder_path, user_name_for_configuration_purposes, overriding_analysis_parameters_as_list, do_try)
-    % This is the function that is called from fly_disco_analysis_pipeline.py, 
-    % which is called by Transfero for each experiment to be analyzed.
+    % This is the function that is called from transfero_FlyDiscoPipeline_wrapper_wrapper.py, 
+    % which is called by Transfero once for each experiment to be analyzed.
   
     % Deal with args
     if ~exist('overriding_analysis_parameters_as_list', 'var') || isempty(overriding_analysis_parameters_as_list) ,
