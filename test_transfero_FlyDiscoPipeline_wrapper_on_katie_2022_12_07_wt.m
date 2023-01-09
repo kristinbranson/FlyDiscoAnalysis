@@ -1,7 +1,7 @@
 % This isn't a proper test b/c it doesn't check whether anything worked
 
 user_name_for_configuration_purposes = 'rubinlab' ;                                
-analysis_parameters = cell(1,0) ;
+analysis_parameters = {'do_try', true} ;
 % analysis_parameters = ...
 %          {'doautomaticchecksincoming',true,...
 %           'doflytracking',true, ...
@@ -18,7 +18,6 @@ analysis_parameters = cell(1,0) ;
 %           'doextradiagnostics',false,...
 %           'doanalysisprotocol',true,...
 %           'doautomaticcheckscomplete',false};
-do_try = true ;
 
 % Where does this script live?
 this_script_path = mfilename('fullpath') ;
@@ -45,5 +44,5 @@ experiment_count = length(folder_path_from_experiment_index) ;
 for experiment_index = 1 : experiment_count ,
     experiment_folder_path = folder_path_from_experiment_index{experiment_index} ;
     fprintf('Running transfero_FlyDiscoPipeline_wrapper on experiment index %d...\n', experiment_index) ;
-    transfero_FlyDiscoPipeline_wrapper(experiment_folder_path, user_name_for_configuration_purposes, analysis_parameters, do_try) ;
+    transfero_FlyDiscoPipeline_wrapper(experiment_folder_path, user_name_for_configuration_purposes, analysis_parameters{:}) ;
 end
