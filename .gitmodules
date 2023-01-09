@@ -5,7 +5,7 @@
 	path = FlyTracker
 	url = https://github.com/kristinbranson/FlyTracker
 [submodule "goldblum/fuster"]
-	path = goldblum/fuster
+	path = fuster
 	url = https://github.com/JaneliaSciComp/fuster
 [submodule "tpt"]
 	path = tpt
