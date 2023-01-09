@@ -23,7 +23,7 @@ function transfero_FlyDiscoPipeline_wrapper(experiment_folder_path, user_name_fo
         argument_analysis_parameters = optional_arguments_as_struct ;
     end           
     
-    % Load the per-lab Goldblum/FDA configuration file
+    % Load the per-lab FDA configuration file
     %user_name = get_user_name() ;
     configuration_function_name = sprintf('%s_configuration', user_name_for_configuration_purposes) ;
     configuration = feval(configuration_function_name) ;
