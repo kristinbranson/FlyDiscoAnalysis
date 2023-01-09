@@ -77,7 +77,7 @@ end
 fprintf('Singularity image file is %s\n', apt_params.singularityimg) ;
 if docomputemd5s ,
   singularity_image_file_md5 = compute_md5_on_local(apt_params.singularityimg) ;
-  fprintf('The md5 hash of the singularity image file is %s\n', apt_params.singularityimg, singularity_image_file_md5) ;
+  fprintf('The md5 hash of the singularity image file is %s\n', singularity_image_file_md5) ;
 end
 
 %% construct the command

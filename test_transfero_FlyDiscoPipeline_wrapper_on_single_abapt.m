@@ -24,10 +24,10 @@ user_name_for_configuration_purposes = 'bransonlab' ;
 %           'doanalysisprotocol',true,...
 %           'doautomaticcheckscomplete',false, ...
 %           'doapt',false} ;
-settings_folder_path = fullfile(fly_disco_analysis_folder_path, 'settings-internal') ;
-analysis_parameters = ...
-    {'settingsdir',settings_folder_path} ;  % for now, want to use internal settings
-do_try = false ;
+settings_folder_path = fullfile(fly_disco_analysis_folder_path, 'settings-internal') ;  % for now, want to use internal settings
+optional_argument_list = ...
+    {'settingsdir', settings_folder_path, ...
+     'do_try', false} ; 
 
 read_only_experiments_folder_path = fullfile(fly_disco_folder_path, 'example-experiments', 'single-apt-able-experiment-with-all-but-apt-track-read-only') ;
 working_experiments_folder_path = fullfile(fly_disco_folder_path, 'example-experiments', 'single-apt-able-experiment-with-all-but-apt-track') ;
@@ -49,5 +49,5 @@ experiment_count = length(folder_path_from_experiment_index) ;
 for experiment_index = 1 : experiment_count ,
     experiment_folder_path = folder_path_from_experiment_index{experiment_index} ;
     fprintf('Running transfero_FlyDiscoPipeline_wrapper on experiment index %d...\n', experiment_index) ;
-    transfero_FlyDiscoPipeline_wrapper(experiment_folder_path, user_name_for_configuration_purposes, analysis_parameters, do_try) ;
+    transfero_FlyDiscoPipeline_wrapper(experiment_folder_path, user_name_for_configuration_purposes, optional_argument_list{:}) ;
 end
