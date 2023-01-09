@@ -6,13 +6,28 @@ jobid = nan;
 
 version = '0.1';
 
-[analysis_protocol,settingsdir,datalocparamsfilestr,rootoutdir,sshhost,dowait,dryrun,waitchecktime,startframe,endframe,verbose,dooverwrite] = ...
+[analysis_protocol,...
+ settingsdir, ...
+ dataloc_params, ...
+ datalocparamsfilestr, ... 
+ rootoutdir, ...
+ sshhost, ...
+ cluster_billing_account_name, ...
+ dowait, ...
+ dryrun, ...
+ waitchecktime, ...
+ startframe, ...
+ endframe, ...
+ verbose, ...
+ dooverwrite] = ...
   myparse(varargin,...
   'analysis_protocol','current_bubble',...
   'settingsdir',default_settings_folder_path(),...
+  'dataloc_params',[], ...
   'datalocparamsfilestr','dataloc_params.txt',...
   'rootoutdir','',...
-  'sshhost','',...
+  'sshhost','submit.int.janelia.org',...
+  'cluster_billing_account_name', '', ...
   'dowait',true,...
   'dryrun',false,...
   'waitchecktime',10,...
@@ -20,14 +35,17 @@ version = '0.1';
   'endframe',[],...
   'verbose',1,...
   'dooverwrite',true);
+% Empty sshhost means to run locally
 
 if verbose >= 1,
   fprintf('Starting FlyDiscoAPTTrack version %s\n',version);
 end
 
-%% read in the data locations
-datalocparamsfile = fullfile(settingsdir,analysis_protocol,datalocparamsfilestr);
-dataloc_params = ReadParams(datalocparamsfile);
+%% read in the data locations if not passed in via dataloc_params
+if isempty(dataloc_params) ,
+  datalocparamsfile = fullfile(settingsdir,analysis_protocol,datalocparamsfilestr);
+  dataloc_params = ReadParams(datalocparamsfile);
+end
 
 %% read in apt params
 
@@ -121,9 +139,15 @@ bindpathstr = sprintf(' -B %s',apt_params.bindpaths{:});
 
 singcmd = sprintf('singularity exec --nv %s %s bash -c %s',bindpathstr,apt_params.singularityimg,escape_string_for_bash(aptcmd));
 if apt_params.dobsub,
-  bsubcmd = sprintf('bsub -n 1 -J apt_%s -gpu "num=1" -q %s -o %s -R"affinity[core(1)]" %s 2>&1',expname,apt_params.gpuqueue,bsublogfile,escape_string_for_bash(singcmd));
+  P_option = fif(isempty(cluster_billing_account_name), '', sprintf('-P %s', cluster_billing_account_name)) ;  
+  bsubcmd = sprintf('bsub %s -n 1 -J apt_%s -gpu "num=1" -q %s -o %s -R"affinity[core(1)]" %s 2>&1', ...
+                    P_option, ...
+                    expname, ...
+                    apt_params.gpuqueue, ...
+                    bsublogfile, ...
+                    escape_string_for_bash(singcmd));
   if ~isempty(sshhost),
-    sshcmd = sprintf('ssh %s %s',sshhost,escape_string_for_bash(bsubcmd));
+    sshcmd = sprintf('ssh %s %s', sshhost, escape_string_for_bash(bsubcmd));
     cmd = sshcmd;
   else
     cmd = bsubcmd;
@@ -157,22 +181,22 @@ if ~dryrun,
 
       while true,
 
-        result = get_single_bsub_job_status(jobid,sshhost);
+        numeric_bsub_job_status = get_bsub_job_status(jobid,sshhost);
 
         elapsedtime = toc(starttime);
         if verbose >= 2,
           fprintf('Checking APT track job status after %f seconds...\n',elapsedtime);
         end
 
-        if result == -1, % errored out
+        if numeric_bsub_job_status == -1, % errored out
           success = false;
           msg = sprintf('APT track command exited without completion.');
-          msgs{end+1} = msg;
+          msgs{end+1} = msg; %#ok<AGROW>
           if verbose >= 1,
             fprintf('%s\n',msg);
           end
           return;
-        elseif result == 1,
+        elseif numeric_bsub_job_status == 1,
           if exist(outtrkfile,'file'),
             if verbose >= 1,
               fprintf('APT track command completed, output trk file found.\n');
@@ -185,7 +209,7 @@ if ~dryrun,
               fprintf('%s\n',msg);
             end
             success = false;
-            msgs{end+1} = msg;
+            msgs{end+1} = msg; %#ok<AGROW>
             return;
           end
         end
@@ -196,7 +220,7 @@ if ~dryrun,
             fprintf('%s\n',msg);
           end
           success = false;
-          msgs{end+1} = msg;
+          msgs{end+1} = msg; %#ok<AGROW>
           return;
         end
         if apt_params.maxupdatetime < apt_params.maxwaittime,
@@ -219,7 +243,7 @@ if ~dryrun,
             end
 
             success = false;
-            msgs{end+1} = msg;
+            msgs{end+1} = msg; %#ok<AGROW>
             return;
           end
         end

@@ -1,10 +1,10 @@
-function transfero_FlyDiscoPipeline_wrapper(experiment_folder_path, user_name_for_configuration_purposes, overriding_analysis_parameters_as_list, do_try)
+function transfero_FlyDiscoPipeline_wrapper(experiment_folder_path, user_name_for_configuration_purposes, argument_analysis_parameters_as_list, do_try)
     % This is the function that is called from transfero_FlyDiscoPipeline_wrapper_wrapper.py, 
     % which is called by Transfero once for each experiment to be analyzed.
   
     % Deal with args
-    if ~exist('overriding_analysis_parameters_as_list', 'var') || isempty(overriding_analysis_parameters_as_list) ,
-        overriding_analysis_parameters_as_list = cell(1, 0) ;
+    if ~exist('argument_analysis_parameters_as_list', 'var') || isempty(argument_analysis_parameters_as_list) ,
+        argument_analysis_parameters_as_list = cell(1, 0) ;
     end
     if ~exist('do_try', 'var') || isempty(do_try) ,
         % true means to wrap the main call to FlyDiscoPipeline in a try-catch clause
@@ -39,10 +39,11 @@ function transfero_FlyDiscoPipeline_wrapper(experiment_folder_path, user_name_fo
     fprintf('%s\n\n', asterisks_string) ;    
     
     % Convert param list to a struct
-    overriding_analysis_parameters = struct_from_name_value_list(overriding_analysis_parameters_as_list) ;
+    overriding_analysis_parameters = struct_from_name_value_list(argument_analysis_parameters_as_list) ;
 
     % Build up the parameters cell array
-    default_analysis_parameters = struct('settingsdir', {settings_folder_path}) ;
+    default_analysis_parameters = struct('settingsdir', {settings_folder_path}, ...
+                                         'cluster_billing_account_name', cluster_billing_account_name) ;
     
     % Combine the caller-supplied analysis parameters with the defaults       
     analysis_parameters_with_overrides = merge_structs(default_analysis_parameters, overriding_analysis_parameters) ;
