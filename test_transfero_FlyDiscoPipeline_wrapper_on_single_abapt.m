@@ -29,7 +29,6 @@ analysis_parameters = ...
     {'settingsdir',settings_folder_path} ;  % for now, want to use internal settings
 do_try = false ;
 
-%settings_folder_path = fullfile(fly_disco_analysis_folder_path, 'settings-internal') ;
 read_only_experiments_folder_path = fullfile(fly_disco_folder_path, 'example-experiments', 'single-apt-able-experiment-with-all-but-apt-track-read-only') ;
 working_experiments_folder_path = fullfile(fly_disco_folder_path, 'example-experiments', 'single-apt-able-experiment-with-all-but-apt-track') ;
 
