@@ -9,8 +9,8 @@ function modpath()
 %   fly_bowl_analysis_modpath_script_path = fullfile(fly_bowl_analysis_folder_path, 'modpath.m') ;
 %   run(fly_bowl_analysis_modpath_script_path) ;  
   
-  % Add the fuster folder
-  addpath(fullfile(path_to_this_folder, 'fuster')) ;
+%   % Add the fuster folder
+%   addpath(fullfile(path_to_this_folder, 'fuster')) ;
   
   % Add this folder
   addpath(path_to_this_folder) ;  % do this so that we don't have to stay in this folder
