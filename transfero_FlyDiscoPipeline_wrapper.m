@@ -19,13 +19,13 @@ function transfero_FlyDiscoPipeline_wrapper(experiment_folder_path, user_name_fo
     
     % Unpack the per-lab configuration file
     cluster_billing_account_name = configuration.cluster_billing_account_name ;
-    host_name_from_rig_index = configuration.host_name_from_rig_index ;
-    rig_user_name_from_rig_index = configuration.rig_user_name_from_rig_index ;
-    data_folder_path_from_rig_index = configuration.data_folder_path_from_rig_index ;
-    destination_folder = configuration.destination_folder ;    
-    settings_folder_path = configuration.settings_folder_path
+    %host_name_from_rig_index = configuration.host_name_from_rig_index ;
+    %rig_user_name_from_rig_index = configuration.rig_user_name_from_rig_index ;
+    %data_folder_path_from_rig_index = configuration.data_folder_path_from_rig_index ;
+    %destination_folder = configuration.destination_folder ;    
+    settings_folder_path = configuration.settings_folder_path ;
     %does_use_per_user_folders = configuration.does_use_per_user_folders ;
-    to_process_folder_name = 'to-process' ;
+    %to_process_folder_name = 'to-process' ;
 
     % Print the date to the stdout, so it gets logged
     dt = datetime('now') ;
@@ -39,14 +39,14 @@ function transfero_FlyDiscoPipeline_wrapper(experiment_folder_path, user_name_fo
     fprintf('%s\n\n', asterisks_string) ;    
     
     % Convert param list to a struct
-    overriding_analysis_parameters = struct_from_name_value_list(argument_analysis_parameters_as_list) ;
+    argument_analysis_parameters = struct_from_name_value_list(argument_analysis_parameters_as_list) ;
 
     % Build up the parameters cell array
     default_analysis_parameters = struct('settingsdir', {settings_folder_path}, ...
                                          'cluster_billing_account_name', cluster_billing_account_name) ;
     
     % Combine the caller-supplied analysis parameters with the defaults       
-    analysis_parameters_with_overrides = merge_structs(default_analysis_parameters, overriding_analysis_parameters) ;
+    analysis_parameters_with_overrides = merge_structs(default_analysis_parameters, argument_analysis_parameters) ;
 
     % Now turn off the auto-checks-complete, we do that separately, afterwards
     analysis_parameters = analysis_parameters_with_overrides ;
