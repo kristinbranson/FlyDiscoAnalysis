@@ -100,6 +100,7 @@ function transfero_FlyDiscoPipeline_wrapper(experiment_folder_path, user_name_fo
     caboose_phase_analysis_parameters.docomputeperframestats = 'off' ;
     caboose_phase_analysis_parameters.doplotperframestats = 'off' ;
     caboose_phase_analysis_parameters.domakectraxresultsmovie = 'off' ;
+    caboose_phase_analysis_parameters.doapt = 'off' ;
     caboose_phase_analysis_parameters.doextradiagnostics = 'off' ;
     caboose_phase_analysis_parameters.doanalysisprotocol = 'off' ;
     
