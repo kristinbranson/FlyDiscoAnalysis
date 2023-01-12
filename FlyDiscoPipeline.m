@@ -686,6 +686,13 @@ function FlyDiscoPipeline(expdir, varargin)
             if forcecompute || todo ,
                 fprintf('Running APT...\n');                
                 aptrepopath = fullfile(source_folder_path, 'APT') ;  % use the subrepo APT
+                % Are we running on a submit host?  If not, use submit.int.janelia.org.
+                [return_code, ~] = system('/usr/bin/which bsub') ;
+                if return_code == 0 ,
+                    submit_host_name = '' ;
+                else
+                    submit_host_name = 'submit.int.janelia.org' ;
+                end
                 [success, msgs] = ...
                     FlyDiscoAPTTrack(expdir, ...
                                      'settingsdir',settingsdir,...
@@ -697,7 +704,8 @@ function FlyDiscoPipeline(expdir, varargin)
                                      'dooverwrite',forcecompute, ...
                                      'cluster_billing_account_name', cluster_billing_account_name, ...
                                      'aptrepopath', aptrepopath, ...
-                                     'docomputemd5s', true) ;
+                                     'docomputemd5s', true, ...
+                                     'sshhost', submit_host_name) ;
                 if ~success ,
                     flydisco_pipeline_error(stage, msgs) ;
                 end
