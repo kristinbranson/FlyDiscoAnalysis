@@ -68,18 +68,25 @@ end
   
 %% Print the md5 hashes of the label file and the singularity image
 fprintf('Label file is %s\n', apt_params.lbl_file) ;
+[~,~,~,lbl_file_modification_datetime] = simple_dir(apt_params.lbl_file) ;
+lbl_file_modification_datetime.Format = 'yyyy-MM-dd HH:mm:ss.SSS' ;
+fprintf('The modification time of the label file is %s\n', string(lbl_file_modification_datetime)) ;
 if docomputemd5s ,
   label_file_md5 = compute_md5_on_local(apt_params.lbl_file) ;
   fprintf('The md5 hash of the label file is %s\n', label_file_md5) ;
 end
 fprintf('Singularity image file is %s\n', apt_params.singularityimg) ;
+[~,~,~,sing_image_file_modification_datetime] = simple_dir(apt_params.singularityimg) ;
+sing_image_file_modification_datetime.Format = 'yyyy-MM-dd HH:mm:ss.SSS' ;
+fprintf('The modification time of the singularity image file is %s\n', string(sing_image_file_modification_datetime)) ;
 if docomputemd5s ,
   singularity_image_file_md5 = compute_md5_on_local(apt_params.singularityimg) ;
   fprintf('The md5 hash of the singularity image file is %s\n', singularity_image_file_md5) ;
 end
 
-%% Print a bunch of of useful info about the .lbl file, APT repo status
-APT_Labeler_printInfo_without_adding_APT_to_path(apt_params.lbl_file) ;
+% %% Print a bunch of of useful info about the .lbl file, APT repo status
+% This has issues b/c APT and JAABA have namespace collisions
+% APT_Labeler_printInfo_without_adding_APT_to_path(apt_params.lbl_file) ;
 
 %% construct the command
 

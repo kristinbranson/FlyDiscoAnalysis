@@ -29,7 +29,7 @@ settings_folder_path = fullfile(fly_disco_analysis_folder_path, 'settings-intern
 optional_argument_list = ...
     {'settingsdir', settings_folder_path, ...
      'do_try', false} ; 
-do_use_bqueue = true ;
+do_use_bqueue = false ;
 do_actually_submit_jobs = true ;
 ssh_host_name = 'submit.int.janelia.org' ;
 
