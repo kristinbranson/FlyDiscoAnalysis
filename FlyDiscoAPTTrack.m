@@ -39,7 +39,7 @@ version = '0.1';
   'dooverwrite',true, ...
   'aptrepopath','', ...
   'docomputemd5s', false);
-% Empty sshhost means to run locally
+% Empty sshhost means to bsub locally
 
 if verbose >= 1,
   fprintf('Starting FlyDiscoAPTTrack version %s\n',version);
@@ -62,13 +62,11 @@ end
 apt_params = ReadParams(aptparamsfile);
 
 %% if aptrepopath was passed as an argument, override the one specified in the APT params file
-
 if ~isempty(aptrepopath),
   apt_params.aptrepopath = aptrepopath ;
 end
   
-%% Print the md5 hashes of the label file and the singularity image, for the worry-warts
-
+%% Print the md5 hashes of the label file and the singularity image
 fprintf('Label file is %s\n', apt_params.lbl_file) ;
 if docomputemd5s ,
   label_file_md5 = compute_md5_on_local(apt_params.lbl_file) ;
@@ -79,6 +77,9 @@ if docomputemd5s ,
   singularity_image_file_md5 = compute_md5_on_local(apt_params.singularityimg) ;
   fprintf('The md5 hash of the singularity image file is %s\n', singularity_image_file_md5) ;
 end
+
+%% Print a bunch of of useful info about the .lbl file, APT repo status
+APT_Labeler_printInfo_without_adding_APT_to_path(apt_params.lbl_file) ;
 
 %% construct the command
 
