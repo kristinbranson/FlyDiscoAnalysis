@@ -34,7 +34,7 @@ do_actually_submit_jobs = true ;
 ssh_host_name = 'submit.int.janelia.org' ;
 
 read_only_experiments_folder_path = fullfile(fly_disco_folder_path, 'example-experiments', 'passing-test-suite-experiments-with-tracking-read-only') ;
-working_experiments_folder_path = fullfile(fly_disco_folder_path, 'example-experiments', 'passing-test-suite-experiments-with-tracking') ;
+working_experiments_folder_path = fullfile(fly_disco_folder_path, 'example-experiments', 'passing-test-suite-experiments-with-tracking-2') ;
 
 % Delete the working experiments folder
 if exist(working_experiments_folder_path, 'file') ,

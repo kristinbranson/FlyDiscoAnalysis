@@ -69,7 +69,8 @@ end
 %% Print the md5 hashes of the label file and the singularity image
 fprintf('Label file is %s\n', apt_params.lbl_file) ;
 [~,~,~,lbl_file_modification_datetime] = simple_dir(apt_params.lbl_file) ;
-lbl_file_modification_datetime.Format = 'yyyy-MM-dd HH:mm:ss.SSS' ;
+lbl_file_modification_datetime.TimeZone = 'local' ;
+lbl_file_modification_datetime.Format = 'yyyy-MM-dd HH:mm:ss z' ;
 fprintf('The modification time of the label file is %s\n', string(lbl_file_modification_datetime)) ;
 if docomputemd5s ,
   label_file_md5 = compute_md5_on_local(apt_params.lbl_file) ;
@@ -77,7 +78,8 @@ if docomputemd5s ,
 end
 fprintf('Singularity image file is %s\n', apt_params.singularityimg) ;
 [~,~,~,sing_image_file_modification_datetime] = simple_dir(apt_params.singularityimg) ;
-sing_image_file_modification_datetime.Format = 'yyyy-MM-dd HH:mm:ss.SSS' ;
+sing_image_file_modification_datetime.TimeZone = 'local' ;
+sing_image_file_modification_datetime.Format = 'yyyy-MM-dd HH:mm:ss z' ;
 fprintf('The modification time of the singularity image file is %s\n', string(sing_image_file_modification_datetime)) ;
 if docomputemd5s ,
   singularity_image_file_md5 = compute_md5_on_local(apt_params.singularityimg) ;
