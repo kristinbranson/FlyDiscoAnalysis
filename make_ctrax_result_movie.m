@@ -458,7 +458,7 @@ for segi = 1:numel(firstframes),
           elapsed_time = toc(tic_id) ;  % seconds
           frame_pace = elapsed_time/frame_count_per_fprintf ;
           fprintf('Just wrote frame %d, write rate = %f s/fr\n',frame,frame_pace);
-          print_matlab_memory_usage() ;
+          % print_matlab_memory_usage() ;
           tic_id = tic() ;
       end
     end

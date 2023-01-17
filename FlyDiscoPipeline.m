@@ -13,7 +13,7 @@ function FlyDiscoPipeline(expdir, varargin)
     %   flies can be, and what the shape of the arena is.  (A number of
     %   analysis-protocol folders are provided in the software repository that
     %   contains the source code for FlyDiscoPipeline(), within a folder named
-    %   "settings-for-testing" at the top level of the repository.)  The screen_type
+    %   "settings-internal" at the top level of the repository.)  The screen_type
     %   of the experiment is used to determine which analysis-protocol folder is
     %   used to analyze that experiment.  First, a folder named
     %   'current_'+screen_type is checked for (where "+" here represents
@@ -96,6 +96,9 @@ function FlyDiscoPipeline(expdir, varargin)
     %           Make a .mp4 movie summarizing the results of the tracking.  (The
     %           CTRAX in the name is vestigial---CTRAX is not used anymore.)
     %           Default: 'on'. 
+    %       apt
+    %           Run APT, the Advanced Part Tracker, on the video.
+    %           Default: 'off'. 
     %       automaticcheckscomplete
     %           Perform a set of final checks that the analysis of the experiment
     %           has been completed successfully.
@@ -163,6 +166,7 @@ function FlyDiscoPipeline(expdir, varargin)
     %       docomputeperframestats
     %       doplotperframestats
     %       domakectraxresultsmovie
+    %       doapt
     %       doautomaticcheckscomplete
     %       requiredfiles_automaticchecksincoming
     %       requiredfiles_flytracker
@@ -174,6 +178,7 @@ function FlyDiscoPipeline(expdir, varargin)
     %       requiredfiles_computehoghofperframefeatures
     %       requiredfiles_plotperframestats
     %       requiredfiles_makectraxresultsmovie
+    %       requiredfiles_apt    
     %       requiredfiles_automaticcheckscomplete
     %
     % The default value for all these parameters is specified by the function
@@ -284,6 +289,7 @@ function FlyDiscoPipeline(expdir, varargin)
     docomputeperframestats = lookup_in_struct(analysis_parameters, 'docomputeperframestats') ;
     doplotperframestats = lookup_in_struct(analysis_parameters, 'doplotperframestats') ;
     domakectraxresultsmovie = lookup_in_struct(analysis_parameters, 'domakectraxresultsmovie') ;
+    doapt = lookup_in_struct(analysis_parameters, 'doapt') ;
     doautomaticcheckscomplete = lookup_in_struct(analysis_parameters, 'doautomaticcheckscomplete') ;
     requiredfiles_automaticchecksincoming = lookup_in_struct(analysis_parameters, 'requiredfiles_automaticchecksincoming') ;
     requiredfiles_flytracker = lookup_in_struct(analysis_parameters, 'requiredfiles_flytracker') ;
@@ -295,13 +301,15 @@ function FlyDiscoPipeline(expdir, varargin)
     requiredfiles_computehoghofperframefeatures = lookup_in_struct(analysis_parameters, 'requiredfiles_computehoghofperframefeatures') ;
     requiredfiles_plotperframestats = lookup_in_struct(analysis_parameters, 'requiredfiles_plotperframestats') ;    
     requiredfiles_makectraxresultsmovie = lookup_in_struct(analysis_parameters, 'requiredfiles_makectraxresultsmovie') ;
+    requiredfiles_apt = lookup_in_struct(analysis_parameters, 'requiredfiles_apt') ;
     requiredfiles_automaticcheckscomplete = lookup_in_struct(analysis_parameters, 'requiredfiles_automaticcheckscomplete') ;
-    
+    cluster_billing_account_name = lookup_in_struct(analysis_parameters, 'cluster_billing_account_name') ;
+
     % Read in the dataloc params
     datalocparamsfile = fullfile(settingsdir,analysis_protocol,datalocparamsfilestr);
     dataloc_params = ReadParams(datalocparamsfile);
     
-    % Coerse all the do* variables to on/off/force
+    % Coerce all the do* variables to on/off/force
     doautomaticchecksincoming = coerce_to_on_off_force(doautomaticchecksincoming) ;
     doflytracking = coerce_to_on_off_force(doflytracking) ;
     doregistration = coerce_to_on_off_force(doregistration) ;
@@ -316,26 +324,26 @@ function FlyDiscoPipeline(expdir, varargin)
     domakectraxresultsmovie = coerce_to_on_off_force(domakectraxresultsmovie) ;
     % doextradiagnostics = coerce_to_on_off_force(doextradiagnostics) ; %#ok<NASGU>
     % doanalysisprotocol = coerce_to_on_off_force(doanalysisprotocol) ; %#ok<NASGU>
+    doapt = coerce_to_on_off_force(doapt) ;
     doautomaticcheckscomplete = coerce_to_on_off_force(doautomaticcheckscomplete) ;
     
     % Print the settings values in use
     variable_names_to_print = ...
         { 'settingsdir', ...
-        'analysis_protocol', ...
-        'doautomaticchecksincoming', ...
-        'doflytracking',  ...
-        'doregistration', ...
-        'doledonoffdetection', ...
-        'dosexclassification', ...
-        'docomputeperframefeatures', ...
-        'docomputeperframestats', ...
-        'docomputehoghofperframefeatures', ...
-        'dojaabadetect', ...
-        'doplotperframestats', ...
-        'domakectraxresultsmovie', ...
-        'doautomaticcheckscomplete' }' ;
-%        'doextradiagnostics', ...
-%        'doanalysisprotocol', ...
+          'analysis_protocol', ...
+          'doautomaticchecksincoming', ...
+          'doflytracking',  ...
+          'doregistration', ...
+          'doledonoffdetection', ...
+          'dosexclassification', ...
+          'docomputeperframefeatures', ...
+          'docomputeperframestats', ...
+          'docomputehoghofperframefeatures', ...
+          'dojaabadetect', ...
+          'doplotperframestats', ...
+          'domakectraxresultsmovie', ...
+          'doapt', ...
+          'doautomaticcheckscomplete' }' ;
     fprintf('Settings values in FlyDiscoPipeline():\n') ;
     for i = 1 : length(variable_names_to_print) ,
         variable_name = variable_names_to_print{i} ;
@@ -376,8 +384,8 @@ function FlyDiscoPipeline(expdir, varargin)
     % stages from running, but should not cause FlyDiscoPipeline() to throw an
     % error.
     
-    fprintf('Memory usage before FlyDiscoAutomaticChecksIncoming():\n') ;
-    print_matlab_memory_usage() ;
+%     fprintf('Memory usage before FlyDiscoAutomaticChecksIncoming():\n') ;
+%     print_matlab_memory_usage() ;
     
     %% incoming checks
     stage = 'automaticchecksincoming';
@@ -390,8 +398,8 @@ function FlyDiscoPipeline(expdir, varargin)
                 stage, ...
                 'settingsdir',settingsdir,'analysis_protocol',analysis_protocol,...
                 automaticchecksincoming_params{:});
-            fprintf('Memory usage after FlyDiscoAutomaticChecksIncoming():\n') ;
-            print_matlab_memory_usage() ;
+%             fprintf('Memory usage after FlyDiscoAutomaticChecksIncoming():\n') ;
+%             print_matlab_memory_usage() ;
         end
         
         % This is just checking to make sure the 'main' file generated by
@@ -428,8 +436,8 @@ function FlyDiscoPipeline(expdir, varargin)
             if forcecompute || todo ,
                 fprintf('Running FlyTracker...\n');
                 FlyTrackerWrapperForFlyDisco(expdir, settingsdir, analysis_protocol, dataloc_params, forcecompute) ;
-                fprintf('Memory usage after FlyTrackerWrapperForFlyDisco():\n') ;
-                print_matlab_memory_usage() ;
+%                 fprintf('Memory usage after FlyTrackerWrapperForFlyDisco():\n') ;
+%                 print_matlab_memory_usage() ;
             end
             
             % make sure flytracker files exist
@@ -454,8 +462,8 @@ function FlyDiscoPipeline(expdir, varargin)
                 FlyDiscoRegisterTrx(expdir,...
                     'settingsdir',settingsdir,'analysis_protocol',analysis_protocol,...
                     registration_params{:});
-                fprintf('Memory usage after FlyDiscoRegisterTrx():\n') ;
-                print_matlab_memory_usage() ;
+%                 fprintf('Memory usage after FlyDiscoRegisterTrx():\n') ;
+%                 print_matlab_memory_usage() ;
             end
             
             % make sure registration files exist
@@ -479,8 +487,8 @@ function FlyDiscoPipeline(expdir, varargin)
                 FlyDiscoDectectIndicatorLedOnOff(expdir,...
                     'settingsdir',settingsdir,'analysis_protocol',analysis_protocol,...
                     registration_params{:});
-                fprintf('Memory usage after FlyDiscoDectectIndicatorLedOnOff():\n') ;
-                print_matlab_memory_usage() ;
+%                 fprintf('Memory usage after FlyDiscoDectectIndicatorLedOnOff():\n') ;
+%                 print_matlab_memory_usage() ;
             end
             % make sure leddetection files exist requiredfiles_ledonoffdetection
             [ismissingfile,missingfiles] = CheckForMissingFiles(expdir,dataloc_params,requiredfiles_ledonoffdetection);
@@ -524,8 +532,8 @@ function FlyDiscoPipeline(expdir, varargin)
                 FlyDiscoClassifySex(expdir,...
                     'settingsdir',settingsdir,'analysis_protocol',analysis_protocol,...
                     sexclassification_params{:});
-                fprintf('Memory usage after FlyDiscoClassifySex():\n') ;
-                print_matlab_memory_usage() ;
+%                 fprintf('Memory usage after FlyDiscoClassifySex():\n') ;
+%                 print_matlab_memory_usage() ;
             end
             
             % make sure sexclassification files exist
@@ -553,8 +561,8 @@ function FlyDiscoPipeline(expdir, varargin)
                     'settingsdir',settingsdir,'analysis_protocol',analysis_protocol,...
                     'forcecompute',forcecompute,...
                     computeperframefeatures_params{:});
-                fprintf('Memory usage after FlyDiscoComputePerFrameFeatures():\n') ;
-                print_matlab_memory_usage() ;
+%                 fprintf('Memory usage after FlyDiscoComputePerFrameFeatures():\n') ;
+%                 print_matlab_memory_usage() ;
             end
             
             % make sure computeperframefeatures files exist
@@ -580,8 +588,8 @@ function FlyDiscoPipeline(expdir, varargin)
                     'settingsdir',settingsdir, ...
                     'analysis_protocol',analysis_protocol, ...
                     stage_additional_arguments{:});
-                fprintf('Memory usage after FlyDiscoComputePerFrameStats():\n') ;
-                print_matlab_memory_usage() ;
+%                 fprintf('Memory usage after FlyDiscoComputePerFrameStats():\n') ;
+%                 print_matlab_memory_usage() ;
             end
             
             % make sure computeperframestats files exist
@@ -605,9 +613,9 @@ function FlyDiscoPipeline(expdir, varargin)
             todo = CheckForMissingFiles(expdir,dataloc_params,requiredfiles_computehoghofperframefeatures);
             if forcecompute || todo,
                 pwdprev = pwd;
-                datalocparamsfilestr = 'dataloc_params.txt';
-                datalocparamsfile = fullfile(settingsdir,analysis_protocol,datalocparamsfilestr);
-                dataloc_params = ReadParams(datalocparamsfile);
+                %datalocparamsfilestr = 'dataloc_params.txt';
+                %datalocparamsfile = fullfile(settingsdir,analysis_protocol,datalocparamsfilestr);
+                %dataloc_params = ReadParams(datalocparamsfile);
                 trxfilestr = fullfile(expdir,dataloc_params.trxfilestr);
                 movfilestr = fullfile(expdir,dataloc_params.moviefilestr);
                 spacetimefeaturesdir = fileparts(which('preparePerFrameFtrs'));
@@ -615,8 +623,8 @@ function FlyDiscoPipeline(expdir, varargin)
                 fprintf('Computing HOG/HOF per-frame features...\n');
                 preparePerFrameFtrs(movfilestr,trxfilestr,false,false);
                 cd(pwdprev);
-                fprintf('Memory usage after preparePerFrameFtrs():\n') ;
-                print_matlab_memory_usage() ;                
+%                 fprintf('Memory usage after preparePerFrameFtrs():\n') ;
+%                 print_matlab_memory_usage() ;                
             end
             % make sure computeperframefeatures files exist
             [ismissingfile,missingfiles] = CheckForMissingFiles(expdir,dataloc_params,requiredfiles_computeperframefeatures);
@@ -632,8 +640,8 @@ function FlyDiscoPipeline(expdir, varargin)
         if is_on_or_force(dojaabadetect),
             forcecompute = is_force(dojaabadetect) ;
             JAABADetectWrapper(expdir, settingsdir, analysis_protocol, forcecompute) ;
-            fprintf('Memory usage after JAABADetectWrapper():\n') ;
-            print_matlab_memory_usage() ;
+%             fprintf('Memory usage after JAABADetectWrapper():\n') ;
+%             print_matlab_memory_usage() ;
         end
         
         %% Make per-frame statistics plots, culminating in stats.html, which shows all of them
@@ -655,11 +663,10 @@ function FlyDiscoPipeline(expdir, varargin)
             todo = CheckForMissingFiles(expdir,dataloc_params,requiredfiles_makectraxresultsmovie);
             if forcecompute || todo ,
                 fprintf('Making Ctrax results movie...\n');
-                FlyDiscoMakeCtraxResultsMovie(expdir,...
-                    'settingsdir',settingsdir,'analysis_protocol',analysis_protocol,...
-                    makectraxresultsmovie_params{:});
-                fprintf('Memory usage after FlyDiscoMakeCtraxResultsMovie():\n') ;
-                print_matlab_memory_usage() ;
+                FlyDiscoMakeCtraxResultsMovie(expdir, ...
+                                              'settingsdir',settingsdir, ...
+                                              'analysis_protocol',analysis_protocol, ...
+                                              makectraxresultsmovie_params{:}) ;
             end
             
             % make sure makectraxresultsmovie files exist
@@ -670,10 +677,51 @@ function FlyDiscoPipeline(expdir, varargin)
             end
             
         end
+        
+        %% Run APT
+        stage = 'apt' ;
+        if is_on_or_force(doapt) ,
+            forcecompute = is_force(doapt) ;
+            todo = CheckForMissingFiles(expdir, dataloc_params, requiredfiles_apt) ;
+            if forcecompute || todo ,
+                fprintf('Running APT...\n');                
+                aptrepopath = fullfile(source_folder_path, 'APT') ;  % use the subrepo APT
+                % Are we running on a submit host?  If not, use submit.int.janelia.org.
+                [return_code, ~] = system('/usr/bin/which bsub') ;
+                if return_code == 0 ,
+                    submit_host_name = '' ;
+                else
+                    submit_host_name = 'submit.int.janelia.org' ;
+                end
+                [success, msgs] = ...
+                    FlyDiscoAPTTrack(expdir, ...
+                                     'settingsdir',settingsdir,...
+                                     'analysis_protocol',analysis_protocol,...
+                                     'dataloc_params', dataloc_params, ...
+                                     'dryrun',false,...
+                                     'verbose',2,...
+                                     'dowait',true,...
+                                     'dooverwrite',forcecompute, ...
+                                     'cluster_billing_account_name', cluster_billing_account_name, ...
+                                     'aptrepopath', aptrepopath, ...
+                                     'docomputemd5s', true, ...
+                                     'sshhost', submit_host_name) ;
+                if ~success ,
+                    flydisco_pipeline_error(stage, msgs) ;
+                end
+            end
+            
+            % make sure flytracker files exist
+            [ismissingfile,missingfiles] = CheckForMissingFiles(expdir, dataloc_params, requiredfiles_apt) ;
+            if ismissingfile ,
+                msgs = cellfun(@(x) sprintf('Missing APT file %s',x),missingfiles,'UniformOutput',false);
+                flydisco_pipeline_error(stage, msgs) ;
+            end
+        end  % APT stage
     end  % if do_run_core_pipeline
 
-    fprintf('Memory usage before FlyDiscoAutomaticChecksComplete():\n') ;
-    print_matlab_memory_usage() ;
+%     fprintf('Memory usage before FlyDiscoAutomaticChecksComplete():\n') ;
+%     print_matlab_memory_usage() ;
     
     %% automaticchecks_complete
     % This would normally be turned off for a goldblum run, and we'd run it in the
@@ -688,8 +736,8 @@ function FlyDiscoPipeline(expdir, varargin)
                 'settingsdir',settingsdir, ...
                 'analysis_protocol',analysis_protocol,...
                 automaticcheckscomplete_params{:});
-            fprintf('Memory usage after FlyDiscoAutomaticChecksComplete():\n') ;
-            print_matlab_memory_usage() ;            
+%             fprintf('Memory usage after FlyDiscoAutomaticChecksComplete():\n') ;
+%             print_matlab_memory_usage() ;            
         end
         
         % This is just checking to make sure the 'main' file generated by
@@ -706,6 +754,6 @@ function FlyDiscoPipeline(expdir, varargin)
     %% If get here, analysis has completed successfully
     fprintf('Analysis pipeline completed!\n');    
     
-    fprintf('Memory usage just before return from FlyDiscoPipeline():\n') ;
-    print_matlab_memory_usage() ;        
+%     fprintf('Memory usage just before return from FlyDiscoPipeline():\n') ;
+%     print_matlab_memory_usage() ;        
 end

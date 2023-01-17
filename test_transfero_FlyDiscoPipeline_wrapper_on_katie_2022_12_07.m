@@ -1,8 +1,7 @@
-do_use_bqueue = false ;
-do_actually_submit_jobs = true ;
-cluster_billing_account_name = 'branson' ;  % used for billing the jobs
-do_force_analysis = false ;
-analysis_parameters = cell(1,0) ;
+% This isn't a proper test b/c it doesn't check whether anything worked
+
+user_name_for_configuration_purposes = 'rubinlab' ;                                
+analysis_parameters = {'do_try', true} ;
 % analysis_parameters = ...
 %          {'doautomaticchecksincoming',true,...
 %           'doflytracking',true, ...
@@ -24,9 +23,10 @@ analysis_parameters = cell(1,0) ;
 this_script_path = mfilename('fullpath') ;
 this_folder_path = fileparts(this_script_path) ;
 fly_disco_analysis_folder_path = fileparts(this_folder_path) ;
-settings_folder_path = fullfile(fly_disco_analysis_folder_path, 'settings-internal') ;
-read_only_experiments_folder_path = fullfile(fly_disco_analysis_folder_path, 'too-much-memory-example-experiments-blank-slate-read-only') ;
-working_experiments_folder_path = fullfile(fly_disco_analysis_folder_path, 'too-much-memory-example-experiments-blank-state') ;
+fly_disco_folder_path = fileparts(fly_disco_analysis_folder_path) ;
+%settings_folder_path = fullfile(fly_disco_analysis_folder_path, 'settings-internal') ;
+read_only_experiments_folder_path = fullfile(fly_disco_folder_path, 'example-experiments', 'single-katie-experiment-2022-12-07-read-only') ;
+working_experiments_folder_path = fullfile(fly_disco_folder_path, 'example-experiments', 'single-katie-experiment-2022-12-07') ;
 
 % Delete the destination folder
 if exist(working_experiments_folder_path, 'file') ,
@@ -41,6 +41,9 @@ reset_experiment_working_copies(working_experiments_folder_path, read_only_exper
 folder_path_from_experiment_index = find_experiment_folders(working_experiments_folder_path) ;
 
 % Run the script under test
-fprintf('Running goldblum_analyze_experiment_folders...\n') ;
-goldblum_analyze_experiment_folders(folder_path_from_experiment_index, settings_folder_path, cluster_billing_account_name, ...
-                           do_force_analysis, do_use_bqueue, do_actually_submit_jobs, analysis_parameters)
+experiment_count = length(folder_path_from_experiment_index) ;
+for experiment_index = 1 : experiment_count ,
+    experiment_folder_path = folder_path_from_experiment_index{experiment_index} ;
+    fprintf('Running transfero_FlyDiscoPipeline_wrapper on experiment index %d...\n', experiment_index) ;
+    transfero_FlyDiscoPipeline_wrapper(experiment_folder_path, user_name_for_configuration_purposes, analysis_parameters{:}) ;
+end

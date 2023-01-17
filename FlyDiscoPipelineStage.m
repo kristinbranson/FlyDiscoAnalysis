@@ -24,8 +24,8 @@ function FlyDiscoPipelineStage(expdir, ...
                   'analysis_protocol', analysis_protocol_name, ...
                   'is_stage_forced', do_force, ...
                   stage_additional_arguments{:}) ;
-            fprintf('Memory usage after %s():\n', stage_function_name) ;
-            print_matlab_memory_usage() ;
+%             fprintf('Memory usage after %s():\n', stage_function_name) ;
+%             print_matlab_memory_usage() ;
         end
 
         % make sure output files exist
