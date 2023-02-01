@@ -14,6 +14,15 @@ modpath
 % explist = {'/groups/branson/bransonlab/alice/20211124_testingperframestats/VNC_JRC_SS71988_RigA_20210914T143410'};
 explist = {'/groups/branson/bransonlab/alice/20211124_testingperframestats/VNC_EXT_VGLUT-GAL4_RigA_20210427T125905'};
 
+explist = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20230125_testgaitanalysis/VNC2_JRC_SS71988_RigD_20220922T115759'
+'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20230125_testgaitanalysis/VNC2_JRC_SS71988_RigD_20220921T115856'
+'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20230125_testgaitanalysis/VNC2_JRC_SS71988_RigC_20220922T115711'
+'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20230125_testgaitanalysis/VNC2_JRC_SS71988_RigC_20220921T115817'
+'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20230125_testgaitanalysis/VNC2_JRC_SS71988_RigB_20220922T115605'
+'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20230125_testgaitanalysis/VNC2_JRC_SS71988_RigB_20220921T115713'
+'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20230125_testgaitanalysis/VNC2_JRC_SS71988_RigA_20220922T115517'
+'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20230125_testgaitanalysis/VNC2_JRC_SS71988_RigA_20220921T115630'};
+
 % analysis_protocol = '20210531_flybubble_LED';
 % analysis_protocol = '20210531_flybubble_LED_AR_20210819';
 analysis_protocol = '20210531_flybubble_LED_AR_20220405';
@@ -51,15 +60,15 @@ settingsdir = 'settings';
 % /misc/public/Kristin2Disco/VNC_EXT_VGLUT-GAL4_RigA_20210427T125905/stats.html
 % /misc/public/Kristin2Disco/VNC_JRC_SS68333_RigA_20210422T150926/stats.html
 % /misc/public/Kristin2Disco/VNC_JRC_SS62014_RigD_20210525T133656/stats.html
-for i = 1:numel(explist)
+for i = 5:numel(explist)
 expdir = explist{i};
 % FlyDiscoRegisterTrx(expdir,'settingsdir',settingsdir,'analysis_protocol',analysis_protocol);
 % FlyDiscoDectectIndicatorLedOnOff(expdir,'settingsdir',settingsdir,'analysis_protocol',analysis_protocol);
 % FlyDiscoClassifySex(expdir,'settingsdir',settingsdir,'analysis_protocol',analysis_protocol);
 % FlyDiscoComputePerFrameFeatures(expdir,'settingsdir',settingsdir,'analysis_protocol',analysis_protocol);
-% FlyDiscoComputePerFrameStats(expdir,'settingsdir',settingsdir,'analysis_protocol',analysis_protocol,'dorecompute',true,'docomputehists',true,'debugplot',3); % 
-% FlyDiscoPlotPerFrameStats2(expdir,'settingsdir',settingsdir,'analysis_protocol',analysis_protocol,'debug',false);
-FlyDiscoPlotPerFrameStats(expdir,'settingsdir',settingsdir,'analysis_protocol',analysis_protocol,'debug',false,'makestimvideos',0,'plotstim',1,'plothist',1,'plotflies',true,'plotstimtrajs',1);
+FlyDiscoComputePerFrameStats(expdir,'settingsdir',settingsdir,'analysis_protocol',analysis_protocol,'dorecompute',false,'docomputehists',false,'debugplot',0); % 
+% % FlyDiscoPlotPerFrameStats2(expdir,'settingsdir',settingsdir,'analysis_protocol',analysis_protocol,'debug',false);
+FlyDiscoPlotPerFrameStats(expdir,'settingsdir',settingsdir,'analysis_protocol',analysis_protocol,'debug',false,'makestimvideos',1,'plotstim',false,'plothist',false,'plotflies',false,'plotstimtrajs',false);
 end
 %%
 
