@@ -10,8 +10,8 @@ rootdatadir = '/groups/branson/bransonlab/flydisco_data';
 % %inputs to getExperimentDirsFlyDisco: 'metadatafile','Metadata.xml','expdirname','*','line_name','*', ...
 %     'date','*','nflies',false,'autocheckin',false,'movielength',false,'TrajNum',false,'autocheckcomplete',false);
 
-savefile = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_allflydisco';
-[expdirstruct] = getExperimentDirsFlyDisco(rootdatadir,'metadatafile','Metadata.xml','movielength',true,'TrajNum',true,'autocheckin',true,'autocheckcomplete',true);
+savefile = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_allflydisco_20230130';
+[expdirstruct] = getExperimentDirsFlyDisco(rootdatadir,'metadatafile','Metadata.xml','movielength',false,'TrajNum',false,'autocheckin',false,'autocheckcomplete',true);
 
 % savefile = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_VNC_week1';
 % [expdirstruct] = getExperimentDirsFlyDisco(rootdatadir,'metadatafile','Metadata.xml','expdirname','VNC','date','202103*','autocheckin',true,'autocheckcomplete',true);
@@ -51,8 +51,9 @@ expdirstruct = expdirstruct(idx);
 % expdirstruct = metadata;
 idx1 = strcmp({expdirstruct.screen_type},'non_olympiad_dickson_VNC');
 idx2 = strcmp({expdirstruct.screen_type},'non_olympiad_dickson_VNC2');
-idx3 = strcmp({expdirstruct.screen_type},'non_olympiad_dickson_led5secVNC');
-idxall = idx1 + idx2 + idx3;
+% idx3 = strcmp({expdirstruct.screen_type},'non_olympiad_dickson_led5secVNC');
+% idxall = idx1 + idx2 + idx3;
+idxall = idx1 +idx2;
 expdirstruct2 = expdirstruct(logical(idxall));
 
 %% find experiments more recent than target date
@@ -71,7 +72,7 @@ expdirtable = struct2table(expdirstruct);
 writetable(expdirtable,savefilecsv,'Delimiter','tab');
 
 %% save mat file
-metadata = expdirstruct;
+metadata = expdirstruct2;
 save(savefile,'metadata')
 
 %% make csv file for all experiments (use for pulling data for metadata changes) 
@@ -128,7 +129,7 @@ expdirstruct = expdirstruct(idx);
 pidx = find([expdirstruct.automated_pf] == 'P');
 
 explist = {expdirstruct(pidx).file_system_path};
-save([savefile,'_VNC2pass.mat'],'explist')
+save([savefile,'_VNC2passAuto.mat'],'explist')
 
 % screen_type VNC
 expdirstruct = expdirstructOG;
@@ -138,7 +139,7 @@ expdirstruct = expdirstruct(idx);
 pidx = find([expdirstruct.automated_pf] == 'P');
 
 explist = {expdirstruct(pidx).file_system_path};
-save([savefile,'_VNCpass.mat'],'explist')
+save([savefile,'_VNCpassAuto.mat'],'explist')
 
 % all list
 expdirstruct = expdirstructOG;
@@ -149,7 +150,7 @@ expdirstruct = expdirstruct(logical(idxall));
 pidx = find([expdirstruct.automated_pf] == 'P');
 
 explist = {expdirstruct(pidx).file_system_path};
-save([savefile,'_VNCallpass.mat'],'explist');
+save([savefile,'_VNCallpassAuto.mat'],'explist');
 
 savefiletext = [savefile,'_VNCallpass.txt'];
 fid = fopen(savefiletext,'w');
@@ -157,3 +158,37 @@ for i = 1:numel(explist)
     fprintf(fid,'%s\n',explist{i});
 end
 fclose(fid);
+
+%% check for manual fails in expdirs with autochecks = P
+idx = true(1,numel(explist));
+for i = 1:numel(explist)
+    expdir = explist{i};
+    if exist(fullfile(expdir,'manual_fail.txt'),'file')
+        idx(i) = false;
+    end
+end
+
+explist = explist(idx);
+
+savefiletext = [savefile,'_VNCall_passAandM.mat'];
+save(savefiletext,'explist');
+
+%% make metadata struct with only auto = P and manual = P 
+% 20230130
+% start with just VNC and VNC2 datastruct
+% auto_pf = P
+pidx = find([expdirstruct2.automated_pf] == 'P');
+expdirstruct3 = expdirstruct2(pidx);
+% no manual_fail.txt file
+explist = {expdirstruct3.file_system_path};
+idx = true(1,numel(explist));
+for i = 1:numel(explist)
+    expdir = explist{i};
+    if exist(fullfile(expdir,'manual_fail.txt'),'file')
+        idx(i) = false;
+    end
+end
+
+metadata = expdirstruct3(idx);
+savefiletext = [savefile,'_VNCall_passAandM_metadata.mat'];
+save(savefiletext,'metadata');
