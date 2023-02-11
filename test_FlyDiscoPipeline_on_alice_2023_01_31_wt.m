@@ -26,13 +26,13 @@ user_name_for_configuration_purposes = 'bransonlab' ;
 %           'doautomaticcheckscomplete',false, ...
 %           'doapt',false} ;
 settings_folder_path = fullfile(fly_disco_analysis_folder_path, 'settings-internal') ;  % for now, want to use internal settings
+do_use_bqueue = true ;
+do_actually_submit_jobs = true ;
+ssh_host_name = 'login2.int.janelia.org' ;
 optional_argument_list = ...
     {'settingsdir', settings_folder_path, ...
      'do_try', false, ...
-     'analysis_protocol', '20230206_BubblefRGB_GtAg' } ;
-do_use_bqueue = true ;
-do_actually_submit_jobs = true ;
-ssh_host_name = 'submit.int.janelia.org' ;
+     'analysis_protocol', '20230206_BubblefRGB_GtAg'} ;
 
 read_only_experiments_folder_path = fullfile(fly_disco_folder_path, 'example-experiments', 'single-robie-experiment-2023-01-31-with-tracking-read-only') ;
 working_experiments_folder_path = fullfile(fly_disco_folder_path, 'example-experiments', 'single-robie-experiment-2023-01-31-with-tracking') ;
