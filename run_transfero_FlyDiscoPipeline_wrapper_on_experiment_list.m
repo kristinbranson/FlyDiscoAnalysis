@@ -7,7 +7,8 @@ function run_transfero_FlyDiscoPipeline_wrapper_on_experiment_list(folder_path_f
                                                                    varargin)
          
     %run_transfero_FlyDiscoPipeline_wrapper_on_experiment_list
-    %   Runs the FlyDisco pipeline on a set of experiment folders.
+    %   Runs the FlyDisco pipeline on a set of experiment folders, optionally on
+    %   an LSF compute cluster.
     %
     %   run_transfero_FlyDiscoPipeline_wrapper_on_experiment_list(experiment_folder_list)
     %   runs the FlyDisco pipeline on the experiment folders given in the cell array
