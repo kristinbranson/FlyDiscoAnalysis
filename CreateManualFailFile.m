@@ -17,6 +17,7 @@ function [success] = CreateManualFailFile(expdir,failure_reason,varargin)
 % 'starvation too long';
 % 'bad video';
 % 'bubble occluded';
+% 'tracked fly outside bubble';
 
 [file_name,Replace] = myparse(varargin,'file_name','manual_fail.txt','Replace',false);
 success = false(1,numel(expdir));

@@ -105,7 +105,7 @@ def transfero_FlyDiscoPipeline_wrapper_wrapper(raw_experiment_folder_path, user_
 
     with cd(this_script_folder_path) as _ :
         matlab_command_line = \
-            "modpath; options = cell(1, 0); transfero_FlyDiscoPipeline_wrapper('%s', '%s', options)" % \
+            "modpath; options = cell(1, 0); transfero_FlyDiscoPipeline_wrapper('%s', '%s', options{:})" % \
                 (experiment_folder_path, user_name_for_configuration_purposes)
         #print("Matlab command line is: %s" % matlab_command_line)
         command_line_as_list = ['/usr/bin/xvfb-run', '-d', '/misc/local/matlab-2019a/bin/matlab', '-batch', matlab_command_line]

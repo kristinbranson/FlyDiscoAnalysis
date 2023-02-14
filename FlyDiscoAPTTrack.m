@@ -6,28 +6,50 @@ jobid = nan;
 
 version = '0.1';
 
-[analysis_protocol,settingsdir,datalocparamsfilestr,rootoutdir,sshhost,dowait,dryrun,waitchecktime,startframe,endframe,verbose,dooverwrite] = ...
+[analysis_protocol,...
+ settingsdir, ...
+ dataloc_params, ...
+ datalocparamsfilestr, ... 
+ rootoutdir, ...
+ sshhost, ...
+ cluster_billing_account_name, ...
+ dowait, ...
+ dryrun, ...
+ waitchecktime, ...
+ startframe, ...
+ endframe, ...
+ verbose, ...
+ dooverwrite, ...
+ aptrepopath, ...
+ docomputemd5s] = ...
   myparse(varargin,...
   'analysis_protocol','current_bubble',...
   'settingsdir',default_settings_folder_path(),...
+  'dataloc_params',[], ...
   'datalocparamsfilestr','dataloc_params.txt',...
   'rootoutdir','',...
   'sshhost','',...
+  'cluster_billing_account_name', '', ...
   'dowait',true,...
   'dryrun',false,...
   'waitchecktime',10,...
   'startframe',[],...
   'endframe',[],...
   'verbose',1,...
-  'dooverwrite',true);
+  'dooverwrite',true, ...
+  'aptrepopath','', ...
+  'docomputemd5s', false);
+% Empty sshhost means to bsub locally
 
 if verbose >= 1,
   fprintf('Starting FlyDiscoAPTTrack version %s\n',version);
 end
 
-%% read in the data locations
-datalocparamsfile = fullfile(settingsdir,analysis_protocol,datalocparamsfilestr);
-dataloc_params = ReadParams(datalocparamsfile);
+%% read in the data locations if not passed in via dataloc_params
+if isempty(dataloc_params) ,
+  datalocparamsfile = fullfile(settingsdir,analysis_protocol,datalocparamsfilestr);
+  dataloc_params = ReadParams(datalocparamsfile);
+end
 
 %% read in apt params
 
@@ -38,6 +60,35 @@ if ~exist(aptparamsfile,'file'),
 end
 % read
 apt_params = ReadParams(aptparamsfile);
+
+%% if aptrepopath was passed as an argument, override the one specified in the APT params file
+if ~isempty(aptrepopath),
+  apt_params.aptrepopath = aptrepopath ;
+end
+  
+%% Print the md5 hashes of the label file and the singularity image
+fprintf('Label file is %s\n', apt_params.lbl_file) ;
+[~,~,~,lbl_file_modification_datetime] = simple_dir(apt_params.lbl_file) ;
+lbl_file_modification_datetime.TimeZone = 'local' ;
+lbl_file_modification_datetime.Format = 'yyyy-MM-dd HH:mm:ss z' ;
+fprintf('The modification time of the label file is %s\n', string(lbl_file_modification_datetime)) ;
+if docomputemd5s ,
+  label_file_md5 = compute_md5_on_local(apt_params.lbl_file) ;
+  fprintf('The md5 hash of the label file is %s\n', label_file_md5) ;
+end
+fprintf('Singularity image file is %s\n', apt_params.singularityimg) ;
+[~,~,~,sing_image_file_modification_datetime] = simple_dir(apt_params.singularityimg) ;
+sing_image_file_modification_datetime.TimeZone = 'local' ;
+sing_image_file_modification_datetime.Format = 'yyyy-MM-dd HH:mm:ss z' ;
+fprintf('The modification time of the singularity image file is %s\n', string(sing_image_file_modification_datetime)) ;
+if docomputemd5s ,
+  singularity_image_file_md5 = compute_md5_on_local(apt_params.singularityimg) ;
+  fprintf('The md5 hash of the singularity image file is %s\n', singularity_image_file_md5) ;
+end
+
+% %% Print a bunch of of useful info about the .lbl file, APT repo status
+% This has issues b/c APT and JAABA have namespace collisions
+% APT_Labeler_printInfo_without_adding_APT_to_path(apt_params.lbl_file) ;
 
 %% construct the command
 
@@ -121,9 +172,15 @@ bindpathstr = sprintf(' -B %s',apt_params.bindpaths{:});
 
 singcmd = sprintf('singularity exec --nv %s %s bash -c %s',bindpathstr,apt_params.singularityimg,escape_string_for_bash(aptcmd));
 if apt_params.dobsub,
-  bsubcmd = sprintf('bsub -n 1 -J apt_%s -gpu "num=1" -q %s -o %s -R"affinity[core(1)]" %s 2>&1',expname,apt_params.gpuqueue,bsublogfile,escape_string_for_bash(singcmd));
+  P_option = fif(isempty(cluster_billing_account_name), '', sprintf('-P %s', cluster_billing_account_name)) ;  
+  bsubcmd = sprintf('bsub %s -n 1 -J apt_%s -gpu "num=1" -q %s -o %s -R"affinity[core(1)]" %s 2>&1', ...
+                    P_option, ...
+                    expname, ...
+                    apt_params.gpuqueue, ...
+                    bsublogfile, ...
+                    escape_string_for_bash(singcmd));
   if ~isempty(sshhost),
-    sshcmd = sprintf('ssh %s %s',sshhost,escape_string_for_bash(bsubcmd));
+    sshcmd = sprintf('ssh -o BatchMode=yes -o StrictHostKeyChecking=no -o ConnectTimeout=20 %s %s', sshhost, escape_string_for_bash(bsubcmd));
     cmd = sshcmd;
   else
     cmd = bsubcmd;
@@ -157,22 +214,22 @@ if ~dryrun,
 
       while true,
 
-        result = get_single_bsub_job_status(jobid,sshhost);
+        numeric_bsub_job_status = get_bsub_job_status(jobid,sshhost);
 
         elapsedtime = toc(starttime);
         if verbose >= 2,
           fprintf('Checking APT track job status after %f seconds...\n',elapsedtime);
         end
 
-        if result == -1, % errored out
+        if numeric_bsub_job_status == -1, % errored out
           success = false;
           msg = sprintf('APT track command exited without completion.');
-          msgs{end+1} = msg;
+          msgs{end+1} = msg; %#ok<AGROW>
           if verbose >= 1,
             fprintf('%s\n',msg);
           end
           return;
-        elseif result == 1,
+        elseif numeric_bsub_job_status == 1,
           if exist(outtrkfile,'file'),
             if verbose >= 1,
               fprintf('APT track command completed, output trk file found.\n');
@@ -185,7 +242,7 @@ if ~dryrun,
               fprintf('%s\n',msg);
             end
             success = false;
-            msgs{end+1} = msg;
+            msgs{end+1} = msg; %#ok<AGROW>
             return;
           end
         end
@@ -196,7 +253,7 @@ if ~dryrun,
             fprintf('%s\n',msg);
           end
           success = false;
-          msgs{end+1} = msg;
+          msgs{end+1} = msg; %#ok<AGROW>
           return;
         end
         if apt_params.maxupdatetime < apt_params.maxwaittime,
@@ -219,7 +276,7 @@ if ~dryrun,
             end
 
             success = false;
-            msgs{end+1} = msg;
+            msgs{end+1} = msg; %#ok<AGROW>
             return;
           end
         end
