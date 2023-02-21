@@ -32,13 +32,13 @@ function breadcrumb_string = get_git_report(source_repo_folder_path)
     commit_hash = strtrim(stdout) ;
 
     % Get the status of all the submodules
-    git_submodule_status = system_with_error_handling('env GIT_SSL_NO_VERIFY=true GIT_TERMINAL_PROMPT=0 git submodule status') ;        
+    git_submodule_status = system_with_error_handling('env GIT_SSL_NO_VERIFY=true GIT_TERMINAL_PROMPT=0 git submodule status --recursive') ;        
     
     % Get the git remote report
     git_remote_report = system_with_error_handling('env GIT_SSL_NO_VERIFY=true GIT_TERMINAL_PROMPT=0 git remote -v') ;    
     
     % Get the recent git log
-    git_log = system_with_error_handling('env GIT_SSL_NO_VERIFY=true GIT_TERMINAL_PROMPT=0 git log --graph --oneline --max-count 10 | cat') ;
+    git_log = system_with_error_handling('env GIT_SSL_NO_VERIFY=true GIT_TERMINAL_PROMPT=0 git --no-pager log --graph --oneline --max-count 10') ;
         
     % Write a file with the commit hash into the folder, for good measure
     breadcrumb_string = ...

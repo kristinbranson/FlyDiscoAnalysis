@@ -180,7 +180,7 @@ if apt_params.dobsub,
                     bsublogfile, ...
                     escape_string_for_bash(singcmd));
   if ~isempty(sshhost),
-    sshcmd = sprintf('ssh %s %s', sshhost, escape_string_for_bash(bsubcmd));
+    sshcmd = sprintf('ssh -o BatchMode=yes -o StrictHostKeyChecking=no -o ConnectTimeout=20 %s %s', sshhost, escape_string_for_bash(bsubcmd));
     cmd = sshcmd;
   else
     cmd = bsubcmd;

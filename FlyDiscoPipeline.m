@@ -315,6 +315,7 @@ function FlyDiscoPipeline(expdir, varargin)
     requiredfiles_makeaptresultsmovie = lookup_in_struct(analysis_parameters, 'requiredfiles_makeaptresultsmovie') ;    
     requiredfiles_automaticcheckscomplete = lookup_in_struct(analysis_parameters, 'requiredfiles_automaticcheckscomplete') ;
     cluster_billing_account_name = lookup_in_struct(analysis_parameters, 'cluster_billing_account_name') ;
+    sshhost = lookup_in_struct(analysis_parameters, 'sshhost') ;
 
     % Read in the dataloc params
     datalocparamsfile = fullfile(settingsdir,analysis_protocol,datalocparamsfilestr);
@@ -705,7 +706,7 @@ function FlyDiscoPipeline(expdir, varargin)
                 if return_code == 0 ,
                     submit_host_name = '' ;
                 else
-                    submit_host_name = 'submit.int.janelia.org' ;
+                    submit_host_name = sshhost ;
                 end
                 [success, msgs] = ...
                     FlyDiscoAPTTrack(expdir, ...
