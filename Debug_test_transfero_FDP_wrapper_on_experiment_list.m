@@ -6,19 +6,22 @@ modpath
 cluster_billing_account_name = 'branson' ;
 % only used for setting configuration of FlyDiscoPipeline 
 user_name_for_configuration_purposes = 'bransonlab' ;  
-do_use_bqueue = true ;
-do_actually_submit_jobs = true ;
+do_use_bqueue = false ;
+do_actually_submit_jobs = false ;
 ssh_host_name = 'login1.int.janelia.org' ;
 
 
 settings_folder_path = '/groups/branson/home/robiea/Code_versioned/FlyDiscoAnalysis/settings-internal';
 % analysis_protocol = '20230206_BubblefRGB_GtAg';
-analysis_protocol = '20230213_flybubble_LED_VNC2';
+% analysis_protocol = '20230213_flybubble_LED_VNC2';
 
+% optional_argument_list = ...
+%     {'settingsdir', settings_folder_path, ...
+%     'analysis_protocol',analysis_protocol, ...
+%      'do_try', false} ; 
 optional_argument_list = ...
     {'settingsdir', settings_folder_path, ...
-    'analysis_protocol',analysis_protocol, ...
-     'do_try', false} ; 
+     'do_try', false} ;
 
 %% experiments 
 
