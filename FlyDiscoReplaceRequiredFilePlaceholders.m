@@ -26,6 +26,17 @@ function required_files_for_stage = ...
         end
     end
     
+    % Handle APTRESULTSMOVIE for stage 'aptresultsmovie'
+    if strcmp(stage_name, 'makeaptresultsmovie') ,
+        i = find(strcmp('APTRESULTSMOVIE',required_files_for_stage),1);
+        if ~isempty(i),
+            [~,basename] = fileparts(expdir);
+            mp4filestr = sprintf('%s_%s',dataloc_params.aptresultsavefilestr,basename);
+            apth264file = [mp4filestr,'.mp4'];
+            required_files_for_stage{i} = apth264file;
+        end
+    end
+
     % Handle PERFRAMEMATFILES for stage 'computeperframefeatures'
     if strcmp(stage_name, 'computeperframefeatures') ,
         if ismember('PERFRAMEMATFILES',required_files_for_stage),

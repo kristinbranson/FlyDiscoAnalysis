@@ -1,0 +1,9 @@
+aptrepopath,/groups/branson/home/bransonlab/APT
+lbl_file,/groups/branson/home/bransonlab/APTlabelfiles/20220826_Grone_60K_aligned.lbl
+model_ndx,1
+bindpaths,/groups,/nrs
+singularityimg,/groups/branson/bransonlab/apt/sif/prod.sif
+gpuqueue,gpu_rtx
+dobsub,true
+maxwaittime,28800
+maxupdatetime,900

@@ -4,7 +4,7 @@ linedatadir,/groups/sciserv/flyolympiad/Olympiad_Screen/fly_bowl/line_data
 configfilepattern,FlyBowlDataCaptureParams*.txt
 moviefilestr,movie.ufmf
 annfilestr,movie.ufmf.ann
-flytrackerparentcalibrationstr,parent_calibration_bubblefrgb_110222.mat
+flytrackerparentcalibrationstr,parent_calibration_bubble_dickson_VNC_20210413.mat
 flytrackercalibrationstr,flytracker-calibration.mat
 flytrackertrackstr,movie-track.mat
 flytrackeroptionsstr,flytracker-options.txt
@@ -16,7 +16,7 @@ registrationtxtfilestr,registrationdata.txt
 ctraxdiagnosticsfilestr,ctrax_diagnostics.txt
 ctraxlogstr,ctrax_log.txt
 acquisitionlogfilestr,Log.txt
-metadatafilestr,metaData.xml
+metadatafilestr,Metadata.xml
 quickstatsfilestr,QuickStats.txt
 quickstatsimagefilestr,QuickStats.png
 temperaturefilestr,temperature.txt
@@ -110,3 +110,4 @@ aptlogfilestr,apt_log.txt
 aptbsublogfilestr,apt_bsub_log.txt
 apterrfilestr,apt_error.txt
 aptresultsavefilestr,apt_results_movie
+aptresultsmovieparamsfilestr,aptresultsmovie_params.txt
