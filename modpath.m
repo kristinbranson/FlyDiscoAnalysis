@@ -18,6 +18,10 @@ function modpath()
   jaaba_modpath_script_path = fullfile(jaaba_perframe_folder_path, 'SetUpJAABAPath.m') ;
   run(jaaba_modpath_script_path) ;    
   
+  % Add the TrkFile code for loading in trk files
+  addpath(fullfile(path_to_this_folder,'APT','matlab','trk')) ;
+
+
   % Add FlyDiscoAnalysis subfolders that are not their own projects
   addpath(fullfile(path_to_this_folder, 'simplewing')) ;
   addpath(fullfile(path_to_this_folder, 'hmm')) ;  
