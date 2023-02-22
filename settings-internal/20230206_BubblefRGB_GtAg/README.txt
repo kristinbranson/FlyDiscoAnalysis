@@ -11,3 +11,7 @@ added jab classifiers
 20230206
 added parameters for APT tracking from FlyDiscoAnalysis/settings-internal20220913_flybubble_LED_VNC2
 used meld to find differences and added in the ones the made sense for adding APT tracking
+
+20230222
+meld in parameters from 20230213_flybubble_LED_VNC2
+adding parameters for apt results movie

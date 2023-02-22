@@ -110,3 +110,4 @@ aptlogfilestr,apt_log.txt
 aptbsublogfilestr,apt_bsub_log.txt
 apterrfilestr,apt_error.txt
 aptresultsavefilestr,apt_results_movie
+aptresultsmovieparamsfilestr,aptresultsmovie_params.txt
