@@ -31,10 +31,11 @@ optional_argument_list = ...
      'do_try', false} ; 
 do_use_bqueue = true ;
 do_actually_submit_jobs = true ;
-ssh_host_name = 'submit.int.janelia.org' ;
+%ssh_host_name = 'submit.int.janelia.org' ;
+ssh_host_name = '' ;
 
 read_only_experiments_folder_path = fullfile(fly_disco_folder_path, 'example-experiments', 'passing-test-suite-experiments-with-tracking-read-only') ;
-working_experiments_folder_path = fullfile(fly_disco_folder_path, 'example-experiments', 'passing-test-suite-experiments-with-tracking-2') ;
+working_experiments_folder_path = fullfile(fly_disco_folder_path, 'example-experiments', 'passing-test-suite-experiments-with-tracking') ;
 
 % Delete the working experiments folder
 if exist(working_experiments_folder_path, 'file') ,
