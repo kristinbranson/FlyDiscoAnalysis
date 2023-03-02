@@ -5,10 +5,10 @@ modpath
 %% set stuff up
 cluster_billing_account_name = 'rubin' ;
 % only used for setting configuration of FlyDiscoPipeline 
-user_name_for_configuration_purposes = 'schretterc' ;  
-do_use_bqueue = true ;
-do_actually_submit_jobs = true ;
-ssh_host_name = 'login1.int.janelia.org' ;
+user_name_for_configuration_purposes = 'rubinlab' ;  
+do_use_bqueue = false ;
+do_actually_submit_jobs = false ;
+ssh_host_name = 'submit.int.janelia.org' ;
 
 
 settings_folder_path = '/groups/rubin/home/schretterc/Documents/FlyDiscoAnalysis/FlyDiscoAnalysis_1022/FlyDiscoAnalysis/settings/RubinFlyDiscoSettings/settings';
