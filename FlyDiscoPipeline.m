@@ -99,6 +99,9 @@ function FlyDiscoPipeline(expdir, varargin)
     %       apt
     %           Run APT, the Advanced Part Tracker, on the video.
     %           Default: 'off'. 
+    %       makeaptresultmovie
+    %           Make a .mp4 movie summarizing the results of APT pose tracking. 
+    %            Default: 'off'.
     %       automaticcheckscomplete
     %           Perform a set of final checks that the analysis of the experiment
     %           has been completed successfully.
@@ -137,6 +140,8 @@ function FlyDiscoPipeline(expdir, varargin)
     %       computeperframestats: FlyDiscoComputePerFrameStats()
     %       plotperframestats: FlyDiscoPlotPerFrameStats()
     %       makectraxresultsmovie: FlyDiscoMakeCtraxResultsMovie()
+    %       apt: FlyDiscoAPTTrack()
+    %       makeaptresultmovie: FlyDiscoMakeAPTResultsMovie()
     %       automaticcheckscomplete: FlyDiscoAutomaticChecksComplete()
     %
     %   In fact, all the optional parameters described above (besides 'settingsdir'
@@ -154,6 +159,7 @@ function FlyDiscoPipeline(expdir, varargin)
     %       computeperframestats_params
     %       plotperframestats_params
     %       makectraxresultsmovie_params
+    %       aptresultsmovie_params
     %       automaticcheckscomplete_params
     %       doautomaticchecksincoming
     %       doflytracking
@@ -167,6 +173,7 @@ function FlyDiscoPipeline(expdir, varargin)
     %       doplotperframestats
     %       domakectraxresultsmovie
     %       doapt
+    %       domakeaptresultsmovie
     %       doautomaticcheckscomplete
     %       requiredfiles_automaticchecksincoming
     %       requiredfiles_flytracker
@@ -179,6 +186,7 @@ function FlyDiscoPipeline(expdir, varargin)
     %       requiredfiles_plotperframestats
     %       requiredfiles_makectraxresultsmovie
     %       requiredfiles_apt    
+    %       requiredfiles_makeaptresultsmovie
     %       requiredfiles_automaticcheckscomplete
     %
     % The default value for all these parameters is specified by the function
@@ -277,6 +285,7 @@ function FlyDiscoPipeline(expdir, varargin)
     computeperframestats_params = lookup_in_struct(analysis_parameters, 'computeperframestats_params') ;    
     plotperframestats_params = lookup_in_struct(analysis_parameters, 'plotperframestats_params') ;    
     makectraxresultsmovie_params = lookup_in_struct(analysis_parameters, 'makectraxresultsmovie_params') ;
+    aptresultsmovie_params = lookup_in_struct(analysis_parameters, 'aptresultsmovie_params') ;
     automaticcheckscomplete_params = lookup_in_struct(analysis_parameters, 'automaticcheckscomplete_params') ;
     doautomaticchecksincoming = lookup_in_struct(analysis_parameters, 'doautomaticchecksincoming') ;
     doflytracking = lookup_in_struct(analysis_parameters, 'doflytracking') ;
@@ -290,6 +299,7 @@ function FlyDiscoPipeline(expdir, varargin)
     doplotperframestats = lookup_in_struct(analysis_parameters, 'doplotperframestats') ;
     domakectraxresultsmovie = lookup_in_struct(analysis_parameters, 'domakectraxresultsmovie') ;
     doapt = lookup_in_struct(analysis_parameters, 'doapt') ;
+    domakeaptresultsmovie = lookup_in_struct(analysis_parameters, 'domakeaptresultsmovie') ;
     doautomaticcheckscomplete = lookup_in_struct(analysis_parameters, 'doautomaticcheckscomplete') ;
     requiredfiles_automaticchecksincoming = lookup_in_struct(analysis_parameters, 'requiredfiles_automaticchecksincoming') ;
     requiredfiles_flytracker = lookup_in_struct(analysis_parameters, 'requiredfiles_flytracker') ;
@@ -302,6 +312,7 @@ function FlyDiscoPipeline(expdir, varargin)
     requiredfiles_plotperframestats = lookup_in_struct(analysis_parameters, 'requiredfiles_plotperframestats') ;    
     requiredfiles_makectraxresultsmovie = lookup_in_struct(analysis_parameters, 'requiredfiles_makectraxresultsmovie') ;
     requiredfiles_apt = lookup_in_struct(analysis_parameters, 'requiredfiles_apt') ;
+    requiredfiles_makeaptresultsmovie = lookup_in_struct(analysis_parameters, 'requiredfiles_makeaptresultsmovie') ;    
     requiredfiles_automaticcheckscomplete = lookup_in_struct(analysis_parameters, 'requiredfiles_automaticcheckscomplete') ;
     cluster_billing_account_name = lookup_in_struct(analysis_parameters, 'cluster_billing_account_name') ;
     sshhost = lookup_in_struct(analysis_parameters, 'sshhost') ;
@@ -326,6 +337,8 @@ function FlyDiscoPipeline(expdir, varargin)
     % doextradiagnostics = coerce_to_on_off_force(doextradiagnostics) ; %#ok<NASGU>
     % doanalysisprotocol = coerce_to_on_off_force(doanalysisprotocol) ; %#ok<NASGU>
     doapt = coerce_to_on_off_force(doapt) ;
+    domakeaptresultsmovie = coerce_to_on_off_force(domakeaptresultsmovie) ;
+
     doautomaticcheckscomplete = coerce_to_on_off_force(doautomaticcheckscomplete) ;
     
     % Print the settings values in use
@@ -344,6 +357,7 @@ function FlyDiscoPipeline(expdir, varargin)
           'doplotperframestats', ...
           'domakectraxresultsmovie', ...
           'doapt', ...
+          'domakeaptresultsmovie', ...
           'doautomaticcheckscomplete' }' ;
     fprintf('Settings values in FlyDiscoPipeline():\n') ;
     for i = 1 : length(variable_names_to_print) ,
@@ -659,7 +673,7 @@ function FlyDiscoPipeline(expdir, varargin)
             
             requiredfiles_makectraxresultsmovie = ...
                 FlyDiscoReplaceRequiredFilePlaceholders(requiredfiles_makectraxresultsmovie, stage, expdir, analysis_protocol_folder_path, ...
-                                                        dataloc_params, plotperframestats_params) ;
+                                                        dataloc_params, makectraxresultsmovie_params) ;
             
             todo = CheckForMissingFiles(expdir,dataloc_params,requiredfiles_makectraxresultsmovie);
             if forcecompute || todo ,
@@ -700,8 +714,9 @@ function FlyDiscoPipeline(expdir, varargin)
                                      'analysis_protocol',analysis_protocol,...
                                      'dataloc_params', dataloc_params, ...
                                      'dryrun',false,...
-                                     'verbose',2,...
+                                     'verbose',1,...
                                      'dowait',true,...
+                                     'waitchecktime',300,...
                                      'dooverwrite',forcecompute, ...
                                      'cluster_billing_account_name', cluster_billing_account_name, ...
                                      'aptrepopath', aptrepopath, ...
@@ -719,6 +734,29 @@ function FlyDiscoPipeline(expdir, varargin)
                 flydisco_pipeline_error(stage, msgs) ;
             end
         end  % APT stage
+        %% make apt results movie
+        stage = 'makeaptresultsmovie';
+        if is_on_or_force(domakeaptresultsmovie)
+            forcecompute = is_force(domakeaptresultsmovie);
+            requiredfiles_makeaptresultsmovie = ...
+                FlyDiscoReplaceRequiredFilePlaceholders(requiredfiles_makeaptresultsmovie, stage, expdir, analysis_protocol_folder_path, ...
+                dataloc_params, aptresultsmovie_params) ;
+            todo = CheckForMissingFiles(expdir, dataloc_params, requiredfiles_makeaptresultsmovie) ;
+            if forcecompute || todo
+                fprintf('Making APT results movie... \n');
+                FlyDiscoMakeAPTResultsMovie(expdir, ...
+                    'settingsdir',settingsdir, ...
+                    'analysis_protocol',analysis_protocol, ...
+                    aptresultsmovie_params{:}) ;
+                
+            end
+            % make sure makeaptresultsmovie files exist
+            [ismissingfile,missingfiles] = CheckForMissingFiles(expdir,dataloc_params,requiredfiles_makeaptresultsmovie);
+            if ismissingfile,
+                msgs = cellfun(@(x) sprintf('Missing APT results movie file %s',x),missingfiles,'UniformOutput',false);
+                flydisco_pipeline_error(stage, msgs) ;
+            end
+        end % make apt results movie
     end  % if do_run_core_pipeline
 
 %     fprintf('Memory usage before FlyDiscoAutomaticChecksComplete():\n') ;

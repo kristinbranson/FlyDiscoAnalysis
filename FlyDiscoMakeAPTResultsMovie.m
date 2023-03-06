@@ -1,8 +1,16 @@
-% make results movies
+% make apt results movie
+% uses 3 possible param files:
+% aptresultsmovie_params sets headlandmark and taillandmark but can also be input directly. defaults in movie making and 1 and 7 (for alice's fly tracker)
+% override_datalocparams - can override the fields of datalocparmas for example trk file name 
+% override_ctraxparams - by default the same movie parameters as
+% ctraxresultsmovie are used, but these can be overridden with this input
+% struct for example fig size of output movie 
+% Note additional input options for anonymizing movies not using for pipeline.  
+
 function FlyDiscoMakeAPTResultsMovie(expdir,varargin)
 
 [analysis_protocol,settingsdir,datalocparamsfilestr,override_datalocparams,override_ctraxparams,apttrk,...
-  hidemovietype,nintervals,hidebackgroundextra,outexpdir,ignoretrxfile,headlandmark,taillandmark,addsubtitles] = ...
+  hidemovietype,nintervals,hidebackgroundextra,outexpdir,ignoretrxfile,headlandmark,taillandmark] = ...
   myparse(varargin,...
   'analysis_protocol','20150915_flybubble_centralcomplex',...
   'settingsdir',default_settings_folder_path(),...
@@ -18,6 +26,27 @@ dataloc_params = ReadParams(datalocparamsfile);
 fns = fieldnames(override_datalocparams);
 for i = 1:numel(fns),
   dataloc_params.(fns{i}) = override_datalocparams.(fns{i});
+end
+
+%% read in apt results movie params : headlandmark, taillandmark
+
+datalocparamsfilestr = 'dataloc_params.txt';
+datalocparamsfile = fullfile(settingsdir,analysis_protocol,datalocparamsfilestr);
+dataloc_params = ReadParams(datalocparamsfile);
+aptresultsmovieparamsfilestr = dataloc_params.aptresultsmovieparamsfilestr;
+% name of parameters file
+aptresultsmovieparamsfile = fullfile(settingsdir,analysis_protocol,aptresultsmovieparamsfilestr);
+if ~exist(aptresultsmovieparamsfile,'file'),
+  error('APT results movie params file %s does not exist',aptresultsmovieparamsfile);
+end
+% read
+aptresultsmovie_params = ReadParams(aptresultsmovieparamsfile);
+
+if isfield(aptresultsmovie_params,'headlandmark')
+    headlandmark = aptresultsmovie_params.headlandmark;
+end
+if isfield(aptresultsmovie_params,'taillandmark')
+    taillandmark = aptresultsmovie_params.taillandmark;
 end
 
 %% location of data
