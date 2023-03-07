@@ -6,7 +6,6 @@ function result = projtechreslab_configuration()
     result.data_folder_path_from_rig_index = {'/cygdrive/e/flydisco_data/projtechres'} ;
     result.destination_folder = '/groups/projtechres/projtechres/flydisco_data' ;
     this_folder_path = fileparts(mfilename('fullpath')) ;
-    flydisco_analysis_path = fileparts(this_folder_path) ;
-    result.settings_folder_path = fullfile(flydisco_analysis_path, 'settings-internal') ;
+    result.settings_folder_path = fullfile(this_folder_path, 'settings-internal') ;
     result.does_have_per_user_folders = true ;
 end
