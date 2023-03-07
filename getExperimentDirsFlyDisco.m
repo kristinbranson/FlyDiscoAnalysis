@@ -6,6 +6,8 @@ function [expdirstruct] = getExperimentDirsFlyDisco(rootdatadir,varargin)
 sxclfilestr = 'sexclassifier_diagnostics.txt';
 autochcksinfilestr = 'automatic_checks_incoming_results.txt';
 autochckscompfilestr = 'automatic_checks_complete_results.txt';
+manchcksfilestr = 'manual_fail.txt';
+
 
 moviefilestr = 'movie.ufmf';
 trxfilestr = 'registered_trx.mat';
@@ -15,8 +17,8 @@ trxfilestr = 'registered_trx.mat';
 % add option to check for aborted complete or failed files. 
 %%% screen_type from experiment name NOT accurate. change to expname, add
 %%% real screen_type filter
-[metadatafile, expdirname,line_name,date,nflies,autocheckin,movielength,TrajNum,autocheckcomplete] = myparse(varargin,'metadatafile','Metadata.xml','expdirname','*','line_name','*', ...
-    'date','*','nflies',false,'autocheckin',false,'movielength',false,'TrajNum',false,'autocheckcomplete',false);
+[metadatafile, expdirname,line_name,date,nflies,autocheckin,movielength,TrajNum,autocheckcomplete,manualcheck] = myparse(varargin,'metadatafile','Metadata.xml','expdirname','*','line_name','*', ...
+    'date','*','nflies',false,'autocheckin',false,'movielength',false,'TrajNum',false,'autocheckcomplete',false,'manualcheck',false);
 
 
 searchname = sprintf('%s%s%s',expdirname,line_name,date);
@@ -100,6 +102,22 @@ for i = 1:numel(tmp)
             tmpM.automated_pf = 'could not load file';
         end
     end
+    % add manual failes
+    if manualcheck
+        try
+            manchcksfile = fullfile(rootdatadir,expdir,manchcksfilestr);
+            if exist(manchcksfile,'file')
+                tmpM.manual_fail = 'F';
+                manchcks = textread(manchcksfile,'%s');               
+                tmpM.manual_fail_category = strjoin(manchcks);
+            else
+                tmpM.manual_fail = 'U';
+            end
+        catch
+            tmpM.manual_fail = 'error check for file';           
+        end
+    end
+
     
     
 %     % add FlyDiscoAnalysisStatus
