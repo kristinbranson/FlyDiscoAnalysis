@@ -958,3 +958,41 @@ for i = 1:numel(explist)
 
 end
 
+%% compile numbersfor bad fly numbers by experimenter
+load /home/robiea@hhmi.org/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_allflydisco_20230301_allVNC.mat
+% problem - empty categories are numbers
+idx = strcmp({metadata.automated_pf},'F');
+failed = {metadata(idx).automated_pf_category};
+
+% two ways to count 
+% categories
+c = categorical(failed);
+categories(c);
+countcats(c);
+
+% unique
+[a,~,d] = unique(failed);
+counts = histcounts(d,1:numel(a));
+
+% experimenters of failed experiments
+experimentersF = {metadata(idx).experimenter};
+c = categorical(experimenters);
+categories(c);
+countcats(c);
+% total experiments 
+experimenters = {metadata.experimenter};
+c = categorical(experimenters);
+categories(c)
+countcats(c)'
+
+% manual fails
+
+idx2 = strcmp({metadata.manual_fail},'F');
+mfailed = [metadata(idx2).manual_fail_category];
+e = categorical(mfailed);
+[aa,~,cc]= unique(e);
+counts = histcounts(cc)
+experimenters = {metadata(idx2).experimenter};
+c = categorical(experimenters);
+categories(c);
+countcats(c);
