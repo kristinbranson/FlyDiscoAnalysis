@@ -21,8 +21,7 @@ optional_argument_list = ...
 
 %% experiments 
 
-folder_path_from_experiment_index = {'/groups/rubin/home/schretterc/Documents/FlyBubblefRGB_Chrim/TestingNewCalibration_030623/20230306T084336_rig1_flyBubble1_SS36564_20XUASCsChrimsonattp18_20221128_AggaIPgChrim',...
-'/groups/rubin/home/schretterc/Documents/FlyBubblefRGB_Chrim/TestingNewCalibration_030623/20230222T163912_rig2_flyBubble1_SS37071_20XUASCsChrimsonattp18_20221129_AggAVLPChrim'};
+folder_path_from_experiment_index = {'/groups/rubin/home/schretterc/Documents/FlyBubblefRGB_Chrim/TestingNewCalibration_030623/20230306T084336_rig1_flyBubble1_SS36564_20XUASCsChrimsonattp18_20221128_AggaIPgChrim'};
 
 %% Call the testing function to do the real work
 test_transfero_FlyDiscoPipeline_wrapper_on_experiment_list(folder_path_from_experiment_index, ...
