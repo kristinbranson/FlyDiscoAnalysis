@@ -5,9 +5,15 @@ function modpath()
   path_to_this_script = mfilename('fullpath') ;
   path_to_this_folder = fileparts(path_to_this_script) ;
   
-  % Add the fuster folder
-  addpath(fullfile(path_to_this_folder, 'fuster')) ;
+%   % Add the fuster folder
+%   addpath(fullfile(path_to_this_folder, 'fuster')) ;
   
+  % Add TMT to the path, so we get fuster stuff, but do it early so it gets
+  % shadowed by anything with a namespace conflict.
+  tmt_folder_path = fullfile(path_to_this_folder, 'tmt') ;
+  tmt_modpath_script_path = fullfile(tmt_folder_path, 'modpath.m') ; 
+  run(tmt_modpath_script_path) ;  
+
   % Run the FlyTracker modpath script
   flytracker_folder_path = fullfile(path_to_this_folder, 'FlyTracker') ;
   flytracker_modpath_script_path = fullfile(flytracker_folder_path, 'modpath.m') ;
@@ -20,7 +26,6 @@ function modpath()
   
   % Add the TrkFile code for loading in trk files
   addpath(fullfile(path_to_this_folder,'APT','matlab','trk')) ;
-
 
   % Add FlyDiscoAnalysis subfolders that are not their own projects
   addpath(fullfile(path_to_this_folder, 'simplewing')) ;

@@ -70,7 +70,9 @@ function run_transfero_FlyDiscoPipeline_wrapper_on_experiment_list(folder_path_f
     % But we want to pass that through to transfero_FlyDiscoPipeline_wrapper()
     % so that it's used for the submission of the APT part of each pipeline run.
     optional_arguments_as_name_value_list = varargin ;
-    optional_arguments_as_name_value_list(end+1:end+2) = {'sshhost', ssh_host_name} ;
+    if ~isempty(ssh_host_name) ,
+        optional_arguments_as_name_value_list(end+1:end+2) = {'sshhost', ssh_host_name} ;
+    end
 
     % Specify bsub parameters
     maxiumum_slot_count = 400 ;
