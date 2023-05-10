@@ -4,8 +4,8 @@
 %%
 modpath
 cluster_billing_account_name = 'branson' ;
-do_use_bqueue = true ;    
-do_actually_submit_jobs = true ;  
+do_use_bqueue = false ;    
+do_actually_submit_jobs = false ;  
 
 %% set params                                  
 settings_folder_path = '/groups/branson/home/robiea/Code_versioned/FlyDiscoAnalysis/settings' ;
