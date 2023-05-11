@@ -114,7 +114,7 @@ function transfero_FlyDiscoPipeline_wrapper(experiment_folder_path, user_name_fo
     % If there was an exception thrown during the main pipeline, rethrow it so that
     % we exit with an error return code when running in batch mode.
     if ~isempty(main_pipeline_exception_maybe) ,
-        fprintf('\nRethrowing an error that occurred suring the main phase:\n') ;
+        fprintf('\nRethrowing an error that occurred during the main phase:\n') ;
         main_pipeline_exception = main_pipeline_exception_maybe(1) ;
         rethrow(main_pipeline_exception) ;
     end
