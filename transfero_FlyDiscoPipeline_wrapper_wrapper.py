@@ -20,19 +20,6 @@ class cd:
 
 
 
-def run_subprocess_live(command_as_list, check=True, shell=False) :
-    '''
-    Call an external executable, with live display of the output.
-    '''
-    p = subprocess.Popen(command_as_list, shell=shell)
-    return_code = p.wait()
-    if check :
-        if return_code != 0 :
-            raise RuntimeError("Running %s returned a non-zero return code: %d" % (str(command_as_list), return_code))
-    return return_code
-
-
-
 def run_subprocess_and_return_stdout(command_as_list, shell=False) :
     completed_process = \
         subprocess.run(command_as_list, 
@@ -41,7 +28,6 @@ def run_subprocess_and_return_stdout(command_as_list, shell=False) :
                        check=True, 
                        shell=shell)
     stdout = completed_process.stdout
-    #print('Result: %s' % result)                   
     return stdout
 
 
@@ -111,7 +97,8 @@ def transfero_FlyDiscoPipeline_wrapper_wrapper(raw_experiment_folder_path, user_
         command_line_as_list = ['/usr/bin/xvfb-run', '-d', '/misc/local/matlab-2019a/bin/matlab', '-batch', matlab_command_line]
         #print("Subprocess command line as list is: %s" % repr(command_line_as_list))        
         sys.stdout.flush()  # Flush stdout output now, so it comes before an stdout output of the subprocess
-        run_subprocess_live(command_line_as_list)
+        subprocess.run(command_line_as_list, 
+                       check=True)
 
 
 

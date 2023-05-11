@@ -67,6 +67,9 @@ function transfero_FlyDiscoPipeline_wrapper(experiment_folder_path, user_name_fo
             FlyDiscoPipeline(experiment_folder_path, main_phase_analysis_parameters) ;
         catch pipeline_exception ,
             main_pipeline_exception_maybe = pipeline_exception ;
+            fprintf('\nAn exception has occured during the main phase of the pipline:\n') ;
+            fprintf('%s\n', pipeline_exception.getReport())
+            fprintf('\nThis exception has been caught, but will be rethrown after completion of the caboose phase.\n') ;
         end
     else
         FlyDiscoPipeline(experiment_folder_path, main_phase_analysis_parameters) ;
