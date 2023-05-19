@@ -15,5 +15,8 @@ added parameters for APT tracking
 adding parameters for apt results movie
 
 20230307
-updated the lbl file in apt_params.txt 
+updated the lbl file, same name in apt_params.txt 
 Same tracker just updated the slots for tracking and training to work with APT update
+
+20230518
+added Alice updated walk jaaba classifier -> scores_walk2.mat
