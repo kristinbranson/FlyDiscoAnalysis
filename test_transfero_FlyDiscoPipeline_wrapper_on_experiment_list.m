@@ -24,7 +24,7 @@ function test_transfero_FlyDiscoPipeline_wrapper_on_experiment_list(folder_path_
     if ~exist('do_actually_submit_jobs', 'var') || isempty(do_actually_submit_jobs) ,
         do_actually_submit_jobs = true ;
     end
-    if ~exist('ssh_host_name', 'var') || isempty(submit_host_name) ,
+    if ~exist('submit_host_name', 'var') || isempty(submit_host_name) ,
         submit_host_name = '' ;
     end
 
