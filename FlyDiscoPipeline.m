@@ -35,7 +35,7 @@ function FlyDiscoPipeline(expdir, varargin)
     %   Note, however, that no "settings/" folder is included in the source
     %   respository.  This is to prevent unintended usage of the wrong settings/
     %   folder.  If convenient, a softlink named "settings" can be created that
-    %   points to settings-for-testing/, which *is* included in the source
+    %   points to settings-internal/, which *is* included in the source
     %   repository.
     %
     %   FlyDiscoPipeline(expdir, 'settingsdir', settingsdir) looks in the given
@@ -45,7 +45,7 @@ function FlyDiscoPipeline(expdir, varargin)
     %   FlyDiscoPipeline(expdir, 'analysis_protocol', analysis_protocol) uses the
     %   analysis-protocol folder specified instead of the analysis-protocol folder
     %   indicated by the experiment metadata.  analysis_protocol should be a string
-    %   that corresponds to a subfolder name within the settings/ folder.
+    %   that corresponds to a subfolder name within the settings folder.
     %
     %   The operation of FlyDiscoPipeline() consists of a number of stages.  Each of
     %   these stages can be turned on or off independently.  (Although some stages
@@ -734,6 +734,7 @@ function FlyDiscoPipeline(expdir, varargin)
                 flydisco_pipeline_error(stage, msgs) ;
             end
         end  % APT stage
+        
         %% make apt results movie
         stage = 'makeaptresultsmovie';
         if is_on_or_force(domakeaptresultsmovie)
