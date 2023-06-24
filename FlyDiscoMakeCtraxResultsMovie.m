@@ -180,19 +180,18 @@ newwidth = 4*ceil(width/4);
 mp4_file_path = fullfile(expdir, [avifilestr,'.mp4']) ;
 nowstr = datestr(now,'yyyymmddTHHMMSSFFF');
 passlogfile = sprintf('%s_%s',avi_file_path,nowstr);
-% ffmpeg_command = 'env -u LD_LIBRARY_PATH /usr/bin/ffmpeg' ;  
-%     % Use the local ffmpeg, to avoid fontconfig issues
-%     % Have to use env -u to clear Matlab's very Matlab-specific
-%     % LD_LIBRARY_PATH
-if isequal(get_distro_codename(), 'Ubuntu') && exist('/usr/bin/ffmpeg', 'file') ,
-    ffmpeg_command = 'env -u LD_LIBRARY_PATH /usr/bin/ffmpeg' ;  
-        % Use the local ffmpeg, to avoid fontconfig issues
-        % Have to use env -u to clear Matlab's very Matlab-specific
-        % LD_LIBRARY_PATH
-else
-    %ffmpeg_command = '/misc/local/ffmpeg-4.3.1/bin/ffmpeg' ;  % cluster pre OL9
-    ffmpeg_command = '/misc/sc/ffmpeg-git-20230313-amd64-static/ffmpeg' ;
-end
+ffmpeg_command = 'env -u LD_LIBRARY_PATH /usr/bin/ffmpeg' ;  
+    % Use env -u to clear Matlab's very Matlab-specific
+    % LD_LIBRARY_PATH
+% if isequal(get_distro_codename(), 'Ubuntu') && exist('/usr/bin/ffmpeg', 'file') ,
+%     ffmpeg_command = 'env -u LD_LIBRARY_PATH /usr/bin/ffmpeg' ;  
+%         % Use the local ffmpeg, to avoid fontconfig issues
+%         % Have to use env -u to clear Matlab's very Matlab-specific
+%         % LD_LIBRARY_PATH
+% else
+%     %ffmpeg_command = '/misc/local/ffmpeg-4.3.1/bin/ffmpeg' ;  % cluster pre OL9
+%     ffmpeg_command = '/misc/sc/ffmpeg-git-20230313-amd64-static/ffmpeg' ;
+% end
 
 cmd = sprintf('%s -i %s -y -passlogfile %s -c:v h264 -pix_fmt yuv420p -s %dx%d -b:v 1600k -vf "subtitles=%s:force_style=''FontSize=10,FontName=Helvetica''" -pass 1 -f mp4 /dev/null',...
   ffmpeg_command, avi_file_path,passlogfile,newwidth,newheight,subtitlefile);
