@@ -3,6 +3,7 @@ function run_transfero_FlyDiscoPipeline_wrapper_on_experiment_list(folder_path_f
                                                                    user_name_for_configuration_purposes, ...
                                                                    do_use_bqueue, ...
                                                                    do_actually_submit_jobs, ...
+                                                                   do_try, ...
                                                                    ssh_host_name, ...
                                                                    varargin)
          
@@ -41,6 +42,12 @@ function run_transfero_FlyDiscoPipeline_wrapper_on_experiment_list(folder_path_f
     %   this argument is ignored. If missing or empty, do_actually_submit_jobs
     %   defaults to true.
     %
+    %   run_transfero_FlyDiscoPipeline_wrapper_on_experiment_list(..., 
+    %   do_try), if do_use_bqueue is false, determines whether jobs are run inside
+    %   a try-catch block or not.  Setting do_try==false is mostly useful for
+    %   debugging purposes.  If do_use_bqueue is true, this argument is ignored.
+    %   If missing or empty, do_try defaults to true.
+    %
     %   run_transfero_FlyDiscoPipeline_wrapper_on_experiment_list(...,
     %   ssh_host_name), if ssh_host_name is nonempty, issues all LSF commands (bsub,
     %   bjobs, etc) through the named ssh_host_name.  This makes it possible to
@@ -61,6 +68,9 @@ function run_transfero_FlyDiscoPipeline_wrapper_on_experiment_list(folder_path_f
     end
     if ~exist('do_actually_submit_jobs', 'var') || isempty(do_actually_submit_jobs) ,
         do_actually_submit_jobs = true ;
+    end
+    if ~exist('do_try', 'var') || isempty(do_try) ,
+        do_try = true ;
     end
     if ~exist('ssh_host_name', 'var') || isempty(ssh_host_name) ,
         ssh_host_name = '' ;
@@ -88,7 +98,7 @@ function run_transfero_FlyDiscoPipeline_wrapper_on_experiment_list(folder_path_f
 
     % Run transfero_FlyDiscoPipeline_wrapper() on all experiments
     if do_use_bqueue ,
-        bqueue = bqueue_type(do_actually_submit_jobs, maxiumum_slot_count, do_use_xvfb, ssh_host_name) ;
+        bqueue = bqueue_type(do_actually_submit_jobs, do_try, maxiumum_slot_count, do_use_xvfb, ssh_host_name) ;
 
         % Queue the jobs
         for i = 1 : experiment_count ,

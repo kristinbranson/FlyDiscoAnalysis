@@ -31,12 +31,12 @@ optional_argument_list = ...
      'do_try', false} ; 
 do_use_bqueue = true ;
 do_actually_submit_jobs = true ;
-do_try = false ;
+do_try = true ;
 submit_host_name = 'submit.int.janelia.org' ;
 %submit_host_name = '' ;
 
-read_only_experiments_folder_path = fullfile(fly_disco_folder_path, 'example-experiments', 'passing-test-suite-experiments-with-tracking-read-only') ;
-working_experiments_folder_path = fullfile(fly_disco_folder_path, 'example-experiments', 'passing-test-suite-experiments-with-tracking') ;
+read_only_experiments_folder_path = fullfile(fly_disco_folder_path, 'example-experiments', 'passing-test-suite-experiments-read-only') ;
+working_experiments_folder_path = fullfile(fly_disco_folder_path, 'example-experiments', 'passing-test-suite-experiments') ;
 
 % Delete the working experiments folder
 if exist(working_experiments_folder_path, 'file') ,
@@ -52,7 +52,6 @@ fprintf('Elapsed time: %g s\n', elapsed_time) ;
 
 % Find the experiments
 folder_path_from_experiment_index = find_experiment_folders(working_experiments_folder_path) ;
-folder_path_from_experiment_index = folder_path_from_experiment_index(end-1) ;
 
 % % Run the script under test
 % experiment_count = length(folder_path_from_experiment_index) ;
@@ -68,7 +67,7 @@ test_transfero_FlyDiscoPipeline_wrapper_on_experiment_list(folder_path_from_expe
                                                            user_name_for_configuration_purposes, ...
                                                            do_use_bqueue, ...
                                                            do_actually_submit_jobs, ...
-                                                           do_try, ...                                                           
+                                                           do_try, ...
                                                            submit_host_name, ...
                                                            optional_argument_list{:}) 
                                                        

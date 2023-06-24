@@ -35,8 +35,8 @@ do_try = false ;
 submit_host_name = 'submit.int.janelia.org' ;
 %submit_host_name = '' ;
 
-read_only_experiments_folder_path = fullfile(fly_disco_folder_path, 'example-experiments', 'passing-test-suite-experiments-with-tracking-read-only') ;
-working_experiments_folder_path = fullfile(fly_disco_folder_path, 'example-experiments', 'passing-test-suite-experiments-with-tracking') ;
+read_only_experiments_folder_path = fullfile(fly_disco_folder_path, 'example-experiments', 'passing-test-suite-experiments-read-only') ;
+working_experiments_folder_path = fullfile(fly_disco_folder_path, 'example-experiments', 'passing-test-suite-experiments') ;
 
 % Delete the working experiments folder
 if exist(working_experiments_folder_path, 'file') ,
