@@ -32,8 +32,7 @@ optional_argument_list = ...
 do_use_bqueue = true ;
 do_actually_submit_jobs = true ;
 do_try = true ;
-submit_host_name = 'submit.int.janelia.org' ;
-%submit_host_name = '' ;
+submit_host_name = if_not_a_submit_host('submit.int.janelia.org') ;
 
 read_only_experiments_folder_path = fullfile(fly_disco_folder_path, 'example-experiments', 'passing-test-suite-experiments-read-only') ;
 working_experiments_folder_path = fullfile(fly_disco_folder_path, 'example-experiments', 'passing-test-suite-experiments') ;
