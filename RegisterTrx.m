@@ -17,7 +17,7 @@ end
 
 if ~isempty(inregistrationfile),
   registrationData = load(inregistrationfile);
-  registrationData = detectRegistrationMarks('registrationData',registrationData);
+  registrationData = extractRegistrationFunctionAndTransform(registrationData);
 else
    
   if ~exist(annName,'file'),

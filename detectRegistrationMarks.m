@@ -1,7 +1,6 @@
 function registration = detectRegistrationMarks(varargin)
 
 %% parse inputs
-
 [saveName,...
   bkgdImage,movieName,annName,bkgdNSampleFrames,...
   method,...
@@ -17,12 +16,10 @@ function registration = detectRegistrationMarks(varargin)
   pairDist_mm,...
   circleRadius_mm,...
   bowlMarkerPairTheta_true,...
-  maxDThetaBowlMarkerPair,...
   markerPairAngle_true,...
   nBowlMarkers,...
   bowlMarkerType,...
-  DEBUG,...
-  registration,...
+  isInDebugMode,...
   nr,nc,...
   imsavename,...
   hfig,figpos,...
@@ -62,37 +59,21 @@ function registration = detectRegistrationMarks(varargin)
   'pairDist_mm',133,...
   'circleRadius_mm',63.5,...
   'bowlMarkerPairTheta_true',-3*pi/4,...
-  'maxDThetaBowlMarkerPair',pi/12,...
   'markerPairAngle_true',pi/6,...
   'nBowlMarkers',1,...
   'bowlMarkerType','gradient',...
   'debug',false,...
-  'registrationData',[],...
   'nr',[],'nc',[],...
   'imsavename','',...
-  'hfig',1,'figpos',[10,10,1600,800],...
+  'hfig',[],'figpos',[10,10,1600,800],...
   'useNormXCorr',false,...
   'doTransposeImage',false,...
   'ledindicator',false,...
   'regXY',[]);
-%annName = [] ;
 
-iscircle = ismember(method,{'circle','circle_manual'});
-
-%% return register function
-
-if ~isempty(registration),
-  registration.registerfn = @(x,y) register(x,y,registration.offX,...
-    registration.offY,registration.offTheta,registration.scale);
-  registration.affine = affineTransform(registration.offX,...
-    registration.offY,registration.offTheta,registration.scale);
-  return;
-end
 
 %% get background image
-
 isBkgdImage = ~isempty(bkgdImage);
-
 if ~isBkgdImage && ~isempty(annName),
   % try reading 
   [bkgdImage,bkgdMed,bkgdMean,bg_algorithm,movie_height,movie_width] = ...
@@ -143,16 +124,19 @@ if ~isBkgdImage,
   % open the movie
   [readframe,~,fid,headerinfo] = get_readframe_fcn(movieName);
   
-  % take the median
-  if isfield(headerinfo, 'nmeans') && headerinfo.nmeans > 1,
-    meanims = ufmf_read_mean(headerinfo,'meani',2:headerinfo.nmeans);
-  else
-    sampleframes = unique(round(linspace(1,headerinfo.nframes,bkgdNSampleFrames)));
-    meanims = repmat(double(readframe(1)),[1,1,1,bkgdNSampleFrames]);
-    for i = 2:bkgdNSampleFrames,
-      meanims(:,:,:,i) = double(readframe(sampleframes(i)));
-    end
+  % compute the background image
+  % Seems like the cached frames are transposed relative to the actual frames?
+  % Just going to compute the background image from scratch
+  % -- ALT, 2023-07-21
+%   if isfield(headerinfo, 'nmeans') && headerinfo.nmeans > 1,
+%     meanims = ufmf_read_mean(headerinfo,'meani',2:headerinfo.nmeans);
+%   else
+  sampleframes = unique(round(linspace(1,headerinfo.nframes,bkgdNSampleFrames)));
+  meanims = repmat(double(readframe(1)),[1,1,1,bkgdNSampleFrames]);
+  for i = 2:bkgdNSampleFrames,
+    meanims(:,:,:,i) = double(readframe(sampleframes(i)));
   end
+%   end
   meanims = double(meanims);
   bkgdImage = median(meanims,4);
   if fid>0 ,
@@ -160,7 +144,7 @@ if ~isBkgdImage,
   end
 end
 
-[nr,nc,ncolors] = size(bkgdImage); %#ok<NASGU>
+[nr,nc,~] = size(bkgdImage);
 r = min(nr,nc);
 
 
@@ -173,7 +157,6 @@ fil = fspecial('disk',diskFilterRadius);
 gradfilI = imfilter(gradI,fil,0,'same');
 
 if strcmpi(method,'normcorr'),
-  
   % make a cross filter
   fil0 = zeros(crossFilterRadius*2+1);
   fil0(crossFilterRadius+1,:) = 1;
@@ -192,14 +175,10 @@ if strcmpi(method,'normcorr'),
   for i = 1:nRotations,
     filI1 = max(filI1,imfilter(bkgdImage,fils{i},'replicate') ./ ...
                       imfilter(bkgdImage,ones(size(fils{i})),'replicate'));
-  end
-  
-elseif strcmpi(method,'gradient'),
-  
-  filI1 = gradfilI;
-  
-elseif strcmpi(method,'circle'),
-  
+  end  
+elseif strcmpi(method,'gradient'),  
+  filI1 = gradfilI;  
+elseif strcmpi(method,'circle'),  
   % hough circle transform to detect 
   if strcmpi(circleImageType,'raw_whiteedge'),
     circleim = bkgdImage >= circleImageThresh;
@@ -217,25 +196,22 @@ elseif strcmpi(method,'circle'),
   bincentersr = linspace(circleRLim(1)*min(nc,nr),circleRLim(2)*min(nc,nr),circleNRTry);
   [circleRadius,circleCenterX,circleCenterY,featureStrengths,circleDetectParams] = ...
     detectcircles(circleim,...
-    'cannythresh',circleCannyThresh,'cannysigma',circleCannySigma,...
-    'binedgesa',binedgesa,'bincentersb',bincentersb,'bincentersr',bincentersr,...
-    'maxncircles',1,'doedgedetect',strcmpi(circleImageType,'canny'));
-
-elseif strcmpi(method,'circle_manual'),
-  
+                  'cannythresh',circleCannyThresh,'cannysigma',circleCannySigma,...
+                  'binedgesa',binedgesa,'bincentersb',bincentersb,'bincentersr',bincentersr,...
+                  'maxncircles',1,'doedgedetect',strcmpi(circleImageType,'canny'));
+elseif strcmpi(method,'circle_manual'),  
   circleim = bkgdImage;
-  hfig = figure;
-  imagesc(bkgdImage,[0,255]); axis image;
-  [circleCenterX,circleCenterY,circleRadius] = fitcircle_manual(hfig);
-  if ishandle(hfig),
-    delete(hfig);
+  hfig_temp = figure() ;
+  axes_temp = axes(hfig_temp) ;
+  imagesc(axes_temp, bkgdImage,[0,255]); 
+  axis(axes_temp, 'image') ;
+  [circleCenterX,circleCenterY,circleRadius] = fitcircle_manual(hfig_temp);
+  if ishandle(hfig_temp),
+    delete(hfig_temp);
   end
-  featureStrengths = nan;
-  
-else
-  
-  error('Unknown method for registration mark detection: %s',method);
-  
+  featureStrengths = nan;  
+else  
+  error('Unknown method for registration mark detection: %s',method);  
 end
 
 
@@ -281,19 +257,23 @@ if nBowlMarkers > 0,
         bowlfils{i} = imrotate(bowlMarkerTemplate,thetas(i),'bilinear','loose');
       end
       % compute normalized maximum correlation
-      filI4 = -inf(nr,nc);
+      filI4_from_theta_index = zeros(nr,nc,2*nRotations) ;
+      %filI4 = -inf(nr,nc);
       for i = 1:2*nRotations,
         if useNormXCorr,
           tmp = normxcorr2(bowlMarkerTemplate,bkgdImage);
           tmp = tmp(offr0+1:end-offr1+1,offc0+1:end-offc1+1);
           tmp(1:sz1(1),:) = 0; tmp(end-sz1(1)+1:end,:) = 0;
           tmp(:,1:sz1(2)) = 0; tmp(:,end-sz1(2)+1:end) = 0;
-          filI4 = max(filI4,tmp);
+          %filI4 = max(filI4,tmp);
         else
-          filI4 = max(filI4,imfilter(bkgdImage,bowlfils{i},'replicate') ./ ...
-            imfilter(bkgdImage,ones(size(bowlfils{i})),'replicate'));
+          tmp = imfilter(bkgdImage,bowlfils{i},            'replicate') ./ ...
+                imfilter(bkgdImage,ones(size(bowlfils{i})),'replicate') ;
+          %filI4 = max(filI4,tmp);
         end
+        filI4_from_theta_index(:,:,i) = tmp ;
       end
+      filI4 = max(filI4_from_theta_index, [] ,3) ;
       methodcurr = 'template';
   end
 
@@ -303,29 +283,33 @@ if nBowlMarkers > 0,
   filI4(distCorner > maxDistCorner_BowlLabel) = -inf;
   % make corner with registration mark -inf
   if ledindicator
-    filI4 = neginfOutDetection(regXY(2),regXY(1),filI4,maxDistCorner_BowlLabel);
-%     filI4 = zeroOutDetection(regXY(2),regXY(1),filI4);
+    filI4 = neginfOutDetection(regXY(2),regXY(1),filI4,maxDistCorner_BowlLabel,nc,nr);
+%     filI4 = zeroOutDetection(regXY(2),regXY(1),filI4,nc,nr,featureRadius);
   end
   
   bowlMarkerPoints = nan(2,nBowlMarkers);
   for i = 1:nBowlMarkers,
     % find maximum
-    [success,x,y,featureStrength] = getNextFeaturePoint(filI4,methodcurr);
+    [success,x,y] = getNextFeaturePoint(filI4, ...
+                                        methodcurr, ...
+                                        nc, nr, ...
+                                        minFeatureStrengthLow, minFeatureStrengthHigh, ...
+                                        minTemplateFeatureStrength, ...
+                                        featureRadius, ...
+                                        dxGrid, dyGrid);
     if success,
       bowlMarkerPoints(:,i) = [x;y];
-      filI4 = zeroOutDetection(bowlMarkerPoints(1,i),bowlMarkerPoints(2,i),filI4);
+      filI4 = zeroOutDetection(bowlMarkerPoints(1,i),bowlMarkerPoints(2,i),filI4,nc,nr,featureRadius);
     else
       error('Could not detect bowl marker %d',i);
     end
   end
 end
 
-%
 
 %% find registration points
-
+iscircle = ismember(method,{'circle','circle_manual'});
 if ~iscircle
-
   % compute distance from center of image
   minDistCenter = minDistCenterFrac * r;
   maxDistCenter = maxDistCenterFrac * r;
@@ -337,27 +321,30 @@ if ~iscircle
   
   % zero out bowl marker
   for i = 1:nBowlMarkerPoints,
-    filI2 = zeroOutDetection(bowlMarkerPoints(1,i),bowlMarkerPoints(2,i),filI2);
+    filI2 = zeroOutDetection(bowlMarkerPoints(1,i),bowlMarkerPoints(2,i),filI2,nc,nr,featureRadius);
   end
   
   registrationPoints = [];
   featureStrengths = [];
   filI3 = filI2;
-  for i = 1:nRegistrationPoints,
-    
-    [success,x,y,featureStrength,filI3] = getNextFeaturePoint(filI3,method);
+  for i = 1:nRegistrationPoints,    
+    [success,x,y,featureStrength,filI3] = ...
+      getNextFeaturePoint(filI3,method, ...
+                          nc,nr, ...
+                          minFeatureStrengthLow,minFeatureStrengthHigh, ...
+                          minTemplateFeatureStrength, ...
+                          featureRadius, ...
+                          dxGrid,dyGrid) ;
     if ~success,
       break;
     end
     registrationPoints(:,i) = [x;y]; %#ok<AGROW>
-    featureStrengths(i) = featureStrength; %#ok<AGROW>
-    
+    featureStrengths(i) = featureStrength; %#ok<AGROW>    
   end
   
   if isempty(registrationPoints),
     error('No registration points detected');
   end
-  
 end
 
 %% origin is the average of all the registration points
@@ -381,10 +368,10 @@ end
 offX = -originX;
 offY = -originY;
 
-%% sort registration points counterclockwise from bowl label
 
+%% sort registration points counterclockwise from bowl label
 if nBowlMarkers > 0 && success,
-  bowlMarkerPoint = nanmean(bowlMarkerPoints,2);
+  bowlMarkerPoint = mean(bowlMarkerPoints, 2, 'omitnan') ;
   bowlMarkerTheta = atan2(bowlMarkerPoint(2)-originY,bowlMarkerPoint(1)-originX);
 else
   bowlMarkerTheta = atan2(1-originY,1-originX);
@@ -398,36 +385,12 @@ if ~iscircle
   featureStrengths = featureStrengths(order);
 end
 
-%% find the rotation
 
-% if nBowlMarkers > 0 && success,
-% 
-%   if iscircle
-%     % registration marker
-%     bowlMarkerPairTheta = bowlMarkerTheta;
-%   else
-%     % take the average of the pair of points around the bowl marker
-%     d1 = mod(dtheta(1)+pi,2*pi)-pi;
-%     d2 = mod(dtheta(end)+pi,2*pi)-pi;
-%     inrange = d1 > 0 && d1 <= maxDThetaBowlMarkerPair && ...
-%       d2 < 0 && -d2 <= maxDThetaBowlMarkerPair;
-%     if inrange,
-%       x = (registrationPoints(1,1)+registrationPoints(1,end))/2;
-%       y = (registrationPoints(2,1)+registrationPoints(2,end))/2;
-%       bowlMarkerPairTheta = atan2(y-originY,x-originX);
-%     else
-%       bowlMarkerPairTheta = bowlMarkerTheta;
-%     end
-%   end
-%   
-%   offTheta = mod(bowlMarkerPairTheta_true-bowlMarkerPairTheta+pi,2*pi)-pi;
-% else
-%   offTheta = 0;
-% end
-
+%% assume zero rotation
 offTheta = 0;
-%% find scale
 
+
+%% find scale
 if iscircle,
   scale = circleRadius_mm / circleRadius;
 else
@@ -487,11 +450,15 @@ if ~isempty(saveName),
 end
 registration.registerfn = registerfn;
 
-%% create images illustrating fitting
 
+%% create images illustrating fitting
 if ~isempty(imsavename) && ~ledindicator,
   
-  figure(hfig);
+  if isempty(hfig) ,
+    hfig = figure() ;
+  else
+    figure(hfig);
+  end
   clf(hfig);
   set(hfig,'Units','pixels','Position',figpos);
   nimsplot = 2;
@@ -547,13 +514,8 @@ if ~isempty(imsavename) && ~ledindicator,
 
   % transform image
   A = affineTransform(offX,offY,offTheta,scale);
-  T = maketform('affine',A);
-  % transformations of corners
-  %udata = [1;nc]; vdata = [1;nr];
-  %outbounds = findbounds(T,[udata,vdata]);
-  %xdata = outbounds(:,1);
-  %ydata = outbounds(:,2);
-  [imreg,xdata,ydata] = imtransform(bkgdImage,T,'XYScale',scale,'FillValues',nan);
+  T = maketform('affine',A);  %#ok<MTFA1> 
+  [imreg,xdata,ydata] = imtransform(bkgdImage,T,'XYScale',scale,'FillValues',nan);  %#ok<DIMTRNS> 
   
   % draw registered image
   imagesc(xdata,ydata,imreg,'parent',hax(2),[0,255]);
@@ -609,12 +571,17 @@ if ~isempty(imsavename) && ~ledindicator,
   if isdeployed && ishandle(hfig),
     close(hfig);
   end
-  
 end
+
+
 %% create image illustrating LED detection
 if ~isempty(imsavename) && ledindicator,
   figpos = [10,10,800,800];
-  figure(hfig);
+  if isempty(hfig) || ~ishandle(hfig) ,
+    hfig = figure();
+  else
+    figure(hfig) ;
+  end
   clf(hfig);
   set(hfig,'Units','pixels','Position',figpos);
   nimsplot = 1;
@@ -651,8 +618,8 @@ if ~isempty(imsavename) && ledindicator,
     plot(hax(1),bowlMarkerPoints(1,:),bowlMarkerPoints(2,:),'kx','markersize',12);
   end
 
- title(hax(1),'Maxvalue image and LED detection');
- colormap(hfig,'jet');
+  title(hax(1),'Maxvalue image and LED detection');
+  colormap(hfig,'jet');
 
   try
     if exist(imsavename,'file'),
@@ -667,7 +634,7 @@ if ~isempty(imsavename) && ledindicator,
   catch ME,
     warning('Could not save to %s:\n%s',imsavename,getReport(ME));
   end
-  
+
   if isdeployed && ishandle(hfig),
     close(hfig);
   end
@@ -676,9 +643,8 @@ end
  
  
 %%
-
-if DEBUG,
-  hfig = figure;
+if isInDebugMode,
+  hfig = figure() ;
   set(hfig,'Position',[20,20,1500,600]);
   clf;
   if iscircle,
@@ -688,7 +654,7 @@ if DEBUG,
   end
   hax = createsubplots(1,nsubplots,.05);
   %hax(1) = subplot(1,nsubplots,1);
-  axes(hax(1)); %#ok<MAXES>
+  axes(hax(1)); 
   imagesc(bkgdImage);
   hold on;
   if iscircle,
@@ -712,7 +678,7 @@ if DEBUG,
     plot(bowlMarkerPoints(1,:),bowlMarkerPoints(2,:),'mo');
   end
   axis image xy;
-  axes(hax(2)); %#ok<MAXES>
+  axes(hax(2)); 
   %hax(2) = subplot(1,nsubplots,2);
   if iscircle,
     imagesc(bkgdImage);
@@ -734,7 +700,7 @@ if DEBUG,
     plot(bowlMarkerPoints(1,:),bowlMarkerPoints(2,:),'mo');
   end
   axis image xy;
-  axes(hax(3)); %#ok<MAXES>
+  axes(hax(3)); 
   %hax(3) = subplot(1,nsubplots,3);
   if iscircle,
     imagesc(circleim);
@@ -759,7 +725,7 @@ if DEBUG,
   axis image xy;
   linkaxes(hax(1:3));
   if ~iscircle
-    axes(hax(4)); %#ok<MAXES>
+    axes(hax(4)); 
     %subplot(1,nsubplots,4);
     tmp = linspace(0,2*pi,100);
     plot(cos(tmp)*pairDist_mm/2,sin(tmp)*pairDist_mm/2,'b');
@@ -784,84 +750,93 @@ if DEBUG,
   end
   
 end
+end  % detectRegistrationMarks()
 
-%%
 
-function [success,x,y,featureStrength,filI] = getNextFeaturePoint(filI,methodcurr)
 
-  success = false;
+function [success,x,y,featureStrength,filI] = ...
+  getNextFeaturePoint(filI, methodcurr, ...
+                      nc, nr, ...
+                      minFeatureStrengthLow, minFeatureStrengthHigh, ...
+                      minTemplateFeatureStrength, ...
+                      featureRadius, ...
+                      dxGrid, dyGrid)
 
-  % find the next strongest feature
-  [featureStrength,j] = max(filI(:));
-  [y,x] = ind2sub([nr,nc],j);
-  
-  % make sure it meets threshold
-  if strcmpi(methodcurr,'grad2'),
-    if featureStrength < minFeatureStrengthHigh,
-      return;
-    end
-  else
-    if featureStrength < minTemplateFeatureStrength,
-      return;
-    end
+% find the next strongest feature
+[featureStrength,j] = max(filI(:));
+[y,x] = ind2sub([nr,nc],j);
+
+% make sure it meets threshold
+if strcmpi(methodcurr,'grad2'),
+  if featureStrength < minFeatureStrengthHigh,
+    success = false ;
+    return
   end
-
-  % subpixel accuracy: 
-  
-  if strcmpi(methodcurr,'grad2'),
-    % take box around point and compute weighted average of feature strength
-    [box] = padgrab(filI,0,y-featureRadius,y+featureRadius,x-featureRadius,x+featureRadius);
-    box = double(box > minFeatureStrengthLow);
-    Z = sum(box(:));
-    dx = sum(box(:).*dxGrid(:))/Z;
-    dy = sum(box(:).*dyGrid(:))/Z;
-    x = x + dx;
-    y = y + dy;
+else
+  if featureStrength < minTemplateFeatureStrength,
+    success = false ;
+    return
   end
-  
-  filI = zeroOutDetection(x,y,filI);
-  success = true;
-
 end
 
-  function filI = zeroOutDetection(x,y,filI)
-    
-    % zero out region around feature
-    i1 = max(1,round(x)-featureRadius);
-    i2 = min(nc,round(x)+featureRadius);
-    j1 = max(1,round(y)-featureRadius);
-    j2 = min(nr,round(y)+featureRadius);
-    filI(j1:j2,i1:i2) = 0;
-    
-  end
+% subpixel accuracy
+if strcmpi(methodcurr,'grad2'),
+  % take box around point and compute weighted average of feature strength
+  [box] = padgrab(filI,0,y-featureRadius,y+featureRadius,x-featureRadius,x+featureRadius);
+  box = double(box > minFeatureStrengthLow);
+  Z = sum(box(:));
+  dx = sum(box(:).*dxGrid(:))/Z;
+  dy = sum(box(:).*dyGrid(:))/Z;
+  x = x + dx;
+  y = y + dy;
+end
 
- function filI = neginfOutDetection(x,y,filI,rd)
-    
-    % zero out region around feature
-    i1 = max(1,round(round(x)-rd));  % ALT 2021-03-05: Added outer round() to eliminate warning, should preserve behavior
-    i2 = min(nc,round(round(x)+rd));
-    j1 = max(1,round(round(y)-rd));
-    j2 = min(nr,round(round(y)+rd));
-    filI(j1:j2,i1:i2) = -inf;  
-    
-  end
+% Zero out region around feature, declare victory
+filI = zeroOutDetection(x,y,filI,nc,nr,featureRadius) ;
+success = true ;
+end
 
-  function [x,y] = register(x,y,offX,offY,offTheta,scale)
-    sz = size(x);
-    if numel(sz) ~= numel(size(y)) || ~all(sz == size(y)),
-      error('Size of x and y must match');
-    end
-    costheta = cos(offTheta); sintheta = sin(offTheta);
-    X = [x(:)'+offX;y(:)'+offY];
-    X = [costheta,-sintheta;sintheta,costheta] * X * scale;
-    x = reshape(X(1,:),sz);
-    y = reshape(X(2,:),sz);    
-  end
 
-  function A = affineTransform(offX,offY,offTheta,scale)
-    costheta = cos(offTheta); sintheta = sin(offTheta);
-    A = [1 0 0; 0 1 0; offX offY 1] * ...
-      [costheta sintheta 0; -sintheta costheta 0; 0 0 1] * ...
-      [scale 0 0; 0 scale 0; 0 0 1];
-  end
+
+function filI = zeroOutDetection(x,y,filI,nc,nr,featureRadius)
+% zero out region around feature
+i1 = max(1,round(x)-featureRadius);
+i2 = min(nc,round(x)+featureRadius);
+j1 = max(1,round(y)-featureRadius);
+j2 = min(nr,round(y)+featureRadius);
+filI(j1:j2,i1:i2) = 0;
+end
+
+
+
+function filI = neginfOutDetection(x,y,filI,rd,nc,nr)
+% zero out region around feature
+i1 = max(1,round(round(x)-rd));  % ALT 2021-03-05: Added outer round() to eliminate warning, should preserve behavior
+i2 = min(nc,round(round(x)+rd));
+j1 = max(1,round(round(y)-rd));
+j2 = min(nr,round(round(y)+rd));
+filI(j1:j2,i1:i2) = -inf;
+end
+
+
+
+function [x,y] = register(x,y,offX,offY,offTheta,scale)
+sz = size(x);
+if numel(sz) ~= numel(size(y)) || ~all(sz == size(y)),
+  error('Size of x and y must match');
+end
+costheta = cos(offTheta); sintheta = sin(offTheta);
+X = [x(:)'+offX;y(:)'+offY];
+X = [costheta,-sintheta;sintheta,costheta] * X * scale;
+x = reshape(X(1,:),sz);
+y = reshape(X(2,:),sz);
+end
+
+
+
+function A = affineTransform(offX,offY,offTheta,scale)
+costheta = cos(offTheta); sintheta = sin(offTheta);
+A = [1 0 0; 0 1 0; offX offY 1] * ...
+  [costheta sintheta 0; -sintheta costheta 0; 0 0 1] * ...
+  [scale 0 0; 0 scale 0; 0 0 1];
 end

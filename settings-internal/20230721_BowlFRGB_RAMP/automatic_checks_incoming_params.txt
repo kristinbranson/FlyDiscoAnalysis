@@ -1,0 +1,8 @@
+min_seconds_fliesloaded,0
+max_seconds_fliesloaded,1800
+movie_length_delta_seconds,10
+control_line_names,pBDPGAL4U
+required_files,metaData.xml,movie.ufmf,protocol.mat
+desired_files,expFigure.jpg,expTimeStamp.txt
+required_fns,flag_aborted,flag_redo,seconds_fliesloaded,screen_type,line,cross_barcode
+frame_rate,30

@@ -103,7 +103,7 @@ else
   fprintf('Registered trx stored to file %s\n',obj.registrationfiles{n});
 end
 registrationData = load(obj.registrationfiles{n});
-obj.registrationData{n} = detectRegistrationMarks('registrationData',registrationData);
+obj.registrationData{n} = extractRegistrationFunctionAndTransform(registrationData);
 
 % compute any necessary derived measurements
 obj.landmarksfiles{n} = fullfile(obj.write_expdirs{n},obj.landmarksfilestr);
