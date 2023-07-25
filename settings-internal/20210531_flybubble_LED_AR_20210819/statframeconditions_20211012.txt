@@ -1,0 +1,104 @@
+# normalization conditions
+prestim4sponta,partm10to0s_stimoff_4,1 # ERROR
+notstimend10,partm10to0s_stimoff_1_2_3_4_5_6_7_8_9_10,1
+notstimend10move,partm10to0s_stimoff_1_2_3_4_5_6_7_8_9_10,min_velmag_ctr,2
+notstimend10walk,partm10to0s_stimoff_1_2_3_4_5_6_7_8_9_10,min_velmag_ctr,2,max_velmag_ctr,45
+notstimend10nearfly,partm10to0s_stimoff_1_2_3_4_5_6_7_8_9_10,max_dcenter,6.5
+
+
+# during stim
+stimweakp5,part0to0.5s_stimon_1_2_3,1 #checked
+stimweak5,part0to5s_stimon_1_2_3,1 # checked
+stimweak10,part0to10s_stimon_1_2_3,1 # checked 
+stimmidp5,part0to0.5s_stimon_4_5_6,1
+stimmid5,part0to5s_stimon_4_5_6,1
+stimmid10,part0to10s_stimon_4_5_6,1
+stimstrongp5,part0to0.5s_stimon_7_8_9,1
+stimstrong5,part0to5s_stimon_7_8_9,1
+stimstrong10,part0to10s_stimon_7_8_9,1
+
+# during stim moving (TODO change to jaaba classifier)
+stimweak5move,part0to5s_stimon_1_2_3,1,min_velmag_ctr,2
+stimweak10move,part0to10s_stimon_1_2_3,1,min_velmag_ctr,2
+stimmid5move,part0to5s_stimon_4_5_6,1,min_velmag_ctr,2
+stimmid10move,part0to10s_stimon_4_5_6,1,min_velmag_ctr,2
+stimstrong5move,part0to5s_stimon_7_8_9,1,min_velmag_ctr,2
+stimstrong10move,part0to10s_stimon_7_8_9,1,min_velmag_ctr,2
+
+# during stim moving not jumping (TODO change to jaaba classifier)
+stimweak5walk,part0to5s_stimon_1_2_3,1,min_velmag_ctr,2,max_velmag_ctr,45
+stimweak10walk,part0to10s_stimon_1_2_3,1,min_velmag_ctr,2,max_velmag_ctr,45
+stimmid5walk,part0to5s_stimon_4_5_6,1,min_velmag_ctr,2,max_velmag_ctr,45
+stimmid10walk,part0to10s_stimon_4_5_6,1,min_velmag_ctr,2,max_velmag_ctr,45
+stimstrong5walk,part0to5s_stimon_7_8_9,1,min_velmag_ctr,2,max_velmag_ctr,45
+stimstrong10walk,part0to10s_stimon_7_8_9,1,min_velmag_ctr,2,max_velmag_ctr,45
+
+# during stim near other flies
+stimweak5nearfly,part0to5s_stimon_1_2_3,1,max_dcenter,6.5
+stimweak10nearfly,part0to10s_stimon_1_2_3,1,max_dcenter,6.5
+stimmid5nearfly,part0to5s_stimon_4_5_6,1,max_dcenter,6.5
+stimmid10nearfly,part0to10s_stimon_4_5_6,1,max_dcenter,6.5
+stimstrong5nearfly,part0to5s_stimon_7_8_9,1,max_dcenter,6.5
+stimstrong10nearfly,part0to10s_stimon_7_8_9,1,max_dcenter,6.5
+
+# pre stim
+prestimweakp5,partm.5to0s_stimoff_1_2_3,1
+prestimweak5,partm5to0s_stimoff_1_2_3,1
+prestimweak10,partm10to0s_stimoff_1_2_3,1
+
+prestimmidp5,partm.5to0s_stimoff_4_5_6,1
+prestimmid5,partm5to0s_stimoff_4_5_6,1
+prestimmid10,partm10to0s_stimoff_4_5_6,1
+
+prestimstrongp5,partm.5to0s_stimoff_7_8_9,1
+prestimstrong5,partm5to0s_stimoff_7_8_9,1
+prestimstrong10,partm10to0s_stimoff_7_8_9,1
+
+
+# post stim
+poststimweak5,part0to5s_stimoff_2_3_4,1
+poststimmid5,part0to5s_stimoff_5_6_7,1
+poststimstrong5,part0to5s_stimoff_8_9_10,1
+poststimweak15,part0to15s_stimoff_2_3_4,1
+poststimmid15,part0to15s_stimoff_5_6_7,1
+poststimstrong15,part0to15s_stimoff_8_9_10,1
+
+
+
+
+
+# currently used conditions
+stimon1start,part0to6s_stimon_1,1
+stimoff1,equal_stimoff_1,1
+stimon1startmove,part0to3s_stimon_1_4_7,1,min_velmag_ctr,2
+stimoff1move,part0to3s_stimoff_2_5_8,1,min_velmag_ctr,2
+
+
+# examples of formats
+#stimon1start,part0to6s_stimon_1,1
+#stimoff1,equal_stimoff_1,1
+#stimon,equal_stimon,1
+#stimoff,equal_stimoff,1
+
+#stimoffstrong,equal_stimoff_4_5_6,1
+#stimonstrong,equal_stimon_4_5_6,1
+
+#stimon1startmove,part0to3s_stimon_1_4_7,1,min_velmag_ctr,2
+#stimoff1move,part0to3s_stimoff_2_5_8,1,min_velmag_ctr,2
+
+#stimmidp5,part0to0.5s_stimon_4_5_6,1
+
+#nearwall,max_dist2wall,15
+#nearfly,max_dcenter,6.5
+#notnearwall,min_dist2wall,15
+#notnearfly,min_dcenter,6.5
+
+#attemptedcopulation,equal_labels_AttemptedCopulation,1
+
+#attemptedcopulationstart,start_labels_AttemptedCopulation,1
+
+#attemptedcopulationend,end_labels_AttemptedCopulation,1
+
+#notattemptedcopulation,equal_labels_AttemptedCopulation,0
+
+#notanybehavior,equal_labels_AttemptedCopulation,0,equal_labelsBackup,0,equal_labels_BodyTurns,0,equal_labels_Chasev7,0,equal_labels_Copulation,0,equal_labels_Crabwalk3,0,equal_labels_Crabwalk2,0,equal_labels_Jump,0,equal_labels_pivot_center,0,equal_labels_pivot_tail,0,equal_labels_Righting,0,equal_labels_Walk,0,equal_labels_Stops,0,equal_labelsTouch,0,equal_labels_WingExtension,0,equal_labelsWingGrooming,0,equal_labels_wingflick,0

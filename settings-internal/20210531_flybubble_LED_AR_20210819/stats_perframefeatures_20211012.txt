@@ -1,0 +1,95 @@
+# <per-frame feature>,<frame condition name>,<fly condition name>,<min n. frames both valid>,<min n. frames fly valid>,[<norm per-frame feature>],[<norm frame condition name>],[<norm fly condition name>],[<norm min n. frames both valid>],[<norm min n. frames fly valid>]
+
+# test zone - batches of 5
+
+backward_vel,notstimend10,any,25,25
+forward_vel,notstimend10,any,25,25
+
+backward_vel,stimmidp5,any,25,25
+absdtheta,stimmidp5,any,25,25,prestim4sponta
+absdtheta,stimmidp5,any,25,25
+
+
+
+
+# The average of velmag in first 20% (6s) of first stimulus on period normalized by the average of velmag in the entire pre-stimulus period (30s)
+velmag_ctr,stimon1start,any,25,100,stimoff1
+velmag_ctr,stimon1start,any,25,100
+velmag_ctr,stimoff1,any,25,100
+
+# Difference in the average angular velocity while moving in first stimulus of each step (# 1,4, 7 in Ryo’s data) between the first 3 seconds of stimulus on (3 seconds out of 10) and the first 3 seconds of post stim period (3 of 30), normalized by the prestim baseline (10 seconds before 1st stimulus period). 
+absdphi,stimon1startmove,any,25,25,stimoff1move
+absdphi,stimon1startmove,any,25,25
+absdphi,stimoff1move,any,25,25
+
+# Difference between post-stim forward distance (mean of positive forward velocity after the onset of stimulus, average of #1-3 and pre-stim forward distance (mean of positive forward velocity before the onset of stimulus, average of #1-3) for time window 500ms
+
+
+# Response to stimulus in walking distance forward or backward
+# normalizations
+backward_vel,prestim4sponta,any,25,25
+forward_vel,prestim4sponta,any,25,25
+
+backward_vel,notstimend10,any,25,25
+forward_vel,notstimend10,any,25,25
+
+
+
+
+
+
+
+forward_vel,stimmid5,any,25,25,prestim4sponta
+forward_vel,stimmid5,any,25,25
+
+backward_vel,stimmid5,any,25,25,prestim4sponta
+backward_vel,poststimmid5,any,25,25
+
+forward_vel,stimmid10,any,25,25,prestim4sponta
+forward_vel,stimmid10,any,25,25
+
+backward_vel,stimmid10,any,25,25,prestim4sponta
+backward_vel,stimmid10,any,25,25
+
+forward_vel,stimstrongp5,any,25,25,prestim4sponta
+forward_vel,stimstrongp5,any,25,25
+
+backward_vel,stimstrongp5,any,25,25,prestim4sponta
+backward_vel,stimstrongp5,any,25,25
+
+forward_vel,stimstrong5,any,25,25,prestim4sponta
+forward_vel,stimstrong5,any,25,25
+
+backward_vel,stimstrong5,any,25,25,prestim4sponta
+backward_vel,stimstrong5,any,25,25
+
+forward_vel,stimstrong10,any,25,25,prestim4sponta
+forward_vel,stimstrong10,any,25,25
+
+backward_vel,stimstrong10,any,25,25,prestim4sponta
+backward_vel,stimstrong10,any,25,25
+
+
+
+
+
+
+
+absdtheta,stimmid5,any,25,25,prestim4sponta
+absdtheta,stimmid5,any,25,25
+
+absdtheta,stimmid10,any,25,25,prestim4sponta
+absdtheta,stimmid10,any,25,25
+
+absdtheta,stimstrongp5,any,25,25,prestim4sponta
+absdtheta,stimstrongp5,any,25,25
+
+absdtheta,stimstrong5,any,25,25,prestim4sponta
+absdtheta,stimstrong5,any,25,25
+
+absdtheta,stimstrong10,any,25,25,prestim4sponta
+absdtheta,stimstrong10,any,25,25
+
+
+# repeat for sideways speed: absdv_cor, social:dcenter, wings:max_wing_angle, turning: absdphi
+# repeat for moving frames forward, backward, absdtheta, absdv_cor,dcenter,max_wing_angle,absdphi

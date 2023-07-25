@@ -20,3 +20,6 @@ Same tracker just updated the slots for tracking and training to work with APT u
 
 20230518
 added Alice updated walk jaaba classifier -> scores_walk2.mat
+
+20230623
+updated the singularity image pointer for cluster upgrade
