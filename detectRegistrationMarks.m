@@ -128,7 +128,7 @@ if ~isBkgdImage,
   % Seems like the cached frames are transposed relative to the actual frames?
   % Just going to compute the background image from scratch
   % -- ALT, 2023-07-21
-  % And this breaks stuff, so let's not do it.
+  % And this breaks stuff, so let's not do it, I guess?  -- ALT, 2023-09-04
   if isfield(headerinfo, 'nmeans') && headerinfo.nmeans > 1,
     meanims = ufmf_read_mean(headerinfo,'meani',2:headerinfo.nmeans);
   else
