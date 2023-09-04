@@ -128,15 +128,16 @@ if ~isBkgdImage,
   % Seems like the cached frames are transposed relative to the actual frames?
   % Just going to compute the background image from scratch
   % -- ALT, 2023-07-21
-%   if isfield(headerinfo, 'nmeans') && headerinfo.nmeans > 1,
-%     meanims = ufmf_read_mean(headerinfo,'meani',2:headerinfo.nmeans);
-%   else
-  sampleframes = unique(round(linspace(1,headerinfo.nframes,bkgdNSampleFrames)));
-  meanims = repmat(double(readframe(1)),[1,1,1,bkgdNSampleFrames]);
-  for i = 2:bkgdNSampleFrames,
-    meanims(:,:,:,i) = double(readframe(sampleframes(i)));
+  % And this breaks stuff, so let's not do it.
+  if isfield(headerinfo, 'nmeans') && headerinfo.nmeans > 1,
+    meanims = ufmf_read_mean(headerinfo,'meani',2:headerinfo.nmeans);
+  else
+    sampleframes = unique(round(linspace(1,headerinfo.nframes,bkgdNSampleFrames)));
+    meanims = repmat(double(readframe(1)),[1,1,1,bkgdNSampleFrames]);
+    for i = 2:bkgdNSampleFrames,
+      meanims(:,:,:,i) = double(readframe(sampleframes(i)));
+    end
   end
-%   end
   meanims = double(meanims);
   bkgdImage = median(meanims,4);
   if fid>0 ,
