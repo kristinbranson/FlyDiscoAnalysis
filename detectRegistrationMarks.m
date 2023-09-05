@@ -125,12 +125,9 @@ if ~isBkgdImage,
   [readframe,~,fid,headerinfo] = get_readframe_fcn(movieName);
   
   % compute the background image
-  % Seems like the cached frames are transposed relative to the actual frames?
-  % Just going to compute the background image from scratch
-  % -- ALT, 2023-07-21
-  % And this breaks stuff, so let's not do it, I guess?  -- ALT, 2023-09-04
   if isfield(headerinfo, 'nmeans') && headerinfo.nmeans > 1,
     meanims = ufmf_read_mean(headerinfo,'meani',2:headerinfo.nmeans);
+    meanims = permute(meanims, [2 1 3 4]) ;  % Need to transpose the raw keypoint frames
   else
     sampleframes = unique(round(linspace(1,headerinfo.nframes,bkgdNSampleFrames)));
     meanims = repmat(double(readframe(1)),[1,1,1,bkgdNSampleFrames]);
@@ -144,19 +141,15 @@ if ~isBkgdImage,
       fclose(fid);
   end
 end
-
 [nr,nc,~] = size(bkgdImage);
 r = min(nr,nc);
 
-
-%% feature detection filtering
-
+%% Feature detection filtering
 % compute gradient magnitude image
 gradI = [diff(bkgdImage,1,1).^2;zeros(1,nc)] + [diff(bkgdImage,1,2).^2,zeros(nr,1)];
 % filter with uniform filter of input radius
 fil = fspecial('disk',diskFilterRadius);
 gradfilI = imfilter(gradI,fil,0,'same');
-
 if strcmpi(method,'normcorr'),
   % make a cross filter
   fil0 = zeros(crossFilterRadius*2+1);
@@ -192,13 +185,13 @@ elseif strcmpi(method,'circle'),
   else
     error('Unknown circleImageType %s',circleImageType);
   end
-  binedgesa = linspace(circleXLim(1)*nc,circleXLim(2)*nc,circleNXTry+1);
-  bincentersb = linspace(circleYLim(1)*nr,circleYLim(2)*nr,circleNYTry);
+  binedgesx = linspace(circleXLim(1)*nc,circleXLim(2)*nc,circleNXTry+1);
+  bincentersy = linspace(circleYLim(1)*nr,circleYLim(2)*nr,circleNYTry);
   bincentersr = linspace(circleRLim(1)*min(nc,nr),circleRLim(2)*min(nc,nr),circleNRTry);
   [circleRadius,circleCenterX,circleCenterY,featureStrengths,circleDetectParams] = ...
     detectcircles(circleim,...
                   'cannythresh',circleCannyThresh,'cannysigma',circleCannySigma,...
-                  'binedgesa',binedgesa,'bincentersb',bincentersb,'bincentersr',bincentersr,...
+                  'binedgesa',binedgesx,'bincentersb',bincentersy,'bincentersr',bincentersr,...
                   'maxncircles',1,'doedgedetect',strcmpi(circleImageType,'canny'));
 elseif strcmpi(method,'circle_manual'),  
   circleim = bkgdImage;
@@ -215,9 +208,7 @@ else
   error('Unknown method for registration mark detection: %s',method);  
 end
 
-
-%% find bowl label
-
+%% Find bowl label
 % compute distance to corners
 if nBowlMarkers > 0,
   [xGrid,yGrid] = meshgrid(1:nc,1:nr);
@@ -234,7 +225,7 @@ if nBowlMarkers > 0,
       filI4 = gradfilI;
       methodcurr = 'grad2';
     otherwise,
-      bowlMarkerTemplate = im2double(imread(bowlMarkerType));
+      bowlMarkerTemplate = im2double(imread(bowlMarkerType));  % bowlMarkerType can be a file path...
       h = fspecial('gaussian',[5,5],1);
       bowlMarkerTemplate =  imfilter(bowlMarkerTemplate,h);
       bkgdImage = imfilter(bkgdImage,h);
@@ -284,8 +275,7 @@ if nBowlMarkers > 0,
   filI4(distCorner > maxDistCorner_BowlLabel) = -inf;
   % make corner with registration mark -inf
   if ledindicator
-    filI4 = neginfOutDetection(regXY(2),regXY(1),filI4,maxDistCorner_BowlLabel,nc,nr);
-%     filI4 = zeroOutDetection(regXY(2),regXY(1),filI4,nc,nr,featureRadius);
+    filI4 = neginfOutDetection(regXY(1),regXY(2),filI4,maxDistCorner_BowlLabel,nc,nr);
   end
   
   bowlMarkerPoints = nan(2,nBowlMarkers);
@@ -468,7 +458,7 @@ if ~isempty(imsavename) && ~ledindicator,
   % plot background image in jet colormap
   imagesc(bkgdImage,'parent',hax(1),[0,255]);
   axis(hax(1),'image');
-  axis(hax(1),'xy');
+  axis(hax(1),'ij');
   hold(hax(1),'on');
   
   % plot detected registration points if not circle mode
@@ -551,7 +541,7 @@ if ~isempty(imsavename) && ~ledindicator,
   text(cos(yangle)*l,sin(yangle)*l,'y','parent',hax(2));
 
   axis(hax(2),'image');
-  axis(hax(2),'xy');
+  axis(hax(2),'ij');
   title(hax(2),'Registered bkgd image');
   colormap(hfig,'jet');
 
@@ -567,10 +557,6 @@ if ~isempty(imsavename) && ~ledindicator,
     save2png(imsavename,hfig);
   catch ME,
     warning('Could not save to %s:\n%s',imsavename,getReport(ME));
-  end
-  
-  if isdeployed && ishandle(hfig),
-    close(hfig);
   end
 end
 
@@ -591,7 +577,7 @@ if ~isempty(imsavename) && ledindicator,
   % plot background image in jet colormap
   imagesc(bkgdImage,'parent',hax(1),[0,1]);
   axis(hax(1),'image');
-  axis(hax(1),'xy');
+  axis(hax(1),'ij');
   hold(hax(1),'on');
 
   % plot detected registration points if not circle mode
@@ -635,15 +621,9 @@ if ~isempty(imsavename) && ledindicator,
   catch ME,
     warning('Could not save to %s:\n%s',imsavename,getReport(ME));
   end
-
-  if isdeployed && ishandle(hfig),
-    close(hfig);
-  end
-  
 end
  
- 
-%%
+%% Make debug plot(s)
 if isInDebugMode,
   hfig = figure() ;
   set(hfig,'Position',[20,20,1500,600]);
@@ -748,8 +728,7 @@ if isInDebugMode,
     quiver(0,0,0,pairDist_mm/4,0,'k');
     axis equal;
     axisalmosttight;
-  end
-  
+  end  
 end
 end  % detectRegistrationMarks()
 
@@ -801,11 +780,11 @@ end
 
 function filI = zeroOutDetection(x,y,filI,nc,nr,featureRadius)
 % zero out region around feature
-i1 = max(1,round(x)-featureRadius);
-i2 = min(nc,round(x)+featureRadius);
-j1 = max(1,round(y)-featureRadius);
-j2 = min(nr,round(y)+featureRadius);
-filI(j1:j2,i1:i2) = 0;
+j1 = max(1,round(x)-featureRadius);
+j2 = min(nc,round(x)+featureRadius);
+i1 = max(1,round(y)-featureRadius);
+i2 = min(nr,round(y)+featureRadius);
+filI(i1:i2,j1:j2) = 0;
 end
 
 

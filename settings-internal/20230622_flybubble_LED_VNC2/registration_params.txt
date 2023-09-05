@@ -11,9 +11,9 @@ circleNXTry,50
 circleNYTry,50
 circleNRTry,50
 circleRadius_mm,26.689
-maxDistCornerFrac_BowlLabel,.12
+maxDistCornerFrac_BowlLabel,.17
 featureRadius,30
-bowlMarkerPairTheta_true,2.3
+bowlMarkerPairTheta_true,-0.785
 nBowlMarkers,1
 # bowl marker indexed by rig
 bowlMarkerType,CircleTemplateLarge.png
