@@ -321,15 +321,7 @@ if isfield(registration_params,'OptogeneticExp') ,
         end
         frametoLEDpulse = max([round(frametoLEDpulse),min(200,headerinfo.nframes)]);
         jump = min(jump,round(frametoLEDpulse/100));
-        im = readfcn(1);
-        for j = 1:jump:frametoLEDpulse
-            tmp = readfcn(j);
-            idx = tmp > im;
-            im(idx) = tmp(idx);
-            %   if (mod(j,1000) == 0);
-            %     disp(round((j/frametoLEDpulse)*100))
-            %   end
-        end
+        ledMaxImage = sampleFramesForMaximumImage(readfcn, 1, jump, frametoLEDpulse) ;
         % check if im has indicator on
         if isfield(registration_params,'LEDMarkerType') && registration_params.OptogeneticExp,
             if ischar(registration_params.LEDMarkerType),
@@ -364,7 +356,7 @@ if isfield(registration_params,'OptogeneticExp') ,
             binLEDstep = 25;
             hist_LED = histcounts(LEDimg,(0:binLEDstep:255));
             brightthres = sum(hist_LED(9:10));
-            diffimage = im - readfcn(1);
+            diffimage = ledMaxImage - readfcn(1);
             
             [xgrid, ygrid] = meshgrid(1:size(diffimage,2), 1:size(diffimage,1));
             mask = ((xgrid-registration_data.circleCenterX).^2 + (ygrid-registration_data.circleCenterY).^2) >= registration_data.circleRadius.^2;
@@ -373,12 +365,7 @@ if isfield(registration_params,'OptogeneticExp') ,
             brightpxs = sum(hist_outSideArenaPxs(9:10));
             if brightpxs <= brightthres %|| brightpxs >= 15
                 % no LED indicator in im, redo for whole movie
-                im = readfcn(1);
-                for j = 1:jump:headerinfo.nframes
-                    tmp = readfcn(j);
-                    idx = tmp > im;
-                    im(idx) = tmp(idx);
-                end
+                ledMaxImage = sampleFramesForMaximumImage(readfcn, 1, jump, headerinfo.nframes) ;
             end
         end
     end
@@ -486,7 +473,7 @@ if isfield(registration_params,'OptogeneticExp')
             ledindicator_data = ...
               detectRegistrationMarks(registration_params_cell{:}, ...
                                       'movieName', moviefile, ...
-                                      'bkgdImage', im2double(im), ...
+                                      'bkgdImage', im2double(ledMaxImage), ...
                                       'ledindicator', true, ...
                                       'regXY', registration_data.bowlMarkerPoints);
 %         catch ME,
@@ -905,4 +892,15 @@ end
 
 if isdeployed,
   delete(findall(0,'type','figure'));
+end
+
+end
+
+
+function result = sampleFramesForMaximumImage(readfcn, firstFrameIndex, stride, lastFrameIndex)
+  result = readfcn(1) ;
+  for j = firstFrameIndex:stride:lastFrameIndex
+    frame = readfcn(j) ;
+    result = max(result,frame) ;
+  end
 end
