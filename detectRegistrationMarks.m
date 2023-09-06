@@ -381,7 +381,7 @@ if ~isempty(imsavename) && ~ledindicator,
   clf(hfig);
   set(hfig,'Units','pixels','Position',figpos);
   nimsplot = 2;
-  hax = createsubplots(1,nimsplot,.025,hfig);
+  hax = createsubplots(1,nimsplot,0.025,hfig);
   
   % plot background image in jet colormap
   imagesc(bkgdImage,'parent',hax(1),[0,255]);
@@ -500,7 +500,7 @@ if ~isempty(imsavename) && ledindicator,
   clf(hfig);
   set(hfig,'Units','pixels','Position',figpos);
   nimsplot = 1;
-  hax = createsubplots(1,nimsplot,.025,hfig);
+  hax = createsubplots(1,nimsplot,0.05,hfig);
    
   % plot background image in jet colormap
   imagesc(bkgdImage,'parent',hax(1),[0,1]);
@@ -561,7 +561,7 @@ if isInDebugMode,
   else
     nsubplots = 4;
   end
-  hax = createsubplots(1,nsubplots,.05);
+  hax = createsubplots(1,nsubplots,0.05);
   %hax(1) = subplot(1,nsubplots,1);
   axes(hax(1)); 
   imagesc(bkgdImage);

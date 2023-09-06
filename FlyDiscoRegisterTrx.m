@@ -43,9 +43,6 @@ else
   error('dataloc_params is missing field flytrackerbgstr, which is required');
 end
 
-% name of movie file
-moviefile = fullfile(expdir,dataloc_params.moviefilestr);
-
 % Collect metadata
 metadata = collect_metadata(expdir, dataloc_params.metadatafilestr) ;
 
@@ -105,7 +102,7 @@ end
 
 fnsignore = intersect(fieldnames(registration_params),...
   {'minFliesLoadedTime','maxFliesLoadedTime','extraBufferFliesLoadedTime','usemediandt','doTemporalRegistration','OptogeneticExp', ...
-   'LEDMarkerType','maxDistCornerFrac_LEDLabel','doTemporalTruncation','maxFlyTrackerNanInterpFrames'});
+   'LEDMarkerType','maxDistCornerFrac_LEDLabel','doTemporalTruncation','maxFlyTrackerNanInterpFrames', 'bkgdNSampleFrames'});
 registration_params_cell = struct2paramscell(rmfield(registration_params,fnsignore));
 
 % file to save image to
@@ -114,7 +111,7 @@ if isfield(dataloc_params,'registrationimagefilestr'),
 end
 
 % detect
-registration_data = detectRegistrationMarks(registration_params_cell{:},'bkgdImage',bg_mean,'movieName',moviefile);
+registration_data = detectRegistrationMarks(registration_params_cell{:},'bkgdImage',bg_mean);
 fprintf('Detected registration marks.\n');
 
 %% apply spatial registration
@@ -373,7 +370,8 @@ if isfield(registration_params,'OptogeneticExp')
                      'LEDMarkerType', ...
                      'maxDistCornerFrac_LEDLabel', ...
                      'doTemporalTruncation', ...
-                     'maxFlyTrackerNanInterpFrames'});        
+                     'maxFlyTrackerNanInterpFrames', ...
+                     'bkgdNSampleFrames'});        
         registration_params_cell = struct2paramscell(rmfield(registration_params,fnsignore));
        
         % file to save image to
@@ -384,7 +382,6 @@ if isfield(registration_params,'OptogeneticExp')
         % detect
         ledindicator_data = ...
           detectRegistrationMarks(registration_params_cell{:}, ...
-                                  'movieName', moviefile, ...
                                   'bkgdImage', im2double(ledMaxImage), ...
                                   'ledindicator', true, ...
                                   'regXY', registration_data.bowlMarkerPoints);
