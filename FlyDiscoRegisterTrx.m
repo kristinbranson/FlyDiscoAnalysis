@@ -33,20 +33,14 @@ if isfield(registration_params,'doTemporalTruncation')
 end
 
 %% detect registration marks
-% name of annotation file
-%annfile = fullfile(expdir,dataloc_params.annfilestr);
-annfile = '';
-bg_mean = [];
-if isfield(dataloc_params,'flytrackerbgstr'),
-  try
-    flytrackerbgfile = fullfile(expdir,dataloc_params.flytrackerbgstr);
-    load(flytrackerbgfile,'bg');
-    bg_mean = 255*bg.bg_mean;
-    clear bg;
-  catch ME,
-    warning('Could not load background image from %s',flytrackerbgfile);
-    disp(getReport(ME));
-  end
+% Load the background file output by FlyTracker
+% Error if there's some problem with that.
+if isfield(dataloc_params,'flytrackerbgstr')
+  flytrackerbgfile = fullfile(expdir,dataloc_params.flytrackerbgstr);
+  load(flytrackerbgfile,'bg');
+  bg_mean = 255*bg.bg_mean;
+else
+  error('dataloc_params is missing field flytrackerbgstr, which is required');
 end
 
 % name of movie file
@@ -131,7 +125,7 @@ ctraxfile = fullfile(expdir,dataloc_params.ctraxfilestr);
 moviefile = fullfile(expdir,dataloc_params.moviefilestr);
 
 % load trajectories
-[trx,~,succeeded,timestamps] = load_tracks(ctraxfile,moviefile,'annname',annfile);
+[trx,~,succeeded,timestamps] = load_tracks(ctraxfile,moviefile,'annname','');
 if ~succeeded,
   error('Could not load trajectories from file %s',ctraxfile);
 end
