@@ -996,3 +996,99 @@ experimenters = {metadata(idx2).experimenter};
 c = categorical(experimenters);
 categories(c);
 countcats(c);
+
+%% dm11 flydisco_data clean up 9/1/2023 - explore data and make list for non_olympiad_dickson_led5secVNC
+% pulled all directories in flydisco with
+% /groups/branson/home/robiea/Code_versioned/FlyDiscoAnalysis/Debug_getExperimentDirs_FlyBubbleRGB.m 
+
+load('/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_allflydisco_20230831_20230901T132911.mat')
+
+% make a list of screen_type non_olympiad_branson_AmpRec - move to
+% nearline
+
+% make a list of screen_type 
+[a,b,c] = unique(cellfun(@num2str,{expdirstruct.screen_type},'uni',0));
+[counts, groupnames] = groupcounts(c)
+for i = 1:numel(counts),fprintf('%s has %d expdirs \n',expdirstruct(b(groupnames(i))).screen_type,counts(i)),end
+
+% list dates of VNC experiments
+VNCidx = strcmp({expdirstruct.screen_type}, 'non_olympiad_dickson_VNC');
+VNCexpdirstruct = expdirstruct(VNCidx);
+[a,b,c] = unique(cellfun(@num2str,{VNCexpdirstruct.date},'uni',0));
+a'
+% find 20210322 in VNC
+wrongscreen_typeIdx = strcmp({VNCexpdirstruct.date}, '20210322');
+VNCexpdirstruct(wrongscreen_typeIdx).file_system_path
+
+
+% list dates of VNC2 experiments
+VNC2idx = strcmp({expdirstruct.screen_type}, 'non_olympiad_dickson_VNC2');
+VNC2expdirstruct = expdirstruct(VNC2idx);
+[a,b,c] = unique(cellfun(@num2str,{VNC2expdirstruct.date},'uni',0));
+a'
+% list dates of led5secVNC
+VNCLED5idx = strcmp({expdirstruct.screen_type}, 'non_olympiad_dickson_led5secVNC');
+VNCLED5expdirstruct = expdirstruct(VNCLED5idx);
+[a,b,c] = unique(cellfun(@num2str,{VNCLED5expdirstruct.date},'uni',0));
+a'
+% make list of led5secVNC experiments to move to nearline 9/1/2023
+filename = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/led5secVNC_cleanuplist.txt'
+fid = fopen(filename,'w')
+for i = 1:numel(VNCLED5expdirstruct)
+    fprintf(fid,'%s\n',VNCLED5expdirstruct(i).file_system_path)
+end
+fclose(fid)
+
+%% dm11 flydisco_data clean up 9/1/2023 and make a list of make a list of automated_pf = F or manual-fail = F for VNC and VNC2 screen_types
+% for data from march 2021 - oct 2022
+clear all
+% load data for VNC before 2023 data added
+load /groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/allVNC_20221116_addedManualFail.mat
+% restrict to VNC and VNC2
+idx1 = strcmp({expdirstruct2.screen_type},'non_olympiad_dickson_VNC');
+idx2 = strcmp({expdirstruct2.screen_type},'non_olympiad_dickson_VNC2');
+idxall = idx1 +idx2;
+expdirstruct2 = expdirstruct2(logical(idxall));
+% % explore data
+% [a,b,c] = unique(cellfun(@num2str,{expdirstruct2.automated_pf},'uni',0));
+% counts = groupcounts(c)
+% % f - 360
+% % NaN - 379
+% % p - 5121
+% 
+% % what are the NaNs
+% NaNsIdx = strcmp({expdirstruct2.automated_pf},'NaN');
+% NaNexpdirstruct = expdirstruct2(NaNsIdx);
+% [a,b,c] = unique(cellfun(@num2str,{NaNexpdirstruct.manual_fail},'uni',0));
+% counts = groupcounts(c)
+% % none - 191
+% % manual_failed - 188
+% % from spreadsheet /groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/allVNC_20221116_addedManualFail.tsv
+% % not manually failed with auto_pf = NaN -> 185 are led5secVNC, 6 are
+% % pipeline folders like to-be-processed
+
+% make a list of automated_pf = F or manual-fail = F
+
+idx3 = strcmp({expdirstruct2.automated_pf},'F');
+autofailedexpdirstruct = expdirstruct2(idx3);
+idx4 = strcmp({expdirstruct2.manual_fail},'F');
+manualfailedexpdirstruct = expdirstruct2(idx4);
+
+AFailList = {autofailedexpdirstruct.file_system_path};
+MFailList = {manualfailedexpdirstruct.file_system_path};
+
+AandMFaillist = [AFailList,MFailList];
+
+filename = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/AandMFail_VNCandVNC2_cleanuplist.txt';
+fid = fopen(filename,'w');
+for i = 1:numel(AandMFaillist)
+    fprintf(fid,'%s\n',AandMFaillist{i});
+end
+fclose(fid);
+
+% manually removed
+% /groups/branson/bransonlab/flydisco_data/TrpAFemale4_EXT_VGLUT-GAL4_RigD_20220713T094246
+% (wrong screen_type) 
+
+
+

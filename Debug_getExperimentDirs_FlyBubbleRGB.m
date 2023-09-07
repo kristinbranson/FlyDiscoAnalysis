@@ -10,15 +10,15 @@ rootdatadir = '/groups/branson/bransonlab/flydisco_data';
 % %inputs to getExperimentDirsFlyDisco: 'metadatafile','Metadata.xml','expdirname','*','line_name','*', ...
 %     'date','*','nflies',false,'autocheckin',false,'movielength',false,'TrajNum',false,'autocheckcomplete',false);
 
-% savefile = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_allflydisco_20230130';
+% savefile = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_allflydisco_20230831';
 % [expdirstruct] = getExperimentDirsFlyDisco(rootdatadir,'metadatafile','Metadata.xml','movielength',false,'TrajNum',false,'autocheckin',false,'autocheckcomplete',true);
 
 
-% savefile = '/groups/bransonr/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_allflydisco_20230301';
+% savefile = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_allflydisco_20230831';
 % [expdirstruct] = getExperimentDirsFlyDisco(rootdatadir,'metadatafile','Metadata.xml','movielength',false,'TrajNum',false,'autocheckin',false,'autocheckcomplete',true,'manualcheck',true);
 
-savefile = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_may2023';
-[expdirstruct] = getExperimentDirsFlyDisco(rootdatadir,'metadatafile','Metadata.xml','expdirname','VNC2','date','202305*','movielength',true,'TrajNum',true,'autocheckin',false,'autocheckcomplete',true,'manualcheck',false);
+savefile = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_2023_pulled20230905';
+[expdirstruct] = getExperimentDirsFlyDisco(rootdatadir,'metadatafile','Metadata.xml','expdirname','VNC2','date','2023*','movielength',true,'TrajNum',true,'autocheckin',true,'autocheckcomplete',true,'manualcheck',false);
 
 
 % savefile = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_VNC_week1';
@@ -28,7 +28,7 @@ savefile = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/
 % savefile = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_AmpRec';
 % [expdirstruct] = getExperimentDirsFlyDisco(rootdatadir,'metadatafile','Metadata.xml','expdirname','AmpRec','date','202208*','autocheckin',true,'autocheckcomplete',true);
 
-% savefile = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_VNCall_20221102';
+% savefile = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_VNCall_20230831';
 % [expdirstruct] = getExperimentDirsFlyDisco(rootdatadir,'metadatafile','Metadata.xml','expdirname','VNC*','autocheckin',true,'autocheckcomplete',true);
 
 % savefile = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_VNC2_20220915';
@@ -201,3 +201,8 @@ end
 metadata = expdirstruct3(idx);
 savefiletext = [savefile,'_VNCall_passAandM_metadata.mat'];
 save(savefiletext,'metadata');
+
+
+%% fix problem with unique and expdirstruct
+
+out = unique(cellfun(@num2str,{expdirstruct.screen_type},'uni',0))

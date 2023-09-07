@@ -41,8 +41,7 @@ for i = 1:numel(tmp)
         try
     tmpM = ReadMetadataFile(metadatafilestr);
         catch
-        fprintf('%s failed ReadMetadataFile\n',expdir)
-        return
+        fprintf('%s failed ReadMetadataFile\n',expdir)       
         end
     tmpM.file_system_path = fullfile(rootdatadir,expdir);  
     % add date

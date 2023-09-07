@@ -32,8 +32,11 @@
 % end
 %reprocess AmpRec with settingdirectory erros 20220824
 % explist = textread('/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/explist_AmpRec_reprocess','%s');
-explist = textread('/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/explist_AmpRec_reprocess_20220825','%s');
-
+% explist = textread('/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/explist_AmpRec_reprocess_20220825','%s');
+explist = {'/groups/branson/bransonlab/flydisco_data/VNC2_JRC_SS74168_RigD_20230620T112923'
+'/groups/branson/bransonlab/flydisco_data/VNC2_JRC_SS74168_RigC_20230620T112856'
+'/groups/branson/bransonlab/flydisco_data/VNC2_JRC_SS73771_RigD_20230620T122726'
+'/groups/branson/bransonlab/flydisco_data/VNC2_JRC_SS73787_RigD_20230620T111749'};
 %%
 toprocessdir =  '/groups/branson/bransonlab/flydisco_data/to-process';
 %ln -s source_file_or_directory_name  softlink_name
