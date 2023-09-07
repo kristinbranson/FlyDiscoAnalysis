@@ -2,7 +2,7 @@ function registration = detectRegistrationMarks(varargin)
 
 %% parse inputs
 [saveName,...
-  bkgdImage,movieName,annName,bkgdNSampleFrames,...
+  bkgdImage,...
   method,...
   circleImageType,circleRLim,circleXLim,circleYLim,...
   circleImageThresh,circleCannyThresh,circleCannySigma,...
@@ -20,19 +20,14 @@ function registration = detectRegistrationMarks(varargin)
   nBowlMarkers,...
   bowlMarkerType,...
   isInDebugMode,...
-  nr,nc,...
   imsavename,...
   hfig,figpos,...
   useNormXCorr,...
-  doTransposeImage,...
   ledindicator,...
   regXY] = ...
   myparse(varargin,...
   'saveName','',...
   'bkgdImage',[],...
-  'movieName','',...
-  'annName','',...
-  'bkgdNSampleFrames',10,...
   'method','normcorr',...
   'circleImageType','canny',...
   'circleRLim',[.475,.51],...
@@ -63,99 +58,26 @@ function registration = detectRegistrationMarks(varargin)
   'nBowlMarkers',1,...
   'bowlMarkerType','gradient',...
   'debug',false,...
-  'nr',[],'nc',[],...
   'imsavename','',...
   'hfig',[],'figpos',[10,10,1600,800],...
   'useNormXCorr',false,...
-  'doTransposeImage',false,...
   'ledindicator',false,...
   'regXY',[]);
 
 
-%% get background image
-isBkgdImage = ~isempty(bkgdImage);
-if ~isBkgdImage && ~isempty(annName),
-  % try reading 
-  [bkgdImage,bkgdMed,bkgdMean,bg_algorithm,movie_height,movie_width] = ...
-    read_ann(annName,'background_center',...
-    'background_median','background_mean','bg_algorithm',...
-    'movie_height','movie_width');
-  if isempty(bkgdImage),
-    if strcmpi(bg_algorithm,'median'),
-      bkgdImage = bkgdMed;
-    else
-      bkgdImage = bkgdMean;
-    end
-  end
-  if isempty(bkgdImage),
-    error('Could not read background center from ann file');
-  end
-  if ~isempty(movie_height),
-    nr = movie_height;
-  end
-  if ~isempty(movie_width),
-    nc = movie_width;
-  end
-  if isempty(nr) || isempty(nc),
-    if exist(movieName,'file'),
-      [readframe,~,fid,~] = get_readframe_fcn(movieName);
-      im = readframe(1);
-      nr = size(im,1);
-      nc = size(im,2);
-      fclose(fid);
-    else
-      error('Shape of movie could not be read from ann file of movie file');
-    end
-  end
-  if doTransposeImage,
-    bkgdImage = reshape(bkgdImage,[nc,nr])';
-  else
-    bkgdImage = reshape(bkgdImage,[nr,nc]);
-  end
-  isBkgdImage = true;
+%% Error if no background image supplied
+if isempty(bkgdImage) ,
+  error('No background image supplied to detectRegistrationMarks()') ;
 end
-if ~isBkgdImage,
-  if isempty(movieName),
-    error('Either bkgdImage, annName, or movieName must be input. Ann file must contain background center parameter');
-  end
-  if ~exist(movieName,'file'),
-    error('Movie file %s does not exist',movieName);
-  end
-  % open the movie
-  [readframe,~,fid,headerinfo] = get_readframe_fcn(movieName);
-  
-  % compute the background image
-  % Seems like the cached frames are transposed relative to the actual frames?
-  % Just going to compute the background image from scratch
-  % -- ALT, 2023-07-21
-%   if isfield(headerinfo, 'nmeans') && headerinfo.nmeans > 1,
-%     meanims = ufmf_read_mean(headerinfo,'meani',2:headerinfo.nmeans);
-%   else
-  sampleframes = unique(round(linspace(1,headerinfo.nframes,bkgdNSampleFrames)));
-  meanims = repmat(double(readframe(1)),[1,1,1,bkgdNSampleFrames]);
-  for i = 2:bkgdNSampleFrames,
-    meanims(:,:,:,i) = double(readframe(sampleframes(i)));
-  end
-%   end
-  meanims = double(meanims);
-  bkgdImage = median(meanims,4);
-  if fid>0 ,
-      fclose(fid);
-  end
-end
-
 [nr,nc,~] = size(bkgdImage);
 r = min(nr,nc);
 
-
-%% feature detection filtering
-
+%% Feature detection filtering
 % compute gradient magnitude image
 gradI = [diff(bkgdImage,1,1).^2;zeros(1,nc)] + [diff(bkgdImage,1,2).^2,zeros(nr,1)];
 % filter with uniform filter of input radius
 fil = fspecial('disk',diskFilterRadius);
 gradfilI = imfilter(gradI,fil,0,'same');
-
 if strcmpi(method,'normcorr'),
   % make a cross filter
   fil0 = zeros(crossFilterRadius*2+1);
@@ -191,13 +113,13 @@ elseif strcmpi(method,'circle'),
   else
     error('Unknown circleImageType %s',circleImageType);
   end
-  binedgesa = linspace(circleXLim(1)*nc,circleXLim(2)*nc,circleNXTry+1);
-  bincentersb = linspace(circleYLim(1)*nr,circleYLim(2)*nr,circleNYTry);
+  binedgesx = linspace(circleXLim(1)*nc,circleXLim(2)*nc,circleNXTry+1);
+  bincentersy = linspace(circleYLim(1)*nr,circleYLim(2)*nr,circleNYTry);
   bincentersr = linspace(circleRLim(1)*min(nc,nr),circleRLim(2)*min(nc,nr),circleNRTry);
   [circleRadius,circleCenterX,circleCenterY,featureStrengths,circleDetectParams] = ...
     detectcircles(circleim,...
                   'cannythresh',circleCannyThresh,'cannysigma',circleCannySigma,...
-                  'binedgesa',binedgesa,'bincentersb',bincentersb,'bincentersr',bincentersr,...
+                  'binedgesa',binedgesx,'bincentersb',bincentersy,'bincentersr',bincentersr,...
                   'maxncircles',1,'doedgedetect',strcmpi(circleImageType,'canny'));
 elseif strcmpi(method,'circle_manual'),  
   circleim = bkgdImage;
@@ -214,9 +136,7 @@ else
   error('Unknown method for registration mark detection: %s',method);  
 end
 
-
-%% find bowl label
-
+%% Find bowl label
 % compute distance to corners
 if nBowlMarkers > 0,
   [xGrid,yGrid] = meshgrid(1:nc,1:nr);
@@ -233,7 +153,7 @@ if nBowlMarkers > 0,
       filI4 = gradfilI;
       methodcurr = 'grad2';
     otherwise,
-      bowlMarkerTemplate = im2double(imread(bowlMarkerType));
+      bowlMarkerTemplate = im2double(imread(bowlMarkerType));  % bowlMarkerType can be a file path...
       h = fspecial('gaussian',[5,5],1);
       bowlMarkerTemplate =  imfilter(bowlMarkerTemplate,h);
       bkgdImage = imfilter(bkgdImage,h);
@@ -283,8 +203,7 @@ if nBowlMarkers > 0,
   filI4(distCorner > maxDistCorner_BowlLabel) = -inf;
   % make corner with registration mark -inf
   if ledindicator
-    filI4 = neginfOutDetection(regXY(2),regXY(1),filI4,maxDistCorner_BowlLabel,nc,nr);
-%     filI4 = zeroOutDetection(regXY(2),regXY(1),filI4,nc,nr,featureRadius);
+    filI4 = neginfOutDetection(regXY(1),regXY(2),filI4,maxDistCorner_BowlLabel,nc,nr);
   end
   
   bowlMarkerPoints = nan(2,nBowlMarkers);
@@ -462,12 +381,12 @@ if ~isempty(imsavename) && ~ledindicator,
   clf(hfig);
   set(hfig,'Units','pixels','Position',figpos);
   nimsplot = 2;
-  hax = createsubplots(1,nimsplot,.025,hfig);
+  hax = createsubplots(1,nimsplot,0.025,hfig);
   
   % plot background image in jet colormap
   imagesc(bkgdImage,'parent',hax(1),[0,255]);
   axis(hax(1),'image');
-  axis(hax(1),'xy');
+  axis(hax(1),'ij');
   hold(hax(1),'on');
   
   % plot detected registration points if not circle mode
@@ -550,7 +469,7 @@ if ~isempty(imsavename) && ~ledindicator,
   text(cos(yangle)*l,sin(yangle)*l,'y','parent',hax(2));
 
   axis(hax(2),'image');
-  axis(hax(2),'xy');
+  axis(hax(2),'ij');
   title(hax(2),'Registered bkgd image');
   colormap(hfig,'jet');
 
@@ -567,10 +486,6 @@ if ~isempty(imsavename) && ~ledindicator,
   catch ME,
     warning('Could not save to %s:\n%s',imsavename,getReport(ME));
   end
-  
-  if isdeployed && ishandle(hfig),
-    close(hfig);
-  end
 end
 
 
@@ -585,12 +500,12 @@ if ~isempty(imsavename) && ledindicator,
   clf(hfig);
   set(hfig,'Units','pixels','Position',figpos);
   nimsplot = 1;
-  hax = createsubplots(1,nimsplot,.025,hfig);
+  hax = createsubplots(1,nimsplot,0.05,hfig);
    
   % plot background image in jet colormap
   imagesc(bkgdImage,'parent',hax(1),[0,1]);
   axis(hax(1),'image');
-  axis(hax(1),'xy');
+  axis(hax(1),'ij');
   hold(hax(1),'on');
 
   % plot detected registration points if not circle mode
@@ -634,15 +549,9 @@ if ~isempty(imsavename) && ledindicator,
   catch ME,
     warning('Could not save to %s:\n%s',imsavename,getReport(ME));
   end
-
-  if isdeployed && ishandle(hfig),
-    close(hfig);
-  end
-  
 end
  
- 
-%%
+%% Make debug plot(s)
 if isInDebugMode,
   hfig = figure() ;
   set(hfig,'Position',[20,20,1500,600]);
@@ -652,7 +561,7 @@ if isInDebugMode,
   else
     nsubplots = 4;
   end
-  hax = createsubplots(1,nsubplots,.05);
+  hax = createsubplots(1,nsubplots,0.05);
   %hax(1) = subplot(1,nsubplots,1);
   axes(hax(1)); 
   imagesc(bkgdImage);
@@ -747,8 +656,7 @@ if isInDebugMode,
     quiver(0,0,0,pairDist_mm/4,0,'k');
     axis equal;
     axisalmosttight;
-  end
-  
+  end  
 end
 end  % detectRegistrationMarks()
 
@@ -800,11 +708,11 @@ end
 
 function filI = zeroOutDetection(x,y,filI,nc,nr,featureRadius)
 % zero out region around feature
-i1 = max(1,round(x)-featureRadius);
-i2 = min(nc,round(x)+featureRadius);
-j1 = max(1,round(y)-featureRadius);
-j2 = min(nr,round(y)+featureRadius);
-filI(j1:j2,i1:i2) = 0;
+j1 = max(1,round(x)-featureRadius);
+j2 = min(nc,round(x)+featureRadius);
+i1 = max(1,round(y)-featureRadius);
+i2 = min(nr,round(y)+featureRadius);
+filI(i1:i2,j1:j2) = 0;
 end
 
 
@@ -820,7 +728,14 @@ end
 
 
 
-function [x,y] = register(x,y,offX,offY,offTheta,scale)
+function [x_reg,y_reg] = register(x,y,offX,offY,offTheta,scale)
+% [x_reg,y_reg] = register(x,y,offX,offY,offTheta,scale)  
+% Given unregistered coordinates <x,y>, add the offset <offX,offY>, rotate
+% through angle offTheta, and scale by the *scalar* scale.  <x,y> are assumed to
+% be in a Cartesian coordinate system, and the angle offTheta (as is usual)
+% specifies a CCW rotation angle.  The resulting registered coordinates
+% <x_reg,y_reg> are likewise in a Cartesian coordinate system.  (Yes, all of
+% this is pretty much what you'd expect.
 sz = size(x);
 if numel(sz) ~= numel(size(y)) || ~all(sz == size(y)),
   error('Size of x and y must match');
@@ -828,8 +743,8 @@ end
 costheta = cos(offTheta); sintheta = sin(offTheta);
 X = [x(:)'+offX;y(:)'+offY];
 X = [costheta,-sintheta;sintheta,costheta] * X * scale;
-x = reshape(X(1,:),sz);
-y = reshape(X(2,:),sz);
+x_reg = reshape(X(1,:),sz);
+y_reg = reshape(X(2,:),sz);
 end
 
 
