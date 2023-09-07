@@ -268,7 +268,7 @@ if isfield(registration_params,'OptogeneticExp')
                             error('More than one active LED color in protocol. Not currently supported')
                         end
                         % call function that transforms new protocol to old protocol
-                        [protocol,ledcolor] = ConvertRGBprotocol2protocolformat(RGBprotocol,countactiveLEDs);
+                        [protocol,ledcolor] = ConvertRGBprotocol2protocolformat(RGBprotocol,countactiveLEDs);  %#ok<ASGLU> 
                     end
                 end
             end
@@ -386,8 +386,8 @@ end
 %% detect LED indicator (modified from detect registration marks)
 if isfield(registration_params,'OptogeneticExp')
     if registration_params.OptogeneticExp
-        % name of annotation file
-        annfile = fullfile(expdir,dataloc_params.annfilestr);
+%         % name of annotation file
+%         annfile = fullfile(expdir,dataloc_params.annfilestr);
         
         % name of movie file
         moviefile = fullfile(expdir,dataloc_params.moviefilestr);
@@ -459,8 +459,18 @@ if isfield(registration_params,'OptogeneticExp')
         registration_params.bowlMarkerType = registration_params.LEDMarkerType;
        
         
-        fnsignore = intersect(fieldnames(registration_params),...
-            {'minFliesLoadedTime','maxFliesLoadedTime','extraBufferFliesLoadedTime','usemediandt','doTemporalRegistration','OptogeneticExp','LEDMarkerType','maxDistCornerFrac_LEDLabel','doTemporalTruncation','maxFlyTrackerNanInterpFrames'});
+        fnsignore = ...
+          intersect(fieldnames(registration_params),...
+                    {'minFliesLoadedTime', ...
+                     'maxFliesLoadedTime', ...
+                     'extraBufferFliesLoadedTime', ...
+                     'usemediandt', ...
+                     'doTemporalRegistration', ...
+                     'OptogeneticExp', ...
+                     'LEDMarkerType', ...
+                     'maxDistCornerFrac_LEDLabel', ...
+                     'doTemporalTruncation', ...
+                     'maxFlyTrackerNanInterpFrames'});
         
         registration_params_cell = struct2paramscell(rmfield(registration_params,fnsignore));
         
@@ -472,16 +482,20 @@ if isfield(registration_params,'OptogeneticExp')
         
         
         % detect
-        try
-            ledindicator_data = detectRegistrationMarks(registration_params_cell{:},'bkgdImage',bg_mean,'movieName',moviefile,'bkgdImage',im2double(im),'ledindicator',true,'regXY',registration_data.bowlMarkerPoints);
-            
-        catch ME,
-            fprintf('Error detecting led indicator:\n');
-            fprintf(getReport(ME));
-            success = false;
-            msgs = {['Error detecting led indicator: ',getReport(ME)]};
-            return;
-        end
+        %try
+            ledindicator_data = ...
+              detectRegistrationMarks(registration_params_cell{:}, ...
+                                      'movieName', moviefile, ...
+                                      'bkgdImage', im2double(im), ...
+                                      'ledindicator', true, ...
+                                      'regXY', registration_data.bowlMarkerPoints);
+%         catch ME,
+%             fprintf('Error detecting led indicator:\n');
+%             fprintf(getReport(ME));
+%             success = false;
+%             msgs = {['Error detecting led indicator: ',getReport(ME)]};
+%             return;
+%         end
         registration_data.ledIndicatorPoints = ledindicator_data.bowlMarkerPoints;
         
         fprintf('Detected led indicator.\n');

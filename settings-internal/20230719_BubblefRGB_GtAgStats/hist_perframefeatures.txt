@@ -1,0 +1,7 @@
+# <per-frame feature>,<frame condition name>,<fly condition name>,<min n. frames both valid>,<min n. frames fly valid>
+dcenter,poststimweak10,any,25,100
+dcenter,poststimstrong10,any,25,100
+dcenter,prestimweak10,any,25,100
+dcenter,prestimstrong10,any,25,100
+dcenter,poststimweak1,any,25,100
+

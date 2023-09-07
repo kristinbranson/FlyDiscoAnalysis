@@ -1,0 +1,24 @@
+# <per-frame feature>,<frame condition name>,<fly condition name>,<min n. frames both valid>,<min n. frames fly valid>,[<norm per-frame feature>],[<norm frame condition name>],[<norm fly condition name>],[<norm min n. frames both valid>],[<norm min n. frames fly valid>]
+
+# The average of velmag in first 5s of first stimulus on period normalized by the average of velmag in the entire pre-stimulus period (30s)
+velmag_ctr,stimon1start,any,25,100,stimoff1
+velmag_ctr,stimon1start,any,25,100
+velmag_ctr,stimoff1,any,25,100
+
+# The average distance of flies (as calculated by dcenter) in the first 5s of each stimulus normalized by the entire prestim baseline
+dcenter,stimon1start,any,25,100,stimoff1
+dcenter,stimon2start,any,25,100,stimoff1
+dcenter,stimon3start,any,25,100,stimoff1
+dcenter,stimoff1,any,25,100
+
+# Difference between pre-stim distance between other flies (averaging of first 5s of post stim 1-3) and stim distance between other flies (average of first 5s of stim #1-3)
+#nearfly,stimoff1dcenter,any,25,100,stimon1dcenter
+#nearfly,stimoff1dcenter,any,25,100
+#nearfly,stimon1center,any,25,100
+
+# The average number of flies that are less that 1 body lenth (2.5 mm) from each other distance to other flies (as calculated by dcenter) in first 5s of the each stimulus normalized by the entire prestim baseline 
+
+
+# The average distance to other flies during aggressive bout in first 5s of stimulus 
+
+#

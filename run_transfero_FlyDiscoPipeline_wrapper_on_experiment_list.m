@@ -83,6 +83,7 @@ function run_transfero_FlyDiscoPipeline_wrapper_on_experiment_list(folder_path_f
     if ~isempty(ssh_host_name) ,
         optional_arguments_as_name_value_list(end+1:end+2) = {'sshhost', ssh_host_name} ;
     end
+    optional_arguments_as_name_value_list(end+1:end+2) = {'do_try', do_try} ;
 
     % Specify bsub parameters
     maxiumum_slot_count = 400 ;

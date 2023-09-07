@@ -1,0 +1,19 @@
+# output movie fps
+fps,30
+nzoomr,5
+nzoomc,2
+boxradius,50
+taillength,25
+#first, middle, endfrmaes not used for optovideos
+Firstframes,0,.5,-1
+middleframes,-1,.5,-1
+endframes,-1,-1,1
+# which of indicatorLEd.startframes to show
+indicatorframes,1,3,5,7
+nframes_beforeindicator,300
+# total frames shown including nframes_beforeindicator
+nframes,600
+subdecimationfactor,3
+figpos,1,1,1434,1024
+tempdatadir,/groups/branson/bransonlab/projects/olympiad/TempData_FlyBowlMakeCtraxResultsMovie
+nosubtitles,1
