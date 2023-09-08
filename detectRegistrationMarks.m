@@ -386,7 +386,7 @@ if ~isempty(imsavename) && ~ledindicator,
   % plot background image in jet colormap
   imagesc(bkgdImage,'parent',hax(1),[0,255]);
   axis(hax(1),'image');
-  axis(hax(1),'ij');
+  axis(hax(1),'xy');  % This means image will be upside-sown from how Matlab normally displays images
   hold(hax(1),'on');
   
   % plot detected registration points if not circle mode
@@ -469,7 +469,7 @@ if ~isempty(imsavename) && ~ledindicator,
   text(cos(yangle)*l,sin(yangle)*l,'y','parent',hax(2));
 
   axis(hax(2),'image');
-  axis(hax(2),'ij');
+  axis(hax(2),'xy');  % This means image will be upside-sown from how Matlab normally displays images
   title(hax(2),'Registered bkgd image');
   colormap(hfig,'jet');
 
@@ -505,7 +505,7 @@ if ~isempty(imsavename) && ledindicator,
   % plot background image in jet colormap
   imagesc(bkgdImage,'parent',hax(1),[0,1]);
   axis(hax(1),'image');
-  axis(hax(1),'ij');
+  axis(hax(1),'xy');  % This means image will be upside-sown from how Matlab normally displays images
   hold(hax(1),'on');
 
   % plot detected registration points if not circle mode
@@ -586,7 +586,7 @@ if isInDebugMode,
   if nBowlMarkers > 0,
     plot(bowlMarkerPoints(1,:),bowlMarkerPoints(2,:),'mo');
   end
-  axis image xy;
+  axis image xy;   % This means image will be upside-sown from how Matlab normally displays images
   axes(hax(2)); 
   %hax(2) = subplot(1,nsubplots,2);
   if iscircle,
@@ -608,7 +608,7 @@ if isInDebugMode,
   if nBowlMarkers > 0,
     plot(bowlMarkerPoints(1,:),bowlMarkerPoints(2,:),'mo');
   end
-  axis image xy;
+  axis image xy;   % This means image will be upside-sown from how Matlab normally displays images
   axes(hax(3)); 
   %hax(3) = subplot(1,nsubplots,3);
   if iscircle,
@@ -631,7 +631,7 @@ if isInDebugMode,
   if nBowlMarkers > 0,
     plot(bowlMarkerPoints(1,:),bowlMarkerPoints(2,:),'mo');
   end
-  axis image xy;
+  axis image xy;   % This means image will be upside-sown from how Matlab normally displays images
   linkaxes(hax(1:3));
   if ~iscircle
     axes(hax(4)); 

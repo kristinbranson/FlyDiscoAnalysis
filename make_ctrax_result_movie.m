@@ -477,7 +477,7 @@ for segi = 1:numel(firstframes),
     if frame == firstframes(1),
       him = image([1,nc],[1,nr],im);
       axis image;
-      axis ij ;
+      axis xy;  % Not necessary, but just to underline that images are upside-down compared to how they're shown by default in Matlab
       axis([.5,x1(end)+.5,.5,y1(end)+.5]);
       axis off;
     else
@@ -505,9 +505,7 @@ for segi = 1:numel(firstframes),
     % text doesn't show up in no display mode
     if showtimestamps && isdisplay,
       if frame == firstframes(1),
-        htext = text(0.5, hax.YLim(1) + 0.92*(hax.YLim(2)-hax.YLim(1)), ...
-                     timestampstr, ...
-                     'Parent',hax,'BackgroundColor','k','Color','w','VerticalAlignment','bottom','interpreter','none');
+        htext = text(.5,hax.YLim(2)-(hax.YLim(2)/15),timestampstr,'Parent',hax,'BackgroundColor','k','Color','w','VerticalAlignment','bottom','interpreter','none');
       else
         set(htext,'String',timestampstr);
       end
@@ -670,7 +668,7 @@ for segi = 1:numel(firstframes),
               hzoomwing(i,j) = plot(nan,nan,'.-','color',colors(fly,:));
             end
             if isdisplay,
-              htextzoom(i,j) = text((x0(j)+x1(j))/2,.05*y0(i)+.95*y1(i),s,...
+              htextzoom(i,j) = text((x0(j)+x1(j))/2,.95*y0(i)+.05*y1(i),s,...
                 'color',colors(fly,:),'horizontalalignment','center',...
                 'verticalalignment','bottom','fontweight','bold');
             else
