@@ -45,8 +45,8 @@ P = Ptransmat;
 % P(eye(K)==1)=Ptransmat;
 
 if nargin<6 || isempty(minCov), minCov=max(1e-9,var(cat(1,X{:}),1)*1e-2); end
-if nargin<5 || isempty(tol), tol=0.0001; end
-if nargin<4 || isempty(cyc), cyc=100; end
+if nargin<5 || isempty(tol), tol=0.0001; end;
+if nargin<4 || isempty(cyc), cyc=100; end;
 
 % cluster ignoring time
 Xmat = cat(1,X{:});
@@ -75,9 +75,13 @@ end
 LL=[];
 lik=0;
 
-c1=(2*pi)^(-p/2);
+k1=(2*pi)^(-p/2);
 
-fprintf('Learning HMM params...\n');
+if isdeployed,
+  fprintf('Learning HMM params...\n');
+else
+  hwait = waitbar(0,'Learning HMM params');
+end
 
 for cycle=1:cyc
   
@@ -90,28 +94,37 @@ for cycle=1:cyc
   Scale = cell(1,N);
   Xi = cell(1,N);
   swait = sprintf('E-Step, iteration %d',cycle);
-  fprintf('%s...\n',swait);
+  if isdeployed,
+    fprintf('%s...\n',swait);
+  else
+    if ishandle(hwait),
+      waitbar(0,hwait,swait);
+    else
+      hwait = waitbar(0,swait);
+    end
+  end
   
   iCov = 1./Cov;
-  c2=c1./sqrt(Cov);
+  k2=k1./sqrt(Cov);
   
   for n=1:N
-        
+    
+    if exist('hwait','var') && ishandle(hwait),
+      waitbar(n/(N+1),hwait);
+    end
+    
     alpha=zeros(Ts(n),K);
     beta=zeros(Ts(n),K);
-    B_unnormed=zeros(Ts(n),K);
+    B=zeros(Ts(n),K);
 
     % B(i,l) = p(X{n}(i) | l)
-    for k=1:K,
-      d = Mu(k)-X{n};
-      B_unnormed(:,k) = c2(k)*exp(-.5*d.^2*iCov(k));
+    for l=1:K,
+      d = Mu(l)-X{n};
+      B(:,l) = k2(l)*exp(-.5*d.^2*iCov(l));
     end
-    B_denom = sum(B_unnormed,2) ;
-    B = B_unnormed./B_denom ;
-    % find frames with very small likelihood for both classes, make all classes
-    % equally likely
-    badidx = B_denom < EPSILON ;
-    B(badidx,:) = 1/K ;
+    % find frames with 0 likelihood for both classes
+    badidx = sum(B,2) < EPSILON;
+    B(badidx,:) = 1;
     
     scale=zeros(Ts(n),1);
     alpha(1,:)=Pi.*B(1,:);
@@ -147,11 +160,15 @@ for cycle=1:cyc
     %Xi=Xi+xi;
     Xi{n} = xi;
     
-  end
+  end;
   
   %%%% M STEP 
   
-  fprintf('\nM-step, iteration %d\n',cycle);
+  if isdeployed,
+    fprintf('\nM-step, iteration %d\n',cycle);
+  elseif ishandle(hwait),
+    waitbar(1,hwait,sprintf('\nM-step, iteration %d\n',cycle));
+  end
 
   % outputs
   Mu=zeros(K,p);
@@ -163,11 +180,11 @@ for cycle=1:cyc
   % covariance
   Cov=zeros(K,1);
   for n = 1:N,
-    for k=1:K
-      d=(X{n}-ones(Ts(n),1)*Mu(k,:));
-      Cov(k)=Cov(k)+rprod(d,Gamma{n}(:,k))'*d;
+    for l=1:K
+      d=(X{n}-ones(Ts(n),1)*Mu(l,:));
+      Cov(l)=Cov(l)+rprod(d,Gamma{n}(:,l))'*d;
     end
-  end
+  end;
   Cov=Cov./Gammasum';
   Cov(Cov<minCov) = minCov;
   
@@ -190,6 +207,10 @@ for cycle=1:cyc
   elseif ((lik-likbase)<(1 + tol)*(oldlik-likbase)||~isfinite(lik)) 
     fprintf('\n');
     break;
-  end
+  end;
   fprintf('\n');
+end
+
+if exist('hwait','var') && ishandle(hwait),
+  delete(hwait);
 end
