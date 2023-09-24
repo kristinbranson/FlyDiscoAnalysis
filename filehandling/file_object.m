@@ -55,6 +55,10 @@ classdef file_object < handle
             fseek(self.fid(), varargin{:}) ;
         end
 
+        function fwrite(self, varargin)
+            fwrite(self.fid(), varargin{:}) ;
+        end
+
         function result = lt(self, n)
             % Want fid<n comparisons to work properly
             result = (self.fid()<n) ;    
