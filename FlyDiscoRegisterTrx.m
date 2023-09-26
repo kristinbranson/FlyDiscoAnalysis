@@ -111,7 +111,7 @@ if isfield(dataloc_params,'registrationimagefilestr'),
 end
 
 % detect
-registration_data = detectRegistrationMarks(registration_params_cell{:},'bkgdImage',bg_mean);
+registration_data = detectRegistrationMarks(registration_params_cell{:},'bkgdImage',bg_mean,'useNormXCorr',true);
 fprintf('Detected registration marks.\n');
 
 %% apply spatial registration
@@ -384,7 +384,8 @@ if isfield(registration_params,'OptogeneticExp')
           detectRegistrationMarks(registration_params_cell{:}, ...
                                   'bkgdImage', im2double(ledMaxImage), ...
                                   'ledindicator', true, ...
-                                  'regXY', registration_data.bowlMarkerPoints);
+                                  'regXY', registration_data.bowlMarkerPoints, ...
+                                  'useNormXCorr',true);
         registration_data.ledIndicatorPoints = ledindicator_data.bowlMarkerPoints;
         
         % Decare victory

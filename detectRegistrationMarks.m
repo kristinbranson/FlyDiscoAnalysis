@@ -154,42 +154,35 @@ if nBowlMarkers > 0,
       methodcurr = 'grad2';
     otherwise,
       bowlMarkerTemplate = im2double(imread(bowlMarkerType));  % bowlMarkerType can be a file path...
+
+      % Soften template and background
       h = fspecial('gaussian',[5,5],1);
       bowlMarkerTemplate =  imfilter(bowlMarkerTemplate,h);
       bkgdImage = imfilter(bkgdImage,h);
-      
-      if useNormXCorr,
-        bowlMarkerTemplate = 255*bowlMarkerTemplate;
-        sz1 = size(bowlMarkerTemplate);
-        offr0 = floor(sz1(1)/2);
-        offr1 = sz1(1)-offr0;
-        offc0 = floor(sz1(2)/2);
-        offc1 = sz1(2)-offc0;
-      else %is what runs in ledma
-        bowlMarkerTemplate = bowlMarkerTemplate - min(bowlMarkerTemplate(:));
-        bowlMarkerTemplate = bowlMarkerTemplate / max(bowlMarkerTemplate(:));
+
+      % Scale the template to be on [0,1]
+      bowlMarkerTemplate = bowlMarkerTemplate - min(bowlMarkerTemplate(:));
+      bowlMarkerTemplate = bowlMarkerTemplate / max(bowlMarkerTemplate(:));
+      % If not using normxcorr, what to scale to [-1,+1]
+      if ~useNormXCorr,
         bowlMarkerTemplate = 2*bowlMarkerTemplate-1;
       end
-      bowlfils = cell(1,2*nRotations);
-      thetas = linspace(0,180,2*nRotations+1);
+      nRotationsOver180Degrees = 2*nRotations ;
+      bowlMarkerTemplateFromTheta = cell(1,nRotationsOver180Degrees);
+      thetas = linspace(0,180,nRotationsOver180Degrees+1);
       thetas = thetas(1:end-1);
-      for i = 1:2*nRotations,
-        bowlfils{i} = imrotate(bowlMarkerTemplate,thetas(i),'bilinear','loose');
+      for i = 1:nRotationsOver180Degrees,
+        bowlMarkerTemplateFromTheta{i} = imrotate(bowlMarkerTemplate,thetas(i),'bilinear','loose');
       end
       % compute normalized maximum correlation
-      filI4_from_theta_index = zeros(nr,nc,2*nRotations) ;
-      %filI4 = -inf(nr,nc);
-      for i = 1:2*nRotations,
+      filI4_from_theta_index = zeros(nr,nc,nRotationsOver180Degrees) ;
+      for i = 1:nRotationsOver180Degrees,
+        thisBowlMarkerTemplate = bowlMarkerTemplateFromTheta{i} ;
         if useNormXCorr,
-          tmp = normxcorr2(bowlMarkerTemplate,bkgdImage);
-          tmp = tmp(offr0+1:end-offr1+1,offc0+1:end-offc1+1);
-          tmp(1:sz1(1),:) = 0; tmp(end-sz1(1)+1:end,:) = 0;
-          tmp(:,1:sz1(2)) = 0; tmp(:,end-sz1(2)+1:end) = 0;
-          %filI4 = max(filI4,tmp);
+          tmp = normxcorr2_padded(thisBowlMarkerTemplate, bkgdImage, 'replicate') ;
         else
-          tmp = imfilter(bkgdImage,bowlfils{i},            'replicate') ./ ...
-                imfilter(bkgdImage,ones(size(bowlfils{i})),'replicate') ;
-          %filI4 = max(filI4,tmp);
+          tmp = imfilter(bkgdImage,thisBowlMarkerTemplate,            'replicate') ./ ...
+                imfilter(bkgdImage,ones(size(thisBowlMarkerTemplate)),'replicate') ;
         end
         filI4_from_theta_index(:,:,i) = tmp ;
       end
@@ -199,8 +192,10 @@ if nBowlMarkers > 0,
 
   bowlMarkerIm = filI4; %#ok<NASGU>
 
+  % Make non-corners -inf
   maxDistCorner_BowlLabel = maxDistCornerFrac_BowlLabel * r;
   filI4(distCorner > maxDistCorner_BowlLabel) = -inf;
+
   % make corner with registration mark -inf
   if ledindicator
     filI4 = neginfOutDetection(regXY(1),regXY(2),filI4,maxDistCorner_BowlLabel,nc,nr);
