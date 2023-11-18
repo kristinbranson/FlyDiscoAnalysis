@@ -16,6 +16,65 @@ explist = [];
 
 % rootdatadir 
 rootdatadir = '/groups/branson/bransonlab/flydisco_data';
+% from reviewing videos with >=12 trajectories (2023 batch)
+% % crub in bubble 
+% expdirlist = {'VNC2_JRC_SS78430_RigA_20230627T123728'
+% 'VNC2_JRC_SS74350_RigB_20230627T122655'
+% 'VNC2_JRC_SS50325_RigD_20230830T115927'}
+% failure_category = 'crud in bubble';
+
+% % tracked fly outside the bubble
+% expdirlist = {'VNC2_EXT_VGLUT-GAL4_RigB_20230621T114253'};
+% failure_category =  'tracked fly outside bubble';
+
+% % tracked dead or damaged fly
+% expdirlist = {'VNC2_EXT_VGLUT-GAL4_RigC_20230725T123503'
+% 'VNC2_EXT_VGLUT-GAL4_RigA_20230627T105833'
+% 'VNC2_JRC_SS77231_RigA_20230627T114356'};
+% failure_category = 'tracked dead or damaged fly';
+
+% prescreen practicing for rig 4/19/2023 to 5/03/2023
+% expdirlist = textread('/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirlist_prescreening_practice. txt','%s');
+% failure_category = 'testing';
+
+% % WL # 38
+% expdirlist = {'VNC2_JRC_SS76743_RigB_20230926T111421'};
+% failure_category =  'crud in bubble';
+% % WL # 34
+% expdirlist = {'VNC2_EXT_VGLUT-GAL4_RigC_20230830T121051'};
+% failure_category =  'bumped rig';
+% % % WL 33
+% expdirlist = {'VNC2_YNA_K_162984_RigA_20230725T121228'};
+% failure_category =  'crud in bubble';
+% expdirlist = {'VNC2_JRC_SS92097_RigA_20230725T140635'
+% 'VNC2_JRC_SS92097_RigB_20230725T140655'
+% 'VNC2_JRC_SS92097_RigC_20230725T140808'
+% 'VNC2_JRC_SS92097_RigD_20230725T140824'}
+% failure_category = 'late runs';
+
+% WL #32
+expdirlist = {'VNC2_JRC_SS90441_RigA_20230718T140114'
+'VNC2_JRC_SS90441_RigB_20230718T140145'
+'VNC2_JRC_SS90441_RigC_20230718T140254'
+'VNC2_JRC_SS90441_RigD_20230718T140333'}
+failure_category = 'late runs';
+% % WL 28
+% expdirlist = {'VNC2_JRC_SS73860_RigA_20230620T094433'};
+% failure_category =  'crud in bubble';
+
+% % WL 26
+% expdirlist = {'VNC2_JRC_SS65770_RigC_20230607T095522'};
+% failure_category =  'crud in bubble';
+
+% % WL 24
+% expdirlist = {'VNC2_JRC_SS83080_RigA_20230516T123901'};
+% failure_category =  'crud in bubble';
+% % WL 23
+% expdirlist = {'VNC2_EXT_VGLUT-GAL4_RigD_20230509T111055'};
+% failure_category = 'tracked dead or damaged fly';
+% expdirlist = {'VNC2_EXT_VGLUT-GAL4_RigD_20230509T120105'};
+% failure_category = 'tracked dead or damaged fly';
+
 % % wk 39 
 % expdirlist = {'VNC2_JRC_SS96599_RigA_20220928T125859'
 % 'VNC2_JRC_SS96599_RigB_20220928T125932'
@@ -41,8 +100,8 @@ rootdatadir = '/groups/branson/bransonlab/flydisco_data';
 % 'VNC2_EXT_VGLUT-GAL4_RigC_20220713T094045'};
 % failure_category = 'testing';
 % 4th effector testing movie 
-expdirlist = {'TrpAFemale4_EXT_VGLUT-GAL4_RigD_20220713T094246'};
-failure_category = 'testing';
+% expdirlist = {'TrpAFemale4_EXT_VGLUT-GAL4_RigD_20220713T094246'};
+% failure_category = 'testing';
 
 % % wk 31 bad effector
 % expdirlist = textread('/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/wk31_manualfail_explist.txt','%s');
@@ -169,12 +228,12 @@ failure_category = 'testing';
 % 'VNC2_EXT_VGLUT-GAL4_RigA_20220830T101614'};
 % failure_category = 'tracked dead or damaged fly';
 
-% fly on outside of bubble
-expdirlist = {'VNC_JRC_SS34580_RigB_20210504T141103'
-'VNC_JRC_SS50326_RigA_20210427T131657'
-'VNC_EXT_VGLUT-GAL4_RigC_20210601T143220'
-'VNC_JRC_SS38601_RigD_20210601T144117'};
-failure_category = 'tracked fly outside bubble';
+% % fly on outside of bubble
+% expdirlist = {'VNC_JRC_SS34580_RigB_20210504T141103'
+% 'VNC_JRC_SS50326_RigA_20210427T131657'
+% 'VNC_EXT_VGLUT-GAL4_RigC_20210601T143220'
+% 'VNC_JRC_SS38601_RigD_20210601T144117'};
+% failure_category = 'tracked fly outside bubble';
 
 %%
 for i = 1:numel(expdirlist)

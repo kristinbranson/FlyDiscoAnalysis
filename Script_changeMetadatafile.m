@@ -3,7 +3,8 @@
 
 logfiledir = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/MetadataFixes';
 %%%CHANGE
-logfilename = 'expdirs_wk40_metadatachanges_logofauto.csv';
+logfilename = 'expdirs_wk39_metadatachanges_logofauto.csv';
+
 
 logfile = fullfile(logfiledir,logfilename);
 
@@ -86,6 +87,8 @@ fid2 = fopen(logfile,'a');
 % explist = {'VNC_JRC_SS40663_RigD_20210503T132030'};
 % explist = {'VNC_JRC_SS57939_RigD_20210505T134338'};
 % explist = {'VNC_JRC_SS57939_RigD_20210505T135215'};
+% % wk7 20231004 - fixing line name introduced in metadata.xml file by Alice
+% explist = {'VNC_JRC_SS59209_RigD_20210503T132030'};
 %wk8
 % explist = {'VNC_JRC_SS45388_RigA_20210510T125529', ...
 % 'VNC_JRC_SS46301_RigA_20210510T130428', ...
@@ -238,11 +241,35 @@ fid2 = fopen(logfile,'a');
 % explist = {'VNC2_JRC_SS71988_RigC_2022092 2T120929'};
 % wk 39 line name error should be SS96599
 % explist = {'VNC2_JRC_SS90044_RigD_20220927T115344'}; 
+% introduced a space when fixing line name - fixed 10/4/2023
+explist = {'VNC2_JRC_SS965599_RigD_20220927T115344'};
 % wk 40experimenter boonek
-explist = textread('/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/wk40_experimentermetadatafix.txt','%s');
+%explist = textread('/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/wk40_experimentermetadatafix.txt','%s');
 % change screen_type for experiments with 0212 led protocol to 'non_olympiad_dickson_led5secVNC'
 % % explist = textread('/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirlist_0212ledprotocol.txt','%s');
-
+%wishlist #23
+% explist = textread('/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/MetadataFixes/expdirlist_WL23_fix_experimenter.txt','%s');
+%wishlist #27
+% line name error - should be SS68630
+%explist = {'VNC2_JRC_SS72048_RigC_20230614T115339'};
+%wishlist #29
+%fix experimentor
+% explist = textread('/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/MetadataFixes/expdirlist_WL29_fix_experimenter.txt','%s');
+% fix line name YNA_K_162984 
+% explist = {'VNC2_JRC_SS77214_RigA_20230628T114754',
+% 'VNC2_JRC_SS77214_RigB_20230628T114822',
+% 'VNC2_JRC_SS77214_RigC_20230628T114935'};
+% fix line name JRC_SS78425 
+% explist = {'VNC2_JRC_SS74639_RigD_20230628T110037'};
+% wishlist #31
+% fix plate #
+% explist = {'VNC2_JRC_SS87672_RigB_20230711T113909'};
+%wishlist 33
+% fix experimenter
+% explist = {'VNC2_JRC_SS68326_RigB_20230725T115130'
+% 'VNC2_JRC_SS93362_RigB_20230725T120219'};
+% fix line name 
+% explist = {'VNC2_JRC_SS91359_RigB_20230726T102957'};
 % fix experiments screen_type for expdirs where i had a type in the file
 % name (introduced a space when manually fixing expdir due to linename
 % changes) 
@@ -274,15 +301,17 @@ for j = 1:numel(explist)
     changestruct = struct;
     %         changestruct.experimenter = 'chenn';
 %     changestruct.experimenter = 'arrudar';
-changestruct.experimenter = 'boonek';
-%           changestruct.plate = '4d';
+%           changestruct.experimenter = 'boonek';
+% changestruct.experimenter = ' managanc';
+%           changestruct.plate = '2d';
     % also need to change expdir and ctrax results movie name manually
     % mv oldname newname
+%     changestruct.line = 'JRC_SS59209'
     %     changestruct.line = 'JRC_SS43660';
     %     changestruct.line = 'JRC_SS43700';
     %     changestruct.line = 'EXT_VGLUT-GAL4';
     %     changestruct.line = 'JRC_SS36194';
-    %     changestruct.line = 'YNA_K_162984';
+%         changestruct.line = 'YNA_K_162984';
     %     changestruct.line = 'JRC59209';
     %     changestruct.line = 'JRC_SS57983';
     %     changestruct.line = 'JRC_SS59163';
@@ -292,11 +321,14 @@ changestruct.experimenter = 'boonek';
     %     changestruct.line = 'JRC_SS66932';
     %     changestruct.line = 'JRC_SS67903';
 %     changestruct.line = 'JRC_SS71988';
-%         changestruct.line = ' JRC_SS96599';
+        changestruct.line = 'JRC_SS96599';
 
 %     changestruct.line = 'JRC_SS50887';
 %     changestruct.line = 'JRC_SS74689';
 %     changestruct.line = 'JRC_SS89292';
+  %  changestruct.line = 'JRC_SS68630';
+%   changestruct.line = 'JRC_SS78425';
+%         changestruct.line = 'JRC_SS93514';
 %     changestruct.screen_type = 'non_olympiad_dickson_led5secVNC';
 %     changestruct.gender = 'b';
 % changestruct.notes_technical = 'used mouth pipette';

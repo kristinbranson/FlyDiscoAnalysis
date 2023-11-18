@@ -17,8 +17,8 @@ rootdatadir = '/groups/branson/bransonlab/flydisco_data';
 % savefile = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_allflydisco_20230831';
 % [expdirstruct] = getExperimentDirsFlyDisco(rootdatadir,'metadatafile','Metadata.xml','movielength',false,'TrajNum',false,'autocheckin',false,'autocheckcomplete',true,'manualcheck',true);
 
-savefile = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_2023_pulled20230905';
-[expdirstruct] = getExperimentDirsFlyDisco(rootdatadir,'metadatafile','Metadata.xml','expdirname','VNC2','date','2023*','movielength',true,'TrajNum',true,'autocheckin',true,'autocheckcomplete',true,'manualcheck',false);
+savefile = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_2023_pulled202310042023';
+[expdirstruct] = getExperimentDirsFlyDisco(rootdatadir,'metadatafile','Metadata.xml','expdirname','VNC2','date','_2023*','movielength',true,'TrajNum',false,'autocheckin',true,'autocheckcomplete',true,'manualcheck',true);
 
 
 % savefile = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_VNC_week1';
@@ -106,7 +106,7 @@ end
 
 fclose(fid);
 %% make csv file for all experiments (use for pulling data for metadata changes) with autochecks
-fid = fopen([savefile,'.tsv'],'w');
+fid = fopen([savefile,'_metadatafixing','.tsv'],'w');
 
 fprintf(fid,'%s\t %s\t %s\t %s\t %s\t %s\t %s\t %s\t %s \n','expname','date','datetime','linename','experimentor','gender','notes_tech','notes_behav','automated_pf');
 
@@ -206,3 +206,57 @@ save(savefiletext,'metadata');
 %% fix problem with unique and expdirstruct
 
 out = unique(cellfun(@num2str,{expdirstruct.screen_type},'uni',0))
+
+%% pull just the HHMMSS from experiment date time
+timeofday =[];
+datetime = {expdirstruct.exp_datetime};
+for i = 1:numel(expdirstruct)
+timeofday(i,:) = datetime{i}(end-5:end);
+expdirstruct(i).timeofday = timeofday(i,:);
+end
+
+
+nowdatetime = datestr(now,'yyyymmddTHHMMSS');
+save([savefile,'_addedtimeofday_',nowdatetime,'.mat'],'expdirstruct');
+%% make csv file for all experiments (use for pulling data for metadata changes) with time of day 
+fid = fopen([savefile,'_timeofday','.tsv'],'w');
+
+fprintf(fid,'%s\t %s\t %s\t %s\t %s\t %s\t %s\t %s\t %s\t %s \n','expname','date','datetime','timeofday','linename','experimentor','gender','notes_tech','notes_behav','automated_pf');
+
+for i = 1:numel(expdirstruct)  
+  [~,expname] = fileparts(expdirstruct(i).file_system_path);
+  datestr = expdirstruct(i).date;
+  datetimestr = expdirstruct(i).exp_datetime;
+  timeofdaystr = expdirstruct(i).timeofday;
+  linename = expdirstruct(i).line;
+  experimenter = expdirstruct(i).experimenter;
+  gender = expdirstruct(i).gender;
+  notestech = expdirstruct(i).notes_technical;
+  notesbeh = expdirstruct(i).notes_behavioral;
+  autopf = expdirstruct(i).automated_pf;
+
+
+%   notes = experiments_eddison(i).notes_curation;
+  fprintf(fid,'%s\t %s\t %s\t %s\t %s\t %s\t %s\t %s\t %s\t %s \n',expname, datestr,datetimestr,timeofdaystr,linename,experimenter,gender,notestech,notesbeh,autopf);
+end
+
+fclose(fid);
+%% make csv file for all experiments (use for pulling data for metadata changes) with time of day 
+fid = fopen([savefile,'.tsv'],'w');
+
+fprintf(fid,'%s\t %s\t %s\t %s\t %s\t %s\t %s\t %s \n','expname','date','datetime','linename','automated_pf','automated_pf_category','manual_fail','manual_fail_category');
+
+for i = 1:numel(expdirstruct)
+    [~,expname] = fileparts(expdirstruct(i).file_system_path);
+    datestr = expdirstruct(i).date;
+    datetimestr = expdirstruct(i).exp_datetime;
+    linename = expdirstruct(i).line;
+    autopf = expdirstruct(i).automated_pf;
+    autopfcat = expdirstruct(i).automated_pf_category;
+    manpf = expdirstruct(i).manual_fail;
+    manpfcat = expdirstruct(i).manual_fail_category;
+    %   notes = experiments_eddison(i).notes_curation;
+    fprintf(fid,'%s\t %s\t %s\t %s\t %s\t %s\t %s\t %s \n',expname, datestr,datetimestr,linename,autopf,autopfcat,manpf,manpfcat);
+end
+
+fclose(fid);

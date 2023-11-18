@@ -917,7 +917,11 @@ end
 
 fclose(fid);
 %% look at tracking for trajectory number 12+ 
-explist = textread('/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/hightrajnum_explist.txt','%s');
+% all VNC and VNC2 data through 2022
+% explist = textread('/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/hightrajnum_explist.txt','%s');
+
+% VNC2 data from 2023 
+explist = textread('/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirlist_hightrajnum_2023.txt','%s');
 rootdatadir = '/groups/branson/bransonlab/flydisco_data';
 
 for i = 1:numel(explist)
@@ -938,12 +942,12 @@ for i = 1:numel(explist)
             uiwait
         else
             i
-            moviename = dir(fullfile(rootdatadir,explist{i},'*.mp4'));
+            moviename = dir(fullfile(rootdatadir,explist{i},'ctrax*.mp4'));
             disp(fullfile(rootdatadir,explist{i},moviename.name))
             implay(fullfile(rootdatadir,explist{i},moviename.name))
             uiwait
         end
-    elseif isempty(dir(fullfile(rootdatadir,explist{i},'*.mp4')))
+    elseif isempty(dir(fullfile(rootdatadir,explist{i},'ctrax*.mp4')))
         i
         disp(explist{i})
         playfmf('filename',fullfile(rootdatadir,explist{i},'movie.ufmf'))
@@ -1090,5 +1094,33 @@ fclose(fid);
 % /groups/branson/bransonlab/flydisco_data/TrpAFemale4_EXT_VGLUT-GAL4_RigD_20220713T094246
 % (wrong screen_type) 
 
+%% high trajectory number - 10/2023
+% print out tsv from data pull with auto and manual fails (from logbook so
+% far) 
+load /groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_2023_pulled202310032023_20231004T103003.mat
+savefile = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/allVNC_20231004_addedManualFail';
 
+fid = fopen([savefile,'.tsv'],'w');
+
+fprintf(fid,'%s\t %s\t %s\t %s\t  %s\t  %s\t %s\t %s\t %s\t %s\t %s \n','expname','date','datetime','linename','trajnum','notes_tech','notes_behav','automated_pf','auto_pf_category','manual_fail','manual_fail_category');
+
+for i = 1:numel(expdirstruct)  
+  [~,expname] = fileparts(expdirstruct(i).file_system_path);
+  datestr = expdirstruct(i).date;
+  datetimestr = expdirstruct(i).exp_datetime;
+  linename = expdirstruct(i).line;
+  trajnum = expdirstruct(i).trajnum;
+  notestech = expdirstruct(i).notes_technical;
+  notesbeh = expdirstruct(i).notes_behavioral;
+  autopf = expdirstruct(i).automated_pf;
+  autopfcat = expdirstruct(i).automated_pf_category;
+  manf = expdirstruct(i).manual_fail;
+  manfcat = expdirstruct(i).manual_fail_category; % code above added manual fail posthoc not from pull
+
+
+%   notes = experiments_eddison(i).notes_curation;
+  fprintf(fid,'%s\t %s\t %s\t %s\t  %d\t  %s\t %s\t %s\t %s\t %s\t %s \n',expname, datestr,datetimestr,linename,trajnum,notestech,notesbeh,autopf,autopfcat,manf,manfcat);
+end
+
+fclose(fid);
 
