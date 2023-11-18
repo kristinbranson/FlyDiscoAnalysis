@@ -3,7 +3,7 @@ function clean_experiment_folder(experiment_folder_name, do_delete_tracking_file
     % If do_delete_tracking_files is true, delete the tracking files also.
     % If do_delete_tracking_files is missing or empty, default is to *not* delete
     % tracking files.
-    % A file is only deleted if it appears on a 'blacklist' of know outputs from
+    % A file is only deleted if it appears on a 'blacklist' of known outputs from
     % the analysis pipeline.
     % PLEASE BE CAREFUL WITH THIS FUNCTION!
     

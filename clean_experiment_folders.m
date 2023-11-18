@@ -6,9 +6,9 @@ function clean_experiment_folders(root_folder_name, do_delete_tracking_files, do
     % If do_wet_run is true, actually do the deleting.  Otherwise, just print what
     % files would have been deleted.
     % If do_wet_run is missing or empty, default is to *not* do the deleting.
-    %
-    % PLEASE DON'T USE THIS ON ANYTHING BUT TEST EXPERIMENT FOLDERS.
-    % IT DELETES ANY FILE WHOSE NAME DOES NOT MATCH A WHITELIST.
+    % A file is only deleted if it appears on a 'blacklist' of known outputs from
+    % the analysis pipeline.
+    % PLEASE BE CAREFUL WITH THIS FUNCTION!
     
     if ~exist('do_delete_tracking_files', 'var') || isempty(do_delete_tracking_files) ,
         do_delete_tracking_files = false ;

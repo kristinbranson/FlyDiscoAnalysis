@@ -94,11 +94,11 @@ def transfero_FlyDiscoPipeline_wrapper_wrapper(raw_experiment_folder_path, user_
             "modpath; options = cell(1, 0); transfero_FlyDiscoPipeline_wrapper('%s', '%s', options{:})" % \
                 (experiment_folder_path, user_name_for_configuration_purposes)
         #print("Matlab command line is: %s" % matlab_command_line)
+        os.environ['FONTCONFIG_USE_MMAP'] = 'false'  # to hopefully eliminate intermittent bus error
         command_line_as_list = ['/usr/bin/xvfb-run', '-d', '/misc/local/matlab-2023a/bin/matlab', '-batch', matlab_command_line]
         #print("Subprocess command line as list is: %s" % repr(command_line_as_list))        
         sys.stdout.flush()  # Flush stdout output now, so it comes before an stdout output of the subprocess
-        subprocess.run(command_line_as_list, 
-                       check=True)
+        subprocess.run(command_line_as_list, check=True)
 
 
 
