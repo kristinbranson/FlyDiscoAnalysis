@@ -268,17 +268,17 @@ if ~dryrun,
           if verbose >= 2,
             fprintf('Time since last part trk file update = %f s\n',deltaupdate);
           end
-          if deltaupdate > apt_params.maxupdatetime,
-
-            msg = sprintf('No update to part track file %s in %f > %f seconds',parttrkfile,deltaupdate,apt_params.maxupdatetime);
-            if verbose >= 1,
-              fprintf('%s\n',msg);
-            end
-
-            success = false;
-            msgs{end+1} = msg; %#ok<AGROW>
-            return;
-          end
+%           if deltaupdate > apt_params.maxupdatetime,
+% 
+%             msg = sprintf('No update to part track file %s in %f > %f seconds',parttrkfile,deltaupdate,apt_params.maxupdatetime);
+%             if verbose >= 1,
+%               fprintf('%s\n',msg);
+%             end
+% 
+%             success = false;
+%             msgs{end+1} = msg; %#ok<AGROW>
+%             return;
+%           end
         end
         if verbose >= 2,
           fprintf('Waiting %f seconds to check again...\n',waitchecktime);
