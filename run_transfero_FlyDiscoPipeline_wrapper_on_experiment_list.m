@@ -60,7 +60,11 @@ function run_transfero_FlyDiscoPipeline_wrapper_on_experiment_list(folder_path_f
     %   might set the parameter 'docomputeperframestats' to 'off' to disable the
     %   computeperframestats stage of FlyDiscoPipeline().  See the documentation of
     %   FlyDiscoPipeline() for more details, including a complete list of the
-    %   supported optional parameters.
+    %   supported optional parameters.  Some other commonly-used parameters are
+    %   'settingsdir', to specify the settings directory to use; and
+    %   'analysis_protocol', to specify the subdirectory within the settings
+    %   directory to use (overriding the screen_type set in the experiment
+    %   folders).
 
     % Process arguments                                
     if ~exist('do_use_bqueue', 'var') || isempty(do_use_bqueue) ,
