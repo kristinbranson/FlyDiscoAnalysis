@@ -2,7 +2,8 @@
 
 % Where does this script live?
 this_script_path = mfilename('fullpath') ;
-fly_disco_analysis_folder_path = fileparts(this_script_path) ;
+fly_disco_analysis_test_folder_path = fileparts(this_script_path) ;
+fly_disco_analysis_folder_path = fileparts(fly_disco_analysis_test_folder_path) ;
 fly_disco_folder_path = fileparts(fly_disco_analysis_folder_path) ;
 
 cluster_billing_account_name = 'branson' ;
