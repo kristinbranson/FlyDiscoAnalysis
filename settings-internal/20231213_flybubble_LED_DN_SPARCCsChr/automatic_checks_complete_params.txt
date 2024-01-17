@@ -1,0 +1,9 @@
+min_num_flies,7
+min_num_males,0
+min_num_females,7
+max_num_flies,12
+required_files,automatic_checks_incoming_results.txt,flytracker-calibration.mat,movie-bg.mat,movie-feat.mat,movie-params.mat,movie-track.mat,/movie_JAABA/perframe,/movie_JAABA/trx.mat,ctrax_results_movie_*.mp4,perframefeatures_info.mat,wingtracking_results.mat,registered_trx.mat,registrationdata.mat,registrationdata.txt,registrationimage.png,indicatordata.mat,ledregistrationimage.png,sexclassifier_diagnostics.txt,apt.trk,apt_results_movie*.mp4
+file_categories,automated_checks_incoming,tracking,tracking,tracking,tracking,tracking,tracking,tracking,results_movie,perframefeatures,perframefeatures,registration,registration,registration,registration,optoregistration,optoregistration,sexclassification,apt_tracking,apt_results_movie
+desired_files,automatic_checks_incoming_info.mat,flydisco-analysis-log.txt,indicator_log.txt
+#desired_files for steps that don't exist yet,jaabadetect_info.mat,plotperframestats_info.mat
+#required_flies for steps that don't exist yet, analysis_protocol.txt,bias_diagnostics.mat,bias_diagnostics.png,bias_diagnostics.txt,bkgd_diagnostics.mat,bkgd_diagnostics.png,bkgd_diagnostics.txt,hist_perframe.mat,hist_perframe.txt,stats_perframe.mat,stats_perframe.txt,temperature_diagnostics.txt

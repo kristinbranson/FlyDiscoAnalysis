@@ -9,6 +9,7 @@ docomputeperframestats,off
 docomputehoghofperframefeatures,off
 dojaabadetect,on
 doplotperframestats,off
-domakectraxresultsmovie,off
+domakectraxresultsmovie,on
 doapt,on
+domakeaptresultsmovie,on
 doautomaticcheckscomplete,force

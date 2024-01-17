@@ -1,0 +1,2 @@
+dnose2ell_strong,log,dnose2ell_flyany_framenearwall_stimonstrong,dnose2ell_flyany_framenearwall_stimoffstrong
+nbinscombine,4

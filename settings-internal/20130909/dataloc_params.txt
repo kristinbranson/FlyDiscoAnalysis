@@ -90,4 +90,3 @@ wingtrackinginfomatfilestr,wingtracking_info.mat
 jaabadetectinfomatfilestr,jaabadetect_info.mat
 statsplotparamsfilestr,stats_plotparams.txt
 plotperframestatsinfomatfilestr,plotperframestats_info.mat
-flytrackerbgstr,movie-bg.mat
