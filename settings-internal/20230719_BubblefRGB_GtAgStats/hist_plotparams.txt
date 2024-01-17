@@ -1,2 +1,2 @@
-dcenter_strong,log,dcenter_flyany_poststimstrong1,dcenter_flyany_prestimstrong10
+dcenter_strong,log,dcenter_flyany_poststimstrong10,dcenter_flyany_prestimstrong10
 nbinscombine,4

@@ -4,7 +4,7 @@ linedatadir,/groups/sciserv/flyolympiad/Olympiad_Screen/fly_bowl/line_data
 configfilepattern,FlyBowlDataCaptureParams*.txt
 moviefilestr,movie.ufmf
 annfilestr,movie.ufmf.ann
-flytrackerparentcalibrationstr,parent_calibration_bubble_FlyBowlRGB_LED_20210413.mat
+flytrackerparentcalibrationstr,parent_calibration_bubblefrgb_030623.mat
 flytrackercalibrationstr,flytracker-calibration.mat
 flytrackertrackstr,movie-track.mat
 flytrackerbgstr,movie-bg.mat
@@ -53,6 +53,11 @@ histperframetxtfilestr,hist_perframe.txt
 histperframematfilestr,hist_perframe.mat
 figdir,analysis_plots
 histplotparamsfilestr,hist_plotparams.txt
+stimulusplotparamsfilestr,stimulus_plotparams.txt
+conditionplotparamsfilestr,condition_plotparams.txt
+statswebpagefilestr,stats.html
+stimulusvideoparamsfilestr,stimulus_videoparams.txt
+stimulusvideofilestr,activation
 combine_experimentsfilestr,experiments.txt
 ctraxresultsavifilestr,ctrax_results_movie
 jaabaresultsavifilestr,jaaba_socialresults_movie
@@ -100,3 +105,10 @@ wingtrackingparamsfilestr,WingTrackingParameters.txt
 jaabadetectinfomatfilestr,jaabadetect_info.mat
 statsplotparamsfilestr,stats_plotparams.txt
 plotperframestatsinfomatfilestr,plotperframestats_info.mat
+apttrkfilestr,apt.trk
+aptparamsfilestr,apt_params.txt
+aptlogfilestr,apt_log.txt
+aptbsublogfilestr,apt_bsub_log.txt
+apterrfilestr,apt_error.txt
+aptresultsavefilestr,apt_results_movie
+aptresultsmovieparamsfilestr,aptresultsmovie_params.txt
