@@ -3,4 +3,4 @@ fly:any,frame:prestimweak10,.35 .35 .35,o
 fly:any,frame:poststimweak1,0.7628    0.4007    0.4696,o
 fly:any,frame:prestimstrong10,.3 .3 .3,o
 fly:any,frame:poststimstrong1,0.6532    0.1241    0.2248,o
-
+fly:any,frame:poststimweak1,0.7628    0.4007    0.4696,o

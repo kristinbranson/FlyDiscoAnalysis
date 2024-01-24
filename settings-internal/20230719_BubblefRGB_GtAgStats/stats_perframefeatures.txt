@@ -1,42 +1,52 @@
 # <per-frame feature>,<frame condition name>,<fly condition name>,<min n. frames both valid>,<min n. frames fly valid>,[<norm per-frame feature>],[<norm frame condition name>],[<norm fly condition name>],[<norm min n. frames both valid>],[<norm min n. frames fly valid>]
 
-# The average of velmag in first 5s of each stimulus on period normalized by the average of velmag in the entire pre-stimulus period (30s)
-velmag_ctr,poststimweak5,any,25,100,stimoff5
-velmag_ctr,poststimstrong5,any,25,100,stimoff5
-velmag_ctr,prestimweak5,any,25,100,stimoff5
-velmag_ctr,prestimstrong5,any,25,100,stimoff5
+# The average distance of flies (as calculated by dcenter) in the first 5s of each stimulus normalized by by first 10s of the first stim off period
+dcenter,poststimweak5,any,25,100,stimoff10
+dcenter,poststimstrong5,any,25,100,stimoff10
+dcenter,prestimweak5,any,25,100,stimoff10
+dcenter,prestimstrong5,any,25,100,stimoff10
 
-# The average of velmag in first 10s of each stimulus on period normalized by the average of velmag in the entire pre-stimulus period (30s)
-velmag_ctr,poststimweak10,any,25,100,stimoff5
-velmag_ctr,poststimstrong10,any,25,100,stimoff5
-velmag_ctr,prestimweak10,any,25,100,stimoff5
-velmag_ctr,prestimstrong10,any,25,100,stimoff5
-velmag_ctr,poststimweak1,any,25,100,stimoff5
+#The average distance of flies (as calculated by dcenter) in the first 10s of each stimulus normalized by by first 10s of the first stim off period
+dcenter,poststimweak10,any,25,100,stimoff10
+dcenter,poststimstrong10,any,25,100,stimoff10
+dcenter,prestimweak10,any,25,100,stimoff10
+dcenter,prestimstrong10,any,25,100,stimoff10
+dcenter,poststimweak1,any,25,100,stimoff10
 
-# The average distance of flies (as calculated by dcenter) in the first 5s of each stimulus normalized by the entire prestim baseline
-dcenter,poststimweak5,any,25,100,stimoff5
-dcenter,poststimstrong5,any,25,100,stimoff5
-dcenter,prestimweak5,any,25,100,stimoff5
-dcenter,prestimstrong5,any,25,100,stimoff5
+#The number of flies close during aggression during first 10s of each stim normalized by the first 10s of stim off period
+nflies_close,aggression_poststimweak10,any,25,100,stimoff10
+nflies_close,aggression_poststimstrong10,any,25,100,stimoff10
+nflies_close,aggression_prestimweak10,any,25,100,stimoff10
+nflies_close,aggression_prestimstrong10,any,25,100,stimoff10
+nflies_close,aggression_poststimweak1,any,25,100,stimoff10
+nflies_close,aggression_poststimstrong1,any,25,100,stimoff10
+nflies_close,aggression_prestimweak1,any,25,100,stimoff10
+nflies_close,aggression_prestimstrong1,any,25,100,stimoff10
 
-# The average distance of flies (as calculated by dcenter) in the first 10s of each stimulus normalized by the entire prestim baseline
-dcenter,poststimweak10,any,25,100,stimoff5
-dcenter,poststimstrong10,any,25,100,stimoff5
-dcenter,prestimweak10,any,25,100,stimoff5
-dcenter,prestimstrong10,any,25,100,stimoff5
-dcenter,poststimweak1,any,25,100,stimoff5
+#The total field of view occluded during aggression during first 10s of each stim normalized by the first 10s of the stim off1
+anglesub,aggression_poststimweak10,any,25,100,stimoff10
+anglesub,aggression_poststimstrong10,any,25,100,stimoff10
+anglesub,aggression_prestimweak10,any,25,100,stimoff10
+anglesub,aggression_prestimstrong10,any,25,100,stimoff10
+anglesub,aggression_poststimweak1,any,25,100,stimoff10
+anglesub,aggression_poststimstrong1,any,25,100,stimoff10
+anglesub,aggression_prestimweak1,any,25,100,stimoff10
+anglesub,aggression_prestimstrong1,any,25,100,stimoff10
 
-# The average change in orientation in the first 10s of each stimulus normalized by the entire prestim baseline
-absdtheta,poststimweak10,any,25,100,stimoff5
-absdtheta,poststimstrong10,any,25,100,stimoff5
-absdtheta,prestimweak10,any,25,100,stimoff5
-absdtheta,prestimstrong10,any,25,100,stimoff5
-absdtheta,poststimweak1,any,25,100,stimoff5
+#The total difference in orientation between current and closest fly during aggression during first 10s of each stim normalized by the first 10s of the stim off1
+absthetadiff_anglesub,aggression_poststimweak10,any,25,100,stimoff10
+absthetadiff_anglesub,aggression_poststimstrong10,any,25,100,stimoff10
+absthetadiff_anglesub,aggression_prestimweak10,any,25,100,stimoff10
+absthetadiff_anglesub,aggression_prestimstrong10,any,25,100,stimoff10
+absthetadiff_anglesub,aggression_poststimweak1,any,25,100,stimoff10
+absthetadiff_anglesub,aggression_poststimstrong1,any,25,100,stimoff10
+absthetadiff_anglesub,aggression_prestimweak1,any,25,100,stimoff10
+absthetadiff_anglesub,aggression_prestimstrong1,any,25,100,stimoff10
 
-# The average angle on other fly in the first 10s of each stimulus normalized by the entire prestim baseline
-angleonclosestfly,poststimweak10,any,25,100,stimoff5
-angleonclosestfly,poststimstrong10,any,25,100,stimoff5
-angleonclosestfly,prestimweak10,any,25,100,stimoff5
-angleonclosestfly,prestimstrong10,any,25,100,stimoff5
-angleonclosestfly,poststimweak1,any,25,100,stimoff5
-
+#number of flies close,field of view occluded, difference in orientation during aggression during the first 5s of first stim normalized by first 5 of stim off1
+nflies_close,aggression_poststimweak1v5s,any,25,100,stimoff5
+nflies_close,aggression_prestimweak1v5s,any,25,100,stimoff5
+anglesub,aggression_poststimweak1v5s,any,25,100,stimoff5
+anglesub,aggression_prestimweak1v5s,any,25,100,stimoff5
+absthetadiff_anglesub,aggression_poststimweak1v5s,any,25,100,stimoff5
+absthetadiff_anglesub,aggression_prestimweak1v5s,any,25,100,stimoff5

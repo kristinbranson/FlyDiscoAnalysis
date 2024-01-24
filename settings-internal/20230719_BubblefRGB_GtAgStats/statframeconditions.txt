@@ -16,8 +16,15 @@ poststimstrong10,part0to10s_stimon_4_5_6,1
 prestimstrong5,partm5to0s_stimoff_4_5_6,1
 prestimstrong10,partm10to0s_stimoff_4_5_6,1
 stimoff5,part0to5s_stimoff_1,1 
+stimoff10,part0to10s_stimoff_1,1
 poststimweak1,part0to10s_stimon_1,1
 poststimstrong1,part0to10s_stimon_4,1
+prestimweak1,partm10to0s_stimoff_1,1
+prestimstrong1,partm10to0s_stimoff_1,1
+poststimweak1v5s,part0to5s_stimon_1,1
+poststimstrong1v5s,part0to5s_stimon_4,1
+prestimweak1v5s,partm5to0s_stimoff_1,1
+prestimstrong1v5s,partm5to0s_stimoff_1,1
 
 nearwall,max_dist2wall,15
 nearfly,max_dcenter,3
@@ -29,16 +36,8 @@ aggressionstart,start_labels_FeAggfRGBub,1
 aggressionend,end_labels_FeAggfRGBub,1
 notaggression,equal_labels_FeAggfRGBub,0
 
-stimon1startclose,part0to10s_stimon_1_2_3,min_nflies_close,3
-stimoff1startclose,part0to10s_stimoff_1_2_3,min_nflies_close,3
-stimon2startclose,part0to10s_stimon_4_5_6,min_nflies_close,3
-stimoff2startclose,part0to10s_stimoff_4_5_6,min_nflies_close,3
-
-stimonweakagg,equal_stimon_1_2_3,equal_labels_FeAggfRGBub,1
-stimonstrongagg,equal_stimon_4_5_6,equal_labels_FeAggfRGBub,1
-
-stimonwstagg,part0to10s_stimon_1_2_3,equal_labels_FeAggfRGBub,1
-stimonstrstagg,part0to10s_stimon_4_5_6,equal_labels_FeAggfRGBub,1
-stimonw1agg,part0to10s_stimon_1,equal_labels_FeAggfRGBub,1
-stimonst1agg,part0to10s_stimon_4,equal_labels_FeAggfRGBub,1
+stimon1startclose,part0to10s_stimon_1_2_3,min_dcenter,3
+stimoff1startclose,part0to10s_stimoff_1_2_3,min_dcenter,3
+stimon2startclose,part0to10s_stimon_4_5_6,min_dcenter,3
+stimoff2startclose,part0to10s_stimoff_4_5_6,min_dcenter,3
 

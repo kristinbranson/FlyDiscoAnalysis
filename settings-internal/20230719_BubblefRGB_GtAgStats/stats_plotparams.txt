@@ -7,8 +7,8 @@
 #stat2
 
 *dcenter_10s_post
-dcenter_flyany_poststimweak1
-dcenter_flyany_poststimstrong1
+dcenter_flyany_poststimweak10
+dcenter_flyany_poststimstrong10
 
 *dcenter_10s_pre
 dcenter_flyany_prestimweak10
