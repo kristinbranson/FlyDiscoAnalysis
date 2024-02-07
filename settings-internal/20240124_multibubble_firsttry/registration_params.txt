@@ -16,7 +16,7 @@ featureRadius,30
 bowlMarkerPairTheta_true,2.3
 nBowlMarkers,1
 # bowl marker indexed by rig
-bowlMarkerType,CircleTemplateLarge.png
+bowlMarkerType,CircleTemplate_multiBubble.png
 minTemplateFeatureStrength,-0.5
 minTemplateFeatureStrength,-0.5
 minTemplateFeatureStrength,-0.5
@@ -24,6 +24,5 @@ usemediandt,0
 OptogeneticExp,1
 # maxdist indexed by plate
 maxDistCornerFrac_LEDLabel,.16
-LEDMarkerType,A,LEDIndicator_largeovaloffcenter.png,B,LEDIndicator_largeovaloffcenter.png,C,LEDIndicator_largeovaloffcenter.png,D,LEDIndicator_largeovaloffcenter.png
-doTemporalRegistration,0
+LEDMarkerType,LEDTemplates_multiBubble.png
 maxFlyTrackerNanInterpFrames,5

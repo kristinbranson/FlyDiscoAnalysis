@@ -1,63 +1,32 @@
 %% set up paths
-    
-addpath /groups/branson/home/bransonk/tracking/code/JCtrax/misc;
-addpath /groups/branson/home/bransonk/tracking/code/JCtrax/filehandling;
-addpath /groups/branson/bransonlab/projects/olympiad/SAGE/MATLABInterface/Trunk;
+modpath
+% addpath /groups/branson/home/bransonk/tracking/code/JCtrax/misc;
+% addpath /groups/branson/home/bransonk/tracking/code/JCtrax/filehandling;
+% addpath /groups/branson/bransonlab/projects/olympiad/SAGE/MATLABInterface/Trunk;
 % settingsdir = '/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/settings';
 % settingsdir = '/groups/branson/home/robiea/Code_versioned/FlyBubbleAnalysis/settings/';
-settingsdir = '/groups/branson/home/robiea/Code_versioned/FlyDiscoAnalysis/settings/';
-
+% settingsdir =
+% '/groups/branson/home/robiea/Code_versioned/FlyDiscoAnalysis/settings/';
+settingsdir = '/groups/branson/home/robiea/Code_versioned/FlyDiscoAnalysis/settings-internal';
 
 %% parameters
 
 % % analysis_protocol = '20150717_flybubble_flybowlMing';
-analysis_protocol = '20210219_flybubble_dickson_RGBGtACR1testing';
+analysis_protocol = '20240124_multibubble_firsttry';
 % expfile = '/groups/branson/home/robiea/Projects_data/Ming/explist_forregistration';
-expfile = '/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/FlyBubbleRGB/locomotionGtACR1_24_RGB_EXT_VGLUT-GAL4_RigA_20210305T083721'
+expdir = '/groups/branson/home/robiea/Projects_data/FlyDisco/multibubble_data/20240124_testingpipeline/20240122T154843_rig2_flyBowl1_1xLwt_attp40_4stop1_3xDSCPLwt_attp40_3stop1_SlowRamp';
 datalocparamsfilestr = 'dataloc_params.txt';
 dataloc_params = ReadParams(fullfile(settingsdir,analysis_protocol,datalocparamsfilestr));
 
-expdirs = importdata(expfile);
-expdirs(cellfun(@isempty,expdirs)) = [];
 
-expis = [];
-platebowls = {};
 
-for expi = 1:numel(expdirs),
-  expdir = expdirs{expi};
-  metadata = ReadMetadataFile(fullfile(expdir,dataloc_params.metadatafilestr));
-  platebowl = sprintf('%d%s',metadata.plate,metadata.bowl);
-  if ~ismember(platebowl,platebowls),
-    expis(end+1) = expi; %#ok<SAGROW>
-    platebowls{end+1} = platebowl; %#ok<SAGROW>
-  end
-end
+%%  
+moviefilename = fullfile(expdir,dataloc_params.moviefilestr);
+annfilename = fullfile(expdir,dataloc_params.annfilestr);
+[readfcn,nframes,fid,headerinfo] = get_readframe_fcn(moviefilename);
+im = readfcn(1);
 
-expi = expis(1);
-
-%%
-
-for i = 1:numel(expis),
-  
-  expi = expis(i);
-  
-  expdir = expdirs{expi};
-  
-  moviefilename = fullfile(expdir,dataloc_params.moviefilestr);
-  annfilename = fullfile(expdir,dataloc_params.annfilestr);
-  [readframe,nframes,fid,headerinfo] = get_readframe_fcn(moviefilename);
-  mu = read_ann(annfilename,'background_median');
-  metadata = ReadMetadataFile(fullfile(expdir,dataloc_params.metadatafilestr));
-  
-  nr = headerinfo.nr;
-  nc = headerinfo.nc;
-  mu = reshape(mu,[nc,nr]);
-  
-  figure(i);
-  clf;
-  imagesc(mu); axis image;
-  
-end
+mu = im;
 
 %% grab a rectangle around the marker to make a template
 
@@ -76,10 +45,12 @@ figure(2);
 imagesc(template);
 axis image;
 
-
+%%%%%%%%% change output file name; copy into analysis protocol directory and edit registration_params.bowlMarkerType  %%%%%%%%%%%%%%%%
 imwrite(uint8(template),'CirleTemplate_FlyBowlMing.png');
 
 %% distance from the corner
+% informative for setting registration_params.maxDistCornerFrac_BowlLabel (restricts template
+% matching to smaller area)
 x = mean(xlim);
 y = mean(ylim);
 corners = [1,1,nc,nc;1,nr,nr,1];
@@ -87,4 +58,4 @@ dcorner = sqrt(min((corners(1,:)-x).^2 + (corners(2,:)-y).^2));
 imr = min(nr,nc);
 dcornerfrac = dcorner / imr;
 
-maxDistCornerFrac_BowlLabel = .12;
+% maxDistCornerFrac_BowlLabel = .12;

@@ -5,7 +5,8 @@
 % addpath /groups/branson/bransonlab/projects/olympiad/SAGE/MATLABInterface/Trunk;
 % settingsdir = '/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/settings';
 % settingsdir = '/groups/branson/home/robiea/Code_versioned/FlyBubbleAnalysis/settings/';
-settingsdir = '/groups/branson/home/robiea/Code_versioned/FlyDiscoAnalysis/settings/';
+% settingsdir = '/groups/branson/home/robiea/Code_versioned/FlyDiscoAnalysis/settings/';
+settingsdir = '/groups/branson/home/robiea/Code_versioned/FlyDiscoAnalysis/settings-internal';
 
 
 %% parameters
@@ -17,83 +18,32 @@ settingsdir = '/groups/branson/home/robiea/Code_versioned/FlyDiscoAnalysis/setti
 % FlyBowlRGB
 % analysis_protocol = '20210329_flybubble_flybowloptoKatie_mingrig_flytracker'; % changed name to 20210329_flybubble_FlyBowlRGB_LED
 % analysis_protocol = '20210329_flybubble_FlyBowlRGB_LED';
-analysis_protocol = '20220622_flybubbleRed_MBL';
+% analysis_protocol = '20220622_flybubbleRed_MBL';
+analysis_protocol = '20240124_multibubble_firsttry';
 % expdirs = {'/groups/branson/home/robiea/Projects_data/FlyDisco/KatieTestData/FlyBowlDisco_RGBonly_318/20210318T135921_rig1_flyBowl2__SS36564_CsChrim_KS_redonly_protocolRGB_0315_2'}
 % adjusted camera height
 % expdirs = {'/groups/branson/home/robiea/Projects_data/FlyDisco/KatieTestData/FlyBowlDisco_RGBonly_401/20210401T132850_rig1_flyBowl2__aIPgSS1UASCsChrimson_KS_redonly_protocolRGB_0315_2'};
 % expdirs = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20220617_testingFlyBubbleRed/CsChrSocial3_P1a_Unknown_RigF_20220616T153431'};
-expdirs = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20220622_testingFlyBubbleRedMBLhardware/CsChrSocial3_TK_RigF_20220622T173359'};
+% expdirs = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20220622_testingFlyBubbleRedMBLhardware/CsChrSocial3_TK_RigF_20220622T173359'};
+expdir = '/groups/branson/home/robiea/Projects_data/FlyDisco/multibubble_data/20240124_testingpipeline/20240122T154843_rig2_flyBowl1_1xLwt_attp40_4stop1_3xDSCPLwt_attp40_3stop1_SlowRamp';
 datalocparamsfilestr = 'dataloc_params.txt';
 dataloc_params = ReadParams(fullfile(settingsdir,analysis_protocol,datalocparamsfilestr));
 
-% expdirs = importdata(expfile);
-% expdirs(cellfun(@isempty,expdirs)) = [];
-% expdirs = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/FlyBubbleRGB/locomotionGtACR1_24_RGB_EXT_VGLUT-GAL4_RigA_20210305T083721'};
-%large oval insert 1LO
-% expdirs = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/singlecolormarkers/pilot24RGB_JHS_K_85321_GtACR1_RigA_20210313T211624_BLUE'};
-% ragged insert 
-% expdirs = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/singlecolormarkers_try2/pilot24RGB_JHS_K_85321_GtACR1_RigA_20210313T212914_BLUE-oval'};
-
-expis = 1;
-% platebowls = {};
-
-% for expi = 1:numel(expdirs),
-%   expdir = expdirs{expi};
-%   metadata = ReadMetadataFile(fullfile(expdir,dataloc_params.metadatafilestr));
-%   platebowl = sprintf('%d%s',metadata.plate,metadata.bowl);
-%   if ~ismember(platebowl,platebowls),
-%     expis(end+1) = expi; %#ok<SAGROW>
-%     platebowls{end+1} = platebowl; %#ok<SAGROW>
-%   end
-% end
-% 
-% expi = expis(1);
-% for ming (no plate)
-% expis = expi;
-%%
-
-% for i = 1:numel(expis),
-%   
-%   expi = expis(i);
-%   
-%   expdir = expdirs{expi};
-%   
-%   moviefilename = fullfile(expdir,dataloc_params.moviefilestr);
-%   annfilename = fullfile(expdir,dataloc_params.annfilestr);
-%   [readframe,nframes,fid,headerinfo] = get_readframe_fcn(moviefilename);
-%   mu = read_ann(annfilename,'background_median');
-%   metadata = ReadMetadataFile(fullfile(expdir,dataloc_params.metadatafilestr));
-%   
-%   nr = headerinfo.nr;
-%   nc = headerinfo.nc;
-%   mu = reshape(mu,[nc,nr]);
-%   
-%   figure(i);
-%   clf;
-%   imagesc(mu); axis image;
-%   
-% end
 
 %%
-for i = 1:numel(expis),
-    expi = expis(i);
-    expdir = expdirs{expi};
-    
-    moviefilename = fullfile(expdir,dataloc_params.moviefilestr);
-    annfilename = fullfile(expdir,dataloc_params.annfilestr);
-    [readfcn,nframes,fid,headerinfo] = get_readframe_fcn(moviefilename);
-    im = readfcn(1);
-   % for j = 1:100:(headerinfo.nframes/5)
-   for j = 1:10:(headerinfo.nframes)
-        tmp = readfcn(j);
-        idx = tmp > im;
-        im(idx) = tmp(idx);
-        if (mod(j,1000) == 0);
-            disp(round((j/headerinfo.nframes)*100))
-        end
+moviefilename = fullfile(expdir,dataloc_params.moviefilestr);
+
+[readfcn,nframes,fid,headerinfo] = get_readframe_fcn(moviefilename);
+im = readfcn(1);
+% for j = 1:100:(headerinfo.nframes/5)
+for j = 1:10:(headerinfo.nframes)
+    tmp = readfcn(j);
+    idx = tmp > im;
+    im(idx) = tmp(idx);
+    if (mod(j,1000) == 0);
+        disp(round((j/headerinfo.nframes)*100))
     end
 end
-
 
 
 %% grab a rectangle around the marker to make a template
@@ -113,10 +63,12 @@ figure(2);
 imagesc(template);
 axis image;
 
+%%%%%%%%% change output file name; copy into analysis protocol directory and edit registration_params.LEDMarkerType  %%%%%%%%%%%%%%%%
+imwrite(uint8(template),'LEDTemplates_multiBubble.png');
 
-imwrite(uint8(template),'RegistrationMark_FlyBubbleRed.png');
-
-%% distance from the corner
+%% distance from the corner 
+% informative for setting registration_params.maxDistCornerFrac_LEDLabel (restricts template
+% matching to smaller area)
 x = mean(xlim);
 y = mean(ylim);
 nc = headerinfo.nc;

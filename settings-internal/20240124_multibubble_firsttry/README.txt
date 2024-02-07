@@ -28,10 +28,14 @@ updated the singularity image pointer for cluster upgrade
 added missing parameter to datalocs 
 flytrackerbgstr,movie-bg.mat
 
-20240224
+20240204
 creating new settings directory for multiBubble assay - data collected using Jin's data aquisition
 analysis-protocol turned off all stages, to be turn back on as set up param files. 
 datalocs - changed metedata capitalization, parent calibration file
 autochecksincoming - include required_fns and experiment specific fields, added flytracker parent calibration field
 ran tests with auto_incoming and tracking, both ran correctly
+
+20240207
+turned on registration in analysis-protocol
+created and added templates for registration mark and indicator LEDS (these will need to be updated for new plate) 
 
