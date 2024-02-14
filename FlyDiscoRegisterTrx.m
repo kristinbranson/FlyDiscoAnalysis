@@ -1,6 +1,8 @@
 function FlyDiscoRegisterTrx(expdir, varargin)
 
-%% Parse arguments
+%
+% Parse arguments
+%
 [analysis_protocol,settingsdir,registrationparamsfilestr,datalocparamsfilestr,dotemporalreg,dotemporaltruncation] = ...
   myparse(varargin,...
   'analysis_protocol','current_bubble',...
@@ -9,125 +11,82 @@ function FlyDiscoRegisterTrx(expdir, varargin)
   'datalocparamsfilestr','dataloc_params.txt',...
   'dotemporalreg',false,'dotemporaltruncation',false);
 
-%% read in the data locations
+
+%
+% read in the data locations
+%
 datalocparamsfile = fullfile(settingsdir,analysis_protocol,datalocparamsfilestr);
 dataloc_params = ReadParams(datalocparamsfile);
 
-%% read in registration params
+
+%
+% read in registration params
+%
+
 % name of parameters file
 registrationparamsfile = fullfile(settingsdir,analysis_protocol,registrationparamsfilestr);
 if ~exist(registrationparamsfile,'file'),
   error('Registration params file %s does not exist',registrationparamsfile);
 end
-% read
-registration_params = ReadParams(registrationparamsfile);
-if isfield(registration_params,'doTemporalRegistration'),
-  dotemporalreg = registration_params.doTemporalRegistration;
-end
-if isfield(registration_params,'doTemporalTruncation')
-    if registration_params.doTemporalTruncation > 0 
-        dotemporaltruncation = true;
-    else 
-        dotemporaltruncation = false;
-    end
-end
 
-%% detect registration marks
+% read the file contents into a struct
+registration_params = ReadParams(registrationparamsfile);
+
+% Use registration_params to determine final dotemporalreg, dotemporaltruncation
+[dotemporalreg, dotemporaltruncation] = determineTemporalStuff(registration_params, dotemporalreg, dotemporaltruncation) ;
+
+
+%
+% Detect registration marks
+%
+
 % Load the background file output by FlyTracker
-% Error if there's some problem with that.
 if isfield(dataloc_params,'flytrackerbgstr')
   flytrackerbgfile = fullfile(expdir,dataloc_params.flytrackerbgstr);
   load(flytrackerbgfile,'bg');
   bg_mean = 255*bg.bg_mean;
 else
+  % Note: We really do want to error if this is missing.
+  % We've been bitten by this not being what we thought it was.
   error('dataloc_params is missing field flytrackerbgstr, which is required');
 end
 
-% Collect metadata
+% Load metadata
 metadata = collect_metadata(expdir, dataloc_params.metadatafilestr) ;
 
-% template filename should be relative to settings directory
+% Tweak registration_params.bowlMarkerType, if present
 if isfield(registration_params,'bowlMarkerType'),
-  if ischar(registration_params.bowlMarkerType),
-    if ~ismember(registration_params.bowlMarkerType,{'gradient'}),
-      registration_params.bowlMarkerType = fullfile(settingsdir,analysis_protocol,registration_params.bowlMarkerType);
-    end
-  else
-    % plate -> bowlmarkertype
-    plateids = registration_params.bowlMarkerType(1:2:end-1);
-    bowlmarkertypes = registration_params.bowlMarkerType(2:2:end);
-    if isnumeric(metadata.plate),
-        plateid = num2str(metadata.plate);
-    else
-        plateid = metadata.plate;
-    end
-    if iscell(plateids)
-        i = find(strcmp(num2str(plateid), plateids));
-    else
-        i = find(str2double(plateid) == plateids,1);
-    end
-    if isempty(i),
-      error('bowlMarkerType not set for plate %s',plateid);
-    end
-    if ~ismember(bowlmarkertypes{i},{'gradient'}),
-      registration_params.bowlMarkerType = fullfile(settingsdir,analysis_protocol,bowlmarkertypes{i});
-    end
-  end
+  registration_params.bowlMarkerType = determineBowlMarkerType(registration_params.bowlMarkerType, metadata, settingsdir, analysis_protocol) ;
 end
 
-% maxDistCornerFrac_BowlLabel might depend on bowl
-if isfield(registration_params,'maxDistCornerFrac_BowlLabel') && ...
-    numel(registration_params.maxDistCornerFrac_BowlLabel) > 1,
-  plateids = registration_params.maxDistCornerFrac_BowlLabel(1:2:end-1);
-  cornerfracs = registration_params.maxDistCornerFrac_BowlLabel(2:2:end);
-  if isnumeric(metadata.plate),
-    plateid = num2str(metadata.plate);
-  else
-    plateid = metadata.plate;
-  end
-  if iscell(plateids)
-      i = find(strcmp(num2str(plateid), plateids));
-  else
-      i = find(str2double(plateid) == plateids,1);
-  end
-  if isempty(i),
-    error('maxDistCornerFrac_BowlLabel not set for plate %d',plateid);
-  end
-  if iscell(cornerfracs)
-      registration_params.maxDistCornerFrac_BowlLabel = str2double(cornerfracs{i});
-  else
-      registration_params.maxDistCornerFrac_BowlLabel = cornerfracs(i);
-  end
+% Tweak registration_params.maxDistCornerFrac_BowlLabel, if present
+if isfield(registration_params,'maxDistCornerFrac_BowlLabel') ,
+  registration_params.maxDistCornerFrac_BowlLabel = determineMaxDistCornerFracBowlLabel(registration_params.maxDistCornerFrac_BowlLabel, metadata) ;
 end
 
-fnsignore = intersect(fieldnames(registration_params),...
-  {'minFliesLoadedTime','maxFliesLoadedTime','extraBufferFliesLoadedTime','usemediandt','doTemporalRegistration','OptogeneticExp', ...
-   'LEDMarkerType','maxDistCornerFrac_LEDLabel','doTemporalTruncation','maxFlyTrackerNanInterpFrames', 'bkgdNSampleFrames'});
-registration_params_cell = struct2paramscell(rmfield(registration_params,fnsignore));
-
-% file to save image to
-if isfield(dataloc_params,'registrationimagefilestr'),
-  registration_params_cell(end+1:end+2) = {'imsavename',fullfile(expdir,dataloc_params.registrationimagefilestr)};
-end
-
-% detect
+% Call the core registration mark detection routine
+registration_params_cell = marshallRegistrationParamsForDetectRegistrationMarks(registration_params, expdir, dataloc_params) ;
 registration_data = detectRegistrationMarks(registration_params_cell{:},'bkgdImage',bg_mean,'useNormXCorr',true);
 fprintf('Detected registration marks.\n');
 
-%% apply spatial registration
-% name of input trx mat file
+
+%
+% Apply spatial registration to trajectories
+%
+
+% Get name of input trx mat file
 ctraxfile = fullfile(expdir,dataloc_params.ctraxfilestr);
 
-% name of movie
+% Get name of movie
 moviefile = fullfile(expdir,dataloc_params.moviefilestr);
 
-% load trajectories
+% Load trajectories
 [trx,~,succeeded,timestamps] = load_tracks(ctraxfile,moviefile,'annname','');
 if ~succeeded,
   error('Could not load trajectories from file %s',ctraxfile);
 end
 
-% remove nans from flytracker outputs
+% Postprocess trajectories to remove nans from flytracker outputs
 nids0 = numel(trx);
 if ~isfield(registration_params,'maxFlyTrackerNanInterpFrames'),
   fprintf('maxFlyTrackerNanInterpFrames not set in registration_params, using default value.\n');
@@ -140,18 +99,15 @@ fprintf('Removed nans from tracker output.\n');
 fprintf('Number of nans interpolated through: %d frames\n',ninterpframes);
 fprintf('Number of identities was %d, now %d\n',nids0,numel(trx));
 
+% Store some metadata about nan-removal in registration_data
 registration_data.flytracker_nnanframes = ninterpframes;
 registration_data.flytracker_nids0 = nids0;
 
-% frame rate
+% Compute the median frame interval, if called for
 if registration_params.usemediandt,
-  tmp = diff(timestamps);
-  tmp(isnan(tmp)) = [];
-  if isempty(tmp),
-    meddt = 1/trx(1).fps;
-  else
-    meddt = median(tmp);
-  end
+  meddt = medianIntervalFromTimestamps(timestamps) ;
+else
+  meddt = [] ;  % Should not be accessed if registration_params.usemediandt is false
 end
 
 % If there are zero tracks, something is wrong
@@ -159,241 +115,17 @@ if isempty(trx),
   error('No flies tracked.');
 end
 
-% Apply registration to trajectories
-for fly = 1:length(trx),  
-  % apply transformation to 4 extremal points on the ellipse
-  xnose0 = trx(fly).x + 2*trx(fly).a.*cos(trx(fly).theta);
-  ynose0 = trx(fly).y + 2*trx(fly).a.*sin(trx(fly).theta);
-  xtail0 = trx(fly).x - 2*trx(fly).a.*cos(trx(fly).theta);
-  ytail0 = trx(fly).y - 2*trx(fly).a.*sin(trx(fly).theta);
-  xleft0 = trx(fly).x + 2*trx(fly).b.*cos(trx(fly).theta-pi/2);
-  yleft0 = trx(fly).y + 2*trx(fly).b.*sin(trx(fly).theta-pi/2);
-  xright0 = trx(fly).x + 2*trx(fly).b.*cos(trx(fly).theta+pi/2);
-  yright0 = trx(fly).y + 2*trx(fly).b.*sin(trx(fly).theta+pi/2);
-  [xnose1,ynose1] = registration_data.registerfn(xnose0,ynose0);
-  [xtail1,ytail1] = registration_data.registerfn(xtail0,ytail0);
-  [xleft1,yleft1] = registration_data.registerfn(xleft0,yleft0);
-  [xright1,yright1] = registration_data.registerfn(xright0,yright0);
-  % compute the center as the mean of these four points
-  x1 = (xnose1+xtail1+xleft1+xright1)/4;
-  y1 = (ynose1+ytail1+yleft1+yright1)/4;
-  % compute the major axis from the nose to tail distance
-  a1 = sqrt( (xnose1-xtail1).^2 + (ynose1-ytail1).^2 ) / 4;
-  % compute the minor axis length as the left to right distance
-  b1 = sqrt( (xleft1-xright1).^2 + (yleft1-yright1).^2 ) / 4;
-  % compute the orientation from the nose and tail points only
-  theta1 = atan2(ynose1-ytail1,xnose1-xtail1);
-  % store the registerd positions
-  trx(fly).x_mm = x1;
-  trx(fly).y_mm = y1;
-  trx(fly).a_mm = a1;
-  trx(fly).b_mm = b1;
-  trx(fly).theta_mm = theta1;
-  
-  % add dt
-  % TODO: fix timestamps after fix errors!
-  if registration_params.usemediandt,
-    trx(fly).dt = repmat(meddt,[1,trx(fly).nframes-1]);
-  else
-    if isfield(trx,'timestamps'),
-      trx(fly).dt = diff(trx(fly).timestamps);
-    else
-      trx(fly).dt = repmat(1/trx(fly).fps,[1,trx(fly).nframes-1]);
-    end
-  end
-  trx(fly).fps = 1/mean(trx(fly).dt);
-  trx(fly).pxpermm = 1 / registration_data.scale;
-end
-fprintf('Applied spatial registration.\n');
+% Apply spatial registration to trajectories
+trx = appendPhysicalUnitFieldsToTrx(trx, registration_params.usemediandt, meddt) ;
+fprintf('Applied spatial registration.\n') ;
 
-%% For FlyBowlRGB and FlyBubbleRGB convert RGB ledprotocol format to ChR led protocol format
-if isfield(registration_params,'OptogeneticExp')
-  if registration_params.OptogeneticExp
-    if isfield(dataloc_params,'ledprotocolfilestr')
-      if exist(fullfile(expdir,dataloc_params.ledprotocolfilestr),'file')
-        load(fullfile(expdir,dataloc_params.ledprotocolfilestr),'protocol')
-        if isExperimentRGB(metadata)
-          if isfield(protocol,'Rintensity')
-            RGBprotocol = protocol;
-            clear protocol;
-            % test if RGBprotocol has only one active color
-            countactiveLEDs = [double(any(RGBprotocol.Rintensity));double(any(RGBprotocol.Gintensity));double(any(RGBprotocol.Bintensity))];
-            % check that there is 1 and only 1 color LED used in protocol
-            if sum(countactiveLEDs) == 0
-              error('ChR = 1 for LED protcol with no active LEDs')
-            elseif sum(countactiveLEDs) > 1
-              error('More than one active LED color in protocol. Not currently supported')
-            end
-            % call function that transforms new protocol to old protocol
-            [protocol,ledcolor] = ConvertRGBprotocol2protocolformat(RGBprotocol,countactiveLEDs);  %#ok<ASGLU>
-          end
-        end
-      end
-    end
-  end
-end
+%
+% Handle all the stuff that is specific to optogenetic experiments
+%
+registration_params = handleOptogeneticExperimentRegistration(registration_params) ;
 
-%% Create max-value image for LED experiments  (needs fps)
-if isfield(registration_params,'OptogeneticExp') ,
-  if registration_params.OptogeneticExp && exist('protocol','var')
-    moviefilename = fullfile(expdir,dataloc_params.moviefilestr);
-    [readfcn,~,~,headerinfo] = get_readframe_fcn(moviefilename);
-    %determine minimum frames to process
-    % protocol now loaded in earlier cell - converted if need for RGB
-    firstactiveStepNum = find([protocol.intensity] ~= 0,1);
-    if isempty(firstactiveStepNum)
-      error('ChR = 1 for LED protcol with no active LEDs')
-    end
 
-    % experiments
-    if ~isempty(protocol)
-      if registration_params.usemediandt
-        fps = 1/meddt;
-      else
-        if isvarname('timestamps')
-          fps = 1/median(diff(timestamps));
-        else
-          [~,~,succeeded,timestamps] = load_tracks(ctraxfile,moviefile);
-          if ~succeeded
-            error('Could not load trajectories from file %s',ctraxfile);
-          end
-          fps = 1/median(diff(timestamps));
-        end
-      end
-
-      secstoLEDpulse = protocol.delayTime(firstactiveStepNum) + protocol.pulsePeriodSP(firstactiveStepNum)*protocol.pulseNum(firstactiveStepNum)/1000;
-      % sets end range in which to find LED on
-      frametoLEDpulse = secstoLEDpulse*fps;
-      if protocol.pulsePeriodSP(firstactiveStepNum)*protocol.pulseNum(firstactiveStepNum) <= 1/fps*1000*2 %pulseWidth(ms) < 2 times sampling
-        jump = 1;
-      else
-        % in frames
-        jump = round(protocol.pulsePeriodSP(firstactiveStepNum)*protocol.pulseNum(firstactiveStepNum)/1000*fps/2);
-      end
-
-    else
-      % reasonable guess
-      frametoLEDpulse = headerinfo.nframes/3;
-      jump = 10;
-    end
-    frametoLEDpulse = max([round(frametoLEDpulse),min(200,headerinfo.nframes)]);
-    jump = min(jump,round(frametoLEDpulse/100));
-    ledMaxImage = sampleFramesForMaximumImage(readfcn, 1, jump, frametoLEDpulse) ;
-    % check if im has indicator on
-    if isfield(registration_params,'LEDMarkerType') && registration_params.OptogeneticExp,
-      if ischar(registration_params.LEDMarkerType),
-        if ~ismember(registration_params.LEDMarkerType,{'gradient'}),
-          registration_params.LEDMarkerType = fullfile(settingsdir,analysis_protocol,registration_params.LEDMarkerType);
-        end
-      else
-        % rignames ABDC -> rigids
-        % will need to change if it turns out to be cartridge
-        % specific
-        rigids = registration_params.LEDMarkerType(1:2:end-1);
-        ledmarkertypes = registration_params.LEDMarkerType(2:2:end);
-        rigid = metadata.rig;
-
-        i = strcmp(rigid,rigids);
-        if isempty(i),
-          error('LEDMarkerType not set for plate %d',rigid);
-        end
-        if ~ismember(ledmarkertypes{i},{'gradient'}),
-          registration_params.LEDMarkerType = fullfile(settingsdir,analysis_protocol,ledmarkertypes{i});
-        end
-      end
-    end
-
-    % need to load find LEDMarkType for this plate
-    if isfield(registration_params,'LEDMarkerType') && ischar(registration_params.LEDMarkerType) && registration_params.OptogeneticExp,
-      LEDimg = imread(registration_params.LEDMarkerType);
-      binLEDstep = 25;
-      hist_LED = histcounts(LEDimg,(0:binLEDstep:255));
-      brightthres = sum(hist_LED(9:10));
-      diffimage = ledMaxImage - readfcn(1);
-
-      [xgrid, ygrid] = meshgrid(1:size(diffimage,2), 1:size(diffimage,1));
-      mask = ((xgrid-registration_data.circleCenterX).^2 + (ygrid-registration_data.circleCenterY).^2) >= registration_data.circleRadius.^2;
-      outSideArenaPxs = diffimage(mask);
-      hist_outSideArenaPxs = histcounts(outSideArenaPxs,(0:binLEDstep:255));
-      brightpxs = sum(hist_outSideArenaPxs(9:10));
-      if brightpxs <= brightthres 
-        % no LED indicator in im, redo for whole movie
-        ledMaxImage = sampleFramesForMaximumImage(readfcn, 1, jump, headerinfo.nframes) ;
-      end
-    end
-  end
-end
-
-%% detect LED indicator (modified from detect registration marks)
-if isfield(registration_params,'OptogeneticExp')
-    if registration_params.OptogeneticExp
-        % name of movie file
-        moviefile = fullfile(expdir,dataloc_params.moviefilestr);
-        
-        % maxDistCornerFrac_BowlLabel might depend on bowl
-        if isfield(registration_params,'maxDistCornerFrac_LEDLabel') && ...
-            numel(registration_params.maxDistCornerFrac_LEDLabel) > 1,
-            plateids = registration_params.maxDistCornerFrac_LEDLabel(1:2:end-1);
-            cornerfracs = registration_params.maxDistCornerFrac_LEDLabel(2:2:end);
-            if isnumeric(metadata.plate),
-                plateid = num2str(metadata.plate);
-            else
-                plateid = metadata.plate;
-            end
-            if iscell(plateids)
-                i = find(strcmp(num2str(plateid), plateids));
-            else
-                i = find(str2double(plateid) == plateids,1);
-            end
-            if isempty(i),
-                error('maxDistCornerFrac_LEDLabel not set for plate %d',plateid);
-            end
-            if iscell(cornerfracs)
-                registration_params.maxDistCornerFrac_BowlLabel = str2double(cornerfracs{i});
-            else
-                registration_params.maxDistCornerFrac_BowlLabel = cornerfracs(i);
-            end
-        else
-            registration_params.maxDistCornerFrac_BowlLabel = registration_params.maxDistCornerFrac_LEDLabel;
-        end
-
-        registration_params.bowlMarkerType = registration_params.LEDMarkerType;
-        
-        fnsignore = ...
-          intersect(fieldnames(registration_params),...
-                    {'minFliesLoadedTime', ...
-                     'maxFliesLoadedTime', ...
-                     'extraBufferFliesLoadedTime', ...
-                     'usemediandt', ...
-                     'doTemporalRegistration', ...
-                     'OptogeneticExp', ...
-                     'LEDMarkerType', ...
-                     'maxDistCornerFrac_LEDLabel', ...
-                     'doTemporalTruncation', ...
-                     'maxFlyTrackerNanInterpFrames', ...
-                     'bkgdNSampleFrames'});        
-        registration_params_cell = struct2paramscell(rmfield(registration_params,fnsignore));
-       
-        % file to save image to
-        if isfield(dataloc_params,'ledregistrationimagefilstr'),
-            registration_params_cell(end+1:end+2) = {'imsavename',fullfile(expdir,dataloc_params.ledregistrationimagefilstr)};
-        end
-        
-        % detect
-        ledindicator_data = ...
-          detectRegistrationMarks(registration_params_cell{:}, ...
-                                  'bkgdImage', im2double(ledMaxImage), ...
-                                  'ledindicator', true, ...
-                                  'regXY', registration_data.bowlMarkerPoints, ...
-                                  'useNormXCorr',true);
-        registration_data.ledIndicatorPoints = ledindicator_data.bowlMarkerPoints;
-        
-        % Decare victory
-        fprintf('Detected led indicator.\n');
-    end
-end
-
-%% Crop start and end of trajectories based on fly loaded time
+%%% Crop start and end of trajectories based on fly loaded time
 % Need this 'global' in several places below  
 fns_notperframe = {'id','moviename','annname','firstframe','arena','off',...
                    'nframes','endframe','matname','fps','pxpermm'};
@@ -556,7 +288,7 @@ else
   fprintf('NOT applying temporal registration.\n');  
 end
 
-%% truncate end of movie based on value from registration params 
+%%% truncate end of movie based on value from registration params 
 if dotemporaltruncation    
   ndelete = 0;
   
@@ -670,7 +402,7 @@ else
   fprintf('NOT applying temporal truncation.\n')
 end
 
-%% save registered trx to file
+%%% save registered trx to file
 % name of output trx mat file
 trxfile = fullfile(expdir,dataloc_params.trxfilestr);
 didsave = false;
@@ -689,7 +421,7 @@ else
   fprintf('Could not save registered trx:\n%s\n',getReport(ME));
 end
 
-%% save params to mat file
+%%% save params to mat file
 registration_data.newid2oldid = newid2oldid;
 registration_data.flytracker_nidsnew = numel(trx);
 registrationmatfile = fullfile(expdir,dataloc_params.registrationmatfilestr);
@@ -710,7 +442,7 @@ else
   fprintf('Could not save registration data to mat file:\n%s\n',getReport(ME));
 end
 
-%% save params to text file
+%%% save params to text file
 registrationtxtfile = fullfile(expdir,dataloc_params.registrationtxtfilestr);
 didsave = false;
 try
@@ -751,10 +483,3 @@ end  % FlyDiscoRegisterTrx()
 
 
 
-function result = sampleFramesForMaximumImage(readfcn, firstFrameIndex, stride, lastFrameIndex)
-result = readfcn(1) ;
-for j = firstFrameIndex:stride:lastFrameIndex
-  frame = readfcn(j) ;
-  result = max(result,frame) ;
-end
-end

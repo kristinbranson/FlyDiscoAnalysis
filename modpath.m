@@ -1,7 +1,7 @@
 function modpath()
   % Add needed libraries to Matlab path
 
-  % Sort out where FlyBowlAnalysis is in the filesytem
+  % Sort out where FlyDiscoAnalysis is in the filesytem
   path_to_this_script = mfilename('fullpath') ;
   path_to_this_folder = fileparts(path_to_this_script) ;
   
@@ -32,6 +32,7 @@ function modpath()
   addpath(fullfile(path_to_this_folder, 'hmm')) ;  
   addpath(fullfile(path_to_this_folder, 'filehandling')) ;  
   addpath(fullfile(path_to_this_folder, 'perframe')) ;
+  addpath(fullfile(path_to_this_folder, 'utility')) ;  
 
   % Add stuff intended to shadow JAABA, FlyTracker versions
   addpath(fullfile(path_to_this_folder, 'shadow')) ;

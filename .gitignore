@@ -17,3 +17,4 @@ aborted-example-experiments
 *.err.txt
 .DS_Store
 settings
+.showufmfrc.mat
