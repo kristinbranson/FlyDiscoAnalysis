@@ -1,4 +1,6 @@
-function registration_params = handleOptogeneticExperimentRegistration(registration_params, expdir, dataloc_params)
+function [registration_data, registration_params] = ...
+  handleOptogeneticExperimentRegistration(...
+      registration_data, registration_params, metadata, expdir, dataloc_params, timestamps, analysis_protocol_folder_path)
 
 % If not an optogenetic experiment, return immediately
 if ~(isfield(registration_params,'OptogeneticExp') && registration_params.OptogeneticExp) ,
@@ -8,24 +10,30 @@ end
 % At this point, we know registration_params.OptogeneticExp exists and that
 % it's true
 
-%%% For FlyBowlRGB and FlyBubbleRGB convert RGB ledprotocol format to ChR led protocol format
+
+%
+% For FlyBowlRGB and FlyBubbleRGB, convert RGB ledprotocol format to ChR led protocol format
+%
+didLoadProtocolOfSomeKind = false ;
 if isfield(dataloc_params,'ledprotocolfilestr')
   led_protocol_file_path = fullfile(expdir,dataloc_params.ledprotocolfilestr) ;
   if exist(led_protocol_file_path,'file')
     protocolOfSomeKind = loadSingleVariableAnonymously(led_protocol_file_path, 'protocol') ;
+    didLoadProtocolOfSomeKind = true ;
     if isExperimentRGB(metadata)
       if isfield(protocolOfSomeKind,'Rintensity')
         RGBprotocol = protocolOfSomeKind;
         % test if RGBprotocol has only one active color
-        countactiveLEDs = [double(any(RGBprotocol.Rintensity));double(any(RGBprotocol.Gintensity));double(any(RGBprotocol.Bintensity))];
+        isLedActive = [any(RGBprotocol.Rintensity) any(RGBprotocol.Gintensity) any(RGBprotocol.Bintensity)] ;
         % check that there is 1 and only 1 color LED used in protocol
-        if sum(countactiveLEDs) == 0
+        activeLedCount = sum(isLedActive) ;
+        if activeLedCount == 0
           error('ChR = 1 for LED protcol with no active LEDs')
-        elseif sum(countactiveLEDs) > 1
+        elseif activeLedCount > 1
           error('More than one active LED color in protocol. Not currently supported')
         end
         % call function that transforms new protocol to old protocol
-        [protocol,ledcolor] = ConvertRGBprotocol2protocolformat(RGBprotocol,countactiveLEDs);  %#ok<ASGLU>
+        [protocol,ledcolor] = ConvertRGBprotocol2protocolformat(RGBprotocol, isLedActive);  %#ok<ASGLU>
       else
         protocol = protocolOfSomeKind ;
       end
@@ -35,8 +43,11 @@ if isfield(dataloc_params,'ledprotocolfilestr')
   end
 end
 
-%%% Create max-value image for LED experiments  (needs fps)
-if exist('protocol','var')
+
+%
+% Create max-value image for LED experiments  (needs fps)
+%
+if didLoadProtocolOfSomeKind ,
   moviefilename = fullfile(expdir,dataloc_params.moviefilestr);
   [readfcn,~,~,headerinfo] = get_readframe_fcn(moviefilename);
   %determine minimum frames to process
@@ -51,15 +62,7 @@ if exist('protocol','var')
     if registration_params.usemediandt
       fps = 1/meddt;
     else
-      if isvarname('timestamps')
-        fps = 1/median(diff(timestamps));
-      else
-        [~,~,succeeded,timestamps] = load_tracks(ctraxfile,moviefile);
-        if ~succeeded
-          error('Could not load trajectories from file %s',ctraxfile);
-        end
-        fps = 1/median(diff(timestamps));
-      end
+      fps = 1/median(diff(timestamps));
     end
 
     secstoLEDpulse = protocol.delayTime(firstactiveStepNum) + protocol.pulsePeriodSP(firstactiveStepNum)*protocol.pulseNum(firstactiveStepNum)/1000;
@@ -71,7 +74,6 @@ if exist('protocol','var')
       % in frames
       jump = round(protocol.pulsePeriodSP(firstactiveStepNum)*protocol.pulseNum(firstactiveStepNum)/1000*fps/2);
     end
-
   else
     % reasonable guess
     frametoLEDpulse = headerinfo.nframes/3;
@@ -84,7 +86,7 @@ if exist('protocol','var')
   if isfield(registration_params,'LEDMarkerType') && registration_params.OptogeneticExp,
     if ischar(registration_params.LEDMarkerType),
       if ~ismember(registration_params.LEDMarkerType,{'gradient'}),
-        registration_params.LEDMarkerType = fullfile(settingsdir,analysis_protocol,registration_params.LEDMarkerType);
+        registration_params.LEDMarkerType = fullfile(analysis_protocol_folder_path,registration_params.LEDMarkerType);
       end
     else
       % rignames ABDC -> rigids
@@ -99,7 +101,7 @@ if exist('protocol','var')
         error('LEDMarkerType not set for plate %d',rigid);
       end
       if ~ismember(ledmarkertypes{i},{'gradient'}),
-        registration_params.LEDMarkerType = fullfile(settingsdir,analysis_protocol,ledmarkertypes{i});
+        registration_params.LEDMarkerType = fullfile(analysis_protocol_folder_path,ledmarkertypes{i});
       end
     end
   end
@@ -124,66 +126,35 @@ if exist('protocol','var')
   end
 end
 
-%%% detect LED indicator (modified from detect registration marks)
-% name of movie file
-moviefile = fullfile(expdir,dataloc_params.moviefilestr);
 
-% maxDistCornerFrac_BowlLabel might depend on bowl
-if isfield(registration_params,'maxDistCornerFrac_LEDLabel') && ...
-    numel(registration_params.maxDistCornerFrac_LEDLabel) > 1,
-  plateids = registration_params.maxDistCornerFrac_LEDLabel(1:2:end-1);
-  cornerfracs = registration_params.maxDistCornerFrac_LEDLabel(2:2:end);
-  if isnumeric(metadata.plate),
-    plateid = num2str(metadata.plate);
-  else
-    plateid = metadata.plate;
-  end
-  if iscell(plateids)
-    i = find(strcmp(num2str(plateid), plateids));
-  else
-    i = find(str2double(plateid) == plateids,1);
-  end
-  if isempty(i),
-    error('maxDistCornerFrac_LEDLabel not set for plate %d',plateid);
-  end
-  if iscell(cornerfracs)
-    registration_params.maxDistCornerFrac_BowlLabel = str2double(cornerfracs{i});
-  else
-    registration_params.maxDistCornerFrac_BowlLabel = cornerfracs(i);
-  end
-else
-  registration_params.maxDistCornerFrac_BowlLabel = registration_params.maxDistCornerFrac_LEDLabel;
+%
+% Detect LED indicator using detectRegistrationMarks()
+% 
+
+% Tweak maxDistCornerFrac_LEDLabel, and stuff it into
+% registration_params.maxDistCornerFrac_BowlLabel so that
+% detectRegistrationMarks() can use it.
+if isfield(registration_params,'maxDistCornerFrac_LEDLabel') ,
+  registration_params.maxDistCornerFrac_BowlLabel = ...
+    determineMaxDistCornerFracLabel(registration_params.maxDistCornerFrac_LEDLabel, metadata, 'maxDistCornerFrac_LEDLabel') ;
 end
 
+% Sub in the LED marker type fpr the bowlMarkerType
 registration_params.bowlMarkerType = registration_params.LEDMarkerType;
 
-fnsignore = ...
-  intersect(fieldnames(registration_params),...
-  {'minFliesLoadedTime', ...
-  'maxFliesLoadedTime', ...
-  'extraBufferFliesLoadedTime', ...
-  'usemediandt', ...
-  'doTemporalRegistration', ...
-  'OptogeneticExp', ...
-  'LEDMarkerType', ...
-  'maxDistCornerFrac_LEDLabel', ...
-  'doTemporalTruncation', ...
-  'maxFlyTrackerNanInterpFrames', ...
-  'bkgdNSampleFrames'});
-registration_params_cell = struct2paramscell(rmfield(registration_params,fnsignore));
-
-% file to save image to
-if isfield(dataloc_params,'ledregistrationimagefilstr'),
-  registration_params_cell(end+1:end+2) = {'imsavename',fullfile(expdir,dataloc_params.ledregistrationimagefilstr)};
-end
+% Collect the registration params into a cell array for passing to
+% detectRegistrationMarks()
+registration_params_cell = ...
+  marshallRegistrationParamsForDetectRegistrationMarks(registration_params, expdir, dataloc_params.ledregistrationimagefilstr) ;
 
 % detect
 ledindicator_data = ...
-  detectRegistrationMarks(registration_params_cell{:}, ...
-  'bkgdImage', im2double(ledMaxImage), ...
-  'ledindicator', true, ...
-  'regXY', registration_data.bowlMarkerPoints, ...
-  'useNormXCorr',true);
+  detectRegistrationMarks(...
+    registration_params_cell{:}, ...
+    'bkgdImage', im2double(ledMaxImage), ...
+    'ledindicator', true, ...
+    'regXY', registration_data.bowlMarkerPoints, ...
+    'useNormXCorr',true);
 registration_data.ledIndicatorPoints = ledindicator_data.bowlMarkerPoints;
 
 % Decare victory

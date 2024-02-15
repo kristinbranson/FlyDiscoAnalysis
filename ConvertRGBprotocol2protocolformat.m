@@ -1,13 +1,13 @@
-function [protocol, ledcolor] = ConvertRGBprotocol2protocolformat(RGBprotocol,countactiveLEDs)
+function [protocol, ledcolor] = ConvertRGBprotocol2protocolformat(RGBprotocol, isLedActive)
 % AR 20210311 
 % takes in RGB format ledprotocol and prodcues ChR (single
 % LED) format protocol
 % RGBprotocol = RGB format protocol struct
 % countactiveLEDS =  [ 0/1 ; 0/1 ; 0/1 ] 0 = no intensity in any step
 % for R/G/B. 1 = nonzero intensity value in at least one step
-red = [1,0,0];
-green = [0,1,0];
-blue = [0,0,1];
+red = logical([1 0 0]) ;
+green = logical([0 1 0]) ;
+blue = logical([0 0 1]) ;
 
 protocol = struct('expData',[],'stepNum',[],'intensity',[],'pulseWidthSP',[],'pulsePeriodSP',[],'pulseNum',[], ...
     'offTime',[],'delayTime',[],'iteration',[],'duration',[],'ProtocolData',[],'ProtocolHeader',[]);
@@ -21,7 +21,7 @@ protocol.ProtocolHeader =  RGBprotocol.ProtocolHeader;
 protocol.ProtocolData = RGBprotocol.ProtocolData;
 
 
-if isequal(countactiveLEDs', red)
+if isequal(isLedActive, red)
     protocol.intensity = RGBprotocol.Rintensity;
     protocol.pulseWidthSP = RGBprotocol.RpulseWidth;
     protocol.pulsePeriodSP = RGBprotocol.RpulsePeriod;
@@ -30,7 +30,7 @@ if isequal(countactiveLEDs', red)
     protocol.iteration = RGBprotocol.Riteration;
     ledcolor = 'r';
     
-elseif isequal(countactiveLEDs', green)
+elseif isequal(isLedActive, green)
     protocol.intensity = RGBprotocol.Gintensity;
     protocol.pulseWidthSP = RGBprotocol.GpulseWidth;
     protocol.pulsePeriodSP = RGBprotocol.GpulsePeriod;
@@ -39,7 +39,7 @@ elseif isequal(countactiveLEDs', green)
     protocol.iteration = RGBprotocol.Giteration;
     ledcolor = 'g';
     
-elseif isequal(countactiveLEDs', blue)
+elseif isequal(isLedActive, blue)
     protocol.intensity = RGBprotocol.Bintensity;
     protocol.pulseWidthSP = RGBprotocol.BpulseWidth;
     protocol.pulsePeriodSP = RGBprotocol.BpulsePeriod;

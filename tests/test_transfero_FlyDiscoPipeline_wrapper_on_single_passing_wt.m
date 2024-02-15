@@ -2,7 +2,8 @@
 
 % Where does this script live?
 this_script_path = mfilename('fullpath') ;
-fly_disco_analysis_folder_path = fileparts(this_script_path) ;
+fly_disco_analysis_tests_folder_path = fileparts(this_script_path) ;
+fly_disco_analysis_folder_path = fileparts(fly_disco_analysis_tests_folder_path) ;
 fly_disco_folder_path = fileparts(fly_disco_analysis_folder_path) ;
 
 cluster_billing_account_name = 'branson' ;
@@ -29,26 +30,24 @@ settings_folder_path = fullfile(fly_disco_analysis_folder_path, 'settings-intern
 optional_argument_list = ...
     {'settingsdir', settings_folder_path, ...
      'do_try', false} ; 
-do_use_bqueue = true ;
-do_actually_submit_jobs = true ;
+do_use_bqueue = false ;
+do_actually_submit_jobs = false ;
 do_try = false ;
+do_reset_working_experiments_folder = true ;
 submit_host_name = 'submit.int.janelia.org' ;
 %submit_host_name = '' ;
 
 read_only_experiments_folder_path = fullfile(fly_disco_folder_path, 'example-experiments', 'passing-test-suite-experiments-with-tracking-read-only') ;
 working_experiments_folder_path = fullfile(fly_disco_folder_path, 'example-experiments', 'passing-test-suite-experiments-with-tracking') ;
 
-% Delete the working experiments folder
-if exist(working_experiments_folder_path, 'file') ,
-    return_code = system_from_list_with_error_handling({'rm', '-rf', working_experiments_folder_path}) ;
-end
-
 % Recopy the working folder from the read-only one
-fprintf('Resetting working experiments folder...\n') ;
-tic_id = tic() ;
-reset_experiment_working_copies(working_experiments_folder_path, read_only_experiments_folder_path) ;
-elapsed_time = toc(tic_id) ;
-fprintf('Elapsed time: %g s\n', elapsed_time) ;
+if do_reset_working_experiments_folder ,
+    fprintf('Resetting working experiments folder...\n') ;
+    tic_id = tic() ;
+    reset_experiment_working_copies(working_experiments_folder_path, read_only_experiments_folder_path) ;
+    elapsed_time = toc(tic_id) ;
+    fprintf('Elapsed time: %g s\n', elapsed_time) ;
+end
 
 % Find the experiments
 folder_path_from_experiment_index = find_experiment_folders(working_experiments_folder_path) ;
