@@ -6,7 +6,7 @@ function protocol = determine_protocol(metadata, ledprotocol_file_contents)
         if isfield(maybeRGBprotocol,'Rintensity')
             RGBprotocol =  maybeRGBprotocol ;
             % test if RGBprotocol has only one active color
-            is_active_from_LED_index = [ any(RGBprotocol.Rintensity) ; any(RGBprotocol.Gintensity) ; any(RGBprotocol.Bintensity) ] ;
+            is_active_from_LED_index = [ any(RGBprotocol.Rintensity) any(RGBprotocol.Gintensity) any(RGBprotocol.Bintensity) ] ;
             % check that there is 1 and only 1 color LED used in protocol
             active_LED_count = sum(double(is_active_from_LED_index)) ;
             if active_LED_count == 0 ,
