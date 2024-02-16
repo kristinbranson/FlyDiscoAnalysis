@@ -1,4 +1,4 @@
-function [registration_data, registration_params] = ...
+function registration_data = ...
   handleOptogeneticExperimentRegistration(...
       registration_data, registration_params, metadata, expdir, dataloc_params, timestamps, analysis_protocol_folder_path)
 
@@ -7,7 +7,13 @@ if ~(isfield(registration_params,'OptogeneticExp') && registration_params.Optoge
   return
 end
 
-% At this point, we know registration_params.OptogeneticExp exists and that
+% We want to modify the registration_params for handing to
+% detectRegistrationMarks() for doing LED detection, so make a
+% copy. (Not really needed, but it's nice to have the original values around
+% for debugging.)
+led_registration_params = registration_params ;
+
+% At this point, we know led_registration_params.OptogeneticExp exists and that
 % it's true
 
 
@@ -59,7 +65,7 @@ if didLoadProtocolOfSomeKind ,
 
   % experiments
   if ~isempty(protocol)
-    if registration_params.usemediandt
+    if led_registration_params.usemediandt
       fps = 1/meddt;
     else
       fps = 1/median(diff(timestamps));
@@ -83,17 +89,17 @@ if didLoadProtocolOfSomeKind ,
   jump = min(jump,round(frametoLEDpulse/100));
   ledMaxImage = sampleFramesForMaximumImage(readfcn, 1, jump, frametoLEDpulse) ;
   % check if im has indicator on
-  if isfield(registration_params,'LEDMarkerType') && registration_params.OptogeneticExp,
-    if ischar(registration_params.LEDMarkerType),
-      if ~ismember(registration_params.LEDMarkerType,{'gradient'}),
-        registration_params.LEDMarkerType = fullfile(analysis_protocol_folder_path,registration_params.LEDMarkerType);
+  if isfield(led_registration_params,'LEDMarkerType') && led_registration_params.OptogeneticExp,
+    if ischar(led_registration_params.LEDMarkerType),
+      if ~ismember(led_registration_params.LEDMarkerType,{'gradient'}),
+        led_registration_params.LEDMarkerType = fullfile(analysis_protocol_folder_path,led_registration_params.LEDMarkerType);
       end
     else
       % rignames ABDC -> rigids
       % will need to change if it turns out to be cartridge
       % specific
-      rigids = registration_params.LEDMarkerType(1:2:end-1);
-      ledmarkertypes = registration_params.LEDMarkerType(2:2:end);
+      rigids = led_registration_params.LEDMarkerType(1:2:end-1);
+      ledmarkertypes = led_registration_params.LEDMarkerType(2:2:end);
       rigid = metadata.rig;
 
       i = strcmp(rigid,rigids);
@@ -101,14 +107,14 @@ if didLoadProtocolOfSomeKind ,
         error('LEDMarkerType not set for plate %d',rigid);
       end
       if ~ismember(ledmarkertypes{i},{'gradient'}),
-        registration_params.LEDMarkerType = fullfile(analysis_protocol_folder_path,ledmarkertypes{i});
+        led_registration_params.LEDMarkerType = fullfile(analysis_protocol_folder_path,ledmarkertypes{i});
       end
     end
   end
 
   % need to load find LEDMarkType for this plate
-  if isfield(registration_params,'LEDMarkerType') && ischar(registration_params.LEDMarkerType) ,
-    LEDimg = imread(registration_params.LEDMarkerType);
+  if isfield(led_registration_params,'LEDMarkerType') && ischar(led_registration_params.LEDMarkerType) ,
+    LEDimg = imread(led_registration_params.LEDMarkerType);
     binLEDstep = 25;
     hist_LED = histcounts(LEDimg,(0:binLEDstep:255));
     brightthres = sum(hist_LED(9:10));
@@ -134,23 +140,23 @@ end
 % Tweak maxDistCornerFrac_LEDLabel, and stuff it into
 % registration_params.maxDistCornerFrac_BowlLabel so that
 % detectRegistrationMarks() can use it.
-if isfield(registration_params,'maxDistCornerFrac_LEDLabel') ,
-  registration_params.maxDistCornerFrac_BowlLabel = ...
-    determineMaxDistCornerFracLabel(registration_params.maxDistCornerFrac_LEDLabel, metadata, 'maxDistCornerFrac_LEDLabel') ;
+if isfield(led_registration_params,'maxDistCornerFrac_LEDLabel') ,
+  led_registration_params.maxDistCornerFrac_BowlLabel = ...
+    determineMaxDistCornerFracLabel(led_registration_params.maxDistCornerFrac_LEDLabel, metadata, 'maxDistCornerFrac_LEDLabel') ;
 end
 
 % Sub in the LED marker type fpr the bowlMarkerType
-registration_params.bowlMarkerType = registration_params.LEDMarkerType;
+led_registration_params.bowlMarkerType = led_registration_params.LEDMarkerType;
 
 % Collect the registration params into a cell array for passing to
 % detectRegistrationMarks()
-registration_params_cell = ...
-  marshallRegistrationParamsForDetectRegistrationMarks(registration_params, expdir, dataloc_params.ledregistrationimagefilstr) ;
+led_registration_params_cell = ...
+  marshallRegistrationParamsForDetectRegistrationMarks(led_registration_params, expdir, dataloc_params.ledregistrationimagefilstr) ;
 
 % detect
 ledindicator_data = ...
   detectRegistrationMarks(...
-    registration_params_cell{:}, ...
+    led_registration_params_cell{:}, ...
     'bkgdImage', im2double(ledMaxImage), ...
     'ledindicator', true, ...
     'regXY', registration_data.bowlMarkerPoints, ...

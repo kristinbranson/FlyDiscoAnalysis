@@ -1,5 +1,5 @@
 function [trx, registration_data] = ...
-  performTemporalTruncation(dotemporaltruncation, trx, registration_data, newid2oldid, fns_notperframe, registration_params, moviefile)
+  performTemporalTruncation(dotemporaltruncation, trx, registration_data, newid2oldid, fns_notperframe, recordLengthIdeal, moviefile)
 
 % Truncate end of movie based on value from registration params.
 
@@ -14,10 +14,7 @@ if dotemporaltruncation ,
     
   % how long is the video
   recordLengthCurr = timestamps_header(end);
-  
-  % how long should the video be?
-  recordLengthIdeal = registration_params.doTemporalTruncation;
-  
+    
   % how much time should we crop from the end?
   if recordLengthCurr < recordLengthIdeal,
     warning('Cropped video is %f seconds long, shorter than ideal length %f seconds.',recordLengthCurr,recordLengthIdeal);

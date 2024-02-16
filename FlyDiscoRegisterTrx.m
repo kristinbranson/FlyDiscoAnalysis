@@ -42,11 +42,13 @@ end
 registration_params_0 = ReadParams(registrationparamsfile);
 
 % Determine final dotemporalreg, dotemporaltruncation
-[dotemporalreg, dotemporaltruncation] = determineTemporalStuff(registration_params_0, dotemporalreg, dotemporaltruncation) ;
+[dotemporalreg, dotemporaltruncation, idealVideoDuration] = determineTemporalStuff(registration_params_0, dotemporalreg, dotemporaltruncation) ;
 if dotemporalreg && dotemporaltruncation ,
   error('Temporal registration and temporal truncation are mutually exclusive.  You can''t do both!') ;
 end
-
+if dotemporaltruncation && isempty(idealVideoDuration) ,
+  error('Temporal truncation requested, but the idealVideoDuration is []') ;
+end
 
 %
 % Detect the registration mark(s)
@@ -142,10 +144,11 @@ fprintf('Applied spatial registration.\n') ;
 %
 % Handle all the stuff that is specific to optogenetic experiments
 %
-[registration_data_2, registration_params_3] = ...
+registration_data_2 = ...
   handleOptogeneticExperimentRegistration(registration_data_1, registration_params_2, ...
                                           metadata, expdir, dataloc_params, timestamps, analysis_protocol_folder_path) ;
-
+% registation_data_2 has the field ledIndicatorPoints, which
+% registration_data_1 lacks.
 
 %
 % Crop start and end of trajectories based on fly loaded time
@@ -158,9 +161,9 @@ fprintf('Applied spatial registration.\n') ;
 % 
 % Truncate end of movie based on value from registration params 
 %
-[trx, registration_data_4] = ...
+[trx, registration_data] = ...
   performTemporalTruncation(dotemporaltruncation, trx, registration_data_3, newid2oldid, ...
-                            trx_file_names_that_are_not_per_frame, registration_params_3, moviefile) ;
+                            trx_file_names_that_are_not_per_frame, idealVideoDuration, moviefile) ;
 
 
 %
@@ -182,7 +185,7 @@ end
 % Save registration_data to mat file
 %
 registrationmatfile = fullfile(expdir,dataloc_params.registrationmatfilestr);
-registration_data_without_registerfn = rmfield(registration_data_4,'registerfn'); 
+registration_data_without_registerfn = rmfield(registration_data,'registerfn'); 
 try
   if exist(registrationmatfile,'file'),
     delete(registrationmatfile);
