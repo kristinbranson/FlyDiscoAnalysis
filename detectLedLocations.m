@@ -3,9 +3,9 @@ function result = ...
       registration_data, registration_params, metadata, expdir, dataloc_params, timestamps, analysis_protocol_folder_path, ...
       are_timestamps_reliable, fallback_dt)
 
-% If not an optogenetic experiment, return immediately
+% If not an optogenetic experiment, error
 if ~(isfield(registration_params,'OptogeneticExp') && registration_params.OptogeneticExp) ,
-  return
+  error('LED detection requested on a non-OptogeneticExp experiment') ;
 end
 
 % We want to modify the registration_params for handing to
