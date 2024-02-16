@@ -1,12 +1,7 @@
-function trx = appendPhysicalUnitFieldsToTrx(input_trx, registration_data, meddt)
+function trx = appendPhysicalUnitFieldsToTrx(input_trx, registration_data, are_timestamps_reliable, fallback_dt)
     % Add the x_mm, y_mm, a_mm, b_mm, theta_mm, dt, fps, and pxpermm fields to the
     % input trx.
     % This is a pure function.
-
-    % Deal with optional args
-    if ~exist('meddt', 'var') ,
-        meddt = [] ;
-    end
 
     trx = input_trx ;
     for fly = 1:length(trx),
@@ -41,14 +36,14 @@ function trx = appendPhysicalUnitFieldsToTrx(input_trx, registration_data, meddt
 
         % add dt
         % TODO: fix timestamps after fix errors!
-        if ~isempty(meddt),
-            trx(fly).dt = repmat(meddt,[1,trx(fly).nframes-1]);
-        else
+        if are_timestamps_reliable ,
             if isfield(trx,'timestamps'),
                 trx(fly).dt = diff(trx(fly).timestamps);
             else
                 trx(fly).dt = repmat(1/trx(fly).fps,[1,trx(fly).nframes-1]);
             end
+        else
+            trx(fly).dt = repmat(fallback_dt,[1,trx(fly).nframes-1]);
         end
         trx(fly).fps = 1/mean(trx(fly).dt);
         trx(fly).pxpermm = 1 / registration_data.scale;

@@ -124,12 +124,8 @@ fprintf('Number of identities was %d, now %d\n',nids0,numel(trx));
 registration_data_0p5 = setfield(registration_data_0, 'flytracker_nnanframes', ninterpframes) ;  %#ok<SFLD> 
 registration_data_1 = setfield(registration_data_0p5, 'flytracker_nids0', nids0) ;  %#ok<SFLD> 
 
-% Compute the median frame interval, if called for
-if registration_params_2.usemediandt,
-  meddt = medianIntervalFromTimestamps(timestamps) ;
-else
-  meddt = [] ;
-end
+% Determine if timestamps are reliable, and compute a fallback dt if not
+[are_timestamps_reliable, fallback_dt] = getFallbackDtIfNeeded(registration_params_2, timestamps, trx) ;
 
 % If there are zero tracks, something is wrong
 if isempty(trx),
@@ -137,24 +133,16 @@ if isempty(trx),
 end
 
 % Apply spatial registration to trajectories
-trx = appendPhysicalUnitFieldsToTrx(trx, registration_data_1, meddt) ;
+trx = appendPhysicalUnitFieldsToTrx(trx, registration_data_1, are_timestamps_reliable, fallback_dt) ;
 fprintf('Applied spatial registration.\n') ;
 
 
-%
-% Handle all the stuff that is specific to optogenetic experiments
-%
-registration_data_2 = ...
-  handleOptogeneticExperimentRegistration(registration_data_1, registration_params_2, ...
-                                          metadata, expdir, dataloc_params, timestamps, analysis_protocol_folder_path) ;
-% registation_data_2 has the field ledIndicatorPoints, which
-% registration_data_1 lacks.
 
 %
 % Crop start and end of trajectories based on fly loaded time
 %
-[trx, timestamps, registration_data_3, newid2oldid] = ...
-  performTemporalRegistration(dotemporalreg, trx, timestamps, registration_data_2, newid2oldid, ...
+[trx, timestamps, registration_data_2, newid2oldid] = ...
+  performTemporalRegistration(dotemporalreg, trx, timestamps, registration_data_1, newid2oldid, ...
                               trx_file_names_that_are_not_per_frame, expdir, dataloc_params) ;
 
 
@@ -162,7 +150,7 @@ registration_data_2 = ...
 % Truncate end of movie based on value from registration params 
 %
 [trx, registration_data] = ...
-  performTemporalTruncation(dotemporaltruncation, trx, registration_data_3, newid2oldid, ...
+  performTemporalTruncation(dotemporaltruncation, trx, registration_data_2, newid2oldid, ...
                             trx_file_names_that_are_not_per_frame, idealVideoDuration, moviefile) ;
 
 

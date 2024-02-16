@@ -1,6 +1,7 @@
-function registration_data = ...
-  handleOptogeneticExperimentRegistration(...
-      registration_data, registration_params, metadata, expdir, dataloc_params, timestamps, analysis_protocol_folder_path)
+function result = ...
+  detectLedLocations(...
+      registration_data, registration_params, metadata, expdir, dataloc_params, timestamps, analysis_protocol_folder_path, ...
+      are_timestamps_reliable, fallback_dt)
 
 % If not an optogenetic experiment, return immediately
 if ~(isfield(registration_params,'OptogeneticExp') && registration_params.OptogeneticExp) ,
@@ -65,10 +66,10 @@ if didLoadProtocolOfSomeKind ,
 
   % experiments
   if ~isempty(protocol)
-    if led_registration_params.usemediandt
-      fps = 1/meddt;
+    if are_timestamps_reliable ,
+      fps = 1/median(diff(timestamps)) ;
     else
-      fps = 1/median(diff(timestamps));
+      fps = 1/fallback_dt ;
     end
 
     secstoLEDpulse = protocol.delayTime(firstactiveStepNum) + protocol.pulsePeriodSP(firstactiveStepNum)*protocol.pulseNum(firstactiveStepNum)/1000;
@@ -161,7 +162,7 @@ ledindicator_data = ...
     'ledindicator', true, ...
     'regXY', registration_data.bowlMarkerPoints, ...
     'useNormXCorr',true);
-registration_data.ledIndicatorPoints = ledindicator_data.bowlMarkerPoints;
+result = ledindicator_data.bowlMarkerPoints;
 
 % Decare victory
 fprintf('Detected led indicator.\n');
