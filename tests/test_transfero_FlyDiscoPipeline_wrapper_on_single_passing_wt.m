@@ -37,8 +37,8 @@ do_reset_working_experiments_folder = true ;
 submit_host_name = 'submit.int.janelia.org' ;
 %submit_host_name = '' ;
 
-read_only_experiments_folder_path = fullfile(fly_disco_folder_path, 'example-experiments', 'passing-test-suite-experiments-with-tracking-read-only') ;
-working_experiments_folder_path = fullfile(fly_disco_folder_path, 'example-experiments', 'passing-test-suite-experiments-with-tracking') ;
+read_only_experiments_folder_path = fullfile(fly_disco_folder_path, 'example-experiments', 'single-passing-test-suite-experiment-with-tracking-read-only') ;
+working_experiments_folder_path = fullfile(fly_disco_folder_path, 'example-experiments', 'single-passing-test-suite-experiment-with-tracking') ;
 
 % Recopy the working folder from the read-only one
 if do_reset_working_experiments_folder ,
@@ -51,15 +51,6 @@ end
 
 % Find the experiments
 folder_path_from_experiment_index = find_experiment_folders(working_experiments_folder_path) ;
-folder_path_from_experiment_index = folder_path_from_experiment_index(end-1) ;
-
-% % Run the script under test
-% experiment_count = length(folder_path_from_experiment_index) ;
-% for experiment_index = 1 : experiment_count ,
-%     experiment_folder_path = folder_path_from_experiment_index{experiment_index} ;
-%     fprintf('Running transfero_FlyDiscoPipeline_wrapper on experiment index %d...\n', experiment_index) ;
-%     transfero_FlyDiscoPipeline_wrapper(experiment_folder_path, user_name_for_configuration_purposes, optional_argument_list{:}) ;
-% end
 
 % Call the testing function to do the real work
 test_transfero_FlyDiscoPipeline_wrapper_on_experiment_list(folder_path_from_experiment_index, ...
