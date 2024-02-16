@@ -1,12 +1,16 @@
-function [trx, timestamps, registration_data, newid2oldid, i0] = ...
+function [trx, timestamps, registration_data, newid2oldid] = ...
         performTemporalRegistration(dotemporalreg, trx, timestamps, registration_data, newid2oldid, fns_notperframe, expdir, dataloc_params)
 
 % If not doing temporal registration, exit early
 if ~dotemporalreg ,
-    i0 = [] ;
     fprintf('NOT applying temporal registration.\n');
     return
 end
+
+% As of 2024-02-16, none of the analysis-protocol files in
+% FlyDiscoAnalysis/settings-internal use temporal registration, and apparently
+% it hasn't been used for several years.  So just note that this code has not
+% been under any selective pressure for a while.
 
 % how long did we actually record for?
 timestamps = timestamps - timestamps(1);

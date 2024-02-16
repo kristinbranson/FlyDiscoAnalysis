@@ -107,7 +107,7 @@ if didLoadProtocolOfSomeKind ,
   end
 
   % need to load find LEDMarkType for this plate
-  if isfield(registration_params,'LEDMarkerType') && ischar(registration_params.LEDMarkerType) && registration_params.OptogeneticExp,
+  if isfield(registration_params,'LEDMarkerType') && ischar(registration_params.LEDMarkerType) ,
     LEDimg = imread(registration_params.LEDMarkerType);
     binLEDstep = 25;
     hist_LED = histcounts(LEDimg,(0:binLEDstep:255));
