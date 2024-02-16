@@ -33,24 +33,34 @@ optional_argument_list = ...
 do_use_bqueue = false ;
 do_actually_submit_jobs = false ;
 do_try = false ;
-do_reset_working_experiments_folder = true ;
 submit_host_name = 'submit.int.janelia.org' ;
 %submit_host_name = '' ;
 
-read_only_experiments_folder_path = fullfile(fly_disco_folder_path, 'example-experiments', 'single-passing-test-suite-experiment-with-tracking-read-only') ;
-working_experiments_folder_path = fullfile(fly_disco_folder_path, 'example-experiments', 'single-passing-test-suite-experiment-with-tracking') ;
+read_only_experiments_folder_path = fullfile(fly_disco_folder_path, 'example-experiments', 'single-adriane-experiment-2024-01-22-read-only') ;
+working_experiments_folder_path = fullfile(fly_disco_folder_path, 'example-experiments', 'single-adriane-experiment-2024-01-22') ;
+
+% Delete the working experiments folder
+if exist(working_experiments_folder_path, 'file') ,
+    return_code = system_from_list_with_error_handling({'rm', '-rf', working_experiments_folder_path}) ;
+end
 
 % Recopy the working folder from the read-only one
-if do_reset_working_experiments_folder ,
-    fprintf('Resetting working experiments folder...\n') ;
-    tic_id = tic() ;
-    reset_experiment_working_copies(working_experiments_folder_path, read_only_experiments_folder_path) ;
-    elapsed_time = toc(tic_id) ;
-    fprintf('Elapsed time: %g s\n', elapsed_time) ;
-end
+fprintf('Resetting working experiments folder...\n') ;
+tic_id = tic() ;
+reset_experiment_working_copies(working_experiments_folder_path, read_only_experiments_folder_path) ;
+elapsed_time = toc(tic_id) ;
+fprintf('Elapsed time: %g s\n', elapsed_time) ;
 
 % Find the experiments
 folder_path_from_experiment_index = find_experiment_folders(working_experiments_folder_path) ;
+
+% % Run the script under test
+% experiment_count = length(folder_path_from_experiment_index) ;
+% for experiment_index = 1 : experiment_count ,
+%     experiment_folder_path = folder_path_from_experiment_index{experiment_index} ;
+%     fprintf('Running transfero_FlyDiscoPipeline_wrapper on experiment index %d...\n', experiment_index) ;
+%     transfero_FlyDiscoPipeline_wrapper(experiment_folder_path, user_name_for_configuration_purposes, optional_argument_list{:}) ;
+% end
 
 % Call the testing function to do the real work
 test_transfero_FlyDiscoPipeline_wrapper_on_experiment_list(folder_path_from_experiment_index, ...

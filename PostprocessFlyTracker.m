@@ -1,4 +1,5 @@
 function [trxout,ninterpframes,sourceid] = PostprocessFlyTracker(trxin,varargin)
+% Postprocess FlyTracker output, mostly to remove nan's.
 
 maxFlyTrackerNanInterpFrames = 5;
 
