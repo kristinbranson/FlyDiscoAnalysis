@@ -35,7 +35,7 @@ function [firstframes, firstframes_off, endframes_off, nframes, indicatorframes]
         indicatorframes_from_params = ctraxresultsmovie_params.indicatorframes ;
         if is_using_default_ctrax_results_movie_params,
             % Figure out the protocol given the metadata, LED protocol file contents
-            protocol = determine_protocol(metadata, ledprotocol_file_contents) ;
+            protocol = downmixProtocolIfNeeded(metadata, ledprotocol_file_contents.protocol) ;
             
             % Extract the indicatorframes from the protocol
             indicatorframes = indicatorframes_from_protocol(protocol) ;

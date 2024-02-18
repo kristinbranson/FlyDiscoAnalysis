@@ -27,26 +27,7 @@ if isfield(dataloc_params,'ledprotocolfilestr')
   if exist(led_protocol_file_path,'file')
     protocolOfSomeKind = loadSingleVariableAnonymously(led_protocol_file_path, 'protocol') ;
     didLoadProtocolOfSomeKind = true ;
-    if isExperimentRGB(metadata)
-      if isfield(protocolOfSomeKind,'Rintensity')
-        RGBprotocol = protocolOfSomeKind;
-        % test if RGBprotocol has only one active color
-        isLedActive = [any(RGBprotocol.Rintensity) any(RGBprotocol.Gintensity) any(RGBprotocol.Bintensity)] ;
-        % check that there is 1 and only 1 color LED used in protocol
-        activeLedCount = sum(isLedActive) ;
-        if activeLedCount == 0
-          error('ChR = 1 for LED protcol with no active LEDs')
-        elseif activeLedCount > 1
-          error('More than one active LED color in protocol. Not currently supported')
-        end
-        % call function that transforms new protocol to old protocol
-        [protocol,ledcolor] = ConvertRGBprotocol2protocolformat(RGBprotocol, isLedActive);  %#ok<ASGLU>
-      else
-        protocol = protocolOfSomeKind ;
-      end
-    else
-      protocol = protocolOfSomeKind ;
-    end
+    protocol = downmixProtocolIfNeeded(metadata, protocolOfSomeKind) ;
   end
 end
 

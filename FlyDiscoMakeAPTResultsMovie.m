@@ -170,23 +170,8 @@ if ~commonregistrationparams.OptogeneticExp,
 else
   if defaultparams,
     load(indicatorfile, 'indicatorLED') ;
-    load(ledprotocolfile, 'protocol') ;
-    if isExperimentRGB(metadata)
-        if isfield(protocol,'Rintensity')
-            RGBprotocol = protocol;
-            clear protocol;
-            % test if RGBprotocol has only one active color
-            countactiveLEDs = [double(any(RGBprotocol.Rintensity));double(any(RGBprotocol.Gintensity));double(any(RGBprotocol.Bintensity))];
-            % check that there is 1 and only 1 color LED used in protocol
-            if sum(countactiveLEDs) == 0
-                error('ChR = 1 for LED protcol with no active LEDs')
-            elseif sum(countactiveLEDs) > 1
-                error('More than one active LED color in protocol. Not currently supported')
-            end
-            % call function that transforms new protocol to old protocol
-            [protocol,ledcolor] = ConvertRGBprotocol2protocolformat(RGBprotocol,countactiveLEDs);
-        end
-    end
+    rgbProtocol = loadSingleVariableAnonymously(ledprotocolfile, 'protocol') ;
+    protocol = downmixProtocolIfNeeded(metadata, rgbProtocol) ;
     
     nsteps = numel(protocol.stepNum);
     % if there's only 1 step 
@@ -351,26 +336,10 @@ if ~hidemovietype,
     fclose(fid);
   else
     
-    load(ledprotocolfile);
-    load(indicatorfile);
-    if isExperimentRGB(metadata)
-      if isfield(protocol,'Rintensity')
-        RGBprotocol = protocol;
-        clear protocol;
-        % test if RGBprotocol has only one active color
-        countactiveLEDs = [double(any(RGBprotocol.Rintensity));double(any(RGBprotocol.Gintensity));double(any(RGBprotocol.Bintensity))];
-        % check that there is 1 and only 1 color LED used in protocol
-        if sum(countactiveLEDs) == 0
-          error('ChR = 1 for LED protcol with no active LEDs')
-        elseif sum(countactiveLEDs) > 1
-          error('More than one active LED color in protocol. Not currently supported')
-        end
-        % call function that transforms new protocol to old protocol
-        [protocol,ledcolor] = ConvertRGBprotocol2protocolformat(RGBprotocol,countactiveLEDs);
-      end
-    end
+    protocolOfSomeKind = loadSingleVariableAnonymously(ledprotocolfile, 'protocol');
+    protocol = downmixProtocolIfNeeded(metadata, protocolOfSomeKind) ;
     
-    
+    load(indicatorfile, 'indicatorLED') ;
     stimtimes = indicatorLED.starttimes(ctraxresultsmovie_params.indicatorframes);
     
     j = 1;
