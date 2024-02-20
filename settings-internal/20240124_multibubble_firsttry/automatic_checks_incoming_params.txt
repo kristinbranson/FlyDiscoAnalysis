@@ -9,6 +9,7 @@ movie_length_delta_seconds,10
 control_line_names,pBDPGAL4U
 required_files,metaData.xml,movie.ufmf,protocol.mat
 desired_files,stamp_log_cam0.txt,cameraSettings1.json
-required_fns,flag_aborted,flag_redo,seconds_fliesloaded,screen_type,line,cross_barcode
+#required_fns,flag_aborted,flag_redo,seconds_fliesloaded,screen_type,line,cross_barcode
+required_fns,flag_aborted,flag_redo,seconds_fliesloaded,screen_type,cross_barcode
 frame_rate,60
 

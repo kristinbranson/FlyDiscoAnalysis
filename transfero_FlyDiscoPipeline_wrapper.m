@@ -60,7 +60,9 @@ analysis_parameters_with_overrides = merge_structs(default_analysis_parameters, 
 
 % Now turn off the auto-checks-complete, we do that separately, afterwards
 main_phase_analysis_parameters = analysis_parameters_with_overrides ;
-main_phase_analysis_parameters.doautomaticcheckscomplete = 'off' ;
+if do_run_caboose ,
+  main_phase_analysis_parameters.doautomaticcheckscomplete = 'off' ;
+end
 
 % Call the function to do the real work
 main_pipeline_exception_maybe = [] ;
