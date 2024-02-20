@@ -1,4 +1,4 @@
-%DebugFlyDiscoDectectIndicatorLedOnOff.m 4/25/2016
+%DebugFlyDiscoDetectIndicatorLedOnOff.m 4/25/2016
 % 
 % /groups/flyprojects/home/leea30/git/fba.build/bubble/current/run_FlyDiscoRegisterTrx.sh /groups/branson/bransonlab/projects/olympiad/MCR/v717 /tier2/branson/fly_bubble/01_tracked/social_GMR_22D03_AE_01_dTrpA1_RigA_20160325T134540 
 % settingsdir = ' /groups/flyprojects/home/olympiad/bubble_bin/FlyBubbleAnalysis/settings/ analysis_protocol current_bubble'
@@ -17,5 +17,5 @@ analysis_protocol = '20211210_FlyBowlRED';
 params = {'settingsdir',settingsdir,...
   'analysis_protocol',analysis_protocol};
 %% run once
-FlyDiscoDectectIndicatorLedOnOff(expdir,params{:});
+FlyDiscoDetectIndicatorLedOnOff(expdir,params{:});
 

@@ -1,4 +1,4 @@
-function FlyDiscoDectectIndicatorLedOnOff(expdir,varargin)
+function FlyDiscoDetectIndicatorLedOnOff(expdir,varargin)
 
 % Deal with optional arguments
 [analysis_protocol,settingsdir,datalocparamsfilestr] = ...
@@ -33,7 +33,11 @@ if ~isfield(registration_params,'OptogeneticExp') ,
   error('Registration params optogenetic flag %s does not exist',registrationparamsfile);
 end
 doLEDdetection = logical(registration_params.OptogeneticExp) ;
-fprintf('\nOptogenetic flag set to: %g, running indicator detection\n',registration_params.OptogeneticExp);
+if doLEDdetection
+  fprintf('\nOptogenetic flag set to: %g, running indicator detection\n',registration_params.OptogeneticExp);
+else
+  fprintf('\nOptogenetic flag set to: %g, not running indicator detection\n',registration_params.OptogeneticExp);
+end
 
 % Load the registration data
 registrationmatfile = fullfile(expdir,dataloc_params.registrationmatfilestr);
@@ -53,14 +57,14 @@ end
 % Determine if timestamps are reliable, and compute a fallback dt if not
 [are_timestamps_reliable, fallback_dt] = getFallbackDtIfNeeded(registration_params, timestamps, trx) ;
 
-% Determine where the LED indicator is in the video frame
-ledIndicatorPoints = ...
-  detectLedLocations(registration_data, registration_params, ...
-                     metadata, expdir, dataloc_params, timestamps, analysis_protocol_folder_path, ...
-                     are_timestamps_reliable, fallback_dt) ;
-
 % Make LED window, if an optogenetic experiment
 if doLEDdetection ,
+  % Determine where the LED indicator is in the video frame
+  ledIndicatorPoints = ...
+    detectLedLocations(registration_data, registration_params, ...
+                       metadata, expdir, dataloc_params, timestamps, analysis_protocol_folder_path, ...
+                       are_timestamps_reliable, fallback_dt) ;
+  % Extract indicatordata from the video
   indicatordata = extractIndicatorLED(expdir, dataloc_params, indicator_params, ledIndicatorPoints) ;
 else
   indicatordata = struct() ;
