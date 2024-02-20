@@ -39,11 +39,16 @@ if ~exist(registrationparamsfile,'file'),
 end
 
 % read the file contents into a struct
-registration_params = ReadParams(registrationparamsfile);
+registration_params_0 = ReadParams(registrationparamsfile);
 
-% Use registration_params to determine final dotemporalreg, dotemporaltruncation
-[dotemporalreg, dotemporaltruncation] = determineTemporalStuff(registration_params, dotemporalreg, dotemporaltruncation) ;
-
+% Determine final dotemporalreg, dotemporaltruncation
+[dotemporalreg, dotemporaltruncation, idealVideoDuration] = determineTemporalStuff(registration_params_0, dotemporalreg, dotemporaltruncation) ;
+if dotemporalreg && dotemporaltruncation ,
+  error('Temporal registration and temporal truncation are mutually exclusive.  You can''t do both!') ;
+end
+if dotemporaltruncation && isempty(idealVideoDuration) ,
+  error('Temporal truncation requested, but the idealVideoDuration is []') ;
+end
 
 %
 % Detect the registration mark(s)
@@ -64,19 +69,25 @@ end
 metadata = collect_metadata(expdir, dataloc_params.metadatafilestr) ;
 
 % Tweak registration_params.bowlMarkerType, if present
-if isfield(registration_params,'bowlMarkerType'),
-  registration_params.bowlMarkerType = determineBowlMarkerType(registration_params.bowlMarkerType, metadata, analysis_protocol_folder_path) ;
+if isfield(registration_params_0,'bowlMarkerType'),
+  bowlMarkerType = determineBowlMarkerType(registration_params_0.bowlMarkerType, metadata, analysis_protocol_folder_path) ;  
+  registration_params_1 = setfield(registration_params_0, 'bowlMarkerType', bowlMarkerType) ;  %#ok<SFLD> 
+else
+  registration_params_1 = registration_param_0 ;
 end
 
 % Tweak registration_params.maxDistCornerFrac_BowlLabel, if present
-if isfield(registration_params,'maxDistCornerFrac_BowlLabel') ,
-  registration_params.maxDistCornerFrac_BowlLabel = ...
-    determineMaxDistCornerFracLabel(registration_params.maxDistCornerFrac_BowlLabel, metadata, 'maxDistCornerFrac_BowlLabel') ;
+if isfield(registration_params_1,'maxDistCornerFrac_BowlLabel') ,
+  maxDistCornerFrac_BowlLabel = ...
+    determineMaxDistCornerFracLabel(registration_params_1.maxDistCornerFrac_BowlLabel, metadata, 'maxDistCornerFrac_BowlLabel') ;
+  registration_params_2 = setfield(registration_params_1, 'maxDistCornerFrac_BowlLabel', maxDistCornerFrac_BowlLabel) ;  %#ok<SFLD> 
+else
+  registration_params_2 = registration_param_1 ;
 end
 
 % Call the core registration mark detection routine
-registration_params_cell = marshallRegistrationParamsForDetectRegistrationMarks(registration_params, expdir, dataloc_params.registrationimagefilestr) ;
-registration_data = detectRegistrationMarks(registration_params_cell{:},'bkgdImage',bg_mean,'useNormXCorr',true);
+registration_params_cell = marshallRegistrationParamsForDetectRegistrationMarks(registration_params_2, expdir, dataloc_params.registrationimagefilestr) ;
+registration_data_0 = detectRegistrationMarks(registration_params_cell{:},'bkgdImage',bg_mean,'useNormXCorr',true);
 fprintf('Detected registration marks.\n');
 
 
@@ -98,11 +109,11 @@ end
 
 % Postprocess trajectories to remove nans from flytracker outputs
 nids0 = numel(trx);
-if ~isfield(registration_params,'maxFlyTrackerNanInterpFrames'),
+if ~isfield(registration_params_2,'maxFlyTrackerNanInterpFrames'),
   fprintf('maxFlyTrackerNanInterpFrames not set in registration_params, using default value.\n');
   args = {};
 else
-  args = {'maxFlyTrackerNanInterpFrames',registration_params.maxFlyTrackerNanInterpFrames};
+  args = {'maxFlyTrackerNanInterpFrames',registration_params_2.maxFlyTrackerNanInterpFrames};
 end
 [trx,ninterpframes,newid2oldid] = PostprocessFlyTracker(trx,args{:});
 fprintf('Removed nans from tracker output.\n');
@@ -110,15 +121,11 @@ fprintf('Number of nans interpolated through: %d frames\n',ninterpframes);
 fprintf('Number of identities was %d, now %d\n',nids0,numel(trx));
 
 % Store some metadata about nan-removal in registration_data
-registration_data.flytracker_nnanframes = ninterpframes;
-registration_data.flytracker_nids0 = nids0;
+registration_data_0p5 = setfield(registration_data_0, 'flytracker_nnanframes', ninterpframes) ;  %#ok<SFLD> 
+registration_data_1 = setfield(registration_data_0p5, 'flytracker_nids0', nids0) ;  %#ok<SFLD> 
 
-% Compute the median frame interval, if called for
-if registration_params.usemediandt,
-  meddt = medianIntervalFromTimestamps(timestamps) ;
-else
-  meddt = [] ;
-end
+% Determine if timestamps are reliable, and compute a fallback dt if not
+[are_timestamps_reliable, fallback_dt] = getFallbackDtIfNeeded(registration_params_2, timestamps, trx) ;
 
 % If there are zero tracks, something is wrong
 if isempty(trx),
@@ -126,22 +133,16 @@ if isempty(trx),
 end
 
 % Apply spatial registration to trajectories
-trx = appendPhysicalUnitFieldsToTrx(trx, registration_data, meddt) ;
+trx = appendPhysicalUnitFieldsToTrx(trx, registration_data_1, are_timestamps_reliable, fallback_dt) ;
 fprintf('Applied spatial registration.\n') ;
 
 
-%
-% Handle all the stuff that is specific to optogenetic experiments
-%
-[registration_data, registration_params] = ...
-  handleOptogeneticExperimentRegistration(registration_data, registration_params, ...
-                                          metadata, expdir, dataloc_params, timestamps, analysis_protocol_folder_path) ;
 
 %
 % Crop start and end of trajectories based on fly loaded time
 %
-[trx, timestamps, registration_data, newid2oldid, i0] = ...
-  performTemporalRegistration(dotemporalreg, trx, timestamps, registration_data, newid2oldid, ...
+[trx, timestamps, registration_data_2, newid2oldid] = ...
+  performTemporalRegistration(dotemporalreg, trx, timestamps, registration_data_1, newid2oldid, ...
                               trx_file_names_that_are_not_per_frame, expdir, dataloc_params) ;
 
 
@@ -149,8 +150,8 @@ fprintf('Applied spatial registration.\n') ;
 % Truncate end of movie based on value from registration params 
 %
 [trx, registration_data] = ...
-  performTemporalTruncation(dotemporaltruncation, trx, registration_data, newid2oldid, ...
-                            trx_file_names_that_are_not_per_frame, registration_params, moviefile, i0, timestamps) ;
+  performTemporalTruncation(dotemporaltruncation, trx, registration_data_2, newid2oldid, ...
+                            trx_file_names_that_are_not_per_frame, idealVideoDuration, moviefile) ;
 
 
 %

@@ -18,7 +18,7 @@ function subtitlefile = ...
     ts = cumsum(dt);
     
     if commonregistrationparams.OptogeneticExp ,
-        protocol = determine_protocol(metadata, ledprotocolstruct) ;
+        protocol = downmixProtocolIfNeeded(metadata, ledprotocolstruct.protocol) ;
         
         indicatorLED = indicatorstruct.indicatorLED ;
         stimtimes = indicatorLED.starttimes(indicatorframes);

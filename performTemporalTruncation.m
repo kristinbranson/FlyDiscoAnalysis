@@ -1,5 +1,5 @@
 function [trx, registration_data] = ...
-  performTemporalTruncation(dotemporaltruncation, trx, registration_data, newid2oldid, fns_notperframe, registration_params, moviefile, i0, timestamps)
+  performTemporalTruncation(dotemporaltruncation, trx, registration_data, newid2oldid, fns_notperframe, recordLengthIdeal, moviefile)
 
 % Truncate end of movie based on value from registration params.
 
@@ -14,10 +14,7 @@ if dotemporaltruncation ,
     
   % how long is the video
   recordLengthCurr = timestamps_header(end);
-  
-  % how long should the video be?
-  recordLengthIdeal = registration_params.doTemporalTruncation;
-  
+    
   % how much time should we crop from the end?
   if recordLengthCurr < recordLengthIdeal,
     warning('Cropped video is %f seconds long, shorter than ideal length %f seconds.',recordLengthCurr,recordLengthIdeal);
@@ -25,7 +22,7 @@ if dotemporaltruncation ,
   else
     i1 = find(timestamps_header >= recordLengthIdeal,1);
     if isempty(i1),
-      warning('No timestamps occur after timeCropEnd = %f. Cannot crop end.',timestamps(i0)+recordLengthIdeal); %??? why warn and not error? 
+      warning('No timestamps occur after recordLengthIdeal = %f. Cannot crop end.',recordLengthIdeal); %??? why warn and not error? 
       i1 = numel(timestamps_header);
     else
       %??? couldn't figure out what this is checking for

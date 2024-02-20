@@ -1,8 +1,8 @@
-function indicatordata = extractIndicatorLED(expdir, dataloc_params, indicator_params)
+function indicatordata = extractIndicatorLED(expdir, dataloc_params, indicator_params, ledIndicatorPoints)
 
-% Load in the LED indicator points
-registrationdatafile = fullfile(expdir,dataloc_params.registrationmatfilestr);
-load(registrationdatafile,'ledIndicatorPoints');
+% % Load in the LED indicator points
+% registrationdatafile = fullfile(expdir,dataloc_params.registrationmatfilestr);
+% load(registrationdatafile,'ledIndicatorPoints');
 
 % Read the video metadata, make a frame-reading function 
 moviefile = fullfile(expdir,dataloc_params.moviefilestr);

@@ -499,10 +499,10 @@ function FlyDiscoPipeline(expdir, varargin)
             todo = CheckForMissingFiles(expdir,dataloc_params,requiredfiles_ledonoffdetection);
             if forcecompute || todo,
                 fprintf('Detecting LED on/off transitions...\n');
-                FlyDiscoDectectIndicatorLedOnOff(expdir,...
+                FlyDiscoDetectIndicatorLedOnOff(expdir,...
                     'settingsdir',settingsdir,'analysis_protocol',analysis_protocol,...
                     registration_params{:});
-%                 fprintf('Memory usage after FlyDiscoDectectIndicatorLedOnOff():\n') ;
+%                 fprintf('Memory usage after FlyDiscoDetectIndicatorLedOnOff():\n') ;
 %                 print_matlab_memory_usage() ;
             end
             % make sure leddetection files exist requiredfiles_ledonoffdetection

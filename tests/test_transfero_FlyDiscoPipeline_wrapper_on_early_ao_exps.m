@@ -2,11 +2,12 @@
 
 % Where does this script live?
 this_script_path = mfilename('fullpath') ;
-fly_disco_analysis_folder_path = fileparts(this_script_path) ;
+fly_disco_analysis_test_folder_path = fileparts(this_script_path) ;
+fly_disco_analysis_folder_path = fileparts(fly_disco_analysis_test_folder_path) ;
 fly_disco_folder_path = fileparts(fly_disco_analysis_folder_path) ;
 
 cluster_billing_account_name = 'branson' ;
-user_name_for_configuration_purposes = 'bransonlab' ;                                
+user_name_for_configuration_purposes = 'bransonlab' ;
 % analysis_parameters = cell(1,0) ;
 % analysis_parameters = ...
 %          {'doautomaticchecksincoming',true,...
@@ -26,28 +27,26 @@ user_name_for_configuration_purposes = 'bransonlab' ;
 %           'doautomaticcheckscomplete',false, ...
 %           'doapt',false} ;
 settings_folder_path = fullfile(fly_disco_analysis_folder_path, 'settings-internal') ;  % for now, want to use internal settings
-optional_argument_list = ...
-    {'settingsdir', settings_folder_path, ...
-     'do_try', false} ; 
-do_use_bqueue = false ;
+optional_argument_list = { ...
+  'settingsdir', settings_folder_path, ...
+  'do_try', false } ;
+do_use_bqueue = true ;
 do_actually_submit_jobs = true ;
 do_try = true ;
-ssh_host_name = 'submit.int.janelia.org' ;
+do_reset_working_experiments_folder = true ;
+submit_host_name = if_not_a_submit_host('submit.int.janelia.org') ;
 
-read_only_experiments_folder_path = fullfile(fly_disco_folder_path, 'example-experiments', 'single-katie-experiment-2022-04-05-with-tracking-read-only') ;
-working_experiments_folder_path = fullfile(fly_disco_folder_path, 'example-experiments', 'single-katie-experiment-2022-04-05-with-tracking') ;
-
-% Delete the working experiments folder
-if exist(working_experiments_folder_path, 'file') ,
-    return_code = system_from_list_with_error_handling({'rm', '-rf', working_experiments_folder_path}) ;
-end
+read_only_experiments_folder_path = fullfile(fly_disco_folder_path, 'example-experiments', 'early-multibubble-experiments-read-only') ;
+working_experiments_folder_path = fullfile(fly_disco_folder_path, 'example-experiments', 'early-multibubble-experiments') ;
 
 % Recopy the working folder from the read-only one
-fprintf('Resetting working experiments folder...\n') ;
-tic_id = tic() ;
-reset_experiment_working_copies(working_experiments_folder_path, read_only_experiments_folder_path) ;
-elapsed_time = toc(tic_id) ;
-fprintf('Elapsed time: %g s\n', elapsed_time) ;
+if do_reset_working_experiments_folder || ~exist(working_experiments_folder_path, 'dir')
+  fprintf('Resetting working experiments folder...\n') ;
+  tic_id = tic() ;
+  reset_experiment_working_copies(working_experiments_folder_path, read_only_experiments_folder_path) ;
+  elapsed_time = toc(tic_id) ;
+  fprintf('Elapsed time: %g s\n', elapsed_time) ;
+end
 
 % Find the experiments
 folder_path_from_experiment_index = find_experiment_folders(working_experiments_folder_path) ;
@@ -61,12 +60,12 @@ folder_path_from_experiment_index = find_experiment_folders(working_experiments_
 % end
 
 % Call the testing function to do the real work
-run_transfero_FlyDiscoPipeline_wrapper_on_experiment_list(folder_path_from_experiment_index, ...
-                                                          cluster_billing_account_name, ...
-                                                          user_name_for_configuration_purposes, ...
-                                                          do_use_bqueue, ...
-                                                          do_actually_submit_jobs, ...
-                                                          do_try, ...
-                                                          ssh_host_name, ...
-                                                          optional_argument_list{:})
-                                                       
+run_transfero_FlyDiscoPipeline_wrapper_on_experiment_list(...
+  folder_path_from_experiment_index, ...
+  cluster_billing_account_name, ...
+  user_name_for_configuration_purposes, ...
+  do_use_bqueue, ...
+  do_actually_submit_jobs, ...
+  do_try, ...
+  submit_host_name, ...
+  optional_argument_list{:})
