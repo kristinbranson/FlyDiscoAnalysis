@@ -37,6 +37,16 @@ if isfield(dataloc_params,'ledprotocolfilestr')
       else
         protocol = protocolOfSomeKind ;
       end
+    % TODO - do this better. hack to convert multibubble protocol (two active LEDS, one for visible light) to one
+    % color be harding coding which active LED should be used. 
+    elseif isExperimentRGB_RedActive(metadata)
+        if isfield(protocolOfSomeKind,'Rintensity')
+            RGBprotocol = protocolOfSomeKind;
+            isLedActive = [1 0 0];
+            [protocol,~] = ConvertRGBprotocol2protocolformat(RGBprotocol, isLedActive); 
+        else
+            protocol = protocolOfSomeKind ;
+        end
     else
       protocol = protocolOfSomeKind ;
     end
