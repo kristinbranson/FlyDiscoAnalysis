@@ -6,6 +6,11 @@ function result = downmixProtocolIfNeeded(metadata, rawProtocol)
 if isExperimentRGB(metadata) && isfield(rawProtocol,'Rintensity')
   % test if RGBprotocol has only one active color
   isActiveFromLedIndex = [ any(rawProtocol.Rintensity) any(rawProtocol.Gintensity) any(rawProtocol.Bintensity) ] ;
+  % Hack for multibubble experiments.  These will have active LEDs besides red,
+  % but for now we just want to ignore those.
+  if strcmp(metadata.assay,'multibubble') ,
+    isActiveFromLedIndex(2:3) = false ;
+  end
   % check that there is 1 and only 1 color LED used in protocol
   activeLedCount = sum(double(isActiveFromLedIndex)) ;
   if activeLedCount == 0 ,
