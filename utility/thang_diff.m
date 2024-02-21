@@ -28,6 +28,20 @@ function thang_diff_helper(test, ref, test_prefix, ref_prefix)
         fprintf('%s and %s are both numeric, but are not the same.  max abs diff = %g, min abs diff = %g\n', ...
                 ref_prefix, test_prefix, max_abs_diff, min_abs_diff) ;
         return
+    elseif islogical(ref) ,
+        % both logical
+        ref_size = size(ref) ;
+        test_size = size(test) ;
+        if ~isequaln(test_size, ref_size) ,
+            fprintf('%s is a %s array of size %s, %s the same but of size %s\n', ref_prefix, class(ref), disp(ref_size), test_prefix, disp(test_size)) ;
+            return
+        end
+        % both logical, same size
+        el_count = numel(test) ;
+        differing_el_count = sum(test~=ref, 'all') ;
+        fprintf('%s and %s are both logical, but are not the same.  They differ at %d element(s) out of %d element(s)\n', ...
+                ref_prefix, test_prefix, differing_el_count, el_count) ;
+        return
     elseif isstruct(ref) ,
         if ~isstruct(test) ,
             fprintf('%s is a struct, %s is not\n', ref_prefix, test_prefix) ;
