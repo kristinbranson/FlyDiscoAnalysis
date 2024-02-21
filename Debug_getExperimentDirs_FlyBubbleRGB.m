@@ -17,8 +17,8 @@ rootdatadir = '/groups/branson/bransonlab/flydisco_data';
 % savefile = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_allflydisco_20230831';
 % [expdirstruct] = getExperimentDirsFlyDisco(rootdatadir,'metadatafile','Metadata.xml','movielength',false,'TrajNum',false,'autocheckin',false,'autocheckcomplete',true,'manualcheck',true);
 
-savefile = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_2023_pulled202310042023';
-[expdirstruct] = getExperimentDirsFlyDisco(rootdatadir,'metadatafile','Metadata.xml','expdirname','VNC2','date','_2023*','movielength',true,'TrajNum',false,'autocheckin',true,'autocheckcomplete',true,'manualcheck',true);
+savefile = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_LPC1';
+[expdirstruct] = getExperimentDirsFlyDisco(rootdatadir,'metadatafile','Metadata.xml','expdirname','LPC1','date','_2023*','movielength',false,'TrajNum',false,'autocheckin',true,'autocheckcomplete',true,'manualcheck',true);
 
 
 % savefile = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_VNC_week1';
@@ -106,7 +106,7 @@ end
 
 fclose(fid);
 %% make csv file for all experiments (use for pulling data for metadata changes) with autochecks
-fid = fopen([savefile,'_metadatafixing','.tsv'],'w');
+fid = fopen([savefile,'_metadata','.tsv'],'w');
 
 fprintf(fid,'%s\t %s\t %s\t %s\t %s\t %s\t %s\t %s\t %s \n','expname','date','datetime','linename','experimentor','gender','notes_tech','notes_behav','automated_pf');
 
