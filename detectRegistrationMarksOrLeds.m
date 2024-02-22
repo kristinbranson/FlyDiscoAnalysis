@@ -1,4 +1,4 @@
-function registration = detectRegistrationMarks(varargin)
+function registration = detectRegistrationMarksOrLeds(varargin)
 
 %% parse inputs
 [saveName,...
@@ -163,7 +163,7 @@ if nBowlMarkers > 0,
       % Scale the template to be on [0,1]
       bowlMarkerTemplate = bowlMarkerTemplate - min(bowlMarkerTemplate(:));
       bowlMarkerTemplate = bowlMarkerTemplate / max(bowlMarkerTemplate(:));
-      % If not using normxcorr, what to scale to [-1,+1]
+      % If not using normxcorr, want to scale to [-1,+1]
       if ~useNormXCorr,
         bowlMarkerTemplate = 2*bowlMarkerTemplate-1;
       end

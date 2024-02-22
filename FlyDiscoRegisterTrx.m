@@ -50,6 +50,7 @@ if dotemporaltruncation && isempty(idealVideoDuration) ,
   error('Temporal truncation requested, but the idealVideoDuration is []') ;
 end
 
+
 %
 % Detect the registration mark(s)
 %
@@ -86,8 +87,8 @@ else
 end
 
 % Call the core registration mark detection routine
-registration_params_cell = marshallRegistrationParamsForDetectRegistrationMarks(registration_params_2, expdir, dataloc_params.registrationimagefilestr) ;
-registration_data_0 = detectRegistrationMarks(registration_params_cell{:},'bkgdImage',bg_mean,'useNormXCorr',true);
+registration_params_cell = marshallRegistrationParams(registration_params_2, expdir, dataloc_params.registrationimagefilestr) ;
+registration_data_0 = detectRegistrationMarksOrLeds(registration_params_cell{:},'bkgdImage',bg_mean,'useNormXCorr',true);
 fprintf('Detected registration marks.\n');
 
 

@@ -21,13 +21,13 @@ led_registration_params = registration_params ;
 %
 % For FlyBowlRGB and FlyBubbleRGB, convert RGB ledprotocol format to ChR led protocol format
 %
-didLoadProtocolOfSomeKind = false ;
+didLoadProtocol = false ;
 if isfield(dataloc_params,'ledprotocolfilestr')
   led_protocol_file_path = fullfile(expdir,dataloc_params.ledprotocolfilestr) ;
   if exist(led_protocol_file_path,'file')
     protocolOfSomeKind = loadSingleVariableAnonymously(led_protocol_file_path, 'protocol') ;
-    didLoadProtocolOfSomeKind = true ;
-    protocol = downmixProtocolIfNeeded(metadata, protocolOfSomeKind) ;
+    didLoadProtocol = true ;
+    protocol = downmixProtocolIfNeeded(protocolOfSomeKind) ;
   end
 end
 
@@ -35,7 +35,7 @@ end
 %
 % Create max-value image for LED experiments  (needs fps)
 %
-if didLoadProtocolOfSomeKind ,
+if didLoadProtocol ,
   moviefilename = fullfile(expdir,dataloc_params.moviefilestr);
   [readfcn,~,~,headerinfo] = get_readframe_fcn(moviefilename);
   %determine minimum frames to process
@@ -127,17 +127,17 @@ if isfield(led_registration_params,'maxDistCornerFrac_LEDLabel') ,
     determineMaxDistCornerFracLabel(led_registration_params.maxDistCornerFrac_LEDLabel, metadata, 'maxDistCornerFrac_LEDLabel') ;
 end
 
-% Sub in the LED marker type fpr the bowlMarkerType
+% Sub in the LED marker type for the bowlMarkerType
 led_registration_params.bowlMarkerType = led_registration_params.LEDMarkerType;
 
 % Collect the registration params into a cell array for passing to
 % detectRegistrationMarks()
 led_registration_params_cell = ...
-  marshallRegistrationParamsForDetectRegistrationMarks(led_registration_params, expdir, dataloc_params.ledregistrationimagefilstr) ;
+  marshallRegistrationParams(led_registration_params, expdir, dataloc_params.ledregistrationimagefilstr) ;
 
 % detect
 ledindicator_data = ...
-  detectRegistrationMarks(...
+  detectRegistrationMarksOrLeds(...
     led_registration_params_cell{:}, ...
     'bkgdImage', im2double(ledMaxImage), ...
     'ledindicator', true, ...
