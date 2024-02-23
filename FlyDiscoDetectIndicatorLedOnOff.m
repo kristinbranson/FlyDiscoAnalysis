@@ -55,8 +55,9 @@ if ~succeeded,
   error('Could not load trajectories from file %s',ctraxfile);
 end
 
-% Determine if timestamps are reliable, and compute a fallback dt if not
+% Get the frame interval for the movie
 [are_timestamps_reliable, fallback_dt] = getFallbackDtIfNeeded(registration_params, timestamps, trx) ;
+dt = fif(are_timestamps_reliable, median(diff(timestamps)), fallback_dt) ;  % frame interval, in seconds
 
 % Make LED window, if an optogenetic experiment
 if doLEDdetection ,
@@ -76,7 +77,7 @@ if doLEDdetection ,
     detectLedLocations(registration_data, registration_params, ...
                        expdir, dataloc_params, timestamps, analysis_protocol_folder_path, ...
                        bg_mean, ...
-                       are_timestamps_reliable, fallback_dt, rigId) ;
+                       dt, rigId) ;
   % Extract indicatordata from the video
   indicatordata = extractIndicatorLED(expdir, dataloc_params, indicator_params, ledIndicatorPoints) ;
 else

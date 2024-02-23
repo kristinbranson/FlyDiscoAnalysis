@@ -1,4 +1,4 @@
-function [stride, lastFrameIndex] = determineStrideAndLastFrameIndexForLedMaxImage(protocol, timestamps, are_timestamps_reliable, fallback_dt, nframes)
+function [stride, lastFrameIndex] = determineStrideAndLastFrameIndexForLedMaxImage(protocol, dt, nframes)
 % To make the "mex LED image", a max will be taken of a bunch of movie frames.
 % These sampled frames start with the first video frame, and will be sampled
 % every stride'th frame, up to frame frameToLedPulse.  This function computes
@@ -18,13 +18,6 @@ end
 
 % Compute rough values for frameToLedPulse and stride
 if ~isempty(protocol)
-  % Compute a good single FPS value
-  if are_timestamps_reliable ,
-    dt = median(diff(timestamps)) ;
-  else
-    dt = fallback_dt ;
-  end
-
   % Compute the time of the end of the first active "step" in the protocol.
   delay = protocol.delayTime(firstActiveStepIndex) ;  % seconds
   pulsePeriod = protocol.pulsePeriodSP(firstActiveStepIndex)/1000 ;  % seconds

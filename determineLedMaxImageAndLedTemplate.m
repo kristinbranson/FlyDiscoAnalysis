@@ -1,6 +1,6 @@
 function [ledMaxImage, ledTemplate] = ...
   determineLedMaxImageAndLedTemplate(expdir, analysis_protocol_folder_path, dataloc_params, registration_params, registration_data, protocol, ...
-                                     timestamps, are_timestamps_reliable, fallback_dt, rigId)
+                                     dt, rigId)
 
 % Extract an image from the movie that will be good for finding the LED.  Also
 % read the LED template image from the analysis-protocol folder.
@@ -18,7 +18,7 @@ moviefilename = fullfile(expdir,dataloc_params.moviefilestr);
 nframes = header.nframes ;
 
 % Determine the stride for sampling movie frames to make the ledMaxImage
-[stride, lastFrameIndex] = determineStrideAndLastFrameIndexForLedMaxImage(protocol, timestamps, are_timestamps_reliable, fallback_dt, nframes) ;
+[stride, lastFrameIndex] = determineStrideAndLastFrameIndexForLedMaxImage(protocol, dt, nframes) ;
 firstPassLedMaxImage = sampleFramesForMaximumImage(readfcn, 1, stride, lastFrameIndex) ;
 
 % Determine the path to the LED template image
