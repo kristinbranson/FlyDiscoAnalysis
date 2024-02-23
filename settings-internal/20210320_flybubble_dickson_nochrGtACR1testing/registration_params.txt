@@ -18,6 +18,3 @@ nBowlMarkers,1
 bowlMarkerType,CircleTemplate_FlyBubble3.png
 minTemplateFeatureStrength,-0.5
 usemediandt,1
-OptogeneticExp,0
-maxDistCornerFrac_LEDLabel,.16
-LEDMarkerType,A,LEDonTemplate_FlyBubble_RigA.png,B,LEDonTemplate_FlyBubble_RigA.png,C,LEDTemplate_FlyBowl_BowlC.png,D,LEDonTemplate_FlyBubble_RigA.png

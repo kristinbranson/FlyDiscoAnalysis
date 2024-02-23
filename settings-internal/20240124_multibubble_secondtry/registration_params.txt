@@ -21,8 +21,5 @@ minTemplateFeatureStrength,-0.5
 minTemplateFeatureStrength,-0.5
 minTemplateFeatureStrength,-0.5
 usemediandt,0
-OptogeneticExp,1
 # maxdist indexed by plate
-maxDistCornerFrac_LEDLabel,.16
-LEDMarkerType,LEDTemplates_multiBubble.png
 maxFlyTrackerNanInterpFrames,5
