@@ -533,7 +533,7 @@ function FlyDiscoPipeline(expdir, varargin)
 %             [ismissingfile,missingfiles] = CheckForMissingFiles(expdir,dataloc_params,requiredfiles_wingtracking);
 %             if ismissingfile,
 %                 msgs = cellfun(@(x) sprintf('Missing wing tracking file %s',x),missingfiles,'UniformOutput',false);
-%                 flydisco_pipeline_error(stage, msgs) ;
+%                 flydisco_pipeline_error(stage, msgs) ;file:///groups/rubin/data0/rubinlab/flydisco_data/schretterc/20230124T081243_rig1_flyBowl1_SS35971_20XUASCsChrimsonattp18_20221028_redonlyRAMP10to90/registrationimage.png
 %             end
 %         end
         

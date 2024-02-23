@@ -45,6 +45,7 @@ registration_data = load(registrationmatfile) ;
 
 % Load metadata
 metadata = collect_metadata(expdir, dataloc_params.metadatafilestr) ;
+rigId = metadata.rig ;  % Should be a scalar char array containing a single capital letter
 
 % Load trajectories
 ctraxfile = fullfile(expdir,dataloc_params.ctraxfilestr);
@@ -59,11 +60,23 @@ end
 
 % Make LED window, if an optogenetic experiment
 if doLEDdetection ,
+  % Load the background file output by FlyTracker
+  if isfield(dataloc_params,'flytrackerbgstr')
+    flytrackerbgfile = fullfile(expdir,dataloc_params.flytrackerbgstr);
+    load(flytrackerbgfile,'bg');
+    bg_mean = 255*bg.bg_mean;  % a double array, elements on [0,255], not necessarily integers
+  else
+    % Note: We really do want to error if this is missing.
+    % We've been bitten by this not being what we thought it was.
+    error('dataloc_params is missing field flytrackerbgstr, which is required');
+  end
+  
   % Determine where the LED indicator is in the video frame
   ledIndicatorPoints = ...
     detectLedLocations(registration_data, registration_params, ...
-                       metadata, expdir, dataloc_params, timestamps, analysis_protocol_folder_path, ...
-                       are_timestamps_reliable, fallback_dt) ;
+                       expdir, dataloc_params, timestamps, analysis_protocol_folder_path, ...
+                       bg_mean, ...
+                       are_timestamps_reliable, fallback_dt, rigId) ;
   % Extract indicatordata from the video
   indicatordata = extractIndicatorLED(expdir, dataloc_params, indicator_params, ledIndicatorPoints) ;
 else

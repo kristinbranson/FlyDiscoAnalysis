@@ -171,7 +171,7 @@ else
   if defaultparams,
     load(indicatorfile, 'indicatorLED') ;
     rgbProtocol = loadSingleVariableAnonymously(ledprotocolfile, 'protocol') ;
-    protocol = downmixProtocolIfNeeded(metadata, rgbProtocol) ;
+    protocol = downmixProtocolIfNeeded(rgbProtocol) ;
     
     nsteps = numel(protocol.stepNum);
     % if there's only 1 step 
@@ -337,7 +337,7 @@ if ~hidemovietype,
   else
     
     protocolOfSomeKind = loadSingleVariableAnonymously(ledprotocolfile, 'protocol');
-    protocol = downmixProtocolIfNeeded(metadata, protocolOfSomeKind) ;
+    protocol = downmixProtocolIfNeeded(protocolOfSomeKind) ;
     
     load(indicatorfile, 'indicatorLED') ;
     stimtimes = indicatorLED.starttimes(ctraxresultsmovie_params.indicatorframes);

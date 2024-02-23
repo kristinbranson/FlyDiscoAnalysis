@@ -88,7 +88,7 @@ end
 
 % Call the core registration mark detection routine
 registration_params_cell = marshallRegistrationParams(registration_params_2, expdir, dataloc_params.registrationimagefilestr) ;
-registration_data_0 = detectRegistrationMarksOrLeds(registration_params_cell{:},'bkgdImage',bg_mean,'useNormXCorr',true);
+registration_data_0 = determineRegistrationTransform(registration_params_cell{:},'bkgdImage',bg_mean,'useNormXCorr',true);
 fprintf('Detected registration marks.\n');
 
 
