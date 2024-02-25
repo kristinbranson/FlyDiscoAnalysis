@@ -1,6 +1,12 @@
 function [ledMaxImage, ledTemplate] = ...
-  determineLedMaxImageAndLedTemplate(expdir, analysis_protocol_folder_path, dataloc_params, registration_params, registration_data, protocol, ...
-                                     dt, rigId)
+  determineLedMaxImageAndLedTemplate(expdir, ...
+                                     analysis_protocol_folder_path, ...
+                                     dataloc_params, ...
+                                     indicator_params, ...
+                                     registration_data, ...
+                                     protocol, ...
+                                     dt, ...
+                                     rigId)
 
 % Extract an image from the movie that will be good for finding the LED.  Also
 % read the LED template image from the analysis-protocol folder.
@@ -8,8 +14,8 @@ function [ledMaxImage, ledTemplate] = ...
 % protocol should be in ChR (single LED) format (i.e. should have .intensity
 % field, not .Rintensity, etc.)
 
-if ~isfield(registration_params,'LEDMarkerType') ,
-  error('No LEDMarkerType field in registration params') ;
+if ~isfield(indicator_params,'LEDMarkerType') ,
+  error('No LEDMarkerType field in indicator params') ;
 end
 
 % Get the movie header and a frame-reader function
@@ -22,13 +28,13 @@ nframes = header.nframes ;
 firstPassLedMaxImage = sampleFramesForMaximumImage(readfcn, 1, stride, lastFrameIndex) ;
 
 % Determine the path to the LED template image
-if ischar(registration_params.LEDMarkerType) ,
-  template_file_path = fullfile(analysis_protocol_folder_path, registration_params.LEDMarkerType) ;
+if ischar(indicator_params.LEDMarkerType) ,
+  template_file_path = fullfile(analysis_protocol_folder_path, indicator_params.LEDMarkerType) ;
 else
   % In this case, LEDMarkerType should be something like {'A', 'led-image-A.png',
   % 'B', 'led-image-B.png', 'C', 'led-image-C.png', 'D', 'led-image-C.png'}
-  rigIdFromRigIndex = registration_params.LEDMarkerType(1:2:end-1);
-  templateFileNameFromRigIndex = registration_params.LEDMarkerType(2:2:end);
+  rigIdFromRigIndex = indicator_params.LEDMarkerType(1:2:end-1);
+  templateFileNameFromRigIndex = indicator_params.LEDMarkerType(2:2:end);
   %rigId = metadata.rig ;
 
   isMatchFromRigIndex = strcmp(rigId,rigIdFromRigIndex);

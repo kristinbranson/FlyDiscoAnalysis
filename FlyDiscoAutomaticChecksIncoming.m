@@ -19,7 +19,7 @@ function FlyDiscoAutomaticChecksIncoming(expdir, stage, varargin)  %#ok<INUSL>
     'settingsdir', default_settings_folder_path(),...
     'datalocparamsfilestr','dataloc_params.txt',...
     'min_barcode_expdatestr','20110301T000000');
-  min_barcode_expdatenum = datenum(min_barcode_expdatestr,datetime_format);
+  min_barcode_expdatenum = datenum(min_barcode_expdatestr,datetime_format); %#ok<DATNM> 
   
   %% parameters
   datalocparamsfile = fullfile(settingsdir,analysis_protocol,datalocparamsfilestr);
@@ -168,7 +168,7 @@ function FlyDiscoAutomaticChecksIncoming(expdir, stage, varargin)  %#ok<INUSL>
     %% check barcode
     
     if isfield(metadata,'exp_datetime') && ~isempty(metadata.exp_datetime) ,
-      exp_datenum = datenum(metadata.exp_datetime,datetime_format);
+      exp_datenum = datenum(metadata.exp_datetime,datetime_format); %#ok<DATNM> 
     else
       exp_datenum = nan;
     end
@@ -184,14 +184,21 @@ function FlyDiscoAutomaticChecksIncoming(expdir, stage, varargin)  %#ok<INUSL>
     end
     registration_params = ReadParams(registrationparamsfile);
     
+    indicatorparamsfile = fullfile(settingsdir,analysis_protocol,dataloc_params.indicatorparamsfilestr);
+    if exist(indicatorparamsfile,'file') ,
+      indicator_params = ReadParams(indicatorparamsfile) ;
+      if ~isfield(indicator_params, 'OptogeneticExp') ,
+        error('No optogenetics flag in indicator params')
+      end
+    else
+      error('Indicator params file %s does not exist',indicatorparamsfile);
+    end
+
     if exist(moviefile,'file')
       try
         headerinfo = ufmf_read_header(moviefile);
-        if ~isfield(registration_params,'OptogeneticExp')
-          error('No optogenetics flag in registration params')
-        end
         % if optogenetic experiment
-        if registration_params.OptogeneticExp
+        if indicator_params.OptogeneticExp
           % if uses mediandt = unreliable timestamps
           if registration_params.usemediandt
             if ~isfield(headerinfo,'nframes'),
@@ -338,7 +345,7 @@ function FlyDiscoAutomaticChecksIncoming(expdir, stage, varargin)  %#ok<INUSL>
       mindatenum = nan(size(check_params.required_files_mindatestr));
       for i = 1:numel(check_params.required_files_mindatestr),
         if ~isempty(check_params.required_files_mindatestr{i}),
-          mindatenum(i) = datenum(check_params.required_files_mindatestr{i},datetime_format);
+          mindatenum(i) = datenum(check_params.required_files_mindatestr{i},datetime_format); %#ok<DATNM> 
         end
       end
     else
