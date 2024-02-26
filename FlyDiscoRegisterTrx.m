@@ -56,7 +56,7 @@ end
 % registration mark(s), even though they are currently not used for
 % registration.
 %
-registration_data_0 = determineRegistrationTransform(expdir, dataloc_params, registration_params) ;
+registration_data_0 = determineRegistrationTransform(expdir, analysis_protocol_folder_path, dataloc_params, registration_params) ;
 fprintf('Determined registration transform.\n');
 
 
@@ -78,11 +78,11 @@ end
 
 % Postprocess trajectories to remove nans from flytracker outputs
 nids0 = numel(trx);
-if ~isfield(working_registration_params_2,'maxFlyTrackerNanInterpFrames'),
+if ~isfield(registration_params,'maxFlyTrackerNanInterpFrames'),
   fprintf('maxFlyTrackerNanInterpFrames not set in registration_params, using default value.\n');
   args = {};
 else
-  args = {'maxFlyTrackerNanInterpFrames',working_registration_params_2.maxFlyTrackerNanInterpFrames};
+  args = {'maxFlyTrackerNanInterpFrames',registration_params.maxFlyTrackerNanInterpFrames};
 end
 [trx,ninterpframes,newid2oldid] = PostprocessFlyTracker(trx,args{:});
 fprintf('Removed nans from tracker output.\n');
@@ -93,7 +93,7 @@ fprintf('Number of identities was %d, now %d\n',nids0,numel(trx));
 registration_data_1 = setfields(registration_data_0, 'flytracker_nnanframes', ninterpframes, 'flytracker_nids0', nids0) ;
 
 % Determine if timestamps are reliable, and compute a fallback dt if not
-[are_timestamps_reliable, fallback_dt] = getFallbackDtIfNeeded(working_registration_params_2, timestamps, trx) ;
+[are_timestamps_reliable, fallback_dt] = getFallbackDtIfNeeded(registration_params, timestamps, trx) ;
 
 % If there are zero tracks, something is wrong
 if isempty(trx),
