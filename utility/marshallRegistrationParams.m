@@ -1,6 +1,6 @@
 function registration_params_cell = marshallRegistrationParams(registration_params, expdir, registrationimagefilestr) 
 % Collect things from registration_params, make a cell array suitable for
-% passing to detectRegistrationMarksOrLeds().
+% passing to determineRegistrationTransform().
 % This is a pure function.
 
 fnsignore = intersect(fieldnames(registration_params),...

@@ -1,4 +1,4 @@
-function result = determineBowlMarkerType(bowlMarkerType, metadata, analysis_protocol_folder_path)
+function result = determineBowlMarkerType(bowlMarkerType, plate, analysis_protocol_folder_path)
 % Determine the bowl marker type. 
 % This is a pure function.
 
@@ -11,10 +11,10 @@ else
   % plate -> bowlmarkertype
   plateids = bowlMarkerType(1:2:end-1);
   bowlmarkertypes = bowlMarkerType(2:2:end);
-  if isnumeric(metadata.plate),
-    plateid = num2str(metadata.plate);
+  if isnumeric(plate),
+    plateid = num2str(plate);
   else
-    plateid = metadata.plate;
+    plateid = plate;
   end
   if iscell(plateids)
     i = find(strcmp(num2str(plateid), plateids));
