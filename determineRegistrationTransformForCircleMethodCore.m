@@ -64,7 +64,6 @@ end
 
 % Get basic dimensions
 [nr,nc,~] = size(bkgdImage);
-r = min(nr,nc);
 
 
 
@@ -110,7 +109,7 @@ end
 if nBowlMarkers == 0 ,
   bowlMarkerPoints = zeros(2,0);
 else
-  corner_radius = maxDistCornerFrac_BowlLabel * r ;
+  corner_radius = maxDistCornerFrac_BowlLabel * min(nr,nc) ;
   bowlMarkerPoints = ...
     findTemplateMatchWithPossibleRotation(bkgdImage, bowlMarkerTemplate, minTemplateFeatureStrength, nRotations, useNormXCorr, corner_radius) ;
 end
@@ -152,7 +151,7 @@ scale = circleRadius_mm / circleRadius;  % mm/pixel
 %
 % Package everything up into the registration struct, save that to disk
 % 
-registerfn = @(x,y)(registerForSingleAffine(x,y,offX,offY,offTheta,scale)) ;
+registerfn = @(x,y)(registerForSingleChamber(x,y,offX,offY,offTheta,scale)) ;
 affine = affineTransformMatrixFromOffsetsAndScale(offX,offY,offTheta,scale);
 registration_data = ...
   struct('offX',offX,...

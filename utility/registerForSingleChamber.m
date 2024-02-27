@@ -1,4 +1,4 @@
-function [x_reg,y_reg] = registerForSingleAffine(x,y,offX,offY,offTheta,scale)
+function [x_reg,y_reg] = registerForSingleChamber(x,y,offX,offY,offTheta,scale)
 % [x_reg,y_reg] = register(x,y,offX,offY,offTheta,scale)  
 % Given unregistered coordinates <x,y>, add the offset <offX,offY>, rotate
 % through angle offTheta, and scale by the *scalar* scale.  <x,y> are assumed to

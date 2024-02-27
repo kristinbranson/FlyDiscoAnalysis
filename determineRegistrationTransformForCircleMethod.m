@@ -45,7 +45,6 @@ registration_data = determineRegistrationTransformForCircleMethodCore(registrati
                                                                       'useNormXCorr',true, ...
                                                                       'maxDistCornerFrac_BowlLabel', maxDistCornerFrac_BowlLabel, ...
                                                                       'bowlMarkerTemplate', bowlMarkerTemplate) ;
-  % bowlMarkerType and maxDistCornerFrac_BowlLabel will override values in registration_params_cell
 
 % Create images illustrating fitting, save to a file as a .png
 hfig = [] ;

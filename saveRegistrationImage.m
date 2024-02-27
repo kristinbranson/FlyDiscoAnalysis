@@ -24,16 +24,26 @@ axis(hax(1),'image');
 axis(hax(1),'xy');  % This means image will be upside-sown from how Matlab normally displays images
 hold(hax(1),'on');
 
-% plot detected/labeled circle if is circle mode
-tmp = linspace(0,2*pi,ceil(2*pi*circleRadius));
-plot(hax(1),circleCenterX + circleRadius*cos(tmp),...
-  circleCenterY + circleRadius*sin(tmp),...
-  'w-','linewidth',2);
-plot(hax(1),circleCenterX + circleRadius*cos(tmp),...
-  circleCenterY + circleRadius*sin(tmp),...
-  'k--','linewidth',2);
-plot(hax(1),circleCenterX,circleCenterY,'ks','markerfacecolor','k');
-plot(hax(1),circleCenterX,circleCenterY,'wd');
+% plot detected/labeled circles
+chamber_count = numel(circleRadius) ;
+theta_line = linspace(0,2*pi,ceil(2*pi*max(circleRadius)));
+for k = 1 : chamber_count ,
+  r = circleRadius(k) ;
+  xc  = circleCenterX(k) ;
+  yc  = circleCenterY(k) ;  
+  plot(...
+    hax(1), ...
+    xc + r*cos(theta_line),...
+    yc + r*sin(theta_line),...
+    'w-','linewidth',2);
+  plot(...
+    hax(1), ...
+    xc + r*cos(theta_line),...
+    yc + r*sin(theta_line),...
+    'k--','linewidth',2);
+  plot(hax(1),xc,yc,'ks','markerfacecolor','k');
+  plot(hax(1),xc,yc,'wd');
+end
 
 % plot bowl marker(s)
 if nBowlMarkers > 0,
@@ -45,18 +55,26 @@ end
 xangle = 0;
 yangle = pi/2;
 l = circleRadius_mm/2 / scale;
-quiver(hax(1),originX,originY,cos(xangle-offTheta)*l,sin(xangle-offTheta)*l,0,'k-');
-quiver(hax(1),originX,originY,cos(xangle-offTheta)*l,sin(xangle-offTheta)*l,0,'w--');
-text(originX+cos(xangle-offTheta)*l,originY+sin(xangle-offTheta)*l,'x','parent',hax(1));
-quiver(hax(1),originX,originY,cos(yangle-offTheta)*l,sin(yangle-offTheta)*l,0,'w-');
-quiver(hax(1),originX,originY,cos(yangle-offTheta)*l,sin(yangle-offTheta)*l,0,'k--');
-text(originX+cos(yangle-offTheta)*l,originY+sin(yangle-offTheta)*l,'y','parent',hax(1));
-
+xc_mean = mean(originX) ;
+yc_mean = mean(originY) ;
+% plot x axis and label
+vxx = cos(xangle-offTheta)*l ;
+vxy = sin(xangle-offTheta)*l ;
+quiver(hax(1),xc_mean,yc_mean,vxx,vxy,0,'k-');
+quiver(hax(1),xc_mean,yc_mean,vxx,vxy,0,'w--');
+text(xc_mean+vxx,yc_mean+vxy,'x','parent',hax(1));
+% plot y axis and label
+vyx = cos(yangle-offTheta)*l ;
+vyy = sin(yangle-offTheta)*l ;
+quiver(hax(1),xc_mean,yc_mean,vyx,vyy,0,'w-');
+quiver(hax(1),xc_mean,yc_mean,vyx,vyy,0,'k--');
+text(xc_mean+vyx,yc_mean+vyy,'y','parent',hax(1));
+% Make title
 title(hax(1),'Input background image');
 
 % transform image
-%A = affineTransform(offX,offY,offTheta,scale);
-T = maketform('affine',A);  %#ok<MTFA1>
+A_mean = affineTransformMatrixFromOffsetsAndScale(-xc_mean,-yc_mean,offTheta,scale) ;
+T = maketform('affine',A_mean);  %#ok<MTFA1>
 [imreg,xdata,ydata] = imtransform(bkgdImage,T,'XYScale',scale,'FillValues',nan);  %#ok<DIMTRNS>
 
 % draw registered image

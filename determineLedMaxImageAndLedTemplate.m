@@ -64,9 +64,10 @@ firstFrame = readfcn(1) ;
 diffImage = firstPassLedMaxImage - firstFrame ;
 
 [nr,nc,~] = size(firstPassLedMaxImage) ;
-[xgrid, ygrid] = meshgrid(1:nc, 1:nr);
-outsideArenaMask = ((xgrid-registration_data.circleCenterX).^2 + (ygrid-registration_data.circleCenterY).^2) >= registration_data.circleRadius.^2;
-outsideArenaPixels = diffImage(outsideArenaMask);  % get the pixel values outside the arean
+%[xgrid, ygrid] = meshgrid(1:nc, 1:nr);
+%outsideArenaMask = ((xgrid-registration_data.circleCenterX).^2 + (ygrid-registration_data.circleCenterY).^2) >= registration_data.circleRadius.^2;
+outsideArenaMask = outsideArenaMaskFromRegistrationData(registration_data, nc, nr) ;
+outsideArenaPixels = diffImage(outsideArenaMask);  % get the pixel values outside the arena
 outsideArenaPixelCountFromBinIndex = histcounts(outsideArenaPixels,binEdges);  % make a histogram of those values
 brightPixelCountOutsideArena = sum(outsideArenaPixelCountFromBinIndex(end-1:end));  % get the total number of pixels in the top two bins
 if brightPixelCountOutsideArena <= brightPixelCountInTemplate

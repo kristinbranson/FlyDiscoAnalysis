@@ -1,5 +1,5 @@
 bkgdNSampleFrames,10
-method,circle
+method,flytracker
 circleImageType,canny
 circleRLim,.475,.499
 circleXLim,.475,.525
@@ -13,7 +13,7 @@ circleNRTry,50
 circleRadius_mm,26.689
 maxDistCornerFrac_BowlLabel,.12
 featureRadius,30
-bowlMarkerPairTheta_true,2.3
+bowlMarkerPairTheta_true,0.852
 nBowlMarkers,1
 # bowl marker indexed by rig
 bowlMarkerType,CirleTemplate_multibubleTriangle.png
