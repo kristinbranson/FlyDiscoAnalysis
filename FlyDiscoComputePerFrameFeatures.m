@@ -1,7 +1,9 @@
 function trx = FlyDiscoComputePerFrameFeatures(expdir,varargin)
 
+% Declare this, even though not really used anymore
 version = '0.3';
 
+% Process the args
 [analysis_protocol,settingsdir,datalocparamsfilestr,forcecompute,perframefns,DEBUG] = ...
   myparse(varargin,...
   'analysis_protocol','current_bubble',...
@@ -12,44 +14,36 @@ version = '0.3';
   'DEBUG',false...
 	);
 
-if ischar(forcecompute),
-  forcecompute = str2double(forcecompute) ~= 0;
-end
-
-% datalocparamsfile = fullfile(settingsdir,analysis_protocol,datalocparamsfilestr);
-% dataloc_params = ReadParams(datalocparamsfile);
-
-% %% 
-% logger = PipelineLogger(expdir,mfilename(),dataloc_params,'perframefeature_logfilestr',...
-%   settingsdir,analysis_protocol,'versionstr',version,'debug',DEBUG);
-
-%% Init trx
+% Init trx
 fprintf('Initializing trx...\n');
 trx = FBATrx('analysis_protocol',analysis_protocol,'settingsdir',settingsdir,...
   'datalocparamsfilestr',datalocparamsfilestr,'DEBUG',DEBUG);
 
-%% Cleanup/log existing perframefns
+% Cleanup/log existing perframefns
 perframefnsfile = fullfile(trx.settingsdir,trx.analysis_protocol,trx.dataloc_params.perframefnsfilestr);
 if isempty(perframefns),
   perframefns = importdata(perframefnsfile);
 end
 nfns = numel(perframefns);
 
-% what files exist already
+% What files exist already?
 tmp = dir(fullfile(expdir,trx.dataloc_params.perframedir,'*.mat'));
 perframefns_preexist = regexprep({tmp.name},'\.mat$','');
 
-% clean this data to force computation
-WINGTRACK_PERFRAMEFILES = {'nwingsdetected' 'wing_trough_angle' 'wing_anglel' 'wing_angler'};
+% Wing-tracking per-frame features require special treatment, so enumerate
+% what those are.
+wing_tracking_feature_names = {'nwingsdetected' 'wing_trough_angle' 'wing_anglel' 'wing_angler'};
 if trx.perframe_params.isflytracker && ~trx.perframe_params.fakectrax,
-  WINGTRACK_PERFRAMEFILES = [WINGTRACK_PERFRAMEFILES,{'wing_lengthl' 'wing_lengthr'}];
+  wing_tracking_feature_names = [wing_tracking_feature_names,{'wing_lengthl' 'wing_lengthr'}];
 else
-  WINGTRACK_PERFRAMEFILES = [WINGTRACK_PERFRAMEFILES,{'wing_areal' 'wing_arear'}];
+  wing_tracking_feature_names = [wing_tracking_feature_names,{'wing_areal' 'wing_arear'}];
 end
-if forcecompute,
-  
-  % AL 20131016: Blow away all preexisting (sans wingtracking) to account for obsolete perframefns
-  perframefns_rm = setdiff(perframefns_preexist,WINGTRACK_PERFRAMEFILES);
+
+% If forcecompute is true, delete all preexisting PFF files 
+% Apparently the individual per-frame functions are supposed to handle this,
+% but apparently some don't.
+if forcecompute,  
+  perframefns_rm = setdiff(perframefns_preexist,wing_tracking_feature_names);
   for i = 1:numel(perframefns_rm)
     pfftmp = fullfile(expdir,trx.dataloc_params.perframedir,[perframefns_rm{i} '.mat']);
     fprintf('Deleting per-frame data file %s\n',perframefns_rm{i});
@@ -57,19 +51,19 @@ if forcecompute,
   end
 end
 
-%% translate wing features from FlyTracker
+% Translate wing features from FlyTracker
 wingperframefns = {};
 if trx.perframe_params.isflytracker,
-  wingperframefns = WINGTRACK_PERFRAMEFILES;
+  wingperframefns = wing_tracking_feature_names;
   allexist = exist(fullfile(expdir,trx.dataloc_params.wingtrxfilestr),'file');
-  for i = 1:numel(WINGTRACK_PERFRAMEFILES),
-    allexist = allexist && exist(fullfile(expdir,trx.dataloc_params.perframedir,[WINGTRACK_PERFRAMEFILES{i} '.mat']),'file');
+  for i = 1:numel(wing_tracking_feature_names),
+    allexist = allexist && exist(fullfile(expdir,trx.dataloc_params.perframedir,[wing_tracking_feature_names{i} '.mat']),'file');
     if ~allexist,
       break;
     end
   end
   if forcecompute || ~allexist,
-    perframefns_rm = intersect(perframefns_preexist,WINGTRACK_PERFRAMEFILES);
+    perframefns_rm = intersect(perframefns_preexist,wing_tracking_feature_names);
     for i = 1:numel(perframefns_rm),
       pfftmp = fullfile(expdir,trx.dataloc_params.perframedir,[perframefns_rm{i} '.mat']);
       fprintf('Deleting wing tracking per-frame data file %s\n',perframefns_rm{i});
@@ -86,11 +80,11 @@ if trx.perframe_params.isflytracker,
   end
 end
 
-%% Load trx
+% Load trx
 fprintf('Loading trajectories for %s...\n',expdir);
-trx.AddExpDir(expdir,'openmovie',false,'tryloadwingtrx',false); % writes trajectory fns to perframe dir
+trx.AddExpDir(expdir,'openmovie',false,'tryloadwingtrx',false);  % writes trajectory fns to perframe dir
 
-%% compute per-frame features
+% compute per-frame features
 for i = 1:nfns,
   try
     fn = perframefns{i};
@@ -102,11 +96,9 @@ for i = 1:nfns,
   end
 end
 
-%% save info to a mat file
-
+% Save info to a mat file
 filename = fullfile(expdir,trx.dataloc_params.perframeinfomatfilestr);
 fprintf('Saving debug info to file %s...\n',filename);
-%cpffinfo = logger.runInfo;
 cpffinfo = struct() ;
 cpffinfo.perframefns = perframefns;
 cpffinfo.forcecompute = forcecompute;
@@ -115,7 +107,6 @@ cpffinfo.landmark_params = trx.landmark_params;
 cpffinfo.perframe_params = trx.perframe_params; 
 cpffinfo.wingperframefns_computed = wingperframefns;
 cpffinfo.version = version;
-
 if exist(filename,'file'),
   try %#ok<TRYNC>
     delete(filename);
@@ -125,8 +116,5 @@ try
   save(filename,'-struct','cpffinfo');
 catch ME
   warning('FlyDiscoComputePerFrameFeatures:save',...
-    'Could not save information to file %s: %s',filename,getReport(ME));
+          'Could not save information to file %s: %s',filename,getReport(ME));
 end
-
-%% 
-%logger.close();

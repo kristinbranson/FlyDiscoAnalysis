@@ -3,6 +3,8 @@ function trx = appendPhysicalUnitFieldsToTrx(input_trx, registration_data, are_t
     % input trx.
     % This is a pure function.
 
+    registerfn = registration_data.registerfn ;
+    scale = registration_data.scale ;
     trx = input_trx ;
     for fly = 1:length(trx),
         % apply transformation to 4 extremal points on the ellipse
@@ -14,10 +16,10 @@ function trx = appendPhysicalUnitFieldsToTrx(input_trx, registration_data, are_t
         yleft0 = trx(fly).y + 2*trx(fly).b.*sin(trx(fly).theta-pi/2);
         xright0 = trx(fly).x + 2*trx(fly).b.*cos(trx(fly).theta+pi/2);
         yright0 = trx(fly).y + 2*trx(fly).b.*sin(trx(fly).theta+pi/2);
-        [xnose1,ynose1] = registration_data.registerfn(xnose0,ynose0);
-        [xtail1,ytail1] = registration_data.registerfn(xtail0,ytail0);
-        [xleft1,yleft1] = registration_data.registerfn(xleft0,yleft0);
-        [xright1,yright1] = registration_data.registerfn(xright0,yright0);
+        [xnose1,ynose1] = registerfn(xnose0,ynose0);
+        [xtail1,ytail1] = registerfn(xtail0,ytail0);
+        [xleft1,yleft1] = registerfn(xleft0,yleft0);
+        [xright1,yright1] = registerfn(xright0,yright0);
         % compute the center as the mean of these four points
         x1 = (xnose1+xtail1+xleft1+xright1)/4;
         y1 = (ynose1+ytail1+yleft1+yright1)/4;
@@ -46,6 +48,6 @@ function trx = appendPhysicalUnitFieldsToTrx(input_trx, registration_data, are_t
             trx(fly).dt = repmat(fallback_dt,[1,trx(fly).nframes-1]);
         end
         trx(fly).fps = 1/mean(trx(fly).dt);
-        trx(fly).pxpermm = 1 / registration_data.scale;
+        trx(fly).pxpermm = 1 / scale ;
     end
 end  % function

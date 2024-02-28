@@ -530,7 +530,7 @@ function FlyDiscoPipeline(expdir, varargin)
 %                 fprintf('Memory usage after FlyTracker2WingTracking():\n') ;
 %                 print_matlab_memory_usage() ;
 %             end
-%             % make sure sexclassification files exist
+%             % make sure wing-tracking files exist
 %             [ismissingfile,missingfiles] = CheckForMissingFiles(expdir,dataloc_params,requiredfiles_wingtracking);
 %             if ismissingfile,
 %                 msgs = cellfun(@(x) sprintf('Missing wing tracking file %s',x),missingfiles,'UniformOutput',false);
