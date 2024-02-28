@@ -724,7 +724,7 @@ moviefile = (fullfile(expdir,'movie.ufmf'));
 [~,~,~,headerinfo] = get_readframe_fcn(moviefile);
 % turn 3 protocol into 1 color protocol
 RGBprotocol = protocol;
-protocol = downmixProtocolIfNeeded(metadata, RGBprotocol) ;
+protocol = downmixProtocolIfNeeded(RGBprotocol) ;
 
 % check stim count
 stimcount_expected  = sum(protocol.iteration);

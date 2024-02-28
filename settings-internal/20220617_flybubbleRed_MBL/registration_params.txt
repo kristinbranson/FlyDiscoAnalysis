@@ -19,9 +19,6 @@ nBowlMarkers,1
 bowlMarkerType,RegistraionMark_FlyBubbleRed.png
 minTemplateFeatureStrength,-0.5
 usemediandt,0
-OptogeneticExp,1
 # maxdist indexed by plate
-maxDistCornerFrac_LEDLabel,.16
-LEDMarkerType,E,LEDtemplate_FlyBubbleRedON.png,F,LEDtemplate_FlyBubbleRedON.png
 doTemporalRegistration,0
 maxFlyTrackerNanInterpFrames,5

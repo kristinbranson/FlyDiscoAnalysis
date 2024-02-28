@@ -1,6 +1,6 @@
 function [firstframes, firstframes_off, endframes_off, nframes, indicatorframes] = ...
-        DetermineStartAndEndOfResultsMovieSnippets(commonregistrationparams, registration_params, ctraxresultsmovie_params, ...
-                                                   is_using_default_ctrax_results_movie_params, indicator_file_contents, ledprotocol_file_contents, metadata)
+        DetermineStartAndEndOfResultsMovieSnippets(isOptogeneticExp, registration_data, ctraxresultsmovie_params, ...
+                                                   is_using_default_ctrax_results_movie_params, indicator_data, raw_protocol)
 
     %DetermineStartAndEndOfResultsMovieSnippets  Use information from various
     %sources to determine which frames to use for each snippet included in the
@@ -30,36 +30,27 @@ function [firstframes, firstframes_off, endframes_off, nframes, indicatorframes]
     
     nframes_from_params = ctraxresultsmovie_params.nframes ;
     
-    if commonregistrationparams.OptogeneticExp ,
-        % if an optogenetic experiment
-        indicatorframes_from_params = ctraxresultsmovie_params.indicatorframes ;
+    if isOptogeneticExp ,
+        % If an optogenetic experiment
         if is_using_default_ctrax_results_movie_params,
-            % Figure out the protocol given the metadata, LED protocol file contents
-            protocol = downmixProtocolIfNeeded(metadata, ledprotocol_file_contents.protocol) ;
-            
             % Extract the indicatorframes from the protocol
-            indicatorframes = indicatorframes_from_protocol(protocol) ;
-            
-            indicatorLED = indicator_file_contents.indicatorLED ;            
-            firstframes_off = indicatorLED.startframe(indicatorframes) - ctraxresultsmovie_params.nframes_beforeindicator ;
+            protocol = downmixProtocolIfNeeded(raw_protocol) ;            
+            indicatorframes = indicatorframes_from_protocol(protocol) ;            
         else
-            % if do_use_default_parameters is false
-            if isempty(indicator_file_contents) ,
-                error('In %s(), do_use_default_parameters is false, but indicator_file_contents is empty.  This combination is not currently supported.', ...
-                      mfilename()) ;
-            else
-                indicatorframes = indicatorframes_from_params ;
-                indicatorLED = indicator_file_contents.indicatorLED ;
-                is_local_indicatorframes_valid = (indicatorframes <= length(indicatorLED.startframe)) ;
-                if ~all(is_local_indicatorframes_valid) ,
-                    error(['The largest value in indicatorframes (%d) is too big for indicatorLED.startframe (length = %d).  ' ...
-                        'Likely there was a problem with indicator detection.'], ...
-                        max(indicatorframes), length(indicatorLED.startframe)) ;
-                    indicatorframes = indicatorframes(is_local_indicatorframes_valid) ;
-                end
-                firstframes_off = indicatorLED.startframe(indicatorframes) - ctraxresultsmovie_params.nframes_beforeindicator;
-            end
+            % Get the indicatorframes from the ctrax-results params
+            indicatorframes = ctraxresultsmovie_params.indicatorframes ;
         end
+        % "indicatorframes" could maybe also be named step_index_from_snippet_index, if one was being long-winded, I think  -- ALT, 2022-03-16
+        indicatorLED = indicator_data.indicatorLED ;
+        indicator_step_count = length(indicatorLED.startframe) ;
+        are_all_indicatorframes_valid = (max(indicatorframes) <= indicator_step_count) ;
+        if ~all(are_all_indicatorframes_valid) ,
+            error(['The largest step index in the ctrax-results movie params (%d) is larger than the number of steps in the LED indicator traces (%d).  ' ...
+                   'Likely there was a problem with indicator detection.'], ...
+                  max(indicatorframes), ...
+                  indicator_step_count) ;
+        end
+        firstframes_off = indicatorLED.startframe(indicatorframes) - ctraxresultsmovie_params.nframes_beforeindicator;        
         % Promote nframes to a vector if necessary
         if isvector(firstframes_off) && isscalar(nframes_from_params) ,
             nframes = repmat(nframes_from_params, size(firstframes_off)) ;
@@ -72,7 +63,7 @@ function [firstframes, firstframes_off, endframes_off, nframes, indicatorframes]
         % In this case, nframes_from_params should be the same size as
         % ctraxresultsmovie_params.firstframes, and their common length is the snippet
         % count.        
-        tracked_frame_count = registration_params.end_frame - registration_params.start_frame + 1;
+        tracked_frame_count = registration_data.end_frame - registration_data.start_frame + 1;
         % We define the "normalized position" within the tracked frames to be a number
         % on the interval [0,1], where 0 means the first frame, and 1 means the last
         % frame, and 0.5 means the middle frame.  You get the idea.
@@ -103,5 +94,5 @@ function [firstframes, firstframes_off, endframes_off, nframes, indicatorframes]
             % matter what we return here.
         nframes = nframes_from_params ;
     end
-    firstframes = registration_params.start_frame + firstframes_off;
+    firstframes = registration_data.start_frame + firstframes_off;
 end  % function

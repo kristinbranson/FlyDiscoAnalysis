@@ -1,7 +1,7 @@
-function FlyDiscoDetectIndicatorLedOnOff(expdir,varargin)
+function FlyDiscoDetectIndicatorLedOnOff(expdir, varargin)
 
 % Deal with optional arguments
-[analysis_protocol,settingsdir,datalocparamsfilestr] = ...
+[analysis_protocol, settingsdir, datalocparamsfilestr] = ...
   myparse(varargin,...
   'analysis_protocol','current_bubble',...
   'settingsdir', default_settings_folder_path(), ...
@@ -28,15 +28,16 @@ registrationparamsfile = fullfile(analysis_protocol_folder_path,dataloc_params.r
 if ~exist(registrationparamsfile,'file')
   error('Registration params file %s does not exist',registrationparamsfile);
 end
-registration_params = ReadParams(registrationparamsfile);
-if ~isfield(registration_params,'OptogeneticExp') ,
-  error('Registration params optogenetic flag %s does not exist',registrationparamsfile);
+raw_registration_params = ReadParams(registrationparamsfile);
+registration_params = modernizeRegistrationParams(raw_registration_params) ;
+if ~isfield(indicator_params,'OptogeneticExp') ,
+  error('Indicator params optogenetic flag %s does not exist',registrationparamsfile);
 end
-doLEDdetection = logical(registration_params.OptogeneticExp) ;
+doLEDdetection = logical(indicator_params.OptogeneticExp) ;
 if doLEDdetection
-  fprintf('\nOptogenetic flag set to: %g, running indicator detection\n',registration_params.OptogeneticExp);
+  fprintf('\nOptogenetic flag set to: %g, running indicator detection\n',indicator_params.OptogeneticExp);
 else
-  fprintf('\nOptogenetic flag set to: %g, not running indicator detection\n',registration_params.OptogeneticExp);
+  fprintf('\nOptogenetic flag set to: %g, not running indicator detection\n',indicator_params.OptogeneticExp);
 end
 
 % Load the registration data
@@ -45,6 +46,7 @@ registration_data = load(registrationmatfile) ;
 
 % Load metadata
 metadata = collect_metadata(expdir, dataloc_params.metadatafilestr) ;
+rigId = metadata.rig ;  % Should be a scalar char array containing a single capital letter
 
 % Load trajectories
 ctraxfile = fullfile(expdir,dataloc_params.ctraxfilestr);
@@ -54,16 +56,34 @@ if ~succeeded,
   error('Could not load trajectories from file %s',ctraxfile);
 end
 
-% Determine if timestamps are reliable, and compute a fallback dt if not
+% Get the frame interval for the movie
 [are_timestamps_reliable, fallback_dt] = getFallbackDtIfNeeded(registration_params, timestamps, trx) ;
+dt = fif(are_timestamps_reliable, median(diff(timestamps)), fallback_dt) ;  % frame interval, in seconds
 
 % Make LED window, if an optogenetic experiment
 if doLEDdetection ,
+  % Load the background file output by FlyTracker
+  if isfield(dataloc_params,'flytrackerbgstr')
+    flytrackerbgfile = fullfile(expdir,dataloc_params.flytrackerbgstr);
+    load(flytrackerbgfile,'bg');
+    bg_mean = 255*bg.bg_mean;  % a double array, elements on [0,255], not necessarily integers
+  else
+    % Note: We really do want to error if this is missing.
+    % We've been bitten by this not being what we thought it was.
+    error('dataloc_params is missing field flytrackerbgstr, which is required');
+  end
+  
   % Determine where the LED indicator is in the video frame
   ledIndicatorPoints = ...
-    detectLedLocations(registration_data, registration_params, ...
-                       metadata, expdir, dataloc_params, timestamps, analysis_protocol_folder_path, ...
-                       are_timestamps_reliable, fallback_dt) ;
+    detectLedLocations(registration_data, ...
+                       indicator_params, ...
+                       expdir, ...
+                       dataloc_params, ...
+                       analysis_protocol_folder_path, ...
+                       bg_mean, ...
+                       dt, ...
+                       rigId, ...
+                       registration_params.doesYAxisPointUp) ;
   % Extract indicatordata from the video
   indicatordata = extractIndicatorLED(expdir, dataloc_params, indicator_params, ledIndicatorPoints) ;
 else

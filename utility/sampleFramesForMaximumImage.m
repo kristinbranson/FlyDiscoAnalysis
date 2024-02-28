@@ -4,4 +4,3 @@ for j = firstFrameIndex:stride:lastFrameIndex
   frame = readfcn(j) ;
   result = max(result,frame) ;
 end
-end

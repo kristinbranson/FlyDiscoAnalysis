@@ -1,2 +1,5 @@
 indicatorwindowr,35
 pad,20
+OptogeneticExp,1
+maxDistCornerFrac_LEDLabel,2,.12
+LEDMarkerType,2,LEDonTemplate_FlyBubble_RigA.png

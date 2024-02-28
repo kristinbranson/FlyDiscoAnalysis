@@ -39,10 +39,11 @@ if ~exist(registrationparamsfile,'file'),
 end
 
 % read the file contents into a struct
-registration_params_0 = ReadParams(registrationparamsfile);
+raw_registration_params = ReadParams(registrationparamsfile);
+registration_params = modernizeRegistrationParams(raw_registration_params) ;
 
 % Determine final dotemporalreg, dotemporaltruncation
-[dotemporalreg, dotemporaltruncation, idealVideoDuration] = determineTemporalStuff(registration_params_0, dotemporalreg, dotemporaltruncation) ;
+[dotemporalreg, dotemporaltruncation, idealVideoDuration] = determineTemporalStuff(registration_params, dotemporalreg, dotemporaltruncation) ;
 if dotemporalreg && dotemporaltruncation ,
   error('Temporal registration and temporal truncation are mutually exclusive.  You can''t do both!') ;
 end
@@ -50,45 +51,14 @@ if dotemporaltruncation && isempty(idealVideoDuration) ,
   error('Temporal truncation requested, but the idealVideoDuration is []') ;
 end
 
+
 %
-% Detect the registration mark(s)
+% Determine the registration transform.  Along the way, detect the
+% registration mark(s), even though they are currently not used for
+% registration.
 %
-
-% Load the background file output by FlyTracker
-if isfield(dataloc_params,'flytrackerbgstr')
-  flytrackerbgfile = fullfile(expdir,dataloc_params.flytrackerbgstr);
-  load(flytrackerbgfile,'bg');
-  bg_mean = 255*bg.bg_mean;
-else
-  % Note: We really do want to error if this is missing.
-  % We've been bitten by this not being what we thought it was.
-  error('dataloc_params is missing field flytrackerbgstr, which is required');
-end
-
-% Load metadata
-metadata = collect_metadata(expdir, dataloc_params.metadatafilestr) ;
-
-% Tweak registration_params.bowlMarkerType, if present
-if isfield(registration_params_0,'bowlMarkerType'),
-  bowlMarkerType = determineBowlMarkerType(registration_params_0.bowlMarkerType, metadata, analysis_protocol_folder_path) ;  
-  registration_params_1 = setfield(registration_params_0, 'bowlMarkerType', bowlMarkerType) ;  %#ok<SFLD> 
-else
-  registration_params_1 = registration_param_0 ;
-end
-
-% Tweak registration_params.maxDistCornerFrac_BowlLabel, if present
-if isfield(registration_params_1,'maxDistCornerFrac_BowlLabel') ,
-  maxDistCornerFrac_BowlLabel = ...
-    determineMaxDistCornerFracLabel(registration_params_1.maxDistCornerFrac_BowlLabel, metadata, 'maxDistCornerFrac_BowlLabel') ;
-  registration_params_2 = setfield(registration_params_1, 'maxDistCornerFrac_BowlLabel', maxDistCornerFrac_BowlLabel) ;  %#ok<SFLD> 
-else
-  registration_params_2 = registration_param_1 ;
-end
-
-% Call the core registration mark detection routine
-registration_params_cell = marshallRegistrationParamsForDetectRegistrationMarks(registration_params_2, expdir, dataloc_params.registrationimagefilestr) ;
-registration_data_0 = detectRegistrationMarks(registration_params_cell{:},'bkgdImage',bg_mean,'useNormXCorr',true);
-fprintf('Detected registration marks.\n');
+registration_data_0 = determineRegistrationTransform(expdir, analysis_protocol_folder_path, dataloc_params, registration_params) ;
+fprintf('Determined registration transform.\n');
 
 
 %
@@ -109,11 +79,11 @@ end
 
 % Postprocess trajectories to remove nans from flytracker outputs
 nids0 = numel(trx);
-if ~isfield(registration_params_2,'maxFlyTrackerNanInterpFrames'),
+if ~isfield(registration_params,'maxFlyTrackerNanInterpFrames'),
   fprintf('maxFlyTrackerNanInterpFrames not set in registration_params, using default value.\n');
   args = {};
 else
-  args = {'maxFlyTrackerNanInterpFrames',registration_params_2.maxFlyTrackerNanInterpFrames};
+  args = {'maxFlyTrackerNanInterpFrames',registration_params.maxFlyTrackerNanInterpFrames};
 end
 [trx,ninterpframes,newid2oldid] = PostprocessFlyTracker(trx,args{:});
 fprintf('Removed nans from tracker output.\n');
@@ -121,11 +91,10 @@ fprintf('Number of nans interpolated through: %d frames\n',ninterpframes);
 fprintf('Number of identities was %d, now %d\n',nids0,numel(trx));
 
 % Store some metadata about nan-removal in registration_data
-registration_data_0p5 = setfield(registration_data_0, 'flytracker_nnanframes', ninterpframes) ;  %#ok<SFLD> 
-registration_data_1 = setfield(registration_data_0p5, 'flytracker_nids0', nids0) ;  %#ok<SFLD> 
+registration_data_1 = setfields(registration_data_0, 'flytracker_nnanframes', ninterpframes, 'flytracker_nids0', nids0) ;
 
 % Determine if timestamps are reliable, and compute a fallback dt if not
-[are_timestamps_reliable, fallback_dt] = getFallbackDtIfNeeded(registration_params_2, timestamps, trx) ;
+[are_timestamps_reliable, fallback_dt] = getFallbackDtIfNeeded(registration_params, timestamps, trx) ;
 
 % If there are zero tracks, something is wrong
 if isempty(trx),

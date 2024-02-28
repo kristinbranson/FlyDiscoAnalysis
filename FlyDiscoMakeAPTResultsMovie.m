@@ -49,6 +49,16 @@ if isfield(aptresultsmovie_params,'taillandmark')
     taillandmark = aptresultsmovie_params.taillandmark;
 end
 
+%% Get one thing from the registration params
+% name of parameters file
+registrationparamsfile = fullfile(settingsdir,analysis_protocol,dataloc_params.registrationparamsfilestr);
+if ~exist(registrationparamsfile,'file'),
+  error('Registration params file %s does not exist',registrationparamsfile);
+end
+raw_registration_params = ReadParams(registrationparamsfile);
+registration_params = modernizeRegistrationParams(raw_registration_params) ;
+doesYAxisPointUp = registration_params.doesYAxisPointUp ;
+
 %% location of data
 
 if isempty(outexpdir),
@@ -171,7 +181,7 @@ else
   if defaultparams,
     load(indicatorfile, 'indicatorLED') ;
     rgbProtocol = loadSingleVariableAnonymously(ledprotocolfile, 'protocol') ;
-    protocol = downmixProtocolIfNeeded(metadata, rgbProtocol) ;
+    protocol = downmixProtocolIfNeeded(rgbProtocol) ;
     
     nsteps = numel(protocol.stepNum);
     % if there's only 1 step 
@@ -246,7 +256,7 @@ else
     firstframes = registration_params.start_frame + firstframes_off;
   else
     if exist(indicatorfile,'file')
-      load(indicatorfile);
+      load(indicatorfile, 'indicatorLED');
       firstframes_off = indicatorLED.startframe(ctraxresultsmovie_params.indicatorframes) - ctraxresultsmovie_params.nframes_beforeindicator;
       endframes_off = firstframes_off + ctraxresultsmovie_params.nframes -1 ;
       firstframes = registration_params.start_frame + firstframes_off;
@@ -337,7 +347,7 @@ if ~hidemovietype,
   else
     
     protocolOfSomeKind = loadSingleVariableAnonymously(ledprotocolfile, 'protocol');
-    protocol = downmixProtocolIfNeeded(metadata, protocolOfSomeKind) ;
+    protocol = downmixProtocolIfNeeded(protocolOfSomeKind) ;
     
     load(indicatorfile, 'indicatorLED') ;
     stimtimes = indicatorLED.starttimes(ctraxresultsmovie_params.indicatorframes);
@@ -361,9 +371,9 @@ if ~hidemovietype,
       % not sure this logic is good
       if protocol.pulseNum(j) > 1,
         freq(i) = 1/(protocol.pulsePeriodSP(j)/1000);
-        stim_type{i} = ['Plsd ', num2str(freq(i)), 'Hz'];
+        stim_type{i} = ['Plsd ', num2str(freq(i)), 'Hz']; %#ok<AGROW> 
       else
-        stim_type{i} = 'Cnst';
+        stim_type{i} = 'Cnst'; %#ok<AGROW> 
       end
       
       intensity(i) = protocol.intensity(j);
@@ -445,7 +455,8 @@ temp_avi_path = [tempname(scratch_folder_path) '.avi'] ;
   'hidemask',dohide,...
   'hidemaskvalue',0,...
   'headlandmark',headlandmark,...
-  'taillandmark',taillandmark);
+  'taillandmark',taillandmark, ...
+  'doesYAxisPointUp', doesYAxisPointUp);
 %'fps',ctraxresultsmovie_params.fps,...
     %'maxnframes',+ctraxresultsmovie_params.nframes,...
 if ishandle(1),

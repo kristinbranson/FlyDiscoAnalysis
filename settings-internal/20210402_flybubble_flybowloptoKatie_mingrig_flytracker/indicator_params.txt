@@ -1,2 +1,5 @@
 indicatorwindowr,35
 pad,20
+OptogeneticExp,1
+maxDistCornerFrac_LEDLabel,.12
+LEDMarkerType,LEDonTemplate_FlyBowlMing.png
