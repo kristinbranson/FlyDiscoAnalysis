@@ -43,7 +43,7 @@ useVideoWriter = exist('VideoWriter','file');
   useVideoWriter,headlandmark,taillandmark,...
   avifileTempDataFile,titletext,showtimestamps,dynamicflyselection,...
   doshowsex,doplotapttail,doplotcentertail,doplotwings,doflipud,dofliplr,...
-  hidemovietype,hidemask,hidemaskvalue, plotYAxisPointsUp] = ...
+  hidemovietype,hidemask,hidemaskvalue, doesYAxisPointUp] = ...
   myparse(varargin,'moviename','','aptname','','trxname',nan,'aviname','','colors',[],'zoomflies',[],'nzoomr',nan,'nzoomc',nan,...
   'boxradius',nan,'taillength',nan,'fps',nan,'maxnframes',nan,'firstframes',[],'compression','',...
   'figpos',[],'movietitle','','useVideoWriter',useVideoWriter,...
@@ -60,7 +60,7 @@ useVideoWriter = exist('VideoWriter','file');
   'hidemovietype',false,...
   'hidemask',[],...
   'hidemaskvalue',0, ...
-  'plotYAxisPointsUp', true);
+  'doesYAxisPointUp', true);
 
 if ~ischar(compression),
   compression = '';
@@ -534,7 +534,7 @@ hax = axes(fig) ;
 hold(hax,'on');
 %hax = gca;
 set(hax,'position',[0,0,1,1]);
-if plotYAxisPointsUp ,
+if doesYAxisPointUp ,
   axis(hax,'xy');  % This means image will be upside-down from how Matlab normally displays images
 else
   axis(hax,'ij'); 
@@ -609,7 +609,7 @@ for segi = 1:numel(firstframes),
     if frame == firstframes(1),
       him = image([1,nc],[1,nr],im);
       axis image;
-      if plotYAxisPointsUp ,
+      if doesYAxisPointUp ,
         axis('xy');  % This means image will be upside-down from how Matlab normally displays images
       else
         axis('ij');
@@ -631,7 +631,7 @@ for segi = 1:numel(firstframes),
     % text doesn't show up in no display mode
     if titletext && isdisplay1,
       if frame == firstframes(1),
-        if plotYAxisPointsUp ,
+        if doesYAxisPointUp ,
           y_text = 0.5 ;
         else
           y_text = nr+0.5 ;
@@ -656,7 +656,7 @@ for segi = 1:numel(firstframes),
     % text doesn't show up in no display mode
     if showtimestamps && isdisplay1,
       if frame == firstframes(1),
-        if plotYAxisPointsUp ,
+        if doesYAxisPointUp ,
           y_text = hax.YLim(2)-10 ;
         else
           y_text = hax.YLim(1)+10 ;
@@ -840,7 +840,7 @@ for segi = 1:numel(firstframes),
               hzoomwing(i,j) = plot(nan,nan,'.-','color',colors(fly,:));
             end
             if isdisplay1,
-              if plotYAxisPointsUp ,
+              if doesYAxisPointUp ,
                 y_bottom = y0(i) ;
                 y_top = y1(i) ;
               else
@@ -886,7 +886,7 @@ for segi = 1:numel(firstframes),
             hzoom(i,j) = plot(nan,nan,'-');
             hzoomwing(i,j) = plot(nan,nan,'.-');
             if isdisplay1,
-              if plotYAxisPointsUp ,
+              if doesYAxisPointUp ,
                 y_bottom = y0(i) ;
                 y_top = y1(i) ;
               else

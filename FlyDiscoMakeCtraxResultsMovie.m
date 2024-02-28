@@ -21,7 +21,7 @@ if ~exist(registrationparamsfile,'file'),
 end
 raw_registration_params = ReadParams(registrationparamsfile);
 registration_params = modernizeRegistrationParams(raw_registration_params) ;
-plotYAxisPointsUp = registration_params.plotYAxisPointsUp ;
+doesYAxisPointUp = registration_params.doesYAxisPointUp ;
 
 %% Get one thing from the indicator params
 indicatorparamsfile = fullfile(settingsdir,analysis_protocol,dataloc_params.indicatorparamsfilestr);
@@ -163,7 +163,7 @@ temp_avi_path = [tempname(scratch_folder_path) '.avi'] ;
   'avifileTempDataFile',temp_avi_path,...
   'dynamicflyselection',true,...
   'doshowsex',true, ...
-  'plotYAxisPointsUp', plotYAxisPointsUp);
+  'doesYAxisPointUp', doesYAxisPointUp);
 %'fps',ctraxresultsmovie_params.fps,...
     %'maxnframes',+ctraxresultsmovie_params_nframes,...
 if ishandle(1),

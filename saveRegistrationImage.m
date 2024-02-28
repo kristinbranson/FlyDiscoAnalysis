@@ -1,6 +1,6 @@
 function saveRegistrationImage(imsavename, hfig, figpos, bkgdImage, circleCenterX, circleCenterY, circleRadius, ...
                                nBowlMarkers, bowlMarkerPoints, circleRadius_mm, originX, originY, offTheta, A, ...
-                               bowlMarkerPairTheta_true, scale, plotYAxisPointsUp) 
+                               bowlMarkerPairTheta_true, scale, doesYAxisPointUp) 
 
 if isempty(imsavename) ,
   return
@@ -21,7 +21,7 @@ hax = createsubplots(1,nimsplot,0.025,hfig);
 % plot background image in jet colormap
 imagesc(bkgdImage,'parent',hax(1),[0,255]);
 axis(hax(1),'image');
-if plotYAxisPointsUp ,
+if doesYAxisPointUp ,
   axis(hax(1),'xy');  % This means image will be upside-down from how Matlab normally displays images
 else
   axis(hax(1),'ij'); 
@@ -106,7 +106,7 @@ quiver(hax(2),0,0,cos(yangle)*l,sin(yangle)*l,0,'k--');
 text(cos(yangle)*l,sin(yangle)*l,'y','parent',hax(2));
 
 axis(hax(2),'image');
-if plotYAxisPointsUp ,
+if doesYAxisPointUp ,
   axis(hax(2),'xy');  % This means image will be upside-down from how Matlab normally displays images
 else
   axis(hax(2),'ij'); 

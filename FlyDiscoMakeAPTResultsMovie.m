@@ -57,7 +57,7 @@ if ~exist(registrationparamsfile,'file'),
 end
 raw_registration_params = ReadParams(registrationparamsfile);
 registration_params = modernizeRegistrationParams(raw_registration_params) ;
-plotYAxisPointsUp = registration_params.plotYAxisPointsUp ;
+doesYAxisPointUp = registration_params.doesYAxisPointUp ;
 
 %% location of data
 
@@ -456,7 +456,7 @@ temp_avi_path = [tempname(scratch_folder_path) '.avi'] ;
   'hidemaskvalue',0,...
   'headlandmark',headlandmark,...
   'taillandmark',taillandmark, ...
-  'plotYAxisPointsUp', plotYAxisPointsUp);
+  'doesYAxisPointUp', doesYAxisPointUp);
 %'fps',ctraxresultsmovie_params.fps,...
     %'maxnframes',+ctraxresultsmovie_params.nframes,...
 if ishandle(1),

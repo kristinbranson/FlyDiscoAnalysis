@@ -1,4 +1,4 @@
-function saveLedDetectionImage(imsavename, bkgdImage, ledXY, plotYAxisPointsUp)
+function saveLedDetectionImage(imsavename, bkgdImage, ledXY, doesYAxisPointUp)
 
 if isempty(imsavename) 
   return
@@ -13,7 +13,7 @@ hax = createsubplots(1,nimsplot,0.05,hfig);
 % plot background image in jet colormap
 imagesc(bkgdImage,'parent',hax(1),[0,255]);
 axis(hax(1),'image');
-if plotYAxisPointsUp ,
+if doesYAxisPointUp ,
   axis(hax(1),'xy');  % This means image will be upside-down from how Matlab normally displays images
 else
   axis(hax(1),'ij'); 
