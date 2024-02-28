@@ -1,6 +1,6 @@
 function makeRegistrationDebugPlots(isInDebugMode, iscircle, bkgdImage, circleRadius_mm, pairDist_mm, originX, originY, offTheta, ...
                                     circleCenterX, circleCenterY, circleRadius, registrationPoints, bowlMarkerPoints, ...
-                                    bowlMarkerPairTheta_true, markerPairAngle_true)
+                                    bowlMarkerPairTheta_true, markerPairAngle_true, plotYAxisPointsUp)
 
 if isInDebugMode,
   hfig = figure() ;
@@ -36,7 +36,12 @@ if isInDebugMode,
   if nBowlMarkers > 0,
     plot(bowlMarkerPoints(1,:),bowlMarkerPoints(2,:),'mo');
   end
-  axis image xy;   % This means image will be upside-sown from how Matlab normally displays images
+  axis image ; 
+  if plotYAxisPointsUp ,
+    axis xy ;  % This means image will be upside-down from how Matlab normally displays images
+  else
+    axis ij ;
+  end
   axes(hax(2)); 
   %hax(2) = subplot(1,nsubplots,2);
   imagesc(bkgdImage);
@@ -54,7 +59,13 @@ if isInDebugMode,
   if nBowlMarkers > 0,
     plot(bowlMarkerPoints(1,:),bowlMarkerPoints(2,:),'mo');
   end
-  axis image xy;   % This means image will be upside-sown from how Matlab normally displays images
+  axis image ;
+  if plotYAxisPointsUp ,
+    axis xy ;  % This means image will be upside-down from how Matlab normally displays images
+  else
+    axis ij ;
+  end
+  
   axes(hax(3)); 
   %hax(3) = subplot(1,nsubplots,3);
   imagesc(circleim);
@@ -72,7 +83,12 @@ if isInDebugMode,
   if nBowlMarkers > 0,
     plot(bowlMarkerPoints(1,:),bowlMarkerPoints(2,:),'mo');
   end
-  axis image xy;   % This means image will be upside-sown from how Matlab normally displays images
+  axis image ;
+  if plotYAxisPointsUp ,
+    axis xy ;  % This means image will be upside-down from how Matlab normally displays images
+  else
+    axis ij ;
+  end  
   linkaxes(hax(1:3));
   if ~iscircle
     axes(hax(4)); 

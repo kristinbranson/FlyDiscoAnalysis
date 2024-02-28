@@ -33,7 +33,7 @@ useVideoWriter = exist('VideoWriter','file');
   taillength,fps,maxnframes,firstframes,compression,figpos,movietitle,...
   useVideoWriter,...
   avifileTempDataFile,titletext,showtimestamps,dynamicflyselection,...
-  doshowsex,doplotwings,doflipud,dofliplr] = ...
+  doshowsex,doplotwings,doflipud,dofliplr,plotYAxisPointsUp] = ...
   myparse(varargin,'moviename','','trxname','','aviname','','colors',[],'zoomflies',[],'nzoomr',nan,'nzoomc',nan,...
   'boxradius',nan,'taillength',nan,'fps',nan,'maxnframes',nan,'firstframes',[],'compression','',...
   'figpos',[],'movietitle','','useVideoWriter',useVideoWriter,...
@@ -43,7 +43,8 @@ useVideoWriter = exist('VideoWriter','file');
   'dynamicflyselection',true,...
   'doshowsex',true,...
   'doplotwings',true,...
-  'flipud',false,'fliplr',false);
+  'flipud',false,'fliplr',false, ...
+  'plotYAxisPointsUp', true);
 
 if ~ischar(compression),
   compression = '';
@@ -477,7 +478,11 @@ for segi = 1:numel(firstframes),
     if frame == firstframes(1),
       him = image([1,nc],[1,nr],im);
       axis image;
-      axis xy;  % Not necessary, but just to underline that images are upside-down compared to how they're shown by default in Matlab
+      if plotYAxisPointsUp ,
+        axis xy ;  % This means image will be upside-down from how Matlab normally displays images
+      else
+        axis ij ;
+      end
       axis([.5,x1(end)+.5,.5,y1(end)+.5]);
       axis off;
     else
@@ -492,7 +497,12 @@ for segi = 1:numel(firstframes),
     % text doesn't show up in no display mode
     if titletext && isdisplay,
       if frame == firstframes(1),
-        htext = text(.5,.5,framestr,'Parent',hax,'BackgroundColor','w','Color','g','VerticalAlignment','bottom','interpreter','none');
+        if plotYAxisPointsUp ,
+          y_text = 0.5 ;
+        else
+          y_text = nr+0.5 ;
+        end          
+        htext = text(.5,y_text,framestr,'Parent',hax,'BackgroundColor','w','Color','g','VerticalAlignment','bottom','interpreter','none');
       else
         set(htext,'String',framestr);
       end
@@ -505,7 +515,16 @@ for segi = 1:numel(firstframes),
     % text doesn't show up in no display mode
     if showtimestamps && isdisplay,
       if frame == firstframes(1),
-        htext = text(.5,hax.YLim(2)-(hax.YLim(2)/15),timestampstr,'Parent',hax,'BackgroundColor','k','Color','w','VerticalAlignment','bottom','interpreter','none');
+        ylim = hax.YLim ;
+        if plotYAxisPointsUp ,
+          y_bottom = ylim(1) ;
+          y_top = ylim(2) ;
+        else
+          y_bottom = ylim(2) ;
+          y_top = ylim(1) ;
+        end          
+        y_text = 1/15*y_bottom + 14/15*y_top ;
+        htext = text(.5,y_text,timestampstr,'Parent',hax,'BackgroundColor','k','Color','w','VerticalAlignment','bottom','interpreter','none');
       else
         set(htext,'String',timestampstr);
       end
@@ -668,7 +687,15 @@ for segi = 1:numel(firstframes),
               hzoomwing(i,j) = plot(nan,nan,'.-','color',colors(fly,:));
             end
             if isdisplay,
-              htextzoom(i,j) = text((x0(j)+x1(j))/2,.95*y0(i)+.05*y1(i),s,...
+              if plotYAxisPointsUp ,
+                y_bottom = y0(i) ;
+                y_top = y1(i) ;
+              else
+                y_bottom = y1(i) ;
+                y_top = y0(i) ;
+              end
+              y_text = 0.95*y_bottom + 0.05*y_top ;
+              htextzoom(i,j) = text((x0(j)+x1(j))/2,y_text,s,...
                 'color',colors(fly,:),'horizontalalignment','center',...
                 'verticalalignment','bottom','fontweight','bold');
             else
@@ -706,7 +733,15 @@ for segi = 1:numel(firstframes),
             hzoom(i,j) = plot(nan,nan,'-');
             hzoomwing(i,j) = plot(nan,nan,'.-');
             if isdisplay,
-              htextzoom(i,j) = text((x0(j)+x1(j))/2,.95*y0(i)+.05*y1(i),'',...
+              if plotYAxisPointsUp ,
+                y_bottom = y0(i) ;
+                y_top = y1(i) ;
+              else
+                y_bottom = y1(i) ;
+                y_top = y0(i) ;
+              end              
+              y_text = 0.95*y_bottom + 0.05*y_top ;
+              htextzoom(i,j) = text((x0(j)+x1(j))/2,y_text,'',...
                 'horizontalalignment','center',...
                 'verticalalignment','bottom','fontweight','bold');
             else

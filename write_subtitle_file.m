@@ -1,6 +1,6 @@
 function subtitlefile = ...
-        write_subtitle_file(expdir, nframes, commonregistrationparams, ctraxresultsmovie_params, basename, firstframes_off, endframes_off, ...
-                            metadata, ledprotocolstruct, indicatorstruct, indicatorframes)
+        write_subtitle_file(expdir, nframes, isOptogeneticExp, ctraxresultsmovie_params, basename, firstframes_off, endframes_off, ...
+                            raw_protocol, indicatorstruct, indicatorframes)
     
     snippet_count = length(nframes) ;
     
@@ -17,8 +17,8 @@ function subtitlefile = ...
     dt = [0,nframes];
     ts = cumsum(dt);
     
-    if commonregistrationparams.OptogeneticExp ,
-        protocol = downmixProtocolIfNeeded(ledprotocolstruct.protocol) ;
+    if isOptogeneticExp ,
+        protocol = downmixProtocolIfNeeded(raw_protocol) ;
         
         indicatorLED = indicatorstruct.indicatorLED ;
         stimtimes = indicatorLED.starttimes(indicatorframes);

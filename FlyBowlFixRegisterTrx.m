@@ -348,7 +348,14 @@ fnssave = {'offX','offY','offTheta','scale','bowlMarkerTheta','featureStrengths'
 fnssave = intersect(fnssave,fieldnames(registration_data));
 for i = 1:numel(fnssave),
   fn = fnssave{i};
-  fprintf(fid,'%s,%f\n',fn,registration_data.(fn));
+  value = registration_data.(fn) ;
+  if isscalar(value) ,
+    valueAsCharArray = sprintf('%f',value) ;
+  else
+    valueAsCharArrayWithTrailingComma = sprintf('%f,',value) ;
+    valueAsCharArray = valueAsCharArrayWithTrailingComma(1:end-1) ;
+  end
+  fprintf(fid,'%s,%s\n',fn,valueAsCharArray);
 end
 fclose(fid);
 

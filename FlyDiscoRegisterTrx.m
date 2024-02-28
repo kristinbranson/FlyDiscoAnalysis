@@ -39,7 +39,8 @@ if ~exist(registrationparamsfile,'file'),
 end
 
 % read the file contents into a struct
-registration_params = ReadParams(registrationparamsfile);
+raw_registration_params = ReadParams(registrationparamsfile);
+registration_params = modernizeRegistrationParams(raw_registration_params) ;
 
 % Determine final dotemporalreg, dotemporaltruncation
 [dotemporalreg, dotemporaltruncation, idealVideoDuration] = determineTemporalStuff(registration_params, dotemporalreg, dotemporaltruncation) ;

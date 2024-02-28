@@ -7,7 +7,8 @@ function result = ...
       analysis_protocol_folder_path, ...
       bkgdImage, ...
       dt, ...
-      rigId)
+      rigId, ...
+      plotYAxisPointsUp)
 
 % This should only be used with optogenetic experiments
 
@@ -68,7 +69,7 @@ fprintf('Detected led indicator.\n');
 
 % Save the LED detection image
 imsavename = fullfile(expdir, dataloc_params.ledregistrationimagefilstr) ;
-saveLedDetectionImage(imsavename, bkgdImage, result) ;
+saveLedDetectionImage(imsavename, bkgdImage, result, plotYAxisPointsUp) ;
 
 end  % function
 

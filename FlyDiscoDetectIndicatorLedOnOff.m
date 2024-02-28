@@ -28,7 +28,8 @@ registrationparamsfile = fullfile(analysis_protocol_folder_path,dataloc_params.r
 if ~exist(registrationparamsfile,'file')
   error('Registration params file %s does not exist',registrationparamsfile);
 end
-registration_params = ReadParams(registrationparamsfile);
+raw_registration_params = ReadParams(registrationparamsfile);
+registration_params = modernizeRegistrationParams(raw_registration_params) ;
 if ~isfield(indicator_params,'OptogeneticExp') ,
   error('Indicator params optogenetic flag %s does not exist',registrationparamsfile);
 end
@@ -81,7 +82,8 @@ if doLEDdetection ,
                        analysis_protocol_folder_path, ...
                        bg_mean, ...
                        dt, ...
-                       rigId) ;
+                       rigId, ...
+                       registration_params.plotYAxisPointsUp) ;
   % Extract indicatordata from the video
   indicatordata = extractIndicatorLED(expdir, dataloc_params, indicator_params, ledIndicatorPoints) ;
 else
