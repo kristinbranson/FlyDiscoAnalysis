@@ -40,21 +40,13 @@ avifilestr = sprintf('%s_%s',dataloc_params.ctraxresultsavifilestr,basename);
 % metadatafile = fullfile(expdir,'Metadata.xml');
 metadatafile = fullfile(expdir,dataloc_params.metadatafilestr);
 metadata = ReadMetadataFile(metadatafile);
+
+%% Determine the ctrax movie parameters file name, and read in the params
+defaultctraxresultsmovieparamsfile = fullfile(settingsdir,analysis_protocol,dataloc_params.ctraxresultsmovieparamsfilestr);
 if isOptogeneticExp,
-  indicatorfile = fullfile(expdir,dataloc_params.indicatordatafilestr);
   datestrpattern = '20\d{6}';
   match = regexp(metadata.led_protocol,datestrpattern);  
   ledprotocoldatestr = metadata.led_protocol(match:match+7);
-  ledprotocolfile = fullfile(expdir,dataloc_params.ledprotocolfilestr);
-else
-  % non-optogenetic experiments don't have these things
-  indicatorfile = [] ;
-  ledprotocolfile = [] ;  
-end
-
-%% ctrax movie parameters
-defaultctraxresultsmovieparamsfile = fullfile(settingsdir,analysis_protocol,dataloc_params.ctraxresultsmovieparamsfilestr);
-if isOptogeneticExp,
   specificctraxresultsmovie_paramsfile = fullfile(settingsdir,analysis_protocol,['ctraxresultsmovie_params_',ledprotocoldatestr,'.txt']);
   if exist(specificctraxresultsmovie_paramsfile,'file'),
     ctraxresultsmovie_params = ReadParams(specificctraxresultsmovie_paramsfile);
@@ -113,7 +105,9 @@ end
 
 % Read a couple of files if this is an optogenetic experiment
 if isOptogeneticExp ,
+  indicatorfile = fullfile(expdir,dataloc_params.indicatordatafilestr);
   indicator_data = load(indicatorfile) ;
+  ledprotocolfile = fullfile(expdir,dataloc_params.ledprotocolfilestr);
   raw_protocol = loadAnonymous(ledprotocolfile) ;
 else
   indicator_data = struct([]) ;
