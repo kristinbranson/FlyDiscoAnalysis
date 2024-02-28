@@ -1,20 +1,18 @@
-function FlyDiscoMakeCtraxResultsMovie(expdir,varargin)
-% make results movies
+function FlyDiscoMakeCtraxResultsMovie(expdir, varargin)
+% Make Ctrax results movie
 
+% Parse the input arguments
 [analysis_protocol,settingsdir,datalocparamsfilestr] = ...
   myparse(varargin,...
   'analysis_protocol','20150915_flybubble_centralcomplex',...
   'settingsdir',default_settings_folder_path(),...
   'datalocparamsfilestr','dataloc_params.txt');
 
-%% locations of parameters
-
+% Get locations of parameter files
 datalocparamsfile = fullfile(settingsdir,analysis_protocol,datalocparamsfilestr);
 dataloc_params = ReadParams(datalocparamsfile);
 
-%% location of data
-
-%% Get one thing from the registration params
+% Get one thing from the registration params
 registrationparamsfile = fullfile(settingsdir,analysis_protocol,dataloc_params.registrationparamsfilestr);
 if ~exist(registrationparamsfile,'file'),
   error('Registration params file %s does not exist',registrationparamsfile);
@@ -23,7 +21,7 @@ raw_registration_params = ReadParams(registrationparamsfile);
 registration_params = modernizeRegistrationParams(raw_registration_params) ;
 doesYAxisPointUp = registration_params.doesYAxisPointUp ;
 
-%% Get one thing from the indicator params
+% Get one thing from the indicator params
 indicatorparamsfile = fullfile(settingsdir,analysis_protocol,dataloc_params.indicatorparamsfilestr);
 if ~exist(indicatorparamsfile,'file'),
   error('Indicator params file %s does not exist',indicatorparamsfile);
@@ -32,16 +30,11 @@ raw_indicator_params = ReadParams(indicatorparamsfile);
 indicator_params = modernizeIndicatorParams(raw_indicator_params) ;
 isOptogeneticExp = logical(indicator_params.OptogeneticExp) ;
 
-[~,basename,~] = fileparts(expdir);
-moviefile = fullfile(expdir,dataloc_params.moviefilestr);
-trxfile = fullfile(expdir,dataloc_params.trxfilestr);
-avifilestr = sprintf('%s_%s',dataloc_params.ctraxresultsavifilestr,basename);
-%xvidfile = fullfile(expdir,[avifilestr,'.avi']);
-% metadatafile = fullfile(expdir,'Metadata.xml');
+% Read in the experiment metadata
 metadatafile = fullfile(expdir,dataloc_params.metadatafilestr);
 metadata = ReadMetadataFile(metadatafile);
 
-%% Determine the ctrax movie parameters file name, and read in the params
+% Determine the ctrax movie parameters file name, and read in the params
 defaultctraxresultsmovieparamsfile = fullfile(settingsdir,analysis_protocol,dataloc_params.ctraxresultsmovieparamsfilestr);
 if isOptogeneticExp,
   datestrpattern = '20\d{6}';
@@ -79,15 +72,14 @@ if ~exist(tempdatadir, 'dir') ,
   end
 end
 
-
 % Read the trx file if if exists
+trxfile = fullfile(expdir,dataloc_params.trxfilestr);
 if exist(trxfile, 'file') ,
   trxfilestruct = load(trxfile) ;
   trx = trxfilestruct.trx ;
 end
 
-%% read start and end of cropped trajectories
-
+% Read start and end of cropped trajectories
 registrationmatfile = fullfile(expdir,dataloc_params.registrationmatfilestr);
 if ~exist(registrationmatfile,'file'),
   registration_data = struct() ;
@@ -114,28 +106,24 @@ else
   raw_protocol = struct([]) ;
 end
 
-
-
-% determine start and end frames of snippets
+% Determine start and end frames of snippets
 [firstframes, firstframes_off, endframes_off, nframes, indicatorframes] = ...
     DetermineStartAndEndOfResultsMovieSnippets(isOptogeneticExp, registration_data, ctraxresultsmovie_params, ...
                                                is_using_default_ctrax_results_movie_params, indicator_data, raw_protocol) ;
-
                                            
 % Determine the layout of the results movie frame
 [final_nzoomr, final_nzoomc, final_figpos] = ...
     determine_results_movie_figure_layout(ctraxresultsmovie_params, trx) ;
-
     
-    
-% create subtitle file
+% Create subtitle file
+[~,basename,~] = fileparts(expdir);
 subtitlefile = ...
     write_subtitle_file(expdir, nframes, isOptogeneticExp, ctraxresultsmovie_params, basename, firstframes_off, endframes_off, ...
                         raw_protocol, indicator_data, indicatorframes) ;
-
-
                 
-% Create results movie
+% Create results movie as .avi
+moviefile = fullfile(expdir,dataloc_params.moviefilestr);
+avifilestr = sprintf('%s_%s',dataloc_params.ctraxresultsavifilestr,basename);
 avi_file_path = fullfile(tempdatadir, [avifilestr, '_temp.avi']);
 if exist(avi_file_path,'file'),
   delete(avi_file_path);
@@ -158,83 +146,12 @@ temp_avi_path = [tempname(scratch_folder_path) '.avi'] ;
   'dynamicflyselection',true,...
   'doshowsex',true, ...
   'doesYAxisPointUp', doesYAxisPointUp);
-%'fps',ctraxresultsmovie_params.fps,...
-    %'maxnframes',+ctraxresultsmovie_params_nframes,...
 if ishandle(1),
   close(1);
 end
-
 if ~succeeded,
-  error('Failed to create raw avi %s',avi_file_path);
+  error('Failed to create Ctrax results movie as .avi file %s',avi_file_path);
 end
 
-% compress
-
-%tmpfile = [xvidfile,'.tmp'];
-newheight = 4*ceil(height/4);
-newwidth = 4*ceil(width/4);
-
-
-% subtitles are upside down, so encode with subtitles and flip, then flip
-% again
-%cmd = sprintf('mencoder %s -o %s -ovc xvid -xvidencopts fixed_quant=4 -vf scale=%d:%d,flip -sub %s -subfont-text-scale 2 -msglevel all=2',...
-%  avifile,tmpfile,newwidth,newheight,subtitlefile);
-
-mp4_file_path = fullfile(expdir, [avifilestr,'.mp4']) ;
-nowstr = datestr(now,'yyyymmddTHHMMSSFFF');
-passlogfile = sprintf('%s_%s',avi_file_path,nowstr);
-ffmpeg_command = 'env -u LD_LIBRARY_PATH /usr/bin/ffmpeg' ;  
-    % Use env -u to clear Matlab's very Matlab-specific
-    % LD_LIBRARY_PATH
-% if isequal(get_distro_codename(), 'Ubuntu') && exist('/usr/bin/ffmpeg', 'file') ,
-%     ffmpeg_command = 'env -u LD_LIBRARY_PATH /usr/bin/ffmpeg' ;  
-%         % Use the local ffmpeg, to avoid fontconfig issues
-%         % Have to use env -u to clear Matlab's very Matlab-specific
-%         % LD_LIBRARY_PATH
-% else
-%     %ffmpeg_command = '/misc/local/ffmpeg-4.3.1/bin/ffmpeg' ;  % cluster pre OL9
-%     ffmpeg_command = '/misc/sc/ffmpeg-git-20230313-amd64-static/ffmpeg' ;
-% end
-
-cmd = sprintf('%s -i %s -y -passlogfile %s -c:v h264 -pix_fmt yuv420p -s %dx%d -b:v 1600k -vf "subtitles=%s:force_style=''FontSize=10,FontName=Helvetica''" -pass 1 -f mp4 /dev/null',...
-  ffmpeg_command, avi_file_path,passlogfile,newwidth,newheight,subtitlefile);
-cmd2 = sprintf('%s -i %s -y -passlogfile %s -c:v h264 -pix_fmt yuv420p -s %dx%d -b:v 1600k -vf "subtitles=%s:force_style=''FontSize=10,FontName=Helvetica''" -pass 2 -f mp4 %s',...
-  ffmpeg_command, avi_file_path,passlogfile,newwidth,newheight,subtitlefile,mp4_file_path);
-
-status = system(cmd);
-if status ~= 0,
-  fprintf('*****\n');
-  warning('ffmpeg first pass failed.');
-  fprintf('Need to run:\n');
-  fprintf('%s\n',cmd);
-%  cmd2 = sprintf('mencoder %s -o %s -ovc xvid -xvidencopts fixed_quant=4 -vf flip -msglevel all=2',...
-%    tmpfile,xvidfile);
-  fprintf('then\n');
-  fprintf('%s\n',cmd2);
-  fprintf('then delete %s %s* %s\n',avi_file_path,passlogfile,subtitlefile);
-  fprintf('*****\n');
-else
-%   cmd = sprintf('mencoder %s -o %s -ovc xvid -xvidencopts fixed_quant=4 -vf flip -msglevel all=2',...
-%     tmpfile,xvidfile);
-  status = system(cmd2);
-  if status ~= 0,
-    fprintf('*****\n');
-    warning('ffmpeg second pass failed.');
-    fprintf('Need to run:\n');
-    fprintf('%s\n',cmd2);
-    fprintf('then delete %s %s* %s\n',avi_file_path,passlogfile,subtitlefile);
-    fprintf('*****\n');    
-  else
-    %delete(tmpfile);
-    delete(avi_file_path);
-    delete(subtitlefile);
-    fname = [passlogfile '-*.log'];
-    if isscalar(dir(fname))
-      delete(fname);
-    end    
-    fname = [passlogfile '-*.log.mbtree'];
-    if isscalar(dir(fname))
-      delete(fname);
-    end    
-  end
-end
+% Compress the .avi to a .mp4 using the h.264 codec
+compressCtraxResultsMovie(expdir, avifilestr, avi_file_path, height, width, subtitlefile) ;
