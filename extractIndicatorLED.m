@@ -22,15 +22,20 @@ width = min(ledwindowr*2,nc-x);
 % of that region for each frame
 maximage = zeros(1,nframes) ;
 meanimage = zeros(1,nframes);
+fprintf('Extracting LED indicator signal from video frames...\n') ;
+pbo = progress_bar_object(nframes) ;
 for i = 1:nframes
   frame = readfcn(i);
   detail = frame(y:y+height,x:x+width);
   maximage(i) = max(detail(:));
   meanimage(i) = mean(detail(:));
   if (mod(i,1000) == 0) ,
-    disp(round((i/nframes)*100))
-  end  
+    pbo.update(1000) ;
+    %disp(round((i/nframes)*100))
+  end
 end
+pbo.update(inf) ;
+fprintf('Done extracting LED indicator signal from video frames.\n') ;
 
 % % plot the middle frame along with the area used for LED detection
 % frame = readfcn(min(max(1,round(nframes/2)),nframes)) ;
