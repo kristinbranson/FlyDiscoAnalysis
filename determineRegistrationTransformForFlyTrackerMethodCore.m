@@ -55,7 +55,7 @@ if isempty(r) ,
   error('The FlyTracker calibration file "r" field is empty.  Currently, only circular chambers are supported.') ;
 end
 chamberCount = size(centroids,1) ;
-circleRadius = repmat(r, [chamberCount 1]) ;
+circleRadius = r ;  % scalar, b/c all arenas have to be the same size
 circleCenterX = centroids(:,2) ;  % chamberCount x 1
 circleCenterY = centroids(:,1) ;  % chamberCount x 1
 
