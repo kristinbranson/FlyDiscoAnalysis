@@ -7,15 +7,21 @@ function trx = appendPhysicalUnitFieldsToTrx(input_trx, registration_data, are_t
     scale = registration_data.scale ;
     trx = input_trx ;
     for fly = 1:length(trx),
-        % apply transformation to 4 extremal points on the ellipse
-        xnose0 = trx(fly).x + 2*trx(fly).a.*cos(trx(fly).theta);
-        ynose0 = trx(fly).y + 2*trx(fly).a.*sin(trx(fly).theta);
-        xtail0 = trx(fly).x - 2*trx(fly).a.*cos(trx(fly).theta);
-        ytail0 = trx(fly).y - 2*trx(fly).a.*sin(trx(fly).theta);
-        xleft0 = trx(fly).x + 2*trx(fly).b.*cos(trx(fly).theta-pi/2);
-        yleft0 = trx(fly).y + 2*trx(fly).b.*sin(trx(fly).theta-pi/2);
-        xright0 = trx(fly).x + 2*trx(fly).b.*cos(trx(fly).theta+pi/2);
-        yright0 = trx(fly).y + 2*trx(fly).b.*sin(trx(fly).theta+pi/2);
+        % apply transformation to center, 4 extremal points on the ellipse
+        x0 = trx(fly).x ;
+        y0 = trx(fly).y ;
+        a0 = trx(fly).a ;
+        b0 = trx(fly).b ;
+        theta0 = trx(fly).theta ;
+        xnose0 = x0 + 2*a0.*cos(theta0);
+        ynose0 = y0 + 2*a0.*sin(theta0);
+        xtail0 = x0 - 2*a0.*cos(theta0);
+        ytail0 = y0 - 2*a0.*sin(theta0);
+        xleft0 = x0 + 2*b0.*cos(theta0-pi/2);
+        yleft0 = y0 + 2*b0.*sin(theta0-pi/2);
+        xright0 = x0 + 2*b0.*cos(theta0+pi/2);
+        yright0 = y0 + 2*b0.*sin(theta0+pi/2);
+        [~,~,chamber_index] = registerfn(x0,y0);
         [xnose1,ynose1] = registerfn(xnose0,ynose0);
         [xtail1,ytail1] = registerfn(xtail0,ytail0);
         [xleft1,yleft1] = registerfn(xleft0,yleft0);
@@ -35,6 +41,7 @@ function trx = appendPhysicalUnitFieldsToTrx(input_trx, registration_data, are_t
         trx(fly).a_mm = a1;
         trx(fly).b_mm = b1;
         trx(fly).theta_mm = theta1;
+        trx(fly).chamber_index = mode(chamber_index) ;  % only save one (scalar) value per trajectory
 
         % add dt
         % TODO: fix timestamps after fix errors!

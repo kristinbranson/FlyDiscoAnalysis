@@ -25,6 +25,14 @@ if isempty(perframefns),
   perframefns = importdata(perframefnsfile);
 end
 nfns = numel(perframefns);
+% Note that the multi-fly per-frame-feature-computation functions have been
+% updated to be multiple-chamber-aware, so they only look at flies in the same
+% chamber as the fly for which the PFFs are being computed.  The
+% arena-relative functions did not need to be updated, because each fly's
+% registered coordinates are relative to the center of the chamber it is in,
+% and all the arenas are the same size.  If at some point a rig is built with
+% different-sized chambers, this will have to be revisited.
+% -- ALT, 2024-03-01.
 
 % What files exist already?
 tmp = dir(fullfile(expdir,trx.dataloc_params.perframedir,'*.mat'));

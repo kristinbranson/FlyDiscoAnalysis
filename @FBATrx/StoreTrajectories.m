@@ -26,6 +26,8 @@ for i = 1:numel(traj_fns),
       units = parseunits('days');
     case 'sex',
       units = parseunits('unit');
+    case 'chamber_index',
+      units = parseunits('unit');
   end
   try
     if dooverwrite && exist(filename,'file') && ~obj.DEBUG,

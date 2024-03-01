@@ -151,8 +151,8 @@ scale = circleRadius_mm / circleRadius;  % mm/pixel
 %
 % Package everything up into the registration struct, save that to disk
 % 
-registerfn = @(x,y)(registerForSingleChamber(x,y,offX,offY,offTheta,scale)) ;
-affine = affineTransformMatrixFromOffsetsAndScale(offX,offY,offTheta,scale);
+registerfn = @(x,y)(registerForMultipleChambers(x,y,offX,offY,offTheta,scale)) ;
+affine = affineTransformMatricesFromOffsetsAndScale(offX,offY,offTheta,scale);
 registration_data = ...
   struct('offX',offX,...
          'offY',offY,...

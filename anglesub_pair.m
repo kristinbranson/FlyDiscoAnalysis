@@ -1,5 +1,7 @@
 function anglesub = anglesub_pair(trx,fly1,fly2)
 
+% Note: fly1 and fly2 must be in the same chamber for this to work properly.
+
 % initialize
 anglesub = nan(1,trx(fly1).nframes);
 
@@ -9,7 +11,7 @@ t1 = min(trx(fly1).endframe,trx(fly2).endframe);
   
 % no overlap
 if t1 < t0, 
-  return;
+  return
 end
 
 x_mm1 = trx(fly1).x_mm;
