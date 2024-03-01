@@ -1,5 +1,5 @@
 % closest fly, based on dnose2ell
-function [data,units,mind,angle] = compute_closestfly_nose2ell2(trx,n,dosave_d,npoints)
+function [data,units,mind,angle] = fba_compute_closestfly_nose2ell2(trx,n,dosave_d,npoints)
 
 if nargin < 3,
   dosave_d = true;
@@ -21,10 +21,8 @@ for i1 = 1:nflies,
 
   % use dnose2center and major axis length to compute upper and lower bounds on
   % dnose2ell
-  % fprintf('CHANGE THIS: THIS IS JUST FOR DEBUGGING NOSE2ELL\n');
   [mindupper,dlower] = dnose2ell_bounds(trx,fly1,flies);
-  %mindupper = zeros(1,trx(fly1).nframes);
-  %dlower = zeros(nflies,trx(fly1).nframes);
+  fly1_chamber_index = trx(fly1).chamber_index ;  % scalar
   
   mind{i1} = inf(1,trx(fly1).nframes);
   closesti = ones(1,trx(fly1).nframes);
@@ -33,8 +31,12 @@ for i1 = 1:nflies,
   for i2 = 1:nflies,
     fly2 = flies(i2);
     if i1 == i2,
-      continue;
+      continue
     end
+    fly2_chamber_index = trx(fly2).chamber_index ;  % scalar
+    if fly2_chamber_index ~= fly1_chamber_index ,
+      continue
+    end        
     % only try for frames where lower bound is smaller than min upper bound
     idx1try = find(mindupper >= dlower(fly2,:));
     [dcurr,anglecurr] = dnose2ell_pair2(trx,fly1,fly2,npoints,idx1try);
@@ -49,11 +51,11 @@ end
 
 % so that we don't compute dcenter twice
 if dosave_d,
-  data = mind; %#ok<NASGU>
-  units = parseunits('mm'); %#ok<NASGU>
+  data = mind;
+  units = parseunits('mm');
   filename = trx.GetPerFrameFile('dnose2ell',n);
   if exist(filename,'file'),
-    try
+    try  %#ok<TRYNC> 
       delete(filename);
     end
   end
@@ -62,8 +64,8 @@ if dosave_d,
   catch ME,
     warning('Could not save file %s:\n%s',filename,getReport(ME));
   end
-  data = angle; %#ok<NASGU>
-  units = parseunits('rad'); %#ok<NASGU>
+  data = angle;
+  units = parseunits('rad');
   filename = trx.GetPerFrameFile('angleonclosestfly',n);
   if exist(filename,'file'),
     try

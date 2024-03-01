@@ -1,4 +1,4 @@
-function [data,units,mind] = compute_closestfly_nose2ell_anglerange(trx,n,anglerange,dosave_d)
+function [data,units,mind] = fba_compute_closestfly_nose2ell_anglerange(trx,n,anglerange,dosave_d)
 
 MAXVALUE = trx.perframe_params.max_dnose2ell_anglerange;
 logmaxvalue = log(MAXVALUE);
@@ -18,6 +18,7 @@ anglerange2 = modrange(anglerange(2),anglerange(1),anglerange(1)+2*pi);
 
 for i1 = 1:nflies,
   fly1 = flies(i1);
+  fly1_chamber_index = trx(fly1).chamber_index ;  % scalar  
   fprintf('fly1 = %d\n',fly1);
 
   % compute upper and lower bounds on distance
@@ -32,9 +33,13 @@ for i1 = 1:nflies,
       continue;
     end
     fly2 = flies(i2);
+    fly2_chamber_index = trx(fly2).chamber_index ;  % scalar
+    if fly2_chamber_index ~= fly1_chamber_index ,
+      continue
+    end    
     
     % compute dnose2center, angle from nose to center
-    [dnose2center,off10,off11,off20,off21,t0,t1,anglefrom1to2] = dnose2center_pair(trx,fly1,fly2);
+    [dnose2center,off10,off11,off20,off21,~,~,anglefrom1to2] = dnose2center_pair(trx,fly1,fly2);
         
     if off10 > off11,
       continue;
@@ -83,8 +88,8 @@ anglerange_deg = round(anglerange*180/pi);
 
 % so that we don't compute dcenter twice
 if dosave_d,
-  data = mind; %#ok<NASGU>
-  units = parseunits('mm'); %#ok<NASGU>
+  data = mind;
+  units = parseunits('mm');
   tmp = sprintf('dnose2ell_angle_%dto%d',anglerange_deg(1),anglerange_deg(2));
   tmp = strrep(tmp,'-','min');
   filename = trx.GetPerFrameFile(tmp,n);

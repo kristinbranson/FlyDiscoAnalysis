@@ -10,8 +10,11 @@ scale = exprnd(1) ;
 offTheta = unifrnd(-pi,+pi) ;
 [x_reg_single,y_reg_single] = registerForSingleChamber(x,y,offX,offY,offTheta,scale) ;
 [x_reg_multi,y_reg_multi] = registerForMultipleChambers(x,y,offX,offY,offTheta,scale) ;
+A_single = affineTransformMatrixFromOffsetsAndScale(offX,offY,offTheta,scale) ;
+A_multi = affineTransformMatricesFromOffsetsAndScale(offX,offY,offTheta,scale) ;
 assert(all(abs(x_reg_single-x_reg_multi)<eps)) ;
 assert(all(abs(y_reg_single-y_reg_multi)<eps)) ;
+assert(all(all(abs(A_single-A_multi)<eps))) ;
 
 % Make sure it gets the chamber assignments right
 chamber_sample_count = 10 ;  % samples per chamber
@@ -47,14 +50,29 @@ x_reg_single = zeros(1,sample_count) ;
 y_reg_single = zeros(1,sample_count) ;
 for chamber_index = 1 : chamber_count ,
   r_center = r_center_from_chamber_index(:,chamber_index) ;
-  offX = -r_center(1) ;
-  offY = -r_center(2) ;
+  offX_single = -r_center(1) ;
+  offY_single = -r_center(2) ;
   is_in_chamber_from_shuffled_sample_index = (chamber_index_from_shuffled_sample_index == chamber_index) ;
   x_shuffled_chamber = x_shuffled(is_in_chamber_from_shuffled_sample_index) ;
   y_shuffled_chamber = y_shuffled(is_in_chamber_from_shuffled_sample_index) ;
-  [x_shuffled_chamber_reg,y_shuffled_chamber_reg] = registerForSingleChamber(x_shuffled_chamber,y_shuffled_chamber,offX,offY,offTheta,scale) ;
+  [x_shuffled_chamber_reg,y_shuffled_chamber_reg] = registerForSingleChamber(x_shuffled_chamber,y_shuffled_chamber,offX_single,offY_single,offTheta,scale) ;
   x_reg_single(is_in_chamber_from_shuffled_sample_index) = x_shuffled_chamber_reg ;
   y_reg_single(is_in_chamber_from_shuffled_sample_index) = y_shuffled_chamber_reg ;  
 end
 assert(all(abs(x_reg_single-x_reg_multi)<eps)) ;
 assert(all(abs(y_reg_single-y_reg_multi)<eps)) ;
+
+% Assemble all the single-chamber transforms, compare with multi
+A_multi = affineTransformMatricesFromOffsetsAndScale(offX,offY,offTheta,scale) ;
+A_single = zeros(3,3,chamber_count) ;
+for chamber_index = 1 : chamber_count ,
+  r_center = r_center_from_chamber_index(:,chamber_index) ;
+  offX_single = -r_center(1) ;
+  offY_single = -r_center(2) ;
+  A_single(:,:,chamber_index) = affineTransformMatrixFromOffsetsAndScale(offX_single,offY_single,offTheta,scale) ;
+end
+assert(all(all(all(abs(A_single-A_multi)<eps)))) ;
+
+% Declare success
+fprintf('All tests passed.\n') ;
+

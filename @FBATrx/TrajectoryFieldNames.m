@@ -26,4 +26,5 @@ fns = {
   'ywingl'
   'xwingr'
   'ywingr'
+  'chamber_index'
   };
