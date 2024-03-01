@@ -15,13 +15,17 @@ else
   % Test if RGBprotocol has only one active color
   isActiveFromLedIndex = [ any(rawProtocol.Rintensity) any(rawProtocol.Gintensity) any(rawProtocol.Bintensity) ] ;
   % Currently we only use the first active LED.  Warn if there is more than one.
+  % TODO: This code should be removed one we're doing proper handling of RGB
+  % protocols.  -- ALT, 2024-02-29
   activeLedIndices = find(isActiveFromLedIndex) ;
   if isempty(activeLedIndices) ,
     error('RGB protocol has zero active LEDs')
   elseif length(activeLedIndices)>1 ,
-    warning('RGB protocol has more than one active LED---only using the first one')    
+    willUseLedIndex = activeLedIndices(1) ;
+    warning('RGB protocol has more than one active LED---only using the first one (LED %d)', willUseLedIndex)
+  else
+    willUseLedIndex = activeLedIndices(1) ;    
   end
-  willUseLedIndex = activeLedIndices(1) ;
   willUseFromLedIndex = ([1 2 3]==willUseLedIndex) ;
   % call function that transforms new protocol to old protocol
   result = ConvertRGBprotocol2protocolformat(rawProtocol, willUseFromLedIndex) ;
