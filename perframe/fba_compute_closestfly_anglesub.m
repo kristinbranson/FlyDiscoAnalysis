@@ -12,7 +12,7 @@ maxanglesub = cell(1,nflies);
 
 for i1 = 1:nflies,
   fly1 = flies(i1);
-  fprintf('fly1 = %d\n',fly1);
+  %fprintf('fly1 = %d\n',fly1);
   fly1_chamber_index = trx(fly1).chamber_index ;  % scalar
   anglesub = nan(nflies,trx(fly1).nframes);
   for i2 = 1:nflies,

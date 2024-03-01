@@ -17,7 +17,7 @@ angle = cell(1,nflies);
 
 for i1 = 1:nflies,
   fly1 = flies(i1);
-  fprintf('target 1 = %d\n',fly1);
+  %fprintf('target 1 = %d\n',fly1);
 
   % use dnose2center and major axis length to compute upper and lower bounds on
   % dnose2ell

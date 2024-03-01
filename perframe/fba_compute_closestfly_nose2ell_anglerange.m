@@ -19,7 +19,7 @@ anglerange2 = modrange(anglerange(2),anglerange(1),anglerange(1)+2*pi);
 for i1 = 1:nflies,
   fly1 = flies(i1);
   fly1_chamber_index = trx(fly1).chamber_index ;  % scalar  
-  fprintf('fly1 = %d\n',fly1);
+  %fprintf('fly1 = %d\n',fly1);
 
   % compute upper and lower bounds on distance
   
