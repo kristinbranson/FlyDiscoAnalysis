@@ -22,7 +22,7 @@ else
     error('RGB protocol has zero active LEDs')
   elseif length(activeLedIndices)>1 ,
     willUseLedIndex = activeLedIndices(1) ;
-    warning('RGB protocol has more than one active LED---only using the first one (LED %d)', willUseLedIndex)
+    warning('RGB protocol has more than one active LED---only using the first active LED (LED %d)', willUseLedIndex)
   else
     willUseLedIndex = activeLedIndices(1) ;    
   end
