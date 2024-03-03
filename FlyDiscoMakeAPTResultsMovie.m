@@ -59,6 +59,15 @@ raw_registration_params = ReadParams(registrationparamsfile);
 registration_params = modernizeRegistrationParams(raw_registration_params) ;
 doesYAxisPointUp = registration_params.doesYAxisPointUp ;
 
+% Get one thing from the indicator params
+indicatorparamsfile = fullfile(settingsdir,analysis_protocol,dataloc_params.indicatorparamsfilestr);
+if ~exist(indicatorparamsfile,'file'),
+  error('Indicator params file %s does not exist',indicatorparamsfile);
+end
+raw_indicator_params = ReadParams(indicatorparamsfile);
+indicator_params = modernizeIndicatorParams(raw_indicator_params) ;
+isOptogeneticExp = logical(indicator_params.OptogeneticExp) ;
+
 %% location of data
 
 if isempty(outexpdir),
@@ -80,15 +89,10 @@ else
   assert(exist(trxfile,'file')>0);
 end
 avifilestr = sprintf('%s_%s',dataloc_params.aptresultsavefilestr,basename);
-%xvidfile = fullfile(expdir,[avifilestr,'.avi']);
 indicatorfile = fullfile(expdir,dataloc_params.indicatordatafilestr);
-% metadatafile = fullfile(expdir,'Metadata.xml');
 metadatafile = fullfile(expdir,dataloc_params.metadatafilestr);
 metadata = ReadMetadataFile(metadatafile);
-% commonregistrationparamsfile = fullfile(settingsdir,analysis_protocol,'registration_params.txt');
-commonregistrationparamsfile = fullfile(settingsdir,analysis_protocol,dataloc_params.registrationparamsfilestr);
-commonregistrationparams = ReadParams(commonregistrationparamsfile);
-if commonregistrationparams.OptogeneticExp,
+if isOptogeneticExp,
   datestrpattern = '20\d{6}';
   match = regexp(metadata.led_protocol,datestrpattern);
   assert(numel(match)==1);
@@ -100,7 +104,7 @@ end
 
 %% ctrax=apt movie parameters
 defaultctraxresultsmovieparamsfile = fullfile(settingsdir,analysis_protocol,dataloc_params.ctraxresultsmovieparamsfilestr);
-if commonregistrationparams.OptogeneticExp,
+if isOptogeneticExp,
   specificctraxresultsmovie_paramsfile = fullfile(settingsdir,analysis_protocol,['ctraxresultsmovie_params_',ledprotocoldatestr,'.txt']);
   defaultparams = 1;
   if exist(specificctraxresultsmovie_paramsfile,'file'),
@@ -161,7 +165,7 @@ end
 
 %% determine start and end frames of snippets
 
-if ~commonregistrationparams.OptogeneticExp,
+if ~isOptogeneticExp,
   nframes = registration_params.end_frame-registration_params.start_frame + 1;
   firstframes_off = min(max(0,round(ctraxresultsmovie_params.firstframes*nframes)),nframes-1);
   firstframes_off(ctraxresultsmovie_params.firstframes < 0) = nan;
@@ -333,7 +337,7 @@ if ~hidemovietype,
   dt = [0,ctraxresultsmovie_params.nframes];
   ts = cumsum(dt);
   
-  if ~commonregistrationparams.OptogeneticExp,
+  if ~isOptogeneticExp,
     for i = 1:numel(dt)-1,
       fprintf(fid,'%d\n',i);
       fprintf(fid,'%s --> %s\n',...
