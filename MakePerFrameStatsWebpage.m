@@ -1,6 +1,6 @@
 function MakePerFrameStatsWebpage(filename,basename,groups,statfiles,statperflyfiles,...
   stimfeatures,stimfiles,stimperflyfiles,...
-  ions,fliesplot,stimtrajfile,vidfiles,...
+  videoions,fliesplot,stimtrajfile,vidfiles,...
   histfiles,histgroups)
 
 fid = fopen(filename,'w');
@@ -47,14 +47,14 @@ if isstimfile,
   fprintf(fid,'<a id="stim"><h2>Mean time series during stimulation</h2></a>\n');
   
   fprintf(fid,'<table width="100%%">\n');
-  fprintf(fid,'<tr><th></th>');
-  for i = 1:size(stimfiles,1),
-    fprintf(fid,'<th>Period %d</th> ',i);
-  end
-  fprintf(fid,'</tr>\n');
+  % fprintf(fid,'<tr><th></th>');
+  % for i = 1:size(stimfiles,1),
+  %   fprintf(fid,'<th>Period %d</th> ',i);
+  % end
+  % fprintf(fid,'</tr>\n');
   for fi = 1:size(stimfiles,2),
     fprintf(fid,'<tr>\n');
-    fprintf(fid,'<th><span style="writing-mode: vertical-lr; -ms-writing-mode: tb-rl; transform: rotate(180deg);">%s</span></th>\n',stimfeatures{fi});
+    %fprintf(fid,'<th><span style="writing-mode: vertical-lr; -ms-writing-mode: tb-rl; transform: rotate(180deg);">%s</span></th>\n',stimfeatures{fi});
     %fprintf(fid,'<a id="stim_%s"><h3>%s</h3></a>\n',stimfeatures{fi},stimfeatures{fi});
     for ion = 1:size(stimfiles,1),
       name = stimfiles{ion,fi};
@@ -74,14 +74,14 @@ if plotflies,
   fprintf(fid,'<a id="stimperfly"><h2>Per-fly time series during stimulation</h2></a>\n');
   
   fprintf(fid,'<table width="100%%">\n');
-  fprintf(fid,'<tr><th></th>');
-  for i = 1:size(stimfiles,1),
-    fprintf(fid,'<th>Period %d</th> ',i);
-  end
-  fprintf(fid,'</tr>\n');
+  % fprintf(fid,'<tr><th></th>');
+  % for i = 1:size(stimfiles,1),
+  %   fprintf(fid,'<th>Period %d</th> ',i);
+  % end
+  % fprintf(fid,'</tr>\n');
   for fi = 1:size(stimfiles,2),
     fprintf(fid,'<tr>\n');
-    fprintf(fid,'<th><span style="writing-mode: vertical-lr; -ms-writing-mode: tb-rl; transform: rotate(180deg);">%s</span></th>\n',stimfeatures{fi});
+    %fprintf(fid,'<th><span style="writing-mode: vertical-lr; -ms-writing-mode: tb-rl; transform: rotate(180deg);">%s</span></th>\n',stimfeatures{fi});
     %fprintf(fid,'<a id="stim_%s"><h3>%s</h3></a>\n',stimfeatures{fi},stimfeatures{fi});
     for ion = 1:size(stimfiles,1),
       name = stimperflyfiles{ion,fi};
@@ -121,7 +121,7 @@ if ~isempty(vidfiles),
   %fprintf(fid,'<tr><th></th>');
   colw = 100/size(vidfiles,1);
   for i = 1:size(vidfiles,1),
-    fprintf(fid,'<th width="%f%%">Period %d</th> ',colw,i);
+    fprintf(fid,'<th width="%f%%">Period %d</th> ',colw,videoions(i));
   end
   fprintf(fid,'</tr>\n');
   for fi = 1:size(vidfiles,2),
@@ -133,7 +133,7 @@ if ~isempty(vidfiles),
       if isempty(name),
         continue;
       end
-      fprintf(fid,'  <td><a id="stimvideo_period%d_fly%d" href="%s"><img src="%s" width="100%%"></a></td>\n',ions(ion),fliesplot(fi),name,name);
+      fprintf(fid,'  <td><a id="stimvideo_period%d_fly%d" href="%s"><img src="%s" width="100%%"></a></td>\n',videoions(ion),fliesplot(fi),name,name);
     end
     fprintf(fid,'</tr>\n');
   end

@@ -1,14 +1,15 @@
 function handles = PlotPerFrameStatsGroup(stats_perframefeatures,statsperfly,statsperexp,basename,varargin)
 
 % parse plotting parameters
-[hfig,hfigflies,visible,position,axposition,plotparams,plotflies] = ...
+[hfig,hfigflies,visible,position,axposition,plotparams,plotflies,fontsize] = ...
   myparse(varargin,'hfig',[],...
   'hfigflies',[],...
   'visible','on',...
   'position',[1 1 800 400],...
-  'axposition',[.075,.3,.9,.65],...
+  'axposition',[.075,.25,.9,.7],...
   'plotparams',struct,...
-  'plotflies',true);
+  'plotflies',true,...
+  'fontsize',8);
 
 % set up figure
 if isempty(hfig) || ~ishandle(hfig),
@@ -165,28 +166,16 @@ for i = 1:nfns,
   end
 end
   
-set(hax,'XTick',1:nfns,'XTickLabel',typestrs);
+set(hax,'XTick',1:nfns,'XTickLabel',typestrs,'FontSize',fontsize);
 
 %% legend
 
 %xlabel(hax,'Experiment','Interpreter','none');
 if ~arefields,
-  hy = ylabel(hax,fields{1},'Interpreter','none');
+  hy = ylabel(hax,fields{1},'Interpreter','none','FontSize',fontsize);
 end
-hti = title(hax,sprintf('Mean, std over flies for %s',basename),'Interpreter','none');
+hti = title(hax,basename,'Interpreter','none','FontSize',fontsize);
 
-%% rotate ticks
-hx = rotateticklabel(hax,90);
-% make sure the ticks don't overlap the x-axis
-ex = get(hx(1),'Extent');
-y1 = ex(2)+ex(4);
-offy = max(0,y1-miny);
-for i = 1:numel(hx),
-  pos = get(hx(i),'Position');
-  pos(2) = pos(2) - offy;
-  set(hx(i),'Position',pos,'color',colors{i});
-end
-set(hx,'Interpreter','none');
 set(hax,'box','off');
 
 %% plot per-fly data
@@ -208,22 +197,22 @@ if plotflies,
   ylim = [miny-(maxy-miny)*.01,maxy+(maxy-miny)*.01];
   set(haxflies,'YLim',ylim);
   set(haxflies,'XTick',1:nfns,'XTickLabel',typestrs);
-  hx = rotateticklabel(haxflies,90);
-  % make sure the ticks don't overlap the x-axis
-  ex = get(hx(1),'Extent');
-  y1 = ex(2)+ex(4);
-  offy = max(0,y1-miny);
-  for i = 1:numel(hx),
-    pos = get(hx(i),'Position');
-    pos(2) = pos(2) - offy;
-    set(hx(i),'Position',pos,'color',colors{i});
-  end
-  set(hx,'Interpreter','none');
-  set(haxflies,'box','off');
+  % hx = rotateticklabel(haxflies,90);
+  % % make sure the ticks don't overlap the x-axis
+  % ex = get(hx(1),'Extent');
+  % y1 = ex(2)+ex(4);
+  % offy = max(0,y1-miny);
+  % for i = 1:numel(hx),
+  %   pos = get(hx(i),'Position');
+  %   pos(2) = pos(2) - offy;
+  %   set(hx(i),'Position',pos,'color',colors{i});
+  % end
+  % set(hx,'Interpreter','none');
+  set(haxflies,'box','off','FontSize',fontsize);
   if ~arefields,
-    hy = ylabel(haxflies,fields{1},'Interpreter','none');
+    hy = ylabel(haxflies,fields{1},'Interpreter','none','FontSize',fontsize);
   end
-  hti = title(haxflies,sprintf('Mean per fly %s',basename),'Interpreter','none');
+  hti = title(haxflies,sprintf('Mean per fly %s',basename),'Interpreter','none','FontSize',fontsize);
   legend(hperfly,sperfly);
   
 end
@@ -236,7 +225,6 @@ handles.hax = hax;
 handles.h = h;
 handles.hy = hy;
 handles.hti = hti;
-handles.hx = hx;
 handles.position = position;
 handles.hfigflies = hfigflies;
 handles.haxflies = haxflies;

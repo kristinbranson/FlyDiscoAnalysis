@@ -1,4 +1,4 @@
-function [hfig,hfigfly] = PlotStimulusInterval(trx,field,ion,basename,varargin)
+function [hfig,hfigfly] = PlotStimulusInterval(trx,field,ions,basename,setname,varargin)
 
 defaultcolors = struct('stimbkgd',[0.927 0.8156 0.8368],...
   'stim',[0.6350 0.0780 0.1840],...
@@ -9,7 +9,7 @@ defaultcolors = struct('stimbkgd',[0.927 0.8156 0.8368],...
 
 % parse plotting parameters
 [hfig,hfigfly,visible,position,axposition,prestim,poststim,colors,ylim,plotflies,...
-  maxnflies,plotstd,fliesplot] = ...
+  maxnflies,plotstd,fliesplot,maxdiffintervallength,fontsize] = ...
   myparse(varargin,'hfig',gobjects(1),...
   'hfigfly',gobjects(1),...
   'visible','on',...
@@ -22,40 +22,63 @@ defaultcolors = struct('stimbkgd',[0.927 0.8156 0.8368],...
   'plotflies',true,...
   'maxnflies',inf,...
   'plotstd',true,...
-  'fliesplot',[]);
+  'fliesplot',[],...
+  'maxdiffintervallength',2,...
+  'fontsize',8);
 
 fns = setdiff(fieldnames(defaultcolors),fieldnames(colors));
 for i = 1:numel(fns),
   colors.(fns{i}) = defaultcolors.(fns{i});
 end
+nons = numel(ions);
 
 % stimulus periods
 ind = trx.getIndicatorLED(1);
-non = numel(ind.starton);
-assert(ion <= non);
+nontotal = numel(ind.starton);
+assert(all(ions <= nontotal));
 
 % times to plot
-f0 = ind.starton(ion);
-f1 = ind.endon(ion);
-t0 = trx.movie_timestamps{1}(f0);
-t1 = trx.movie_timestamps{1}(f1);
-tpre = t0-prestim;
-tpost = t1+poststim;
-[~,fpre] = min(abs(trx.movie_timestamps{1}-tpre));
-[~,fpost] = min(abs(trx.movie_timestamps{1}-tpost));
+f0s = ind.starton(ions);
+f1s = ind.endon(ions);
+t0s = trx.movie_timestamps{1}(f0s);
+t1s = trx.movie_timestamps{1}(f1s);
+tpres = t0s-prestim;
+tposts = t1s+poststim;
+[~,fpres] = min(abs(trx.movie_timestamps{1}'-tpres),[],1);
+[~,fposts] = min(abs(trx.movie_timestamps{1}'-tposts),[],1);
 
 data = trx.(field);
 nflies = numel(data);
-ipre = fpre-trx.firstframe+1;
-ipost = fpost-trx.firstframe+1;
+ndata = cell(1,nflies);
+stddata_perfly = cell(nflies,nons);
 for fly = 1:nflies,
-  data{fly} = padgrab(data{fly},nan,1,1,ipre(fly),ipost(fly));
+  datacurr = cell(nons,1);
+  for ioni = 1:nons,
+    ipre = fpres(ioni)-trx(fly).firstframe+1;
+    ipost = fposts(ioni)-trx(fly).firstframe+1;
+    datacurr{ioni} = padgrab(data{fly},nan,1,1,ipre,ipost);
+  end
+  nscurr = cellfun(@numel,datacurr);
+  ncurr = min(nscurr);
+  if (max(nscurr) - ncurr > maxdiffintervallength) && (fly == 1),
+    warning('Not all interval lengths are the same, using the first %d frames (max length = %d)',ncurr,max(nscurr));
+  end
+  datacurr = cellfun(@(x) x(1:ncurr), datacurr,'Uni',0);
+  datacurr = cat(1,datacurr{:});
+  meandatacurr = mean(datacurr,1,'omitnan');
+  stddatacurr = std(datacurr,1,1,'omitnan');
+  ndatacurr = sum(~isnan(datacurr),1);
+  data{fly} = meandatacurr;
+  stddata_perfly{fly} = stddatacurr;
+  ndata{fly} = ndatacurr;
 end
 data = cat(1,data{:});
-meandata = nanmean(data,1);
-ndatafly = sum(~isnan(data),2);
+stddata_perfly = cat(1,stddata_perfly{:});
+meandata = mean(data,1,'omitnan');
+ndata = cat(1,ndata{:});
+ndatafly = sum(ndata,2);
 if plotstd,
-  stddata = nanstd(data,1,1);
+  stddata = std(data,1,1,'omitnan');
 end
 
 if isempty(ylim),
@@ -73,24 +96,35 @@ end
 
 clf(hfig);
 set(hfig,'Units','pixels','Visible',visible,'Position',position);
-hax = axes('Position',axposition,'Parent',hfig,'YLim',ylim);
+hax = axes('Position',axposition,'Parent',hfig,'YLim',ylim,'FontSize',fontsize);
 
-patch(hax,[t0,t0,t1,t1,t0],ylim([1,2,2,1,1]),colors.stimbkgd,'LineStyle','none');
+dfs = f1s-f0s;
+[~,baseseti] = min(dfs);
+dt = t1s(baseseti)-t0s(baseseti);
+f0 = f0s(baseseti);
+f1 = f1s(baseseti);
+t0 = t0s(baseseti);
+fpre = fpres(baseseti);
+fpost = fposts(baseseti);
+tpre = tpres(baseseti);
+tpost = tposts(baseseti);
+
+patch(hax,[0,0,dt,dt,0],ylim([1,2,2,1,1]),colors.stimbkgd,'LineStyle','none');
 hold(hax,'on');
 
 if plotstd,
-  ts = trx.movie_timestamps{1}(fpre:f0-1);
+  ts = trx.movie_timestamps{1}(fpre:f0-1) - t0;
   mu = meandata(1:f0-fpre);
   sig = stddata(1:f0-fpre);
   patch(hax,[ts,fliplr(ts)],[mu-sig,fliplr(mu+sig)],colors.offstd,'LineStyle','none');
-  ts = trx.movie_timestamps{1}(f1+1:fpost);
+  ts = trx.movie_timestamps{1}(f1+1:fpost) - t0;
   mu = meandata(f1-fpre+2:end);
   sig = stddata(f1-fpre+2:end);
   patch(hax,[ts,fliplr(ts)],[mu-sig,fliplr(mu+sig)],colors.offstd,'LineStyle','none');
-  ts = trx.movie_timestamps{1}(f0:f1);
+  ts = trx.movie_timestamps{1}(f0:f1) - t0;
   mu = meandata(f0-fpre+1:f1-fpre+1);
   sig = stddata(f0-fpre+1:f1-fpre+1);
-  patch(hax,[ts,fliplr(ts)],[mu-sig,fliplr(mu+sig)],colors.stimstd,'LineStyle','none');  
+  patch(hax,[ts,fliplr(ts)],[mu-sig,fliplr(mu+sig)],colors.stimstd,'LineStyle','none');  hax
 end
 
 % hfly = plot(hax,trx.movie_timestamps{1}(fpre:fpost),data,'-','LineWidth',.5);
@@ -100,14 +134,14 @@ end
 % end
 % plot(hax,[t0,t0],ylim,'-','Color',colors.stim);
 % plot(hax,[t1,t1],ylim,'-','Color',colors.stim);
-plot(hax,trx.movie_timestamps{1}(fpre:f0-1),meandata(1:f0-fpre),'-','LineWidth',1,'Color',colors.off);
-plot(hax,trx.movie_timestamps{1}(f1+1:fpost),meandata(f1-fpre+2:end),'-','LineWidth',1,'Color',colors.off);
-plot(hax,trx.movie_timestamps{1}(f0:f1),meandata(f0-fpre+1:f1-fpre+1),'-','LineWidth',1,'Color',colors.stim);
-set(hax,'YLim',ylim,'XLim',[tpre,tpost]);
+plot(hax,trx.movie_timestamps{1}(fpre:f0-1)-t0,meandata(1:f0-fpre),'-','LineWidth',1,'Color',colors.off);
+plot(hax,trx.movie_timestamps{1}(f1+1:fpost)-t0,meandata(f1-fpre+2:end),'-','LineWidth',1,'Color',colors.off);
+plot(hax,trx.movie_timestamps{1}(f0:f1)-t0,meandata(f0-fpre+1:f1-fpre+1),'-','LineWidth',1,'Color',colors.stim);
+set(hax,'YLim',ylim,'XLim',[tpre-t0,tpost-t0]);
 
-ylabel(hax,field,'Interpreter','none');
+ylabel(hax,field,'Interpreter','none','Fontsize',fontsize);
 xlabel(hax,'Time (s)');
-title(hax,{basename,sprintf('Stimulus period %d',ion)},'Interpreter','none');
+title(hax,sprintf('Stimulus period %s',setname),'Interpreter','none');
 
 if plotflies,
   
@@ -133,18 +167,33 @@ if plotflies,
   position_fly(4) = min(ss(4),position(4)*nfliesplot);
   clf(hfigfly);
   set(hfigfly,'Units','pixels','Visible',visible,'Position',position_fly);
-  hax_fly = createsubplots(nfliesplot,1,[[.05,.05];[.05,.01]],hfigfly);
+  hax_fly = createsubplots(nfliesplot,1,[[.07,.07];[.025,.01]],hfigfly);
 
   for flyi = 1:nfliesplot,
     fly = fliesplot(flyi);
   
-    patch(hax_fly(flyi),[t0,t0,t1,t1,t0],ylim([1,2,2,1,1]),colors.stimbkgd,'LineStyle','none');
+    patch(hax_fly(flyi),[0,0,dt,dt,0],ylim([1,2,2,1,1]),colors.stimbkgd,'LineStyle','none');
     hold(hax_fly(flyi),'on');
   
-    plot(hax_fly(flyi),trx.movie_timestamps{1}(fpre:f0-1),data(fly,1:f0-fpre),'-','LineWidth',1,'Color',colors.off);
-    plot(hax_fly(flyi),trx.movie_timestamps{1}(f1+1:fpost),data(fly,f1-fpre+2:end),'-','LineWidth',1,'Color',colors.off);
-    plot(hax_fly(flyi),trx.movie_timestamps{1}(f0:f1),data(fly,f0-fpre+1:f1-fpre+1),'-','LineWidth',1,'Color',colors.stim);
-    set(hax_fly(flyi),'YLim',ylim,'XLim',[tpre,tpost]);
+    if plotstd,
+      ts = trx.movie_timestamps{1}(fpre:f0-1) - t0;
+      mu = data(fly,1:f0-fpre);
+      sig = stddata_perfly(fly,1:f0-fpre);
+      patch(hax_fly(flyi),[ts,fliplr(ts)],[mu-sig,fliplr(mu+sig)],colors.offstd,'LineStyle','none');
+      ts = trx.movie_timestamps{1}(f1+1:fpost) - t0;
+      mu = data(fly,f1-fpre+2:end);
+      sig = stddata_perfly(fly,f1-fpre+2:end);
+      patch(hax_fly(fly),[ts,fliplr(ts)],[mu-sig,fliplr(mu+sig)],colors.offstd,'LineStyle','none');
+      ts = trx.movie_timestamps{1}(f0:f1) - t0;
+      mu = data(fly,f0-fpre+1:f1-fpre+1);
+      sig = stddata_perfly(fly,f0-fpre+1:f1-fpre+1);
+      patch(hax_fly(fly),[ts,fliplr(ts)],[mu-sig,fliplr(mu+sig)],colors.stimstd,'LineStyle','none');
+    end
+
+    plot(hax_fly(flyi),trx.movie_timestamps{1}(fpre:f0-1)-t0,data(fly,1:f0-fpre),'-','LineWidth',1,'Color',colors.off);
+    plot(hax_fly(flyi),trx.movie_timestamps{1}(f1+1:fpost)-t0,data(fly,f1-fpre+2:end),'-','LineWidth',1,'Color',colors.off);
+    plot(hax_fly(flyi),trx.movie_timestamps{1}(f0:f1)-t0,data(fly,f0-fpre+1:f1-fpre+1),'-','LineWidth',1,'Color',colors.stim);
+    set(hax_fly(flyi),'YLim',ylim,'XLim',[tpre-t0,tpost-t0]);
     
     ylabel(hax_fly(flyi),sprintf('Fly %d',fly),'Interpreter','none');
     if flyi == nfliesplot,
@@ -153,7 +202,7 @@ if plotflies,
       set(hax_fly(flyi),'XTickLabels',{});
     end
     if flyi == 1,
-      title(hax_fly(flyi),{basename,sprintf('%s, period %d',field,ion)},'Interpreter','none');
+      title(hax_fly(flyi),sprintf('%s, period %s',field,setname),'Interpreter','none','FontSize',fontsize);
     end
   end
   

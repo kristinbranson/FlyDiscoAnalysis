@@ -1,8 +1,9 @@
 function [outfiles,ions,fliesplot] = MakeStimulusOnsetMovies(moviefile,trx,outfilebase,varargin)
 
-[nfliesplot,fliesplot,ions,nperiodsplot,visible,force,leftovers] = ...
+[nfliesplot,fliesplot,ions,nperiodsplot,stimsets,visible,force,leftovers] = ...
   myparse_nocheck(varargin,'nfliesplot',[],...
   'fliesplot',[],'ions',[],'nperiodsplot',[],...
+  'stimsets',cell(0,2),...
   'visible','on','force',false);
 
 if ~isempty(fliesplot),
@@ -33,13 +34,20 @@ hax = axes('Position',[0,0,1,1],'Parent',hfig);
 %   end
 % end
 if isempty(ions),
-  if isempty(nperiodsplot),
+  if isempty(nperiodsplot) || nperiodsplot < 0,
     nperiodsplot = non;
   end
-  ions = round(linspace(1,non,nperiodsplot));
-else
-  nperiodsplot = numel(ions);
+  if isempty(stimsets),
+    ions = unique(round(linspace(1,non,nperiodsplot)));
+  else
+    ions = [];
+    for seti = 1:size(stimsets,1),
+      idxcurr = unique(round(linspace(1,numel(stimsets{seti,2}),nperiodsplot)));
+      ions = [ions,stimsets{seti,2}(idxcurr)]; %#ok<AGROW>
+    end
+  end
 end
+nperiodsplot = numel(ions);
 
 if isempty(fliesplot),
   if nfliesplot < trx.nflies,

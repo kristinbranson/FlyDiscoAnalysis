@@ -13,11 +13,12 @@ colors.stimbody = colors.stim;
 colors.offwing = colors.off*.4+.6;
 colors.stimwing = colors.stim*.4+.6;
 
-[nfliesplot,fliesplot,ions,nperiodsplot,hfig,...
+[nfliesplot,fliesplot,ions,nperiodsplot,stimsets,hfig,...
   prestim,poststim,minboxwidth,boxborder,downsample,axwpx,...
   visible,maxnflies] = ...
   myparse_nocheck(varargin,'nfliesplot',[],...
   'fliesplot',[],'ions',[],'nperiodsplot',[],...
+  'stimsets',cell(0,2),...
   'hfig',gobjects(0),...
   'prestim',.25,'poststim',1,...
   'minboxwidth',100,'boxborder',10,'downsample',30,'axwpx',200,...
@@ -39,10 +40,17 @@ if isempty(ions),
   if isempty(nperiodsplot) || nperiodsplot < 0,
     nperiodsplot = non;
   end
-  ions = round(linspace(1,non,nperiodsplot));
-else
-  nperiodsplot = numel(ions);
+  if isempty(stimsets),
+    ions = unique(round(linspace(1,non,nperiodsplot)));
+  else
+    ions = [];
+    for seti = 1:size(stimsets,1),
+      idxcurr = unique(round(linspace(1,numel(stimsets{seti,2}),nperiodsplot)));
+      ions = [ions,stimsets{seti,2}(idxcurr)]; %#ok<AGROW>
+    end
+  end
 end
+nperiodsplot = numel(ions);
 
 if isempty(fliesplot),
   
