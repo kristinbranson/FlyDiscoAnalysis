@@ -29,10 +29,10 @@ end
 hold(hax(1),'on');
 
 % plot detected/labeled circles
-chamber_count = numel(circleRadius) ;
-theta_line = linspace(0,2*pi,ceil(2*pi*max(circleRadius)));
+chamber_count = numel(circleCenterX) ;
+r = circleRadius ;
+theta_line = linspace(0,2*pi,ceil(2*pi*r));
 for k = 1 : chamber_count ,
-  r = circleRadius(k) ;
   xc  = circleCenterX(k) ;
   yc  = circleCenterY(k) ;  
   plot(...
