@@ -183,11 +183,11 @@ if plotflies,
       ts = trx.movie_timestamps{1}(f1+1:fpost) - t0;
       mu = data(fly,f1-fpre+2:end);
       sig = stddata_perfly(fly,f1-fpre+2:end);
-      patch(hax_fly(fly),[ts,fliplr(ts)],[mu-sig,fliplr(mu+sig)],colors.offstd,'LineStyle','none');
+      patch(hax_fly(flyi),[ts,fliplr(ts)],[mu-sig,fliplr(mu+sig)],colors.offstd,'LineStyle','none');
       ts = trx.movie_timestamps{1}(f0:f1) - t0;
       mu = data(fly,f0-fpre+1:f1-fpre+1);
       sig = stddata_perfly(fly,f0-fpre+1:f1-fpre+1);
-      patch(hax_fly(fly),[ts,fliplr(ts)],[mu-sig,fliplr(mu+sig)],colors.stimstd,'LineStyle','none');
+      patch(hax_fly(flyi),[ts,fliplr(ts)],[mu-sig,fliplr(mu+sig)],colors.stimstd,'LineStyle','none');
     end
 
     plot(hax_fly(flyi),trx.movie_timestamps{1}(fpre:f0-1)-t0,data(fly,1:f0-fpre),'-','LineWidth',1,'Color',colors.off);

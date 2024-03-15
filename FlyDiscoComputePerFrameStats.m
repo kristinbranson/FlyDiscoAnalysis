@@ -539,7 +539,7 @@ end
 
 %% close log
 
-fprintf(logfid,'Finished running FlyDiscoComputePerFrameStats2 at %s.\n',datestr(now,'yyyymmddTHHMMSS'));
+fprintf(logfid,'Finished running FlyDiscoComputePerFrameStats at %s.\n',datestr(now,'yyyymmddTHHMMSS'));
 
 if logfid > 1,
   fclose(logfid);
