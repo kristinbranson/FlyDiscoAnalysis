@@ -40,7 +40,8 @@ function [firstframes, firstframes_off, endframes_off, nframes, indicatorframes]
             % Get the indicatorframes from the ctrax-results params
             indicatorframes = ctraxresultsmovie_params.indicatorframes ;
         end
-        % "indicatorframes" could maybe also be named step_index_from_snippet_index, if one was being long-winded, I think  -- ALT, 2022-03-16
+        % "indicatorframes" could maybe also be named train_index_from_snippet_index,
+        % if one was being long-winded, I think  -- ALT, 2024-03-22
         indicatorLED = indicator_data.indicatorLED ;
         indicator_step_count = length(indicatorLED.startframe) ;
         are_all_indicatorframes_valid = (max(indicatorframes) <= indicator_step_count) ;
