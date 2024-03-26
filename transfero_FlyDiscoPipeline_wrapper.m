@@ -64,11 +64,14 @@ if do_run_caboose ,
   main_phase_analysis_parameters.doautomaticcheckscomplete = 'off' ;
 end
 
+% Convert the analysis arguments back to a name-value list
+main_phase_analysis_parameters_as_list = name_value_list_from_struct(main_phase_analysis_parameters) ;
+
 % Call the function to do the real work
 main_pipeline_exception_maybe = [] ;
 if do_try ,
   try
-    FlyDiscoPipeline(experiment_folder_path, main_phase_analysis_parameters) ;
+    FlyDiscoPipeline(experiment_folder_path, main_phase_analysis_parameters_as_list) ;
   catch pipeline_exception ,
     main_pipeline_exception_maybe = pipeline_exception ;
     fprintf('\nAn exception has occured during the main phase of the pipeline:\n') ;
@@ -76,7 +79,7 @@ if do_try ,
     fprintf('\nThis exception has been caught, but will be rethrown after completion of the caboose phase.\n') ;
   end
 else
-  FlyDiscoPipeline(experiment_folder_path, main_phase_analysis_parameters) ;
+  FlyDiscoPipeline(experiment_folder_path, main_phase_analysis_parameters_as_list) ;
 end
 
 % Now we do the "caboose" phase, which we want to run even if the

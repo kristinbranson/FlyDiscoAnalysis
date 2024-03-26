@@ -1,11 +1,12 @@
 function FlyDiscoDetectIndicatorLedOnOff(expdir, varargin)
 
 % Deal with optional arguments
-[analysis_protocol, settingsdir, datalocparamsfilestr] = ...
+[analysis_protocol, settingsdir, datalocparamsfilestr, debug] = ...
   myparse(varargin,...
   'analysis_protocol','current_bubble',...
   'settingsdir', default_settings_folder_path(), ...
-  'datalocparamsfilestr','dataloc_params.txt');
+  'datalocparamsfilestr','dataloc_params.txt', ...
+  'debug',false) ;
 
 % Write a header for this stage to the 'log'
 timestamp = datestr(now,'yyyymmddTHHMMSS');
@@ -85,7 +86,7 @@ if doLEDdetection ,
                        rigId, ...
                        registration_params.doesYAxisPointUp) ;
   % Extract indicatordata from the video
-  indicatordata = extractIndicatorLED(expdir, dataloc_params, indicator_params, ledIndicatorPoints) ;
+  indicatordata = extractIndicatorLED(expdir, dataloc_params, indicator_params, ledIndicatorPoints, debug) ;
 else
   indicatordata = struct() ;
 end

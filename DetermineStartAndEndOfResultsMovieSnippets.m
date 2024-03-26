@@ -43,13 +43,13 @@ function [firstframes, firstframes_off, endframes_off, nframes, indicatorframes]
         % "indicatorframes" could maybe also be named train_index_from_snippet_index,
         % if one was being long-winded, I think  -- ALT, 2024-03-22
         indicatorLED = indicator_data.indicatorLED ;
-        indicator_step_count = length(indicatorLED.startframe) ;
-        are_all_indicatorframes_valid = (max(indicatorframes) <= indicator_step_count) ;
+        indicator_train_count = length(indicatorLED.startframe) ;
+        are_all_indicatorframes_valid = (max(indicatorframes) <= indicator_train_count) ;
         if ~all(are_all_indicatorframes_valid) ,
-            error(['The largest step index in the ctrax-results movie params (%d) is larger than the number of steps in the LED indicator traces (%d).  ' ...
+            error(['The largest train index in the ctrax-results movie params (%d) is larger than the number of trains in the LED indicator trace (%d).  ' ...
                    'Likely there was a problem with indicator detection.'], ...
                   max(indicatorframes), ...
-                  indicator_step_count) ;
+                  indicator_train_count) ;
         end
         firstframes_off = indicatorLED.startframe(indicatorframes) - ctraxresultsmovie_params.nframes_beforeindicator;        
         % Promote nframes to a vector if necessary

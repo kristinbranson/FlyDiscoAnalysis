@@ -1,8 +1,9 @@
-function indicatordata = extractIndicatorLED(expdir, dataloc_params, indicator_params, ledIndicatorPoints)
+function indicatordata = extractIndicatorLED(expdir, dataloc_params, indicator_params, ledIndicatorPoints, debug)
 
-% % Load in the LED indicator points
-% registrationdatafile = fullfile(expdir,dataloc_params.registrationmatfilestr);
-% load(registrationdatafile,'ledIndicatorPoints');
+% Deal with optional args
+if ~exist('debug', 'var') || isempty(debug) ,
+  debug = false ;
+end
 
 % Read the video metadata, make a frame-reading function 
 moviefile = fullfile(expdir,dataloc_params.moviefilestr);
@@ -37,34 +38,39 @@ end
 pbo.update(inf) ;
 fprintf('Done extracting LED indicator signal from video frames.\n') ;
 
-% % plot the middle frame along with the area used for LED detection
-% frame = readfcn(min(max(1,round(nframes/2)),nframes)) ;
-% f = figure('color', 'w') ;
-% a = axes(f) ;
-% imshow(frame, 'Parent', a) ;
-% a.YDir = 'normal' ;  % this is how FlyBowl/FlyBubble/FlyDisco videos are typically viewed, seemingly
-% a.Colormap = parula(256) ;
-% corners = [x       y        ; ...
-%            x+width y        ; ...
-%            x+width y+height ; ...
-%            x       y+height ; ...
-%            x       y        ] ;
-% x_data = corners(:,1)' ;
-% y_data = corners(:,2)' ;
-% line('Parent', a, 'XData', x_data, 'YData', y_data, 'Color', 'r') ;
-% a.Box = 'on' ;
-% a.Layer = 'top' ;
-% 
-% % For debugging, plot the derived LED signals
-% f = figure('color', 'w') ;
-% set_figure_size([10 6]) ;
-% a1 = axes(f, 'Position', [0.1 0.6 0.8 0.3]) ;
-% a2 = axes(f, 'Position', [0.1 0.1 0.8 0.3]) ;
-% line('Parent', a1, 'XData', 1:nframes, 'YData', meanimage, 'Color', 'r') ;
-% line('Parent', a2, 'XData', 1:nframes, 'YData', maximage, 'Color', 'b') ;
-% xlabel(a2, 'Frame index') ;
-% ylabel(a1, 'Mean') ;
-% ylabel(a2, 'Max') ;
+% plot the middle frame along with the area used for LED detection
+if debug ,
+  frame = readfcn(min(max(1,round(nframes/2)),nframes)) ;
+  f = figure('color', 'w') ;
+  a = axes(f) ;
+  imshow(frame, 'Parent', a) ;
+  a.YDir = 'reverse' ;
+  a.Colormap = parula(256) ;
+  corners = [x       y        ; ...
+    x+width y        ; ...
+    x+width y+height ; ...
+    x       y+height ; ...
+    x       y        ] ;
+  x_data = corners(:,1)' ;
+  y_data = corners(:,2)' ;
+  line('Parent', a, 'XData', x_data, 'YData', y_data, 'Color', 'r') ;
+  a.Box = 'on' ;
+  a.Layer = 'top' ;
+  title(a, 'Example frame and LED detection window', 'Fontsize', 11) ;
+
+  % For debugging, plot the derived LED signals
+  f = figure('color', 'w') ;
+  set_figure_size([10 6]) ;
+  a1 = axes(f, 'Position', [0.1 0.6 0.8 0.3]) ;
+  a2 = axes(f, 'Position', [0.1 0.1 0.8 0.3]) ;
+  line('Parent', a1, 'XData', 1:nframes, 'YData', meanimage, 'Color', 'r') ;
+  line('Parent', a2, 'XData', 1:nframes, 'YData', maximage, 'Color', 'b') ;
+  xlabel(a2, 'Frame index') ;
+  ylabel(a1, 'Mean') ;
+  ylabel(a2, 'Max') ;
+  title(a1, 'Mean and max of LED window for each frame', 'Fontsize', 11) ;
+  drawnow() ;
+end
 
 % Report the standard deviation of the LED signal.
 % Error if it's crazy low.
@@ -84,15 +90,20 @@ IRthreshold = (max(meanimage)+min(meanimage))/2 ;
 meanimagethresh = (meanimage>IRthreshold) ;
 [indicatordigital, startframe, endframe] = compute_pulse_envelope(meanimagethresh, indicator_params.pad) ;
 
-% % For debugging, compare indicatordigital to thresholded meanimage
-% f = figure('color', 'w') ;
-% set_figure_size([10 6]) ;
-% a = axes(f) ;
-% line('Parent', a, 'XData', 1:nframes, 'YData', double(meanimagethresh), 'Color', 'b') ;
-% line('Parent', a, 'XData', 1:nframes, 'YData', double(indicatordigital), 'Color', 'r') ;
-% xlabel(a, 'Frame index') ;
-% ylabel(a, 'LED') ;
-% ylim(a, [-0.05 1.05]) ;
+% For debugging, compare indicatordigital to thresholded meanimage
+if debug ,
+  f = figure('color', 'w') ;
+  set_figure_size([10 6]) ;
+  a = axes(f) ;
+  l1 = line('Parent', a, 'XData', 1:nframes, 'YData', double(meanimagethresh), 'Color', 'b') ;
+  l2 = line('Parent', a, 'XData', 1:nframes, 'YData', double(indicatordigital), 'Color', 'r') ;
+  xlabel(a, 'Frame index') ;
+  ylabel(a, 'LED') ;
+  ylim(a, [-0.05 1.05]) ;
+  legend(a, [l1 l2], {'signal', 'envelope'}) ;
+  title(a, 'LED signal and envelope', 'Fontsize', 11) ;
+  drawnow() ;
+end
 
 % Put stuff into indicatorLED
 indicatorLED = [] ;

@@ -1,5 +1,5 @@
 min_seconds_fliesloaded,0
-max_seconds_fliesloaded,1000
+max_seconds_fliesloaded,inf
 # for optogenetic experiment: min movie length = protocol duration - movie_length_delta_seconds
 movie_length_delta_seconds,10
 #ONLY for non optogenetic experiments, registration params: usemediandt = 0

@@ -26,8 +26,6 @@ for i = 1:numel(traj_fns),
       units = parseunits('days');
     case 'sex',
       units = parseunits('unit');
-    case 'chamber_index',
-      units = parseunits('unit');
   end
   try
     if dooverwrite && exist(filename,'file') && ~obj.DEBUG,
@@ -62,6 +60,7 @@ flies = obj.exp2flies{n};
 obj.firstframes(flies) = [traj.firstframe];
 obj.endframes(flies) = [traj.endframe];
 obj.nframes(flies) = [traj.nframes];
+obj.chamber_index(flies) = [traj.chamber_index];
 % fps
 if isfield(traj,'fps'),
   obj.fps(n) = traj(1).fps;

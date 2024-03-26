@@ -45,56 +45,59 @@ function indicatorframes = indicatorframes_from_protocol(protocol)
 % The amplitude of all the pulses in step i is intensity(i).
 
 step_count = numel(protocol.stepNum);
-% if there's only 1 step
-if step_count == 1,
-  train_count = protocol.iteration;
-  train_stride = ceil(train_count/6);     % take every stride'th iteration of the stimulus
-  indicatorframes = 1:train_stride:train_count;
+
+% Figure out some things about the mapping from train indices to step indices
+preceding_train_count_from_step_index = [0 ; cumsum(protocol.iteration(1:end-1))] ;  % The number of trains that come before each step
+first_train_index_from_step_index = preceding_train_count_from_step_index + 1 ;  % The train index of the first train in each step
+
+% Figure out which steps, if any, are "blank" (i.e. intensity==0)
+intensity_from_step_index = protocol.intensity ;
+is_nonblank_from_step_index = ( intensity_from_step_index>0 ) ;
+nonblank_step_count = sum(is_nonblank_from_step_index) ;
+step_index_from_nonblank_step_index = find(is_nonblank_from_step_index) ;
+
+% How snippets are chosen depends on the step count
+if nonblank_step_count == 0 ,
+  error('There are zero non-blank steps') ;
+elseif nonblank_step_count == 1,
+  step_index = step_index_from_nonblank_step_index(1) ;
+  first_train_index = first_train_index_from_step_index(step_index) ;  % index of first train in the step
+  train_count = protocol.iteration(step_index) ;  % Number of pulse trains in the step
+  train_stride = ceil(train_count/6);  % take every stride'th iteration of the stimulus
+  indicatorframes = (first_train_index-1) + 1:train_stride:train_count ;
   step_index_from_snippet_index = ones(size(indicatorframes)) ;
-elseif step_count <= 3,
-  % assumes steps have more 2 or more iterations/trains
-  if ~all([protocol.iteration] > 1)
-    error('Step with iteration < 2. User needs to make a specific ctrax results movie param file')
+elseif nonblank_step_count <= 3,
+  % In this case we do two snippets for each nonblank step, one for the first
+  % train of the step, one for the last train of the step.
+  % We assume all steps have more 2 or more iterations/trains
+  if ~all(protocol.iteration>=2)
+    error('There are two or three nonblank steps, and at least one step with iterations < 2. User needs to make a specific ctrax results movie param file')
   end
-  snippet_count = 2*step_count ;
+  snippet_count = 2*nonblank_step_count ;
   indicatorframes = zeros(1,snippet_count);
   step_index_from_snippet_index = zeros(1,snippet_count) ;
-  for step_index = 1:step_count,
+  for nonblank_step_index = 1:nonblank_step_count ,
+    step_index = step_index_from_nonblank_step_index(nonblank_step_index) ;
+    first_train_index = first_train_index_from_step_index(step_index) ;  % Index of first train in the step
     train_count = protocol.iteration(step_index);
-    if step_index==1,
-      indicatorframes(1)=1;
-      indicatorframes(2)=train_count;
-      step_index_from_snippet_index(1:2) = 1 ;
-    elseif step_index == 2
-      indicatorframes(3) = indicatorframes(2)+1;
-      indicatorframes(4) = indicatorframes(2)+train_count;
-      step_index_from_snippet_index(3:4) = 2 ;
-    elseif step_index == 3
-      indicatorframes(5) = indicatorframes(4)+1;
-      indicatorframes(6) = indicatorframes(4)+train_count;
-      step_index_from_snippet_index(5:6) = 3 ;
-    end
+    first_snippet_index = 2*(nonblank_step_index-1)+1 ;
+    second_snippet_index = 2*(nonblank_step_index-1)+2 ;
+    indicatorframes(first_snippet_index) = first_train_index ;
+    indicatorframes(second_snippet_index) = first_train_index+train_count-1 ;
+    step_index_from_snippet_index(first_snippet_index:second_snippet_index) = step_index ;
   end
 else
   % If there are many steps, do one snippet for the first train in each step.
-  step_stride = ceil(step_count/6) ;
-  step_index_from_snippet_index = 1:step_stride:step_count ;
-  preceding_train_count_from_step_index = [0 ; cumsum(protocol.iteration(1:end-1))] ;  % The number of trains that come before each step
-  first_train_index_from_step_index = preceding_train_count_from_step_index + 1 ;  % The train index of the first train in each step
+  nonblank_step_stride = ceil(step_count/6) ;
+  nonblank_step_index_from_snippet_index = 1:nonblank_step_stride:nonblank_step_count ;
+  step_index_from_snippet_index = step_index_from_nonblank_step_index(nonblank_step_index_from_snippet_index) ;
   raw_indicatorframes = first_train_index_from_step_index(step_index_from_snippet_index) ;  % indicatorframes, but as a col vector
   indicatorframes = raw_indicatorframes(:)' ;  % Make a row vector
 end
 
-% Make sure none of the steps from which snippets are drawn have zero intensity
-snippet_count = numel(indicatorframes) ;
+% Double-check that none of the steps from which snippets are drawn have zero intensity
 intensity_from_snippet_index = protocol.intensity(step_index_from_snippet_index) ;
-% If the last snippet is from a step with zero intensity, just drop that
-% snippet
-if intensity_from_snippet_index(snippet_count) == 0
-  indicatorframes(snippet_count) = [] ;
-  intensity_from_snippet_index(snippet_count) = [] ;
-end
 % If any remaining snippets are from steps with zero intensity, raise an error
 if any(intensity_from_snippet_index == 0) ,
-  error('Step with intensity = 0 in middle of experiment. User needs to make specific ctrax results movie params file')
+  error('Internal error: At least one of the snippets is from a step with zero intensity')
 end
