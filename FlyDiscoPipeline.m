@@ -220,7 +220,7 @@ function FlyDiscoPipeline(expdir, varargin)
     if length(varargin)==1 && isstruct(varargin{1}) ,
         argument_parameters = varargin{1} ;
     else
-        argument_parameters = struct_from_name_value_list(varargin) ;
+        argument_parameters = struct_from_name_value_list(varargin{:}) ;
     end
     
     % First, get the settingsdir
@@ -316,6 +316,7 @@ function FlyDiscoPipeline(expdir, varargin)
     requiredfiles_automaticcheckscomplete = lookup_in_struct(analysis_parameters, 'requiredfiles_automaticcheckscomplete') ;
     cluster_billing_account_name = lookup_in_struct(analysis_parameters, 'cluster_billing_account_name') ;
     sshhost = lookup_in_struct(analysis_parameters, 'sshhost') ;
+    debug = lookup_in_struct(analysis_parameters, 'debug') ;
 
     % Read in the dataloc params
     datalocparamsfile = fullfile(settingsdir,analysis_protocol,datalocparamsfilestr);
@@ -338,7 +339,6 @@ function FlyDiscoPipeline(expdir, varargin)
     % doanalysisprotocol = coerce_to_on_off_force(doanalysisprotocol) ; %#ok<NASGU>
     doapt = coerce_to_on_off_force(doapt) ;
     domakeaptresultsmovie = coerce_to_on_off_force(domakeaptresultsmovie) ;
-
     doautomaticcheckscomplete = coerce_to_on_off_force(doautomaticcheckscomplete) ;
     
     % Print the settings values in use
@@ -502,7 +502,8 @@ function FlyDiscoPipeline(expdir, varargin)
                 FlyDiscoDetectIndicatorLedOnOff(expdir,...
                                                 'settingsdir',settingsdir, ...
                                                 'analysis_protocol',analysis_protocol, ...
-                                                'datalocparamsfilestr', datalocparamsfilestr);
+                                                'datalocparamsfilestr', datalocparamsfilestr, ...
+                                                'debug', debug);
 %                 fprintf('Memory usage after FlyDiscoDetectIndicatorLedOnOff():\n') ;
 %                 print_matlab_memory_usage() ;
             end
