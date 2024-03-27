@@ -78,13 +78,13 @@ if trx.perframe_params.isflytracker,
       delete(pfftmp);
     end
     
-    fprintf('Running FlyTracker2WingTracking...\n');
+    %fprintf('Running FlyTracker2WingTracking...\n');
     FlyTracker2WingTracking(expdir,'dataloc_params',trx.dataloc_params,...
       'analysis_protocol',analysis_protocol,...
       'datalocparamsfilestr',datalocparamsfilestr,...
       'settingsdir',settingsdir,...
       'perframe_params',trx.perframe_params);
-    fprintf('Done running FlyTracker2WingTracking.\n');
+    %fprintf('Done running FlyTracker2WingTracking.\n');
   end
 end
 

@@ -1,11 +1,12 @@
 function FlyDiscoDetectIndicatorLedOnOff(expdir, varargin)
 
 % Deal with optional arguments
-[analysis_protocol, settingsdir, datalocparamsfilestr, debug] = ...
+[analysis_protocol, settingsdir, datalocparamsfilestr, forcecompute, debug] = ...
   myparse(varargin,...
   'analysis_protocol','current_bubble',...
   'settingsdir', default_settings_folder_path(), ...
   'datalocparamsfilestr','dataloc_params.txt', ...
+  'forcecompute', false, ...
   'debug',false) ;
 
 % Write a header for this stage to the 'log'
@@ -16,6 +17,11 @@ fprintf('\n\n***\nRunning %s with analysis protocol %s at %s\n', mfilename(), an
 analysis_protocol_folder_path = fullfile(settingsdir, analysis_protocol) ;
 datalocparamsfile = fullfile(analysis_protocol_folder_path,datalocparamsfilestr);
 dataloc_params = ReadParams(datalocparamsfile);
+
+% If forcecompute is true, warn that this does nothing
+if forcecompute ,
+  warning('In %s(), the value of forcecompute is not used.  (Except for deciding whether to output this message.)', mfilename()) ;
+end
 
 % Read in indicator params
 indicatorparamsfile = fullfile(analysis_protocol_folder_path,dataloc_params.indicatorparamsfilestr);
