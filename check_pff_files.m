@@ -1,4 +1,4 @@
-expdir = '/groups/branson/bransonlab/taylora/flydisco/example-experiments/nice-early-pfly-experiment-with-tracking/pflySingleMale_pfly_SlowRamp_LexAChrimx71G01LexA_UASChrimsonVenusX0070_20240320T095847';
+expdir = '/groups/branson/bransonlab/taylora/flydisco/example-experiments/nice-early-pfly-experiment-with-tracking-new/pflySingleMale_pfly_SlowRamp_LexAChrimx71G01LexA_UASChrimsonVenusX0070_20240320T095847';
 %%
 td = load(fullfile(expdir,'registered_trx.mat'));
 %%

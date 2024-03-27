@@ -21,6 +21,7 @@ for i1 = 1:nflies,
   
   mind{i1} = inf(1,trx(fly1).nframes);
   closesti = ones(1,trx(fly1).nframes);
+  angle{i1} = nan(1,trx(fly1).nframes);
   
   for i2 = 1:nflies,
     fly2 = flies(i2);

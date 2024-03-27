@@ -1,4 +1,4 @@
-function [data,units] = compute_angleonclosestfly(trx,n)
+function [data,units] = fba_compute_angleonclosestfly(trx,n)
 
 flies = trx.exp2flies{n};
 nflies = numel(flies);
