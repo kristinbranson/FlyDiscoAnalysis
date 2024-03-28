@@ -18,9 +18,22 @@ analysis_protocol_folder_path = fullfile(settingsdir, analysis_protocol) ;
 datalocparamsfile = fullfile(analysis_protocol_folder_path,datalocparamsfilestr);
 dataloc_params = ReadParams(datalocparamsfile);
 
-% If forcecompute is true, warn that this does nothing
+% If forcecompute is true, delete the output files now
+imsavename = fullfile(expdir, dataloc_params.ledregistrationimagefilstr) ;
+indicatordatamatfilename = fullfile(expdir,dataloc_params.indicatordatafilestr);
 if forcecompute ,
-  warning('In %s(), the value of forcecompute is not used.  (Except for deciding whether to output this message.)', mfilename()) ;
+  % Delete the output files, so they have to be recomputed.
+  % This may not particularly matter for LED indicator detection, actually...
+
+  % Delete the LED detection image
+  if exist(imsavename,'file'),
+    delete(imsavename);
+  end
+
+  % Delete indicator data mat file
+  if exist(indicatordatamatfilename,'file'),
+    delete(indicatordatamatfilename);
+  end
 end
 
 % Read in indicator params
@@ -87,23 +100,27 @@ if doLEDdetection ,
                        expdir, ...
                        dataloc_params, ...
                        analysis_protocol_folder_path, ...
-                       bg_mean, ...
                        dt, ...
-                       rigId, ...
-                       registration_params.doesYAxisPointUp) ;
+                       rigId) ;
   % Extract indicatordata from the video
   indicatordata = extractIndicatorLED(expdir, dataloc_params, indicator_params, ledIndicatorPoints, debug) ;
 else
   indicatordata = struct() ;
 end
 
+% Save the LED detection image
+if exist(imsavename,'file'),
+  delete(imsavename);
+end
+saveLedDetectionImage(imsavename, bg_mean, ledIndicatorPoints, registration_params.doesYAxisPointUp) ;
+fprintf('Saved LED detection image to file %s\n', imsavename) ;
+
 % save indicator data to mat file
-indicatordatamatfilename = fullfile(expdir,dataloc_params.indicatordatafilestr);
 if exist(indicatordatamatfilename,'file'),
   delete(indicatordatamatfilename);
 end
 save(indicatordatamatfilename, '-struct', 'indicatordata') ;
-fprintf('\n Saved indicator data to file %s\n', indicatordatamatfilename) ;
+fprintf('Saved indicator data to file %s\n', indicatordatamatfilename) ;
 
 % Final message
 fprintf('\n Finished running %s at %s.\n',mfilename(), datestr(now,'yyyymmddTHHMMSS'));

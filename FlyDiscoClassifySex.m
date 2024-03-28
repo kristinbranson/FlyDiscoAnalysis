@@ -8,13 +8,16 @@ version = '0.2';
   datalocparamsfilestr,...
   outdir,...
   dosave,...
-  override_gender] = myparse(varargin,...
-  'analysis_protocol','current_bubble',...
-  'settingsdir',default_settings_folder_path(),...
-  'datalocparamsfilestr','dataloc_params.txt',...
-  'outdir',[],...
-  'dosave',true,...
-  'override_gender','');
+  override_gender, ...
+  ~] = ...
+    myparse(varargin,...
+            'analysis_protocol','current_bubble',...
+            'settingsdir',default_settings_folder_path(),...
+            'datalocparamsfilestr','dataloc_params.txt',...
+            'outdir',[],...
+            'dosave',true,...
+            'override_gender','', ...
+            'forcecompute', false);
 
 fprintf('Classifying sex for %s\n',expdir);
 
@@ -33,7 +36,7 @@ fprintf('Loading data...\n');
 trxfile = fullfile(expdir,dataloc_params.trxfilestr);
 load(trxfile,'trx');
 % first and end frame
-firstframe = min([trx.firstframe]); %#ok<NODEF>
+firstframe = min([trx.firstframe]);
 endframe = max([trx.endframe]);
 
 %% data locations
@@ -48,7 +51,7 @@ sexclassifieroutmatfile = fullfile(expdir,outdir,...
 sexclassifierdiagnosticsfile = fullfile(expdir,outdir,...
   dataloc_params.sexclassifierdiagnosticsfilestr);
 trxfileout = fullfile(expdir,outdir,dataloc_params.trxfilestr);
-tftrxappend = strcmp(trxfile,trxfileout);
+tftrxappend = strcmp(trxfile,trxfileout);  % logical
 
 %% compute areas
 fprintf('Computing area...\n');
@@ -96,14 +99,14 @@ if isfield(metadata,'gender') && ~strcmpi(metadata.gender,'b'),
   % set sex to metadata.gender for all flies
   % also set diagnostics that we can
   clear diagnostics
-  mean_area_all = nanmean(cat(1,X{:}));
-  var_area_all = nanstd(cat(1,X{:}),1);
+  mean_area_all = nanmean(cat(1,X{:})); %#ok<NANMEAN> 
+  var_area_all = nanstd(cat(1,X{:}),1); %#ok<NANSTD> 
   for fly = 1:numel(trx),
     trx(fly).sex = repmat({upper(metadata.gender)},[1,trx(fly).nframes]);
     diagnostics_curr = struct;
     diagnostics_curr.normhmmscore = nan;
     diagnostics_curr.nswaps = 0;
-    diagnostics_curr.meanabsdev = nanmean(abs(X{fly}-mean_area_all));
+    diagnostics_curr.meanabsdev = nanmean(abs(X{fly}-mean_area_all)); %#ok<NANMEAN> 
     diagnostics(fly) = diagnostics_curr; %#ok<AGROW>
   end
   
@@ -168,9 +171,9 @@ else
     
   %% save classifier
   
-  filterorder = sexclassifierin.areasmooth_filterorder; %#ok<NASGU>
-  maxfreq = sexclassifierin.areasmooth_maxfreq; %#ok<NASGU>
-  maxerrx = sexclassifierin.areasmooth_maxerrx; %#ok<NASGU>
+  filterorder = sexclassifierin.areasmooth_filterorder;
+  maxfreq = sexclassifierin.areasmooth_maxfreq;
+  maxerrx = sexclassifierin.areasmooth_maxerrx;
   
   if dosave,
     try
@@ -248,9 +251,9 @@ summary_diagnostics.classifier_niters = numel(ll);
 fns = fieldnames(diagnostics);
 for i = 1:numel(fns),
   fn = fns{i};
-  summary_diagnostics.(sprintf('mean_%s',fn)) = nanmean([diagnostics.(fn)]);
-  summary_diagnostics.(sprintf('median_%s',fn)) = nanmedian([diagnostics.(fn)]);
-  summary_diagnostics.(sprintf('std_%s',fn)) = nanstd([diagnostics.(fn)],1);
+  summary_diagnostics.(sprintf('mean_%s',fn)) = nanmean([diagnostics.(fn)]); %#ok<NANMEAN> 
+  summary_diagnostics.(sprintf('median_%s',fn)) = nanmedian([diagnostics.(fn)]); %#ok<NANMEDIAN> 
+  summary_diagnostics.(sprintf('std_%s',fn)) = nanstd([diagnostics.(fn)],1); %#ok<NANSTD> 
   summary_diagnostics.(sprintf('min_%s',fn)) = min([diagnostics.(fn)]);
   summary_diagnostics.(sprintf('max_%s',fn)) = max([diagnostics.(fn)]);
 end
@@ -258,9 +261,9 @@ end
 fns = fieldnames(counts);
 for i = 1:numel(fns),
   fn = fns{i};
-  summary_diagnostics.(sprintf('mean_%s',fn)) = nanmean([counts.(fn)]);
-  summary_diagnostics.(sprintf('median_%s',fn)) = nanmedian([counts.(fn)]);
-  summary_diagnostics.(sprintf('std_%s',fn)) = nanstd([counts.(fn)],1);
+  summary_diagnostics.(sprintf('mean_%s',fn)) = nanmean([counts.(fn)]); %#ok<NANMEAN> 
+  summary_diagnostics.(sprintf('median_%s',fn)) = nanmedian([counts.(fn)]); %#ok<NANMEDIAN> 
+  summary_diagnostics.(sprintf('std_%s',fn)) = nanstd([counts.(fn)],1); %#ok<NANSTD> 
   summary_diagnostics.(sprintf('min_%s',fn)) = min([counts.(fn)]);
   summary_diagnostics.(sprintf('max_%s',fn)) = max([counts.(fn)]);
 end
@@ -287,6 +290,8 @@ if dosave,
     warning('FlyDiscoClassifySex:diags',...
       'Could not open file %s for writing, printing diagnostics to stdout instead',sexclassifierdiagnosticsfile);
     fid = 1;
+  else
+    cleaner = onCleanup(@()(fclose(fid))) ;
   end
 else
   fid = 1;
@@ -294,17 +299,6 @@ end
 fns = fieldnames(summary_diagnostics);
 for i = 1:numel(fns),
   fprintf(fid,'%s,%f\n',fns{i},summary_diagnostics.(fns{i}));
-end
-% fns = fieldnames(sexclassifierinfo);
-% for i = 1:numel(fns),
-%   val = sexclassifierinfo.(fns{i});
-%   if ischar(val)
-%     fprintf(fid,'%s,%s\n',fns{i},val);
-%   end
-% end
-
-if dosave && fid > 1,
-  fclose(fid);
 end
 
 %% resave
