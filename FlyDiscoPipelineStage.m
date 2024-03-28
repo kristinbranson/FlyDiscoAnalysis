@@ -8,30 +8,31 @@ function FlyDiscoPipelineStage(expdir, ...
                                stage_function_name, ...
                                stage_additional_arguments)
                            
-    % General function for running 'typical' pipeline stage
+    % General function for running 'typical' pipeline stage.   
     if is_on_or_force(do_run_stage) ,
         do_force = is_force(do_run_stage) ;
         analysis_protocol_folder_path = fullfile(settingsdir, analysis_protocol_name) ;
         required_files_for_stage = ...
             FlyDiscoReplaceRequiredFilePlaceholders(required_files_for_stage_with_placeholders, stage_name, expdir, analysis_protocol_folder_path, ...
                                                     dataloc_params, stage_additional_arguments) ;
-        do_run = do_force || CheckForMissingFiles(expdir,dataloc_params,required_files_for_stage) ;
+        are_some_files_missing_on_entry = CheckForMissingFiles(expdir,dataloc_params,required_files_for_stage) ;
+        do_run = do_force || are_some_files_missing_on_entry ;
         if do_run ,
-            fprintf('Calling %s()...\n', stage_function_name);
+            fprintf('In stage %s, calling core function %s()...\n', stage_name, stage_function_name);
             feval(stage_function_name, ...
                   expdir, ...
                   'settingsdir', settingsdir, ...
                   'analysis_protocol', analysis_protocol_name, ...
-                  'is_stage_forced', do_force, ...
+                  'forcecompute', do_force, ...
                   stage_additional_arguments{:}) ;
-%             fprintf('Memory usage after %s():\n', stage_function_name) ;
-%             print_matlab_memory_usage() ;
+            fprintf('Function %s() has returned.\n', stage_function_name);
         end
 
-        % make sure output files exist
-        [ismissingfile, missingfiles] = CheckForMissingFiles(expdir,dataloc_params,required_files_for_stage) ;
-        if ismissingfile ,
-            msgs = cellfun(@(file_name)(sprintf('Missing %s file %s', stage_name, file_name)), missingfiles, 'UniformOutput', false) ;
+        % Make sure output files exist
+        [are_some_files_missing_on_exit, missing_file_names] = CheckForMissingFiles(expdir,dataloc_params,required_files_for_stage) ;
+        if are_some_files_missing_on_exit ,
+            msgs = cellfun(@(file_name)(sprintf('Missing %s file %s', stage_name, file_name)), missing_file_names, 'UniformOutput', false) ;
+            fprintf('Stage %s failed:\n', stage_name);
             flydisco_pipeline_error(stage_name, msgs) ;
         end
     end

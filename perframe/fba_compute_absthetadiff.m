@@ -1,6 +1,6 @@
 % absolute difference in orientation between a fly and the closest fly
 % according to type
-function [data,units] = compute_absthetadiff(trx,n,type)
+function [data,units] = fba_compute_absthetadiff(trx,n,type)
 
 flies = trx.exp2flies{n};
 nflies = numel(flies);
@@ -11,6 +11,11 @@ for i1 = 1:nflies,
   
   % fly closest to fly1 according to type
   closestfly = trx(fly1).(['closestfly_',type]);
+  
+  % Fill data with nan's by default
+  % This makes sure output is properly dimensioned if, e.g., there is only one
+  % fly per chamber.
+  data{i1} = nan(size(closestfly)) ;
   
   % orientation of fly1
   theta_mm1 = trx(fly1).theta_mm;
