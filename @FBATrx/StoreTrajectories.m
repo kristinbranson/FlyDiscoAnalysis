@@ -60,7 +60,12 @@ flies = obj.exp2flies{n};
 obj.firstframes(flies) = [traj.firstframe];
 obj.endframes(flies) = [traj.endframe];
 obj.nframes(flies) = [traj.nframes];
-obj.chamber_index(flies) = [traj.chamber_index];
+if isfield(traj, 'chamber_index') ,
+  obj.chamber_index(flies) = [traj.chamber_index] ;
+else
+  % For backwards compatibility
+  obj.chamber_index(flies) = 1 ;
+end
 % fps
 if isfield(traj,'fps'),
   obj.fps(n) = traj(1).fps;
