@@ -215,7 +215,10 @@ function FlyDiscoPipeline(expdir, varargin)
     git_report = get_git_report(source_folder_path) ;
     fprintf('%s', git_report) ;
 
-    % Process varargin parameters
+    % Process varargin parameters---If there's one optional arg and it's a struct,
+    % then each field is an optional arg name, and each field's value is, well, a
+    % value.  Otherwise, treat the optional arg as name-value pairs and collect
+    % them up into a struct.
     if length(varargin)==1 && isstruct(varargin{1}) ,
         argument_parameters = varargin{1} ;
     else

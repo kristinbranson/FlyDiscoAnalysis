@@ -71,7 +71,7 @@ main_phase_analysis_parameters_as_list = name_value_list_from_struct(main_phase_
 main_pipeline_exception_maybe = [] ;
 if do_try ,
   try
-    FlyDiscoPipeline(experiment_folder_path, main_phase_analysis_parameters_as_list) ;
+    FlyDiscoPipeline(experiment_folder_path, main_phase_analysis_parameters_as_list{:}) ;
   catch pipeline_exception ,
     main_pipeline_exception_maybe = pipeline_exception ;
     fprintf('\nAn exception has occured during the main phase of the pipeline:\n') ;
