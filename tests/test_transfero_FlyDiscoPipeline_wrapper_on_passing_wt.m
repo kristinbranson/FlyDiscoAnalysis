@@ -6,7 +6,7 @@ fly_disco_analysis_test_folder_path = fileparts(this_script_path) ;
 fly_disco_analysis_folder_path = fileparts(fly_disco_analysis_test_folder_path) ;
 fly_disco_folder_path = fileparts(fly_disco_analysis_folder_path) ;
 
-cluster_billing_account_name = 'branson' ;
+cluster_billing_account_name = [] ;
 user_name_for_configuration_purposes = 'bransonlab' ;
 % analysis_parameters = cell(1,0) ;
 % analysis_parameters = ...
