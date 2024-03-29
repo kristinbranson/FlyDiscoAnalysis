@@ -190,15 +190,17 @@ function FlyDiscoAutomaticChecksIncoming(expdir, stage, varargin)  %#ok<INUSL>
       if ~isfield(indicator_params, 'OptogeneticExp') ,
         error('No optogenetics flag in indicator params')
       end
+      isOptogeneticExp = indicator_params.OptogeneticExp ;
     else
-      error('Indicator params file %s does not exist',indicatorparamsfile);
+      %error('Indicator params file %s does not exist',indicatorparamsfile);
+      isOptogeneticExp = false ;
     end
 
     if exist(moviefile,'file')
       try
         headerinfo = ufmf_read_header(moviefile);
         % if optogenetic experiment
-        if indicator_params.OptogeneticExp
+        if isOptogeneticExp
           % if uses mediandt = unreliable timestamps
           if registration_params.usemediandt
             if ~isfield(headerinfo,'nframes'),

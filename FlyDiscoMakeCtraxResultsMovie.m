@@ -23,12 +23,13 @@ doesYAxisPointUp = registration_params.doesYAxisPointUp ;
 
 % Get one thing from the indicator params
 indicatorparamsfile = fullfile(settingsdir,analysis_protocol,dataloc_params.indicatorparamsfilestr);
-if ~exist(indicatorparamsfile,'file'),
-  error('Indicator params file %s does not exist',indicatorparamsfile);
+if exist(indicatorparamsfile,'file'),
+  raw_indicator_params = ReadParams(indicatorparamsfile);
+  indicator_params = modernizeIndicatorParams(raw_indicator_params) ;
+  isOptogeneticExp = logical(indicator_params.OptogeneticExp) ;
+else
+  isOptogeneticExp = false ;
 end
-raw_indicator_params = ReadParams(indicatorparamsfile);
-indicator_params = modernizeIndicatorParams(raw_indicator_params) ;
-isOptogeneticExp = logical(indicator_params.OptogeneticExp) ;
 
 % Read in the experiment metadata
 metadatafile = fullfile(expdir,dataloc_params.metadatafilestr);
