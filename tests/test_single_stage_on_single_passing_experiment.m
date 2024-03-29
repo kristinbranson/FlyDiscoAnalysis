@@ -6,7 +6,7 @@ fly_disco_analysis_tests_folder_path = fileparts(this_script_path) ;
 fly_disco_analysis_folder_path = fileparts(fly_disco_analysis_tests_folder_path) ;
 fly_disco_folder_path = fileparts(fly_disco_analysis_folder_path) ;
 
-cluster_billing_account_name = 'branson' ;
+cluster_billing_account_name = [] ;
 user_name_for_configuration_purposes = 'bransonlab' ;                                
 settings_folder_path = fullfile(fly_disco_analysis_folder_path, 'settings-internal') ;  % for now, want to use internal settings
 do_use_bqueue = false ;

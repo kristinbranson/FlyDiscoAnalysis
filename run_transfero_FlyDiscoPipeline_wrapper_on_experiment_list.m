@@ -26,7 +26,17 @@ function run_transfero_FlyDiscoPipeline_wrapper_on_experiment_list(folder_path_f
     %   run_transfero_FlyDiscoPipeline_wrapper_on_experiment_list(...,
     %   cluster_billing_account_name) bills any jobs submitted to the LSF cluster to
     %   the account specified by the string cluster_billing_account_name.  Examples
-    %   might be 'branson', 'rubin', and 'scicompsoft'.
+    %   might be 'branson', 'rubin', and 'scicompsoft'.  If empty, the cluster
+    %   billing account name will be looked for in the configuration file
+    %   specified by user_name_for_configuration_purposes.
+    %   
+    %   run_transfero_FlyDiscoPipeline_wrapper_on_experiment_list(...,
+    %   user_name_for_configuration_purposes) specifies the user name used for
+    %   configuration purposes.  This is normally the name of '*lab' or '*robot'
+    %   account used for automated runs.  It is used to look up the cluster
+    %   billing account name and the settings folder.  If
+    %   cluster_billing_account_name is non-empty, it will override the setting
+    %   specified in the lab configuration file.
     %   
     %   run_transfero_FlyDiscoPipeline_wrapper_on_experiment_list(...,
     %   do_use_bqueue), if do_use_bqueue is true, uses the bqueue_type() framework

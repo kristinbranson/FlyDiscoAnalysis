@@ -79,7 +79,7 @@ if do_try ,
     fprintf('\nThis exception has been caught, but will be rethrown after completion of the caboose phase.\n') ;
   end
 else
-  FlyDiscoPipeline(experiment_folder_path, main_phase_analysis_parameters_as_list) ;
+  FlyDiscoPipeline(experiment_folder_path, main_phase_analysis_parameters_as_list{:}) ;
 end
 
 % Now we do the "caboose" phase, which we want to run even if the
