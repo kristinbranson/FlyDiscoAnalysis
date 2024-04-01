@@ -1,5 +1,3 @@
-% This isn't a proper test b/c it doesn't check whether anything worked
-
 % Where does this script live?
 this_script_path = mfilename('fullpath') ;
 fly_disco_analysis_test_folder_path = fileparts(this_script_path) ;
@@ -41,7 +39,7 @@ optional_argument_list = horzcat(optional_argument_list, analysis_parameters) ;
 
 
 read_only_experiments_folder_path = fullfile(fly_disco_folder_path, 'example-experiments', 'nice-early-pfly-experiment-with-tracking-read-only') ;
-working_experiments_folder_path = fullfile(fly_disco_folder_path, 'example-experiments', 'nice-early-pfly-experiment-with-tracking-new') ;
+working_experiments_folder_path = fullfile(fly_disco_folder_path, 'example-experiments', 'nice-early-pfly-experiment-with-tracking') ;
 
 % Recopy the working folder from the read-only one
 if do_reset_working_experiments_folder || ~exist(working_experiments_folder_path, 'dir')
@@ -73,3 +71,14 @@ run_transfero_FlyDiscoPipeline_wrapper_on_experiment_list(...
   do_try, ...
   submit_host_name, ...
   optional_argument_list{:})
+
+% Check for success in the ACC output files
+did_succeed_from_experiment_folder_index = cellfun(@did_analysis_of_experiment_folder_succeed, folder_path_from_experiment_index)
+did_all_succeed = all(did_succeed_from_experiment_folder_index) ;
+if did_all_succeed ,
+  fprintf('Test passed.\n') ;
+else
+  fprintf('Test failed.\n') ;  
+end
+
+  

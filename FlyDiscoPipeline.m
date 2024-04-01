@@ -302,7 +302,9 @@ function FlyDiscoPipeline(expdir, varargin)
 
     % Combine the default parameters with those from the analysis-protocol folder and those in the arguments
     % Precedence is: argument_parameters > analysis-protocol paramters > default parameters
-    analysis_parameters = merge_structs(default_analysis_parameters, analysis_protocol_parameters, argument_parameters) ;
+    intermediate_analysis_parameters = merge_structs(default_analysis_parameters, analysis_protocol_parameters) ;  
+      % analysis params according to defaults and the analysis-protocol folder
+    analysis_parameters = merge_structs(intermediate_analysis_parameters, argument_parameters) ;
     
     % Assign the paramters to individual variables
     automaticchecksincoming_params = lookup_in_struct(analysis_parameters, 'automaticchecksincoming_params') ;
@@ -740,6 +742,7 @@ function FlyDiscoPipeline(expdir, varargin)
             FlyDiscoAutomaticChecksComplete(expdir,...
                 'settingsdir',settingsdir, ...
                 'analysis_protocol',analysis_protocol,...
+                'intermediate_analysis_parameters', intermediate_analysis_parameters, ...
                 automaticcheckscomplete_params{:});
         end
         
