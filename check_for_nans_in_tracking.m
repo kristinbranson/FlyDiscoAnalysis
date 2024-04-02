@@ -1,4 +1,5 @@
-function [success, iserror, error_or_warning_messages] = check_for_nans_in_tracking(trx_file_name, has_wing_info, success, iserror, error_or_warning_messages)  
+function [success, iserror, error_or_warning_messages] = check_for_nans_in_tracking(trx_file_name, has_wing_info, category2idx, ...
+                                                                                    success, iserror, error_or_warning_messages)  
 
 if ~exist(trx_file_name,'file'),
   error_or_warning_messages{end+1} = sprintf('File %s does not exist', trx_file_name);
