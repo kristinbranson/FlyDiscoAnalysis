@@ -137,14 +137,14 @@ if is_on_or_force(intermediate_analysis_parameters.docomputeperframefeatures) ,
   wingtrxfile = fullfile(expdir,dataloc_params.wingtrxfilestr);
   has_wing_info = true ;
   [success, iserror, error_or_warning_messages] = ...
-    check_for_nans_in_tracking(wingtrxfile, has_wing_info, success, iserror, error_or_warning_messages) ;
+    check_for_nans_in_tracking(wingtrxfile, has_wing_info, category2idx, success, iserror, error_or_warning_messages) ;
 elseif is_on_or_force(intermediate_analysis_parameters.doregistration) ,
   % If PFFs were not calculated in the screen, fallback to checking the registered_trx.mat
   % file.
   registered_trx_file_name = fullfile(expdir,dataloc_params.trxfilestr);
   has_wing_info = false ;
   [success, iserror, error_or_warning_messages] = ...
-    check_for_nans_in_tracking(registered_trx_file_name, has_wing_info, success, iserror, error_or_warning_messages) ;  
+    check_for_nans_in_tracking(registered_trx_file_name, has_wing_info, category2idx, success, iserror, error_or_warning_messages) ;  
 end
 
 
