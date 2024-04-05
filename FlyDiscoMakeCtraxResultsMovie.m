@@ -23,12 +23,13 @@ doesYAxisPointUp = registration_params.doesYAxisPointUp ;
 
 % Get one thing from the indicator params
 indicatorparamsfile = fullfile(settingsdir,analysis_protocol,dataloc_params.indicatorparamsfilestr);
-if ~exist(indicatorparamsfile,'file'),
-  error('Indicator params file %s does not exist',indicatorparamsfile);
+if exist(indicatorparamsfile,'file'),
+  raw_indicator_params = ReadParams(indicatorparamsfile);
+  indicator_params = modernizeIndicatorParams(raw_indicator_params) ;
+  isOptogeneticExp = logical(indicator_params.OptogeneticExp) ;
+else
+  isOptogeneticExp = false ;
 end
-raw_indicator_params = ReadParams(indicatorparamsfile);
-indicator_params = modernizeIndicatorParams(raw_indicator_params) ;
-isOptogeneticExp = logical(indicator_params.OptogeneticExp) ;
 
 % Read in the experiment metadata
 metadatafile = fullfile(expdir,dataloc_params.metadatafilestr);
@@ -37,31 +38,50 @@ metadata = ReadMetadataFile(metadatafile);
 % Determine the ctrax movie parameters file name, and read in the params
 defaultctraxresultsmovieparamsfile = fullfile(settingsdir,analysis_protocol,dataloc_params.ctraxresultsmovieparamsfilestr);
 if isOptogeneticExp,
+  % Branson Lab optogenetic experiments have a metadata field named
+  % "led_protocol", with values like "protocolRGBms_locomotion_GtACR_20220414".
+  % The Ctrax results movie params file to use depends on which LED protocol was
+  % used.  In particular, the LED protocol files have a date in the file name,
+  % and that date matches the date in the "led_protocol" field of the metadata.
+  % So we extract that date from the led_protocol field, and check if there's a
+  % file named ctraxresultsmovie_params_<date>.txt in the analysis-protocol
+  % file.  I think everyone acknowledges this is a little hacky.
   datestrpattern = '20\d{6}';
-  match = regexp(metadata.led_protocol,datestrpattern);  
-  ledprotocoldatestr = metadata.led_protocol(match:match+7);
-  specificctraxresultsmovie_paramsfile = fullfile(settingsdir,analysis_protocol,['ctraxresultsmovie_params_',ledprotocoldatestr,'.txt']);
-  if exist(specificctraxresultsmovie_paramsfile,'file'),
-    ctraxresultsmovie_params = ReadParams(specificctraxresultsmovie_paramsfile);
-    is_using_default_ctrax_results_movie_params = 0 ;
-  else
+  match = regexp(metadata.led_protocol,datestrpattern);
+  if isempty(match) ,
+    % The led_protocol field does not seem to contain a date, so fall back to
+    % usual Ctrax results movie parameter file.
     ctraxresultsmovie_params = ReadParams(defaultctraxresultsmovieparamsfile);
     is_using_default_ctrax_results_movie_params = 1 ;
+  else
+    % The led_protocol field seems to contain a date in the right format, so check
+    % for a matching ctraxresultsmovie_params_<date>.txt file.
+    ledprotocoldatestr = metadata.led_protocol(match:match+7);
+    specificctraxresultsmovie_paramsfile = fullfile(settingsdir,analysis_protocol,['ctraxresultsmovie_params_',ledprotocoldatestr,'.txt']);
+    if exist(specificctraxresultsmovie_paramsfile,'file'),
+      % The ctraxresultsmovie_params_<date>.txt file exists, so use it.
+      ctraxresultsmovie_params = ReadParams(specificctraxresultsmovie_paramsfile);
+      is_using_default_ctrax_results_movie_params = 0 ;
+    else
+      % The ctraxresultsmovie_params_<date>.txt file does not seem to exist, so fall back to
+      % usual Ctrax results movie parameter file.
+      ctraxresultsmovie_params = ReadParams(defaultctraxresultsmovieparamsfile);
+      is_using_default_ctrax_results_movie_params = 1 ;
+    end
   end
 else
-  %  ctraxresultsmovie_params_nonoptogenetic.txt doesn't exist as far as I can tell
-  specificctraxresultsmovie_paramsfile = fullfile(settingsdir,analysis_protocol,'ctraxresultsmovie_params_nonoptogenetic.txt');
-  ctraxresultsmovie_params = ReadParams(specificctraxresultsmovie_paramsfile);
-  is_using_default_ctrax_results_movie_params = nan ;  % want an error if we ever try to use this in an if statement
+  % If non-optogenetic experiment, use the usual Ctrax results movie parameter file.
+  ctraxresultsmovie_params = ReadParams(defaultctraxresultsmovieparamsfile);
+  is_using_default_ctrax_results_movie_params = 1 ;
 end
 
 % Sort out where the temporary data directory will be
 scratch_folder_path = get_scratch_folder_path() ;
-defaulttempdatadir = fullfile(scratch_folder_path, 'TempData_FlyBowlMakeCtraxResultsMovie') ;
+defaulttempdatadir = fullfile(scratch_folder_path, 'TempData_FlyDiscoMakeCtraxResultsMovie') ;
 if isfield(ctraxresultsmovie_params,'tempdatadir') ,
-    tempdatadir = ctraxresultsmovie_params.tempdatadir ;
+  tempdatadir = ctraxresultsmovie_params.tempdatadir ;
 else
-    tempdatadir = defaulttempdatadir ;
+  tempdatadir = defaulttempdatadir ;
 end
 
 % Create the temporary data folder if it doesn't exist
@@ -108,18 +128,18 @@ end
 
 % Determine start and end frames of snippets
 [firstframes, firstframes_off, endframes_off, nframes, indicatorframes] = ...
-    DetermineStartAndEndOfResultsMovieSnippets(isOptogeneticExp, registration_data, ctraxresultsmovie_params, ...
-                                               is_using_default_ctrax_results_movie_params, indicator_data, raw_protocol) ;
+  DetermineStartAndEndOfResultsMovieSnippets(isOptogeneticExp, registration_data, ctraxresultsmovie_params, ...
+                                             is_using_default_ctrax_results_movie_params, indicator_data, raw_protocol) ;
                                            
 % Determine the layout of the results movie frame
 [final_nzoomr, final_nzoomc, final_figpos] = ...
-    determine_results_movie_figure_layout(ctraxresultsmovie_params, trx) ;
+  determine_results_movie_figure_layout(ctraxresultsmovie_params, trx) ;
     
 % Create subtitle file
 [~,basename,~] = fileparts(expdir);
 subtitlefile = ...
-    write_subtitle_file(expdir, nframes, isOptogeneticExp, ctraxresultsmovie_params, basename, firstframes_off, endframes_off, ...
-                        raw_protocol, indicator_data, indicatorframes) ;
+  write_subtitle_file(expdir, nframes, isOptogeneticExp, ctraxresultsmovie_params, basename, firstframes_off, endframes_off, ...
+                      raw_protocol, indicator_data, indicatorframes) ;
                 
 % Create results movie as .avi
 moviefile = fullfile(expdir,dataloc_params.moviefilestr);

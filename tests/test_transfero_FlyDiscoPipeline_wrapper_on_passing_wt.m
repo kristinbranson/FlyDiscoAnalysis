@@ -6,7 +6,7 @@ fly_disco_analysis_test_folder_path = fileparts(this_script_path) ;
 fly_disco_analysis_folder_path = fileparts(fly_disco_analysis_test_folder_path) ;
 fly_disco_folder_path = fileparts(fly_disco_analysis_folder_path) ;
 
-cluster_billing_account_name = 'branson' ;
+cluster_billing_account_name = [] ;
 user_name_for_configuration_purposes = 'bransonlab' ;
 % analysis_parameters = cell(1,0) ;
 % analysis_parameters = ...
@@ -31,7 +31,7 @@ settings_folder_path = fullfile(fly_disco_analysis_folder_path, 'settings-intern
 do_use_bqueue = true ;
 do_actually_submit_jobs = true ;
 do_try = true ;
-do_reset_working_experiments_folder = false ;
+do_reset_working_experiments_folder = true ;
 submit_host_name = if_not_a_submit_host('submit.int.janelia.org') ;
 optional_argument_list = { ...
   'settingsdir', settings_folder_path, ...

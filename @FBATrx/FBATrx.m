@@ -138,6 +138,7 @@ classdef FBATrx < handle
     firstframes = [];
     endframes = [];
     nframes = [];
+    chamber_index = [];
 
     %% indexing stuff
     

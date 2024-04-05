@@ -115,6 +115,8 @@ elseif strcmp(fn,'endframe'),
   res = {obj.endframes(idx)};
 elseif strcmp(fn,'off'),
   res = {1-obj.firstframes(idx)};
+elseif strcmp(fn,'chamber_index'),
+  res = {obj.chamber_index(idx)};
 else
   res = cell(1,numel(idx));
   for j = 1:numel(idx),

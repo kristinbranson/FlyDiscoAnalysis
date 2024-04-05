@@ -1,4 +1,4 @@
-function [result, t] = ComputeRgbStimulusProtocol(protocol)
+function [result, t, oneStep] = ComputeRgbStimulusProtocol(protocol)
 
 oneStep = ProtocolExperimentSteps(protocol);
 

@@ -26,7 +26,17 @@ function run_transfero_FlyDiscoPipeline_wrapper_on_experiment_list(folder_path_f
     %   run_transfero_FlyDiscoPipeline_wrapper_on_experiment_list(...,
     %   cluster_billing_account_name) bills any jobs submitted to the LSF cluster to
     %   the account specified by the string cluster_billing_account_name.  Examples
-    %   might be 'branson', 'rubin', and 'scicompsoft'.
+    %   might be 'branson', 'rubin', and 'scicompsoft'.  If empty, the cluster
+    %   billing account name will be looked for in the configuration file
+    %   specified by user_name_for_configuration_purposes.
+    %   
+    %   run_transfero_FlyDiscoPipeline_wrapper_on_experiment_list(...,
+    %   user_name_for_configuration_purposes) specifies the user name used for
+    %   configuration purposes.  This is normally the name of '*lab' or '*robot'
+    %   account used for automated runs.  It is used to look up the cluster
+    %   billing account name and the settings folder.  If
+    %   cluster_billing_account_name is non-empty, it will override the setting
+    %   specified in the lab configuration file.
     %   
     %   run_transfero_FlyDiscoPipeline_wrapper_on_experiment_list(...,
     %   do_use_bqueue), if do_use_bqueue is true, uses the bqueue_type() framework
@@ -79,7 +89,7 @@ function run_transfero_FlyDiscoPipeline_wrapper_on_experiment_list(folder_path_f
     if ~exist('ssh_host_name', 'var') || isempty(ssh_host_name) ,
         ssh_host_name = '' ;
     end
-    
+
     % We get passed ssh_host_name as a normal arg,
     % But we want to pass that through to transfero_FlyDiscoPipeline_wrapper()
     % so that it's used for the submission of the APT part of each pipeline run.
@@ -93,6 +103,15 @@ function run_transfero_FlyDiscoPipeline_wrapper_on_experiment_list(folder_path_f
     maxiumum_slot_count = 400 ;
     slots_per_job = 4 ;
     do_use_xvfb = true ;  % Matlab on linux leaks memory when you call getframe() without an X11 server   
+
+    % if cluster_billing_account_name is empty, look it up in the configuration
+    % file
+    if isempty(cluster_billing_account_name) ,
+      configuration_function_name = sprintf('%s_configuration', user_name_for_configuration_purposes) ;
+      configuration = feval(configuration_function_name) ;
+      % Unpack the per-lab configuration file
+      cluster_billing_account_name = configuration.cluster_billing_account_name ;  
+    end
 
     % Report how many experiments are to be analyzed
     experiment_count = length(folder_path_from_experiment_index) ;
