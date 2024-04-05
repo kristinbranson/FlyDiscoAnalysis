@@ -1,5 +1,7 @@
 function FlyDiscoComputePerFrameStats(expdir,varargin)
-
+% debugplot,n will create figures that display perframe data and the time period of the first n statistics
+% defined in stats_perframefeatures.txt with the norm periods, if any, plotted in
+% the subplot below 
 QUICKDEBUG = false;
 
 if QUICKDEBUG,

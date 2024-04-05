@@ -202,7 +202,7 @@ for flyi = 1:nfliesplot,
 end
 for ioni = 1:nperiodsplot,
   ion = ions(ioni);
-  title(haxs(1,ioni),sprintf('Period %d, %.1fs',ion,allts(ioni,2)));
+  title(haxs(1,ioni),sprintf('Period %d, %.1fs',ion,allts(ioni,2)),'FontSize',10);
 end
 
 set(haxs,'YDir','reverse','XTickLabel',{},'YTickLabel',{});

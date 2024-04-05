@@ -1,0 +1,4 @@
+#<group name> <binning> <hist_perframefeature><hist_perframefeature><hist_perframefeature> ...
+velmag,linear,velmag_ctr_flyany_frameprestim,velmag_ctr_flyany_framestimweak,velmag_ctr_flyany_framestimmed,velmag_ctr_flyany_framestimstrg
+dtheta,linear,absdtheta_flyany_frameprestim,absdtheta_flyany_framestimweak,absdtheta_flyany_framestimmed,absdtheta_flyany_framestimstrg
+nbinscombine,4

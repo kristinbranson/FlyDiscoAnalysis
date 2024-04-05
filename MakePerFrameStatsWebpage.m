@@ -1,4 +1,4 @@
-function MakePerFrameStatsWebpage(filename,basename,groups,statfiles,statperflyfiles,...
+function MakePerFrameStatsWebpage(filename,basename,timeseriesfiles,groups,statfiles,statperflyfiles,...
   stimfeatures,stimfiles,stimperflyfiles,...
   videoions,fliesplot,stimtrajfile,vidfiles,...
   histfiles,histgroups)
@@ -22,6 +22,22 @@ fprintf(fid,'<html>\n<title>%s</title>\n<body>\n',basename);
     
 
 fprintf(fid,'<h1>%s</h1>\n',basename);
+
+
+istimeseriesfile = ~isempty(timeseriesfiles) && ~all(cellfun(@isempty,timeseriesfiles(:)));
+if istimeseriesfile
+  fprintf(fid,'<a id="timeseries"><h2>Time Series</h2></a>\n');
+  fprintf(fid,'<center><table width="75%%">\n');
+  for i = 1:numel(timeseriesfiles),
+    name = timeseriesfiles{i};
+    if isempty(name),
+      continue;
+    end
+    fprintf(fid,'<tr><td><a id="timeseries_%s" href="%s"><img src="%s" width="100%%"></a></td></tr>\n',name,name,name);
+  end
+  fprintf(fid,'</table></center>\n');
+end
+
 isstatfile = ~isempty(statfiles) && ~all(cellfun(@isempty,statfiles(:)));
 
 if isstatfile,
@@ -96,7 +112,7 @@ if plotflies,
 end
 
 if ~isempty(stimtrajfile),
-  fprintf(fid,'<p>Trajectories at the onset of activation</p>\n');
+  fprintf(fid,'<p><h2>Trajectories at the onset of activation</h2></p>\n');
   fprintf(fid,'<p><a id="stimtraj" href="%s"><img src="%s" width="100%%"></a></p>\n',stimtrajfile,stimtrajfile);
 end
 
@@ -112,7 +128,7 @@ if ishist,
     end
     fprintf(fid,'<tr><td><a id="hist_%s" href="%s"><img src="%s" width="100%%"></a></td></tr>\n',histgroups{i},name,name);
   end
-  fprintf(fid,'</table>\n');
+  fprintf(fid,'</table>,</center>\n');
 end
 
 if ~isempty(vidfiles),

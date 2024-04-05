@@ -7,6 +7,11 @@
 %     true -> The stage *has* been forced, so delete any pre-existing HTML
 %             output file and the output folder before running anything
 % Default value: false
+% plottimeseries: Whether to plot mean stats. 
+%     0 -> Do not plot
+%     1 -> Plot if files do not exist
+%     2 -> Replot whether or not files exist
+% Default value 2. 
 % plotstats: Whether to plot mean stats. 
 %     0 -> Do not plot
 %     1 -> Plot if files do not exist
@@ -53,7 +58,7 @@ function FlyDiscoPlotPerFrameStats(expdir,varargin)
 version = '0.1';
 
 [analysis_protocol,settingsdir,datalocparamsfilestr,visible,DEBUG,...
-  is_stage_forced,plotstats,plotstim,makestimvideos,plothist,...
+  is_stage_forced,plottimeseries,plotstats,plotstim,makestimvideos,plothist,...
   plotflies,plotstimtrajs,verbose] = ...
   myparse(varargin,...
   'analysis_protocol','current',...
@@ -62,6 +67,7 @@ version = '0.1';
   'visible','',...
   'debug',false,...
   'is_stage_forced', false, ...
+  'plottimeseries',2,...
   'plotstats',2,...
   'plotstim',[],...
   'makestimvideos',[],...
@@ -114,7 +120,7 @@ logfid = 1;
 timestamp = datestr(now,'yyyymmddTHHMMSS');
 real_analysis_protocol = GetRealAnalysisProtocol(analysis_protocol,settingsdir);
 
-fprintf(logfid,'\n\n***\nRunning FlyDiscoPlotPerFrameStats version %s analysis_protocol %s (linked to %s) at %s\n',version,analysis_protocol,real_analysis_protocol,timestamp);
+fprintf(logfid,'\n\n***\nRunning FlyDiscoPlotPerFrameStats2 version %s analysis_protocol %s (linked to %s) at %s\n',version,analysis_protocol,real_analysis_protocol,timestamp);
 
 %% load experiment data
 
@@ -137,7 +143,8 @@ end
 
 %statsperframefeaturesfile = fullfile(settingsdir,analysis_protocol,dataloc_params.statsperframefeaturesfilestr);
 %stats_perframefeatures = ReadStatsPerFrameFeatures2(statsperframefeaturesfile);
-
+timeseriesplotparamsfile = fullfile(settingsdir,analysis_protocol,dataloc_params.timeseriesplotparamsfilestr);
+timeseries_params = ReadParams(timeseriesplotparamsfile);
 statsplotparamsfile = fullfile(settingsdir,analysis_protocol,dataloc_params.statsplotparamsfilestr);
 stats_plotparams = ReadStatsPlotParams(statsplotparamsfile);
 stimulusplotparamsfile = fullfile(settingsdir,analysis_protocol,dataloc_params.stimulusplotparamsfilestr);
@@ -160,6 +167,69 @@ conditionplotparamsfile = fullfile(settingsdir,analysis_protocol,dataloc_params.
 condition_plot_params = ReadConditionParams(conditionplotparamsfile);
 [~,expname] = fileparts(expdir);
 
+%% plot timeseries
+% add checks for whether this run
+hfig = [];
+% plottimeseries = true;
+timeseriesfiles = {};
+if plottimeseries
+    if verbose > 0
+        fprintf('Plotting time series...\n')
+    end
+
+%     timeseries_params = ReadParams('/groups/branson/home/robiea/Code_versioned/FlyDiscoAnalysis/settings-internal/20230907_flybubble_LED_VNC2_hack/timeseries_perframefeatures.txt');
+    trx = FBATrx('analysis_protocol',analysis_protocol,'settingsdir',settingsdir,...
+        'datalocparamsfilestr',datalocparamsfilestr,...
+        'maxdatacached',2^30);
+    trx.AddExpDir(expdir,'dooverwrite',false,'openmovie',false);
+    % load indicator data
+    ind = trx.getIndicatorLED(1);
+    non = numel(ind.starton);
+    % check if there are stim periods in indicator data 
+    % TODO use this check
+    if non == 0,
+        plottimeseries = 0;
+    end 
+
+    % fix for just 1 feature
+    if ischar(timeseries_params.features)
+        timeseries_params.features = {timeseries_params.features};
+    end
+    timeseriesfiles = cell(size(timeseries_params.features));
+    for fns = 1:numel(timeseries_params.features)    
+        field = timeseries_params.features{fns};
+        savename = sprintf('timeseries_%s.png',field);
+        relsavename = fullfile(dataloc_params.figdir,savename);
+        savename = fullfile(figdir,savename);
+        if ~DEBUG &&  plottimeseries <2 && exist(savename,'file')
+            timeseriesfiles{fns} = relsavename;
+            continue;
+        end
+        if verbose > 1,
+            fprintf('Plotting time series for %s\n',fns);
+        end
+
+        inputparams = {};
+        if isfield(timeseries_params,'bin')
+            inputparams = {'bin', timeseries_params.bin};
+        end
+        if isfield(timeseries_params,'perctimebin')
+            inputparams = [inputparams,'percbin',timeseries_params.perctimebin];
+        end
+        tshandle = PlotPerFrameTimeSeries(trx,ind,field,'visible',visible,'hfig',hfig,inputparams{:});
+
+        if ~DEBUG,
+            if exist(savename,'file'),
+                delete(savename);
+            end
+            set(tshandle,'Units','pixels','Position',tshandle.Position)
+            save2png(savename,tshandle);
+            timeseriesfiles{fns} = relsavename;
+            hfig = tshandle;
+
+        end
+    end
+end
 %% plot means, stds
 
 hfig = [];
@@ -524,7 +594,7 @@ if ~DEBUG,
   if exist(statswebpagefile,'file'),
     delete(statswebpagefile);
   end
-  MakePerFrameStatsWebpage(statswebpagefile,basename,groups,statfiles,...
+  MakePerFrameStatsWebpage(statswebpagefile,basename,timeseriesfiles,groups,statfiles,...
     statperflyfiles,stimulus_plotparams.features,stimfiles,stimperflyfiles,...
     videoions,fliesplot,stimtrajfile,videofiles,...
     histfiles,{hist_plot_params.groups.name});

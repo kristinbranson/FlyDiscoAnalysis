@@ -124,7 +124,7 @@ if plotstd,
   ts = trx.movie_timestamps{1}(f0:f1) - t0;
   mu = meandata(f0-fpre+1:f1-fpre+1);
   sig = stddata(f0-fpre+1:f1-fpre+1);
-  patch(hax,[ts,fliplr(ts)],[mu-sig,fliplr(mu+sig)],colors.stimstd,'LineStyle','none');  hax
+  patch(hax,[ts,fliplr(ts)],[mu-sig,fliplr(mu+sig)],colors.stimstd,'LineStyle','none');
 end
 
 % hfly = plot(hax,trx.movie_timestamps{1}(fpre:fpost),data,'-','LineWidth',.5);

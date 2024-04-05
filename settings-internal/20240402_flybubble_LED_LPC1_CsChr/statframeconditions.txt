@@ -1,0 +1,8 @@
+stim,equal_stimon,1
+prestim,equal_stimoff_1,1
+stimweak,equal_stimon_1_2_3_4_5_6_7_8_9_10_11_12_13_14_15_16_17_18_19_20,1
+stimmed,equal_stimon_21_22_23_24_25_26_27_28_29_30_31_32_33_34_35_36_37_38_39_40,1
+stimstrg,equal_stimon_41_42_43_44_45_46_47_48_49_50_51_52_53_54_55_56_57_58_59_60,1
+
+walk,equal_labels_Walk2,1
+

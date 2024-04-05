@@ -1,0 +1,14 @@
+# <per-frame feature>,<frame condition name_frame condition name>,<fly condition name>,<min n. frames both valid>,<min n. frames fly valid>
+# per-frame feature must be present in hist_perframebins.mat, created by ChooseHistBins.m
+# frame conditions defined in statframeconditions.txt and fly conditions defined in staflyconditions.txt
+
+dnose2ell,nearwall,any,25,100
+dnose2ell,nearwall_prestim,any,25,100
+dnose2ell,nearwall_stimstrg,any,25,100
+
+velmag_ctr,prestim,any,25,50
+velmag_ctr,stimweak,any,25,50
+velmag_ctr,stimmed,any,25,50
+velmag_ctr,stimstrg,any,25,50
+
+

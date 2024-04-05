@@ -45,7 +45,7 @@ for i = 1:numel(shortnames),
 end
 
 fns = stats_perframefeatures;
-
+% i don't think this is working _norm 
 m = regexp(fns,'^(.*)_fly(.*)_frame(.*)$','once','tokens');
 fields = cellfun(@(x) x{1},m,'UniformOutput',false);
 flyconditions = cellfun(@(x) x{2},m,'UniformOutput',false);
@@ -167,12 +167,14 @@ for i = 1:nfns,
 end
   
 set(hax,'XTick',1:nfns,'XTickLabel',typestrs,'FontSize',fontsize);
-
+set(gca,'TickLabelInterpreter','none')
 %% legend
 
 %xlabel(hax,'Experiment','Interpreter','none');
 if ~arefields,
   hy = ylabel(hax,fields{1},'Interpreter','none','FontSize',fontsize);
+else 
+    hy = [];
 end
 hti = title(hax,basename,'Interpreter','none','FontSize',fontsize);
 
@@ -211,6 +213,8 @@ if plotflies,
   set(haxflies,'box','off','FontSize',fontsize);
   if ~arefields,
     hy = ylabel(haxflies,fields{1},'Interpreter','none','FontSize',fontsize);
+  else
+      hy=[];
   end
   hti = title(haxflies,sprintf('Mean per fly %s',basename),'Interpreter','none','FontSize',fontsize);
   legend(hperfly,sperfly);
