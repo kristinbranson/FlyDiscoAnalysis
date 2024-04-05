@@ -9,10 +9,11 @@ settingsdir = 'settings-internal';
 % explist = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20240315_statplotting_KBupdates/LPC1CsChr_BJD_SS02407_RigC_20231211T140526'};
 % analysis_protocol = '20240402_flybubble_LED_LPC1_CsChr';
 % explist = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20240315_statplotting_KBupdates/VNC2_EXT_VGLUT-GAL4_RigB_20230516T125145'};
-% analysis_protocol = '20240402_flybubble_LED_VNC2';
+explist = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20240315_statplotting_KBupdates/VNC2_EXT_VGLUT-GAL4_RigB_20230705T111622'};
+analysis_protocol = '20240402_flybubble_LED_VNC2';
 
-explist = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20240404_statsplotting_Katie/20230719T074540_rig1_flyBubble1_SS36564_72C11LexAivk5LexAopTrpAVIE260UASGtACR_20230419_AggAVLPGtACR'};
-analysis_protocol ='20240329_BubblefRGB_GtAgStats_AR';
+% explist = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20240404_statsplotting_Katie/20230719T074540_rig1_flyBubble1_SS36564_72C11LexAivk5LexAopTrpAVIE260UASGtACR_20230419_AggAVLPGtACR'};
+% analysis_protocol ='20240329_BubblefRGB_GtAgStats_AR';
 
 % for i = 1:numel(explist)
 % expdir = explist{i};
@@ -46,8 +47,8 @@ expdir = explist{i};
 % FlyDiscoDetectIndicatorLedOnOff(expdir,'settingsdir',settingsdir,'analysis_protocol',analysis_protocol);
 % FlyDiscoClassifySex(expdir,'settingsdir',settingsdir,'analysis_protocol',analysis_protocol);
 % FlyDiscoComputePerFrameFeatures(expdir,'settingsdir',settingsdir,'analysis_protocol',analysis_protocol);
-FlyDiscoComputePerFrameStats(expdir,'settingsdir',settingsdir,'analysis_protocol',analysis_protocol,'dorecompute',false,'docomputehists',false,'debugplot',false);  
-FlyDiscoPlotPerFrameStats(expdir,'settingsdir',settingsdir,'analysis_protocol',analysis_protocol,'debug',false,'makestimvideos',1,'plotstim',true,'plothist',false,'plotflies',true,'plotstimtrajs',true,'plottimeseries',2);
+FlyDiscoComputePerFrameStats(expdir,'settingsdir',settingsdir,'analysis_protocol',analysis_protocol,'dorecompute',false,'docomputehists',true,'debugplot',false);  
+FlyDiscoPlotPerFrameStats(expdir,'settingsdir',settingsdir,'analysis_protocol',analysis_protocol,'debug',false,'makestimvideos',1,'plotstim',true,'plothist',true,'plotflies',true,'plotstimtrajs',true,'plottimeseries',1);
 end
 %%
 

@@ -167,7 +167,7 @@ for i = 1:nfns,
 end
   
 set(hax,'XTick',1:nfns,'XTickLabel',typestrs,'FontSize',fontsize);
-set(gca,'TickLabelInterpreter','none')
+set(hax,'TickLabelInterpreter','none')
 %% legend
 
 %xlabel(hax,'Experiment','Interpreter','none');
@@ -199,6 +199,7 @@ if plotflies,
   ylim = [miny-(maxy-miny)*.01,maxy+(maxy-miny)*.01];
   set(haxflies,'YLim',ylim);
   set(haxflies,'XTick',1:nfns,'XTickLabel',typestrs);
+  set(haxflies,'TickLabelInterpreter','none');
   % hx = rotateticklabel(haxflies,90);
   % % make sure the ticks don't overlap the x-axis
   % ex = get(hx(1),'Extent');
