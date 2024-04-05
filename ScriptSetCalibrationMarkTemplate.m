@@ -12,9 +12,9 @@ settingsdir = '/groups/branson/home/robiea/Code_versioned/FlyDiscoAnalysis/setti
 %% parameters
 
 % % analysis_protocol = '20150717_flybubble_flybowlMing';
-analysis_protocol = '20240124_multibubble_firsttry';
+analysis_protocol = '20240124_multibubble_secondtry';
 % expfile = '/groups/branson/home/robiea/Projects_data/Ming/explist_forregistration';
-expdir = '/groups/branson/home/robiea/Projects_data/FlyDisco/multibubble_data/20240124_testingpipeline/20240122T154843_rig2_flyBowl1_1xLwt_attp40_4stop1_3xDSCPLwt_attp40_3stop1_SlowRamp';
+expdir = '/groups/branson/home/robiea/Projects_data/FlyDisco/multibubble_data/20240214T095625_rig1_multibubble_CSx71G01_1_1_UAS_Chrimson_Venus_X_0070_SlowRamp';
 datalocparamsfilestr = 'dataloc_params.txt';
 dataloc_params = ReadParams(fullfile(settingsdir,analysis_protocol,datalocparamsfilestr));
 
@@ -46,7 +46,7 @@ imagesc(template);
 axis image;
 
 %%%%%%%%% change output file name; copy into analysis protocol directory and edit registration_params.bowlMarkerType  %%%%%%%%%%%%%%%%
-imwrite(uint8(template),'CirleTemplate_FlyBowlMing.png');
+imwrite(uint8(template),['CirleTemplate_multibubleTriangle.png']);
 
 %% distance from the corner
 % informative for setting registration_params.maxDistCornerFrac_BowlLabel (restricts template

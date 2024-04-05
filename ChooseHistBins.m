@@ -1,6 +1,6 @@
 %% set up path
-addpath /groups/branson/home/bransonk/tracking/code/JCtrax/misc;
-addpath /groups/branson/home/bransonk/tracking/code/JCtrax/filehandling;
+modpath
+%%
 settingsdir = '/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/settings';
 realrootdir = '/groups/sciserv/flyolympiad/Olympiad_Screen/fly_bowl/bowl_data';
 %rootdir = '/groups/branson/bransonlab/projects/olympiad/HackHitData';

@@ -3,7 +3,7 @@
 
 logfiledir = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/MetadataFixes';
 %%%CHANGE
-logfilename = 'expdirs_wk39_metadatachanges_logofauto.csv';
+logfilename = 'expdirs_LPC1_logofauto_20231219.csv';
 
 
 logfile = fullfile(logfiledir,logfilename);
@@ -242,7 +242,7 @@ fid2 = fopen(logfile,'a');
 % wk 39 line name error should be SS96599
 % explist = {'VNC2_JRC_SS90044_RigD_20220927T115344'}; 
 % introduced a space when fixing line name - fixed 10/4/2023
-explist = {'VNC2_JRC_SS965599_RigD_20220927T115344'};
+% explist = {'VNC2_JRC_SS965599_RigD_20220927T115344'};
 % wk 40experimenter boonek
 %explist = textread('/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/wk40_experimentermetadatafix.txt','%s');
 % change screen_type for experiments with 0212 led protocol to 'non_olympiad_dickson_led5secVNC'
@@ -280,6 +280,21 @@ explist = {'VNC2_JRC_SS965599_RigD_20220927T115344'};
 % redo experiments with bad metadata files after screen_type changed for
 % older led protocol - appending updates to the same csv file 
 % expnamelist = textread('/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/malformedmetadataexplist_bransonlab.txt','%s');
+% % LPC1 experiments for Reiser lab - wrong screen_type and effector
+% explist = {'LPC1ShiKir_JHS_K_85321_RigA_20231120T153353'
+% 'LPC1ShiKir_JHS_K_85321_RigB_20231120T153618'
+% 'LPC1ShiKir_BJD_SS02407_RigC_20231120T153725'
+% 'LPC1ShiKir_BJD_SS02407_RigD_20231120T153809'
+% 'LPC1ShiKir_JHS_K_85321_RigA_20231120T155527'};
+% also LPC1
+% line name should be GMR_SS02575
+% explist = {'LPC1ShiKir_JHS_K_85321_RigA_20231120T155527'};
+% % line name should be GMR_SS02575
+% explist = {'LPC1ShiKir_BJD_SS02407_RigA_20231212T140400'
+% 'LPC1ShiKir_BJD_SS02407_RigB_20231212T140403'};
+% line name should be BJD_SS02407
+explist = {'LPC1ShiKir_JHS_K_85321_RigD_20231212T142701'};
+
 %% 
 rootdatadir = '/groups/branson/bransonlab/flydisco_data';
 % for k =1:numel(expnamelist)
@@ -321,7 +336,7 @@ for j = 1:numel(explist)
     %     changestruct.line = 'JRC_SS66932';
     %     changestruct.line = 'JRC_SS67903';
 %     changestruct.line = 'JRC_SS71988';
-        changestruct.line = 'JRC_SS96599';
+%         changestruct.line = 'JRC_SS96599';
 
 %     changestruct.line = 'JRC_SS50887';
 %     changestruct.line = 'JRC_SS74689';
@@ -329,7 +344,12 @@ for j = 1:numel(explist)
   %  changestruct.line = 'JRC_SS68630';
 %   changestruct.line = 'JRC_SS78425';
 %         changestruct.line = 'JRC_SS93514';
+%       changestruct.line = 'GMR_SS02575';
+      changestruct.line = 'BJD_SS02407';
 %     changestruct.screen_type = 'non_olympiad_dickson_led5secVNC';
+%     changestruct.screen_type = 'non_olympiad_branson_LPC1CsChr';
+%     changestruct.effector = 'CsChr';
+
 %     changestruct.gender = 'b';
 % changestruct.notes_technical = 'used mouth pipette';
     % replace metadata fields with changes

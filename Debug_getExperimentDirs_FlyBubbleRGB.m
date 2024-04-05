@@ -17,8 +17,8 @@ rootdatadir = '/groups/branson/bransonlab/flydisco_data';
 % savefile = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_allflydisco_20230831';
 % [expdirstruct] = getExperimentDirsFlyDisco(rootdatadir,'metadatafile','Metadata.xml','movielength',false,'TrajNum',false,'autocheckin',false,'autocheckcomplete',true,'manualcheck',true);
 
-savefile = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_LPC1';
-[expdirstruct] = getExperimentDirsFlyDisco(rootdatadir,'metadatafile','Metadata.xml','expdirname','LPC1','date','_2023*','movielength',false,'TrajNum',false,'autocheckin',true,'autocheckcomplete',true,'manualcheck',true);
+% savefile = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_LPC1';
+% [expdirstruct] = getExperimentDirsFlyDisco(rootdatadir,'metadatafile','Metadata.xml','expdirname','LPC1','date','_2023*','movielength',false,'TrajNum',false,'autocheckin',true,'autocheckcomplete',true,'manualcheck',true);
 
 
 % savefile = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_VNC_week1';
@@ -28,8 +28,8 @@ savefile = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/
 % savefile = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_AmpRec';
 % [expdirstruct] = getExperimentDirsFlyDisco(rootdatadir,'metadatafile','Metadata.xml','expdirname','AmpRec','date','202208*','autocheckin',true,'autocheckcomplete',true);
 
-% savefile = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_VNCall_20230831';
-% [expdirstruct] = getExperimentDirsFlyDisco(rootdatadir,'metadatafile','Metadata.xml','expdirname','VNC*','autocheckin',true,'autocheckcomplete',true);
+savefile = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_VNCall_20240313';
+[expdirstruct] = getExperimentDirsFlyDisco(rootdatadir,'metadatafile','Metadata.xml','expdirname','VNC*','autocheckin',true,'autocheckcomplete',true,'manualcheck',true);
 
 % savefile = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_VNC2_20220915';
 % [expdirstruct] = getExperimentDirsFlyDisco(rootdatadir,'metadatafile','Metadata.xml','expdirname','VNC*','autocheckin',true,'autocheckcomplete',true);
@@ -48,7 +48,7 @@ savefile = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/
 
 % [expdirstruct] = getExperimentDirsFlyDisco(rootdatadir,'metadatafile','Metadata.xml','expdirname','VNC','autocheckin',true,'autocheckcomplete',true,'TrajNum',true);
 % [expdirstruct] = getExperimentDirsFlyDisco(rootdatadir,'metadatafile','Metadata.xml','autocheckin',true);
-%% save raw pull data
+% save raw pull data
 nowdatetime = datestr(now,'yyyymmddTHHMMSS');
 save([savefile,'_',nowdatetime,'.mat'],'expdirstruct');
 %% select on expdirs with certain led protocol
