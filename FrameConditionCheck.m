@@ -24,7 +24,7 @@ for i = 1:2:numel(frameconditionparams)-1,
   plotisstim = contains(param,'stim');
     
   % parse condition type
-  m = regexp(param,'^(?<type>(min)|(max)|(equal)|(start)|(partm?[\d\.]+tom?[\d\.]+[sfp]))_(?<param>.+)$','names','once');
+  m = regexp(param,'^(?<type>(min)|(max)|(equal)|(start)|(end)|(partm?[\d\.]+tom?[\d\.]+[sfp]))_(?<param>.+)$','names','once');
   if isempty(m),
     paramtype = '';
     param1 = param;
