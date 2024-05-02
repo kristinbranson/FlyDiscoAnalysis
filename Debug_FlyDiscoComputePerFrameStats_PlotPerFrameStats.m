@@ -1,19 +1,23 @@
 modpath
 
-%run code with KB's March 2024 updates
-% explist = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20240315_statplotting_KBupdates/VNC2_EXT_VGLUT-GAL4_RigB_20231114T124058'};
-% explist = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20240315_statplotting_KBupdates/VNC2_JRC_SS39036_RigB_20231024T114951'};
+% %run code with KB's March 2024 updates
+% % explist = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20240315_statplotting_KBupdates/VNC2_EXT_VGLUT-GAL4_RigB_20231114T124058'};
+% % explist = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20240315_statplotting_KBupdates/VNC2_JRC_SS39036_RigB_20231024T114951'};
 % explist= {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20240315_statplotting_KBupdates/LPC1CsChr_GMR_SS02575_RigA_20231120T155527'};
 settingsdir = 'settings-internal';
-% analysis_protocol = '20230907_flybubble_LED_VNC2_hack';
-% explist = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20240315_statplotting_KBupdates/LPC1CsChr_BJD_SS02407_RigC_20231211T140526'};
-% analysis_protocol = '20240402_flybubble_LED_LPC1_CsChr';
-% explist = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20240315_statplotting_KBupdates/VNC2_EXT_VGLUT-GAL4_RigB_20230516T125145'};
-explist = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20240315_statplotting_KBupdates/VNC2_EXT_VGLUT-GAL4_RigB_20230705T111622'};
-analysis_protocol = '20240402_flybubble_LED_VNC2';
+% % analysis_protocol = '20230907_flybubble_LED_VNC2_hack';
 
-% explist = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20240404_statsplotting_Katie/20230719T074540_rig1_flyBubble1_SS36564_72C11LexAivk5LexAopTrpAVIE260UASGtACR_20230419_AggAVLPGtACR'};
-% analysis_protocol ='20240329_BubblefRGB_GtAgStats_AR';
+% LPC1
+explist = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20240315_statplotting_KBupdates/LPC1CsChr_BJD_SS02407_RigC_20231211T140526'};
+analysis_protocol = '20240402_flybubble_LED_LPC1_CsChr';
+
+% % VNC
+% % % explist = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20240315_statplotting_KBupdates/VNC2_EXT_VGLUT-GAL4_RigB_20230516T125145'};
+% explist = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20240315_statplotting_KBupdates/VNC2_EXT_VGLUT-GAL4_RigB_20230705T111622'};
+% analysis_protocol = '20240402_flybubble_LED_VNC2';
+
+% % explist = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20240404_statsplotting_Katie/20230719T074540_rig1_flyBubble1_SS36564_72C11LexAivk5LexAopTrpAVIE260UASGtACR_20230419_AggAVLPGtACR'};
+% % analysis_protocol ='20240329_BubblefRGB_GtAgStats_AR';
 
 % for i = 1:numel(explist)
 % expdir = explist{i};
