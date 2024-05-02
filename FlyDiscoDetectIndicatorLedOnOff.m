@@ -101,6 +101,9 @@ else
   error('dataloc_params is missing field flytrackerbgstr, which is required');
 end
 
+% Make sure the protocol is shorter than the video
+error_if_protocol_is_longer_than_video(expdir, settingsdir, analysis_protocol) ;
+
 % Determine where the LED indicator is in the video frame
 ledIndicatorPoints = ...
   detectLedLocations(registration_data, ...

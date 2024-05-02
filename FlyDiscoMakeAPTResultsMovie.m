@@ -164,6 +164,10 @@ else
   end
 end
 
+%% Make sure the protocol is shorter than the video
+
+error_if_protocol_is_longer_than_video(expdir, settingsdir, analysis_protocol) ;
+
 %% determine start and end frames of snippets
 
 if ~isOptogeneticExp,
