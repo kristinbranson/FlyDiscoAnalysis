@@ -24,6 +24,7 @@ if ~isOptogeneticExp ,
 end
 
 % Read in registration params
+analysis_protocol_folder_path = fullfile(settingsdir, analysis_protocol) ;
 registrationparamsfile = fullfile(analysis_protocol_folder_path,dataloc_params.registrationparamsfilestr);
 if ~exist(registrationparamsfile,'file')
   error('Registration params file %s does not exist',registrationparamsfile);
@@ -54,15 +55,22 @@ protocol = downmixProtocolIfNeeded(raw_protocol) ;
   % should change this.
 % See the comments in indicatorframes_from_protocol.m for details about how
 % the protocol structure works, and what it means.
-duration_from_step_index = protocol.delayTime + protocol.iteration * (protocol.pulseNum*protocol.pulsePeriodSP/1000+protocol.offTime) ;
-  % protocol already has a duration field giving the duration for each step, but
-  % we just recalculate it, just in case the duration field is wrong.
+duration_from_step_index = protocol.duration/1000 ;  % seconds
+active_duration_from_step_index = ...
+  protocol.delayTime + protocol.iteration .* (protocol.pulseNum .* protocol.pulsePeriodSP + protocol.offTime)/1000 ;  % seconds
+  % For each i, active_duration_from_step_index(i) should be <=
+  % duration_from_step_index(i)
+if any(active_duration_from_step_index>duration_from_step_index)
+  warning('Active duration of at least one protocol step is greater than the step duration') ;
+  duration_from_step_index  %#ok<NOPRT> 
+  active_duration_from_step_index  %#ok<NOPRT> 
+end
 total_protocol_duration = sum(duration_from_step_index) ;
 
 % Finally, compare the protocol duration to the video duration and error if
 % the protocol is longer.
 if total_protocol_duration > video_duration ,
-  error('According to the protocol file, the protocol in longer in duration (%g s) than the video (%g s)', ...
+  error('According to the protocol file, the protocol is longer in duration (%g s) than the video (%g s)', ...
         total_protocol_duration, ...
         video_duration) ;
 end

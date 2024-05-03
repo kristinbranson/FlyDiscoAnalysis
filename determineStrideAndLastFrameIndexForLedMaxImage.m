@@ -26,13 +26,13 @@ if ~isempty(protocol)
   timeOfEndOfFirstActivePulseTrain = durationBeforeFirstActiveStep + delay + pulsePeriod*pulseCount ;  % seconds
 
   % sets end range in which to find LED on
-  timeOfEndOfFirstActivePulseTrainInFrameIntervals = timeOfEndOfFirstActivePulseTrain/dt ;
   movieDuration = dt*nframes ;  % seconds
-  if timeOfEndOfFirstActivePulseTrainInFrameIntervals > dt*nframes ,
+  if timeOfEndOfFirstActivePulseTrain > movieDuration ,
     error('According to the protocol, the first active pulse train ends at t = %g s.  This is after the end of the video (duration = %g s).', ...
-          timeOfEndOfFirstActivePulseTrainInFrameIntervals, ...
+          timeOfEndOfFirstActivePulseTrain, ...
           movieDuration) ;
   end
+  timeOfEndOfFirstActivePulseTrainInFrameIntervals = timeOfEndOfFirstActivePulseTrain/dt ;
   roughStride = max(1, round(pulsePeriod*pulseCount/(2*dt))) ;
 else
   % reasonable guess if no protocol
