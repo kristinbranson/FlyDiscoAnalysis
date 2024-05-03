@@ -126,6 +126,9 @@ else
   raw_protocol = struct([]) ;
 end
 
+% Make sure the protocol is shorter than the video
+error_if_protocol_is_longer_than_video(expdir, settingsdir, analysis_protocol) ;
+
 % Determine start and end frames of snippets
 [firstframes, firstframes_off, endframes_off, nframes, indicatorframes] = ...
   DetermineStartAndEndOfResultsMovieSnippets(isOptogeneticExp, registration_data, ctraxresultsmovie_params, ...

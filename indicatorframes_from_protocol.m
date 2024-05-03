@@ -4,42 +4,45 @@ function indicatorframes = indicatorframes_from_protocol(protocol)
 % Here a "stimulus" is a single "pulse train" as described below.
 % "indicatorframes" could maybe also be named train_index_from_snippet_index,
 % if one was being long-winded, I think  -- ALT, 2024-03-22
-
+%
 % The protocol describes a pattern of pulses to be delivered.  These pulses
 % are organized into "pulse trains", each train an evenly-spaced series of
 % individual pulses.  A single "step" of the protocol specifies a
 % "supertrain": a series of pulse trains.
-
+%
 % An example protocol structure looks like this:
 %
 % protocol =
 %
 %   struct with fields:
 %
+%           duration: [22×1 double] (ms)
 %          intensity: [22×1 double]
-%       pulseWidthSP: [22×1 double]
-%      pulsePeriodSP: [22×1 double]
-%           pulseNum: [22×1 double]
-%            offTime: [22×1 double]
-%          delayTime: [22×1 double]
-%          iteration: [22×1 double]
+%       pulseWidthSP: [22×1 double] (ms)
+%      pulsePeriodSP: [22×1 double] (ms)
+%           pulseNum: [22×1 double] (pure, a count)
+%            offTime: [22×1 double] (ms)
+%          delayTime: [22×1 double] (s)
+%          iteration: [22×1 double] (pure, a count)
 %
-% This protocol contains 22 steps, i.e. 22 supertrains.  Each step
-% begins with a delay.  The delay for step i is delayTime(i).  This is
-% followed by a pulse train.  The number of pulses in step i is given by
-% pulseNum(i).  The duration of each pulse in step i is given by
-% pulseWidthSP(i) (in ms).  The time between pulse starts in step i is given
-% by pulsePeriodSP(i) (in ms).  At the end of each pulse train is an "off time", where
-% no pulses occur.  The duration of each off time in step i is given by
-% offTime(i).  The pulse train consists of the evenly-spaced pulses plus the
-% off time at the end of each pulse train.  Thus each pulse train in step i is
-% of duration pulseNum(i)*pulsePeriodSP(i)/1000+offTime(i).  Step i contains
-% iteration(i) pulse trains.  Thus step i consists of a delay of duration
-% delayTime(i), then a series of iteration(i) pulse trains.  The duration of
-% step i is thus:
+% This protocol contains 22 steps, i.e. 22 supertrains.  Step i is of duration
+% duration(i).  Each step begins with a delay.  The delay for step i is
+% delayTime(i).  This is followed by a pulse train.  The number of pulses in
+% step i is given by pulseNum(i).  The duration of each pulse in step i is
+% given by pulseWidthSP(i) (in ms).  The time between pulse starts in step i
+% is given by pulsePeriodSP(i) (in ms).  At the end of each pulse train is an
+% "off time", where no pulses occur.  The duration of each off time in step i
+% is given by offTime(i).  The pulse train consists of the evenly-spaced
+% pulses plus the off time at the end of each pulse train.  Thus each pulse
+% train in step i is of duration pulseNum(i)*pulsePeriodSP(i)/1000+offTime(i).
+% Step i contains iteration(i) pulse trains.  Thus step i consists of a delay
+% of duration delayTime(i), then a series of iteration(i) pulse trains.  The
+% "active" duration of step i is thus:
 %
-%   delayTime(i) + iteration(i) * (pulseNum(i)*pulsePeriodSP(i)/1000+offTime(i))
+%   delayTime(i) + iteration(i) * (pulseNum(i)*pulsePeriodSP(i)+offTime(i))/1000
 %
+% For each step, the active duration should be less than or equal to the
+% duration.  Any leftover time at the end of each step will contain no pulses.
 % The total duration of the protocol is the sum of the step durations.
 %
 % The amplitude of all the pulses in step i is intensity(i).

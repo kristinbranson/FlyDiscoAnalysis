@@ -1,6 +1,6 @@
 function result = downmixProtocolIfNeeded(rawProtocol)
 % Examine the metadata and the contents of the LED protocol file to determine
-% the protocol.  A protocol from an RGB experiment has be massaged a bit.
+% the protocol.  A protocol from an RGB experiment has to be massaged a bit.
 % Other protocols are passed through unaltered.
 
 if isfield(rawProtocol, 'intensity') ,

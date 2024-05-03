@@ -19,13 +19,19 @@ end
 % Compute rough values for frameToLedPulse and stride
 if ~isempty(protocol)
   % Compute the time of the end of the first active "step" in the protocol.
-  durationBeforeFirstActiveStep = sum(protocol.duration(1:firstActiveStepIndex-1))/1000 ;
+  durationBeforeFirstActiveStep = sum(protocol.duration(1:firstActiveStepIndex-1))/1000 ;  % seconds
   delay = protocol.delayTime(firstActiveStepIndex) ;  % seconds
   pulsePeriod = protocol.pulsePeriodSP(firstActiveStepIndex)/1000 ;  % seconds
   pulseCount = protocol.pulseNum(firstActiveStepIndex) ;  % pure
   timeOfEndOfFirstActivePulseTrain = durationBeforeFirstActiveStep + delay + pulsePeriod*pulseCount ;  % seconds
 
   % sets end range in which to find LED on
+  movieDuration = dt*nframes ;  % seconds
+  if timeOfEndOfFirstActivePulseTrain > movieDuration ,
+    error('According to the protocol, the first active pulse train ends at t = %g s.  This is after the end of the video (duration = %g s).', ...
+          timeOfEndOfFirstActivePulseTrain, ...
+          movieDuration) ;
+  end
   timeOfEndOfFirstActivePulseTrainInFrameIntervals = timeOfEndOfFirstActivePulseTrain/dt ;
   roughStride = max(1, round(pulsePeriod*pulseCount/(2*dt))) ;
 else
@@ -35,5 +41,5 @@ else
 end
 
 % Put the final touches on things
-stride = min(roughStride,round(timeOfEndOfFirstActivePulseTrainInFrameIntervals/100)) ;
-lastFrameIndex = max([round(timeOfEndOfFirstActivePulseTrainInFrameIntervals),min(200,nframes)]) ;
+stride = min(roughStride, round(timeOfEndOfFirstActivePulseTrainInFrameIntervals/100)) ;
+lastFrameIndex = max(round(timeOfEndOfFirstActivePulseTrainInFrameIntervals), min(200, nframes)) ;
