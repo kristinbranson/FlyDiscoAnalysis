@@ -84,6 +84,9 @@ function FlyDiscoPipeline(expdir, varargin)
     %           Compute Histogram-of-Oriented-Gradient (HOG) features for each
     %           frame, for each fly.  Also HOF features. Not tested, makes large files
     %           Default: 'off'. 
+    %       computeaptperframefeatures
+    %           Compute APT-based features for each frame, for each fly.
+    %           Default: 'off'. 
     %       jaabadetect
     %           Use JAABA to classify the behavior of each fly in each frame
     %           according to a set of classes.
@@ -137,6 +140,7 @@ function FlyDiscoPipeline(expdir, varargin)
     %       automaticchecksincoming: FlyDiscoAutomaticChecksIncoming()
     %       sexclassification: FlyDiscoClassifySex()
     %       computeperframefeatures: FlyDiscoComputePerFrameFeatures()
+    %       computeaptperframefeatures: FlyDiscoComputeAptPerFrameFeatures()
     %       computeperframestats: FlyDiscoComputePerFrameStats()
     %       plotperframestats: FlyDiscoPlotPerFrameStats()
     %       makectraxresultsmovie: FlyDiscoMakeCtraxResultsMovie()
@@ -155,6 +159,7 @@ function FlyDiscoPipeline(expdir, varargin)
     %       registration_params
     %       sexclassification_params
     %       computeperframefeatures_params
+    %       computeaptperframefeatures_params
     %       computeperframestats_params
     %       plotperframestats_params
     %       makectraxresultsmovie_params
@@ -182,6 +187,7 @@ function FlyDiscoPipeline(expdir, varargin)
     %       requiredfiles_computeperframefeatures
     %       requiredfiles_computeperframestats
     %       requiredfiles_computehoghofperframefeatures
+    %       requiredfiles_computeaptperframefeatures
     %       requiredfiles_plotperframestats
     %       requiredfiles_makectraxresultsmovie
     %       requiredfiles_apt    
@@ -311,6 +317,7 @@ function FlyDiscoPipeline(expdir, varargin)
     registration_params = lookup_in_struct(analysis_parameters, 'registration_params') ;
     sexclassification_params = lookup_in_struct(analysis_parameters, 'sexclassification_params') ;
     computeperframefeatures_params = lookup_in_struct(analysis_parameters, 'computeperframefeatures_params') ;
+    computeaptperframefeatures_params = lookup_in_struct(analysis_parameters, 'computeaptperframefeatures_params') ;
     computeperframestats_params = lookup_in_struct(analysis_parameters, 'computeperframestats_params') ;    
     plotperframestats_params = lookup_in_struct(analysis_parameters, 'plotperframestats_params') ;    
     makectraxresultsmovie_params = lookup_in_struct(analysis_parameters, 'makectraxresultsmovie_params') ;
@@ -323,6 +330,7 @@ function FlyDiscoPipeline(expdir, varargin)
     dosexclassification = lookup_in_struct(analysis_parameters, 'dosexclassification') ;
     docomputeperframefeatures = lookup_in_struct(analysis_parameters, 'docomputeperframefeatures') ;
     docomputehoghofperframefeatures = lookup_in_struct(analysis_parameters, 'docomputehoghofperframefeatures') ;
+    docomputeaptperframefeatures = lookup_in_struct(analysis_parameters, 'docomputeaptperframefeatures') ;
     dojaabadetect = lookup_in_struct(analysis_parameters, 'dojaabadetect') ;
     docomputeperframestats = lookup_in_struct(analysis_parameters, 'docomputeperframestats') ;
     doplotperframestats = lookup_in_struct(analysis_parameters, 'doplotperframestats') ;
@@ -338,6 +346,7 @@ function FlyDiscoPipeline(expdir, varargin)
     requiredfiles_computeperframefeatures = lookup_in_struct(analysis_parameters, 'requiredfiles_computeperframefeatures') ;
     requiredfiles_computeperframestats = lookup_in_struct(analysis_parameters, 'requiredfiles_computeperframestats') ;
     requiredfiles_computehoghofperframefeatures = lookup_in_struct(analysis_parameters, 'requiredfiles_computehoghofperframefeatures') ;
+    requiredfiles_computeaptperframefeatures = lookup_in_struct(analysis_parameters, 'requiredfiles_computeaptperframefeatures') ;
     requiredfiles_plotperframestats = lookup_in_struct(analysis_parameters, 'requiredfiles_plotperframestats') ;    
     requiredfiles_makectraxresultsmovie = lookup_in_struct(analysis_parameters, 'requiredfiles_makectraxresultsmovie') ;
     requiredfiles_apt = lookup_in_struct(analysis_parameters, 'requiredfiles_apt') ;
@@ -355,6 +364,7 @@ function FlyDiscoPipeline(expdir, varargin)
     dosexclassification = coerce_to_on_off_force(dosexclassification) ;
     docomputeperframefeatures = coerce_to_on_off_force(docomputeperframefeatures) ;
     docomputehoghofperframefeatures = coerce_to_on_off_force(docomputehoghofperframefeatures) ;
+    docomputeaptperframefeatures = coerce_to_on_off_force(docomputeaptperframefeatures) ;
     dojaabadetect = coerce_to_on_off_force(dojaabadetect) ;
     docomputeperframestats = coerce_to_on_off_force(docomputeperframestats) ;
     doplotperframestats = coerce_to_on_off_force(doplotperframestats) ; 
@@ -375,6 +385,7 @@ function FlyDiscoPipeline(expdir, varargin)
           'doapt', ...
           'docomputeperframefeatures', ...
           'docomputehoghofperframefeatures', ...
+          'docomputeaptperframefeatures', ...
           'docomputeperframestats', ...
           'dojaabadetect', ...
           'doplotperframestats', ...
@@ -623,6 +634,22 @@ function FlyDiscoPipeline(expdir, varargin)
             end            
         end
 
+
+
+        %% Compute APT per-frame features        
+        stage = 'computeaptperframefeatures';      
+        stage_function = @FlyDiscoComputeAptPerFrameFeatures ;
+        FlyDiscoPipelineStage(...
+            expdir, ...
+            stage, ...
+            docomputeaptperframefeatures, ...
+            dataloc_params, ...
+            requiredfiles_computeaptperframefeatures, ...
+            settingsdir, ...
+            analysis_protocol, ...
+            stage_function, ...
+            computeaptperframefeatures_params) ;
+        
 
 
         %% Run JAABA behavior detection
