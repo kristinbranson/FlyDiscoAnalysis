@@ -6,29 +6,26 @@ timestamp = datestr(now,'yyyymmddTHHMMSS');
 success = true ;  % Reflects whether any ACC failures have been detected yet (missing *required* files count, missing *desired* files do not)
 error_or_warning_messages = {} ;  % Each message in this list is either an error message or a warning message
 
-[analysis_protocol,settingsdir,datalocparamsfilestr,debug,intermediate_analysis_parameters] = ...
+[analysis_protocol,settingsdir,~,debug] = ...
   myparse(varargin,...
   'analysis_protocol','current',...
-  'settingsdir','/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/settings',...
+  'settingsdir',default_settings_folder_path(),...
   'datalocparamsfilestr','dataloc_params.txt',...
-  'debug',false, ...
-  'intermediate_analysis_parameters', []);
+  'debug',false);
 
 if ischar(debug),
   debug = (str2double(debug) ~= 0) ;
 end
 
-if isempty(intermediate_analysis_parameters) ,
-  error('intermediate_analysis_parameters is a required argument') ;
-end
-
 
 
 %% parameters
+[intermediate_analysis_parameters, dataloc_params, analysis_protocol_folder_path] = ...
+  readIntermediateAnalysisParameters(settingsdir, analysis_protocol) ;     % analysis params according to defaults and the analysis-protocol folder
 
-datalocparamsfile = fullfile(settingsdir,analysis_protocol,datalocparamsfilestr);
-dataloc_params = ReadParams(datalocparamsfile);
-paramsfile = fullfile(settingsdir,analysis_protocol,dataloc_params.automaticcheckscompleteparamsfilestr);
+%datalocparamsfile = fullfile(settingsdir,analysis_protocol,datalocparamsfilestr);
+%dataloc_params = ReadParams(datalocparamsfile);
+paramsfile = fullfile(analysis_protocol_folder_path,dataloc_params.automaticcheckscompleteparamsfilestr);
 check_params = ReadParams(paramsfile);
 %metadatafile = fullfile(expdir,dataloc_params.metadatafilestr);
 automatedchecksincomingfile = fullfile(expdir,dataloc_params.automaticchecksincomingresultsfilestr);
