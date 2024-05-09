@@ -149,23 +149,43 @@ end
 
 
 if is_on_or_force(intermediate_analysis_parameters.doledonoffdetection)
-    indicatordatafile = fullfile(expdir,dataloc_params.indicatordatafilestr);
-    load(indicatordatafile,'indicatorLED');
-
+    datalocparamsfile = fullfile(settingsdir,analysis_protocol,'dataloc_params.txt');   
+    dataloc_params = ReadParams(datalocparamsfile);
     indicatorparamsfile = fullfile(settingsdir,analysis_protocol,dataloc_params.indicatorparamsfilestr);
-if exist(indicatorparamsfile,'file'),
-  raw_indicator_params = ReadParams(indicatorparamsfile);
-  indicator_params = modernizeIndicatorParams(raw_indicator_params) ;
-  isOptogeneticExp = logical(indicator_params.OptogeneticExp) ;
-else
-  isOptogeneticExp = false ;
+            
+% Get one thing from the indicator params
+    if exist(indicatorparamsfile,'file'),
+        raw_indicator_params = ReadParams(indicatorparamsfile);
+        indicator_params = modernizeIndicatorParams(raw_indicator_params) ;
+        isOptogeneticExp = logical(indicator_params.OptogeneticExp) ;
+    else
+        isOptogeneticExp = false ;
+        % add error here too?
+    end
+    if isOptogeneticExp
+        % load LED indicator data
+        indicatordatafile = fullfile(expdir,dataloc_params.indicatordatafilestr);
+        load(indicatordatafile,'indicatorLED');
+        indicatorparamsfile = fullfile(settingsdir,analysis_protocol,dataloc_params.indicatorparamsfilestr);
+        % load protocol file
+        ledprotocolfile = fullfile(expdir,dataloc_params.ledprotocolfilestr);
+        raw_protocol = loadAnonymous(ledprotocolfile) ;
+        protocol = downmixProtocolIfNeeded(raw_protocol) ;
+        % pull out stim numbers
+        nprotocolstim = sum(protocol.iteration);
+        ndetectedstim = numel(indicatorLED.startframe);
+
+        if nprotocolstim ~= ndetectedstim
+            error_or_warning_messages{end+1} = sprintf('detected stim %g not equal protocol stim %g ', ...
+                ndetectedstim, ...
+                nprotocolstim) ;
+            success = false;
+            iserror(category2idx.bad_number_of_stimuli) = true;
+        end
+
+    end
+
 end
-
-
-
-    success = false;
-    iserror(category2idx.bad_number_of_stimuli) = true;
-end 
 
 
 

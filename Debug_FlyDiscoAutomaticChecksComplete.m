@@ -4,8 +4,12 @@ modpath
 %% set parameters
 % settingsdir = '/groups/branson/home/robiea/Code_versioned/FlyDiscoAnalysis/settings';
 % analysis_protocol = '20210531_flybubble_LED_ARtestingperframe';
-settingsdir = '/groups/branson/home/robiea/Code_versioned/FlyDiscoAnalysis/settings-internal';
-analysis_protocol = '20230213_flybubble_LED_VNC2';
+% settingsdir = '/groups/branson/home/robiea/Code_versioned/FlyDiscoAnalysis/settings-internal';
+% analysis_protocol = '20230213_flybubble_LED_VNC2';
+
+
+settingsdir = '/groups/branson/home/robiea/Code_versioned/FlyDiscoAnalysis';
+analysis_protocol = 'settings-internal/20240507_flybubble_LED_VNC3';
 params = {'settingsdir',settingsdir,...
   'analysis_protocol',analysis_protocol};
 
@@ -42,22 +46,24 @@ params = {'settingsdir',settingsdir,...
 
 % expdirs = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20210621_APTTracking/VNC_JRC_SS64175_RigB_20210518T145000'}
 
-expdirs = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20230509_autochecksERROR/VNC2_YNA_K_162984_RigD_20230503T135414'};
+% expdirs = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20230509_autochecksERROR/VNC2_YNA_K_162984_RigD_20230503T135414'};
+
+expdir = '/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20240508_VNC3/VNC3_YNA_K_162984_RigA_20240507T182023';
 
 %% 
-
-success = [];
-msg = {};
-
-for i = 1:numel(expdirs),
-  expdir = expdirs{i};
-  disp(expdir);
-  try 
-      FlyDiscoAutomaticChecksComplete(expdir,params{:})
-      success(i) = false ;  %#ok<SAGROW>
-      msg{i} = '' ;  %#ok<SAGROW>
-  catch me
-      success(i) = false ;  %#ok<SAGROW>
-      msg{i} = me.getReport() ;  %#ok<SAGROW>
-  end
-end
+FlyDiscoAutomaticChecksComplete(expdir,params{:})
+% success = [];
+% msg = {};
+% 
+% for i = 1:numel(expdirs),
+%   expdir = expdirs{i};
+%   disp(expdir);
+%   try 
+%       FlyDiscoAutomaticChecksComplete(expdir,params{:})
+%       success(i) = false ;  %#ok<SAGROW>
+%       msg{i} = '' ;  %#ok<SAGROW>
+%   catch me
+%       success(i) = false ;  %#ok<SAGROW>
+%       msg{i} = me.getReport() ;  %#ok<SAGROW>
+%   end
+% end
