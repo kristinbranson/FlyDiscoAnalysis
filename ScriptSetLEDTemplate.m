@@ -20,7 +20,8 @@ settingsdir = '/groups/branson/home/robiea/Code_versioned/FlyDiscoAnalysis/setti
 % analysis_protocol = '20210329_flybubble_FlyBowlRGB_LED';
 % analysis_protocol = '20220622_flybubbleRed_MBL';
 % analysis_protocol = '20240124_multibubble_firsttry';
-analysis_protocol = '20240124_multibubble_secondtry';
+% analysis_protocol = '20240124_multibubble_secondtry';
+analysis_protocol = '20240507_flybubble_LED_VNC3'
 
 % expdirs = {'/groups/branson/home/robiea/Projects_data/FlyDisco/KatieTestData/FlyBowlDisco_RGBonly_318/20210318T135921_rig1_flyBowl2__SS36564_CsChrim_KS_redonly_protocolRGB_0315_2'}
 % adjusted camera height
@@ -28,7 +29,8 @@ analysis_protocol = '20240124_multibubble_secondtry';
 % expdirs = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20220617_testingFlyBubbleRed/CsChrSocial3_P1a_Unknown_RigF_20220616T153431'};
 % expdirs = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20220622_testingFlyBubbleRedMBLhardware/CsChrSocial3_TK_RigF_20220622T173359'};
 % expdir = '/groups/branson/home/robiea/Projects_data/FlyDisco/multibubble_data/20240124_testingpipeline/20240122T154843_rig2_flyBowl1_1xLwt_attp40_4stop1_3xDSCPLwt_attp40_3stop1_SlowRamp';
-expdir = '/groups/branson/home/robiea/Projects_data/FlyDisco/multibubble_data/20240214T095625_rig1_multibubble_CSx71G01_1_1_UAS_Chrimson_Venus_X_0070_SlowRamp';
+% expdir = '/groups/branson/home/robiea/Projects_data/FlyDisco/multibubble_data/20240214T095625_rig1_multibubble_CSx71G01_1_1_UAS_Chrimson_Venus_X_0070_SlowRamp';
+expdir = '/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20240507_testingVNC3/VNC3_YNA_K_162984_RigD_20240507T182533';
 
 datalocparamsfilestr = 'dataloc_params.txt';
 dataloc_params = ReadParams(fullfile(settingsdir,analysis_protocol,datalocparamsfilestr));

@@ -50,6 +50,7 @@ categories = {...
   'missing_other_analysis_files',...
   'bad_number_of_flies',...
   'bad_number_of_flies_per_sex',...
+  'bad_number_of_stimuli',...
   'completed_checks_other', ...
   'missing_indicatorled_files', ...
   'missing_apt_tracking_files', ...
@@ -146,6 +147,28 @@ elseif is_on_or_force(intermediate_analysis_parameters.doregistration) ,
   [success, iserror, error_or_warning_messages] = ...
     check_for_nans_in_tracking(registered_trx_file_name, has_wing_info, category2idx, success, iserror, error_or_warning_messages) ;  
 end
+
+%% check the number of stimuli detecter match the expected number from protocol
+
+
+if is_on_or_force(intermediate_analysis_parameters.doledonoffdetection)
+    indicatordatafile = fullfile(expdir,dataloc_params.indicatordatafilestr);
+    load(indicatordatafile,'indicatorLED');
+
+    indicatorparamsfile = fullfile(settingsdir,analysis_protocol,dataloc_params.indicatorparamsfilestr);
+if exist(indicatorparamsfile,'file'),
+  raw_indicator_params = ReadParams(indicatorparamsfile);
+  indicator_params = modernizeIndicatorParams(raw_indicator_params) ;
+  isOptogeneticExp = logical(indicator_params.OptogeneticExp) ;
+else
+  isOptogeneticExp = false ;
+end
+
+
+
+    success = false;
+    iserror(category2idx.bad_number_of_stimuli) = true;
+end 
 
 
 
