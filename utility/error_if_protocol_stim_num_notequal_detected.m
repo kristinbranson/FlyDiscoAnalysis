@@ -1,28 +1,32 @@
-function error_if_protocol_stim_num_notequal_detected(expdir, settingsdir, analysis_protocol,varargin)
+function error_if_protocol_stim_num_notequal_detected(expdir, settingsdir, analysis_protocol, varargin)
 % Throws an error if this is an optogenetic experiment and the number of
 % stimuli from the protocol does not match the number of stimuli detected
 % from the indicator LEDs. 
 
-[indicatordata] = myparse(varargin,'indicatordata',[]);
+% Parse the arguments
+indicatordata = myparse(varargin,'indicatordata',[]);
+
 % Get locations of parameter files
 datalocparamsfile = fullfile(settingsdir,analysis_protocol,'dataloc_params.txt');
 dataloc_params = ReadParams(datalocparamsfile);
 
-% Get one thing from the indicator params
-indicatorparamsfile = fullfile(settingsdir,analysis_protocol,dataloc_params.indicatorparamsfilestr);
-if exist(indicatorparamsfile,'file'),
-  raw_indicator_params = ReadParams(indicatorparamsfile);
-  indicator_params = modernizeIndicatorParams(raw_indicator_params) ;
-  isOptogeneticExp = logical(indicator_params.OptogeneticExp) ;
-else
-  isOptogeneticExp = false ;
-end
-
-% This check only makes sense for opto experiments
-if ~isOptogeneticExp ,
-  return
-end
-
+% Don't need this check---this is called from a location that is only reached
+% if it's an optogenetic experiment.
+%
+% % Get one thing from the indicator params
+% indicatorparamsfile = fullfile(settingsdir,analysis_protocol,dataloc_params.indicatorparamsfilestr);
+% if exist(indicatorparamsfile,'file'),
+%   raw_indicator_params = ReadParams(indicatorparamsfile);
+%   indicator_params = modernizeIndicatorParams(raw_indicator_params) ;
+%   isOptogeneticExp = logical(indicator_params.OptogeneticExp) ;
+% else
+%   isOptogeneticExp = false ;
+% end
+% 
+% % This check only makes sense for opto experiments
+% if ~isOptogeneticExp ,
+%   return
+% end
 
 % Read in the LED protocol, compute the total protocol duration
 ledprotocolfile = fullfile(expdir,dataloc_params.ledprotocolfilestr);
@@ -31,20 +35,17 @@ protocol = downmixProtocolIfNeeded(raw_protocol) ;
 
 % If indictor not passed in, load detected stim data
 if isempty(indicatordata)
-    indicatordatafile = fullfile(expdir,dataloc_params.indicatordatafilestr);
-    load(indicatordatafile,'indicatorLED');
+  indicatordatafile = fullfile(expdir,dataloc_params.indicatordatafilestr);
+  load(indicatordatafile,'indicatorLED');
 else
-    indicatorLED = indicatordata.indicatorLED;
+  indicatorLED = indicatordata.indicatorLED;
 end
 
-nprotocolstim = sum(protocol.iteration);
+% Perform the test, error if it fails
+nprotocolstim = sum(protocol.intensity>0);
 ndetectedstim = numel(indicatorLED.startframe);
-
 if nprotocolstim ~= ndetectedstim
-      error('The number of detected stimuli: %g does not equal the expected number of stimuli: %g from the protocol file ', ...
+  error('The number of detected stimuli (%g) does not equal the expected number of stimuli (%g) from the protocol file', ...
         ndetectedstim, ...
         nprotocolstim) ;
 end
-
-
-
