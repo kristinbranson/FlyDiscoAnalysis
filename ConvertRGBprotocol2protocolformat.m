@@ -1,10 +1,11 @@
-function [protocol, ledcolor] = ConvertRGBprotocol2protocolformat(RGBprotocol, isLedActive)
+function [protocol, ledcolor] = ConvertRGBprotocol2protocolformat(RGBprotocol, isLedActiveRaw)
 % AR 20210311
 % takes in RGB format ledprotocol and prodcues ChR (single
 % LED) format protocol
 % RGBprotocol = RGB format protocol struct
 % countactiveLEDS =  [ 0/1 ; 0/1 ; 0/1 ] 0 = no intensity in any step
 % for R/G/B. 1 = nonzero intensity value in at least one step
+isLedActive = logical(isLedActiveRaw) ;
 red = logical([1 0 0]) ;
 green = logical([0 1 0]) ;
 blue = logical([0 0 1]) ;

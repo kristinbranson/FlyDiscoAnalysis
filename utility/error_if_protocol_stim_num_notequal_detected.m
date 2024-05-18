@@ -42,7 +42,7 @@ else
 end
 
 % Perform the test, error if it fails
-nprotocolstim = sum(protocol.intensity>0);
+nprotocolstim = distinct_pulse_count_from_single_channel_protocol(protocol) ;
 ndetectedstim = numel(indicatorLED.startframe);
 if nprotocolstim ~= ndetectedstim
   error('The number of detected stimuli (%g) does not equal the expected number of stimuli (%g) from the protocol file', ...

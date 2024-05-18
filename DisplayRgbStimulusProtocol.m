@@ -7,7 +7,8 @@ if isempty(hfig) || ~ishandle(hfig),
 end
 
 % Compute the signals
-[Yrgb, t, oneStep] = ComputeRgbStimulusProtocol(protocol) ;
+%[Yrgbo, to] = ComputeRgbStimulusProtocol(protocol) ;
+[Yrgb, t] = computeRgbStimulusProtocol(protocol) ;
 Yr = Yrgb(:,1) ;
 Yg = Yrgb(:,2) ;
 Yb = Yrgb(:,3) ;
@@ -40,7 +41,7 @@ stepStartSec = 0;
 %plot steps start and stop line
 for stepIndex = 1:length(protocol.stepNum) 
     %plot steps sstart and stop line
-    stepStartSec = stepStartSec + oneStep(stepIndex).Duration;
+    stepStartSec = stepStartSec + protocol.duration(stepIndex)/1000 ;
     line(haxr, 'XData', [stepStartSec stepStartSec], 'YData', [0 1], 'Color', 'c', 'LineStyle','--');
     line(haxg, 'XData', [stepStartSec stepStartSec], 'YData', [0 1], 'Color', 'c', 'LineStyle','--');
     line(haxb, 'XData', [stepStartSec stepStartSec], 'YData', [0 1], 'Color', 'c', 'LineStyle','--');
