@@ -6,29 +6,26 @@ timestamp = datestr(now,'yyyymmddTHHMMSS');
 success = true ;  % Reflects whether any ACC failures have been detected yet (missing *required* files count, missing *desired* files do not)
 error_or_warning_messages = {} ;  % Each message in this list is either an error message or a warning message
 
-[analysis_protocol,settingsdir,datalocparamsfilestr,debug,intermediate_analysis_parameters] = ...
+[analysis_protocol,settingsdir,~,debug] = ...
   myparse(varargin,...
   'analysis_protocol','current',...
-  'settingsdir','/groups/branson/bransonlab/projects/olympiad/FlyBowlAnalysis/settings',...
+  'settingsdir',default_settings_folder_path(),...
   'datalocparamsfilestr','dataloc_params.txt',...
-  'debug',false, ...
-  'intermediate_analysis_parameters', []);
+  'debug',false);
 
 if ischar(debug),
   debug = (str2double(debug) ~= 0) ;
 end
 
-if isempty(intermediate_analysis_parameters) ,
-  error('intermediate_analysis_parameters is a required argument') ;
-end
-
 
 
 %% parameters
+[intermediate_analysis_parameters, dataloc_params, analysis_protocol_folder_path] = ...
+  readIntermediateAnalysisParameters(settingsdir, analysis_protocol) ;     % analysis params according to defaults and the analysis-protocol folder
 
-datalocparamsfile = fullfile(settingsdir,analysis_protocol,datalocparamsfilestr);
-dataloc_params = ReadParams(datalocparamsfile);
-paramsfile = fullfile(settingsdir,analysis_protocol,dataloc_params.automaticcheckscompleteparamsfilestr);
+%datalocparamsfile = fullfile(settingsdir,analysis_protocol,datalocparamsfilestr);
+%dataloc_params = ReadParams(datalocparamsfile);
+paramsfile = fullfile(analysis_protocol_folder_path,dataloc_params.automaticcheckscompleteparamsfilestr);
 check_params = ReadParams(paramsfile);
 %metadatafile = fullfile(expdir,dataloc_params.metadatafilestr);
 automatedchecksincomingfile = fullfile(expdir,dataloc_params.automaticchecksincomingresultsfilestr);
@@ -50,6 +47,7 @@ categories = {...
   'missing_other_analysis_files',...
   'bad_number_of_flies',...
   'bad_number_of_flies_per_sex',...
+  'bad_number_of_stimuli',...
   'completed_checks_other', ...
   'missing_indicatorled_files', ...
   'missing_apt_tracking_files', ...
@@ -145,6 +143,46 @@ elseif is_on_or_force(intermediate_analysis_parameters.doregistration) ,
   has_wing_info = false ;
   [success, iserror, error_or_warning_messages] = ...
     check_for_nans_in_tracking(registered_trx_file_name, has_wing_info, category2idx, success, iserror, error_or_warning_messages) ;  
+end
+
+
+
+%% check the number of stimuli detecter match the expected number from protocol
+
+if is_on_or_force(intermediate_analysis_parameters.doledonoffdetection)
+  datalocparamsfile = fullfile(settingsdir,analysis_protocol,'dataloc_params.txt');
+  dataloc_params = ReadParams(datalocparamsfile);
+  indicatorparamsfile = fullfile(settingsdir,analysis_protocol,dataloc_params.indicatorparamsfilestr);
+
+  % Get one thing from the indicator params
+  if exist(indicatorparamsfile,'file'),
+    raw_indicator_params = ReadParams(indicatorparamsfile);
+    indicator_params = modernizeIndicatorParams(raw_indicator_params) ;
+    isOptogeneticExp = logical(indicator_params.OptogeneticExp) ;
+  else
+    isOptogeneticExp = false ;
+    % add error here too?
+  end
+  if isOptogeneticExp
+    % load LED indicator data
+    indicatordatafile = fullfile(expdir,dataloc_params.indicatordatafilestr);
+    load(indicatordatafile,'indicatorLED');
+    % load protocol file
+    ledprotocolfile = fullfile(expdir,dataloc_params.ledprotocolfilestr);
+    raw_protocol = loadAnonymous(ledprotocolfile) ;
+    protocol = downmixProtocolIfNeeded(raw_protocol) ;
+    % pull out stim numbers
+    nprotocolstim = sum(protocol.intensity>0);
+    ndetectedstim = numel(indicatorLED.startframe);
+
+    if nprotocolstim ~= ndetectedstim
+      error_or_warning_messages{end+1} = sprintf('Detected stimulus count (%g) not equal to protocol stimulus count (%g)', ...
+                                                 ndetectedstim, ...
+                                                 nprotocolstim) ;
+      success = false;
+      iserror(category2idx.bad_number_of_stimuli) = true;
+    end
+  end
 end
 
 

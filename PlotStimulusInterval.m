@@ -40,12 +40,18 @@ assert(all(ions <= nontotal));
 % times to plot
 f0s = ind.starton(ions);
 f1s = ind.endon(ions);
-t0s = trx.movie_timestamps{1}(f0s);
-t1s = trx.movie_timestamps{1}(f1s);
-tpres = t0s-prestim;
-tposts = t1s+poststim;
-[~,fpres] = min(abs(trx.movie_timestamps{1}'-tpres),[],1);
-[~,fposts] = min(abs(trx.movie_timestamps{1}'-tposts),[],1);
+timestamp_from_frame_index = trx.movie_timestamps{1} ;
+t0s = timestamp_from_frame_index(f0s);
+t1s = timestamp_from_frame_index(f1s);
+%tpres = t0s-prestim;
+%tposts = t1s+poststim;
+%[~,fpres] = min(abs(trx.movie_timestamps{1}'-tpres),[],1);
+%[~,fposts] = min(abs(trx.movie_timestamps{1}'-tposts),[],1);
+dt = median(diff(timestamp_from_frame_index), 'omitnan') ;
+fpres = f0s-round(prestim/dt) ;  % frame index in movie.ufmf
+fposts = f1s+round(poststim/dt) ;  % frame index in movie.ufmf
+tpres = timestamp_from_frame_index(fpres) ;
+tposts = timestamp_from_frame_index(fposts) ;
 
 data = trx.(field);
 nflies = numel(data);

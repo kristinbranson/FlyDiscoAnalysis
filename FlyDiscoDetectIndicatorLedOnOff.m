@@ -131,5 +131,8 @@ end
 save(indicatordatamatfilename, '-struct', 'indicatordata') ;
 fprintf('Saved indicator data to file %s\n', indicatordatamatfilename) ;
 
+% Check if detected stim number matches number expected from protocol 
+error_if_protocol_stim_num_notequal_detected(expdir, settingsdir, analysis_protocol, 'indicatordata', indicatordata); 
+
 % Final message
 fprintf('\n Finished running %s at %s.\n',mfilename(), datestr(now,'yyyymmddTHHMMSS'));

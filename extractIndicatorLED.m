@@ -74,7 +74,10 @@ end
 
 % Report the standard deviation of the LED signal.
 % Error if it's crazy low.
-meanimage_range = max(meanimage)-min(meanimage) ;
+%meanimage_range = max(meanimage)-min(meanimage) ;
+meanimage_max = quantile(meanimage,0.999) ;  % quantiles more robust than max/min
+meanimage_min = quantile(meanimage,0.001) ;
+meanimage_range = meanimage_max-meanimage_min ;  % more robust than max/min
 meanimage_sd = std(meanimage) ;
 fprintf('LED signal range is %g counts, standard deviation is %g counts\n', meanimage_range, meanimage_sd) ;
 if meanimage_range < 5 ,
@@ -86,7 +89,7 @@ end
 % For pulsed stimuli, group pulses together by mean(pad length) is either 1/0 before/after start/stop.
 % Pad needs to be more than 1/2 duty cycle of pulses / sampling frequency.
 % Offtime can't be less than pad+1 or it will fail.
-IRthreshold = (max(meanimage)+min(meanimage))/2 ;
+IRthreshold = (meanimage_max+meanimage_min)/2 ;
 meanimagethresh = (meanimage>IRthreshold) ;
 [indicatordigital, startframe, endframe] = compute_pulse_envelope(meanimagethresh, indicator_params.pad) ;
 
