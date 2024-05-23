@@ -1,10 +1,10 @@
-function error_if_protocol_stim_num_notequal_detected(expdir, settingsdir, analysis_protocol, varargin)
+function [do_stim_counts_match, message] = does_protocol_pulse_count_equal_measured(expdir, settingsdir, analysis_protocol, varargin)
 % Throws an error if this is an optogenetic experiment and the number of
 % stimuli from the protocol does not match the number of stimuli detected
 % from the indicator LEDs. 
 
 % Parse the arguments
-indicatordata = myparse(varargin,'indicatordata',[]);
+[indicatordata, dothrowerror] = myparse(varargin, 'indicatordata', [], 'dothrowerror', false) ;
 
 % Get locations of parameter files
 datalocparamsfile = fullfile(settingsdir,analysis_protocol,'dataloc_params.txt');
@@ -44,8 +44,16 @@ end
 % Perform the test, error if it fails
 nprotocolstim = distinct_pulse_count_from_single_channel_protocol(protocol) ;
 ndetectedstim = numel(indicatorLED.startframe) ;
-if nprotocolstim ~= ndetectedstim
-  error('The number of detected stimuli (%g) does not equal the expected number of stimuli (%g) from the protocol file', ...
-        ndetectedstim, ...
-        nprotocolstim) ;
+do_stim_counts_match = ( nprotocolstim == ndetectedstim ) ;
+if do_stim_counts_match ,
+  message = sprintf('The number of detected stimuli (%g) is equal to the expected number of stimuli (%g) from the protocol file', ...
+                    ndetectedstim, ...
+                    nprotocolstim) ;
+else
+  message = sprintf('The number of detected stimuli (%g) does not equal the expected number of stimuli (%g) from the protocol file', ...
+                    ndetectedstim, ...
+                    nprotocolstim) ;
+  if dothrowerror ,
+    error(message) ;  %#ok<SPERR> 
+  end
 end
