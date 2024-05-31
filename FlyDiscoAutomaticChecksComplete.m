@@ -254,9 +254,9 @@ if success && ~strcmpi(automatedchecks_incoming.automated_pf,'F'),
   end
 else
   fprintf(fid,'automated_pf,F\n');
-  fprintf(fid,'notes_curation,');
-  s = sprintf('%s\\n',error_or_warning_messages{:});
-  s = s(1:end-2);
+  fprintf(fid,'notes_curation,\n');
+  s = sprintf('%s,\\n',error_or_warning_messages{:});
+%   s = s(1:end-2);
   if isfield(automatedchecks_incoming,'notes_curation') && ...
       ~isempty(automatedchecks_incoming.notes_curation),
     if isempty(s),
@@ -265,7 +265,8 @@ else
       s = [automatedchecks_incoming.notes_curation,'\n',s];
     end
   end
-  fprintf(fid,'%s\n',s);
+% AR 20240530 changed autochecks complete formatting to make it easier to read 
+  fprintf(fid,s);
   if strcmpi(automatedchecks_incoming.automated_pf,'F'),
     if isfield(automatedchecks_incoming,'automated_pf_category') && ...
         ~isempty(automatedchecks_incoming.automated_pf_category),

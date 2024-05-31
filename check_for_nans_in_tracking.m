@@ -4,7 +4,7 @@ function [success, iserror, error_or_warning_messages] = check_for_nans_in_track
 if ~exist(trx_file_name,'file'),
   error_or_warning_messages{end+1} = sprintf('File %s does not exist', trx_file_name);
   success = false;
-  iserror(category2idx.missing_registration_files) = true;
+  iserror(category2idx.missing_perframefeatures_files) = true;
   return
 end
 
