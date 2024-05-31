@@ -7,8 +7,8 @@ user_name_for_configuration_purposes = 'bransonlab' ;
 % settings_folder_path = '/groups/branson/home/robiea/Code_versioned/BransonFlyDiscoSettings/settings';
 settings_folder_path = '/groups/branson/home/robiea/Code_versioned/FlyDiscoAnalysis/settings-internal';
 % analysis_protocol_use = '20240124_multibubble_secondtry';
-analysis_protocol_use = '20240507_flybubble_LED_VNC3';
-optional_argument_list = {'settingsdir', settings_folder_path,'analysis_protocol',analysis_protocol_use};
+analysis_protocol_use = '20240521_flybubble_LED_VNC3';
+optional_argument_list = {'settingsdir', settings_folder_path,'analysis_protocol',analysis_protocol_use,'docomputeaptperframefeatures','off'};
 do_use_bqueue = false ;
 do_actually_submit_jobs = false ;
 do_try = false ;
@@ -32,7 +32,9 @@ ssh_host_name = 'login2.int.janelia.org' ;
 % '/groups/branson/home/robiea/Projects_data/FlyDisco/multibubble_data/20240124_testingpipeline/NewMultiBubble_14Feb2024/20240214T095625_rig1_multibubble_CSx71G01_1_1_UAS_Chrimson_Venus_X_0070_SlowRamp'
 % '/groups/branson/home/robiea/Projects_data/FlyDisco/multibubble_data/20240124_testingpipeline/NewMultiBubble_14Feb2024/20240214T093136_rig1_multibubble_CSx71G01_3_1_UAS_Chrimson_Venus_X_0070_SlowRamp'}
 
-folder_path_from_experiment_index = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20240508_VNC3/VNC3_YNA_K_162984_RigA_20240507T182023'};
+% folder_path_from_experiment_index = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20240508_VNC3/VNC3_YNA_K_162984_RigA_20240507T182023'};
+%test apt features in compute perframe and apt pff computation
+folder_path_from_experiment_index = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20240521_testAPTfeatures/VNC2_YNA_K_162984_RigB_20220831T124607'};
 % Call the user-facing run function to do the real work
 run_transfero_FlyDiscoPipeline_wrapper_on_experiment_list(folder_path_from_experiment_index, ...
                                                           cluster_billing_account_name, ...
