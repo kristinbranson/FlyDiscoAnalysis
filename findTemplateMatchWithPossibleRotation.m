@@ -63,7 +63,7 @@ templateMatchImage(distanceToCornerImage > corner_radius) = -inf;
 
 % Make points within exclustion zones -inf
 exclusion_zone_count = size(excluded_xyrs, 1) ;
-for zone_index = 1 :  exclusion_zone_count ,
+for zone_index = 1 : exclusion_zone_count ,
   excluded_xyr = excluded_xyrs(zone_index,:) ;
   templateMatchImage = setPixelsWithinRadiusToNegInf(templateMatchImage, excluded_xyr(1), excluded_xyr(2), excluded_xyr(3)) ;
 end
