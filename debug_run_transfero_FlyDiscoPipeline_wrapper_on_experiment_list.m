@@ -32,7 +32,9 @@ ssh_host_name = 'login2.int.janelia.org' ;
 % '/groups/branson/home/robiea/Projects_data/FlyDisco/multibubble_data/20240124_testingpipeline/NewMultiBubble_14Feb2024/20240214T095625_rig1_multibubble_CSx71G01_1_1_UAS_Chrimson_Venus_X_0070_SlowRamp'
 % '/groups/branson/home/robiea/Projects_data/FlyDisco/multibubble_data/20240124_testingpipeline/NewMultiBubble_14Feb2024/20240214T093136_rig1_multibubble_CSx71G01_3_1_UAS_Chrimson_Venus_X_0070_SlowRamp'}
 
-folder_path_from_experiment_index = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20240508_VNC3/VNC3_YNA_K_162984_RigA_20240507T182023'};
+% folder_path_from_experiment_index = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20240508_VNC3/VNC3_YNA_K_162984_RigA_20240507T182023'};
+folder_path_from_experiment_index = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20240530_testACC/VNC3_JRC_SS50831_RigD_20240528T104805'};
+
 % Call the user-facing run function to do the real work
 run_transfero_FlyDiscoPipeline_wrapper_on_experiment_list(folder_path_from_experiment_index, ...
                                                           cluster_billing_account_name, ...

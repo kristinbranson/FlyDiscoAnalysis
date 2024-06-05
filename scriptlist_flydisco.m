@@ -1123,3 +1123,50 @@ end
 
 fclose(fid);
 
+
+%% checks for restarting VNC screening
+% create trx class
+% settings_folder_path = '/groups/branson/home/robiea/Code_versioned/BransonFlyDiscoSettings/settings';
+settings_folder_path = '/groups/branson/home/robiea/Code_versioned/FlyDiscoAnalysis/settings-internal';
+% analysis_protocol_use = '20240124_multibubble_secondtry';
+analysis_protocol_use = '20240507_flybubble_LED_VNC3';
+datalocparamsfilestr = 'dataloc_params.txt';
+trx = FBATrx('analysis_protocol',analysis_protocol_use,'settingsdir',settings_folder_path,...
+    'datalocparamsfilestr',datalocparamsfilestr);
+
+% load in data
+explist = textread('/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirlist_practice202405.txt','%s');
+
+for i = 1:10%numel(explist)
+    expdir = explist{i};
+    %     trx = load_tracks(fullfile(expdir,'registered_trx.mat'));
+    fprintf('Loading trajectories for %s...\n',expdir);
+
+trx.AddExpDir(expdir,'dooverwrite',false,'openmovie',false);
+    %     px2mm(i) =  trx.pxpermm;
+    %
+    %    area.data
+end
+% 
+% %% px2mm
+% figure
+% hist([trx.pxpermm])
+% % velmag and absdtheta
+% %% animal size
+% figure
+% for i = 1:trx.nexpdirs
+% h(i) = histogram([trx(i).area])
+% end
+
+
+%% save a reload m-file open in matlab
+
+openFiles = matlab.desktop.editor.getAll;
+mfileNames = {openFiles.Filename};
+save (['mfileNames' datestr(now,'yyyymmddTHHMM')],'mfileNames')
+
+% reload them in the future whenever you want
+load('/groups/branson/home/robiea/Code_versioned/FlyDiscoAnalysis/mfileNames20240514T1101.mat')
+for i=1:length(mfileNames)
+open(char(mfileNames(i)));
+end
