@@ -1,0 +1,83 @@
+# <per-frame feature>,<frame condition name>,<fly condition name>,<min n. frames both valid>,<min n. frames fly valid>,[<norm per-frame feature>],[<norm frame condition name>],[<norm fly condition name>],[<norm min n. frames both valid>],[<norm min n. frames fly valid>]
+
+
+#The average of anglesub of each stimulus not normalized and normalized by the whole first stim
+anglesub,stimonstrong,any,25,50
+anglesub,stimonweak,any,25,50
+anglesub,stimoff1,any,25,50
+
+anglesub,stimonstrong,any,25,50,stimoff1
+anglesub,stimonweak,any,25,50,stimoff1
+
+
+#The total field of view occluded during aggression
+anglesub,agg,any,0,50
+anglesub,aggstrong,any,0,50
+anglesub,aggweak,any,0,50
+anglesub,aggstimoff1,any,0,50
+anglesub,notagg,any,0,50
+
+#Number of flies close during aggression 
+nflies_close,agg,any,0,50
+nflies_close,aggstrong,any,0,50
+nflies_close,aggweak,any,0,50
+nflies_close,aggstimoff1,any,0,50
+nflies_close,notagg,any,0,50
+
+#The total difference in orientation between current and closest fly during aggression during first 10s of each stim 
+
+
+
+#fraction of time performing aggression - not being calculated for me I am getting only NaNs
+fractime,agg,any,0,50
+fractime,aggstrong,any,0,50
+fractime,aggweak,any,0,50
+fractime,aggstimoff1,any,0,50
+
+#The average distance of flies (as calculated by dcenter) of all strong or weak stimulus normalized by the whole first stim 
+#dcenter,stimonweak,any,25,100,stimoff1
+#dcenter,stimonstrong,any,25,100,stimoff1
+#dcenter,stimoff1,any,25,100
+
+#The number of flies close during aggression during first 10s of each stim normalized by the whole first stim
+#nflies_close,aggression_poststimweak10,any,25,100,stimoff1
+#nflies_close,aggression_poststimstrong10,any,25,100,stimoff1
+
+#The total field of view occluded during aggression during first 10s of each stim normalized by the whole first stim
+#anglesub,aggression_poststimweak10,any,25,100,stimoff1
+#anglesub,aggression_poststimstrong10,any,25,100,stimoff1
+
+# The average distance of flies (as calculated by dcenter) in the first 5s of each stimulus normalized by by first 10s of the first stim off period
+#dcenter,poststimweak5,any,25,100,stimoff10
+#dcenter,poststimstrong5,any,25,100,stimoff10
+#dcenter,prestimweak5,any,25,100,stimoff10
+#dcenter,prestimstrong5,any,25,100,stimoff10
+
+#The average distance of the flies in the first 10s of stim 1 normalized by the first 10s of the first pre-stim period
+#dcenter,poststimweak1,any,25,100,stimoff10
+
+#The number of flies close during aggression during first 10s of each stim normalized by the first 10s of stim off period
+#nflies_close,aggression_poststimweak10,any,25,100,stimoff10
+#nflies_close,aggression_poststimstrong10,any,25,100,stimoff10
+
+#The total field of view occluded during aggression during first 10s of each stim normalized by the first 10s of the stim off1
+#anglesub,aggression_poststimweak10,any,25,100,stimoff10
+#anglesub,aggression_poststimstrong10,any,25,100,stimoff10
+
+#The total difference in orientation between current and closest fly during aggression during first 10s of each stim normalized by the first 10s of the stim off1
+#absthetadiff_anglesub,aggression_poststimweak10,any,25,100,stimoff10
+#absthetadiff_anglesub,aggression_poststimstrong10,any,25,100,stimoff10
+#absthetadiff_anglesub,aggression_prestimweak10,any,25,100,stimoff10
+#absthetadiff_anglesub,aggression_prestimstrong10,any,25,100,stimoff10
+#absthetadiff_anglesub,aggression_poststimweak1,any,25,100,stimoff10
+#absthetadiff_anglesub,aggression_poststimstrong1,any,25,100,stimoff10
+#absthetadiff_anglesub,aggression_prestimweak1,any,25,100,stimoff10
+#absthetadiff_anglesub,aggression_prestimstrong1,any,25,100,stimoff10
+
+#number of flies close,field of view occluded, difference in orientation during aggression during the first 5s of first stim normalized by first 5 of stim off1
+#nflies_close,aggression_poststimweak1v5s,any,25,100,stimoff5
+#nflies_close,aggression_prestimweak1v5s,any,25,100,stimoff5
+#anglesub,aggression_poststimweak1v5s,any,25,100,stimoff5
+#anglesub,aggression_prestimweak1v5s,any,25,100,stimoff5
+#absthetadiff_anglesub,aggression_poststimweak1v5s,any,25,100,stimoff5
+#absthetadiff_anglesub,aggression_prestimweak1v5s,any,25,100,stimoff5

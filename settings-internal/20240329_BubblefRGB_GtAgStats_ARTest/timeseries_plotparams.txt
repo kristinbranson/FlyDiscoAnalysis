@@ -1,0 +1,4 @@
+# perframe feature file name or score file name for beahvior
+features,anglesub,scores_FeAggfRGBub
+bin,10
+perctimebin,50
