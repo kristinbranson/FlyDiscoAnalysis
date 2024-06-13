@@ -37,6 +37,7 @@ result.endon = led.endframe;
 % end
 result.startoff = led.endframe+1;
 result.endoff = led.startframe-1;
+result.indicatordigital = led.indicatordigital;
 % if led.StartEndStatus(1)==0,
 %   result.startoff = [1,result.startoff];
 % end

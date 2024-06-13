@@ -5,6 +5,7 @@ function FlyDiscoComputeAptPerFrameFeatures(expdir, varargin)
 % 'settingsdir', 'analysis_protocol', and 'forcecompute'.  It will also
 % contain any additional stage-specific key-value pairs passed as the last
 % argument to FlyDiscoPipelineStage().
+try
 
 version = '0.1';
 
@@ -46,29 +47,28 @@ if forcecompute,
     end
 end
 
-
-
-
-
 % read in parameters
 aptperframefeaturesparamsfile = fullfile(trx.settingsdir,trx.analysis_protocol,trx.dataloc_params.aptperframefeaturesparamsfilestr);
 aptperframefeatures_params = ReadParams(aptperframefeaturesparamsfile);
 
-% specify leg tip points
-legtip_landmarknums = aptperframefeatures_params.legtip_landmarknums;
+% nfeet_ground
 
-% load velmag of leg tips from JAABA apt perframe features
-% transform to format ground contact expects
-% nfly x 6 leg tips x frames cell array
-perframestr = 'apt_view1_global_velmag_';
-tips_velmag =cell(1,trx.nflies);
-
-for i = 1:numel(legtip_landmarknums)
-    fn = [perframestr,num2str(legtip_landmarknums(i))];
-    for fly = 1:trx.nflies
-        tips_velmag{fly}(i,:) = trx(fly).(fn);
-    end    
-end
+% % specify leg tip points
+% legtip_landmarknums = aptperframefeatures_params.legtip_landmarknums;
+% 
+% % load velmag of leg tips from JAABA apt perframe features
+% % transform to format ground contact expects
+% % nfly x 6 leg tips x frames cell array
+% perframestr = 'apt_view1_global_velmag_';
+% tips_velmag =cell(1,trx.nflies);
+% 
+% for i = 1:numel(legtip_landmarknums)
+%     fn = [perframestr,num2str(legtip_landmarknums(i))];
+%     for fly = 1:trx.nflies
+%         tips_velmag{fly}(i,:) = trx(fly).(fn);
+%     end    
+% end
+load(fullfile(expdir,"tips_velmag.mat"),'tips_velmag');
 
 % run groundcontact detections
 gc_threshold_low = aptperframefeatures_params.gc_threshold_low;
@@ -83,12 +83,53 @@ end
 units = parseunits('unit');
 save(fullfile(expdir,trx.dataloc_params.perframedir,'nfeet_ground.mat'),'data','units');
 
+%compute swing stance bouts
+[perfly_limbboutdata] = limbSwingStance(groundcontact);
 
-% compute number of feet on ground perframe feature 
+% filter swing stance for during walking
+% how to load score data from trx file??
+% ScoreFile = fullfile(expdir,"scores_Walk2.mat");
+% load(ScoreFile,'allScores');
+% digitalscores = allScores.postprocessed;
+[~,digitalscores] = LoadScoresFromFile(trx,'scores_Walk2',1);
+[walkingSwingStance] = restrictedSwingStance(digitalscores,perfly_limbboutdata,'trajectory');
 
-% save perframe feature to perframe feature directory
 
+% convert bout start and end indices to movie reference frame
+[walkingSwingStance] = convert_boutdata_to_movieformat(trx,walkingSwingStance);
+
+% seperate walking stwing stance for stimon and stimoff data
+% how to load stim data from trx file??
+% indicatorfile = fullfile(expdir,"indicatordata.mat");
+% load(indicatorfile,'indicatorLED');
+% digitalindicator = indicatorLED.indicatordigital;
+indicatordata = trx.getIndicatorLED(1);
+digitalindicator = indicatordata.indicatordigital;
+[stimON_walkingSwingStance] = restrictedSwingStance(digitalindicator,walkingSwingStance,'movie');
+[stimOFF_walkingSwingStance] = restrictedSwingStance(~digitalindicator,walkingSwingStance,'movie');
+
+
+% save(fullfile(expdir,'swingstance.mat'),'stimON_walkingSwingStance','stimOFF_walkingSwingStance');
+
+
+
+% compute durations for bouts
+[bout_metrics_ON] = computeboutmetrics2(trx,stimON_walkingSwingStance);
+[bout_metrics_OFF] = computeboutmetrics2(trx,stimOFF_walkingSwingStance);
+
+
+
+save(fullfile(expdir,trx.dataloc_params.aptperframeboutstatsfilestr),'bout_metrics_ON','bout_metrics_OFF')
+% compute durations with timestamps and concatinate perfly and perexp. 
 
 
 % If something goes wrong, throw an error.  Any values returned from this
 % function are ignored.
+catch
+        fid = fopen('/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/boutduration_fails.txt','a');
+    fprintf(fid,'%s \n',expdir);
+    fclose(fid);
+%     exit
+end
+% exit
+end

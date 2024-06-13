@@ -8,7 +8,7 @@ user_name_for_configuration_purposes = 'bransonlab' ;
 settings_folder_path = '/groups/branson/home/robiea/Code_versioned/FlyDiscoAnalysis/settings-internal';
 % analysis_protocol_use = '20240124_multibubble_secondtry';
 analysis_protocol_use = '20240521_flybubble_LED_VNC3';
-optional_argument_list = {'settingsdir', settings_folder_path,'analysis_protocol',analysis_protocol_use,'docomputeaptperframefeatures','off'};
+optional_argument_list = {'settingsdir', settings_folder_path,'analysis_protocol',analysis_protocol_use,'docomputeaptperframefeatures','on'};
 do_use_bqueue = false ;
 do_actually_submit_jobs = false ;
 do_try = false ;
@@ -34,7 +34,26 @@ ssh_host_name = 'login2.int.janelia.org' ;
 
 % folder_path_from_experiment_index = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20240508_VNC3/VNC3_YNA_K_162984_RigA_20240507T182023'};
 %test apt features in compute perframe and apt pff computation
-folder_path_from_experiment_index = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20240521_testAPTfeatures/VNC2_YNA_K_162984_RigB_20220831T124607'};
+% folder_path_from_experiment_index = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20240521_testAPTfeatures/VNC2_YNA_K_162984_RigB_20220831T124607'};
+
+% testing new stage
+% folder_path_from_experiment_index = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20240611_testingboutmetrics_ctrlset_inpipeline/VNC_YNA_K_162984_RigD_20210922T133035'
+% '/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20240611_testingboutmetrics_ctrlset_inpipeline/VNC_YNA_K_162984_RigC_20210922T132938'
+% '/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20240611_testingboutmetrics_ctrlset_inpipeline/VNC_YNA_K_162984_RigB_20210922T132823'
+% '/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20240611_testingboutmetrics_ctrlset_inpipeline/VNC_YNA_K_162984_RigA_20210922T132731'
+% '/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20240611_testingboutmetrics_ctrlset_inpipeline/VNC_YNA_K_162984_RigD_20210921T140825'
+% '/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20240611_testingboutmetrics_ctrlset_inpipeline/VNC_YNA_K_162984_RigC_20210921T140740'
+% '/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20240611_testingboutmetrics_ctrlset_inpipeline/VNC_YNA_K_162984_RigB_20210921T140516'
+% '/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20240611_testingboutmetrics_ctrlset_inpipeline/VNC_YNA_K_162984_RigA_20210921T140433'};
+
+folder_path_from_experiment_index = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20240611_testingboutmetrics_ctrlset/VNC2_YNA_K_162984_RigA_20220802T121645'
+'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20240611_testingboutmetrics_ctrlset/VNC2_YNA_K_162984_RigA_20220803T112613'
+'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20240611_testingboutmetrics_ctrlset/VNC2_YNA_K_162984_RigB_20220803T112705'
+'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20240611_testingboutmetrics_ctrlset/VNC2_YNA_K_162984_RigC_20220802T121835'
+'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20240611_testingboutmetrics_ctrlset/VNC2_YNA_K_162984_RigC_20220803T112800'
+'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20240611_testingboutmetrics_ctrlset/VNC2_YNA_K_162984_RigD_20220802T121919'
+'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20240611_testingboutmetrics_ctrlset/VNC2_YNA_K_162984_RigD_20220803T112857'};
+
 % Call the user-facing run function to do the real work
 run_transfero_FlyDiscoPipeline_wrapper_on_experiment_list(folder_path_from_experiment_index, ...
                                                           cluster_billing_account_name, ...
