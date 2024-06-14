@@ -10,39 +10,34 @@ catch ME
   warning(getReport(ME));
   return;
 end
-indicatordigital = id.indicatorLED.indicatordigital ;
-indicatorLED = convertIndicatorData(indicatordigital) ;
-obj.indicatorLED{n} = indicatorLED;
+indicatorLed = LoadIndicatorDataFromFileCore(id) ;
+obj.indicatorLED{n} = indicatorLed;
 
 end  % function
 
 
 
-function result = convertIndicatorData(indicatordigital)
+
+
+function result = LoadIndicatorDataFromFileCore(id)
 % Extracts the pulse starts/ends from the indicatordigital signal and alose
 % the "after-pulse" starts/ends.  And puts it in a struct of the type that the
 % rest of the code expects.
 
+indicatordigital = id.indicatorLED.indicatordigital ;
+
 % Just easier to recompute this stuff here from the digital signal
 % Also, pre-mid-2023 versions of the LED indicator stage have an off-by-one bug,
 % so better just to do it here to be sure.
-y = logical(indicatordigital) ;
-[first_sample_index_from_pulse_index, last_sample_index_from_pulse_index] = compute_pulse_starts_and_ends(y) ;
-n = numel(y) ;
+y = logical(indicatordigital) ;  % Just to make sure it's logical
+[first_tick_index_from_pulse_index, last_tick_index_from_pulse_index, ...
+ first_tick_index_from_interpulse_index, last_tick_index_from_interpulse_index] = ...
+  compute_pulse_and_interpulse_starts_and_ends(y) ;
 
-% Assemble the result struct.
-%
-% A "pulse" is a continuous span of high samples, with a low sample just
-% before and just after.  (Where samples outside the interval [1,n] are
-% considered low.)
-%
-% An "after-pulse" is the continuous span of low samples in-between two
-% pulses.
-result = struct() ;
-result.starton = first_sample_index_from_pulse_index ;  % frame index of the first high frame of each pulse 
-result.endon = last_sample_index_from_pulse_index ;  % frame index of the last high frame of each pulse
-result.startoff = last_sample_index_from_pulse_index+1 ;  % frame index of the first low frame of each after-pulse 
-result.endoff = [first_sample_index_from_pulse_index(2:end)-1 n] ;  % frame index of the last low frame of each after-pulse
+result.starton = first_tick_index_from_pulse_index ;  % frame index of the first high frame of each pulse 
+result.endon = last_tick_index_from_pulse_index ;  % frame index of the last high frame of each pulse
+result.startoff = first_tick_index_from_interpulse_index ;  % frame index of the first low frame of each interpulse 
+result.endoff = last_tick_index_from_interpulse_index ;  % frame index of the last low frame of each interpulse
 
 % % Debug code
 % pulse_count = numel(result.starton) ;
