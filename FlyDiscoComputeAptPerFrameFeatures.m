@@ -5,17 +5,17 @@ function FlyDiscoComputeAptPerFrameFeatures(expdir, varargin)
 % 'settingsdir', 'analysis_protocol', and 'forcecompute'.  It will also
 % contain any additional stage-specific key-value pairs passed as the last
 % argument to FlyDiscoPipelineStage().
-try
+
 
 version = '0.1';
-
+addpath /groups/branson/home/robiea/Code_versioned/locomotion_analysis/Alice
 % Parse the optional arguments
 [settingsdir, analysis_protocol,datalocparamsfilestr,forcecompute] = ...
-  myparse(varargin,...
-          'settingsdir', default_settings_folder_path(), ...
-          'analysis_protocol', 'current', ...
-          'datalocparamsfilestr','dataloc_params.txt',...
-          'forcecompute', false) ;
+    myparse(varargin,...
+    'settingsdir', default_settings_folder_path(), ...
+    'analysis_protocol', 'current', ...
+    'datalocparamsfilestr','dataloc_params.txt',...
+    'forcecompute', false) ;
 
 % starting stage messgage
 logfid = 1;
@@ -32,14 +32,14 @@ aptpfflist = {'nfeet_ground'};
 % Initialize trx class object
 fprintf('Initializing trx...\n');
 trx = FBATrx('analysis_protocol',analysis_protocol,'settingsdir',settingsdir,...
-  'datalocparamsfilestr',datalocparamsfilestr);
+    'datalocparamsfilestr',datalocparamsfilestr);
 trx.AddExpDir(expdir,'dooverwrite',false,'openmovie',false);
 
 % if force compute is true, delete aptPFF if they exist
-%should check if files exist first 
+%should check if files exist first
 if forcecompute,
     for i = 1:numel(aptpfflist)
-        curr_aptpff = fullfile(expdir,trx.dataloc_params.perframedir,[aptpfflist{i} '.mat']);        
+        curr_aptpff = fullfile(expdir,trx.dataloc_params.perframedir,[aptpfflist{i} '.mat']);
         if exist(curr_aptpff,'file')
             fprintf('Deleting per-frame data file %s\n',aptpfflist{i});
             delete(curr_aptpff);
@@ -55,18 +55,18 @@ aptperframefeatures_params = ReadParams(aptperframefeaturesparamsfile);
 
 % % specify leg tip points
 % legtip_landmarknums = aptperframefeatures_params.legtip_landmarknums;
-% 
+%
 % % load velmag of leg tips from JAABA apt perframe features
 % % transform to format ground contact expects
 % % nfly x 6 leg tips x frames cell array
 % perframestr = 'apt_view1_global_velmag_';
 % tips_velmag =cell(1,trx.nflies);
-% 
+%
 % for i = 1:numel(legtip_landmarknums)
 %     fn = [perframestr,num2str(legtip_landmarknums(i))];
 %     for fly = 1:trx.nflies
 %         tips_velmag{fly}(i,:) = trx(fly).(fn);
-%     end    
+%     end
 % end
 load(fullfile(expdir,"tips_velmag.mat"),'tips_velmag');
 
@@ -112,24 +112,17 @@ digitalindicator = indicatordata.indicatordigital;
 % save(fullfile(expdir,'swingstance.mat'),'stimON_walkingSwingStance','stimOFF_walkingSwingStance');
 
 
-
 % compute durations for bouts
 [bout_metrics_ON] = computeboutmetrics2(trx,stimON_walkingSwingStance);
 [bout_metrics_OFF] = computeboutmetrics2(trx,stimOFF_walkingSwingStance);
 
 
 
-save(fullfile(expdir,trx.dataloc_params.aptperframeboutstatsfilestr),'bout_metrics_ON','bout_metrics_OFF')
-% compute durations with timestamps and concatinate perfly and perexp. 
-
-
 % If something goes wrong, throw an error.  Any values returned from this
 % function are ignored.
-catch
-        fid = fopen('/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/boutduration_fails.txt','a');
-    fprintf(fid,'%s \n',expdir);
-    fclose(fid);
-%     exit
-end
-% exit
+try
+    save(fullfile(expdir,trx.dataloc_params.aptperframeboutstatsfilestr),'bout_metrics_ON','bout_metrics_OFF')
+catch ME
+    warning('FlyDiscoComputePerFrameFeatures:save',...
+        'Could not save information to file %s: %s',filename,getReport(ME));
 end
