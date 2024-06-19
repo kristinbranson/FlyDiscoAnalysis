@@ -1,4 +1,5 @@
-experiment_folder_path = '/groups/branson/bransonlab/taylora/flydisco/pflySingleMale_pfly_SlowRamp_71G01_UASChrimsonVenusX0070_20240320T102203' ;
+experiment_folder_path = ...
+  '/groups/branson/bransonlab/taylora/flydisco/example-experiments/pflySingleMale_pfly_SlowRamp_71G01_UASChrimsonVenusX0070_20240320T102203' ;
 dot_movie_path = fullfile(experiment_folder_path, 'dotmovie.ufmf') ;
 %playfmf([], dotmovie_path) ;
 movie_path = fullfile(experiment_folder_path, 'movie.ufmf') ;
@@ -260,6 +261,12 @@ for output_movie_frame_index = 1 : output_movie_frame_count ,
     output_movie_frame.cdata = tweak_rgb_image_size(output_movie_frame.cdata, height, width) ;  % sometimes subsequent frames aren't quite the right size.
   end
   vw.writeVideo(output_movie_frame) ;
+
+  % If this is the middle frame, output an example frame
+  if output_movie_frame_index == round((1+output_movie_frame_count)/2) ,
+    output_image_file_name = 'pfly-test-result.png' ;
+    imwrite(output_movie_frame.cdata, output_image_file_name, 'png') ;
+  end
 end
 vw.close() ;
 
@@ -293,7 +300,7 @@ delete(output_movie_avi_file_name);
 flytracker_trx_file_path = fullfile(experiment_folder_path, 'movie_JAABA/trx.mat') ;
 s = load(flytracker_trx_file_path);
 trx_timestamp_from_movie_frame_index = s.timestamps - s.timestamps(1) ;
-ft_trx = s.trx ;  % ft_ is for FlyTracker
+original_trx = s.trx ;  % ft_ is for FlyTracker
 
 % How do these timestamps compare to the ones from the camera timestamp file?
 trx_timestamp_diff_from_movie_frame_index = trx_timestamp_from_movie_frame_index - timestamp_from_movie_frame_index ;
@@ -319,23 +326,26 @@ timestamp_diff_at_end_in_theory_in_ms = 1000*(frame_count*mean_trx_timestamp_int
 
 % Read in the fake-fly config, to get fake fly ellipse dimensions
 fake_fly_params_file_path = fullfile(experiment_folder_path, 'ellipseTrajectory_config.csv') ;
-fake_fly_params =  readtable(fake_fly_params_file_path); 
+fake_fly_params = readtable(fake_fly_params_file_path) ; 
 
 %%
 % Create the trx struct array for the pflies
-maximum_real_fly_id = max([ft_trx.id]) ;
+maximum_real_fly_id = max([original_trx.id]) ;
 arena_center_shift = [ 0 16 ]' ;  % pels
 do_debug = false ; 
 fake_trx = ...
   fake_fly_trx_from_various_inputs(dot_movie_path, timestamp_from_dot_movie_frame_index, ellipse_trajectory, actual_trajectory, ...
                                    calib, fake_fly_params, maximum_real_fly_id, arena_center_shift, do_debug)
 
-trx = [ ft_trx fake_trx ] ;
+% Concatenated the real tracks to the fake ones
+augmented_original_trx = arrayfun(@(s)(add_fields(s, 'is_pfly', false)), original_trx) ;
+trx = [ augmented_original_trx fake_trx ] ;
+
 timestamps = (1/calib.FPS) * ( 0 : frame_count )' ;
 save('trx-with-pfly.mat', 'trx', 'timestamps') ;
 
-make_ctrax_result_movie('moviename', 'pflySingleMale_pfly_SlowRamp_71G01_UASChrimsonVenusX0070_20240320T102203/movie.ufmf', ...
-                        'trxname', 'trx-with-pfly.mat', ...
-                        'aviname', 'trx-with-pfly.avi', ...
-                        'doshowsex', false, ...
-                        'doesYAxisPointUp', false) ;
+% make_ctrax_result_movie('moviename', 'pflySingleMale_pfly_SlowRamp_71G01_UASChrimsonVenusX0070_20240320T102203/movie.ufmf', ...
+%                         'trxname', 'trx-with-pfly.mat', ...
+%                         'aviname', 'trx-with-pfly.avi', ...
+%                         'doshowsex', false, ...
+%                         'doesYAxisPointUp', false) ;

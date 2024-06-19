@@ -57,11 +57,12 @@ fake_trx = ...
                                    flytracker_calibration, fake_fly_params, maximum_real_fly_id, arena_center_shift, debug) ;
 
 % Create the final output struct
-trx = [ original_trx fake_trx ] ;
-trx_wrapper = struct('trx', {trx}, 'timestamps', {original_trx.timestamps}) ;
+augmented_original_trx = arrayfun(@(s)(add_fields(s, 'is_pfly', false)), original_trx) ;
+trx = [ augmented_original_trx fake_trx ] ;
+trx_wrapper = struct('trx', {trx}, 'timestamps', {original_trx_wrapper.timestamps}) ;
 
 % Before overwriting the unregistered trx file, make a backup
-[parent_folder_path, base_name, ext] = fullfile2(unregistered_trx_file_path) ;
+[parent_folder_path, base_name, ext] = fileparts(unregistered_trx_file_path) ;
 max_backup_file_index = 100 ;
 did_find_valid_backup_file_path = false ;
 for backup_file_index = 1:max_backup_file_index ,
@@ -83,8 +84,8 @@ else
 end
 
 % Write the output file
-save('-mat', '-struct', unregistered_trx_file_path, trx_wrapper) ;
+save('-mat', '-v7.3', unregistered_trx_file_path, '-struct', 'trx_wrapper') ;
 
 % Final message
 end_timestamp = datestr(now(), 'yyyymmddTHHMMSS') ;
-fprintf('\n Finished running %s at %s.\n', mfilename(), end_timestamp) ;
+fprintf('\nFinished running %s at %s.\n', mfilename(), end_timestamp) ;

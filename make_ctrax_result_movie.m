@@ -128,8 +128,9 @@ end
 nids = length(trx);
 
 % make sure sex is set
-doshowsex = doshowsex && isfield(trx,'sex') && ~any(cellfun(@isempty,{trx.sex}));
+doshowsex = doshowsex && isfield(trx,'sex') && ~any(cellfun(@isempty,{trx.sex})) ;
 if doshowsex,
+  trx = normalize_sex(trx) ;  % Make sure sex field is a cell array with the correct number of elements for each tracklet
   sexes = {};
   for i = 1:numel(trx),
     if ~iscell(trx(i).sex),
