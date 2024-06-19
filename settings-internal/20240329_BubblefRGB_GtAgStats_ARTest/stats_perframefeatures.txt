@@ -2,6 +2,10 @@
 
 
 #The average of anglesub of each stimulus not normalized and normalized by the whole first stim
+anglesub,prestim,any,1,1
+anglesub,aggoffwk,any,1,1
+
+
 anglesub,stimonstrong,any,1,1
 anglesub,stimonweak,any,1,1
 anglesub,stimoff1,any,1,1

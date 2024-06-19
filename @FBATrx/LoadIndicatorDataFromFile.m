@@ -10,40 +10,49 @@ catch ME
   warning(getReport(ME));
   return;
 end
-indicatorLED = convertIndicatorData(id.indicatorLED) ;
-obj.indicatorLED{n} = indicatorLED;
+indicatorLed = LoadIndicatorDataFromFileCore(id) ;
+obj.indicatorLED{n} = indicatorLed;
 
 end  % function
 
 
 
-function result = convertIndicatorData(led)
-% Converts the indicator LED onset/offset data in the form it is held in the
-% data file to the form we want it in.  This is a pure function.
 
-result = struct;
-result.starton = [];
-result.endon = [];
-result.startoff = [];
-result.endoff = [];
 
-result.starton = led.startframe;
-result.endon = led.endframe;
-% if led.StartEndStatus(1),
-%   result.starton = [1,result.starton];
-% end
-% if led.StartEndStatus(2),
-%   result.endon(end+1) = obj.movie_nframes(n);
-% end
-result.startoff = led.endframe+1;
-result.endoff = led.startframe-1;
-% if led.StartEndStatus(1)==0,
-%   result.startoff = [1,result.startoff];
-% end
-% if led.StartEndStatus(2)==0,
-%   result.endoff(end+1) = obj.movie_nframes(n);
-% end
-assert(numel(result.starton) == numel(result.endon));
-assert(numel(result.startoff) == numel(result.endoff));
+function result = LoadIndicatorDataFromFileCore(id)
+% Extracts the pulse starts/ends from the indicatordigital signal and alose
+% the "after-pulse" starts/ends.  And puts it in a struct of the type that the
+% rest of the code expects.
+
+indicatordigital = id.indicatorLED.indicatordigital ;
+
+% Just easier to recompute this stuff here from the digital signal
+% Also, pre-mid-2023 versions of the LED indicator stage have an off-by-one bug,
+% so better just to do it here to be sure.
+y = logical(indicatordigital) ;  % Just to make sure it's logical
+[first_tick_index_from_pulse_index, last_tick_index_from_pulse_index, ...
+ first_tick_index_from_interpulse_index, last_tick_index_from_interpulse_index] = ...
+  compute_pulse_and_interpulse_starts_and_ends(y) ;
+
+result.starton = first_tick_index_from_pulse_index ;  % frame index of the first high frame of each pulse 
+result.endon = last_tick_index_from_pulse_index ;  % frame index of the last high frame of each pulse
+result.startoff = first_tick_index_from_interpulse_index ;  % frame index of the first low frame of each interpulse 
+result.endoff = last_tick_index_from_interpulse_index ;  % frame index of the last low frame of each interpulse
+
+% % Debug code
+% pulse_count = numel(result.starton) ;
+% figure('color', 'w') ;
+% plot(y,'b.') ;
+% ylim([-0.05 1.05]) ;
+% hold on ;
+% plot(result.starton, ones(1, pulse_count), 'og', 'MarkerSize', 9) ;
+% plot(result.endon, ones(1, pulse_count), 'or', 'MarkerSize', 9) ;
+% plot(result.startoff, zeros(1, pulse_count), 'ob', 'MarkerSize', 9) ;
+% plot(result.endoff, zeros(1, pulse_count), 'om', 'MarkerSize', 9) ;
+% hold off; 
+
+% Quick sanity-check
+assert(numel(result.starton) == numel(result.endon)) ;
+assert(numel(result.startoff) == numel(result.endoff)) ;
 
 end  % function
