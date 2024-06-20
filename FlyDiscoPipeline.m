@@ -259,7 +259,7 @@ function FlyDiscoPipeline(expdir, varargin)
     
     % Read in the analysis parameters, dataloc_params
     [intermediate_analysis_parameters, dataloc_params, analysis_protocol_folder_path, datalocparamsfilestr] = ...
-       readIntermediateAnalysisParameters(settingsdir, analysis_protocol) ;     % analysis params according to defaults and the analysis-protocol folder
+        readIntermediateAnalysisParameters(settingsdir, analysis_protocol) ;     % analysis params according to defaults and the analysis-protocol folder
     analysis_parameters = merge_structs(intermediate_analysis_parameters, argument_parameters) ;
     
     % Assign the paramters to individual variables
@@ -274,6 +274,7 @@ function FlyDiscoPipeline(expdir, varargin)
     automaticcheckscomplete_params = lookup_in_struct(analysis_parameters, 'automaticcheckscomplete_params') ;
     doautomaticchecksincoming = lookup_in_struct(analysis_parameters, 'doautomaticchecksincoming') ;
     doflytracking = lookup_in_struct(analysis_parameters, 'doflytracking') ;
+    doaddpflies = lookup_in_struct(analysis_parameters, 'doaddpflies') ;    
     doregistration = lookup_in_struct(analysis_parameters, 'doregistration') ;
     doledonoffdetection = lookup_in_struct(analysis_parameters, 'doledonoffdetection') ;
     dosexclassification = lookup_in_struct(analysis_parameters, 'dosexclassification') ;
@@ -306,6 +307,7 @@ function FlyDiscoPipeline(expdir, varargin)
     % Coerce all the do* variables to on/off/force
     doautomaticchecksincoming = coerce_to_on_off_force(doautomaticchecksincoming) ;
     doflytracking = coerce_to_on_off_force(doflytracking) ;
+    doaddpflies = coerce_to_on_off_force(doaddpflies) ;
     doregistration = coerce_to_on_off_force(doregistration) ;
     doledonoffdetection = coerce_to_on_off_force(doledonoffdetection) ;
     dosexclassification = coerce_to_on_off_force(dosexclassification) ;
@@ -325,6 +327,7 @@ function FlyDiscoPipeline(expdir, varargin)
           'analysis_protocol', ...
           'doautomaticchecksincoming', ...
           'doflytracking',  ...
+          'doaddpflies',  ...
           'doregistration', ...
           'doledonoffdetection', ...
           'dosexclassification', ...
@@ -434,6 +437,11 @@ function FlyDiscoPipeline(expdir, varargin)
             end
             
         end
+        
+        
+        
+        %% Add projector flies
+        FlyDiscoAddPFliesStage(expdir, dataloc_params, settingsdir, analysis_protocol, doaddpflies, debug) ;
         
         
         

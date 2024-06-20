@@ -39,6 +39,10 @@ function FlyTrackerWrapperForFlyDisco(expdir, settingsdir, analysis_protocol, da
   
   % Merge options
   options = merge_structs(default_options, options_from_file) ;
+%   % A hack for running locally in some situations
+%   options.num_cores = 8 ;
+%   options.num_chunks = 16 ;
+%   options.force_calib = false ;
   
   % Override certain options, since we get those directly from arguments or
   % dataloc_params
