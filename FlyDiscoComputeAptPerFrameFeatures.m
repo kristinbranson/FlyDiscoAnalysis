@@ -8,7 +8,7 @@ function FlyDiscoComputeAptPerFrameFeatures(expdir, varargin)
 
 
 version = '0.1';
-addpath /groups/branson/home/robiea/Code_versioned/locomotion_analysis/Alice
+% addpath /groups/branson/home/robiea/Code_versioned/locomotion_analysis/Alice
 % Parse the optional arguments
 [settingsdir, analysis_protocol,datalocparamsfilestr,forcecompute] = ...
     myparse(varargin,...
@@ -37,6 +37,7 @@ trx.AddExpDir(expdir,'dooverwrite',false,'openmovie',false);
 
 % if force compute is true, delete aptPFF if they exist
 %should check if files exist first
+% TO DO ADD  tips_velmag to list for deleting if forcecompute 
 if forcecompute,
     for i = 1:numel(aptpfflist)
         curr_aptpff = fullfile(expdir,trx.dataloc_params.perframedir,[aptpfflist{i} '.mat']);
@@ -47,28 +48,57 @@ if forcecompute,
     end
 end
 
+
+
 % read in parameters
 aptperframefeaturesparamsfile = fullfile(trx.settingsdir,trx.analysis_protocol,trx.dataloc_params.aptperframefeaturesparamsfilestr);
 aptperframefeatures_params = ReadParams(aptperframefeaturesparamsfile);
 
-% nfeet_ground
+
+% get leg tip velocities
 
 % % specify leg tip points
-% legtip_landmarknums = aptperframefeatures_params.legtip_landmarknums;
-%
-% % load velmag of leg tips from JAABA apt perframe features
-% % transform to format ground contact expects
-% % nfly x 6 leg tips x frames cell array
-% perframestr = 'apt_view1_global_velmag_';
-% tips_velmag =cell(1,trx.nflies);
-%
-% for i = 1:numel(legtip_landmarknums)
-%     fn = [perframestr,num2str(legtip_landmarknums(i))];
-%     for fly = 1:trx.nflies
-%         tips_velmag{fly}(i,:) = trx(fly).(fn);
-%     end
-% end
-load(fullfile(expdir,"tips_velmag.mat"),'tips_velmag');
+legtip_landmarknums = aptperframefeatures_params.legtip_landmarknums;
+
+% if perframe features exist load from them
+
+% load velmag of leg tips from JAABA apt perframe features
+% transform to format ground contact expects
+% nfly x 6 leg tips x frames cell array
+perframestr = 'apt_view1_global_velmag_';
+tips_velmag =cell(1,trx.nflies);
+perframeload_success = ones(1,numel(legtip_landmarknums));
+
+for i = 1:numel(legtip_landmarknums)
+    fn = [perframestr,num2str(legtip_landmarknums(i))];
+    if exist(fullfile(expdir,trx.dataloc_params.perframedir,[fn,'.mat']),'file') % currently trx class can't compute apt features on the fly
+        for fly = 1:trx.nflies
+            tips_velmag{fly}(i,:) = trx(fly).(fn);
+        end
+    else
+        perframeload_success(i) = 0;
+    end
+end
+
+if ~all(perframeload_success) && exist(fullfile(expdir,"tips_velmag.mat"),'file') 
+
+    % if tips_velmag already exists load them
+    load(fullfile(expdir,"tips_velmag.mat"),'tips_velmag');
+
+else
+    % compute and save if doesn't already exist
+    % need apt data 
+    aptfile = trx.dataloc_params.apttrkfilestr;
+    aptdata = TrkFile.load(fullfile(expdir,aptfile));
+    ts = trx.movie_timestamps{:};
+    dt = diff(ts)';
+    pxpermm = trx.pxpermm;
+  
+        % leg tip velocity
+    [tips_velmag] = compute_legtipvelmag(aptdata,dt,pxpermm,legtip_landmarknums);
+
+    save(fullfile(expdir,'tips_velmag.mat'),'tips_velmag');
+end
 
 % run groundcontact detections
 gc_threshold_low = aptperframefeatures_params.gc_threshold_low;
@@ -123,6 +153,6 @@ digitalindicator = indicatordata.indicatordigital;
 try
     save(fullfile(expdir,trx.dataloc_params.aptperframeboutstatsfilestr),'bout_metrics_ON','bout_metrics_OFF')
 catch ME
-    warning('FlyDiscoComputePerFrameFeatures:save',...
+    warning('FlyDiscoComputeAptPerFrameFeatures:save',...
         'Could not save information to file %s: %s',filename,getReport(ME));
 end

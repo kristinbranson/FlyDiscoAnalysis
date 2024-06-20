@@ -1,0 +1,7 @@
+#<group name>,<binning>,<hist_perframefeature>,<hist_perframefeature>,<hist_perframefeature>, ...
+#each hist_perframefeature defined in hist_perframfeatures and must be present in histperexp
+
+dnose2ell_nearwall,log,dnose2ell_flyany_framenearwall_prestim,dnose2ell_flyany_framenearwall_stimstrg
+velmag,linear,velmag_ctr_flyany_frameprestim,velmag_ctr_flyany_framestimweak,velmag_ctr_flyany_framestimmed,velmag_ctr_flyany_framestimstrg
+nbinscombine,4
+

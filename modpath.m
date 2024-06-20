@@ -33,6 +33,8 @@ function modpath()
   addpath(fullfile(path_to_this_folder, 'filehandling')) ;  
   addpath(fullfile(path_to_this_folder, 'perframe')) ;
   addpath(fullfile(path_to_this_folder, 'utility')) ;  
+  addpath(fullfile(path_to_this_folder, 'locomotion')) ; 
+  addpath(fullfile(path_to_this_folder, 'locomotion/external')) ; 
 
   % Add stuff intended to shadow JAABA, FlyTracker versions
   addpath(fullfile(path_to_this_folder, 'shadow')) ;
