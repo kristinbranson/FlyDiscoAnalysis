@@ -38,8 +38,8 @@ initial_optional_argument_list = { ...
   'do_run_caboose', do_run_caboose } ;
 optional_argument_list = horzcat(initial_optional_argument_list, analysis_parameters) ;
 
-read_only_experiments_folder_path = fullfile(fly_disco_folder_path, 'example-experiments', 'passing-test-suite-experiments-with-tracking-read-only') ;
-working_experiments_folder_path = fullfile(fly_disco_folder_path, 'example-experiments', 'passing-test-suite-experiments-with-tracking') ;
+read_only_experiments_folder_path = fullfile(fly_disco_folder_path, 'example-experiments', 'pfly-stage-test-suite-read-only') ;
+working_experiments_folder_path = fullfile(fly_disco_folder_path, 'example-experiments', 'pfly-stage-test-suite') ;
 
 % Recopy the working folder from the read-only one
 if do_reset_working_experiments_folder || ~exist(working_experiments_folder_path, 'dir')
