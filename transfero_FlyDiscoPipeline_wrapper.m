@@ -100,6 +100,7 @@ if do_run_caboose ,
   caboose_phase_analysis_parameters = analysis_parameters_with_overrides ;
   caboose_phase_analysis_parameters.doautomaticchecksincoming = 'off' ;
   caboose_phase_analysis_parameters.doflytracking = 'off' ;
+  caboose_phase_analysis_parameters.doaddpflies = 'off' ;
   caboose_phase_analysis_parameters.doregistration = 'off' ;
   caboose_phase_analysis_parameters.doledonoffdetection = 'off' ;
   caboose_phase_analysis_parameters.dosexclassification = 'off' ;
