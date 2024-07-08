@@ -40,6 +40,9 @@ ellipse_trajectory = readmatrix(ellipse_trajectory_csv_path) ;
 % actualTraj.csv contains a LUT index for each frame
 actual_trajectory_csv_path = fullfile(expdir, 'actualTraj.csv') ;
 actual_trajectory = load_actual_traj_csv(actual_trajectory_csv_path) ;
+if isempty(actual_trajectory) ,
+  error('The file %s does not seem to contain any data', actual_trajectory_csv_path) ;
+end
 
 % Load the flytracker info about the arena locations and size, etc
 ft_calibration_path = fullfile(expdir, 'flytracker-calibration.mat') ;
