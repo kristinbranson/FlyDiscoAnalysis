@@ -69,7 +69,7 @@ total_protocol_duration = sum(duration_from_step_index) ;
 
 % Finally, compare the protocol duration to the video duration and error if
 % the protocol is longer.
-if total_protocol_duration > video_duration+dt ,  % Add a frame's worth of 'slop' to be lenient
+if total_protocol_duration > video_duration+5*dt ,  % Add a few frame's worth of 'slop' to be lenient
   error('According to the protocol file, the protocol is longer in duration (%g s) than the video (%g s)', ...
         total_protocol_duration, ...
         video_duration) ;
