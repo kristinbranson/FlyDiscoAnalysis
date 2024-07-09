@@ -23,7 +23,12 @@ function modpath()
   jaaba_perframe_folder_path = fullfile(path_to_this_folder, 'JAABA', 'perframe') ;
   jaaba_modpath_script_path = fullfile(jaaba_perframe_folder_path, 'SetUpJAABAPath.m') ;
   run(jaaba_modpath_script_path) ;    
-  
+  % Remove spaceTime stuff...
+  w = warning('query','MATLAB:rmpath:DirNotFound');
+  warning('off','MATLAB:rmpath:DirNotFound');
+  rmpath(genpath(fullfile(path_to_this_folder, 'JAABA', 'spaceTime'))) ;
+  warning(w.state,w.identifier);
+
   % Add the TrkFile code for loading in trk files
   addpath(fullfile(path_to_this_folder,'APT','matlab','trk')) ;
 
@@ -43,7 +48,8 @@ function modpath()
   addpath(fullfile(path_to_this_folder, 'tests')) ;
   
   % Finally, add this folder itself, so we don't have to stay in this folder
-  addpath(path_to_this_folder) ;
+  % Add at the beginning so that e.g. FlyTracker doesn't override
+  addpath(path_to_this_folder,'-begin') ;
   
   % Run code to set the parpool location appropriately
   set_parpool_job_storage_location()

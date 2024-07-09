@@ -1,0 +1,15 @@
+fps,150
+nzoomr,5
+nzoomc,2
+boxradius,50
+taillength,25
+fps,30
+firstframes,0,.5,-1
+middleframes,-1,.5,-1
+endframes,-1,-1,1
+indicatorframes,1,5,6,10
+nframes_beforeindicator,150
+nframes,400,400,400,400
+subdecimationfactor,3
+figpos,1,1,1434,1024
+tempdatadir,/groups/branson/bransonlab/projects/olympiad/TempData_FlyBowlMakeCtraxResultsMovie

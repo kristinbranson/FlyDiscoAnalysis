@@ -1,5 +1,3 @@
-% This isn't a proper test b/c it doesn't check whether anything worked
-
 % Where does this script live?
 this_script_path = mfilename('fullpath') ;
 fly_disco_analysis_test_folder_path = fileparts(this_script_path) ;
@@ -8,7 +6,7 @@ fly_disco_folder_path = fileparts(fly_disco_analysis_folder_path) ;
 
 cluster_billing_account_name = [] ;
 user_name_for_configuration_purposes = 'bransonlab' ;
-% analysis_parameters = cell(1,0) ;
+analysis_parameters = cell(1,0) ;
 % analysis_parameters = ...
 %          {'doautomaticchecksincoming',true,...
 %           'doflytracking',true, ...
@@ -21,7 +19,7 @@ user_name_for_configuration_purposes = 'bransonlab' ;
 %           'dojaabadetect',false,...
 %           'docomputeperframestats',false,...
 %           'doplotperframestats',false,...
-%           'domakectraxresultsmovie',true,...
+%           'domakectraxresultsmovie',false,...
 %           'doextradiagnostics',false,...
 %           'doanalysisprotocol',false,...
 %           'doautomaticcheckscomplete',false, ...
@@ -32,12 +30,13 @@ do_use_bqueue = true ;
 do_actually_submit_jobs = true ;
 do_try = true ;
 do_reset_working_experiments_folder = true ;
+do_run_caboose = true ;
 submit_host_name = if_not_a_submit_host('submit.int.janelia.org') ;
-optional_argument_list = { ...
+initial_optional_argument_list = { ...
   'settingsdir', settings_folder_path, ...
   'do_try', do_try, ...
-  'do_run_caboose', true } ;
-% optional_argument_list = horzcat(optional_argument_list, analysis_parameters) ;
+  'do_run_caboose', do_run_caboose } ;
+optional_argument_list = horzcat(initial_optional_argument_list, analysis_parameters) ;
 
 read_only_experiments_folder_path = fullfile(fly_disco_folder_path, 'example-experiments', 'passing-test-suite-experiments-with-tracking-read-only') ;
 working_experiments_folder_path = fullfile(fly_disco_folder_path, 'example-experiments', 'passing-test-suite-experiments-with-tracking') ;
@@ -54,14 +53,6 @@ end
 % Find the experiments
 folder_path_from_experiment_index = find_experiment_folders(working_experiments_folder_path) ;
 
-% % Run the script under test
-% experiment_count = length(folder_path_from_experiment_index) ;
-% for experiment_index = 1 : experiment_count ,
-%     experiment_folder_path = folder_path_from_experiment_index{experiment_index} ;
-%     fprintf('Running transfero_FlyDiscoPipeline_wrapper on experiment index %d...\n', experiment_index) ;
-%     transfero_FlyDiscoPipeline_wrapper(experiment_folder_path, user_name_for_configuration_purposes, optional_argument_list{:}) ;
-% end
-
 % Call the testing function to do the real work
 run_transfero_FlyDiscoPipeline_wrapper_on_experiment_list(...
   folder_path_from_experiment_index, ...
@@ -72,3 +63,12 @@ run_transfero_FlyDiscoPipeline_wrapper_on_experiment_list(...
   do_try, ...
   submit_host_name, ...
   optional_argument_list{:})
+
+% Check for success in the ACC output files
+did_succeed_from_experiment_folder_index = cellfun(@did_analysis_of_experiment_folder_succeed, folder_path_from_experiment_index)
+did_all_succeed = all(did_succeed_from_experiment_folder_index) ;
+if did_all_succeed ,
+  fprintf('Test passed.\n') ;
+else
+  fprintf('Test failed.\n') ;  
+end

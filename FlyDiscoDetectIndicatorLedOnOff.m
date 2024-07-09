@@ -114,15 +114,15 @@ ledIndicatorPoints = ...
                      dt, ...
                      rigId) ;
 
-% Extract indicatordata from the video
-indicatordata = extractIndicatorLED(expdir, dataloc_params, indicator_params, ledIndicatorPoints, debug) ;
-
 % Save the LED detection image
 if exist(imsavename,'file'),
   delete(imsavename);
 end
 saveLedDetectionImage(imsavename, bg_mean, ledIndicatorPoints, registration_params.doesYAxisPointUp) ;
 fprintf('Saved LED detection image to file %s\n', imsavename) ;
+
+% Extract indicatordata from the video
+indicatordata = extractIndicatorLED(expdir, dataloc_params, indicator_params, ledIndicatorPoints, debug) ;
 
 % save indicator data to mat file
 if exist(indicatordatamatfilename,'file'),

@@ -48,10 +48,11 @@ params = {'settingsdir',settingsdir,...
 
 % expdirs = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20230509_autochecksERROR/VNC2_YNA_K_162984_RigD_20230503T135414'};
 
-expdir = '/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20240508_VNC3/VNC3_YNA_K_162984_RigA_20240507T182023';
+% expdir = '/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20240508_VNC3/VNC3_YNA_K_162984_RigA_20240507T182023';
+expdir = '/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20240530_testACC/VNC3_JRC_SS57980_RigD_20240529T114756';
 
 %% 
-FlyDiscoAutomaticChecksComplete(expdir,params{:})
+FlyDiscoAutomaticChecksComplete(expdir,params{:});
 % success = [];
 % msg = {};
 % 
