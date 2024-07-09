@@ -32,8 +32,8 @@ rootdatadir = '/groups/branson/bransonlab/flydisco_data';
 % [expdirstruct] = getExperimentDirsFlyDisco(rootdatadir,'metadatafile','Metadata.xml','expdirname','VNC*','autocheckin',true,'autocheckcomplete',true,'manualcheck',true);
 
 
-savefile = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_VNC3practive_20240513';
-[expdirstruct] = getExperimentDirsFlyDisco(rootdatadir,'metadatafile','Metadata.xml','expdirname','VNC3*','autocheckin',true,'autocheckcomplete',true,'manualcheck',true,'TrajNum',true);
+savefile = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_VNC2_2023';
+[expdirstruct] = getExperimentDirsFlyDisco(rootdatadir,'metadatafile','Metadata.xml','expdirname','VNC2*','date','2023*','autocheckin',true,'autocheckcomplete',true,'manualcheck',true,'TrajNum',true);
 
 % savefile = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_VNC2_20220915';
 % [expdirstruct] = getExperimentDirsFlyDisco(rootdatadir,'metadatafile','Metadata.xml','expdirname','VNC*','autocheckin',true,'autocheckcomplete',true);

@@ -4,11 +4,11 @@
 cluster_billing_account_name = 'branson' ;
 user_name_for_configuration_purposes = 'bransonlab' ; 
 
-% settings_folder_path = '/groups/branson/home/robiea/Code_versioned/BransonFlyDiscoSettings/settings';
-settings_folder_path = '/groups/branson/home/robiea/Code_versioned/FlyDiscoAnalysis/settings-internal';
+settings_folder_path = '/groups/branson/home/robiea/Code_versioned/BransonFlyDiscoSettings/settings';
+% settings_folder_path = '/groups/branson/home/robiea/Code_versioned/FlyDiscoAnalysis/settings-internal';
 % analysis_protocol_use = '20240124_multibubble_secondtry';
-analysis_protocol_use = '20240521_flybubble_LED_VNC3';
-optional_argument_list = {'settingsdir', settings_folder_path,'analysis_protocol',analysis_protocol_use,'docomputeaptperframefeatures','on'};
+% analysis_protocol_use = '20240521_flybubble_LED_VNC3';
+optional_argument_list = {'settingsdir', settings_folder_path};
 do_use_bqueue = true ;
 do_actually_submit_jobs = true ;
 do_try = false ;
