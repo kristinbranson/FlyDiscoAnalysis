@@ -103,19 +103,21 @@ end
 
 for is = 1:numel(state)
     for pair = 1:npairs
-        [Nboutspervelmagbin,velmagbincenters,meanboutdurationsofvelmagbins] = compute_meanboutdurationVSspeed(bout_metrics.allflies.pairs(pair).(state{is}).durations_time,...
-        bout_metrics.allflies.pairs(pair).(state{is}).meanvelmag,'binedges',binedges);
+        [Nboutspervelmagbin,velmagbincenters,meanboutdurationsofvelmagbins,stdboutdurationsofvelmagbins] = compute_meanboutdurationVSspeed(bout_metrics.allflies.pairs(pair).(state{is}).durations_time,...
+            bout_metrics.allflies.pairs(pair).(state{is}).meanvelmag,'binedges',binedges);
         bout_metrics.allflies.pairs(pair).(state{is}).Nboutspervelmagbin =Nboutspervelmagbin;
         bout_metrics.allflies.pairs(pair).(state{is}).velmagbincenters = velmagbincenters;
         bout_metrics.allflies.pairs(pair).(state{is}).meanboutdurationsofvelmagbins = meanboutdurationsofvelmagbins;
+        bout_metrics.allflies.pairs(pair).(state{is}).stdboutdurationsofvelmagbins = stdboutdurationsofvelmagbins;
     end
     % for all limbs
     
-    [Nboutspervelmagbin,velmagbincenters,meanboutdurationsofvelmagbins] = compute_meanboutdurationVSspeed(bout_metrics.allflies.all_limbs.(state{is}).durations_time,...
+    [Nboutspervelmagbin,velmagbincenters,meanboutdurationsofvelmagbins,stdboutdurationsofvelmagbins] = compute_meanboutdurationVSspeed(bout_metrics.allflies.all_limbs.(state{is}).durations_time,...
         bout_metrics.allflies.all_limbs.(state{is}).meanvelmag,'binedges',binedges);
     bout_metrics.allflies.all_limbs.(state{is}).Nboutspervelmagbin =Nboutspervelmagbin;
     bout_metrics.allflies.all_limbs.(state{is}).velmagbincenters = velmagbincenters;
     bout_metrics.allflies.all_limbs.(state{is}).meanboutdurationsofvelmagbins = meanboutdurationsofvelmagbins;
+    bout_metrics.allflies.all_limbs.(state{is}).meanboutdurationsofvelmagbins = stdboutdurationsofvelmagbins;
 
 end
 

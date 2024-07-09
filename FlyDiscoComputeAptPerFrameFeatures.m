@@ -27,7 +27,7 @@ fprintf(logfid,'\n\n***\nRunning FlyDiscoComputeAptPerFrameFeatures version %s a
 
 
 % make list of special perframe features being computed
-aptpfflist = {'nfeet_ground'};
+aptpfflist = {'nfeet_ground','aptperframefeature_boutmetrics'};
 
 % Initialize trx class object
 fprintf('Initializing trx...\n');
