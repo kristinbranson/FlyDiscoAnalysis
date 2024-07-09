@@ -39,6 +39,7 @@ end
 if ~exist('do_debug', 'var') || isempty(do_debug) ,
   do_debug = false ;
 end
+do_debug = false ;  % debug code is not working right now
 
 %experiment_folder_path = '/groups/branson/bransonlab/taylora/flydisco/pflySingleMale_pfly_SlowRamp_71G01_UASChrimsonVenusX0070_20240320T102203' ;
 %dotmovie_path = fullfile(experiment_folder_path, 'dotmovie.ufmf') ;
@@ -76,8 +77,8 @@ assert(all(abs(pfly_heading_angle_from_lut_index-pfly_theta_from_lut_index+pi/2)
 % theta-pi/2 in the "CRTesian" (y-axis points down) coordinate system.
 pfly_heading_hat_from_lut_index = [ cos(pfly_heading_angle_from_lut_index) ; sin(pfly_heading_angle_from_lut_index) ] ;
 
-% % How many frames in the video
-% frame_count = numel(timestamp_from_frame_index) ;
+% How many frames in the video
+frame_count = numel(timestamp_from_frame_index) ;  %#ok<NASGU> 
 
 %% 
 %actual_trajectory_csv_path = fullfile(experiment_folder_path, 'actualTraj.csv') ;
