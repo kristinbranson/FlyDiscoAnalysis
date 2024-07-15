@@ -3,7 +3,7 @@
 
 logfiledir = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/MetadataFixes';
 %%%CHANGE
-logfilename = 'expdirs_LPC1_logofauto_20231219.csv';
+logfilename = 'expdirs_wl41_metadatachanges_logofauto.csv';
 
 
 logfile = fullfile(logfiledir,logfilename);
@@ -293,8 +293,13 @@ fid2 = fopen(logfile,'a');
 % explist = {'LPC1ShiKir_BJD_SS02407_RigA_20231212T140400'
 % 'LPC1ShiKir_BJD_SS02407_RigB_20231212T140403'};
 % line name should be BJD_SS02407
-explist = {'LPC1ShiKir_JHS_K_85321_RigD_20231212T142701'};
-
+% explist = {'LPC1ShiKir_JHS_K_85321_RigD_20231212T142701'};
+%wishlist 43 line name errors
+% explist = {'VNC2_YNA_K_162984_RigD_20231206T130852','VNC2_YNA_K_162984_RigB_20231206T130718'};
+% WL 42 line name error
+% explist = {'VNC2_YNA_K_162984_RigB_20231115T093545'};
+% WL 41 line name error
+explist = {'VNC2_EXT_VGLUT-GAL4_RigD_20231108T115331'};
 %% 
 rootdatadir = '/groups/branson/bransonlab/flydisco_data';
 % for k =1:numel(expnamelist)
@@ -324,9 +329,9 @@ for j = 1:numel(explist)
 %     changestruct.line = 'JRC_SS59209'
     %     changestruct.line = 'JRC_SS43660';
     %     changestruct.line = 'JRC_SS43700';
-    %     changestruct.line = 'EXT_VGLUT-GAL4';
+%         changestruct.line = 'EXT_VGLUT-GAL4';
     %     changestruct.line = 'JRC_SS36194';
-%         changestruct.line = 'YNA_K_162984';
+        changestruct.line = 'YNA_K_162984';
     %     changestruct.line = 'JRC59209';
     %     changestruct.line = 'JRC_SS57983';
     %     changestruct.line = 'JRC_SS59163';
@@ -335,6 +340,7 @@ for j = 1:numel(explist)
     %     changestruct.line = 'JRC_SS53050';
     %     changestruct.line = 'JRC_SS66932';
     %     changestruct.line = 'JRC_SS67903';
+%     changestruct.line = 'JRC_SS89300';
 %     changestruct.line = 'JRC_SS71988';
 %         changestruct.line = 'JRC_SS96599';
 
@@ -345,7 +351,7 @@ for j = 1:numel(explist)
 %   changestruct.line = 'JRC_SS78425';
 %         changestruct.line = 'JRC_SS93514';
 %       changestruct.line = 'GMR_SS02575';
-      changestruct.line = 'BJD_SS02407';
+%       changestruct.line = 'BJD_SS02407';
 %     changestruct.screen_type = 'non_olympiad_dickson_led5secVNC';
 %     changestruct.screen_type = 'non_olympiad_branson_LPC1CsChr';
 %     changestruct.effector = 'CsChr';

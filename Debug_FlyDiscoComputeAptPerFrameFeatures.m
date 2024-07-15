@@ -6,8 +6,7 @@ modpath
 settingsdir = '/groups/branson/home/robiea/Code_versioned/FlyDiscoAnalysis';
 analysis_protocol = 'settings-internal/20240521_flybubble_LED_VNC3';
 params = {'settingsdir',settingsdir,...
-    'analysis_protocol',analysis_protocol,...
-    'forcecompute',true};
+    'analysis_protocol',analysis_protocol};
 
 %% expdir
 % expdir = '/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20240521_testAPTfeatures/VNC2_YNA_K_162984_RigB_20220831T124607';

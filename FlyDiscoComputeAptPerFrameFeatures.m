@@ -24,32 +24,39 @@ real_analysis_protocol = GetRealAnalysisProtocol(analysis_protocol,settingsdir);
 
 fprintf(logfid,'\n\n***\nRunning FlyDiscoComputeAptPerFrameFeatures version %s analysis_protocol %s (linked to %s) at %s\n',version,analysis_protocol,real_analysis_protocol,timestamp);
 
-
-
-% make list of special perframe features being computed
-aptpfflist = {'nfeet_ground','aptperframefeature_boutmetrics'};
-
 % Initialize trx class object
 fprintf('Initializing trx...\n');
 trx = FBATrx('analysis_protocol',analysis_protocol,'settingsdir',settingsdir,...
     'datalocparamsfilestr',datalocparamsfilestr);
 trx.AddExpDir(expdir,'dooverwrite',false,'openmovie',false);
 
+% make list of special perframe features being computed
+aptpfflist = {'nfeet_ground'};
+aptpffoutputfiles = {trx.dataloc_params.aptperframeboutstatsfilestr};
+
 % if force compute is true, delete aptPFF if they exist
 %should check if files exist first
-% TO DO ADD  tips_velmag to list for deleting if forcecompute 
+% TO DO ADD  tips_velmag to list for deleting if forcecompute (don't want
+% to delete now
 if forcecompute,
-    for i = 1:numel(aptpfflist)
+    for i = 1:numel(aptpfflist) 
         curr_aptpff = fullfile(expdir,trx.dataloc_params.perframedir,[aptpfflist{i} '.mat']);
         if exist(curr_aptpff,'file')
-            fprintf('Deleting per-frame data file %s\n',aptpfflist{i});
+            fprintf(logfid,'Deleting per-frame data file %s\n',aptpfflist{i});
             delete(curr_aptpff);
+        end
+    end
+    for i = 1:numel(aptpffoutputfiles)
+        curr_out = fullfile(expdir,aptpffoutputfiles{i});
+        if exist(curr_out,'file')
+            fprintf(logfid,'Deleting FlyDiscoComputeAptPerFrameFeatures output file: %s\n',aptpffoutputfiles{i});
+            delete(curr_out);
         end
     end
 end
 
 
-
+fprintf(logfid,'Computing nfeet_ground ...\n')
 % read in parameters
 aptperframefeaturesparamsfile = fullfile(trx.settingsdir,trx.analysis_protocol,trx.dataloc_params.aptperframefeaturesparamsfilestr);
 aptperframefeatures_params = ReadParams(aptperframefeaturesparamsfile);
@@ -112,6 +119,9 @@ for fly = 1:trx.nflies
 end
 units = parseunits('unit');
 save(fullfile(expdir,trx.dataloc_params.perframedir,'nfeet_ground.mat'),'data','units');
+
+
+fprintf(logfid,'Computing swing and stance bout metrics ...\n')
 
 %compute swing stance bouts
 [perfly_limbboutdata] = limbSwingStance(groundcontact);

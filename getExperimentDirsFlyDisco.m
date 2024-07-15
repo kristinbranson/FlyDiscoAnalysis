@@ -78,7 +78,7 @@ for i = 1:numel(tmp)
                 tmpM.automated_pf_incoming = 'NaN';
             end
         catch
-            tmpM.automated_pf_incoming = 'could not load file';
+            tmpM.automated_pf_incoming = 'could not load ACI file';
         end
     end
     
@@ -98,7 +98,7 @@ for i = 1:numel(tmp)
                 tmpM.automated_pf = 'NaN';
             end
         catch
-            tmpM.automated_pf = 'could not load file';
+            tmpM.automated_pf = 'could not load ACC file';
         end
     end
     % add manual failes

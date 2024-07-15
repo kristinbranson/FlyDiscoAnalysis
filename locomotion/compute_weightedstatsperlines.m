@@ -13,3 +13,4 @@ mean_weighted = sum(moviemeans.*Ns,1,'omitnan')./sum(Ns,1,'omitnan');
 sigma_weighted = sum(Ns.*(moviestds.^2 + (moviemeans-mean_weighted).^2),1,'omitnan')./sum(Ns,1,'omitnan');
 
 SE_weighted = sqrt(sigma_weighted)./sqrt(sum(Ns,1,'omitnan'));
+    

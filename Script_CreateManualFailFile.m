@@ -1,7 +1,7 @@
 %% write manual fail files 
 %%%must run as bransonlab for VNC screen data%%%
 %% set path
-modpath
+% modpath
 
 %% exp list and failure reason (keep failure reason list)
 % csv file for manual fails 
@@ -37,6 +37,9 @@ rootdatadir = '/groups/branson/bransonlab/flydisco_data';
 % expdirlist = textread('/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirlist_prescreening_practice. txt','%s');
 % failure_category = 'testing';
 
+% WL 43
+expdirlist = {'VNC2_EXT_VGLUT-GAL4_RigA_20231205T115555'};
+failure_category =  'crud in bubble';
 % % WL # 38
 % expdirlist = {'VNC2_JRC_SS76743_RigB_20230926T111421'};
 % failure_category =  'crud in bubble';
@@ -53,11 +56,11 @@ rootdatadir = '/groups/branson/bransonlab/flydisco_data';
 % failure_category = 'late runs';
 
 % WL #32
-expdirlist = {'VNC2_JRC_SS90441_RigA_20230718T140114'
-'VNC2_JRC_SS90441_RigB_20230718T140145'
-'VNC2_JRC_SS90441_RigC_20230718T140254'
-'VNC2_JRC_SS90441_RigD_20230718T140333'}
-failure_category = 'late runs';
+% expdirlist = {'VNC2_JRC_SS90441_RigA_20230718T140114'
+% 'VNC2_JRC_SS90441_RigB_20230718T140145'
+% 'VNC2_JRC_SS90441_RigC_20230718T140254'
+% 'VNC2_JRC_SS90441_RigD_20230718T140333'}
+% failure_category = 'late runs';
 % % WL 28
 % expdirlist = {'VNC2_JRC_SS73860_RigA_20230620T094433'};
 % failure_category =  'crud in bubble';

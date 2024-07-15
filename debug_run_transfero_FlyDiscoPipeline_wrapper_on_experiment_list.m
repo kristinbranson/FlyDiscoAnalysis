@@ -33,7 +33,7 @@ ssh_host_name = 'login2.int.janelia.org' ;
 % '/groups/branson/home/robiea/Projects_data/FlyDisco/multibubble_data/20240124_testingpipeline/NewMultiBubble_14Feb2024/20240214T093136_rig1_multibubble_CSx71G01_3_1_UAS_Chrimson_Venus_X_0070_SlowRamp'}
 
 % folder_path_from_experiment_index = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20240508_VNC3/VNC3_YNA_K_162984_RigA_20240507T182023'};
-<<<<<<< HEAD
+
 %test apt features in compute perframe and apt pff computation
 % folder_path_from_experiment_index = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20240521_testAPTfeatures/VNC2_YNA_K_162984_RigB_20220831T124607'};
 

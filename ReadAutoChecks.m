@@ -19,7 +19,9 @@ while ischar(tline)
             if ~isempty(splitLine{2})
                 notes_curation = splitLine{2};
                 tline = fgetl(fileID);
-                if startsWith(tline, 'automated_pf_category')
+
+              
+                if ischar(tline) && startsWith(tline, 'automated_pf_category')
                     splitLine = strsplit(tline, ',', 'CollapseDelimiters', false);
                     automated_pf_category = splitLine{2};
                     break;
@@ -28,7 +30,7 @@ while ischar(tline)
                 notes_curation = '';
                 while true
                     tline = fgetl(fileID);
-                    if startsWith(tline, 'automated_pf_category')
+                    if ischar(tline) && startsWith(tline, 'automated_pf_category')
                         splitLine = strsplit(tline, ',', 'CollapseDelimiters', false);
                         automated_pf_category = splitLine{2};
                         break;

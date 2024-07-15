@@ -920,7 +920,8 @@ fclose(fid);
 % explist = textread('/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/hightrajnum_explist.txt','%s');
 
 % VNC2 data from 2023 
-explist = textread('/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirlist_hightrajnum_2023.txt','%s');
+% explist = textread('/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirlist_hightrajnum_2023.txt','%s');
+explist = textread('/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirlist_hightrajnum_2023_wl39to43.txt','%s');
 rootdatadir = '/groups/branson/bransonlab/flydisco_data';
 
 for i = 1:numel(explist)
@@ -1096,8 +1097,9 @@ fclose(fid);
 %% high trajectory number - 10/2023
 % print out tsv from data pull with auto and manual fails (from logbook so
 % far) 
-load /groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_2023_pulled202310032023_20231004T103003.mat
-savefile = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/allVNC_20231004_addedManualFail';
+% load /groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_2023_pulled202310032023_20231004T103003.mat
+load /groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_VNC2_2023_20240711T093349.mat
+savefile = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/VNC_2023_addedManualFail';
 
 fid = fopen([savefile,'.tsv'],'w');
 
@@ -1170,3 +1172,43 @@ load('/groups/branson/home/robiea/Code_versioned/FlyDiscoAnalysis/mfileNames2024
 for i=1:length(mfileNames)
 open(char(mfileNames(i)));
 end
+
+%% testing my SE calculation
+% with the correct kind of std(data,1) the SE of all bouts and the weighted
+% SE calculated from the pergroup std match perfectly!! wahoo
+
+movie_bouts1 = rand(1,15);
+movie_bouts2 = rand(1,5);
+movie_bouts3 = rand(1,27);
+Ns = [15,5,27];
+moviestds(1) = std(movie_bouts1,1,'omitnan');
+moviestds(2) = std(movie_bouts2,1,'omitnan');
+moviestds(3) = std(movie_bouts3,1,'omitnan');
+
+moviemeans(1) = mean(movie_bouts1,'omitnan');
+moviemeans(2) = mean(movie_bouts2,'omitnan');
+moviemeans(3) = mean(movie_bouts3,'omitnan');
+
+allbouts =  [movie_bouts1,movie_bouts2,movie_bouts3];
+mean_weighted = mean(allbouts);
+std_all = std(allbouts,1);
+se_all = std_all/sqrt(sum(Ns))
+
+ 
+
+% reweighting
+sigma_weighted = sum(Ns'.*(moviestds'.^2 + (moviemeans'-mean_weighted).^2),1,'omitnan')./sum(Ns',1,'omitnan');
+
+SE_weighted = sqrt(sigma_weighted)./sqrt(sum(Ns',1,'omitnan'));
+
+% example:
+% se_all =
+% 
+%     0.0369
+% 
+% 
+% SE_weighted =
+% 
+%     0.0369
+
+
