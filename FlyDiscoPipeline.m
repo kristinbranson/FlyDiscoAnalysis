@@ -597,9 +597,18 @@ function FlyDiscoPipeline(expdir, varargin)
                 flydisco_pipeline_error(stage, msgs) ;
             end            
         end
+       
 
 
+        %% Run JAABA behavior detection
+        stage = 'jaabadetect';  %#ok<NASGU>
+        if is_on_or_force(dojaabadetect),
+            forcecompute = is_force(dojaabadetect) ;
+            JAABADetectWrapper(expdir, settingsdir, analysis_protocol, forcecompute) ;
+        end
 
+        
+        
         %% Compute APT per-frame features        
         stage = 'computeaptperframefeatures';      
         stage_function = @FlyDiscoComputeAptPerFrameFeatures ;
@@ -613,15 +622,6 @@ function FlyDiscoPipeline(expdir, varargin)
             analysis_protocol, ...
             stage_function, ...
             computeaptperframefeatures_params) ;
-        
-
-
-        %% Run JAABA behavior detection
-        stage = 'jaabadetect';  %#ok<NASGU>
-        if is_on_or_force(dojaabadetect),
-            forcecompute = is_force(dojaabadetect) ;
-            JAABADetectWrapper(expdir, settingsdir, analysis_protocol, forcecompute) ;
-        end
         
 
 
