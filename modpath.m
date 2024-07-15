@@ -26,11 +26,11 @@ function modpath()
 
   % Un-removing spaceTime stuff at least for now, b/c get errors on the test
   % suite if we remove it -- ALT, 2024-07-11
-  % % Remove spaceTime stuff...
-  % w = warning('query','MATLAB:rmpath:DirNotFound');
-  % warning('off','MATLAB:rmpath:DirNotFound');
-  % rmpath(genpath(fullfile(path_to_this_folder, 'JAABA', 'spaceTime'))) ;
-  % warning(w.state,w.identifier);
+  % Remove spaceTime stuff...
+  w = warning('query','MATLAB:rmpath:DirNotFound');
+  warning('off','MATLAB:rmpath:DirNotFound');
+  rmpath(genpath(fullfile(path_to_this_folder, 'JAABA', 'spaceTime'))) ;
+  warning(w.state,w.identifier);
 
   % Add the TrkFile code for loading in trk files
   % The -begin option forces it to the front of the path, even if it's on the
