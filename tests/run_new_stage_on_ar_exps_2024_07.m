@@ -26,7 +26,7 @@ analysis_parameters = cell(1,0) ;
 %           'domakeaptresultsmovie',false, ...
 %           'doapt',false} ;
 %settings_folder_path = fullfile(fly_disco_analysis_folder_path, 'settings-internal') ;  % for now, want to use internal settings
-settings_folder_path = '/groups/branson/home/bransonlab/BransonFlyDiscoSettings' ;
+settings_folder_path = '/groups/branson/home/bransonlab/BransonFlyDiscoSettings/settings' ;
 do_use_bqueue = true ;
 do_actually_submit_jobs = true ;
 do_try = true ;
