@@ -30,13 +30,13 @@ analysis_parameters = ...
 settings_folder_path = fullfile(fly_disco_analysis_folder_path, 'settings-internal') ;  % for now, want to use internal settings
 do_use_bqueue = false ;
 do_actually_submit_jobs = false ;
-do_try = false ;
+do_try = true ;
 do_reset_working_experiments_folder = true ;
 submit_host_name = if_not_a_submit_host('submit.int.janelia.org') ;
 optional_argument_list = { ...
   'settingsdir', settings_folder_path, ...
   'do_try', do_try, ...
-  'do_run_caboose', false } ;
+  'do_run_caboose', true } ;
 optional_argument_list = horzcat(optional_argument_list, analysis_parameters) ;
 
 read_only_experiments_folder_path = fullfile(fly_disco_folder_path, 'example-experiments', 'single-passing-test-suite-experiment-with-tracking-read-only') ;

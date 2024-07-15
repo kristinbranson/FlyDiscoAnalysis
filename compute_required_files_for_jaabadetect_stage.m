@@ -9,7 +9,8 @@ function required_files_for_stage = ...
 % These are typically of the form scores*.mat.
 
 jaabaclassifierparamsfilestrs = fullfile(analysis_protocol_folder_path, dataloc_params.jaabaclassifierparamsfilestrs) ;
-jabfiles = read_one_file_name_per_line(jaabaclassifierparamsfilestrs) ;
+raw_jabfiles = read_one_file_name_per_line(jaabaclassifierparamsfilestrs) ;
+jabfiles = raw_jabfiles(:)' ;  % want a row vector
 
 function result = score_file_name_from_jab_file_name(jab_file_name)
   Q = loadAnonymous(jab_file_name);
