@@ -41,9 +41,9 @@ optional_argument_list = horzcat(initial_optional_argument_list, analysis_parame
 
 % Find the experiments
 s1 = loadAnonymous('/groups/branson/home/bransonlab/expdirs_VNC_20240711_VNC_passAandM_metadata_explist.mat') ;
-folder_path_from_experiment_index_1 = (s1.explist)' ;
+folder_path_from_experiment_index_1 = s1' ;
 s2 = loadAnonymous('/groups/branson/home/bransonlab/expdirs_VNC_20240711_VNC_passAandM_metadata_explist.mat') ;
-folder_path_from_experiment_index_2 = (s2.explist)' ;
+folder_path_from_experiment_index_2 = s2' ;
 folder_path_from_raw_experiment_index = vertcat(folder_path_from_experiment_index_1, folder_path_from_experiment_index_2) ;
 folder_path_from_experiment_index = folder_path_from_raw_experiment_index(1:10) ;
 
