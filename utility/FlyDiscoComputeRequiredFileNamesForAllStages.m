@@ -1,4 +1,4 @@
-function result = FlyDiscoComputeRequiredFileNamesForAllStages(analysis_protocol_folder_path, dataloc_params, expdir)
+function result = FlyDiscoComputeRequiredFileNamesForAllStages(analysis_protocol_folder_path, dataloc_params, expdir, do_run)
 
 % Determine what all the file names are that should be produced by each
 % pipeline stage.  Returns a struct s such that s.(stage_name) is a cell
@@ -12,6 +12,11 @@ stage_count = numel(name_from_stage_index) ;
 result = struct() ;
 for stage_index = 1 : stage_count ,
   stage_name = name_from_stage_index{stage_index} ;
+  if strcmp(do_run.(stage_name), 'off') ,
+    % Skip stages that are turned off, b/c the relevant dataloc_params fields
+    % might be missing.
+    continue
+  end
   if strcmp(stage_name, 'automaticchecksincoming') ,
     required_file_names = { dataloc_params.automaticchecksincomingresultsfilestr, ...
                             dataloc_params.automaticchecksincominginfomatfilestr } ;

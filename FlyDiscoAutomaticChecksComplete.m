@@ -39,7 +39,7 @@ automatedchecksincomingfile = fullfile(expdir,dataloc_params.automaticchecksinco
 acc_text_output_file_path = fullfile(expdir,dataloc_params.automaticcheckscompleteresultsfilestr);
 
 % There's a category for each stage
-stage_name_from_stage_index = fieldnames(required_file_names_from_stage_name) ;
+stage_name_from_stage_index = FlyDiscoStageNames() ;
 stage_count = numel(stage_name_from_stage_index) ;
 some_categories = cell(1,0) ;
 for stage_index = 1 : stage_count ,
