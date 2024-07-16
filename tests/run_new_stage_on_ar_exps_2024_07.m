@@ -45,7 +45,7 @@ folder_path_from_experiment_index_1 = s1' ;
 s2 = loadAnonymous('/groups/branson/home/bransonlab/expdirs_VNC_20240711_VNC_passAandM_metadata_explist.mat') ;
 folder_path_from_experiment_index_2 = s2' ;
 folder_path_from_raw_experiment_index = vertcat(folder_path_from_experiment_index_1, folder_path_from_experiment_index_2) ;
-folder_path_from_experiment_index = folder_path_from_raw_experiment_index(1:10) ;
+folder_path_from_experiment_index = folder_path_from_raw_experiment_index(1:100) ;
 
 % Call the testing function to do the real work
 run_transfero_FlyDiscoPipeline_wrapper_on_experiment_list(...
