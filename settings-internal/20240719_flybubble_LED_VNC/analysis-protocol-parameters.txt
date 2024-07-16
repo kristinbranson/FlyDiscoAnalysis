@@ -6,8 +6,8 @@ doledonoffdetection,on
 dosexclassification,on
 docomputeperframefeatures,on
 docomputehoghofperframefeatures,off
-docomputeaptperframefeatures,on
 dojaabadetect,off
+dolocomotionmetrics,on
 docomputeperframestats,off
 doplotperframestats,off
 domakectraxresultsmovie,on

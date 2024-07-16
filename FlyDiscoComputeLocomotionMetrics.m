@@ -1,5 +1,5 @@
-function FlyDiscoComputeAptPerFrameFeatures(expdir, varargin)
-% This function implements the computeaptperframefeatures stage.
+function FlyDiscoComputeLocomotionMetrics(expdir, varargin)
+% This function implements the locomotionmetrics stage.
 
 % varargin will be a sequence of key-value pairs, including at least the keys
 % 'settingsdir', 'analysis_protocol', and 'forcecompute'.  It will also
@@ -22,7 +22,7 @@ logfid = 1;
 timestamp = datestr(now,'yyyymmddTHHMMSS');
 real_analysis_protocol = GetRealAnalysisProtocol(analysis_protocol,settingsdir);
 
-fprintf(logfid,'\n\n***\nRunning FlyDiscoComputeAptPerFrameFeatures version %s analysis_protocol %s (linked to %s) at %s\n',version,analysis_protocol,real_analysis_protocol,timestamp);
+fprintf(logfid,'\n\n***\nRunning FlyDiscoComputeLocomotionMetrics version %s analysis_protocol %s (linked to %s) at %s\n',version,analysis_protocol,real_analysis_protocol,timestamp);
 
 % Initialize trx class object
 fprintf('Initializing trx...\n');
@@ -31,25 +31,25 @@ trx = FBATrx('analysis_protocol',analysis_protocol,'settingsdir',settingsdir,...
 trx.AddExpDir(expdir,'dooverwrite',false,'openmovie',false);
 
 % make list of special perframe features being computed
-aptpfflist = {'nfeet_ground'};
-aptpffoutputfiles = {trx.dataloc_params.aptperframeboutstatsfilestr};
+pfflist = {'nfeet_ground'};
+outputfiles = {trx.dataloc_params.locomotionmetricsswingstanceboutstatsfilestr};
 
 % if force compute is true, delete aptPFF if they exist
 %should check if files exist first
 % TO DO ADD  tips_velmag to list for deleting if forcecompute (don't want
 % to delete now
 if forcecompute,
-    for i = 1:numel(aptpfflist) 
-        curr_aptpff = fullfile(expdir,trx.dataloc_params.perframedir,[aptpfflist{i} '.mat']);
+    for i = 1:numel(pfflist) 
+        curr_aptpff = fullfile(expdir,trx.dataloc_params.perframedir,[pfflist{i} '.mat']);
         if exist(curr_aptpff,'file')
-            fprintf(logfid,'Deleting per-frame data file %s\n',aptpfflist{i});
+            fprintf(logfid,'Deleting per-frame data file %s\n',pfflist{i});
             delete(curr_aptpff);
         end
     end
-    for i = 1:numel(aptpffoutputfiles)
-        curr_out = fullfile(expdir,aptpffoutputfiles{i});
+    for i = 1:numel(outputfiles)
+        curr_out = fullfile(expdir,outputfiles{i});
         if exist(curr_out,'file')
-            fprintf(logfid,'Deleting FlyDiscoComputeAptPerFrameFeatures output file: %s\n',aptpffoutputfiles{i});
+            fprintf(logfid,'Deleting FlyDiscoComputeLocomotionMetrics output file: %s\n',outputfiles{i});
             delete(curr_out);
         end
     end
@@ -58,14 +58,14 @@ end
 
 fprintf(logfid,'Computing nfeet_ground ...\n')
 % read in parameters
-aptperframefeaturesparamsfile = fullfile(trx.settingsdir,trx.analysis_protocol,trx.dataloc_params.aptperframefeaturesparamsfilestr);
-aptperframefeatures_params = ReadParams(aptperframefeaturesparamsfile);
+stageparamsfile = fullfile(trx.settingsdir,trx.analysis_protocol,trx.dataloc_params.locomotionmetricsparamsfilestr);
+stage_params = ReadParams(stageparamsfile);
 
 
 % get leg tip velocities
 
 % % specify leg tip points
-legtip_landmarknums = aptperframefeatures_params.legtip_landmarknums;
+legtip_landmarknums = stage_params.legtip_landmarknums;
 
 % if perframe features exist load from them
 
@@ -108,8 +108,8 @@ else
 end
 
 % run groundcontact detections
-gc_threshold_low = aptperframefeatures_params.gc_threshold_low;
-gc_threshold_high = aptperframefeatures_params.gc_threshold_high;
+gc_threshold_low = stage_params.gc_threshold_low;
+gc_threshold_high = stage_params.gc_threshold_high;
 [groundcontact] = compute_groundcontact(tips_velmag,'gc_threshold_low',gc_threshold_low,'gc_threshold_high',gc_threshold_high);
 
 %compute number of feet on the ground
@@ -161,8 +161,8 @@ digitalindicator = indicatordata.indicatordigital;
 % If something goes wrong, throw an error.  Any values returned from this
 % function are ignored.
 try
-    save(fullfile(expdir,trx.dataloc_params.aptperframeboutstatsfilestr),'bout_metrics_ON','bout_metrics_OFF')
+    save(fullfile(expdir,trx.dataloc_params.locomotionmetricsswingstanceboutstatsfilestr),'bout_metrics_ON','bout_metrics_OFF')
 catch ME
-    warning('FlyDiscoComputeAptPerFrameFeatures:save',...
+    warning('FlyDiscoComputeLocomotionMetrics:save',...
         'Could not save information to file %s: %s',filename,getReport(ME));
 end
