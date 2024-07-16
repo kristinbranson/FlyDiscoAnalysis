@@ -68,7 +68,7 @@ for i = 1:numel(tmp)
         try
             autochcksinfile = fullfile(rootdatadir,expdir,autochcksinfilestr);
             if exist(autochcksinfile,'file')
-                autochcksin = ReadParams(autochcksinfile);
+                autochcksin = ReadAutoChecks(autochcksinfile);
                 tmpM.automated_pf_incoming = autochcksin.automated_pf;
                 if tmpM.automated_pf_incoming == 'F',
                 tmpM.automated_pf_incoming_category = autochcksin.automated_pf_category;
@@ -78,7 +78,7 @@ for i = 1:numel(tmp)
                 tmpM.automated_pf_incoming = 'NaN';
             end
         catch
-            tmpM.automated_pf_incoming = 'could not load file';
+            tmpM.automated_pf_incoming = 'could not load ACI file';
         end
     end
     
@@ -87,7 +87,7 @@ for i = 1:numel(tmp)
         try
             autochckscompfile = fullfile(rootdatadir,expdir,autochckscompfilestr);
             if exist(autochckscompfile,'file')
-                autochckscomplete = ReadParams(autochckscompfile);
+                autochckscomplete = ReadAutoChecks(autochckscompfile);
                 tmpM.automated_pf = autochckscomplete.automated_pf;
                 if tmpM.automated_pf == 'F',
                 tmpM.automated_pf_category = autochckscomplete.automated_pf_category;
@@ -98,7 +98,7 @@ for i = 1:numel(tmp)
                 tmpM.automated_pf = 'NaN';
             end
         catch
-            tmpM.automated_pf = 'could not load file';
+            tmpM.automated_pf = 'could not load ACC file';
         end
     end
     % add manual failes

@@ -1,0 +1,4 @@
+legtip_landmarknums,12,13,14,15,16,17
+gc_threshold_low,5
+gc_threshold_high,20
+speeds,-inf, 5 10 15 20 25 30 35 40,inf

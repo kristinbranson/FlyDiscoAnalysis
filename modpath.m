@@ -24,8 +24,6 @@ function modpath()
   jaaba_modpath_script_path = fullfile(jaaba_perframe_folder_path, 'SetUpJAABAPath.m') ;
   run(jaaba_modpath_script_path) ;    
 
-  % Un-removing spaceTime stuff at least for now, b/c get errors on the test
-  % suite if we remove it -- ALT, 2024-07-11
   % Remove spaceTime stuff...
   w = warning('query','MATLAB:rmpath:DirNotFound');
   warning('off','MATLAB:rmpath:DirNotFound');
@@ -43,6 +41,8 @@ function modpath()
   addpath(fullfile(path_to_this_folder, 'filehandling'), '-begin') ;  
   addpath(fullfile(path_to_this_folder, 'perframe'), '-begin') ;
   addpath(fullfile(path_to_this_folder, 'utility'), '-begin') ;  
+  addpath(fullfile(path_to_this_folder, 'locomotion'), '-begin') ; 
+  addpath(fullfile(path_to_this_folder, 'locomotion/external'), '-begin') ; 
 
   % Add stuff intended to shadow JAABA, FlyTracker versions
   addpath(fullfile(path_to_this_folder, 'shadow'), '-begin') ;

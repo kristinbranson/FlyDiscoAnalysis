@@ -8,6 +8,11 @@ function FlyDiscoPipelineStage(expdir, ...
                                stage_function, ...
                                stage_additional_arguments)  %#ok<INUSD> 
                            
+    % Deal with args
+    if ~exist('stage_additional_arguments', 'var') || isempty(stage_additional_arguments) ,
+      stage_additional_arguments = cell(1,0) ;
+    end
+
     % General function for running 'typical' pipeline stage.       
     do_run_stage = do_run.(stage_name) ;
     if is_on_or_force(do_run_stage) ,

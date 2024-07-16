@@ -67,9 +67,50 @@
 %     '/groups/branson/bransonlab/flydisco_data/LPC1CsChr_JHS_K_85321_RigB_20231211T142434'
 %     '/groups/branson/bransonlab/flydisco_data/LPC1CsChr_JHS_K_85321_RigC_20231211T142559'};
 
-% fixing Kai's DN setting dirs
-explist = {'/groups/branson/bransonlab/flydisco_data/DNcontrol_GMR_SS02575_RigB_20231213T135549'
-    '/groups/branson/bransonlab/flydisco_data/DNretinal_SS77821_RigA_20231213T141155'};
+% % fixing Kai's DN setting dirs
+% explist = {'/groups/branson/bransonlab/flydisco_data/DNcontrol_GMR_SS02575_RigB_20231213T135549'
+%     '/groups/branson/bransonlab/flydisco_data/DNretinal_SS77821_RigA_20231213T141155'};
+% gpu errors 20240702 trasnfero run
+explist = {'/groups/branson/bransonlab/flydisco_data/VNC3_EXT_VGLUT-GAL4_RigA_20240702T114554'
+    '/groups/branson/bransonlab/flydisco_data/VNC3_EXT_VGLUT-GAL4_RigB_20240702T114634'
+    '/groups/branson/bransonlab/flydisco_data/VNC3_JRC_SS37641_RigA_20240702T130258'
+    '/groups/branson/bransonlab/flydisco_data/VNC3_JRC_SS37641_RigB_20240702T130339'
+    '/groups/branson/bransonlab/flydisco_data/VNC3_JRC_SS37652_RigA_20240702T115635'
+    '/groups/branson/bransonlab/flydisco_data/VNC3_JRC_SS37652_RigB_20240702T115708'
+    '/groups/branson/bransonlab/flydisco_data/VNC3_JRC_SS37652_RigD_20240702T115838'
+    '/groups/branson/bransonlab/flydisco_data/VNC3_JRC_SS37671_RigA_20240702T131351'
+    '/groups/branson/bransonlab/flydisco_data/VNC3_JRC_SS37671_RigB_20240702T131521'
+    '/groups/branson/bransonlab/flydisco_data/VNC3_JRC_SS37671_RigC_20240702T131649'
+    '/groups/branson/bransonlab/flydisco_data/VNC3_JRC_SS37671_RigD_20240702T131713'
+    '/groups/branson/bransonlab/flydisco_data/VNC3_JRC_SS38013_RigB_20240702T111227'
+    '/groups/branson/bransonlab/flydisco_data/VNC3_JRC_SS38013_RigD_20240702T111412'
+    '/groups/branson/bransonlab/flydisco_data/VNC3_JRC_SS38021_RigA_20240702T125209'
+    '/groups/branson/bransonlab/flydisco_data/VNC3_JRC_SS38021_RigB_20240702T125246'
+    '/groups/branson/bransonlab/flydisco_data/VNC3_JRC_SS38021_RigC_20240702T125400'
+    '/groups/branson/bransonlab/flydisco_data/VNC3_JRC_SS38021_RigD_20240702T125428'
+    '/groups/branson/bransonlab/flydisco_data/VNC3_JRC_SS38592_RigA_20240702T104910'
+    '/groups/branson/bransonlab/flydisco_data/VNC3_JRC_SS38592_RigB_20240702T104956'
+    '/groups/branson/bransonlab/flydisco_data/VNC3_JRC_SS38592_RigD_20240702T105144'
+    '/groups/branson/bransonlab/flydisco_data/VNC3_JRC_SS38631_RigA_20240702T112317'
+    '/groups/branson/bransonlab/flydisco_data/VNC3_JRC_SS38631_RigC_20240702T112508'
+    '/groups/branson/bransonlab/flydisco_data/VNC3_JRC_SS41570_RigA_20240702T121826'
+    '/groups/branson/bransonlab/flydisco_data/VNC3_JRC_SS41570_RigB_20240702T121905'
+    '/groups/branson/bransonlab/flydisco_data/VNC3_JRC_SS41570_RigC_20240702T122015'
+    '/groups/branson/bransonlab/flydisco_data/VNC3_JRC_SS41570_RigD_20240702T122045'
+    '/groups/branson/bransonlab/flydisco_data/VNC3_JRC_SS41835_RigA_20240702T124119'
+    '/groups/branson/bransonlab/flydisco_data/VNC3_JRC_SS41835_RigC_20240702T124310'
+    '/groups/branson/bransonlab/flydisco_data/VNC3_JRC_SS41835_RigD_20240702T124340'
+    '/groups/branson/bransonlab/flydisco_data/VNC3_JRC_SS44225_RigA_20240702T110009'
+    '/groups/branson/bransonlab/flydisco_data/VNC3_JRC_SS44225_RigB_20240702T110048'
+    '/groups/branson/bransonlab/flydisco_data/VNC3_JRC_SS44225_RigD_20240702T110223'
+    '/groups/branson/bransonlab/flydisco_data/VNC3_JRC_SS46233_RigC_20240702T120842'
+    '/groups/branson/bransonlab/flydisco_data/VNC3_JRC_SS46696_RigB_20240702T113457'
+    '/groups/branson/bransonlab/flydisco_data/VNC3_JRC_SS46696_RigC_20240702T113601'
+    '/groups/branson/bransonlab/flydisco_data/VNC3_JRC_SS46696_RigD_20240702T113633'
+    '/groups/branson/bransonlab/flydisco_data/VNC3_YNA_K_162984_RigA_20240702T123049'
+    '/groups/branson/bransonlab/flydisco_data/VNC3_YNA_K_162984_RigB_20240702T123122'
+    '/groups/branson/bransonlab/flydisco_data/VNC3_YNA_K_162984_RigC_20240702T123229'
+    '/groups/branson/bransonlab/flydisco_data/VNC3_YNA_K_162984_RigD_20240702T123257'};
 %%
 toprocessdir =  '/groups/branson/bransonlab/flydisco_data/to-process';
 %ln -s source_file_or_directory_name  softlink_name

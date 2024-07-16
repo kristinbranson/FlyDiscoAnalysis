@@ -91,6 +91,9 @@ function FlyDiscoPipeline(expdir, varargin)
     %           Use JAABA to classify the behavior of each fly in each frame
     %           according to a set of classes.
     %           Default: 'on'. 
+    %       computelocomotionmetrics
+    %           Compute locomotion metrics.
+    %           Default: 'off'. 
     %       plotperframestats
     %           Make histograms and other plots of the per-frame features across
     %           frames.
@@ -172,6 +175,7 @@ function FlyDiscoPipeline(expdir, varargin)
     %       docomputeperframefeatures
     %       docomputehoghofperframefeatures
     %       dojaabadetect
+    %       docomputelocomotionmetrics
     %       docomputeperframestats
     %       doplotperframestats
     %       domakectraxresultsmovie
@@ -550,6 +554,21 @@ function FlyDiscoPipeline(expdir, varargin)
             stage_function, ...
             jaabadetect_params) ;
         
+
+
+        %% Compute APT per-frame features        
+        stage_name = 'computelocomotionmetrics';      
+        stage_function = @FlyDiscoComputeAptPerFrameFeatures ;
+        FlyDiscoPipelineStage(...
+            expdir, ...
+            stage_name, ...
+            do_run, ...
+            dataloc_params, ...
+            required_file_names_from_stage_name, ...
+            settingsdir, ...
+            analysis_protocol, ...
+            stage_function) ;
+
 
 
         %% Compute perframestats

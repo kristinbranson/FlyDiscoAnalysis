@@ -32,8 +32,20 @@ rootdatadir = '/groups/branson/bransonlab/flydisco_data';
 % [expdirstruct] = getExperimentDirsFlyDisco(rootdatadir,'metadatafile','Metadata.xml','expdirname','VNC*','autocheckin',true,'autocheckcomplete',true,'manualcheck',true);
 
 
-savefile = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_VNC3practive_20240513';
-[expdirstruct] = getExperimentDirsFlyDisco(rootdatadir,'metadatafile','Metadata.xml','expdirname','VNC3*','autocheckin',true,'autocheckcomplete',true,'manualcheck',true,'TrajNum',true);
+% savefile = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_VNC2_2023';
+% [expdirstruct] = getExperimentDirsFlyDisco(rootdatadir,'metadatafile','Metadata.xml','expdirname','VNC2*','date','2023*','autocheckin',true,'autocheckcomplete',true,'manualcheck',true,'TrajNum',true);
+
+
+% savefile = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_VNC3_julytemperatureproblem';
+% [expdirstruct] = getExperimentDirsFlyDisco(rootdatadir,'metadatafile','Metadata.xml','expdirname','VNC3*','date','202407*','autocheckin',true,'autocheckcomplete',true,'manualcheck',false,'TrajNum',false);
+
+
+% savefile = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_VNC_20240711';
+% [expdirstruct] = getExperimentDirsFlyDisco(rootdatadir,'metadatafile','Metadata.xml','expdirname','VNC*','autocheckin',true,'autocheckcomplete',true,'manualcheck',true,'TrajNum',false);
+
+savefile = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_VNC2_20240711';
+[expdirstruct] = getExperimentDirsFlyDisco(rootdatadir,'metadatafile','Metadata.xml','expdirname','VNC2*','autocheckin',true,'autocheckcomplete',true,'manualcheck',false,'TrajNum',false);
+
 
 % savefile = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_VNC2_20220915';
 % [expdirstruct] = getExperimentDirsFlyDisco(rootdatadir,'metadatafile','Metadata.xml','expdirname','VNC*','autocheckin',true,'autocheckcomplete',true);
@@ -55,6 +67,9 @@ savefile = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/
 % save raw pull data
 nowdatetime = datestr(now,'yyyymmddTHHMMSS');
 save([savefile,'_',nowdatetime,'.mat'],'expdirstruct');
+%% rerun to add autochecks
+
+
 %% select on expdirs with certain led protocol
 % idx = strcmp({expdirstruct.screen_type},'non_olympiad_dickson_VNC');
 idx = strcmp({expdirstruct.screen_type},'non_olympiad_dickson_VNC2');
@@ -190,8 +205,10 @@ save(savefiletext,'explist');
 % 20230130
 % start with just VNC and VNC2 datastruct
 % auto_pf = P
-pidx = find([expdirstruct2.automated_pf] == 'P');
-expdirstruct3 = expdirstruct2(pidx);
+% pidx = find([expdirstruct2.automated_pf] == 'P');
+% pidx = find([expdirstruct.automated_pf] == 'P');
+pidx = strcmp({expdirstruct.automated_pf},'P');
+expdirstruct3 = expdirstruct(pidx);
 % no manual_fail.txt file
 explist = {expdirstruct3.file_system_path};
 idx = true(1,numel(explist));
@@ -203,9 +220,15 @@ for i = 1:numel(explist)
 end
 
 metadata = expdirstruct3(idx);
-savefiletext = [savefile,'_VNCall_passAandM_metadata.mat'];
+savefiletext = [savefile,'_VNC_passAandM_metadata.mat'];
 save(savefiletext,'metadata');
 
+%% filter VNC2 and VNC3 out of VNC data
+savefile = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_VNC_20240711';
+load /groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_VNC_20240711_20240711T175926.mat
+idx = strcmp({metadata.screen_type},'non_olympiad_dickson_VNC');
+expdirstruct = expdirstruct(idx);
+%input into cell above 
 
 %% fix problem with unique and expdirstruct
 

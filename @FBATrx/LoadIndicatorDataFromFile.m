@@ -39,6 +39,8 @@ result.endon = last_tick_index_from_pulse_index ;  % frame index of the last hig
 result.startoff = first_tick_index_from_interpulse_index ;  % frame index of the first low frame of each interpulse 
 result.endoff = last_tick_index_from_interpulse_index ;  % frame index of the last low frame of each interpulse
 
+result.indicatordigital = indicatordigital; % return the full movie indicator digital signal AR
+
 % % Debug code
 % pulse_count = numel(result.starton) ;
 % figure('color', 'w') ;

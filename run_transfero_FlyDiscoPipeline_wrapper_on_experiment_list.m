@@ -157,45 +157,41 @@ function run_transfero_FlyDiscoPipeline_wrapper_on_experiment_list(folder_path_f
         successful_job_count = sum(job_statuses==1) ;
         errored_job_count = sum(job_statuses==-1) ;
         did_not_finish_job_count = sum(job_statuses==0) ;
-        if experiment_count == successful_job_count ,
-            % All is well
-            fprintf('All %d jobs completed successfully.\n', successful_job_count) ;
-        else
-            % Print the folders that completed successfully
-            did_complete_successfully = (job_statuses==+1) ;
-            folder_path_from_successful_experiment_index = folder_path_from_experiment_index(did_complete_successfully) ;
-            if ~isempty(folder_path_from_successful_experiment_index) ,                
-                fprintf('These %d jobs completed successfully:\n', successful_job_count) ;
-                for i = 1 : length(folder_path_from_successful_experiment_index) ,
-                    experiment_folder_path = folder_path_from_successful_experiment_index{i} ;
-                    fprintf('    %s\n', experiment_folder_path) ;
-                end
-                fprintf('\n') ;
-            end            
-            
-            % Print the folders that had errors
-            had_error = (job_statuses==-1) ;
-            folder_path_from_errored_experiment_index = folder_path_from_experiment_index(had_error) ;
-            if ~isempty(folder_path_from_errored_experiment_index) ,                
-                fprintf('These %d experiment folders had errors:\n', errored_job_count) ;
-                for i = 1 : length(folder_path_from_errored_experiment_index) ,
-                    experiment_folder_path = folder_path_from_errored_experiment_index{i} ;
-                    fprintf('    %s\n', experiment_folder_path) ;
-                end
-                fprintf('\n') ;
+
+        % Print the folders that completed successfully
+        did_complete_successfully = (job_statuses==+1) ;
+        folder_path_from_successful_experiment_index = folder_path_from_experiment_index(did_complete_successfully) ;
+        if ~isempty(folder_path_from_successful_experiment_index) ,                
+            fprintf('These %d jobs completed successfully:\n', successful_job_count) ;
+            for i = 1 : length(folder_path_from_successful_experiment_index) ,
+                experiment_folder_path = folder_path_from_successful_experiment_index{i} ;
+                fprintf('    %s\n', experiment_folder_path) ;
             end
-            
-            % Print the folders that did not finish
-            did_not_finish = (job_statuses==0) ;
-            folder_path_from_unfinished_experiment_index = folder_path_from_experiment_index(did_not_finish) ;
-            if ~isempty(folder_path_from_unfinished_experiment_index) ,                
-                fprintf('These %d experiment folders did not finish processing in the alloted time:\n', did_not_finish_job_count) ;
-                for i = 1 : length(folder_path_from_unfinished_experiment_index) ,
-                    experiment_folder_path = folder_path_from_unfinished_experiment_index{i} ;
-                    fprintf('    %s\n', experiment_folder_path) ;
-                end
-                fprintf('\n') ;
+            fprintf('\n') ;
+        end            
+        
+        % Print the folders that had errors
+        had_error = (job_statuses==-1) ;
+        folder_path_from_errored_experiment_index = folder_path_from_experiment_index(had_error) ;
+        if ~isempty(folder_path_from_errored_experiment_index) ,                
+            fprintf('These %d experiment folders had errors:\n', errored_job_count) ;
+            for i = 1 : length(folder_path_from_errored_experiment_index) ,
+                experiment_folder_path = folder_path_from_errored_experiment_index{i} ;
+                fprintf('    %s\n', experiment_folder_path) ;
             end
+            fprintf('\n') ;
+        end
+        
+        % Print the folders that did not finish
+        did_not_finish = (job_statuses==0) ;
+        folder_path_from_unfinished_experiment_index = folder_path_from_experiment_index(did_not_finish) ;
+        if ~isempty(folder_path_from_unfinished_experiment_index) ,                
+            fprintf('These %d experiment folders did not finish processing in the alloted time:\n', did_not_finish_job_count) ;
+            for i = 1 : length(folder_path_from_unfinished_experiment_index) ,
+                experiment_folder_path = folder_path_from_unfinished_experiment_index{i} ;
+                fprintf('    %s\n', experiment_folder_path) ;
+            end
+            fprintf('\n') ;
         end
     else
         % If not using bqueue, just run them normally (usually just for debugging)
