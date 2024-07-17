@@ -6,7 +6,7 @@ doledonoffdetection,on
 dosexclassification,on
 docomputeperframefeatures,on
 docomputehoghofperframefeatures,off
-dojaabadetect,off
+dojaabadetect,on
 dolocomotionmetrics,on
 docomputeperframestats,off
 doplotperframestats,off
