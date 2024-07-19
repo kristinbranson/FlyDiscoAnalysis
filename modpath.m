@@ -23,6 +23,7 @@ function modpath()
   jaaba_perframe_folder_path = fullfile(path_to_this_folder, 'JAABA', 'perframe') ;
   jaaba_modpath_script_path = fullfile(jaaba_perframe_folder_path, 'SetUpJAABAPath.m') ;
   run(jaaba_modpath_script_path) ;    
+
   % Remove spaceTime stuff...
   w = warning('query','MATLAB:rmpath:DirNotFound');
   warning('off','MATLAB:rmpath:DirNotFound');
@@ -30,26 +31,28 @@ function modpath()
   warning(w.state,w.identifier);
 
   % Add the TrkFile code for loading in trk files
-  addpath(fullfile(path_to_this_folder,'APT','matlab','trk')) ;
+  % The -begin option forces it to the front of the path, even if it's on the
+  % path already.
+  addpath(fullfile(path_to_this_folder,'APT','matlab','trk'), '-begin') ;
 
   % Add FlyDiscoAnalysis subfolders that are not their own projects
-  addpath(fullfile(path_to_this_folder, 'simplewing')) ;
-  addpath(fullfile(path_to_this_folder, 'hmm')) ;  
-  addpath(fullfile(path_to_this_folder, 'filehandling')) ;  
-  addpath(fullfile(path_to_this_folder, 'perframe')) ;
-  addpath(fullfile(path_to_this_folder, 'utility')) ;  
-  addpath(fullfile(path_to_this_folder, 'locomotion')) ; 
-  addpath(fullfile(path_to_this_folder, 'locomotion/external')) ; 
+  addpath(fullfile(path_to_this_folder, 'simplewing'), '-begin') ;
+  addpath(fullfile(path_to_this_folder, 'hmm'), '-begin') ;  
+  addpath(fullfile(path_to_this_folder, 'filehandling'), '-begin') ;  
+  addpath(fullfile(path_to_this_folder, 'perframe'), '-begin') ;
+  addpath(fullfile(path_to_this_folder, 'utility'), '-begin') ;  
+  addpath(fullfile(path_to_this_folder, 'locomotion'), '-begin') ; 
+  addpath(fullfile(path_to_this_folder, 'locomotion/external'), '-begin') ; 
 
   % Add stuff intended to shadow JAABA, FlyTracker versions
-  addpath(fullfile(path_to_this_folder, 'shadow')) ;
+  addpath(fullfile(path_to_this_folder, 'shadow'), '-begin') ;
   
   % Add tests folder
-  addpath(fullfile(path_to_this_folder, 'tests')) ;
+  addpath(fullfile(path_to_this_folder, 'tests'), '-begin') ;
   
   % Finally, add this folder itself, so we don't have to stay in this folder
   % Add at the beginning so that e.g. FlyTracker doesn't override
-  addpath(path_to_this_folder,'-begin') ;
+  addpath(path_to_this_folder, '-begin') ;
   
   % Run code to set the parpool location appropriately
   set_parpool_job_storage_location()

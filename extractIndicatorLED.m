@@ -89,7 +89,13 @@ end
 % For pulsed stimuli, group pulses together by mean(pad length) is either 1/0 before/after start/stop.
 % Pad needs to be more than 1/2 duty cycle of pulses / sampling frequency.
 % Offtime can't be less than pad+1 or it will fail.
-IRthreshold = (meanimage_max+meanimage_min)/2 ;
+IRthreshold = 0.6*meanimage_max + 0.4*meanimage_min ;  
+  % Changed to 60/40 to help with AO pfly exps in summer 2024.  Only needed b/c
+  % we're not properly reading all three flydisco LEDs properly, but taking a
+  % signal that gets one corner of all three.  They're using a 2nd LED to
+  % indicate when the pfly is shown, which is on for most frames except possible
+  % a few at the beginning and end.  using a 60/40 threshold usually allows us
+  % to extract the optogenetic stimulus LED even if this other LED is active.
 meanimagethresh = (meanimage>IRthreshold) ;
 [indicatordigital, startframe, endframe] = compute_pulse_envelope(meanimagethresh, indicator_params.pad) ;
 
@@ -97,14 +103,19 @@ meanimagethresh = (meanimage>IRthreshold) ;
 if debug ,
   f = figure('color', 'w') ;
   set_figure_size([10 6]) ;
-  a = axes(f) ;
-  l1 = line('Parent', a, 'XData', 1:nframes, 'YData', double(meanimagethresh), 'Color', 'b') ;
-  l2 = line('Parent', a, 'XData', 1:nframes, 'YData', double(indicatordigital), 'Color', 'r') ;
-  xlabel(a, 'Frame index') ;
-  ylabel(a, 'LED') ;
-  ylim(a, [-0.05 1.05]) ;
-  legend(a, [l1 l2], {'signal', 'envelope'}) ;
-  title(a, 'LED signal and envelope', 'Fontsize', 11) ;
+  a1 = axes(f, 'Position', [0.1 0.6 0.8 0.3]) ;
+  a2 = axes(f, 'Position', [0.1 0.1 0.8 0.3]) ;
+  l1 = line('Parent', a1, 'XData', 1:nframes, 'YData', meanimage, 'Color', [0 0.8 0]) ;
+  l2 = line('Parent', a1, 'XData', [1 nframes], 'YData', IRthreshold*[1 1], 'Color', [242 140 40]/255, 'LineStyle', '--') ;  
+  l3 = line('Parent', a2, 'XData', 1:nframes, 'YData', double(meanimagethresh), 'Color', 'b') ;
+  l4 = line('Parent', a2, 'XData', 1:nframes, 'YData', double(indicatordigital), 'Color', 'r') ;
+  xlabel(a2, 'Frame index') ;
+  ylabel(a1, 'LED mean (counts)') ;
+  ylabel(a2, 'LED binary') ;
+  ylim(a2, [-0.05 1.05]) ;
+  legend(a1, [l1 l2], {'signal', 'threshold'}) ;
+  legend(a2, [l3 l4], {'signal', 'envelope'}) ;
+  title(a1, 'LED mean, binary, and envelope', 'Fontsize', 11) ;
   drawnow() ;
 end
 

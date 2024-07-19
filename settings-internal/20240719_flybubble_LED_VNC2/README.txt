@@ -30,10 +30,10 @@ flytrackerbgstr,movie-bg.mat
 
 20240719 (date wrong updating on 07/15/2024)
 
-add params for new pipelinestage - FlyDiscoComputeAptPerFrameFeatures
+add params for new pipelinestage - computemetrics
 
 and updates for pipeline changes
 
-
+turned on jaabadetect stage
 
 

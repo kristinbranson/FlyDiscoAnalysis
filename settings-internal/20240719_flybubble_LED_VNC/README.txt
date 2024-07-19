@@ -29,10 +29,13 @@ added missing parameter to datalocs
 flytrackerbgstr,movie-bg.mat
 
 20240719
-adding params for new stage FlyDiscoComputeAptPerFrameFeatures
+adding params for new stage locomotionmetrics
 
 updates to for LED detection stage change
 
 left alone stats features since those are still in progress
+
+turned on jaabadetect stage
+
 
 

@@ -98,22 +98,15 @@ if do_run_caboose ,
 
   % Now turn off everything *except* the auto-checks-complete
   caboose_phase_analysis_parameters = analysis_parameters_with_overrides ;
-  caboose_phase_analysis_parameters.doautomaticchecksincoming = 'off' ;
-  caboose_phase_analysis_parameters.doflytracking = 'off' ;
-  caboose_phase_analysis_parameters.doregistration = 'off' ;
-  caboose_phase_analysis_parameters.doledonoffdetection = 'off' ;
-  caboose_phase_analysis_parameters.dosexclassification = 'off' ;
-  caboose_phase_analysis_parameters.dotrackwings = 'off' ;
-  caboose_phase_analysis_parameters.docomputeperframefeatures = 'off' ;
-  caboose_phase_analysis_parameters.docomputehoghofperframefeatures = 'off' ;
-  caboose_phase_analysis_parameters.dojaabadetect = 'off' ;
-  caboose_phase_analysis_parameters.docomputeperframestats = 'off' ;
-  caboose_phase_analysis_parameters.doplotperframestats = 'off' ;
-  caboose_phase_analysis_parameters.domakectraxresultsmovie = 'off' ;
-  caboose_phase_analysis_parameters.doapt = 'off' ;
-  caboose_phase_analysis_parameters.domakeaptresultsmovie = 'off' ;
-  caboose_phase_analysis_parameters.doextradiagnostics = 'off' ;
-  caboose_phase_analysis_parameters.doanalysisprotocol = 'off' ;
+  stage_name_from_stage_index = FlyDiscoStageNames() ;
+  stage_count = numel(stage_name_from_stage_index) ;
+  for stage_index = 1 : stage_count ,
+    stage_name = stage_name_from_stage_index{stage_index} ;
+    if ~strcmp(stage_name, 'automaticcheckscomplete') ,
+      field_name = strcat('do', stage_name) ;
+      caboose_phase_analysis_parameters.(field_name) = 'off' ;
+    end
+  end
 
   % Call the function to do the real work
   FlyDiscoPipeline(experiment_folder_path, caboose_phase_analysis_parameters) ;

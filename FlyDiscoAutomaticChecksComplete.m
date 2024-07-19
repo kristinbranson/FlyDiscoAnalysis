@@ -1,4 +1,4 @@
-function success = FlyDiscoAutomaticChecksComplete(expdir,varargin)
+function success = FlyDiscoAutomaticChecksComplete(expdir, varargin)
 
 version = '0.1';
 timestamp = datestr(now,'yyyymmddTHHMMSS');
@@ -6,68 +6,69 @@ timestamp = datestr(now,'yyyymmddTHHMMSS');
 success = true ;  % Reflects whether any ACC failures have been detected yet (missing *required* files count, missing *desired* files do not)
 error_or_warning_messages = {} ;  % Each message in this list is either an error message or a warning message
 
-[analysis_protocol,settingsdir,~,debug] = ...
+[analysis_protocol,settingsdir,datalocparamsfilestr,debug,required_file_names_from_stage_name,do_run] = ...
   myparse(varargin,...
   'analysis_protocol','current',...
   'settingsdir',default_settings_folder_path(),...
   'datalocparamsfilestr','dataloc_params.txt',...
-  'debug',false);
+  'debug',false, ...
+  'required_file_names_from_stage_name', [], ...
+  'do_run', []);
 
 if ischar(debug),
   debug = (str2double(debug) ~= 0) ;
 end
-
-
+if isempty(required_file_names_from_stage_name) ,
+  error('Must supply required_file_names_from_stage_name argument') ;
+end
+if isempty(do_run) ,
+  error('Must supply do_run argument') ;
+end
 
 %% parameters
-[intermediate_analysis_parameters, dataloc_params, analysis_protocol_folder_path] = ...
-  readIntermediateAnalysisParameters(settingsdir, analysis_protocol) ;     % analysis params according to defaults and the analysis-protocol folder
-
-%datalocparamsfile = fullfile(settingsdir,analysis_protocol,datalocparamsfilestr);
-%dataloc_params = ReadParams(datalocparamsfile);
-paramsfile = fullfile(analysis_protocol_folder_path,dataloc_params.automaticcheckscompleteparamsfilestr);
+analysis_protocol_folder_path = fullfile(settingsdir, analysis_protocol) ;
+datalocparamsfile = fullfile(analysis_protocol_folder_path, datalocparamsfilestr) ;
+dataloc_params = ReadParams(datalocparamsfile) ;
+paramsfile = fullfile(analysis_protocol_folder_path, dataloc_params.automaticcheckscompleteparamsfilestr) ;
 check_params = ReadParams(paramsfile);
+% These fields are not longer used, so delete them
+check_params = rmfield(check_params, 'required_files') ;
+check_params = rmfield(check_params, 'file_categories') ;
 %metadatafile = fullfile(expdir,dataloc_params.metadatafilestr);
 automatedchecksincomingfile = fullfile(expdir,dataloc_params.automaticchecksincomingresultsfilestr);
 acc_text_output_file_path = fullfile(expdir,dataloc_params.automaticcheckscompleteresultsfilestr);
 
+% There's a category for each stage
+stage_name_from_stage_index = FlyDiscoStageNames() ;
+stage_count = numel(stage_name_from_stage_index) ;
+some_categories = cell(1,0) ;
+for stage_index = 1 : stage_count ,
+  stage_name = stage_name_from_stage_index{stage_index} ;
+  some_categories{end+1} = sprintf('missing_%s_files', stage_name) ;  %#ok<AGROW> 
+end
 % types of automated errors: order matters in this list
-categories = {...
-  'missing_automated_checks_incoming_files',...
-  'missing_tracking_files',...
+other_categories = {...
   'flytracker_nans',...
-  'missing_registration_files',...
-  'missing_optoregistration_files',...
-  'missing_sexclassification_files',...
-  'missing_wingtracking_files',...
-  'missing_perframefeatures_files',...
-  'missing_perframestats_files',...
-  'missing_extra_diagnostics_files',...
-  'missing_results_movie_files',...
-  'missing_other_analysis_files',...
   'bad_number_of_flies',...
   'bad_number_of_flies_per_sex',...
   'bad_number_of_stimuli',...
-  'completed_checks_other', ...
-  'missing_indicatorled_files', ...
-  'missing_apt_tracking_files', ...
-  'missing_apt_results_movie_files'};
+  'completed_checks_other'};
+categories = horzcat(some_categories, other_categories) ;
 category2idx = struct() ;
 for i = 1:numel(categories),
   category2idx.(categories{i}) = i;
 end
 iserror = false(1,numel(categories));
 
-% make sure there is a category for each file
-if numel(check_params.required_files) ~= numel(check_params.file_categories),
-  error('required_files and file_categories parameters do not match');
-end
+% % make sure there is a category for each file
+% if numel(check_params.required_files) ~= numel(check_params.file_categories),
+%   error('required_files and file_categories parameters do not match');
+% end
 
 
 
 %% do some sex-classification-related checks, if that stage is turned on in the screen
-
-if is_on_or_force(intermediate_analysis_parameters.dosexclassification) ,
+if is_on_or_force(do_run.sexclassification) ,
   sexclassifierfile = fullfile(expdir,dataloc_params.sexclassifierdiagnosticsfilestr);
   if ~exist(sexclassifierfile,'file'),
     error_or_warning_messages{end+1} = sprintf('sex classifier diagnostics file %s does not exist',sexclassifierfile);
@@ -129,14 +130,14 @@ end
 
 %% check for nan's in flytracker data after postprocessing 
 
-if is_on_or_force(intermediate_analysis_parameters.docomputeperframefeatures) ,
+if is_on_or_force(do_run.computeperframefeatures) ,
   % using the wingtrxfilestr - this is output by perframe features and is the
   % last modification of data in the trx file in the pipeline
   wingtrxfile = fullfile(expdir,dataloc_params.wingtrxfilestr);
   has_wing_info = true ;
   [success, iserror, error_or_warning_messages] = ...
     check_for_nans_in_tracking(wingtrxfile, has_wing_info, category2idx, success, iserror, error_or_warning_messages) ;
-elseif is_on_or_force(intermediate_analysis_parameters.doregistration) ,
+elseif is_on_or_force(do_run.registration) ,
   % If PFFs were not calculated in the screen, fallback to checking the registered_trx.mat
   % file.
   registered_trx_file_name = fullfile(expdir,dataloc_params.trxfilestr);
@@ -149,7 +150,7 @@ end
 
 %% check the number of stimuli detecter match the expected number from protocol
 
-if is_on_or_force(intermediate_analysis_parameters.doledonoffdetection)
+if is_on_or_force(do_run.ledonoffdetection)
   datalocparamsfile = fullfile(settingsdir,analysis_protocol,'dataloc_params.txt');
   dataloc_params = ReadParams(datalocparamsfile);
   indicatorparamsfile = fullfile(settingsdir,analysis_protocol,dataloc_params.indicatorparamsfilestr);
@@ -177,18 +178,25 @@ end
 
 %% check for missing files
 
-for i = 1:numel(check_params.required_files),
-  fn = check_params.required_files{i};
-  if any(fn == '*'),
-    isfile = ~isempty(dir(fullfile(expdir,fn)));
-  else
-    isfile = exist(fullfile(expdir,fn),'file');
+for i = 1:stage_count ,
+  stage_name = stage_name_from_stage_index{i} ; 
+  if strcmp(stage_name, 'automaticcheckscomplete') ,
+    % These files will typically be missing, b/c we're in the middle
+    % of the stage right now!
+    continue
   end
-  if ~isfile,
-    error_or_warning_messages{end+1} = sprintf('Missing file %s',fn); %#ok<AGROW>
-    success = false;
-    category = sprintf('missing_%s_files',check_params.file_categories{i});
-    iserror(category2idx.(category)) = true;
+  if is_on_or_force(do_run.(stage_name)) ,
+    required_file_names = required_file_names_from_stage_name.(stage_name) ;
+    for j = 1 : numel(required_file_names) ,
+      fn = required_file_names{j} ;
+      isfile = logical(exist(fullfile(expdir,fn), 'file')) ;
+      if ~isfile ,
+        error_or_warning_messages{end+1} = sprintf('Missing file %s',fn) ;  %#ok<AGROW>
+        success = false ;
+        category = sprintf('missing_%s_files',stage_name) ;
+        iserror(category2idx.(category)) = true ;
+      end
+    end
   end
 end
 

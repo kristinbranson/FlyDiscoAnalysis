@@ -1,3 +1,0 @@
-num_cores,2
-num_chunks,4
-n_flies,15

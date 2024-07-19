@@ -59,6 +59,9 @@ function FlyDiscoPipeline(expdir, varargin)
     %           Tracks the flies in the video, computing x,y coordinates and heading
     %           angle for each in each frame.
     %           Default: 'on'. 
+    %       addpflies
+    %           Adds 'projector flies' to the tracks.
+    %           Default: 'off'. 
     %       registration
     %           Determines where the boundaries of the chamber are, and where each
     %           fly is relative to those boundaries.  Also converts fly positions in
@@ -84,13 +87,13 @@ function FlyDiscoPipeline(expdir, varargin)
     %           Compute Histogram-of-Oriented-Gradient (HOG) features for each
     %           frame, for each fly.  Also HOF features. Not tested, makes large files
     %           Default: 'off'. 
-    %       computeaptperframefeatures
-    %           Compute APT-based features for each frame, for each fly.
-    %           Default: 'off'. 
     %       jaabadetect
     %           Use JAABA to classify the behavior of each fly in each frame
     %           according to a set of classes.
     %           Default: 'on'. 
+    %       locomotionmetrics
+    %           Compute locomotion metrics.
+    %           Default: 'off'. 
     %       plotperframestats
     %           Make histograms and other plots of the per-frame features across
     %           frames.
@@ -140,7 +143,6 @@ function FlyDiscoPipeline(expdir, varargin)
     %       automaticchecksincoming: FlyDiscoAutomaticChecksIncoming()
     %       sexclassification: FlyDiscoClassifySex()
     %       computeperframefeatures: FlyDiscoComputePerFrameFeatures()
-    %       computeaptperframefeatures: FlyDiscoComputeAptPerFrameFeatures()
     %       computeperframestats: FlyDiscoComputePerFrameStats()
     %       plotperframestats: FlyDiscoPlotPerFrameStats()
     %       makectraxresultsmovie: FlyDiscoMakeCtraxResultsMovie()
@@ -159,7 +161,6 @@ function FlyDiscoPipeline(expdir, varargin)
     %       registration_params
     %       sexclassification_params
     %       computeperframefeatures_params
-    %       computeaptperframefeatures_params
     %       computeperframestats_params
     %       plotperframestats_params
     %       makectraxresultsmovie_params
@@ -167,32 +168,20 @@ function FlyDiscoPipeline(expdir, varargin)
     %       automaticcheckscomplete_params
     %       doautomaticchecksincoming
     %       doflytracking
+    %       doaddpflies
     %       doregistration
     %       doledonoffdetection
     %       dosexclassification
     %       docomputeperframefeatures
     %       docomputehoghofperframefeatures
     %       dojaabadetect
+    %       dolocomotionmetrics
     %       docomputeperframestats
     %       doplotperframestats
     %       domakectraxresultsmovie
     %       doapt
     %       domakeaptresultsmovie
     %       doautomaticcheckscomplete
-    %       requiredfiles_automaticchecksincoming
-    %       requiredfiles_flytracker
-    %       requiredfiles_registration
-    %       requiredfiles_ledonoffdetection
-    %       requiredfiles_sexclassification
-    %       requiredfiles_computeperframefeatures
-    %       requiredfiles_computeperframestats
-    %       requiredfiles_computehoghofperframefeatures
-    %       requiredfiles_computeaptperframefeatures
-    %       requiredfiles_plotperframestats
-    %       requiredfiles_makectraxresultsmovie
-    %       requiredfiles_apt    
-    %       requiredfiles_makeaptresultsmovie
-    %       requiredfiles_automaticcheckscomplete
     %
     % The default value for all these parameters is specified by the function
     % FlyDiscoPipelineDefaultAnalysisParameters().  The values returned by that
@@ -264,98 +253,45 @@ function FlyDiscoPipeline(expdir, varargin)
     end
     
     % Read in the analysis parameters, dataloc_params
-    [intermediate_analysis_parameters, dataloc_params, analysis_protocol_folder_path, datalocparamsfilestr] = ...
+    [analysis_parameters_according_to_protocol, dataloc_params, analysis_protocol_folder_path, datalocparamsfilestr] = ...
         readIntermediateAnalysisParameters(settingsdir, analysis_protocol) ;     % analysis params according to defaults and the analysis-protocol folder
-    analysis_parameters = merge_structs(intermediate_analysis_parameters, argument_parameters) ;
+
+    % Merge in the argument parameters
+    analysis_parameters = merge_structs(analysis_parameters_according_to_protocol, argument_parameters) ;
+    do_run = do_run_from_analysis_parameters(analysis_parameters) ;  % whether or not to run each stage
     
+    % Compute the required output files for each stage
+    required_file_names_from_stage_name = FlyDiscoComputeRequiredFileNamesForAllStages(analysis_protocol_folder_path, dataloc_params, expdir, do_run) ;
+
     % Assign the paramters to individual variables
     automaticchecksincoming_params = lookup_in_struct(analysis_parameters, 'automaticchecksincoming_params') ;
     registration_params = lookup_in_struct(analysis_parameters, 'registration_params') ;
     sexclassification_params = lookup_in_struct(analysis_parameters, 'sexclassification_params') ;
     computeperframefeatures_params = lookup_in_struct(analysis_parameters, 'computeperframefeatures_params') ;
-    computeaptperframefeatures_params = lookup_in_struct(analysis_parameters, 'computeaptperframefeatures_params') ;
     computeperframestats_params = lookup_in_struct(analysis_parameters, 'computeperframestats_params') ;    
     plotperframestats_params = lookup_in_struct(analysis_parameters, 'plotperframestats_params') ;    
     makectraxresultsmovie_params = lookup_in_struct(analysis_parameters, 'makectraxresultsmovie_params') ;
     aptresultsmovie_params = lookup_in_struct(analysis_parameters, 'aptresultsmovie_params') ;
     automaticcheckscomplete_params = lookup_in_struct(analysis_parameters, 'automaticcheckscomplete_params') ;
-    doautomaticchecksincoming = lookup_in_struct(analysis_parameters, 'doautomaticchecksincoming') ;
-    doflytracking = lookup_in_struct(analysis_parameters, 'doflytracking') ;
-    doaddpflies = lookup_in_struct(analysis_parameters, 'doaddpflies') ;    
-    doregistration = lookup_in_struct(analysis_parameters, 'doregistration') ;
-    doledonoffdetection = lookup_in_struct(analysis_parameters, 'doledonoffdetection') ;
-    dosexclassification = lookup_in_struct(analysis_parameters, 'dosexclassification') ;
-    docomputeperframefeatures = lookup_in_struct(analysis_parameters, 'docomputeperframefeatures') ;
-    docomputehoghofperframefeatures = lookup_in_struct(analysis_parameters, 'docomputehoghofperframefeatures') ;
-    docomputeaptperframefeatures = lookup_in_struct(analysis_parameters, 'docomputeaptperframefeatures') ;
-    dojaabadetect = lookup_in_struct(analysis_parameters, 'dojaabadetect') ;
-    docomputeperframestats = lookup_in_struct(analysis_parameters, 'docomputeperframestats') ;
-    doplotperframestats = lookup_in_struct(analysis_parameters, 'doplotperframestats') ;
-    domakectraxresultsmovie = lookup_in_struct(analysis_parameters, 'domakectraxresultsmovie') ;
-    doapt = lookup_in_struct(analysis_parameters, 'doapt') ;
-    domakeaptresultsmovie = lookup_in_struct(analysis_parameters, 'domakeaptresultsmovie') ;
-    doautomaticcheckscomplete = lookup_in_struct(analysis_parameters, 'doautomaticcheckscomplete') ;
-    requiredfiles_automaticchecksincoming = lookup_in_struct(analysis_parameters, 'requiredfiles_automaticchecksincoming') ;
-    requiredfiles_flytracker = lookup_in_struct(analysis_parameters, 'requiredfiles_flytracker') ;
-    requiredfiles_registration = lookup_in_struct(analysis_parameters, 'requiredfiles_registration') ;
-    requiredfiles_ledonoffdetection = lookup_in_struct(analysis_parameters, 'requiredfiles_ledonoffdetection') ;
-    requiredfiles_sexclassification = lookup_in_struct(analysis_parameters, 'requiredfiles_sexclassification') ;
-    requiredfiles_computeperframefeatures = lookup_in_struct(analysis_parameters, 'requiredfiles_computeperframefeatures') ;
-    requiredfiles_computeperframestats = lookup_in_struct(analysis_parameters, 'requiredfiles_computeperframestats') ;
-    requiredfiles_computehoghofperframefeatures = lookup_in_struct(analysis_parameters, 'requiredfiles_computehoghofperframefeatures') ;
-    requiredfiles_computeaptperframefeatures = lookup_in_struct(analysis_parameters, 'requiredfiles_computeaptperframefeatures') ;
-    requiredfiles_plotperframestats = lookup_in_struct(analysis_parameters, 'requiredfiles_plotperframestats') ;    
-    requiredfiles_makectraxresultsmovie = lookup_in_struct(analysis_parameters, 'requiredfiles_makectraxresultsmovie') ;
-    requiredfiles_apt = lookup_in_struct(analysis_parameters, 'requiredfiles_apt') ;
-    requiredfiles_makeaptresultsmovie = lookup_in_struct(analysis_parameters, 'requiredfiles_makeaptresultsmovie') ;    
-    requiredfiles_automaticcheckscomplete = lookup_in_struct(analysis_parameters, 'requiredfiles_automaticcheckscomplete') ;
     cluster_billing_account_name = lookup_in_struct(analysis_parameters, 'cluster_billing_account_name') ;
     sshhost = lookup_in_struct(analysis_parameters, 'sshhost') ;
     debug = lookup_in_struct(analysis_parameters, 'debug') ;
     
-    % Coerce all the do* variables to on/off/force
-    doautomaticchecksincoming = coerce_to_on_off_force(doautomaticchecksincoming) ;
-    doflytracking = coerce_to_on_off_force(doflytracking) ;
-    doaddpflies = coerce_to_on_off_force(doaddpflies) ;
-    doregistration = coerce_to_on_off_force(doregistration) ;
-    doledonoffdetection = coerce_to_on_off_force(doledonoffdetection) ;
-    dosexclassification = coerce_to_on_off_force(dosexclassification) ;
-    docomputeperframefeatures = coerce_to_on_off_force(docomputeperframefeatures) ;
-    docomputehoghofperframefeatures = coerce_to_on_off_force(docomputehoghofperframefeatures) ;
-    docomputeaptperframefeatures = coerce_to_on_off_force(docomputeaptperframefeatures) ;
-    dojaabadetect = coerce_to_on_off_force(dojaabadetect) ;
-    docomputeperframestats = coerce_to_on_off_force(docomputeperframestats) ;
-    doplotperframestats = coerce_to_on_off_force(doplotperframestats) ; 
-    domakectraxresultsmovie = coerce_to_on_off_force(domakectraxresultsmovie) ;
-    doapt = coerce_to_on_off_force(doapt) ;
-    domakeaptresultsmovie = coerce_to_on_off_force(domakeaptresultsmovie) ;
-    doautomaticcheckscomplete = coerce_to_on_off_force(doautomaticcheckscomplete) ;
-    
     % Print the settings values in use
     variable_names_to_print = ...
         { 'settingsdir', ...
-          'analysis_protocol', ...
-          'doautomaticchecksincoming', ...
-          'doflytracking',  ...
-          'doaddpflies',  ...
-          'doregistration', ...
-          'doledonoffdetection', ...
-          'dosexclassification', ...
-          'doapt', ...
-          'docomputeperframefeatures', ...
-          'docomputehoghofperframefeatures', ...
-          'docomputeaptperframefeatures', ...
-          'docomputeperframestats', ...
-          'dojaabadetect', ...
-          'doplotperframestats', ...
-          'domakectraxresultsmovie', ...
-          'domakeaptresultsmovie', ...
-          'doautomaticcheckscomplete' }' ;
+          'analysis_protocol'}' ;
     fprintf('Settings values in FlyDiscoPipeline():\n') ;
     for i = 1 : length(variable_names_to_print) ,
         variable_name = variable_names_to_print{i} ;
         value = eval(variable_name) ;
         fprintf('  %s: %s\n', variable_name, char_array_from_value(value)) ;
+    end
+    stage_name_from_stage_index = FlyDiscoStageNames() ;
+    for stage_index = 1 : numel(stage_name_from_stage_index) ,
+      stage_name = stage_name_from_stage_index{stage_index} ;
+      value = do_run.(stage_name) ;
+      fprintf('  do_run.%s: %s\n', stage_name, value) ;      
     end
     fprintf('\n') ;
     
@@ -392,14 +328,15 @@ function FlyDiscoPipeline(expdir, varargin)
     % error.
         
     %% Run incoming checks
-    stage = 'automaticchecksincoming';
-    if is_on_or_force(doautomaticchecksincoming) ,
-        forcecompute = is_force(doautomaticchecksincoming) ;
-        todo = CheckForMissingFiles(expdir,dataloc_params,requiredfiles_automaticchecksincoming);
+    stage_name = 'automaticchecksincoming';
+    if is_on_or_force(do_run.(stage_name)) ,
+        forcecompute = is_force(do_run.(stage_name)) ;
+        requiredfiles = required_file_names_from_stage_name.(stage_name) ;
+        todo = CheckForMissingFilesExplicit(expdir, requiredfiles);
         if forcecompute || todo,
             fprintf('Running incoming automatic checks...\n');
             FlyDiscoAutomaticChecksIncoming(expdir, ...
-                stage, ...
+                stage_name, ...
                 'settingsdir',settingsdir,'analysis_protocol',analysis_protocol,...
                 automaticchecksincoming_params{:});
         end
@@ -408,10 +345,10 @@ function FlyDiscoPipeline(expdir, varargin)
         % FlyDiscoAutomaticChecksIncoming(), usually named
         % 'automatic_checks_incoming_results.txt',
         % is present.  If it's not, it means that something has gone seriously wrong.
-        [ismissingfile,missingfiles] = CheckForMissingFiles(expdir,dataloc_params,requiredfiles_automaticchecksincoming);
+        [ismissingfile, missingfiles] = CheckForMissingFilesExplicit(expdir, requiredfiles) ;        
         if ismissingfile,
             msgs = cellfun(@(x) sprintf('Missing incoming automatic checks file %s',x),missingfiles,'UniformOutput',false) ;
-            flydisco_pipeline_error(stage, msgs) ;
+            flydisco_pipeline_error(stage_name, msgs) ;
         end
         
         % Make sure the file usually named automatic_checks_incoming_results.txt
@@ -419,9 +356,9 @@ function FlyDiscoPipeline(expdir, varargin)
         % "automated_pf,F" (nor anything else).
         % This ensures the the core pipeline only runs if the current run or a previous run of the ACI stage
         % indicated that it should do so.
-        do_run_core_pipeline = CheckACIResultsFileContents(expdir, dataloc_params, stage) ;
+        do_run_core_pipeline = CheckACIResultsFileContents(expdir, dataloc_params, stage_name) ;
         if ~do_run_core_pipeline ,
-            fprintf('FlyDisco pipeline encountered issues with experiment during %s stage.  Skipping core pipeline stages.\n', stage);
+            fprintf('FlyDisco pipeline encountered issues with experiment during %s stage.  Skipping core pipeline stages.\n', stage_name);
         end
     else
         do_run_core_pipeline = true ;
@@ -431,36 +368,37 @@ function FlyDiscoPipeline(expdir, varargin)
     
     if do_run_core_pipeline ,
         %% Run FlyTracker
-        stage = 'flytracking' ;
-        if is_on_or_force(doflytracking) ,
-            forcecompute = is_force(doflytracking) ;
-            todo = CheckForMissingFiles(expdir,dataloc_params,requiredfiles_flytracker) ;
+        stage_name = 'flytracking' ;
+        if is_on_or_force(do_run.(stage_name)) ,
+            forcecompute = is_force(do_run.(stage_name)) ;
+            requiredfiles = required_file_names_from_stage_name.(stage_name) ;
+            todo = CheckForMissingFilesExplicit(expdir, requiredfiles);
             if forcecompute || todo ,
                 fprintf('Running FlyTracker...\n');
                 FlyTrackerWrapperForFlyDisco(expdir, settingsdir, analysis_protocol, dataloc_params, forcecompute) ;
             end
             
             % make sure flytracker files exist
-            [ismissingfile,missingfiles] = CheckForMissingFiles(expdir,dataloc_params,requiredfiles_flytracker);
+            [ismissingfile, missingfiles] = CheckForMissingFilesExplicit(expdir, requiredfiles);
             if ismissingfile,
                 msgs = cellfun(@(x) sprintf('Missing FlyTracker file %s',x),missingfiles,'UniformOutput',false);
-                flydisco_pipeline_error(stage, msgs) ;
+                flydisco_pipeline_error(stage_name, msgs) ;
             end
-            
         end
         
         
         
         %% Add projector flies
-        FlyDiscoAddPFliesStage(expdir, dataloc_params, settingsdir, analysis_protocol, doaddpflies, debug) ;
+        FlyDiscoAddPFliesStage(expdir, dataloc_params, settingsdir, analysis_protocol, do_run.addpflies, debug) ;
         
         
         
         %% registration
-        stage = 'registration';
-        if is_on_or_force(doregistration) ,
-            forcecompute = is_force(doregistration) ;
-            todo = CheckForMissingFiles(expdir,dataloc_params,requiredfiles_registration);
+        stage_name = 'registration';
+        if is_on_or_force(do_run.(stage_name)) ,
+            forcecompute = is_force(do_run.(stage_name)) ;
+            requiredfiles = required_file_names_from_stage_name.(stage_name) ;
+            todo = CheckForMissingFilesExplicit(expdir,requiredfiles);
             if forcecompute || todo,
                 fprintf('Registering tracks...\n');
                 
@@ -470,27 +408,27 @@ function FlyDiscoPipeline(expdir, varargin)
             end
             
             % make sure registration files exist
-            [ismissingfile,missingfiles] = CheckForMissingFiles(expdir,dataloc_params,requiredfiles_registration);
+            [ismissingfile,missingfiles] = CheckForMissingFilesExplicit(expdir,requiredfiles);
             if ismissingfile,
                 msgs = cellfun(@(x) sprintf('Missing registration file %s',x),missingfiles,'UniformOutput',false);
-                flydisco_pipeline_error(stage, msgs) ;
+                flydisco_pipeline_error(stage_name, msgs) ;
             end
         end
         
         
         
         %% led indicator detection on/off
-        stage = 'ledonoffdetection';
+        stage_name = 'ledonoffdetection';
         stage_function = @FlyDiscoDetectIndicatorLedOnOff ;
         ledonoffdetection_params = ...
             {'datalocparamsfilestr', datalocparamsfilestr, ...
              'debug', debug } ;
         FlyDiscoPipelineStage(...
             expdir, ...
-            stage, ...
-            doledonoffdetection, ...
+            stage_name, ...
+            do_run, ...
             dataloc_params, ...
-            requiredfiles_ledonoffdetection, ...
+            required_file_names_from_stage_name , ...
             settingsdir, ...
             analysis_protocol, ...
             stage_function, ...
@@ -499,14 +437,14 @@ function FlyDiscoPipeline(expdir, varargin)
         
         
         %% Run sex classification
-        stage = 'sexclassification';
+        stage_name = 'sexclassification';
         stage_function = @FlyDiscoClassifySex ;
         FlyDiscoPipelineStage(...
             expdir, ...
-            stage, ...
-            dosexclassification, ...
+            stage_name, ...
+            do_run, ...
             dataloc_params, ...
-            requiredfiles_sexclassification, ...
+            required_file_names_from_stage_name, ...
             settingsdir, ...
             analysis_protocol, ...
             stage_function, ...
@@ -515,10 +453,11 @@ function FlyDiscoPipeline(expdir, varargin)
 
 
         %% Run APT
-        stage = 'apt' ;
-        if is_on_or_force(doapt) ,
-            forcecompute = is_force(doapt) ;
-            todo = CheckForMissingFiles(expdir, dataloc_params, requiredfiles_apt) ;
+        stage_name = 'apt' ;
+        if is_on_or_force(do_run.(stage_name)) ,
+            forcecompute = is_force(do_run.(stage_name)) ;
+            requiredfiles = required_file_names_from_stage_name.(stage_name) ;
+            todo = CheckForMissingFilesExplicit(expdir, requiredfiles) ;
             if forcecompute || todo ,
                 fprintf('Running APT...\n');                
                 aptrepopath = fullfile(source_folder_path, 'APT') ;  % use the subrepo APT
@@ -544,29 +483,29 @@ function FlyDiscoPipeline(expdir, varargin)
                                      'docomputemd5s', true, ...
                                      'sshhost', submit_host_name) ;
                 if ~success ,
-                    flydisco_pipeline_error(stage, msgs) ;
+                    flydisco_pipeline_error(stage_name, msgs) ;
                 end
             end
             
             % make sure flytracker files exist
-            [ismissingfile,missingfiles] = CheckForMissingFiles(expdir, dataloc_params, requiredfiles_apt) ;
+            [ismissingfile,missingfiles] = CheckForMissingFilesExplicit(expdir, requiredfiles) ;
             if ismissingfile ,
                 msgs = cellfun(@(x) sprintf('Missing APT file %s',x),missingfiles,'UniformOutput',false);
-                flydisco_pipeline_error(stage, msgs) ;
+                flydisco_pipeline_error(stage_name, msgs) ;
             end
         end  % APT stage
         
 
 
         %% Compute most per-frame features
-        stage = 'computeperframefeatures';
+        stage_name = 'computeperframefeatures';
         stage_function = @FlyDiscoComputePerFrameFeatures ;
         FlyDiscoPipelineStage(...
             expdir, ...
-            stage, ...
-            docomputeperframefeatures, ...
+            stage_name, ...
+            do_run, ...
             dataloc_params, ...
-            requiredfiles_computeperframefeatures, ...
+            required_file_names_from_stage_name, ...
             settingsdir, ...
             analysis_protocol, ...
             stage_function, ...
@@ -575,11 +514,11 @@ function FlyDiscoPipeline(expdir, varargin)
 
 
         %% Compute hog hof per-frame features        
-        stage = 'computehoghofperframefeatures';        
-        if is_on_or_force(docomputehoghofperframefeatures) ,
-            forcecompute = is_force(docomputehoghofperframefeatures) ;
-            requiredfiles_computehoghofperframefeatures = fullfile(dataloc_params.perframedir,requiredfiles_computehoghofperframefeatures);
-            todo = CheckForMissingFiles(expdir,dataloc_params,requiredfiles_computehoghofperframefeatures);
+        stage_name = 'computehoghofperframefeatures';        
+        if is_on_or_force(do_run.(stage_name)) ,
+            forcecompute = is_force(do_run.(stage_name)) ;
+            requiredfiles = required_file_names_from_stage_name.(stage_name) ;
+            todo = CheckForMissingFilesExplicit(expdir,requiredfiles) ;
             if forcecompute || todo,
                 pwdprev = pwd() ;
                 trxfilestr = fullfile(expdir,dataloc_params.trxfilestr);
@@ -591,46 +530,53 @@ function FlyDiscoPipeline(expdir, varargin)
                 cd(pwdprev);
             end
             % make sure computeperframefeatures files exist
-            [ismissingfile,missingfiles] = CheckForMissingFiles(expdir,dataloc_params,requiredfiles_computeperframefeatures);
+            [ismissingfile,missingfiles] = CheckForMissingFilesExplicit(expdir,requiredfiles);
             if ismissingfile,
                 msgs = cellfun(@(x) sprintf('Missing HOG/HOF per-frame features file %s',x),missingfiles,'UniformOutput',false);
-                flydisco_pipeline_error(stage, msgs) ;
+                flydisco_pipeline_error(stage_name, msgs) ;
             end            
         end
-       
+
 
 
         %% Run JAABA behavior detection
-        stage = 'jaabadetect';  %#ok<NASGU>
-        if is_on_or_force(dojaabadetect),
-            forcecompute = is_force(dojaabadetect) ;
-            JAABADetectWrapper(expdir, settingsdir, analysis_protocol, forcecompute) ;
-        end
-
-        
-        
-        %% Compute APT per-frame features        
-        stage = 'computeaptperframefeatures';      
-        stage_function = @FlyDiscoComputeAptPerFrameFeatures ;
+        stage_name = 'jaabadetect';
+        stage_function = @FlyDiscoJAABADetect ;
+        jaabadetect_params = cell(1,0) ;
         FlyDiscoPipelineStage(...
             expdir, ...
-            stage, ...
-            docomputeaptperframefeatures, ...
+            stage_name, ...
+            do_run, ...
             dataloc_params, ...
-            requiredfiles_computeaptperframefeatures, ...
+            required_file_names_from_stage_name, ...
             settingsdir, ...
             analysis_protocol, ...
             stage_function, ...
-            computeaptperframefeatures_params) ;
+            jaabadetect_params) ;
         
 
 
+        %% Compute APT per-frame features        
+        stage_name = 'locomotionmetrics';      
+        stage_function = @FlyDiscoComputeLocomotionMetrics ;
+        FlyDiscoPipelineStage(...
+            expdir, ...
+            stage_name, ...
+            do_run, ...
+            dataloc_params, ...
+            required_file_names_from_stage_name, ...
+            settingsdir, ...
+            analysis_protocol, ...
+            stage_function) ;
+
+
+
         %% Compute perframestats
-        stage = 'computeperframestats';
-        if is_on_or_force(docomputeperframestats)
-            forcecompute = is_force(docomputeperframestats);
-            
-            todo = CheckForMissingFiles(expdir,dataloc_params,requiredfiles_computeperframestats);
+        stage_name = 'computeperframestats';
+        if is_on_or_force(do_run.(stage_name)) ,
+            forcecompute = is_force(do_run.(stage_name)) ;
+            requiredfiles = required_file_names_from_stage_name.(stage_name) ;
+            todo = CheckForMissingFilesExplicit(expdir,requiredfiles);
             if forcecompute || todo,
                 fprintf('ComputePerFrameStats...\n');
                 stage_additional_arguments = computeperframestats_params ;
@@ -641,24 +587,24 @@ function FlyDiscoPipeline(expdir, varargin)
             end
             
             % make sure computeperframestats files exist
-            [ismissingfile,missingfiles] = CheckForMissingFiles(expdir,dataloc_params,requiredfiles_computeperframestats);
+            [ismissingfile,missingfiles] = CheckForMissingFilesExplicit(expdir,requiredfiles);
             if ismissingfile,
                 msgs = cellfun(@(x) sprintf('Missing computeperframestats file %s',x),missingfiles,'UniformOutput',false);
-                flydisco_pipeline_error(stage, msgs) ;
+                flydisco_pipeline_error(stage_name, msgs) ;
             end            
         end
         
         
 
         %% Make per-frame statistics plots, culminating in stats.html, which shows all of them
-        stage = 'plotperframestats' ;
+        stage_name = 'plotperframestats' ;
         stage_function = @FlyDiscoPlotPerFrameStats ;
         FlyDiscoPipelineStage(...
             expdir, ...
-            stage, ...
-            doplotperframestats, ...
+            stage_name, ...
+            do_run, ...
             dataloc_params, ...
-            requiredfiles_plotperframestats, ...
+            required_file_names_from_stage_name, ...
             settingsdir, ...
             analysis_protocol, ...
             stage_function, ...
@@ -667,15 +613,11 @@ function FlyDiscoPipeline(expdir, varargin)
 
 
         %% Make ctrax results movie
-        stage = 'makectraxresultsmovie';
-        if is_on_or_force(domakectraxresultsmovie) ,
-            forcecompute = is_force(domakectraxresultsmovie) ;
-            
-            requiredfiles_makectraxresultsmovie = ...
-                FlyDiscoReplaceRequiredFilePlaceholders(requiredfiles_makectraxresultsmovie, stage, expdir, analysis_protocol_folder_path, ...
-                                                        dataloc_params, makectraxresultsmovie_params) ;
-            
-            todo = CheckForMissingFiles(expdir,dataloc_params,requiredfiles_makectraxresultsmovie);
+        stage_name = 'makectraxresultsmovie';
+        if is_on_or_force(do_run.(stage_name)) ,
+            forcecompute = is_force(do_run.(stage_name)) ;
+            requiredfiles = required_file_names_from_stage_name.(stage_name) ;
+            todo = CheckForMissingFilesExplicit(expdir,requiredfiles);
             if forcecompute || todo ,
                 fprintf('Making Ctrax results movie...\n');
                 FlyDiscoMakeCtraxResultsMovie(expdir, ...
@@ -685,23 +627,21 @@ function FlyDiscoPipeline(expdir, varargin)
             end
             
             % make sure makectraxresultsmovie files exist
-            [ismissingfile,missingfiles] = CheckForMissingFiles(expdir,dataloc_params,requiredfiles_makectraxresultsmovie);
+            [ismissingfile,missingfiles] = CheckForMissingFilesExplicit(expdir,requiredfiles);
             if ismissingfile,
                 msgs = cellfun(@(x) sprintf('Missing Ctrax results movie file %s',x),missingfiles,'UniformOutput',false);
-                flydisco_pipeline_error(stage, msgs) ;
+                flydisco_pipeline_error(stage_name, msgs) ;
             end            
         end
         
 
 
         %% Make APT results movie
-        stage = 'makeaptresultsmovie';
-        if is_on_or_force(domakeaptresultsmovie)
-            forcecompute = is_force(domakeaptresultsmovie);
-            requiredfiles_makeaptresultsmovie = ...
-                FlyDiscoReplaceRequiredFilePlaceholders(requiredfiles_makeaptresultsmovie, stage, expdir, analysis_protocol_folder_path, ...
-                dataloc_params, aptresultsmovie_params) ;
-            todo = CheckForMissingFiles(expdir, dataloc_params, requiredfiles_makeaptresultsmovie) ;
+        stage_name = 'makeaptresultsmovie';
+        if is_on_or_force(do_run.(stage_name)) ,
+            forcecompute = is_force(do_run.(stage_name)) ;
+            requiredfiles = required_file_names_from_stage_name.(stage_name) ;
+            todo = CheckForMissingFilesExplicit(expdir, requiredfiles) ;
             if forcecompute || todo
                 fprintf('Making APT results movie... \n');
                 FlyDiscoMakeAPTResultsMovie(expdir, ...
@@ -711,10 +651,10 @@ function FlyDiscoPipeline(expdir, varargin)
                 
             end
             % make sure makeaptresultsmovie files exist
-            [ismissingfile,missingfiles] = CheckForMissingFiles(expdir,dataloc_params,requiredfiles_makeaptresultsmovie);
+            [ismissingfile,missingfiles] = CheckForMissingFilesExplicit(expdir,requiredfiles);
             if ismissingfile,
                 msgs = cellfun(@(x) sprintf('Missing APT results movie file %s',x),missingfiles,'UniformOutput',false);
-                flydisco_pipeline_error(stage, msgs) ;
+                flydisco_pipeline_error(stage_name, msgs) ;
             end
         end % make apt results movie
     end  % if do_run_core_pipeline
@@ -724,15 +664,18 @@ function FlyDiscoPipeline(expdir, varargin)
     %% automaticchecks_complete
     % This would normally be turned off for a Transfero run, and we'd run it in the
     % caboose stage.
-    stage = 'automaticcheckscomplete';
-    if is_on_or_force(doautomaticcheckscomplete) ,
-        forcecompute = is_force(doautomaticcheckscomplete) ;
-        todo = CheckForMissingFiles(expdir,dataloc_params,requiredfiles_automaticcheckscomplete);
+    stage_name = 'automaticcheckscomplete';
+    if is_on_or_force(do_run.(stage_name)) ,
+        forcecompute = is_force(do_run.(stage_name)) ;
+        requiredfiles = required_file_names_from_stage_name.(stage_name) ;
+        todo = CheckForMissingFilesExplicit(expdir,requiredfiles);
         if forcecompute || todo,
             fprintf('Running completion automatic checks...\n');
             FlyDiscoAutomaticChecksComplete(expdir,...
                 'settingsdir',settingsdir, ...
                 'analysis_protocol',analysis_protocol,...
+                'required_file_names_from_stage_name', required_file_names_from_stage_name, ...
+                'do_run', do_run, ...
                 automaticcheckscomplete_params{:});
         end
         
@@ -740,10 +683,10 @@ function FlyDiscoPipeline(expdir, varargin)
         % FlyDiscoAutomaticChecksComplete(), usually named
         % 'automatic_checks_complete_results.txt',
         % is present.  If it's not, it means that something has gone seriously wrong.
-        [ismissingfile,missingfiles] = CheckForMissingFiles(expdir,dataloc_params,requiredfiles_automaticcheckscomplete);
+        [ismissingfile,missingfiles] = CheckForMissingFilesExplicit(expdir,requiredfiles);
         if ismissingfile,
             msgs = cellfun(@(x) sprintf('Missing completion automatic checks file %s',x),missingfiles,'UniformOutput',false);
-            flydisco_pipeline_error(stage, msgs) ;
+            flydisco_pipeline_error(stage_name, msgs) ;
         end
     end
         
