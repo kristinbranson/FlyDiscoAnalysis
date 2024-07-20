@@ -64,30 +64,10 @@ augmented_original_trx = arrayfun(@(s)(add_fields(s, 'is_pfly', false)), origina
 trx = [ augmented_original_trx fake_trx ] ;
 trx_wrapper = struct('trx', {trx}, 'timestamps', {original_trx_wrapper.timestamps}) ;
 
-% Before overwriting the unregistered trx file, make a backup
-[parent_folder_path, base_name, ext] = fileparts(unregistered_trx_file_path) ;
-max_backup_file_index = 100 ;
-did_find_valid_backup_file_path = false ;
-for backup_file_index = 1:max_backup_file_index ,
-  putative_backup_file_name = sprintf('%s-backup-%02d%s', base_name, backup_file_index, ext) ;
-  putative_backup_file_path = fullfile(parent_folder_path, putative_backup_file_name) ;
-  if ~exist(putative_backup_file_path, 'file') ,
-    did_find_valid_backup_file_path = true ;
-      backup_file_path = putative_backup_file_path ;
-    break
-  end
-end
-if did_find_valid_backup_file_path ,
-  [did_succeed, message, messageid] = copyfile(unregistered_trx_file_path, backup_file_path) ;
-  if ~did_succeed ,
-    error(messageid, 'Unable to backup %s to %s before adding projected fly tracks: %s', unregistered_trx_file_path, backup_file_path, message) ;
-  end
-else
-  error('Unable to find a filename for the pfiles backup trx file, after trying %d options', max_backup_file_index) ;
-end
-
 % Write the output file
-save('-mat', '-v7.3', unregistered_trx_file_path, '-struct', 'trx_wrapper') ;
+addpflies_trx_output_file_name = determine_addpflies_trx_output_file_name(dataloc_params) ;
+addpflies_trx_output_file_path = fullfile(expdir, addpflies_trx_output_file_name) ;
+save('-mat', '-v7.3', addpflies_trx_output_file_path, '-struct', 'trx_wrapper') ;
 
 % Final message
 end_timestamp = datestr(now(), 'yyyymmddTHHMMSS') ;

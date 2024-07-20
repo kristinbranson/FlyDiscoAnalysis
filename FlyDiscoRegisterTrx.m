@@ -66,15 +66,16 @@ fprintf('Determined registration transform.\n');
 %
 
 % Get name of input trx mat file
-ctraxfile = fullfile(expdir,dataloc_params.ctraxfilestr);
+trx_input_file_name = determine_registration_input_trx_file_name(expdir, dataloc_params) ;
+trx_input_file_path = fullfile(expdir, trx_input_file_name) ;
 
 % Get name of movie
 moviefile = fullfile(expdir,dataloc_params.moviefilestr);
 
 % Load trajectories
-[trx,~,succeeded,timestamps] = load_tracks(ctraxfile,moviefile,'annname','');
+[trx,~,succeeded,timestamps] = load_tracks(trx_input_file_path,moviefile,'annname','');
 if ~succeeded,
-  error('Could not load trajectories from file %s',ctraxfile);
+  error('Could not load trajectories from file %s',trx_input_file_path);
 end
 
 % Postprocess trajectories to remove nans from flytracker outputs

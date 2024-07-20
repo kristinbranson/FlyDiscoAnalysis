@@ -6,7 +6,7 @@ fly_disco_folder_path = fileparts(fly_disco_analysis_folder_path) ;
 
 cluster_billing_account_name = [] ;
 user_name_for_configuration_purposes = 'bransonlab' ;
-analysis_parameters = cell(1,0) ;
+% analysis_parameters = cell(1,0) ;
 % analysis_parameters = ...
 %          {'doautomaticchecksincoming',true,...
 %           'doflytracking',true, ...
@@ -25,21 +25,24 @@ analysis_parameters = cell(1,0) ;
 %           'doautomaticcheckscomplete',false, ...
 %           'domakeaptresultsmovie',false, ...
 %           'doapt',false} ;
-%settings_folder_path = fullfile(fly_disco_analysis_folder_path, 'settings-internal') ;  % for now, want to use internal settings
-settings_folder_path = '/groups/branson/bransonlab/taylora/flydisco/OtopalikFlyDiscoSettings/settings' ;  % at same commit as when prod run happened
+analysis_parameters = ...
+         { 'domakectraxresultsmovie', true } ;
+settings_folder_path = fullfile(fly_disco_analysis_folder_path, 'settings-internal') ;  % for now, want to use internal settings
+%settings_folder_path = '/groups/branson/bransonlab/taylora/flydisco/OtopalikFlyDiscoSettings/settings' ;  % at same commit as when prod run happened
 do_use_bqueue = false ;
 do_actually_submit_jobs = false ;
 do_try = false ;
-do_reset_working_experiments_folder = false ;
+do_reset_working_experiments_folder = true ;
 submit_host_name = if_not_a_submit_host('submit.int.janelia.org') ;
 initial_optional_argument_list = { ...
   'settingsdir', settings_folder_path, ...
   'do_try', do_try, ...
-  'do_run_caboose', false } ;
+  'do_run_caboose', false, ...
+  'debug', true } ;
 optional_argument_list = horzcat(initial_optional_argument_list, analysis_parameters) ;
 
-read_only_experiments_folder_path = fullfile(fly_disco_folder_path, 'example-experiments', 'ao-exp-issues-2024-07-08-read-only') ;
-working_experiments_folder_path = fullfile(fly_disco_folder_path, 'example-experiments', 'ao-exp-issues-2024-07-08') ;
+read_only_experiments_folder_path = fullfile(fly_disco_folder_path, 'example-experiments', 'ao-exp-4-read-only') ;
+working_experiments_folder_path = fullfile(fly_disco_folder_path, 'example-experiments', 'ao-exp-4') ;
 
 % Recopy the working folder from the read-only one
 if do_reset_working_experiments_folder || ~exist(working_experiments_folder_path, 'dir')
