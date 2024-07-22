@@ -1,4 +1,11 @@
 function result = is_experiment_folder_given_contents(file_names)
+
+    % specifying experiment directory, not contents
+    if ischar(file_names),
+      expdir = file_names;
+      file_names = dir(expdir);
+      file_names = {file_names.name};
+    end
     lowercase_file_names = lower(file_names) ;
     % We check for three files.  If two or more are present, we consider it an
     % experiment folder

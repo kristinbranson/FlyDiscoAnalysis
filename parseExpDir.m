@@ -35,6 +35,15 @@ function [res,success] = parseExpDir(expdir,sagecompatible)
       res.type = 'condition1';
     end
   end
+  if ~success,
+    % katie's naming scheme...
+    expr = '^(?<pathstr>(.*[/\\])*)(?<date>\d{8}T\d{6})_rig(?<rig>[0-9]_[a-zA-Z0-9]+)__(?<effector>[a-zA-Z0-9]+)_(?<type>.*)$';
+    res = regexp(expdir,expr,'names','once');
+    success = ~isempty(res);
+    if success,
+      res.notstarted = '';
+    end
+  end
 
   if success,
     res.notstarted = strcmp(res.notstarted,'notstarted_');
