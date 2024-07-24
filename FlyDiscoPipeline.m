@@ -393,25 +393,36 @@ function FlyDiscoPipeline(expdir, varargin)
         
         %% registration
         stage_name = 'registration';
-        if is_on_or_force(do_run.(stage_name)) ,
-            forcecompute = is_force(do_run.(stage_name)) ;
-            requiredfiles = required_file_names_from_stage_name.(stage_name) ;
-            todo = CheckForMissingFilesExplicit(expdir,requiredfiles);
-            if forcecompute || todo,
-                fprintf('Registering tracks...\n');
-                
-                FlyDiscoRegisterTrx(expdir,...
-                                    'settingsdir',settingsdir,'analysis_protocol',analysis_protocol,...
-                                    registration_params{:});
-            end
-            
-            % make sure registration files exist
-            [ismissingfile,missingfiles] = CheckForMissingFilesExplicit(expdir,requiredfiles);
-            if ismissingfile,
-                msgs = cellfun(@(x) sprintf('Missing registration file %s',x),missingfiles,'UniformOutput',false);
-                flydisco_pipeline_error(stage_name, msgs) ;
-            end
-        end
+        FlyDiscoPipelineStage(...
+            expdir, ...
+            stage_name, ...
+            do_run, ...
+            required_file_names_from_stage_name , ...
+            settingsdir, ...
+            analysis_protocol, ...
+            @FlyDiscoRegisterTrx, ...
+            registration_params) ;
+        
+%         if is_on_or_force(do_run.(stage_name)) ,
+%             forcecompute = is_force(do_run.(stage_name)) ;
+%             requiredfiles = required_file_names_from_stage_name.(stage_name) ;
+%             todo = CheckForMissingFilesExplicit(expdir,requiredfiles);
+%             if forcecompute || todo,
+%                 fprintf('Registering tracks...\n');
+%                 
+%                 FlyDiscoRegisterTrx(expdir,...
+%                                     'settingsdir',settingsdir, ...
+%                                     'analysis_protocol',analysis_protocol,...
+%                                     registration_params{:});
+%             end
+%             
+%             % make sure registration files exist
+%             [ismissingfile,missingfiles] = CheckForMissingFilesExplicit(expdir,requiredfiles);
+%             if ismissingfile,
+%                 msgs = cellfun(@(x) sprintf('Missing registration file %s',x),missingfiles,'UniformOutput',false);
+%                 flydisco_pipeline_error(stage_name, msgs) ;
+%             end
+%         end
         
         
         
@@ -496,6 +507,7 @@ function FlyDiscoPipeline(expdir, varargin)
         %% Compute most per-frame features
         stage_name = 'computeperframefeatures';
         stage_function = @FlyDiscoComputePerFrameFeatures ;
+        computeperframefeatures_params_plus = horzcat(computeperframefeatures_params, {'do_run', do_run}) ;
         FlyDiscoPipelineStage(...
             expdir, ...
             stage_name, ...
@@ -504,7 +516,7 @@ function FlyDiscoPipeline(expdir, varargin)
             settingsdir, ...
             analysis_protocol, ...
             stage_function, ...
-            computeperframefeatures_params) ;
+            computeperframefeatures_params_plus) ;
         
 
 

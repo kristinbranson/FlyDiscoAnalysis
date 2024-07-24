@@ -62,15 +62,34 @@ fake_trx = ...
   fake_fly_trx_from_various_inputs(movie_path, timestamp_from_movie_frame_index, ellipse_trajectory, actual_trajectory, ...
                                    flytracker_calibration, fake_fly_params, maximum_real_fly_id, arena_center_shift, debug) ;
 
-% Create the final output struct
+% Create the final trx output struct
 augmented_original_trx = arrayfun(@(s)(add_fields(s, 'is_pfly', false)), original_trx) ;
 trx = [ augmented_original_trx fake_trx ] ;
 trx_wrapper = struct('trx', {trx}, 'timestamps', {original_trx_wrapper.timestamps}) ;
 
-% Write the output file
+% Write the trx output file
 addpflies_trx_output_file_name = determine_addpflies_trx_output_file_name(dataloc_params) ;
 addpflies_trx_output_file_path = fullfile(expdir, addpflies_trx_output_file_name) ;
 save('-mat', '-v7.3', addpflies_trx_output_file_path, '-struct', 'trx_wrapper') ;
+
+% 
+% Now handle the FT tracks output
+%
+
+% Get the name of file usually named movie-track.mat
+ft_track_file_name = dataloc_params.flytrackertrackstr ;
+ft_track_file_path = fullfile(expdir, ft_track_file_name) ;
+ft_trk = loadAnonymous(ft_track_file_path) ;
+
+% Add the pflies to ft_trk
+trk = append_pflies_to_trk(ft_trk, trx) ;
+
+% Get the tracks output file path
+addpflies_ft_tracks_output_file_name = determine_addpflies_ft_tracks_output_file_name(dataloc_params) ;
+addpflies_ft_tracks_output_file_path = fullfile(expdir, addpflies_ft_tracks_output_file_name) ;
+
+% Write the trk file
+save('-mat', '-v7.3', addpflies_ft_tracks_output_file_path, 'trk') ;
 
 % Final message
 end_timestamp = datestr(now(), 'yyyymmddTHHMMSS') ;
