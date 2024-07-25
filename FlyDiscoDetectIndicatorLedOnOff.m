@@ -1,13 +1,14 @@
 function FlyDiscoDetectIndicatorLedOnOff(expdir, varargin)
 
 % Deal with optional arguments
-[analysis_protocol, settingsdir, datalocparamsfilestr, forcecompute, debug] = ...
+[analysis_protocol, settingsdir, datalocparamsfilestr, forcecompute, debug, do_run] = ...
   myparse(varargin,...
   'analysis_protocol','current_bubble',...
   'settingsdir', default_settings_folder_path(), ...
   'datalocparamsfilestr','dataloc_params.txt', ...
   'forcecompute', false, ...
-  'debug',false) ;
+  'debug',false, ...
+  'do_run', []) ;
 
 % Write a header for this stage to the 'log'
 timestamp = datestr(now,'yyyymmddTHHMMSS');
@@ -79,7 +80,7 @@ metadata = collect_metadata(expdir, dataloc_params.metadatafilestr) ;
 rigId = metadata.rig ;  % Should be a scalar char array containing a single capital letter
 
 % Load trajectories
-ctraxfile = fullfile(expdir,dataloc_params.ctraxfilestr);
+ctraxfile = determine_downstream_trx_file_path(expdir, dataloc_params, do_run) ;
 moviefile = fullfile(expdir,dataloc_params.moviefilestr);
 [trx,~,succeeded,timestamps] = load_tracks(ctraxfile,moviefile,'annname','');
 if ~succeeded,
@@ -102,7 +103,7 @@ else
 end
 
 % Make sure the protocol is shorter than the video
-error_if_protocol_is_longer_than_video(expdir, settingsdir, analysis_protocol) ;
+error_if_protocol_is_longer_than_video(expdir, settingsdir, analysis_protocol, do_run) ;
 
 % Determine where the LED indicator is in the video frame
 ledIndicatorPoints = ...

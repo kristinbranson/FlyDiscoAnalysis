@@ -2,12 +2,13 @@ function FlyDiscoComputePerFrameStats(expdir,varargin)
 % debugplot,n will create figures that display perframe data and the time period of the first n statistics
 % defined in stats_perframefeatures.txt with the norm periods, if any, plotted in
 % the subplot below 
-QUICKDEBUG = false;
 
-if QUICKDEBUG,
-  global trx; %#ok<UNRCH,TLEV>
-  warning('using global variable trx');
-end
+%QUICKDEBUG = false;
+% 
+% if QUICKDEBUG,
+%   global trx; %#ok<UNRCH,TLEV>
+%   warning('using global variable trx');
+% end
 
 version = '0.1';
 
@@ -50,19 +51,20 @@ if verbose,
   fprintf('Initializing trx...\n');
 end
 
-if QUICKDEBUG && ~isempty(trx), %#ok<NODEF>
-  warning('using global variable trx');
-else
-trx = FBATrx('analysis_protocol',analysis_protocol,'settingsdir',settingsdir,...
-  'datalocparamsfilestr',datalocparamsfilestr,...
-  'maxdatacached',2^30);
+% if QUICKDEBUG && ~isempty(trx), %#ok<NODEF>
+%   warning('using global variable trx');
+% else
+trx = FBATrx('analysis_protocol',analysis_protocol,...
+             'settingsdir',settingsdir,...
+             'datalocparamsfilestr',datalocparamsfilestr,...
+             'maxdatacached',2^30);
 
 if verbose,
   fprintf('Loading trajectories for %s...\n',expdir);
 end
 
 trx.AddExpDir(expdir,'dooverwrite',false,'openmovie',false);
-end
+% end
 
 % % load labels
 % labelfiles = dir(fullfile(trx.expdirs{1},'*_labels.mat'));
@@ -690,7 +692,7 @@ for fly = 1:nflies,
   elseif strcmp(field,'duration'),
     [bout_starts,bout_ends] = ComputeBouts(doanalyze,doanalyze_fly);
     boutdurs = trx(fly).timestamps(min(bout_ends+1,n))-trx(fly).timestamps(bout_starts);
-    statsperflycurr.mean(fly) = nanmean(boutdurs);
+    statsperflycurr.mean(fly) = nanmean(boutdurs);  %#ok<NANMEAN> 
     statsperflycurr.Z(fly) = nnz(doanalyze);
     statsperflycurr.std(fly) = std(boutdurs,1);
     statsperflycurr.prctiles(:,fly) = prctile(boutdurs,stats_params.prctiles_compute);
