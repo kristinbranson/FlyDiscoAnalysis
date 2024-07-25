@@ -7,7 +7,7 @@ function FlyDiscoComputeLocomotionMetrics(expdir, varargin)
 % argument to FlyDiscoPipelineStage().
 
 
-version = '0.1';
+%version = '0.1';
 % addpath /groups/branson/home/robiea/Code_versioned/locomotion_analysis/Alice
 % Parse the optional arguments
 [settingsdir, analysis_protocol,datalocparamsfilestr,forcecompute] = ...
@@ -19,10 +19,10 @@ version = '0.1';
 
 % starting stage messgage
 logfid = 1;
-timestamp = datestr(now,'yyyymmddTHHMMSS');
-real_analysis_protocol = GetRealAnalysisProtocol(analysis_protocol,settingsdir);
+% timestamp = datestr(now,'yyyymmddTHHMMSS');
+% real_analysis_protocol = GetRealAnalysisProtocol(analysis_protocol,settingsdir);
 
-fprintf(logfid,'\n\n***\nRunning FlyDiscoComputeLocomotionMetrics version %s analysis_protocol %s (linked to %s) at %s\n',version,analysis_protocol,real_analysis_protocol,timestamp);
+%fprintf(logfid,'\n\n***\nRunning FlyDiscoComputeLocomotionMetrics version %s analysis_protocol %s (linked to %s) at %s\n',version,analysis_protocol,real_analysis_protocol,timestamp);
 
 % Initialize trx class object
 fprintf('Initializing trx...\n');

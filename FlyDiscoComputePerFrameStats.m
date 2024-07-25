@@ -94,7 +94,7 @@ end
 timestamp = datestr(now,'yyyymmddTHHMMSS');
 real_analysis_protocol = GetRealAnalysisProtocol(analysis_protocol,settingsdir);
 
-fprintf(logfid,'\n\n***\nRunning FlyDiscoComputePerFrameStats version %s analysis_protocol %s (linked to %s) at %s\n',version,analysis_protocol,real_analysis_protocol,timestamp);
+%fprintf(logfid,'\n\n***\nRunning FlyDiscoComputePerFrameStats version %s analysis_protocol %s (linked to %s) at %s\n',version,analysis_protocol,real_analysis_protocol,timestamp);
 
 
 %% read the stats params

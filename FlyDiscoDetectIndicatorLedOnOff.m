@@ -10,13 +10,13 @@ function FlyDiscoDetectIndicatorLedOnOff(expdir, varargin)
   'debug',false, ...
   'do_run', []) ;
 
-% Write a header for this stage to the 'log'
-timestamp = datestr(now,'yyyymmddTHHMMSS');
-fprintf('\n\n***\nRunning %s with analysis protocol %s at %s\n', mfilename(), analysis_protocol, timestamp) ;
+% % Write a header for this stage to the 'log'
+% timestamp = datestr(now,'yyyymmddTHHMMSS');
+% fprintf('\n\n***\nRunning %s with analysis protocol %s at %s\n', mfilename(), analysis_protocol, timestamp) ;
 
 % Read in the data locations
 analysis_protocol_folder_path = fullfile(settingsdir, analysis_protocol) ;
-datalocparamsfile = fullfile(analysis_protocol_folder_path,datalocparamsfilestr);
+datalocparamsfile = fullfile(analysis_protocol_folder_path, datalocparamsfilestr);
 dataloc_params = ReadParams(datalocparamsfile);
 
 % If forcecompute is true, delete the output files now
@@ -135,5 +135,5 @@ fprintf('Saved indicator data to file %s\n', indicatordatamatfilename) ;
 % Check if detected stim number matches number expected from protocol 
 error_if_protocol_stim_num_notequal_detected(expdir, settingsdir, analysis_protocol, 'indicatordata', indicatordata); 
 
-% Final message
-fprintf('\n Finished running %s at %s.\n',mfilename(), datestr(now,'yyyymmddTHHMMSS'));
+% % Final message
+% fprintf('\n Finished running %s at %s.\n',mfilename(), datestr(now,'yyyymmddTHHMMSS'));

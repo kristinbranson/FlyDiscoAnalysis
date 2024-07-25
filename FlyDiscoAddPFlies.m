@@ -9,9 +9,9 @@ function FlyDiscoAddPFlies(expdir, varargin)
           'debug',false, ...
           'do_run', []) ;  %#ok<ASGLU> 
 
-% Write a header for this stage to the 'log'
-start_timestamp = datestr(now(), 'yyyymmddTHHMMSS') ;
-fprintf('\n\n***\nRunning %s with analysis protocol %s at %s\n', mfilename(), analysis_protocol, start_timestamp) ;
+% % Write a header for this stage to the 'log'
+% start_timestamp = datestr(now(), 'yyyymmddTHHMMSS') ;
+% fprintf('\n\n***\nRunning %s with analysis protocol %s at %s\n', mfilename(), analysis_protocol, start_timestamp) ;
 
 % Read in the dataloc_params
 datalocparamsfile = fullfile(settingsdir, analysis_protocol, 'dataloc_params.txt') ;
@@ -92,6 +92,6 @@ addpflies_ft_tracks_output_file_path = fullfile(expdir, addpflies_ft_tracks_outp
 % Write the trk file
 save('-mat', '-v7.3', addpflies_ft_tracks_output_file_path, 'trk') ;
 
-% Final message
-end_timestamp = datestr(now(), 'yyyymmddTHHMMSS') ;
-fprintf('\nFinished running %s at %s.\n', mfilename(), end_timestamp) ;
+% % Final message
+% end_timestamp = datestr(now(), 'yyyymmddTHHMMSS') ;
+% fprintf('\nFinished running %s at %s.\n', mfilename(), end_timestamp) ;
