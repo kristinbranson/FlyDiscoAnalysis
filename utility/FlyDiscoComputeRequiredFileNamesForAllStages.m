@@ -72,14 +72,14 @@ for stage_index = 1 : stage_count ,
   elseif strcmp(stage_name, 'makectraxresultsmovie') ,
     [~,basename] = fileparts(expdir) ;
     avifilestr = sprintf('%s_%s',dataloc_params.ctraxresultsavifilestr, basename) ;
-    h264filename = strcat(avifilestr, '.mp4') ;
+    h264filename = horzcat(avifilestr, '.mp4') ;
     required_file_names = { h264filename } ;
   elseif strcmp(stage_name, 'apt') ,
     required_file_names = { dataloc_params.apttrkfilestr } ;
   elseif strcmp(stage_name, 'makeaptresultsmovie') ,
     [~,basename] = fileparts(expdir) ;
     mp4filestr = sprintf('%s_%s', dataloc_params.aptresultsavefilestr, basename) ;
-    apth264file = strcat(mp4filestr, '.mp4') ;
+    apth264file = horzcat(mp4filestr, '.mp4') ;
     required_file_names = { apth264file } ;
   elseif strcmp(stage_name, 'automaticcheckscomplete') ,
     required_file_names = { dataloc_params.automaticcheckscompleteresultsfilestr, ...

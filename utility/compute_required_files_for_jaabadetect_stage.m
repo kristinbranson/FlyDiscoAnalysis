@@ -20,7 +20,7 @@ function result = score_file_name_from_jab_file_name(jab_file_name)
   Q.modernize(true);  
   raw_score_file_name = Q.file.scorefilename{1} ;
   [~, raw_result] = fileparts(raw_score_file_name) ;
-  result = strcat(raw_result, '.mat') ;
+  result = horzcat(raw_result, '.mat') ;
 end
 
 required_files_for_stage = cellfun(@score_file_name_from_jab_file_name, jabfiles, 'UniformOutput', false) ;

@@ -30,7 +30,7 @@ settings_folder_path = fullfile(fly_disco_analysis_folder_path, 'settings-intern
 do_use_bqueue = false ;
 do_actually_submit_jobs = false ;
 do_try = false ;
-do_reset_working_experiments_folder = false ;
+do_reset_working_experiments_folder = true ;
 submit_host_name = if_not_a_submit_host('submit.int.janelia.org') ;
 initial_optional_argument_list = { ...
   'settingsdir', settings_folder_path, ...

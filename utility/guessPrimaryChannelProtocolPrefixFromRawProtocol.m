@@ -14,7 +14,7 @@ function result = guessPrimaryChannelProtocolPrefixFromRawProtocol(rawProtocol)
   isActiveFromChannelIndex = false(1,prefixCount) ;
   for prefixIndex = 1 : prefixCount ,
     prefix = prefixFromChannelIndex{prefixIndex} ;
-    fieldName = strcat(prefix, 'intensity') ;
+    fieldName = horzcat(prefix, 'intensity') ;
     if isfield(rawProtocol, fieldName) ,
       isActiveFromChannelIndex(prefixIndex) = any(rawProtocol.(fieldName)) ;
     end

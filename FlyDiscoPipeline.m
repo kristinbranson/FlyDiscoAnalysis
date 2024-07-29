@@ -243,7 +243,7 @@ function FlyDiscoPipeline(expdir, varargin)
     stage_additional_arguments_from_stage_name = struct() ;
     for stage_index = 1 : stage_count ,
         stage_name = stage_name_from_stage_index{stage_index} ;
-        analysis_parameters_field_name = strcat(stage_name, '_params') ;
+        analysis_parameters_field_name = horzcat(stage_name, '_params') ;
         stage_additional_arguments = lookup_in_struct(analysis_parameters, analysis_parameters_field_name, cell(1,0)) ;
         stage_additional_arguments_from_stage_name.(stage_name) = stage_additional_arguments ;
     end
