@@ -248,12 +248,12 @@ if debug ,
     l3 = line('Parent', a2, 'XData', 1:nframes, 'YData', double(raw_binary_led_signal(mask_index,:)), 'Color', 'b') ;
     l4 = line('Parent', a2, 'XData', 1:nframes, 'YData', double(binary_led_signal(mask_index,:)), 'Color', 'r') ;
     xlabel(a2, 'Frame index') ;
-    ylabel(a1, 'LED mean (counts)') ;
+    ylabel(a1, 'LED signal (counts)') ;
     ylabel(a2, 'LED binary') ;
     ylim(a2, [-0.05 1.05]) ;
     legend(a1, [l1 l2], {'signal', 'threshold'}) ;
     legend(a2, [l3 l4], {'signal', 'envelope'}) ;
-    title(a1, sprintf('LED %d mean, binary, and envelope', mask_index), 'Fontsize', 11) ;
+    title(a1, sprintf('LED %d signal, binary, and envelope', mask_index), 'Fontsize', 11) ;
     drawnow() ;
   end
 end
