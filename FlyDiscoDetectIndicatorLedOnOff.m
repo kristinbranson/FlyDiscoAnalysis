@@ -122,8 +122,29 @@ end
 saveLedDetectionImage(imsavename, bg_mean, ledIndicatorPoints, registration_params.doesYAxisPointUp) ;
 fprintf('Saved LED detection image to file %s\n', imsavename) ;
 
+% Read the LED masks, if present
+has_explicit_masks = isfield(indicator_params, 'ledmask1') ;
+if has_explicit_masks ,
+  % Read in the masks
+  for mask_index = 1:3 ,
+    field_name = sprintf('ledmask%d', mask_index) ;
+    if ~isfield(indicator_params, field_name) ,
+      break
+    end
+    file_specification = indicator_params.(field_name) ;
+    mask_file_path = determine_template_or_mask_file_path(file_specification, rigId, analysis_protocol_folder_path) ;
+    raw_mask_as_double = double(imread(mask_file_path)) ;
+    mask_as_double = mean(raw_mask_as_double, 3) ;
+    threshold = 0.5*max(mask_as_double,[],'all') + 0.5*min(mask_as_double,[],'all') ;
+    mask = (mask_as_double > threshold) ;
+    mask_from_mask_index(:,:,mask_index) = mask ;  %#ok<AGROW> 
+  end
+else
+  mask_from_mask_index = [] ;
+end
+
 % Extract indicatordata from the video
-indicatordata = extractIndicatorLED(expdir, dataloc_params, indicator_params, ledIndicatorPoints, debug) ;
+indicatordata = extractIndicatorLED(expdir, dataloc_params, indicator_params, ledIndicatorPoints, has_explicit_masks, mask_from_mask_index, debug) ;
 
 % save indicator data to mat file
 if exist(indicatordatamatfilename,'file'),
@@ -137,3 +158,5 @@ error_if_protocol_stim_num_notequal_detected(expdir, settingsdir, analysis_proto
 
 % % Final message
 % fprintf('\n Finished running %s at %s.\n',mfilename(), datestr(now,'yyyymmddTHHMMSS'));
+
+end
