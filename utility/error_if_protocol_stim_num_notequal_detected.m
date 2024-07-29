@@ -43,7 +43,12 @@ end
 
 % Perform the test, error if it fails
 nprotocolstim = distinct_pulse_count_from_single_channel_protocol(protocol) ;
-ndetectedstim = numel(indicatorLED.startframe) ;
+if iscell(indicatorLED.startframe) ,
+  startframe = indicatorLED.startframe{1} ;
+  ndetectedstim = numel(startframe) ;  
+else
+  ndetectedstim = numel(indicatorLED.startframe) ;
+end
 if nprotocolstim ~= ndetectedstim
   error('The number of detected stimuli (%g) does not equal the expected number of stimuli (%g) from the protocol file', ...
         ndetectedstim, ...
