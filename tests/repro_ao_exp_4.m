@@ -66,7 +66,7 @@ run_transfero_FlyDiscoPipeline_wrapper_on_experiment_list(...
   optional_argument_list{:})
 
 % Check for success in the ACC output files
-did_succeed_from_experiment_folder_index = cellfun(@did_analysis_of_experiment_folder_succeed, folder_path_from_experiment_index)
+did_succeed_from_experiment_folder_index = cellfun(@did_analysis_of_experiment_folder_succeed, folder_path_from_experiment_index) ;
 did_all_succeed = all(did_succeed_from_experiment_folder_index) ;
 if did_all_succeed ,
   fprintf('Test passed.\n') ;

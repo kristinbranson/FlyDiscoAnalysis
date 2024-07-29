@@ -10,28 +10,25 @@ indicatordata = myparse(varargin,'indicatordata',[]);
 datalocparamsfile = fullfile(settingsdir,analysis_protocol,'dataloc_params.txt');
 dataloc_params = ReadParams(datalocparamsfile);
 
-% Don't need this check---this is called from a location that is only reached
-% if it's an optogenetic experiment.
-%
-% % Get one thing from the indicator params
-% indicatorparamsfile = fullfile(settingsdir,analysis_protocol,dataloc_params.indicatorparamsfilestr);
-% if exist(indicatorparamsfile,'file'),
-%   raw_indicator_params = ReadParams(indicatorparamsfile);
-%   indicator_params = modernizeIndicatorParams(raw_indicator_params) ;
-%   isOptogeneticExp = logical(indicator_params.OptogeneticExp) ;
-% else
-%   isOptogeneticExp = false ;
-% end
-% 
-% % This check only makes sense for opto experiments
-% if ~isOptogeneticExp ,
-%   return
-% end
+% Get one thing from the indicator params
+indicatorparamsfile = fullfile(settingsdir,analysis_protocol,dataloc_params.indicatorparamsfilestr);
+if exist(indicatorparamsfile,'file'),
+  raw_indicator_params = ReadParams(indicatorparamsfile);
+  indicator_params = modernizeIndicatorParams(raw_indicator_params) ;
+  isOptogeneticExp = logical(indicator_params.OptogeneticExp) ;
+else
+  isOptogeneticExp = false ;
+end
+
+% This check only makes sense for opto experiments
+if ~isOptogeneticExp ,
+  return
+end
 
 % Read in the LED protocol, compute the total protocol duration
 ledprotocolfile = fullfile(expdir,dataloc_params.ledprotocolfilestr);
 raw_protocol = loadAnonymous(ledprotocolfile) ;
-protocol = downmixProtocolIfNeeded(raw_protocol) ;
+protocol = downmixProtocolIfNeeded(raw_protocol, indicator_params) ;
 
 % If indictor not passed in, load detected stim data
 if isempty(indicatordata)
@@ -40,15 +37,11 @@ if isempty(indicatordata)
 else
   indicatorLED = indicatordata.indicatorLED;
 end
+downmixed_indicatorLED = downmix_indicatorLED(indicatorLED) ;
 
 % Perform the test, error if it fails
 nprotocolstim = distinct_pulse_count_from_single_channel_protocol(protocol) ;
-if iscell(indicatorLED.startframe) ,
-  startframe = indicatorLED.startframe{1} ;
-  ndetectedstim = numel(startframe) ;  
-else
-  ndetectedstim = numel(indicatorLED.startframe) ;
-end
+ndetectedstim = numel(downmixed_indicatorLED.startframe) ;
 if nprotocolstim ~= ndetectedstim
   error('The number of detected stimuli (%g) does not equal the expected number of stimuli (%g) from the protocol file', ...
         ndetectedstim, ...

@@ -75,6 +75,61 @@ else
   trimmed_mask_from_mask_index = true(trimmed_mask_shape) ;
 end
 
+% Plot the middle frame along with the area(s) to be used for signal
+% extraction
+if debug ,
+  frame = readfcn(min(max(1,round(nframes/2)),nframes)) ;
+  f = figure('color', 'w') ;
+  a = axes(f) ;
+  imshow(frame, 'Parent', a) ;
+  a.YDir = 'reverse' ;
+  a.Colormap = parula(256) ;
+  corners = [ trimmed_mask_lo_bound_in_frame_coords(2)-0.5 trimmed_mask_lo_bound_in_frame_coords(1)-0.5 ; ...
+              trimmed_mask_hi_bound_in_frame_coords(2)+0.5 trimmed_mask_lo_bound_in_frame_coords(1)-0.5 ; ...
+              trimmed_mask_hi_bound_in_frame_coords(2)+0.5 trimmed_mask_hi_bound_in_frame_coords(1)+0.5 ; ...
+              trimmed_mask_lo_bound_in_frame_coords(2)-0.5 trimmed_mask_hi_bound_in_frame_coords(1)+0.5 ; ...
+              trimmed_mask_lo_bound_in_frame_coords(2)-0.5 trimmed_mask_lo_bound_in_frame_coords(1)-0.5 ] ; 
+  x_data = corners(:,1)' ;
+  y_data = corners(:,2)' ;
+  line('Parent', a, 'XData', x_data, 'YData', y_data, 'Color', 'w', 'LineWidth', 3) ;
+  line('Parent', a, 'XData', x_data, 'YData', y_data, 'Color', 'r', 'LineWidth', 1) ;  % 0.5 is the default line width
+  if has_explicit_masks ,
+    for mask_index = 1 : mask_count ,
+      trimmed_mask = trimmed_mask_from_mask_index(:,:,mask_index) ;
+      boundary_from_island_index = bwboundaries(trimmed_mask) ;  % boundary_count x 2, in yx order
+      boundary = boundary_from_island_index{1} ;  % hopefully there's only one
+      boundary_mean = mean(boundary, 1) ; % 1x2, yx order
+      line('Parent', a, ...
+           'XData', trimmed_mask_lo_bound_in_frame_coords(2)+1+boundary(:,2), ...
+           'YData', trimmed_mask_lo_bound_in_frame_coords(1)-1+boundary(:,1), ...
+           'Color', 'w', ...
+           'LineWidth', 3) ;
+      line('Parent', a, ...
+           'XData', trimmed_mask_lo_bound_in_frame_coords(2)+1+boundary(:,2), ...
+           'YData', trimmed_mask_lo_bound_in_frame_coords(1)-1+boundary(:,1), ...
+           'Color', 'r', ...
+           'LineWidth', 1) ;
+      text(a, ...
+           trimmed_mask_lo_bound_in_frame_coords(2)+1+boundary_mean(2), ...
+           trimmed_mask_lo_bound_in_frame_coords(1)+1+boundary_mean(1), ...
+           sprintf('%d', mask_index), ...
+           'Color', 'w', ...
+           'FontWeight', 'bold', ...
+           'HorizontalAlignment', 'center') ;      
+      text(a, ...
+           trimmed_mask_lo_bound_in_frame_coords(2)+1+boundary_mean(2), ...
+           trimmed_mask_lo_bound_in_frame_coords(1)+1+boundary_mean(1), ...
+           sprintf('%d', mask_index), ...
+           'Color', 'r', ...
+           'HorizontalAlignment', 'center') ;      
+    end
+  end
+  a.Box = 'on' ;
+  a.Layer = 'top' ;
+  title(a, 'Example frame and LED detection window', 'Fontsize', 11) ;
+  drawnow() ;
+end
+
 % Read in video frames, extract the LED indicator region, compute the mean+max
 % of that region for each frame
 pixel_mean_signal = zeros(mask_count,nframes) ;
@@ -97,26 +152,8 @@ end
 pbo.update(inf) ;
 fprintf('Done extracting LED indicator signal from video frames.\n') ;
 
-% plot the middle frame along with the area used for LED detection
+% Make some debug plots, if called for
 if debug ,
-  frame = readfcn(min(max(1,round(nframes/2)),nframes)) ;
-  f = figure('color', 'w') ;
-  a = axes(f) ;
-  imshow(frame, 'Parent', a) ;
-  a.YDir = 'reverse' ;
-  a.Colormap = parula(256) ;
-  corners = [ trimmed_mask_lo_bound_in_frame_coords(2)-0.5 trimmed_mask_lo_bound_in_frame_coords(1)-0.5 ; ...
-              trimmed_mask_hi_bound_in_frame_coords(2)+0.5 trimmed_mask_lo_bound_in_frame_coords(1)-0.5 ; ...
-              trimmed_mask_hi_bound_in_frame_coords(2)+0.5 trimmed_mask_hi_bound_in_frame_coords(1)+0.5 ; ...
-              trimmed_mask_lo_bound_in_frame_coords(2)-0.5 trimmed_mask_hi_bound_in_frame_coords(1)+0.5 ; ...
-              trimmed_mask_lo_bound_in_frame_coords(2)-0.5 trimmed_mask_lo_bound_in_frame_coords(1)-0.5 ] ; 
-  x_data = corners(:,1)' ;
-  y_data = corners(:,2)' ;
-  line('Parent', a, 'XData', x_data, 'YData', y_data, 'Color', 'r') ;
-  a.Box = 'on' ;
-  a.Layer = 'top' ;
-  title(a, 'Example frame and LED detection window', 'Fontsize', 11) ;
-
   % Plot the raw extracted signals
   f = figure('color', 'w') ;
   set_figure_size([10 6]) ;

@@ -49,7 +49,7 @@ video_duration = dt*nframes ;
 % Read in the LED protocol, compute the total protocol duration
 ledprotocolfile = fullfile(expdir,dataloc_params.ledprotocolfilestr);
 raw_protocol = loadAnonymous(ledprotocolfile) ;
-protocol = downmixProtocolIfNeeded(raw_protocol) ;
+protocol = downmixProtocolIfNeeded(raw_protocol, indicator_params) ;
   % We downmix the (possibly RGB) protocol as an expedient, because we want to
   % take an RGB protocol as input.  When we enrich support for RGB protocols, we
   % should change this.
