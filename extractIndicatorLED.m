@@ -130,10 +130,30 @@ if debug ,
   drawnow() ;
 end
 
+% Figure out how to combine all the pixels in each region/mask, in each frame
+% Will use either max or mean
+if isfield(indicator_params, 'reducefun') ,
+  reducefun = indicator_params.reducefun ;
+  if strcmp(reducefun, 'mean') ,
+    do_reduce_with_max = false ;
+  elseif strcmp(reducefun, 'max') ,
+    do_reduce_with_max = true ;
+  else
+    if ischar(reducefun)
+      error('indicator_params.reducefun is ''%s''.  It should be ''mean'' or ''max''.', reducefun) ;
+    else
+      error('indicator_params.reducefun is of class %s.  It should be a char array with value ''mean'' or ''max''.', class(reducefun)) ;
+    end
+  end
+else
+  % Use mean, for backwards-compatibility
+  do_reduce_with_max = false ;
+end
+
 % Read in video frames, extract the LED indicator region, compute the mean+max
 % of that region for each frame
-pixel_mean_signal = zeros(mask_count,nframes) ;
 pixel_max_signal = zeros(mask_count,nframes) ;
+pixel_mean_signal = zeros(mask_count,nframes) ;
 fprintf('Extracting LED indicator signal from video frames...\n') ;
 pbo = progress_bar_object(nframes) ;
 for frame_index = 1:nframes
@@ -141,10 +161,10 @@ for frame_index = 1:nframes
   detail = double(frame(trimmed_mask_lo_bound_in_frame_coords(1):trimmed_mask_hi_bound_in_frame_coords(1), ...
                         trimmed_mask_lo_bound_in_frame_coords(2):trimmed_mask_hi_bound_in_frame_coords(2))) ;
   masked_detail = detail .* trimmed_mask_from_mask_index ;  % detail_height x detail_width x mark_count
-  pixel_mean_signal(:,frame_index) = reshape(mean(masked_detail, [1 2]), ...
-                                             [mask_count 1]) ;
   pixel_max_signal(:,frame_index) = reshape(max(masked_detail, [], [1 2]), ...
                                             [mask_count 1]) ;
+  pixel_mean_signal(:,frame_index) = reshape(mean(masked_detail, [1 2]), ...
+                                             [mask_count 1]) ;
   if (mod(frame_index,1000) == 0) ,    
     pbo.update(1000) ;
   end
@@ -160,42 +180,28 @@ if debug ,
   a = axes(f) ;
   plot(a, 1:nframes, pixel_mean_signal) ;
   xlabel(a, 'Frame index') ;
-  ylabel(a, 'LED pixel mean (counts)') ;
-  title(a, 'LED pixel mean', 'Fontsize', 11) ;
+  ylabel(a, 'LED mean signal (counts)') ;
+  title(a, 'LED mean signal', 'Fontsize', 11) ;
   drawnow() ;  
 
-  % Plot the raw max extracted signals
   f = figure('color', 'w') ;
   set_figure_size([10 6]) ;
   a = axes(f) ;
   plot(a, 1:nframes, pixel_max_signal) ;
   xlabel(a, 'Frame index') ;
-  ylabel(a, 'LED pixel max (counts)') ;
-  title(a, 'LED pixel max', 'Fontsize', 11) ;
-  drawnow() ;  
+  ylabel(a, 'LED max signal (counts)') ;
+  title(a, 'LED max signal', 'Fontsize', 11) ;
+  drawnow() ;    
 end
 
-% Get the range of the pixel mean signal
-pixel_mean_signal_max = max(pixel_mean_signal, [], 2) ;
-pixel_mean_signal_min = min(pixel_mean_signal, [], 2) ;
-pixel_mean_signal_range = pixel_mean_signal_max - pixel_mean_signal_min ;
-
-% Get the range of the pixel max signal
-pixel_max_signal_max = max(pixel_max_signal, [], 2) ;
-pixel_max_signal_min = min(pixel_max_signal, [], 2) ;
-pixel_max_signal_range = pixel_max_signal_max - pixel_max_signal_min ;
-
-% For each mask, use the signal with the larger range
-analog_led_signal = zeros(mask_count, nframes) ;
-for mask_index = 1 : mask_count ,
-  if pixel_mean_signal_range(mask_index) > pixel_max_signal_range(mask_index) ,
-    analog_led_signal(mask_index,:) = pixel_mean_signal(mask_index,:) ;
-  else
-    analog_led_signal(mask_index,:) = pixel_max_signal(mask_index,:) ;
-  end
+% Select which signal to go forward with
+if do_reduce_with_max ,
+  analog_led_signal = pixel_max_signal ;
+else
+  analog_led_signal = pixel_mean_signal ;
 end
 
-% Report the standard deviation of the LED signal.
+% Report the range, standard deviation of the LED signal.
 analog_led_signal_max = max(analog_led_signal, [], 2) ;
 analog_led_signal_min = min(analog_led_signal, [], 2) ;
 analog_led_signal_range = analog_led_signal_max - analog_led_signal_min ;

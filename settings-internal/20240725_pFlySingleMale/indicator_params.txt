@@ -6,3 +6,4 @@ LEDMarkerType,LEDTemplates_pfly.png
 ledmask1,LEDTemplates_pfly_mask_1.png
 ledmask2,LEDTemplates_pfly_mask_2.png
 protocol_prefix_from_mask_index,R,G
+reducefun,max
