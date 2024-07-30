@@ -103,7 +103,7 @@ if do_run_caboose ,
   for stage_index = 1 : stage_count ,
     stage_name = stage_name_from_stage_index{stage_index} ;
     if ~strcmp(stage_name, 'automaticcheckscomplete') ,
-      field_name = strcat('do', stage_name) ;
+      field_name = horzcat('do', stage_name) ;
       caboose_phase_analysis_parameters.(field_name) = 'off' ;
     end
   end

@@ -28,16 +28,15 @@ if ~useNormXCorr,
 end
 
 % Rotate the template, to match any rotation
-nRotationsOver180Degrees = 2*nRotations ;
-bowlMarkerTemplateFromTheta = cell(1,nRotationsOver180Degrees);
-thetas = linspace(0,180,nRotationsOver180Degrees+1);
-thetas = thetas(1:end-1);
-for i = 1:nRotationsOver180Degrees,
-  bowlMarkerTemplateFromTheta{i} = imrotate(template,thetas(i),'bilinear','loose');
+bowlMarkerTemplateFromTheta = cell(1,nRotations) ;
+degrees = linspace(0,360,nRotations+1) ;
+degrees = degrees(1:end-1) ;
+for i = 1:nRotations,
+  bowlMarkerTemplateFromTheta{i} = imrotate(template,degrees(i),'bilinear','loose');
 end
 % compute normalized maximum correlation
-match_image_from_theta_index = zeros(nr,nc,nRotationsOver180Degrees) ;
-for i = 1:nRotationsOver180Degrees,
+match_image_from_theta_index = zeros(nr,nc,nRotations) ;
+for i = 1:nRotations,
   thisBowlMarkerTemplate = bowlMarkerTemplateFromTheta{i} ;
   if useNormXCorr,
     match_image = normxcorr2_padded(thisBowlMarkerTemplate, softIm, 'replicate') ;

@@ -133,11 +133,11 @@ function FlyDiscoPipeline(expdir, varargin)
     %   FlyDiscoAutomaticChecksIncoming().  See the documentation for that function
     %   for details about what parameters are supported.
     %
-    %   Several other stages support similar lists of additional parameters.  For
-    %   each such stage, the name of the relevant parameter to FlyDiscoPipeine() is
+    %   All stages support similar lists of additional parameters.  For
+    %   each such stage, the name of the relevant parameter to FlyDiscoPipeline() is
     %   the stage name followed by '_params'.  See the documentation for the
     %   function that implements each stage for details about what parameters are
-    %   supported.  The stages that support a '_params' parameter, and the function
+    %   supported.  Some of the stages, and the function
     %   implementing the respective stage, are:
     %
     %       automaticchecksincoming: FlyDiscoAutomaticChecksIncoming()
@@ -150,53 +150,21 @@ function FlyDiscoPipeline(expdir, varargin)
     %       makeaptresultmovie: FlyDiscoMakeAPTResultsMovie()
     %       automaticcheckscomplete: FlyDiscoAutomaticChecksComplete()
     %
-    %   In fact, all the optional parameters described above (besides 'settingsdir'
-    %   and 'analysis_protocol') are determined by starting with a set of default
-    %   parameter values, overriding these with values set in the analysis-protocol
-    %   folder, and finally overriding these with values provided in the argument
-    %   list to FlyDiscoPipeline().  The full list of parameters that use this
-    %   three-level scheme is:
+    %   In fact, all the optional parameters described above (all the
+    %   do<stage_name> and <stage_name>_params parameters) are determined by
+    %   starting with a set of default parameter values, overriding these with
+    %   values set in the analysis-protocol folder, and finally overriding these
+    %   with values provided in the argument list to FlyDiscoPipeline().
     %
-    %       automaticchecksincoming_params
-    %       registration_params
-    %       sexclassification_params
-    %       computeperframefeatures_params
-    %       computeperframestats_params
-    %       plotperframestats_params
-    %       makectraxresultsmovie_params
-    %       aptresultsmovie_params
-    %       automaticcheckscomplete_params
-    %       doautomaticchecksincoming
-    %       doflytracking
-    %       doaddpflies
-    %       doregistration
-    %       doledonoffdetection
-    %       dosexclassification
-    %       docomputeperframefeatures
-    %       docomputehoghofperframefeatures
-    %       dojaabadetect
-    %       dolocomotionmetrics
-    %       docomputeperframestats
-    %       doplotperframestats
-    %       domakectraxresultsmovie
-    %       doapt
-    %       domakeaptresultsmovie
-    %       doautomaticcheckscomplete
-    %
-    % The default value for all these parameters is specified by the function
-    % FlyDiscoPipelineDefaultAnalysisParameters().  The values returned by that
-    % function are (possibly) overridden by values specified by the file
-    % analysis-protocol-parameters.txt in the analysis-protocol folder.  That file
-    % specifies a set of name-value pairs, and is read using the function
-    % ReadParams().  The values specified in that file override those specified in
-    % FlyDiscoPipelineDefaultAnalysisParameters().  Finally, any of these values can
-    % in turn be overridden by providing a name-value pair in the argument list to
-    % FlyDiscoPipeline().
-    %
-    % It should be noted that not all parameters of all stages can be set in this
-    % way.  Some parameters are determined by the files in the analysis-protocol
-    % folder, and cannot easily be changed without modifying the analysis-protcol
-    % folder.
+    %   The default value for all these parameters is specified by the function
+    %   FlyDiscoPipelineDefaultAnalysisParameters().  The values returned by that
+    %   function are (possibly) overridden by values specified by the file
+    %   analysis-protocol-parameters.txt in the analysis-protocol folder.  That file
+    %   specifies a set of name-value pairs, and is read using the function
+    %   ReadParams().  The values specified in that file override those specified in
+    %   FlyDiscoPipelineDefaultAnalysisParameters().  Finally, any of these values can
+    %   in turn be overridden by providing a name-value pair in the argument list to
+    %   FlyDiscoPipeline().
 
     
     % Report the Matlab version
@@ -253,7 +221,7 @@ function FlyDiscoPipeline(expdir, varargin)
     end
     
     % Read in the analysis parameters, dataloc_params
-    [analysis_parameters_according_to_protocol, dataloc_params, analysis_protocol_folder_path, datalocparamsfilestr] = ...
+    [analysis_parameters_according_to_protocol, dataloc_params, analysis_protocol_folder_path] = ...
         readIntermediateAnalysisParameters(settingsdir, analysis_protocol) ;     % analysis params according to defaults and the analysis-protocol folder
 
     % Merge in the argument parameters
@@ -263,20 +231,32 @@ function FlyDiscoPipeline(expdir, varargin)
     % Compute the required output files for each stage
     required_file_names_from_stage_name = FlyDiscoComputeRequiredFileNamesForAllStages(analysis_protocol_folder_path, dataloc_params, expdir, do_run) ;
 
-    % Assign the paramters to individual variables
-    automaticchecksincoming_params = lookup_in_struct(analysis_parameters, 'automaticchecksincoming_params') ;
-    registration_params = lookup_in_struct(analysis_parameters, 'registration_params') ;
-    sexclassification_params = lookup_in_struct(analysis_parameters, 'sexclassification_params') ;
-    computeperframefeatures_params = lookup_in_struct(analysis_parameters, 'computeperframefeatures_params') ;
-    computeperframestats_params = lookup_in_struct(analysis_parameters, 'computeperframestats_params') ;    
-    plotperframestats_params = lookup_in_struct(analysis_parameters, 'plotperframestats_params') ;    
-    makectraxresultsmovie_params = lookup_in_struct(analysis_parameters, 'makectraxresultsmovie_params') ;
-    aptresultsmovie_params = lookup_in_struct(analysis_parameters, 'aptresultsmovie_params') ;
-    automaticcheckscomplete_params = lookup_in_struct(analysis_parameters, 'automaticcheckscomplete_params') ;
+    % Assign a few params to variables
     cluster_billing_account_name = lookup_in_struct(analysis_parameters, 'cluster_billing_account_name') ;
     sshhost = lookup_in_struct(analysis_parameters, 'sshhost') ;
     debug = lookup_in_struct(analysis_parameters, 'debug') ;
+
+    % Handle the per-stage parameters
+    stage_function_from_stage_name = FlyDiscoStageFunctionFromName() ;
+    stage_name_from_stage_index = fieldnames(stage_function_from_stage_name) ;
+    stage_count = numel(stage_name_from_stage_index) ;
+    stage_additional_arguments_from_stage_name = struct() ;
+    for stage_index = 1 : stage_count ,
+        stage_name = stage_name_from_stage_index{stage_index} ;
+        analysis_parameters_field_name = horzcat(stage_name, '_params') ;
+        stage_additional_arguments = lookup_in_struct(analysis_parameters, analysis_parameters_field_name, cell(1,0)) ;
+        stage_additional_arguments_from_stage_name.(stage_name) = stage_additional_arguments ;
+    end
     
+    % Need to supply custom arguments for a few stages
+    stage_additional_arguments_from_stage_name.apt = ...
+      horzcat(stage_additional_arguments_from_stage_name.apt, ...
+              {'cluster_billing_account_name', cluster_billing_account_name, ...
+               'sshhost', sshhost}) ;
+    stage_additional_arguments_from_stage_name.automaticcheckscomplete = ...
+      horzcat(stage_additional_arguments_from_stage_name.automaticcheckscomplete, ...
+              {'required_file_names_from_stage_name', required_file_names_from_stage_name}) ;
+
     % Print the settings values in use
     variable_names_to_print = ...
         { 'settingsdir', ...
@@ -287,7 +267,6 @@ function FlyDiscoPipeline(expdir, varargin)
         value = eval(variable_name) ;
         fprintf('  %s: %s\n', variable_name, char_array_from_value(value)) ;
     end
-    stage_name_from_stage_index = FlyDiscoStageNames() ;
     for stage_index = 1 : numel(stage_name_from_stage_index) ,
       stage_name = stage_name_from_stage_index{stage_index} ;
       value = do_run.(stage_name) ;
@@ -310,386 +289,20 @@ function FlyDiscoPipeline(expdir, varargin)
     
     
     
-    % Fundamentally, the job of FlyDiscoPipeline() is to generate all the
-    % appropriate analysis files from the `raw' data files. If it generates all the
-    % appropriate analysis files, that's a successful run. So if the auto-checks
-    % incoming (ACI) code finds that there are dead flies, then the appropriate
-    % files to generate for that experiment are just
-    % automatic_checks_incoming_results.txt, automatic_checks_incoming_info.mat,
-    % automatic_checks_complete_results.txt, and automatic_checks_complete_info.mat.
-    % If that is done successfully, then FlyDiscoPipline() should return normally,
-    % and not throw an error. Thus the throwing of uncaught errors should be
-    % restricted to cases where it's not even clear to the programmer how to proceed
-    % to generate the output files for a particular stage. The simplest case would
-    % be if a write to disk of one of the output files fails, that should clearly
-    % lead to FlyDiscoPipeline() throwing an error. Another simple case is if the
-    % experiment metadata indicates dead flies. That should stop the core pipeline
-    % stages from running, but should not cause FlyDiscoPipeline() to throw an
-    % error.
-        
-    %% Run incoming checks
-    stage_name = 'automaticchecksincoming';
-    if is_on_or_force(do_run.(stage_name)) ,
-        forcecompute = is_force(do_run.(stage_name)) ;
-        requiredfiles = required_file_names_from_stage_name.(stage_name) ;
-        todo = CheckForMissingFilesExplicit(expdir, requiredfiles);
-        if forcecompute || todo,
-            fprintf('Running incoming automatic checks...\n');
-            FlyDiscoAutomaticChecksIncoming(expdir, ...
-                stage_name, ...
-                'settingsdir',settingsdir,'analysis_protocol',analysis_protocol,...
-                automaticchecksincoming_params{:});
-        end
-        
-        % This is just checking to make sure the 'main' file generated by
-        % FlyDiscoAutomaticChecksIncoming(), usually named
-        % 'automatic_checks_incoming_results.txt',
-        % is present.  If it's not, it means that something has gone seriously wrong.
-        [ismissingfile, missingfiles] = CheckForMissingFilesExplicit(expdir, requiredfiles) ;        
-        if ismissingfile,
-            msgs = cellfun(@(x) sprintf('Missing incoming automatic checks file %s',x),missingfiles,'UniformOutput',false) ;
-            flydisco_pipeline_error(stage_name, msgs) ;
-        end
-        
-        % Make sure the file usually named automatic_checks_incoming_results.txt
-        % contains either "automated_pf,P" or "automated_pf,U", but not
-        % "automated_pf,F" (nor anything else).
-        % This ensures the the core pipeline only runs if the current run or a previous run of the ACI stage
-        % indicated that it should do so.
-        do_run_core_pipeline = CheckACIResultsFileContents(expdir, dataloc_params, stage_name) ;
-        if ~do_run_core_pipeline ,
-            fprintf('FlyDisco pipeline encountered issues with experiment during %s stage.  Skipping core pipeline stages.\n', stage_name);
-        end
-    else
-        do_run_core_pipeline = true ;
-    end
-    
-    
-    
-    if do_run_core_pipeline ,
-        %% Run FlyTracker
-        stage_name = 'flytracking' ;
-        if is_on_or_force(do_run.(stage_name)) ,
-            forcecompute = is_force(do_run.(stage_name)) ;
-            requiredfiles = required_file_names_from_stage_name.(stage_name) ;
-            todo = CheckForMissingFilesExplicit(expdir, requiredfiles);
-            if forcecompute || todo ,
-                fprintf('Running FlyTracker...\n');
-                FlyTrackerWrapperForFlyDisco(expdir, settingsdir, analysis_protocol, dataloc_params, forcecompute) ;
-            end
-            
-            % make sure flytracker files exist
-            [ismissingfile, missingfiles] = CheckForMissingFilesExplicit(expdir, requiredfiles);
-            if ismissingfile,
-                msgs = cellfun(@(x) sprintf('Missing FlyTracker file %s',x),missingfiles,'UniformOutput',false);
-                flydisco_pipeline_error(stage_name, msgs) ;
-            end
-        end
-        
-        
-        
-        %% Add projector flies
-        FlyDiscoAddPFliesStage(expdir, dataloc_params, settingsdir, analysis_protocol, do_run.addpflies, debug) ;
-        
-        
-        
-        %% registration
-        stage_name = 'registration';
-        if is_on_or_force(do_run.(stage_name)) ,
-            forcecompute = is_force(do_run.(stage_name)) ;
-            requiredfiles = required_file_names_from_stage_name.(stage_name) ;
-            todo = CheckForMissingFilesExplicit(expdir,requiredfiles);
-            if forcecompute || todo,
-                fprintf('Registering tracks...\n');
-                
-                FlyDiscoRegisterTrx(expdir,...
-                    'settingsdir',settingsdir,'analysis_protocol',analysis_protocol,...
-                    registration_params{:});
-            end
-            
-            % make sure registration files exist
-            [ismissingfile,missingfiles] = CheckForMissingFilesExplicit(expdir,requiredfiles);
-            if ismissingfile,
-                msgs = cellfun(@(x) sprintf('Missing registration file %s',x),missingfiles,'UniformOutput',false);
-                flydisco_pipeline_error(stage_name, msgs) ;
-            end
-        end
-        
-        
-        
-        %% led indicator detection on/off
-        stage_name = 'ledonoffdetection';
-        stage_function = @FlyDiscoDetectIndicatorLedOnOff ;
-        ledonoffdetection_params = ...
-            {'datalocparamsfilestr', datalocparamsfilestr, ...
-             'debug', debug } ;
-        FlyDiscoPipelineStage(...
-            expdir, ...
-            stage_name, ...
-            do_run, ...
-            dataloc_params, ...
-            required_file_names_from_stage_name , ...
-            settingsdir, ...
-            analysis_protocol, ...
-            stage_function, ...
-            ledonoffdetection_params) ;
-        
-        
-        
-        %% Run sex classification
-        stage_name = 'sexclassification';
-        stage_function = @FlyDiscoClassifySex ;
-        FlyDiscoPipelineStage(...
-            expdir, ...
-            stage_name, ...
-            do_run, ...
-            dataloc_params, ...
-            required_file_names_from_stage_name, ...
-            settingsdir, ...
-            analysis_protocol, ...
-            stage_function, ...
-            sexclassification_params) ;
-        
-
-
-        %% Run APT
-        stage_name = 'apt' ;
-        if is_on_or_force(do_run.(stage_name)) ,
-            forcecompute = is_force(do_run.(stage_name)) ;
-            requiredfiles = required_file_names_from_stage_name.(stage_name) ;
-            todo = CheckForMissingFilesExplicit(expdir, requiredfiles) ;
-            if forcecompute || todo ,
-                fprintf('Running APT...\n');                
-                aptrepopath = fullfile(source_folder_path, 'APT') ;  % use the subrepo APT
-                % Are we running on a submit host?  If not, use submit.int.janelia.org.
-                [return_code, ~] = system('/usr/bin/which bsub') ;
-                if return_code == 0 ,
-                    submit_host_name = '' ;
-                else
-                    submit_host_name = sshhost ;
-                end
-                [success, msgs] = ...
-                    FlyDiscoAPTTrack(expdir, ...
-                                     'settingsdir',settingsdir,...
-                                     'analysis_protocol',analysis_protocol,...
-                                     'dataloc_params', dataloc_params, ...
-                                     'dryrun',false,...
-                                     'verbose',1,...
-                                     'dowait',true,...
-                                     'waitchecktime',300,...
-                                     'dooverwrite',forcecompute, ...
-                                     'cluster_billing_account_name', cluster_billing_account_name, ...
-                                     'aptrepopath', aptrepopath, ...
-                                     'docomputemd5s', true, ...
-                                     'sshhost', submit_host_name) ;
-                if ~success ,
-                    flydisco_pipeline_error(stage_name, msgs) ;
-                end
-            end
-            
-            % make sure flytracker files exist
-            [ismissingfile,missingfiles] = CheckForMissingFilesExplicit(expdir, requiredfiles) ;
-            if ismissingfile ,
-                msgs = cellfun(@(x) sprintf('Missing APT file %s',x),missingfiles,'UniformOutput',false);
-                flydisco_pipeline_error(stage_name, msgs) ;
-            end
-        end  % APT stage
-        
-
-
-        %% Compute most per-frame features
-        stage_name = 'computeperframefeatures';
-        stage_function = @FlyDiscoComputePerFrameFeatures ;
-        FlyDiscoPipelineStage(...
-            expdir, ...
-            stage_name, ...
-            do_run, ...
-            dataloc_params, ...
-            required_file_names_from_stage_name, ...
-            settingsdir, ...
-            analysis_protocol, ...
-            stage_function, ...
-            computeperframefeatures_params) ;
-        
-
-
-        %% Compute hog hof per-frame features        
-        stage_name = 'computehoghofperframefeatures';        
-        if is_on_or_force(do_run.(stage_name)) ,
-            forcecompute = is_force(do_run.(stage_name)) ;
-            requiredfiles = required_file_names_from_stage_name.(stage_name) ;
-            todo = CheckForMissingFilesExplicit(expdir,requiredfiles) ;
-            if forcecompute || todo,
-                pwdprev = pwd() ;
-                trxfilestr = fullfile(expdir,dataloc_params.trxfilestr);
-                movfilestr = fullfile(expdir,dataloc_params.moviefilestr);
-                spacetimefeaturesdir = fileparts(which('preparePerFrameFtrs'));
-                cd (spacetimefeaturesdir);
-                fprintf('Computing HOG/HOF per-frame features...\n');
-                preparePerFrameFtrs(movfilestr,trxfilestr,false,false);
-                cd(pwdprev);
-            end
-            % make sure computeperframefeatures files exist
-            [ismissingfile,missingfiles] = CheckForMissingFilesExplicit(expdir,requiredfiles);
-            if ismissingfile,
-                msgs = cellfun(@(x) sprintf('Missing HOG/HOF per-frame features file %s',x),missingfiles,'UniformOutput',false);
-                flydisco_pipeline_error(stage_name, msgs) ;
-            end            
-        end
+    %% Run the stages
+    FlyDiscoPipelineCore(expdir, ...
+                         stage_name_from_stage_index, ...
+                         do_run, ...
+                         required_file_names_from_stage_name, ...
+                         debug, ...
+                         settingsdir, ...
+                         analysis_protocol, ...
+                         stage_function_from_stage_name, ...
+                         stage_additional_arguments_from_stage_name, ...
+                         dataloc_params) ;
 
 
 
-        %% Run JAABA behavior detection
-        stage_name = 'jaabadetect';
-        stage_function = @FlyDiscoJAABADetect ;
-        jaabadetect_params = cell(1,0) ;
-        FlyDiscoPipelineStage(...
-            expdir, ...
-            stage_name, ...
-            do_run, ...
-            dataloc_params, ...
-            required_file_names_from_stage_name, ...
-            settingsdir, ...
-            analysis_protocol, ...
-            stage_function, ...
-            jaabadetect_params) ;
-        
-
-
-        %% Compute APT per-frame features        
-        stage_name = 'locomotionmetrics';      
-        stage_function = @FlyDiscoComputeLocomotionMetrics ;
-        FlyDiscoPipelineStage(...
-            expdir, ...
-            stage_name, ...
-            do_run, ...
-            dataloc_params, ...
-            required_file_names_from_stage_name, ...
-            settingsdir, ...
-            analysis_protocol, ...
-            stage_function) ;
-
-
-
-        %% Compute perframestats
-        stage_name = 'computeperframestats';
-        if is_on_or_force(do_run.(stage_name)) ,
-            forcecompute = is_force(do_run.(stage_name)) ;
-            requiredfiles = required_file_names_from_stage_name.(stage_name) ;
-            todo = CheckForMissingFilesExplicit(expdir,requiredfiles);
-            if forcecompute || todo,
-                fprintf('ComputePerFrameStats...\n');
-                stage_additional_arguments = computeperframestats_params ;
-                FlyDiscoComputePerFrameStats(expdir,...
-                    'settingsdir',settingsdir, ...
-                    'analysis_protocol',analysis_protocol, ...
-                    stage_additional_arguments{:});
-            end
-            
-            % make sure computeperframestats files exist
-            [ismissingfile,missingfiles] = CheckForMissingFilesExplicit(expdir,requiredfiles);
-            if ismissingfile,
-                msgs = cellfun(@(x) sprintf('Missing computeperframestats file %s',x),missingfiles,'UniformOutput',false);
-                flydisco_pipeline_error(stage_name, msgs) ;
-            end            
-        end
-        
-        
-
-        %% Make per-frame statistics plots, culminating in stats.html, which shows all of them
-        stage_name = 'plotperframestats' ;
-        stage_function = @FlyDiscoPlotPerFrameStats ;
-        FlyDiscoPipelineStage(...
-            expdir, ...
-            stage_name, ...
-            do_run, ...
-            dataloc_params, ...
-            required_file_names_from_stage_name, ...
-            settingsdir, ...
-            analysis_protocol, ...
-            stage_function, ...
-            plotperframestats_params) ;
-        
-
-
-        %% Make ctrax results movie
-        stage_name = 'makectraxresultsmovie';
-        if is_on_or_force(do_run.(stage_name)) ,
-            forcecompute = is_force(do_run.(stage_name)) ;
-            requiredfiles = required_file_names_from_stage_name.(stage_name) ;
-            todo = CheckForMissingFilesExplicit(expdir,requiredfiles);
-            if forcecompute || todo ,
-                fprintf('Making Ctrax results movie...\n');
-                FlyDiscoMakeCtraxResultsMovie(expdir, ...
-                                              'settingsdir',settingsdir, ...
-                                              'analysis_protocol',analysis_protocol, ...
-                                              makectraxresultsmovie_params{:}) ;
-            end
-            
-            % make sure makectraxresultsmovie files exist
-            [ismissingfile,missingfiles] = CheckForMissingFilesExplicit(expdir,requiredfiles);
-            if ismissingfile,
-                msgs = cellfun(@(x) sprintf('Missing Ctrax results movie file %s',x),missingfiles,'UniformOutput',false);
-                flydisco_pipeline_error(stage_name, msgs) ;
-            end            
-        end
-        
-
-
-        %% Make APT results movie
-        stage_name = 'makeaptresultsmovie';
-        if is_on_or_force(do_run.(stage_name)) ,
-            forcecompute = is_force(do_run.(stage_name)) ;
-            requiredfiles = required_file_names_from_stage_name.(stage_name) ;
-            todo = CheckForMissingFilesExplicit(expdir, requiredfiles) ;
-            if forcecompute || todo
-                fprintf('Making APT results movie... \n');
-                FlyDiscoMakeAPTResultsMovie(expdir, ...
-                    'settingsdir',settingsdir, ...
-                    'analysis_protocol',analysis_protocol, ...
-                    aptresultsmovie_params{:}) ;
-                
-            end
-            % make sure makeaptresultsmovie files exist
-            [ismissingfile,missingfiles] = CheckForMissingFilesExplicit(expdir,requiredfiles);
-            if ismissingfile,
-                msgs = cellfun(@(x) sprintf('Missing APT results movie file %s',x),missingfiles,'UniformOutput',false);
-                flydisco_pipeline_error(stage_name, msgs) ;
-            end
-        end % make apt results movie
-    end  % if do_run_core_pipeline
-
-
-
-    %% automaticchecks_complete
-    % This would normally be turned off for a Transfero run, and we'd run it in the
-    % caboose stage.
-    stage_name = 'automaticcheckscomplete';
-    if is_on_or_force(do_run.(stage_name)) ,
-        forcecompute = is_force(do_run.(stage_name)) ;
-        requiredfiles = required_file_names_from_stage_name.(stage_name) ;
-        todo = CheckForMissingFilesExplicit(expdir,requiredfiles);
-        if forcecompute || todo,
-            fprintf('Running completion automatic checks...\n');
-            FlyDiscoAutomaticChecksComplete(expdir,...
-                'settingsdir',settingsdir, ...
-                'analysis_protocol',analysis_protocol,...
-                'required_file_names_from_stage_name', required_file_names_from_stage_name, ...
-                'do_run', do_run, ...
-                automaticcheckscomplete_params{:});
-        end
-        
-        % This is just checking to make sure the 'main' file generated by
-        % FlyDiscoAutomaticChecksComplete(), usually named
-        % 'automatic_checks_complete_results.txt',
-        % is present.  If it's not, it means that something has gone seriously wrong.
-        [ismissingfile,missingfiles] = CheckForMissingFilesExplicit(expdir,requiredfiles);
-        if ismissingfile,
-            msgs = cellfun(@(x) sprintf('Missing completion automatic checks file %s',x),missingfiles,'UniformOutput',false);
-            flydisco_pipeline_error(stage_name, msgs) ;
-        end
-    end
-        
     %% If we get here, analysis has completed successfully
     fprintf('Analysis pipeline completed!\n');        
 end  % function

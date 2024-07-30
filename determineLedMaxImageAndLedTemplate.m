@@ -28,28 +28,7 @@ nframes = header.nframes ;
 firstPassLedMaxImage = sampleFramesForMaximumImage(readfcn, 1, stride, lastFrameIndex) ;
 
 % Determine the path to the LED template image
-if ischar(indicator_params.LEDMarkerType) ,
-  template_file_path = fullfile(analysis_protocol_folder_path, indicator_params.LEDMarkerType) ;
-else
-  % In this case, LEDMarkerType should be something like {'A', 'led-image-A.png',
-  % 'B', 'led-image-B.png', 'C', 'led-image-C.png', 'D', 'led-image-C.png'}
-  rigIdFromRigIndex = indicator_params.LEDMarkerType(1:2:end-1);
-  templateFileNameFromRigIndex = indicator_params.LEDMarkerType(2:2:end);
-  %rigId = metadata.rig ;
-
-  isMatchFromRigIndex = strcmp(rigId,rigIdFromRigIndex);
-  matchingRigIndices = find(isMatchFromRigIndex) ;
-  matchCount = numel(matchingRigIndices) ;
-  if matchCount == 0 ,
-    error('LEDMarkerType has no entry for rig %s',rigId) ;
-  elseif matchCount == 1,
-    matchingRigIndex = matchingRigIndices(1) ;
-  else
-    error('LEDMarkerType seems to have more than one entry that matches rig %s.  This is no good.', rigId) ;      
-  end
-  templateFileName = templateFileNameFromRigIndex{matchingRigIndex} ;
-  template_file_path = fullfile(analysis_protocol_folder_path, templateFileName) ;
-end
+template_file_path = determine_template_or_mask_file_path(indicator_params.LEDMarkerType, rigId, analysis_protocol_folder_path) ;
 
 %
 % Check if something of similar brightness to the LED template is present in

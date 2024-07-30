@@ -1,17 +1,21 @@
 function FlyDiscoAddPFlies(expdir, varargin)
 
 % Deal with optional arguments
-[analysis_protocol, settingsdir, dataloc_params, forcecompute, debug] = ...
+[analysis_protocol, settingsdir, forcecompute, debug, ~] = ...
   myparse(varargin,...
           'analysis_protocol','current_bubble',...
           'settingsdir', default_settings_folder_path(), ...
-          'dataloc_params',struct(), ...
           'forcecompute', false, ...
-          'debug',false) ;  %#ok<ASGLU> 
+          'debug',false, ...
+          'do_run', []) ;  %#ok<ASGLU> 
 
-% Write a header for this stage to the 'log'
-start_timestamp = datestr(now(), 'yyyymmddTHHMMSS') ;
-fprintf('\n\n***\nRunning %s with analysis protocol %s at %s\n', mfilename(), analysis_protocol, start_timestamp) ;
+% % Write a header for this stage to the 'log'
+% start_timestamp = datestr(now(), 'yyyymmddTHHMMSS') ;
+% fprintf('\n\n***\nRunning %s with analysis protocol %s at %s\n', mfilename(), analysis_protocol, start_timestamp) ;
+
+% Read in the dataloc_params
+datalocparamsfile = fullfile(settingsdir, analysis_protocol, 'dataloc_params.txt') ;
+dataloc_params = ReadParams(datalocparamsfile) ;
 
 % Read in the FlyTracker-output trx file
 unregistered_trx_file_path = fullfile(expdir, dataloc_params.ctraxfilestr) ;
@@ -59,36 +63,35 @@ fake_trx = ...
   fake_fly_trx_from_various_inputs(movie_path, timestamp_from_movie_frame_index, ellipse_trajectory, actual_trajectory, ...
                                    flytracker_calibration, fake_fly_params, maximum_real_fly_id, arena_center_shift, debug) ;
 
-% Create the final output struct
+% Create the final trx output struct
 augmented_original_trx = arrayfun(@(s)(add_fields(s, 'is_pfly', false)), original_trx) ;
 trx = [ augmented_original_trx fake_trx ] ;
 trx_wrapper = struct('trx', {trx}, 'timestamps', {original_trx_wrapper.timestamps}) ;
 
-% Before overwriting the unregistered trx file, make a backup
-[parent_folder_path, base_name, ext] = fileparts(unregistered_trx_file_path) ;
-max_backup_file_index = 100 ;
-did_find_valid_backup_file_path = false ;
-for backup_file_index = 1:max_backup_file_index ,
-  putative_backup_file_name = sprintf('%s-backup-%02d%s', base_name, backup_file_index, ext) ;
-  putative_backup_file_path = fullfile(parent_folder_path, putative_backup_file_name) ;
-  if ~exist(putative_backup_file_path, 'file') ,
-    did_find_valid_backup_file_path = true ;
-      backup_file_path = putative_backup_file_path ;
-    break
-  end
-end
-if did_find_valid_backup_file_path ,
-  [did_succeed, message, messageid] = copyfile(unregistered_trx_file_path, backup_file_path) ;
-  if ~did_succeed ,
-    error(messageid, 'Unable to backup %s to %s before adding projected fly tracks: %s', unregistered_trx_file_path, backup_file_path, message) ;
-  end
-else
-  error('Unable to find a filename for the pfiles backup trx file, after trying %d options', max_backup_file_index) ;
-end
+% Write the trx output file
+addpflies_trx_output_file_name = determine_addpflies_trx_output_file_name(dataloc_params) ;
+addpflies_trx_output_file_path = fullfile(expdir, addpflies_trx_output_file_name) ;
+save('-mat', '-v7.3', addpflies_trx_output_file_path, '-struct', 'trx_wrapper') ;
 
-% Write the output file
-save('-mat', '-v7.3', unregistered_trx_file_path, '-struct', 'trx_wrapper') ;
+% 
+% Now handle the FT tracks output
+%
 
-% Final message
-end_timestamp = datestr(now(), 'yyyymmddTHHMMSS') ;
-fprintf('\nFinished running %s at %s.\n', mfilename(), end_timestamp) ;
+% Get the name of file usually named movie-track.mat
+ft_track_file_name = dataloc_params.flytrackertrackstr ;
+ft_track_file_path = fullfile(expdir, ft_track_file_name) ;
+ft_trk = loadAnonymous(ft_track_file_path) ;
+
+% Add the pflies to ft_trk
+trk = append_pflies_to_trk(ft_trk, trx) ;
+
+% Get the tracks output file path
+addpflies_ft_tracks_output_file_name = determine_addpflies_ft_tracks_output_file_name(dataloc_params) ;
+addpflies_ft_tracks_output_file_path = fullfile(expdir, addpflies_ft_tracks_output_file_name) ;
+
+% Write the trk file
+save('-mat', '-v7.3', addpflies_ft_tracks_output_file_path, 'trk') ;
+
+% % Final message
+% end_timestamp = datestr(now(), 'yyyymmddTHHMMSS') ;
+% fprintf('\nFinished running %s at %s.\n', mfilename(), end_timestamp) ;

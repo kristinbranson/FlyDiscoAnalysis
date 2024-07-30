@@ -154,7 +154,7 @@ aviobj.Bitmapheader.Colormap = [];
 
 [path,name,ext] = fileparts(filename);
 if isempty(ext)
-  filename = strcat(filename,'.avi');
+  filename = horzcat(filename,'.avi');
 end
 
 aviobj.Filename = filename;
