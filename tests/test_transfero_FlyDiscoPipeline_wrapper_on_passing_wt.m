@@ -30,7 +30,7 @@ do_use_bqueue = true ;
 do_actually_submit_jobs = true ;
 do_try = true ;
 do_run_caboose = true ;
-do_reset_working_experiments_folder = false ;
+do_reset_working_experiments_folder = true ;
 submit_host_name = if_not_a_submit_host('submit.int.janelia.org') ;
 initial_optional_argument_list = { ...
   'settingsdir', settings_folder_path, ...
