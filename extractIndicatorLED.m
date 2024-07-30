@@ -206,15 +206,20 @@ analog_led_signal_max = max(analog_led_signal, [], 2) ;
 analog_led_signal_min = min(analog_led_signal, [], 2) ;
 analog_led_signal_range = analog_led_signal_max - analog_led_signal_min ;
 analog_led_signal_sd = std(analog_led_signal, [], 2) ;
-for signal_index = 1 : mask_count ,
+for mask_index = 1 : mask_count ,
   fprintf('LED signal %d range is %g counts, standard deviation is %g counts\n', ...
-          signal_index, analog_led_signal_range(signal_index), analog_led_signal_sd(signal_index)) ;
+          mask_index, analog_led_signal_range(mask_index), analog_led_signal_sd(mask_index)) ;
 end
 
-% Error if the primary LED signal has very low range
+% Error if any of the LED signals have very low range
 minimum_signal_range = 5 ;
-if analog_led_signal_range(1) < minimum_signal_range ,
-  error('Insufficient variation in primary LED signal to reliably detect edges') ;
+for mask_index = 1 : mask_count ,
+  if analog_led_signal_range(mask_index) < minimum_signal_range ,
+    fprintf('Insufficient variation in LED signal %d to reliably detect edges\n', mask_index) ;
+  end
+end
+if any(analog_led_signal_range < minimum_signal_range) ,
+    error('Insufficient variation in at least one LED signal to reliably detect edges') ;
 end
 
 % % Find start and ends of light stimulus.
