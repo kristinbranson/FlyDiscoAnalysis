@@ -6,7 +6,7 @@ if is_on_or_force(do_run.addpflies) ,
   addpflies_ft_tracks_output_file_path = fullfile(expdir, addpflies_ft_tracks_output_file_name) ;
   result = addpflies_ft_tracks_output_file_path ;
 else
-  result = fullfile(expdir, trx.dataloc_params.flytrackertrackstr) ;
+  result = fullfile(expdir, dataloc_params.flytrackertrackstr) ;
 end
 
 end
