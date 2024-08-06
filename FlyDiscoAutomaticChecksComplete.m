@@ -6,17 +6,19 @@ timestamp = datestr(now,'yyyymmddTHHMMSS');
 success = true ;  % Reflects whether any ACC failures have been detected yet (missing *required* files count, missing *desired* files do not)
 error_or_warning_messages = {} ;  % Each message in this list is either an error message or a warning message
 
-[analysis_protocol,settingsdir,datalocparamsfilestr,debug,required_file_names_from_stage_name,do_run] = ...
+[analysis_protocol,settingsdir,datalocparamsfilestr,debug_acc,required_file_names_from_stage_name,do_run,~,~] = ...
   myparse(varargin,...
   'analysis_protocol','current',...
   'settingsdir',default_settings_folder_path(),...
   'datalocparamsfilestr','dataloc_params.txt',...
-  'debug',false, ...
+  'debug_acc',false, ...    % special debug variable for ACC stage, not the pipeline-wide debug variable
   'required_file_names_from_stage_name', [], ...
-  'do_run', []);
+  'do_run', [], ...
+  'debug', false, ...
+  'forcecompute', false);
 
-if ischar(debug),
-  debug = (str2double(debug) ~= 0) ;
+if ischar(debug_acc),
+  debug_acc = (str2double(debug_acc) ~= 0) ;
 end
 if isempty(required_file_names_from_stage_name) ,
   error('Must supply required_file_names_from_stage_name argument') ;
@@ -204,21 +206,22 @@ end
 
 %% check for missing desired files
 
-if isfield(check_params,'desired_files'),
-  for i = 1:numel(check_params.desired_files),
-    fn = check_params.desired_files{i};
-    if any(fn == '*'),
-      isfile = ~isempty(dir(fullfile(expdir,fn)));
-    else
-      isfile = exist(fullfile(expdir,fn),'file');
-    end
-    if ~isfile,
-      error_or_warning_messages{end+1} = sprintf('Missing desired file %s',fn); %#ok<AGROW>
-      % not that we don't set success = false, b/c these are desired files, not
-      % required files
-    end
-  end
-end
+% To heck with desired files
+% if isfield(check_params,'desired_files'),
+%   for i = 1:numel(check_params.desired_files),
+%     fn = check_params.desired_files{i};
+%     if any(fn == '*'),
+%       isfile = ~isempty(dir(fullfile(expdir,fn)));
+%     else
+%       isfile = exist(fullfile(expdir,fn),'file');
+%     end
+%     if ~isfile,
+%       error_or_warning_messages{end+1} = sprintf('Missing desired file %s',fn); %#ok<AGROW>
+%       % not that we don't set success = false, b/c these are desired files, not
+%       % required files
+%     end
+%   end
+% end
 
 
 
@@ -231,7 +234,7 @@ else
   automatedchecks_incoming = struct('automated_pf','U','notes_curation','');
 end
 
-if debug,
+if debug_acc,
   fid = 1;
 else
   if exist(acc_text_output_file_path,'file'),
@@ -291,14 +294,14 @@ else
     end
   end
   fprintf(fid,'automated_pf_category,%s\n',s);      
-  if debug,
+  if debug_acc,
     fprintf('[[automated_pf_categories:');
     fprintf(' %s',categories{iserror});
     fprintf(']]\n');
   end
 end
 
-if ~debug,
+if ~debug_acc,
   fclose(fid);
 end
 
@@ -323,7 +326,7 @@ accinfo.msgs = error_or_warning_messages;
 accinfo.automatedchecks_incoming = automatedchecks_incoming;
 accinfo.success = success ;
 
-if ~debug,
+if ~debug_acc,
   if exist(acc_mat_output_file_path,'file'),
     try %#ok<TRYNC>
       delete(acc_mat_output_file_path);

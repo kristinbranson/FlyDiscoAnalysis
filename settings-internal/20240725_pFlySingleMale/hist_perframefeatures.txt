@@ -1,0 +1,4 @@
+# <per-frame feature>,<frame condition name>,<fly condition name>,<min n. frames both valid>,<min n. frames fly valid>
+
+dnose2ell,nearwall_stimonstrong,any,25,100
+dnose2ell,nearwall_stimoffstrong,any,25,100

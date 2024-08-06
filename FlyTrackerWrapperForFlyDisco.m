@@ -1,9 +1,17 @@
-function FlyTrackerWrapperForFlyDisco(expdir, settingsdir, analysis_protocol, dataloc_params, do_force_tracking)
+function FlyTrackerWrapperForFlyDisco(expdir, varargin)
   % Process arguments
-  if nargin<5 || isempty(do_force_tracking) ,
-    do_force_tracking = false ;
-  end    
+  [analysis_protocol, settingsdir, forcecompute, debug, ~] = ...
+    myparse(varargin,...
+            'analysis_protocol','current_bubble',...
+            'settingsdir', default_settings_folder_path(), ...
+            'forcecompute', false, ...
+            'debug',false, ...
+            'do_run',[]) ;  %#ok<ASGLU> 
     
+  % Read in the dataloc_params
+  datalocparamsfile = fullfile(settingsdir, analysis_protocol, 'dataloc_params.txt') ;
+  dataloc_params = ReadParams(datalocparamsfile) ;
+
   % Determine paths to needed files
   flytracker_parent_calibration_file_name = dataloc_params.flytrackerparentcalibrationstr ;
   flytracker_parent_calibration_file_path = fullfile(settingsdir, analysis_protocol, flytracker_parent_calibration_file_name) ;
@@ -47,7 +55,7 @@ function FlyTrackerWrapperForFlyDisco(expdir, settingsdir, analysis_protocol, da
   % Override certain options, since we get those directly from arguments or
   % dataloc_params
   %options.f_parent_calib = flytracker_parent_calibration_file_path ;  
-  options.do_recompute_tracking = do_force_tracking ;
+  options.do_recompute_tracking = forcecompute ;
   
   % Get the arena radius from the registration parameters, and stuff it into the
   % options. (tracker() is such that this value will override any value in the parent calibration).

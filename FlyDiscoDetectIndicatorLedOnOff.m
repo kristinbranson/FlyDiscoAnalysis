@@ -1,21 +1,22 @@
 function FlyDiscoDetectIndicatorLedOnOff(expdir, varargin)
 
 % Deal with optional arguments
-[analysis_protocol, settingsdir, datalocparamsfilestr, forcecompute, debug] = ...
+[analysis_protocol, settingsdir, datalocparamsfilestr, forcecompute, debug, do_run] = ...
   myparse(varargin,...
   'analysis_protocol','current_bubble',...
   'settingsdir', default_settings_folder_path(), ...
   'datalocparamsfilestr','dataloc_params.txt', ...
   'forcecompute', false, ...
-  'debug',false) ;
+  'debug',false, ...
+  'do_run', []) ;
 
-% Write a header for this stage to the 'log'
-timestamp = datestr(now,'yyyymmddTHHMMSS');
-fprintf('\n\n***\nRunning %s with analysis protocol %s at %s\n', mfilename(), analysis_protocol, timestamp) ;
+% % Write a header for this stage to the 'log'
+% timestamp = datestr(now,'yyyymmddTHHMMSS');
+% fprintf('\n\n***\nRunning %s with analysis protocol %s at %s\n', mfilename(), analysis_protocol, timestamp) ;
 
 % Read in the data locations
 analysis_protocol_folder_path = fullfile(settingsdir, analysis_protocol) ;
-datalocparamsfile = fullfile(analysis_protocol_folder_path,datalocparamsfilestr);
+datalocparamsfile = fullfile(analysis_protocol_folder_path, datalocparamsfilestr);
 dataloc_params = ReadParams(datalocparamsfile);
 
 % If forcecompute is true, delete the output files now
@@ -79,7 +80,7 @@ metadata = collect_metadata(expdir, dataloc_params.metadatafilestr) ;
 rigId = metadata.rig ;  % Should be a scalar char array containing a single capital letter
 
 % Load trajectories
-ctraxfile = fullfile(expdir,dataloc_params.ctraxfilestr);
+ctraxfile = determine_downstream_trx_file_path(expdir, dataloc_params, do_run) ;
 moviefile = fullfile(expdir,dataloc_params.moviefilestr);
 [trx,~,succeeded,timestamps] = load_tracks(ctraxfile,moviefile,'annname','');
 if ~succeeded,
@@ -102,10 +103,10 @@ else
 end
 
 % Make sure the protocol is shorter than the video
-error_if_protocol_is_longer_than_video(expdir, settingsdir, analysis_protocol) ;
+error_if_protocol_is_longer_than_video(expdir, settingsdir, analysis_protocol, do_run) ;
 
 % Determine where the LED indicator is in the video frame
-ledIndicatorPoints = ...
+[ledIndicatorPoints, templateShapeXY] = ...
   detectLedLocations(registration_data, ...
                      indicator_params, ...
                      expdir, ...
@@ -118,11 +119,32 @@ ledIndicatorPoints = ...
 if exist(imsavename,'file'),
   delete(imsavename);
 end
-saveLedDetectionImage(imsavename, bg_mean, ledIndicatorPoints, registration_params.doesYAxisPointUp) ;
+saveLedDetectionImage(imsavename, bg_mean, ledIndicatorPoints, templateShapeXY, registration_params.doesYAxisPointUp) ;
 fprintf('Saved LED detection image to file %s\n', imsavename) ;
 
+% Read the LED masks, if present
+has_explicit_masks = isfield(indicator_params, 'ledmask1') ;
+if has_explicit_masks ,
+  % Read in the masks
+  for mask_index = 1:3 ,
+    field_name = sprintf('ledmask%d', mask_index) ;
+    if ~isfield(indicator_params, field_name) ,
+      break
+    end
+    file_specification = indicator_params.(field_name) ;
+    mask_file_path = determine_template_or_mask_file_path(file_specification, rigId, analysis_protocol_folder_path) ;
+    raw_mask_as_double = double(imread(mask_file_path)) ;
+    mask_as_double = mean(raw_mask_as_double, 3) ;
+    threshold = 0.5*max(mask_as_double,[],'all') + 0.5*min(mask_as_double,[],'all') ;
+    mask = (mask_as_double > threshold) ;
+    mask_from_mask_index(:,:,mask_index) = mask ;  %#ok<AGROW> 
+  end
+else
+  mask_from_mask_index = [] ;
+end
+
 % Extract indicatordata from the video
-indicatordata = extractIndicatorLED(expdir, dataloc_params, indicator_params, ledIndicatorPoints, debug) ;
+indicatordata = extractIndicatorLED(expdir, dataloc_params, indicator_params, ledIndicatorPoints, has_explicit_masks, mask_from_mask_index, debug) ;
 
 % save indicator data to mat file
 if exist(indicatordatamatfilename,'file'),
@@ -134,5 +156,7 @@ fprintf('Saved indicator data to file %s\n', indicatordatamatfilename) ;
 % Check if detected stim number matches number expected from protocol 
 error_if_protocol_stim_num_notequal_detected(expdir, settingsdir, analysis_protocol, 'indicatordata', indicatordata); 
 
-% Final message
-fprintf('\n Finished running %s at %s.\n',mfilename(), datestr(now,'yyyymmddTHHMMSS'));
+% % Final message
+% fprintf('\n Finished running %s at %s.\n',mfilename(), datestr(now,'yyyymmddTHHMMSS'));
+
+end
