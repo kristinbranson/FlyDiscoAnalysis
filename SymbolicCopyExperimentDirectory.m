@@ -63,16 +63,18 @@ if exist(inperframedir,'dir') && (isempty(copyfiles) || ismember('perframe',copy
     unix(cmd);
   end
   subfiles = dir(inperframedir);
-  subfiles = setdiff({subfiles.name},{'.','..','a_mm.mat','b_mm.mat','x_mm.mat','y_mm.mat','theta_mm.mat'});
+  subfiles = setdiff({subfiles.name},{'.','..'});
+  cpfiles = {'a_mm.mat','b_mm.mat','x_mm.mat','y_mm.mat','theta_mm.mat'};
 
   for i = 1:numel(subfiles),
     infile = fullfile(inperframedir,subfiles{i});
     if ~exist(infile,'file'),
       continue;
     end
+    dosoftlinkcurr = dosoftlink && ~ismember(subfiles{i},cpfiles);
     outfile = fullfile(outperframedir,subfiles{i});
     if ~exist(outfile,'file'),
-      if dosoftlink,
+      if dosoftlinkcurr,
         cmd = sprintf('ln -s %s %s',infile,outfile);
       else
         cmd = sprintf('cp %s %s',infile,outfile);

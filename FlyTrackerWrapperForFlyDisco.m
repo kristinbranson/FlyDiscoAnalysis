@@ -51,11 +51,13 @@ function FlyTrackerWrapperForFlyDisco(expdir, settingsdir, analysis_protocol, da
   
   % Get the arena radius from the registration parameters, and stuff it into the
   % options. (tracker() is such that this value will override any value in the parent calibration).
-  registration_parameters_file_name = dataloc_params.registrationparamsfilestr ;
-  registration_parameters_file_path = fullfile(settingsdir, analysis_protocol, registration_parameters_file_name) ;
-  registration_parameters = ReadParams(registration_parameters_file_path) ;
-  arena_r_mm = registration_parameters.circleRadius_mm ;
-  options.arena_r_mm = arena_r_mm ;
+  if isfield(dataloc_params,'registrationparamsfilestr'),
+    registration_parameters_file_name = dataloc_params.registrationparamsfilestr ;
+    registration_parameters_file_path = fullfile(settingsdir, analysis_protocol, registration_parameters_file_name) ;
+    registration_parameters = ReadParams(registration_parameters_file_path) ;
+    arena_r_mm = registration_parameters.circleRadius_mm ;
+    options.arena_r_mm = arena_r_mm ;
+  end
   
   % Run the tracker proper
   fda_batch_track_single_video(expdir, video_file_path, flytracker_parent_calibration_file_path, options, flytracker_calibration_file_name)  
