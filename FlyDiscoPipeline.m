@@ -235,6 +235,10 @@ function FlyDiscoPipeline(expdir, varargin)
     cluster_billing_account_name = lookup_in_struct(analysis_parameters, 'cluster_billing_account_name') ;
     sshhost = lookup_in_struct(analysis_parameters, 'sshhost') ;
     debug = lookup_in_struct(analysis_parameters, 'debug') ;
+    do_try = lookup_in_struct(analysis_parameters, 'do_try', true) ;
+      % Whether or not we wrap the running of each stage in a try-catch clause.
+      % Should be true in production runs to ensure that the final ACC stage runs
+      % even if a core stage throws.
 
     % Handle the per-stage parameters
     stage_function_from_stage_name = FlyDiscoStageFunctionFromName() ;
@@ -299,10 +303,6 @@ function FlyDiscoPipeline(expdir, varargin)
                          analysis_protocol, ...
                          stage_function_from_stage_name, ...
                          stage_additional_arguments_from_stage_name, ...
-                         dataloc_params) ;
-
-
-
-    %% If we get here, analysis has completed successfully
-    fprintf('Analysis pipeline completed!\n');        
+                         dataloc_params, ...
+                         do_try) ;
 end  % function

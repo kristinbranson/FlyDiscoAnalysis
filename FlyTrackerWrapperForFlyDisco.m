@@ -1,5 +1,6 @@
 function FlyTrackerWrapperForFlyDisco(expdir, varargin)
   % Process arguments
+  % NB: Leave the dataloc_params optional argument in place, b/c KB needs it.  -- ALT, 2024-08-19
   [analysis_protocol, settingsdir, forcecompute, debug, ~, dataloc_params] = ...
     myparse(varargin,...
             'analysis_protocol','current_bubble',...
@@ -62,6 +63,8 @@ function FlyTrackerWrapperForFlyDisco(expdir, varargin)
   
   % Get the arena radius from the registration parameters, and stuff it into the
   % options. (tracker() is such that this value will override any value in the parent calibration).
+  % The "if isfield(dataloc_params,'registrationparamsfilestr')" check is needed
+  % to support non-circular arenas used by external code.  -- ALT, 2024-08-18
   if isfield(dataloc_params,'registrationparamsfilestr'),
     registration_parameters_file_name = dataloc_params.registrationparamsfilestr ;
     registration_parameters_file_path = fullfile(settingsdir, analysis_protocol, registration_parameters_file_name) ;

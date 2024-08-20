@@ -17,7 +17,7 @@ for i = 1:numel(fs),
   end
   if f.isdir,
     srcdir1 = fullfile(srcdir,f.name);
-    isexpdir = is_experiment_folder_given_contents(srcdir1);
+    isexpdir = is_experiment_folder_given_name(srcdir1);
     %[~,isexpdir] = parseExpDir(f.name);
     destdir1 = fullfile(destdir,f.name);
     if isexpdir,
