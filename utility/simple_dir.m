@@ -4,8 +4,17 @@ function [name, is_folder, file_size, modification_datetime] = simple_dir(templa
     is_bs = ismember(name_raw, {'.', '..'}) ;
     s = s_raw(~is_bs) ;
     name = {s.name} ;
+    if nargout < 2 ,
+      return
+    end
     is_folder = [s.isdir] ;
+    if nargout < 3 ,
+      return
+    end
     file_size = [s.bytes] ;
+    if nargout < 4 ,
+      return
+    end
     modification_datetime = datetime([s.datenum], 'ConvertFrom', 'datenum', 'TimeZone', 'local') ;
     modification_datetime.TimeZone = 'UTC' ;  
         % This does the proper conversion from the local timezone to UTC.
