@@ -36,43 +36,43 @@ initial_optional_argument_list = { ...
   'do_try', do_try } ;
 optional_argument_list = horzcat(initial_optional_argument_list, analysis_parameters) ;
 
-read_only_experiments_folder_path = fullfile(fly_disco_folder_path, 'example-experiments', 'passing-test-suite-experiments-with-tracking-read-only') ;
+%read_only_experiments_folder_path = fullfile(fly_disco_folder_path, 'example-experiments', 'passing-test-suite-experiments-with-tracking-read-only') ;
 working_experiments_folder_path = fullfile(fly_disco_folder_path, 'example-experiments', 'passing-test-suite-experiments-with-tracking') ;
 
-% Recopy the working folder from the read-only one
-if do_reset_working_experiments_folder || ~exist(working_experiments_folder_path, 'dir')
-  fprintf('Resetting working experiments folder...\n') ;
-  tic_id = tic() ;
-  reset_experiment_working_copies(working_experiments_folder_path, read_only_experiments_folder_path) ;
-  elapsed_time = toc(tic_id) ;
-  fprintf('Elapsed time: %g s\n', elapsed_time) ;
-end
+% % Recopy the working folder from the read-only one
+% if do_reset_working_experiments_folder || ~exist(working_experiments_folder_path, 'dir')
+%   fprintf('Resetting working experiments folder...\n') ;
+%   tic_id = tic() ;
+%   reset_experiment_working_copies(working_experiments_folder_path, read_only_experiments_folder_path) ;
+%   elapsed_time = toc(tic_id) ;
+%   fprintf('Elapsed time: %g s\n', elapsed_time) ;
+% end
 
 % Find the experiments
 folder_path_from_experiment_index = find_experiment_folders(working_experiments_folder_path) ;
 
-% Call the testing function to do the real work
-run_transfero_FlyDiscoPipeline_wrapper_on_experiment_list(...
-  folder_path_from_experiment_index, ...
-  cluster_billing_account_name, ...
-  user_name_for_configuration_purposes, ...
-  do_use_bqueue, ...
-  do_actually_submit_jobs, ...
-  do_try, ...
-  submit_host_name, ...
-  optional_argument_list{:})
+% % Call the testing function to do the real work
+% run_transfero_FlyDiscoPipeline_wrapper_on_experiment_list(...
+%   folder_path_from_experiment_index, ...
+%   cluster_billing_account_name, ...
+%   user_name_for_configuration_purposes, ...
+%   do_use_bqueue, ...
+%   do_actually_submit_jobs, ...
+%   do_try, ...
+%   submit_host_name, ...
+%   optional_argument_list{:})
 
 % All the ACC check files should exist, but for some experiments ACC check
 % failure is the desired result.
 does_acc_mat_file_exist_from_experiment_folder_index = cellfun(@does_acc_mat_file_exist, folder_path_from_experiment_index) ;
-do_all_acc_mat_files_exist = all(did_succeed_from_experiment_folder_index) ;
-if do_all_acc_mat_files_exist ,
+do_all_acc_mat_files_exist = all(does_acc_mat_file_exist_from_experiment_folder_index) ;
+if ~do_all_acc_mat_files_exist ,
   fprintf('Test failed---not all ACC mat files are present.\n') ;  
   return
 end
 
 % Check for success in the ACC output files
-should_acc_pass_from_experiment_folder_index = cellfun(@determine_if_acc_checks_should_pass_on_experiment_folder, folder_path_from_experiment_index) ;
+should_acc_pass_from_experiment_folder_index = cellfun(@determine_if_acc_should_pass_on_experiment_folder, folder_path_from_experiment_index) ;
 did_acc_pass_from_experiment_folder_index = cellfun(@did_acc_pass_for_experiment_folder, folder_path_from_experiment_index) ;
 did_all_do_the_right_thing = all(did_acc_pass_from_experiment_folder_index==should_acc_pass_from_experiment_folder_index) ;
 if did_all_do_the_right_thing ,
