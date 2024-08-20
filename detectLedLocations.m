@@ -1,4 +1,4 @@
-function result = ...
+function [result, templateShapeXY] = ...
   detectLedLocations(...
       registration_data, ...
       indicator_params, ...
@@ -20,7 +20,7 @@ else
 end
 if exist(led_protocol_file_path,'file')
   protocolOfSomeKind = loadSingleVariableAnonymously(led_protocol_file_path, 'protocol') ;
-  protocol = downmixProtocolIfNeeded(protocolOfSomeKind) ;
+  protocol = downmixProtocolIfNeeded(protocolOfSomeKind, indicator_params) ;
 else
   error('LED protocol file %s does not exist', dataloc_params.ledprotocolfilestr) ;
 end
@@ -38,7 +38,7 @@ end
                                      protocol, ...
                                      dt, ...
                                      rigId) ;
-
+templateShapeXY = fliplr(size(template)) ;
 
 
 %

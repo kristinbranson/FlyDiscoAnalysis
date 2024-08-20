@@ -1,6 +1,7 @@
 function [firstframes, firstframes_off, endframes_off, nframes, indicatorframes] = ...
         DetermineStartAndEndOfResultsMovieSnippets(isOptogeneticExp, registration_data, ctraxresultsmovie_params, ...
-                                                   is_using_default_ctrax_results_movie_params, indicator_data, raw_protocol)
+                                                   is_using_default_ctrax_results_movie_params, indicator_data, raw_protocol, ...
+                                                   indicator_params)
 
     %DetermineStartAndEndOfResultsMovieSnippets  Use information from various
     %sources to determine which frames to use for each snippet included in the
@@ -34,7 +35,7 @@ function [firstframes, firstframes_off, endframes_off, nframes, indicatorframes]
         % If an optogenetic experiment
         if is_using_default_ctrax_results_movie_params,
             % Extract the indicatorframes from the protocol
-            protocol = downmixProtocolIfNeeded(raw_protocol) ;            
+            protocol = downmixProtocolIfNeeded(raw_protocol, indicator_params) ;            
             indicatorframes = indicatorframes_from_protocol(protocol) ;            
         else
             % Get the indicatorframes from the ctrax-results params
@@ -42,8 +43,9 @@ function [firstframes, firstframes_off, endframes_off, nframes, indicatorframes]
         end
         % "indicatorframes" could maybe also be named train_index_from_snippet_index,
         % if one was being long-winded, I think  -- ALT, 2024-03-22
-        indicatorLED = indicator_data.indicatorLED ;
-        indicator_train_count = length(indicatorLED.startframe) ;
+        indicatorLED = downmix_indicatorLED(indicator_data.indicatorLED) ;
+        startframe = indicatorLED.startframe ;
+        indicator_train_count =  numel(startframe) ;
         are_all_indicatorframes_valid = (max(indicatorframes) <= indicator_train_count) ;
         if ~all(are_all_indicatorframes_valid) ,
             error(['The largest train index in the ctrax-results movie params (%d) is larger than the number of trains in the LED indicator trace (%d).  ' ...
@@ -51,7 +53,7 @@ function [firstframes, firstframes_off, endframes_off, nframes, indicatorframes]
                   max(indicatorframes), ...
                   indicator_train_count) ;
         end
-        firstframes_off = indicatorLED.startframe(indicatorframes) - ctraxresultsmovie_params.nframes_beforeindicator;        
+        firstframes_off = startframe(indicatorframes) - ctraxresultsmovie_params.nframes_beforeindicator;        
         % Promote nframes to a vector if necessary
         if isvector(firstframes_off) && isscalar(nframes_from_params) ,
             nframes = repmat(nframes_from_params, size(firstframes_off)) ;

@@ -29,8 +29,8 @@ settings_folder_path = fullfile(fly_disco_analysis_folder_path, 'settings-intern
 do_use_bqueue = true ;
 do_actually_submit_jobs = true ;
 do_try = true ;
-do_reset_working_experiments_folder = true ;
 do_run_caboose = true ;
+do_reset_working_experiments_folder = true ;
 submit_host_name = if_not_a_submit_host('submit.int.janelia.org') ;
 initial_optional_argument_list = { ...
   'settingsdir', settings_folder_path, ...
@@ -65,7 +65,7 @@ run_transfero_FlyDiscoPipeline_wrapper_on_experiment_list(...
   optional_argument_list{:})
 
 % Check for success in the ACC output files
-did_succeed_from_experiment_folder_index = cellfun(@did_analysis_of_experiment_folder_succeed, folder_path_from_experiment_index)
+did_succeed_from_experiment_folder_index = cellfun(@did_analysis_of_experiment_folder_succeed, folder_path_from_experiment_index) ;
 did_all_succeed = all(did_succeed_from_experiment_folder_index) ;
 if did_all_succeed ,
   fprintf('Test passed.\n') ;

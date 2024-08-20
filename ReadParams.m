@@ -1,10 +1,11 @@
 function params = ReadParams(filename)
 
-params = struct;
-fid = fopen(filename,'r');
-if fid < 0,
+params = struct() ;
+fid = fopen(filename, 'r') ;
+if fid < 0 ,
   error('Could not open parameter file %s for reading',filename);
 end
+cleaner = onCleanup(@()(fclose(fid))) ;
 while true,
   s = fgetl(fid);
   
@@ -53,6 +54,4 @@ while true,
     continue;
   end
 
-end
-
-fclose(fid);
+end  % while
