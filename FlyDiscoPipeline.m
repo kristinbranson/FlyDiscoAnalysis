@@ -224,6 +224,14 @@ function FlyDiscoPipeline(expdir, varargin)
     [analysis_parameters_according_to_protocol, dataloc_params, analysis_protocol_folder_path] = ...
         readIntermediateAnalysisParameters(settingsdir, analysis_protocol) ;     % analysis params according to defaults and the analysis-protocol folder
 
+    % Print the canonical path to the analysis folder
+    canonical_analysis_protocol_folder_path = realpath(absolute_filename(analysis_protocol_folder_path)) ;
+    fprintf('Canonical path to analysis protocol folder is:\n  %s\n\n', canonical_analysis_protocol_folder_path) ;
+    
+    % Print the canonical path to the experiment folder
+    canonical_experiment_folder_path = realpath(absolute_filename(expdir)) ;
+    fprintf('Canonical path to experiment folder is:\n  %s\n\n', canonical_experiment_folder_path) ;
+        
     % Merge in the argument parameters
     analysis_parameters = merge_structs(analysis_parameters_according_to_protocol, argument_parameters) ;
     do_run = do_run_from_analysis_parameters(analysis_parameters) ;  % whether or not to run each stage
@@ -277,14 +285,6 @@ function FlyDiscoPipeline(expdir, varargin)
       fprintf('  do_run.%s: %s\n', stage_name, value) ;      
     end
     fprintf('\n') ;
-    
-    % Print the canonical path to the analysis folder
-    canonical_analysis_protocol_folder_path = realpath(absolute_filename(analysis_protocol_folder_path)) ;
-    fprintf('Canonical path to analysis protocol folder is:\n  %s\n\n', canonical_analysis_protocol_folder_path) ;
-    
-    % Print the canonical path to the experiment folder
-    canonical_experiment_folder_path = realpath(absolute_filename(expdir)) ;
-    fprintf('Canonical path to experiment folder is:\n  %s\n\n', canonical_experiment_folder_path) ;
     
     %% check that experiment exists
     if ~exist(expdir, 'dir') ,

@@ -32,6 +32,14 @@ function [y, first_sample_index_from_pulse_index, last_sample_index_from_pulse_i
 % previous_kernel = [zeros(1, n_pad) 0 ones(1, n_pad)] ;
 % y_previous = conv(y_raw, previous_kernel, 'same') 
 
+% Convert columnar x to row, convert back at end
+if iscolumn(x) ,
+  was_x_columnar = true ;
+  x = x' ;
+else
+  was_x_columnar = false ;
+end
+
 % For each sample, compute the sum of the previous, next n_pad samples
 % This code is faster than the commented-out version above.
 kernel = ones(1, n_pad) ;
@@ -87,3 +95,10 @@ end
 % Extract start+end frames, which are guaranteed to be paired, and in order,
 % and start with a pulse-start and end with a pulse-end
 [first_sample_index_from_pulse_index, last_sample_index_from_pulse_index] = compute_pulse_starts_and_ends(y) ;
+
+% Convert y to a column, if needed
+if was_x_columnar ,
+  y = y' ; 
+  first_sample_index_from_pulse_index = first_sample_index_from_pulse_index' ;
+  last_sample_index_from_pulse_index = last_sample_index_from_pulse_index' ;
+end
