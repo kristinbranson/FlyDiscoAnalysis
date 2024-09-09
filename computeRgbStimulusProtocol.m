@@ -1,9 +1,9 @@
 function [result, t] = computeRgbStimulusProtocol(protocol)
 
 % Extract out the protocol for each color channel
-red_protocol = ConvertRGBprotocol2protocolformat(protocol, [1 0 0]) ;
-green_protocol = ConvertRGBprotocol2protocolformat(protocol, [0 1 0]) ;
-blue_protocol = ConvertRGBprotocol2protocolformat(protocol, [0 0 1]) ;
+red_protocol = single_channel_protocol_from_multi_channel_protocol(protocol, 'R') ;
+green_protocol = single_channel_protocol_from_multi_channel_protocol(protocol, 'G') ;
+blue_protocol = single_channel_protocol_from_multi_channel_protocol(protocol, 'B') ;
 
 % Compute the signal for each color channel
 dt = 0.001 ;  % s

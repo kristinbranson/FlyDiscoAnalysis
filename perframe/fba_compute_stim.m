@@ -1,4 +1,4 @@
-function [data,units] = compute_stim(trx,n,stimtype,stimnums)
+function [data,units] = fba_compute_stim(trx,n,stimtype,stimnums)
 
 ind = false(1,trx.movie_nframes(n));
 for ii = 1:numel(stimnums),

@@ -30,12 +30,10 @@ do_use_bqueue = true ;
 do_actually_submit_jobs = true ;
 do_try = true ;
 do_reset_working_experiments_folder = true ;
-do_run_caboose = true ;
 submit_host_name = if_not_a_submit_host('submit.int.janelia.org') ;
 initial_optional_argument_list = { ...
   'settingsdir', settings_folder_path, ...
-  'do_try', do_try, ...
-  'do_run_caboose', do_run_caboose } ;
+  'do_try', do_try } ;
 optional_argument_list = horzcat(initial_optional_argument_list, analysis_parameters) ;
 
 read_only_experiments_folder_path = fullfile(fly_disco_folder_path, 'example-experiments', 'passing-test-suite-experiments-with-tracking-read-only') ;
@@ -64,11 +62,21 @@ run_transfero_FlyDiscoPipeline_wrapper_on_experiment_list(...
   submit_host_name, ...
   optional_argument_list{:})
 
+% All the ACC check files should exist, but for some experiments ACC check
+% failure is the desired result.
+does_acc_mat_file_exist_from_experiment_folder_index = cellfun(@does_acc_mat_file_exist, folder_path_from_experiment_index) ;
+do_all_acc_mat_files_exist = all(did_succeed_from_experiment_folder_index) ;
+if do_all_acc_mat_files_exist ,
+  fprintf('Test failed---not all ACC mat files are present.\n') ;  
+  return
+end
+
 % Check for success in the ACC output files
-did_succeed_from_experiment_folder_index = cellfun(@did_analysis_of_experiment_folder_succeed, folder_path_from_experiment_index)
-did_all_succeed = all(did_succeed_from_experiment_folder_index) ;
-if did_all_succeed ,
+should_acc_pass_from_experiment_folder_index = cellfun(@determine_if_acc_checks_should_pass_on_experiment_folder, folder_path_from_experiment_index) ;
+did_acc_pass_from_experiment_folder_index = cellfun(@did_acc_pass_for_experiment_folder, folder_path_from_experiment_index) ;
+did_all_do_the_right_thing = all(did_acc_pass_from_experiment_folder_index==should_acc_pass_from_experiment_folder_index) ;
+if did_all_do_the_right_thing ,
   fprintf('Test passed.\n') ;
 else
-  fprintf('Test failed.\n') ;  
+  fprintf('Test failed---some files that should have passed ACC did not, or vice-versa.\n') ;  
 end

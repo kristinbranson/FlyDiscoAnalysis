@@ -1,4 +1,4 @@
-function do_continue_pipeline = CheckACIResultsFileContents(expdir, dataloc_params, stage)  %#ok<INUSD>
+function do_continue_pipeline = CheckACIResultsFileContents(expdir, dataloc_params)
     aci_results_as_text_file_name = dataloc_params.automaticchecksincomingresultsfilestr ;
     aci_results_as_text_file_path = fullfile(expdir, aci_results_as_text_file_name) ;
     aci_results = ReadParams(aci_results_as_text_file_path) ;

@@ -1,9 +1,21 @@
-function FlyTrackerWrapperForFlyDisco(expdir, settingsdir, analysis_protocol, dataloc_params, do_force_tracking)
+function FlyTrackerWrapperForFlyDisco(expdir, varargin)
   % Process arguments
-  if nargin<5 || isempty(do_force_tracking) ,
-    do_force_tracking = false ;
-  end    
+  % NB: Leave the dataloc_params optional argument in place, b/c KB needs it.  -- ALT, 2024-08-19
+  [analysis_protocol, settingsdir, forcecompute, debug, ~, dataloc_params] = ...
+    myparse(varargin,...
+            'analysis_protocol','current_bubble',...
+            'settingsdir', default_settings_folder_path(), ...
+            'forcecompute', false, ...
+            'debug',false, ...
+            'do_run',[],...
+            'dataloc_params',[]) ;  %#ok<ASGLU> 
     
+  % Read in the dataloc_params
+  if isempty(dataloc_params),
+    datalocparamsfile = fullfile(settingsdir, analysis_protocol, 'dataloc_params.txt') ;
+    dataloc_params = ReadParams(datalocparamsfile) ;
+  end
+
   % Determine paths to needed files
   flytracker_parent_calibration_file_name = dataloc_params.flytrackerparentcalibrationstr ;
   flytracker_parent_calibration_file_path = fullfile(settingsdir, analysis_protocol, flytracker_parent_calibration_file_name) ;
@@ -47,15 +59,19 @@ function FlyTrackerWrapperForFlyDisco(expdir, settingsdir, analysis_protocol, da
   % Override certain options, since we get those directly from arguments or
   % dataloc_params
   %options.f_parent_calib = flytracker_parent_calibration_file_path ;  
-  options.do_recompute_tracking = do_force_tracking ;
+  options.do_recompute_tracking = forcecompute ;
   
   % Get the arena radius from the registration parameters, and stuff it into the
   % options. (tracker() is such that this value will override any value in the parent calibration).
-  registration_parameters_file_name = dataloc_params.registrationparamsfilestr ;
-  registration_parameters_file_path = fullfile(settingsdir, analysis_protocol, registration_parameters_file_name) ;
-  registration_parameters = ReadParams(registration_parameters_file_path) ;
-  arena_r_mm = registration_parameters.circleRadius_mm ;
-  options.arena_r_mm = arena_r_mm ;
+  % The "if isfield(dataloc_params,'registrationparamsfilestr')" check is needed
+  % to support non-circular arenas used by external code.  -- ALT, 2024-08-18
+  if isfield(dataloc_params,'registrationparamsfilestr'),
+    registration_parameters_file_name = dataloc_params.registrationparamsfilestr ;
+    registration_parameters_file_path = fullfile(settingsdir, analysis_protocol, registration_parameters_file_name) ;
+    registration_parameters = ReadParams(registration_parameters_file_path) ;
+    arena_r_mm = registration_parameters.circleRadius_mm ;
+    options.arena_r_mm = arena_r_mm ;
+  end
   
   % Run the tracker proper
   fda_batch_track_single_video(expdir, video_file_path, flytracker_parent_calibration_file_path, options, flytracker_calibration_file_name)  

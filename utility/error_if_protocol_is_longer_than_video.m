@@ -1,4 +1,4 @@
-function error_if_protocol_is_longer_than_video(expdir, settingsdir, analysis_protocol)
+function error_if_protocol_is_longer_than_video(expdir, settingsdir, analysis_protocol, do_run)
 % Throws an error if this is an optogenetic experiment and the protocol is
 % longer than the video.  Otherwise, exits normally.  This reads all the info
 % it needs from the experiment folder and the analysis-protocol folder, even
@@ -33,7 +33,7 @@ raw_registration_params = ReadParams(registrationparamsfile);
 registration_params = modernizeRegistrationParams(raw_registration_params) ;
 
 % Load trajectories
-ctraxfile = fullfile(expdir,dataloc_params.ctraxfilestr);
+ctraxfile = determine_downstream_trx_file_path(expdir, dataloc_params, do_run) ;
 moviefile = fullfile(expdir,dataloc_params.moviefilestr);
 [trx,~,succeeded,timestamps] = load_tracks(ctraxfile,moviefile,'annname','');
 if ~succeeded,
@@ -49,7 +49,7 @@ video_duration = dt*nframes ;
 % Read in the LED protocol, compute the total protocol duration
 ledprotocolfile = fullfile(expdir,dataloc_params.ledprotocolfilestr);
 raw_protocol = loadAnonymous(ledprotocolfile) ;
-protocol = downmixProtocolIfNeeded(raw_protocol) ;
+protocol = downmixProtocolIfNeeded(raw_protocol, indicator_params) ;
   % We downmix the (possibly RGB) protocol as an expedient, because we want to
   % take an RGB protocol as input.  When we enrich support for RGB protocols, we
   % should change this.
