@@ -4,14 +4,16 @@
 cluster_billing_account_name = 'branson' ;
 user_name_for_configuration_purposes = 'bransonlab' ; 
 
-settings_folder_path = '/groups/branson/home/robiea/Code_versioned/BransonFlyDiscoSettings/settings';
+% settings_folder_path = '/groups/branson/home/robiea/Code_versioned/BransonFlyDiscoSettings/settings';
 % settings_folder_path = '/groups/branson/home/robiea/Code_versioned/FlyDiscoAnalysis/settings-internal';
+settings_folder_path = '/groups/branson/home/robiea/Code_versioned/BransonFlyDiscoSettings/settings';
 % analysis_protocol_use = '20240124_multibubble_secondtry';
 % analysis_protocol_use = '20240521_flybubble_LED_VNC3';
-optional_argument_list = {'settingsdir', settings_folder_path};
+analysis_protocol_use   = '20240908_flybubble_centralcomplex';
+optional_argument_list = {'settingsdir', settings_folder_path,'analysis_protocol',analysis_protocol_use};
 do_use_bqueue = true ;
 do_actually_submit_jobs = true ;
-do_try = false ;
+do_try = true ;
 ssh_host_name = 'login2.int.janelia.org' ;
 
 % explist to run
@@ -56,7 +58,10 @@ ssh_host_name = 'login2.int.janelia.org' ;
 % folder_path_from_experiment_index = {'/groups/branson/bransonlab/flydisco_data/VNC2_YNA_K_162984_RigA_20220802T121645'};
 
 %test rerunning failed experiments
-folder_path_from_experiment_index = {'/groups/branson/bransonlab/flydisco_data/VNC3_YNA_K_162984_RigD_20240702T123257'};
+% folder_path_from_experiment_index = {'/groups/branson/bransonlab/flydisco_data/VNC3_YNA_K_162984_RigD_20240702T123257'};
+
+%test new settings dir for cx
+folder_path_from_experiment_index = {'/groups/branson/home/robiea/Projects_data/FlyBubbleMethods/Data/CsChr_OL0046B/cx_GMR_OL0046B_CsChr_RigC_20150408T142551_testing'};
 
 % Call the user-facing run function to do the real work
 run_transfero_FlyDiscoPipeline_wrapper_on_experiment_list(folder_path_from_experiment_index, ...

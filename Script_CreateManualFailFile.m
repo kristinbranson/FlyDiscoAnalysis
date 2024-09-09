@@ -38,8 +38,8 @@ rootdatadir = '/groups/branson/bransonlab/flydisco_data';
 % failure_category = 'testing';
 
 % WL 43
-expdirlist = {'VNC2_EXT_VGLUT-GAL4_RigA_20231205T115555'};
-failure_category =  'crud in bubble';
+% expdirlist = {'VNC2_EXT_VGLUT-GAL4_RigA_20231205T115555'};
+% failure_category =  'crud in bubble';
 % % WL # 38
 % expdirlist = {'VNC2_JRC_SS76743_RigB_20230926T111421'};
 % failure_category =  'crud in bubble';
@@ -237,6 +237,10 @@ failure_category =  'crud in bubble';
 % 'VNC_EXT_VGLUT-GAL4_RigC_20210601T143220'
 % 'VNC_JRC_SS38601_RigD_20210601T144117'};
 % failure_category = 'tracked fly outside bubble';
+
+% fail WL 51 - temperature issue July 2024
+expdirlist = textread('/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/julytempissue_20240709and10.txt','%s');
+failure_category = 'temperature ctrl failed';
 
 %%
 for i = 1:numel(expdirlist)

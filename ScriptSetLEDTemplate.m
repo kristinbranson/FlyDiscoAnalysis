@@ -86,3 +86,25 @@ imr = min(nr,nc);
 dcornerfrac = dcorner / imr
 
 % maxDistCornerFrac_BowlLabel = .12;
+
+%% makes masks for multicolor optogenetics
+% read in LED template made in earlier step
+image = imread('LEDTemplates_multiBubble.png');
+
+figure
+imshow(image);
+title('Draw a circle and double-click to confirm');
+
+h = drawcircle();
+
+binarymask = createMask(h);
+
+% show template and mask
+
+figure
+subplot(1, 2, 1), imshow(image), title('LED template image');
+subplot(1, 2, 2), imshow(binaryMask), title('Binary Mask');
+
+% i think 'mask_1' is controlled vocabulary
+imwrite(uint8(binarymask),'LEDTemplates_RGBbubble_mask_1.png')
+
