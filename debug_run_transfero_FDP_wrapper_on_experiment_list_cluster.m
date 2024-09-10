@@ -61,10 +61,10 @@ ssh_host_name = 'login2.int.janelia.org' ;
 % folder_path_from_experiment_index = {'/groups/branson/bransonlab/flydisco_data/VNC3_YNA_K_162984_RigD_20240702T123257'};
 
 %test new settings dir for cx
-% folder_path_from_experiment_index = {'/groups/branson/home/robiea/Projects_data/FlyBubbleMethods/Data/CsChr_OL0046B/cx_GMR_OL0046B_CsChr_RigC_20150408T142551'};
-folder_path_from_experiment_index = {'/groups/branson/home/robiea/Projects_data/FlyBubbleMethods/Data/CsChr_OL0046B/cx_GMR_OL0046B_CsChr_RigA_20150617T094711'
-'/groups/branson/home/robiea/Projects_data/FlyBubbleMethods/Data/CsChr_OL0046B/cx_GMR_OL0046B_CsChr_RigB_20150623T102758'
-'/groups/branson/home/robiea/Projects_data/FlyBubbleMethods/Data/CsChr_OL0046B/cx_GMR_OL0046B_CsChr_RigD_20150708T092748'}
+folder_path_from_experiment_index = {'/groups/branson/home/robiea/Projects_data/FlyBubbleMethods/Data/CsChr_OL0046B/cx_GMR_OL0046B_CsChr_RigC_20150408T142551'};
+% folder_path_from_experiment_index = {'/groups/branson/home/robiea/Projects_data/FlyBubbleMethods/Data/CsChr_OL0046B/cx_GMR_OL0046B_CsChr_RigA_20150617T094711'
+% '/groups/branson/home/robiea/Projects_data/FlyBubbleMethods/Data/CsChr_OL0046B/cx_GMR_OL0046B_CsChr_RigB_20150623T102758'
+% '/groups/branson/home/robiea/Projects_data/FlyBubbleMethods/Data/CsChr_OL0046B/cx_GMR_OL0046B_CsChr_RigD_20150708T092748'}
 % Call the user-facing run function to do the real work
 run_transfero_FlyDiscoPipeline_wrapper_on_experiment_list(folder_path_from_experiment_index, ...
                                                           cluster_billing_account_name, ...
