@@ -1,0 +1,8 @@
+lbl_file,/groups/branson/bransonlab/DataforAPT/FlyBubble/APTprojects/20220826_Grone_60K_aligned_nslots.lbl
+model_ndx,1
+bindpaths,/groups,/nrs
+singularityimg,/groups/branson/bransonlab/apt/sif/apt_20230427_tf211_pytorch113_ampere.sif
+gpuqueue,gpu_l4_large
+dobsub,true
+maxwaittime,28800
+maxupdatetime,28800

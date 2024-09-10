@@ -1,0 +1,8 @@
+min_seconds_fliesloaded,0
+max_seconds_fliesloaded,60
+#ONLY for non optogenetic experiments, registration params: usemediandt = 0
+min_movie_length_seconds, 295
+control_line_names,pBDPGAL4U
+required_files,Metadata.xml,movie.ufmf
+desired_files,FlyBowlDataCaptureParams_BIAS*.txt,cx__BARCODE.csv,Log.txt,QuickStats.png,QuickStats.txt,StimulusTimingLog.txt
+frame_rate,150
