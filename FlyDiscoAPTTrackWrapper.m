@@ -47,6 +47,7 @@ end
 
 % Deal with failure
 if ~success ,
+  stage_name = 'apt' ;
   flydisco_pipeline_error(stage_name, msgs) ;
 end
 
