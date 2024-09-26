@@ -43,8 +43,17 @@ rootdatadir = '/groups/branson/bransonlab/flydisco_data';
 % savefile = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_VNC_20240711';
 % [expdirstruct] = getExperimentDirsFlyDisco(rootdatadir,'metadatafile','Metadata.xml','expdirname','VNC*','autocheckin',true,'autocheckcomplete',true,'manualcheck',true,'TrajNum',false);
 
-savefile = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_VNC2_20240711';
-[expdirstruct] = getExperimentDirsFlyDisco(rootdatadir,'metadatafile','Metadata.xml','expdirname','VNC2*','autocheckin',true,'autocheckcomplete',true,'manualcheck',false,'TrajNum',false);
+% savefile = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_VNC2_20240711';
+% [expdirstruct] = getExperimentDirsFlyDisco(rootdatadir,'metadatafile','Metadata.xml','expdirname','VNC2*','autocheckin',true,'autocheckcomplete',true,'manualcheck',false,'TrajNum',false);
+
+% savefile = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_VNC2202305_20240822';
+% [expdirstruct] = getExperimentDirsFlyDisco(rootdatadir,'metadatafile','Metadata.xml','expdirname','VNC2*','date','202305*','autocheckin',true,'autocheckcomplete',true,'manualcheck',false,'TrajNum',false);
+
+% savefile = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_VNC2202407_20240823';
+% [expdirstruct] = getExperimentDirsFlyDisco(rootdatadir,'metadatafile','Metadata.xml','expdirname','VNC3*','date','202407*','autocheckin',true,'autocheckcomplete',true,'manualcheck',false,'TrajNum',false);
+
+savefile = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_allVNC_tofindmanualF_20240824';
+[expdirstruct] = getExperimentDirsFlyDisco(rootdatadir,'metadatafile','Metadata.xml','expdirname','VNC*','autocheckin',true,'autocheckcomplete',true,'manualcheck',true,'TrajNum',false);
 
 
 % savefile = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_VNC2_20220915';
@@ -286,4 +295,14 @@ for i = 1:numel(expdirstruct)
     fprintf(fid,'%s\t %s\t %s\t %s\t %s\t %s\t %s\t %s \n',expname, datestr,datetimestr,linename,autopf,autopfcat,manpf,manpfcat);
 end
 
+fclose(fid);
+
+%% list of experiments with manual fail
+idx = strcmp({expdirstruct.manual_fail},'F');
+idx2 = find(idx);
+savefile = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/moveto_nearlineVNCscreen_notinuse.txt';
+fid = fopen(savefile,'w');
+for i = 1:numel(idx2)
+    fprintf(fid,'%s\n',expdirstruct(idx2(i)).file_system_path);
+end
 fclose(fid);

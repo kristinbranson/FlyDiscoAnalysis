@@ -61,7 +61,7 @@ end
 downmixed_indicatorLED = downmix_indicatorLED(indicatorLED) ;
 
 % Perform the test, error if it fails
-nprotocolstim = distinct_pulse_count_from_single_channel_protocol(protocol) ;
+nprotocolstim = distinct_pulse_count_from_single_channel_protocol(protocol, indicator_params.pad) ;
 ndetectedstim = numel(downmixed_indicatorLED.startframe) ;
 do_stim_counts_match = ( nprotocolstim == ndetectedstim ) ;
 if do_stim_counts_match ,

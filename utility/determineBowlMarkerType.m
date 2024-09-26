@@ -25,7 +25,7 @@ else
     error('bowlMarkerType not set for plate %s',plateid);
   end
   if ~ismember(bowlmarkertypes{i},{'gradient'}),
-    result = fullfile(analysis_protocol_folder_pathl,bowlmarkertypes{i});
+    result = fullfile(analysis_protocol_folder_path,bowlmarkertypes{i});
   end
 end
 
