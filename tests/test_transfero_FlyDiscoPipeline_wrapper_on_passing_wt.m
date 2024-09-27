@@ -65,7 +65,7 @@ run_transfero_FlyDiscoPipeline_wrapper_on_experiment_list(...
 % All the ACC check files should exist, but for some experiments ACC check
 % failure is the desired result.
 does_acc_mat_file_exist_from_experiment_folder_index = cellfun(@does_acc_mat_file_exist, folder_path_from_experiment_index) ;
-do_all_acc_mat_files_exist = all(did_succeed_from_experiment_folder_index) ;
+do_all_acc_mat_files_exist = all(does_acc_mat_file_exist_from_experiment_folder_index) ;
 if do_all_acc_mat_files_exist ,
   fprintf('Test failed---not all ACC mat files are present.\n') ;  
   return
