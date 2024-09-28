@@ -4,20 +4,15 @@ function [stride, lastFrameIndex] = determineStrideAndLastFrameIndexForLedMaxIma
 % every stride'th frame, up to frame frameToLedPulse.  This function computes
 % good values for stride and frameToLedPulse.
 
-isActiveFromStepIndex = (protocol.intensity~=0) ;  % Steps can have intensity of zero.  We don't want those.
-firstActiveStepIndex = find(isActiveFromStepIndex,1);
-if isempty(firstActiveStepIndex)
-  error('No steps with LED intensity greater than zero')
-end
-% if firstActiveStepIndex~=1 ,
-%   % The computations below need to take into account the durations of the
-%   % "passive" steps before the first active step, if the are to work properly
-%   % for firstActiveStepIndex>1.
-%   error('Current code for LED finding only works if the first step has intensity>0') ;
-% end
-
 % Compute rough values for frameToLedPulse and stride
 if ~isempty(protocol)
+  % Determine which step is the first with non-zero intensity
+  isActiveFromStepIndex = (protocol.intensity~=0) ;  % Steps can have intensity of zero.  We don't want those.
+  firstActiveStepIndex = find(isActiveFromStepIndex,1);
+  if isempty(firstActiveStepIndex)
+    error('No steps with LED intensity greater than zero')
+  end
+
   % Compute the time of the end of the first active "step" in the protocol.
   durationBeforeFirstActiveStep = sum(protocol.duration(1:firstActiveStepIndex-1))/1000 ;  % seconds
   delay = protocol.delayTime(firstActiveStepIndex) ;  % seconds
