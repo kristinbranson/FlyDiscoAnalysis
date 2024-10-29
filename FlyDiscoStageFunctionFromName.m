@@ -5,7 +5,7 @@ function result = FlyDiscoStageFunctionFromName()
 
 result = struct() ;
 result.automaticchecksincoming = @FlyDiscoAutomaticChecksIncoming ;
-result.flytracking = @FlyTrackerWrapperForFlyDisco ;
+result.flytracking = @FlyDiscoFlyTrackerWrapper ;
 result.addpflies = @FlyDiscoAddPFlies ;
 result.registration = @FlyDiscoRegisterTrx ;
 result.ledonoffdetection = @FlyDiscoDetectIndicatorLedOnOff ;
