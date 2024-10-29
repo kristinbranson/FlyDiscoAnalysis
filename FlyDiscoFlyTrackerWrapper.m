@@ -1,4 +1,4 @@
-function FlyTrackerWrapperForFlyDisco(expdir, varargin)
+function FlyDiscoFlyTrackerWrapper(expdir, varargin)
   % Process arguments
   % NB: Leave the dataloc_params optional argument in place, b/c KB needs it.  -- ALT, 2024-08-19
   [analysis_protocol, settingsdir, forcecompute, debug, ~, dataloc_params] = ...
@@ -35,6 +35,14 @@ function FlyTrackerWrapperForFlyDisco(expdir, varargin)
   default_options.expdir_naming = true ;
   default_options.fr_samp = 200 ;  % Max number of frames to use when computing background model
   default_options.n_flies_is_max = true;
+  default_options.do_compute_relative_features = false;  
+    % Normally, when FlyTracker computes JAABA input features, it treats the case
+    % of n==2 flies per chamber as special, and computes relative features like
+    % 'dist_to_other' and 'angle_between' only in the n==2 case.
+    % do_compute_relative_features==true will yield this default behavior.
+    % do_compute_relative_features==false implies that the case
+    % of n==2 flies per chamber will *not* cause relative features to be computed.
+    %  I.e. if this is false, n==2 is treated like any other n.
   
   % Read the options file, if dataloc param specifies it, and it exists
   if isfield(dataloc_params, 'flytrackeroptionsstr') ,
