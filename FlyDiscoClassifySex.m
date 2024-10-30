@@ -85,129 +85,50 @@ end
 
 %% fix sex if gender is not 'b'
 
-% read gender
+% read metadata
 metadatafile = fullfile(expdir,dataloc_params.metadatafilestr);
 metadata = ReadMetadataFile(metadatafile);
+
+% metadata.gender should be one of { 'b', 'm', 'f', 'x' }.  (Can also be
+% uppercase.)
+% 'b' means there are both male and female flies, and we want the gender to be
+%     determined via machine vision.
+% 'm' means all flies are known to be male, so just label them all that way in
+%     registered_trx.mat.
+% 'f' means all flies are known to be female, so just label them all that way in
+%     registered_trx.mat.
+% 'x' means flies might be male or female, but we don't care, so don't bother
+%     determining gender via machine vision.
+
+% Sanitize gender field
 if ~isempty(override_gender),
   metadata.gender = override_gender;
 end
-
-% Fix possible metadata error
-if isfield(metadata, 'gender') && strcmpi(metadata.gender, 'both') ,
+% If field missing, create it, with value 'b'
+if ~isfield(metadata, 'gender') ,
   metadata.gender = 'b' ;
 end
+% Fix possible metadata error
+if strcmpi(metadata.gender, 'both') ,
+  metadata.gender = 'b' ;
+end
+% Make sure the field is lowercase
+metadata.gender = lower(metadata.gender) ;
+% Fix illegal gender field
+valid_gender_values = { 'b', 'm', 'f', 'x' } ;
+if ~any(strcmp(metadata.gender, valid_gender_values)) ,
+  warningNoTrace('metadata.gender is the illegal value ''%s'', setting to ''b''', metadata.gender) ;
+  metadata.gender = 'b' ;  
+end
 
-if isfield(metadata,'gender') && ~strcmpi(metadata.gender,'b'),
-  fprintf('gender is not "b", not doing sex classification, just setting sex to %s for all flies',upper(metadata.gender));
-
-  % set sex to metadata.gender for all flies
-  % also set diagnostics that we can
-  clear diagnostics
-  mean_area_all = nanmean(cat(1,X{:})); %#ok<NANMEAN> 
-  var_area_all = nanstd(cat(1,X{:}),1); %#ok<NANSTD> 
-  for fly = 1:numel(trx),
-    trx(fly).sex = repmat({upper(metadata.gender)},[1,trx(fly).nframes]);
-    diagnostics_curr = struct;
-    diagnostics_curr.normhmmscore = nan;
-    diagnostics_curr.nswaps = 0;
-    diagnostics_curr.meanabsdev = nanmean(abs(X{fly}-mean_area_all)); %#ok<NANMEAN> 
-    diagnostics(fly) = diagnostics_curr; %#ok<AGROW>
-  end
-  
-  mu_area = nan(1,2);
-  var_area = nan(1,2);
-  if strcmpi(metadata.gender,'f'),
-    mu_area(2) = mean_area_all;
-    var_area(2) = var_area_all;
-  elseif strcmpi(metadata.gender,'m'),
-    mu_area(1) = mean_area_all;
-    var_area(1) = var_area_all;
-  end
-  state2sex = {'M','F'};
-  ll = [];
-  
+% Run the machine vision algo to determine sex of each fly, or use the
+% predetermined values if called for.
+if strcmpi(metadata.gender,'b') ,
+  [trx, diagnostics, mu_area, var_area, state2sex, ll] = ...
+    add_sex_field_to_trx_computed_using_machine_vision(trx, X, version, analysis_protocol, sexclassifier_params, sexclassifierin, ...
+                                                       dosave, sexclassifieroutmatfile) ; 
 else
-  
-  %% learn a 2-state HMM for area in an unsupervised manner
-  
-  fprintf('gender = "b", learning 2-state HMM...\n');
-  
-  % initialize parameters
-  nstates = 2;
-  if isfield(sexclassifierin,'ptrans')
-    fprintf(1,'''ptrans'' field present in SC settings...\n');
-
-    ptrans = sexclassifierin.ptrans;
-    psame = 1-ptrans;
-  else
-    fprintf(1,'''ptrans'' field not present in SC settings. Using ''psame'' field...\n');
-   
-    psame = sexclassifierin.psame;
-    ptrans = 1-psame;
-  end
-  fprintf(1,' ... setting [psame ptrans] = [%.03g %.03g]\n',psame,ptrans);
-  ptransmat = ones(nstates)*ptrans;
-  ptransmat(eye(nstates)==1) = psame;
-  
-  if isfield(sexclassifier_params,'frac_female'),
-    prior = [1-sexclassifier_params.frac_female,sexclassifier_params.frac_female];
-  else
-    prior = ones(1,nstates)/nstates;
-  end
-  state2sex = cell(1,nstates);
-  
-  % em for hmm
-  [mu_area,var_area,ll,mu_area_km,var_area_km]=hmm_multiseq_1d(X,nstates,ptransmat,...
-    sexclassifier_params.niters_em,sexclassifier_params.tol_em,...
-    [],prior);
-  if mu_area(1) > mu_area(2),
-    mu_area = mu_area(end:-1:1);
-    var_area = var_area(end:-1:1);
-  end
-  state2sex{argmax(mu_area)} = 'F';
-  state2sex{argmin(mu_area)} = 'M';
-  
-  fprintf(1,'mu_area(1) mu_area_km(1) mu_area(2) mu_area_km(2): %0.3f %0.3f %0.3f %0.3f\n',...
-    mu_area(1),mu_area_km(1),mu_area(2),mu_area_km(2));
-  fprintf(1,'vr_area(1) vr_area_km(1) vr_area(2) vr_area_km(2): %0.3f %0.3f %0.3f %0.3f\n',...
-    var_area(1),var_area_km(1),var_area(2),var_area_km(2));
-    
-    
-  %% save classifier
-  
-  filterorder = sexclassifierin.areasmooth_filterorder;
-  maxfreq = sexclassifierin.areasmooth_maxfreq;
-  maxerrx = sexclassifierin.areasmooth_maxerrx;
-  
-  if dosave,
-    try
-      if exist(sexclassifieroutmatfile,'file'),
-        delete(sexclassifieroutmatfile);
-      end
-    catch ,
-      % Ignore any errors that occur
-    end
-    try
-      save(sexclassifieroutmatfile,'mu_area','var_area','ptrans','prior','ll',...
-        'nstates','state2sex','maxerrx','maxfreq','filterorder','version','analysis_protocol');
-    catch ME,
-      warning('FlyDiscoClassifySex:save',...
-        'Could not save to file %s: %s',sexclassifieroutmatfile,getReport(ME));
-      fprintf('Could not save to file %s: %s\n',sexclassifieroutmatfile,getReport(ME));
-    end
-  end
-  
-  %% classify sex
-  
-  clear diagnostics;
-  for fly = 1:numel(trx),
-    
-    % Viterbi to classify per-frame
-    [trx(fly).sex,diagnostics(fly)] = ClassifySex(X{fly}',...
-      mu_area,var_area,ptransmat,state2sex); %#ok<AGROW>
-    
-  end
-  
+  [trx, diagnostics, mu_area, var_area, state2sex, ll] = add_predetermined_sex_field_to_trx(trx, metadata, X) ;
 end
 
 %% count number of flies, females, males
@@ -334,3 +255,5 @@ if dosave,
 end
 
 %logger.close();
+
+end

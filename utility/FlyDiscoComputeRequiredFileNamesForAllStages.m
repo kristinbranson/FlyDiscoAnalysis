@@ -6,6 +6,10 @@ function result = FlyDiscoComputeRequiredFileNamesForAllStages(analysis_protocol
 % those returned by FlyDiscoStageNames().  All returned file names are relative to the
 % experiment folder.
 
+% This is sometimes needed to determine what files to expect
+metadatafile = fullfile(expdir,dataloc_params.metadatafilestr);
+metadata = ReadMetadataFile(metadatafile);
+
 name_from_stage_index = FlyDiscoStageNames() ;
 stage_count = numel(name_from_stage_index) ;
 
@@ -21,19 +25,12 @@ for stage_index = 1 : stage_count ,
     required_file_names = { dataloc_params.automaticchecksincomingresultsfilestr, ...
                             dataloc_params.automaticchecksincominginfomatfilestr } ;
   elseif strcmp(stage_name, 'flytracking') ,
-    main_required_file_names = { dataloc_params.flytrackercalibrationstr, ...
-                                 dataloc_params.flytrackertrackstr, ...
-                                 dataloc_params.flytrackerbgstr, ...
-                                 dataloc_params.ctraxfilestr, ...
-                                 'movie-feat.mat', ...
-                                 'movie-params.mat'} ;
-    jaaba_folder_name = fileparts(dataloc_params.ctraxfilestr) ;  % typically 'movie_JAABA'
-    jaaba_input_feature_names = compute_flytracker_augmented_jaaba_input_feature_names() ;
-    jaaba_perframe_file_names = ...
-      cellfun(@(feature_name)(sprintf('%s/perframe/%s.mat',jaaba_folder_name,feature_name)), ...
-              jaaba_input_feature_names, ...
-              'UniformOutput', false) ;
-    required_file_names = horzcat(main_required_file_names, jaaba_perframe_file_names) ;
+    required_file_names = { dataloc_params.flytrackercalibrationstr, ...
+                            dataloc_params.flytrackertrackstr, ...
+                            dataloc_params.flytrackerbgstr, ...
+                            dataloc_params.ctraxfilestr, ...
+                            'movie-feat.mat', ...
+                            'movie-params.mat'} ;
   elseif strcmp(stage_name, 'addpflies') ,
     addpflies_trx_output_file_name = determine_addpflies_trx_output_file_name(dataloc_params) ;
     addpflies_ft_tracks_output_file_name = determine_addpflies_ft_tracks_output_file_name(dataloc_params) ;
@@ -47,7 +44,12 @@ for stage_index = 1 : stage_count ,
   elseif strcmp(stage_name, 'ledonoffdetection') ,
     required_file_names = { dataloc_params.indicatordatafilestr } ;    
   elseif strcmp(stage_name, 'sexclassification') ,
-    required_file_names = { dataloc_params.sexclassifiermatfilestr dataloc_params.sexclassifierdiagnosticsfilestr } ;    
+    if isfield(metadata,'gender') && ~(strcmpi(metadata.gender,'b') || strcmpi(metadata.gender,'both')) ,
+      required_file_names = { dataloc_params.sexclassifierdiagnosticsfilestr } ;
+    else
+      required_file_names = { dataloc_params.sexclassifierdiagnosticsfilestr dataloc_params.sexclassifiermatfilestr } ;
+    end        
+    % N.B.: This stage also modifies registered_trx.mat
   elseif strcmp(stage_name, 'computeperframefeatures') ,
     perframe_dir_name = dataloc_params.perframedir ;
     perframefnsfilename = fullfile(analysis_protocol_folder_path, dataloc_params.perframefnsfilestr) ;
