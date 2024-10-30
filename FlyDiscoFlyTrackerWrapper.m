@@ -43,6 +43,9 @@ function FlyDiscoFlyTrackerWrapper(expdir, varargin)
     % do_compute_relative_features==false implies that the case
     % of n==2 flies per chamber will *not* cause relative features to be computed.
     %  I.e. if this is false, n==2 is treated like any other n.
+  default_options.save_JAABA_trk_mat_file = true ;  % whether to save the JABBA/CTRAX trk.mat.
+  default_options.save_JAABA_perframe_features = false ;  % whether to save the JABBA perframe feature .mat files.
+  default_options.save_JAABA_movie_link_or_copy = false ;  % whether to create a link/copy of the movie in the movie_JAABA folder.
   
   % Read the options file, if dataloc param specifies it, and it exists
   if isfield(dataloc_params, 'flytrackeroptionsstr') ,
