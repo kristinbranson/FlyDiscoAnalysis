@@ -44,10 +44,11 @@ for stage_index = 1 : stage_count ,
   elseif strcmp(stage_name, 'ledonoffdetection') ,
     required_file_names = { dataloc_params.indicatordatafilestr } ;    
   elseif strcmp(stage_name, 'sexclassification') ,
-    if isfield(metadata,'gender') && ~(strcmpi(metadata.gender,'b') || strcmpi(metadata.gender,'both')) ,
-      required_file_names = { dataloc_params.sexclassifierdiagnosticsfilestr } ;
-    else
+    sex = sanitize_metadata_sex(metadata) ;
+    if strcmp(sex,'b') ,
       required_file_names = { dataloc_params.sexclassifierdiagnosticsfilestr dataloc_params.sexclassifiermatfilestr } ;
+    else
+      required_file_names = { dataloc_params.sexclassifierdiagnosticsfilestr } ;
     end        
     % N.B.: This stage also modifies registered_trx.mat
   elseif strcmp(stage_name, 'computeperframefeatures') ,
