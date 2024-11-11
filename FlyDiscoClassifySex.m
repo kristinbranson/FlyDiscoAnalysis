@@ -8,7 +8,8 @@ version = '0.2';
   datalocparamsfilestr,...
   outdir,...
   dosave,...
-  override_gender, ...
+  override_gender,...
+  override_sex,...
   ~, ...
   ~, ...
   ~] = ...
@@ -19,6 +20,7 @@ version = '0.2';
             'outdir',[],...
             'dosave',true,...
             'override_gender','', ...
+            'override_sex','', ...
             'forcecompute', false, ...
             'debug', false, ...
             'do_run', []);
@@ -83,52 +85,44 @@ for fly = 1:nflies,
   X{fly} = areacurr(:);
 end
 
-%% fix sex if gender is not 'b'
+%% perform sex classification, if needed
 
 % read metadata
 metadatafile = fullfile(expdir,dataloc_params.metadatafilestr);
 metadata = ReadMetadataFile(metadatafile);
 
-% metadata.gender should be one of { 'b', 'm', 'f', 'x' }.  (Can also be
-% uppercase.)
-% 'b' means there are both male and female flies, and we want the gender to be
-%     determined via machine vision.
-% 'm' means all flies are known to be male, so just label them all that way in
-%     registered_trx.mat.
-% 'f' means all flies are known to be female, so just label them all that way in
-%     registered_trx.mat.
-% 'x' means flies might be male or female, but we don't care, so don't bother
-%     determining gender via machine vision.
+% metadata.sex should be one of { 'b', 'm', 'f', 'x' }.  (Can also be
+% uppercase.)  This field describes how the flies were prepared for the
+% experiment.
+%
+% 'b' means there are both male and female flies, the user would like each 
+%     fly's sex to be identified.  In this case, we use machine vision to
+%     determine the sex of each fly.
+% 'm' means all flies are known to be male.  In this case we simply label 
+%     them all that way in registered_trx.mat, without using machine vision 
+%     to determine the sex of each.
+% 'f' means all flies are known to be female.  In this case we simply label 
+%     them all that way in registered_trx.mat, without using machine vision 
+%     to determine the sex of each.
+% 'x' means flies were not presorted for sex, and the user does not want to 
+%     perform sex classification.  In this case, we label each
+%     fly's sex as 'x' in registered_trx.mat, meaning the sex is unknown.
+%
+% if the metadata lacks a 'sex' field, the deprecated 'gender' field is used as a
+% fallback, for backward compatibility.  If neither field is present, a warning is
+% raised, and 'b' is assumed,
 
-% Sanitize gender field
-if ~isempty(override_gender),
-  metadata.gender = override_gender;
-end
-% If field missing, create it, with value 'b'
-if ~isfield(metadata, 'gender') ,
-  metadata.gender = 'b' ;
-end
-% Fix possible metadata error
-if strcmpi(metadata.gender, 'both') ,
-  metadata.gender = 'b' ;
-end
-% Make sure the field is lowercase
-metadata.gender = lower(metadata.gender) ;
-% Fix illegal gender field
-valid_gender_values = { 'b', 'm', 'f', 'x' } ;
-if ~any(strcmp(metadata.gender, valid_gender_values)) ,
-  warningNoTrace('metadata.gender is the illegal value ''%s'', setting to ''b''', metadata.gender) ;
-  metadata.gender = 'b' ;  
-end
+% Sanitize sex field
+sex = sanitize_metadata_sex(metadata, override_sex, override_gender) ;  % guaranteed to be one of {'b', 'm', 'f', 'x'}
 
 % Run the machine vision algo to determine sex of each fly, or use the
 % predetermined values if called for.
-if strcmpi(metadata.gender,'b') ,
+if strcmp(sex,'b') ,
   [trx, diagnostics, mu_area, var_area, state2sex, ll] = ...
     add_sex_field_to_trx_computed_using_machine_vision(trx, X, version, analysis_protocol, sexclassifier_params, sexclassifierin, ...
                                                        dosave, sexclassifieroutmatfile) ; 
 else
-  [trx, diagnostics, mu_area, var_area, state2sex, ll] = add_predetermined_sex_field_to_trx(trx, metadata, X) ;
+  [trx, diagnostics, mu_area, var_area, state2sex, ll] = add_predetermined_sex_field_to_trx(trx, sex, X) ;
 end
 
 %% count number of flies, females, males
