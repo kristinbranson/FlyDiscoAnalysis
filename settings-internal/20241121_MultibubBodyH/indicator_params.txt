@@ -1,0 +1,7 @@
+indicatorwindowr,35
+pad,20
+OptogeneticExp,1
+maxDistCornerFrac_LEDLabel,.16
+LEDMarkerType,LEDonTemplate_FlyBubblefRGB.png
+protocol_prefix_from_mask_index,R,B
+reducefun,max
