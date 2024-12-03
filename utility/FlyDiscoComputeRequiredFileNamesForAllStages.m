@@ -6,6 +6,10 @@ function result = FlyDiscoComputeRequiredFileNamesForAllStages(analysis_protocol
 % those returned by FlyDiscoStageNames().  All returned file names are relative to the
 % experiment folder.
 
+% This is sometimes needed to determine what files to expect
+metadatafile = fullfile(expdir,dataloc_params.metadatafilestr);
+metadata = ReadMetadataFile(metadatafile);
+
 name_from_stage_index = FlyDiscoStageNames() ;
 stage_count = numel(name_from_stage_index) ;
 
@@ -24,7 +28,9 @@ for stage_index = 1 : stage_count ,
     required_file_names = { dataloc_params.flytrackercalibrationstr, ...
                             dataloc_params.flytrackertrackstr, ...
                             dataloc_params.flytrackerbgstr, ...
-                            dataloc_params.ctraxfilestr } ;
+                            dataloc_params.ctraxfilestr, ...
+                            'movie-feat.mat', ...
+                            'movie-params.mat'} ;
   elseif strcmp(stage_name, 'addpflies') ,
     addpflies_trx_output_file_name = determine_addpflies_trx_output_file_name(dataloc_params) ;
     addpflies_ft_tracks_output_file_name = determine_addpflies_ft_tracks_output_file_name(dataloc_params) ;
@@ -38,7 +44,13 @@ for stage_index = 1 : stage_count ,
   elseif strcmp(stage_name, 'ledonoffdetection') ,
     required_file_names = { dataloc_params.indicatordatafilestr } ;    
   elseif strcmp(stage_name, 'sexclassification') ,
-    required_file_names = { dataloc_params.sexclassifierdiagnosticsfilestr } ;    
+    sex = sanitize_metadata_sex(metadata) ;
+    if strcmp(sex,'b') ,
+      required_file_names = { dataloc_params.sexclassifierdiagnosticsfilestr dataloc_params.sexclassifiermatfilestr } ;
+    else
+      required_file_names = { dataloc_params.sexclassifierdiagnosticsfilestr } ;
+    end        
+    % N.B.: This stage also modifies registered_trx.mat
   elseif strcmp(stage_name, 'computeperframefeatures') ,
     perframe_dir_name = dataloc_params.perframedir ;
     perframefnsfilename = fullfile(analysis_protocol_folder_path, dataloc_params.perframefnsfilestr) ;
@@ -57,7 +69,9 @@ for stage_index = 1 : stage_count ,
                             dataloc_params.locomotionmetricsswingstanceboutstatsfilestr } ;
   elseif strcmp(stage_name, 'computeperframestats') ,
     required_file_names = { dataloc_params.statsperframetxtfilestr, ...
-                            dataloc_params.statsperframematfilestr } ;
+                            dataloc_params.statsperframematfilestr, ...
+                            dataloc_params.histperframetxtfilestr, ...
+                            dataloc_params.histperframematfilestr} ;
   elseif strcmp(stage_name, 'plotperframestats') ,
     required_file_names = { dataloc_params.figdir, dataloc_params.statswebpagefilestr } ;    
     histperframefeaturesfile = fullfile(analysis_protocol_folder_path, dataloc_params.histperframefeaturesfilestr) ;
@@ -75,7 +89,11 @@ for stage_index = 1 : stage_count ,
     h264filename = horzcat(avifilestr, '.mp4') ;
     required_file_names = { h264filename } ;
   elseif strcmp(stage_name, 'apt') ,
-    required_file_names = { dataloc_params.apttrkfilestr } ;
+    required_file_names = { dataloc_params.apttrkfilestr, ...
+                            dataloc_params.aptlogfilestr, ...
+                            dataloc_params.apterrfilestr, ...
+                            dataloc_params.aptbsublogfilestr ...
+                            } ;
   elseif strcmp(stage_name, 'makeaptresultsmovie') ,
     [~,basename] = fileparts(expdir) ;
     mp4filestr = sprintf('%s_%s', dataloc_params.aptresultsavefilestr, basename) ;

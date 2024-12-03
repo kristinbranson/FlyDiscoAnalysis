@@ -159,8 +159,7 @@ if is_on_or_force(do_run.ledonoffdetection)
 
   % Get one thing from the indicator params
   if exist(indicatorparamsfile,'file'),
-    raw_indicator_params = ReadParams(indicatorparamsfile);
-    indicator_params = modernizeIndicatorParams(raw_indicator_params) ;
+    indicator_params = loadIndicatorParams(indicatorparamsfile) ;
     isOptogeneticExp = logical(indicator_params.OptogeneticExp) ;
   else
     isOptogeneticExp = false ;

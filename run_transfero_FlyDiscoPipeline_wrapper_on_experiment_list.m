@@ -90,19 +90,23 @@ function run_transfero_FlyDiscoPipeline_wrapper_on_experiment_list(folder_path_f
         ssh_host_name = '' ;
     end
 
+    % Extract any bsub arguments passed in
+    [slots_per_job, maximum_slot_count, do_use_xvfb, optional_pipeline_arguments_as_name_value_list] = ...
+      myparse_nocheck(varargin, ...
+                      'slots_per_job', 4, ...
+                      'maximum_slot_count', 400, ...
+                      'do_use_xvfb', true) ;
+      % About do_use_xvfb: Matlab on linux leaks memory when you call getframe()
+      % without an X11 server, so we typically wrap the matlab call in the 'xvfb'
+      % command to give it an in-memory-only X11 server.
+
     % We get passed ssh_host_name as a normal arg,
     % But we want to pass that through to transfero_FlyDiscoPipeline_wrapper()
     % so that it's used for the submission of the APT part of each pipeline run.
-    optional_arguments_as_name_value_list = varargin ;
     if ~isempty(ssh_host_name) ,
-        optional_arguments_as_name_value_list(end+1:end+2) = {'sshhost', ssh_host_name} ;
+        optional_pipeline_arguments_as_name_value_list(end+1:end+2) = {'sshhost', ssh_host_name} ;
     end
-    optional_arguments_as_name_value_list(end+1:end+2) = {'do_try', do_try} ;
-
-    % Specify bsub parameters
-    maxiumum_slot_count = 400 ;
-    slots_per_job = 4 ;
-    do_use_xvfb = true ;  % Matlab on linux leaks memory when you call getframe() without an X11 server   
+    optional_pipeline_arguments_as_name_value_list(end+1:end+2) = {'do_try', do_try} ;
 
     % if cluster_billing_account_name is empty, look it up in the configuration
     % file
@@ -122,7 +126,7 @@ function run_transfero_FlyDiscoPipeline_wrapper_on_experiment_list(folder_path_f
 
     % Run transfero_FlyDiscoPipeline_wrapper() on all experiments
     if do_use_bqueue ,
-        bqueue = bqueue_type(do_actually_submit_jobs, do_try, maxiumum_slot_count, do_use_xvfb, ssh_host_name) ;
+        bqueue = bqueue_type(do_actually_submit_jobs, do_try, maximum_slot_count, do_use_xvfb, ssh_host_name) ;
 
         % Queue the jobs
         for i = 1 : experiment_count ,
@@ -143,7 +147,7 @@ function run_transfero_FlyDiscoPipeline_wrapper_on_experiment_list(folder_path_f
                            @transfero_FlyDiscoPipeline_wrapper, ...
                                experiment_folder_path, ...
                                user_name_for_configuration_purposes, ...
-                               optional_arguments_as_name_value_list{:}) ;
+                               optional_pipeline_arguments_as_name_value_list{:}) ;
         end
 
         % Actually run the jobs
@@ -198,7 +202,7 @@ function run_transfero_FlyDiscoPipeline_wrapper_on_experiment_list(folder_path_f
         job_statuses = nan(1, experiment_count) ;
         for i = 1 : experiment_count ,
             experiment_folder_path = folder_path_from_experiment_index{i} ;
-            transfero_FlyDiscoPipeline_wrapper(experiment_folder_path, user_name_for_configuration_purposes, optional_arguments_as_name_value_list{:}) ;
+            transfero_FlyDiscoPipeline_wrapper(experiment_folder_path, user_name_for_configuration_purposes, optional_pipeline_arguments_as_name_value_list{:}) ;
             job_statuses(i) = +1 ;  % Indicates completed sucessfully
         end
     end

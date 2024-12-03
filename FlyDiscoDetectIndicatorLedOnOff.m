@@ -42,8 +42,7 @@ indicatorparamsfile = fullfile(analysis_protocol_folder_path,dataloc_params.indi
 if ~exist(indicatorparamsfile,'file')
   error('Indictor params file %s does not exist',indicatorparamsfile);
 end
-raw_indicator_params = ReadParams(indicatorparamsfile);
-indicator_params = modernizeIndicatorParams(raw_indicator_params) ;
+indicator_params = loadIndicatorParams(indicatorparamsfile) ;
 
 % If the OptogeneticExp flag is false, issue a warning then exit, b/c they really
 % shouldn't be running this stage in that case.  

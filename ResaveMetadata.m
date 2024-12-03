@@ -73,8 +73,14 @@ fprintf(fid, '    <apparatus apparatus_id="%s" room="%s" rig="%s" plate="%s" top
 fprintf(fid,'    <flies line="%s" ', metadata.line);
 % effector
 fprintf(fid,'effector="%s" ',metadata.effector);
-% gender
-fprintf(fid,'gender="%s" ',metadata.gender); 
+% sex
+if isfield(metadata, 'sex') ,
+  fprintf(fid,'sex="%s" ',metadata.sex);
+elseif isfield(metadata, 'gender') ,
+  fprintf(fid,'gender="%s" ',metadata.gender);
+else
+  warning('No sex or gender field in metadata') ;
+end
 % cross date
 fprintf(fid,'cross_date="%s" ',metadata.cross_date);
 % flip_date

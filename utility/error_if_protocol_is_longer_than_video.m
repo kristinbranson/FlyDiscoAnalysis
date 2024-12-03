@@ -11,8 +11,7 @@ dataloc_params = ReadParams(datalocparamsfile);
 % Get one thing from the indicator params
 indicatorparamsfile = fullfile(settingsdir,analysis_protocol,dataloc_params.indicatorparamsfilestr);
 if exist(indicatorparamsfile,'file'),
-  raw_indicator_params = ReadParams(indicatorparamsfile);
-  indicator_params = modernizeIndicatorParams(raw_indicator_params) ;
+  indicator_params = loadIndicatorParams(indicatorparamsfile) ;
   isOptogeneticExp = logical(indicator_params.OptogeneticExp) ;
 else
   isOptogeneticExp = false ;
