@@ -3,7 +3,7 @@
 
 logfiledir = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/MetadataFixes';
 %%%CHANGE
-logfilename = 'expdirs_wl41_metadatachanges_logofauto.csv';
+logfilename = 'expdirs_wl52_metadatachanges_logofauto.csv';
 
 
 logfile = fullfile(logfiledir,logfilename);
@@ -299,7 +299,18 @@ fid2 = fopen(logfile,'a');
 % WL 42 line name error
 % explist = {'VNC2_YNA_K_162984_RigB_20231115T093545'};
 % WL 41 line name error
-explist = {'VNC2_EXT_VGLUT-GAL4_RigD_20231108T115331'};
+% explist = {'VNC2_EXT_VGLUT-GAL4_RigD_20231108T115331'};
+% % WL 46 experimenter name error
+% explist = {'VNC3_JRC_SS49174_RigB_20240522T103704'
+% 'VNC3_JRC_SS49174_RigC_20240522T103806'
+% 'VNC3_JRC_SS49174_RigD_20240522T103850'
+% 'VNC3_JRC_SS43557_RigB_20240522T105039'
+% 'VNC3_JRC_SS43557_RigC_20240522T105155'
+% 'VNC3_JRC_SS43557_RigD_20240522T105248'};
+% WL 50 line name JRC_SS37671
+% explist = {'VNC3_JRC_SS38631_RigD_20240703T121137'}
+% WL 52 line naeme JRC_SS60232
+explist = {'VNC3_JRC_SS65710_RigA_20240724T111510'}
 %% 
 rootdatadir = '/groups/branson/bransonlab/flydisco_data';
 % for k =1:numel(expnamelist)
@@ -331,7 +342,7 @@ for j = 1:numel(explist)
     %     changestruct.line = 'JRC_SS43700';
 %         changestruct.line = 'EXT_VGLUT-GAL4';
     %     changestruct.line = 'JRC_SS36194';
-        changestruct.line = 'YNA_K_162984';
+%         changestruct.line = 'YNA_K_162984';
     %     changestruct.line = 'JRC59209';
     %     changestruct.line = 'JRC_SS57983';
     %     changestruct.line = 'JRC_SS59163';
@@ -352,6 +363,9 @@ for j = 1:numel(explist)
 %         changestruct.line = 'JRC_SS93514';
 %       changestruct.line = 'GMR_SS02575';
 %       changestruct.line = 'BJD_SS02407';
+% changestruct.line = 'JRC_SS37671';
+changestruct.line = 'JRC_SS60232';
+
 %     changestruct.screen_type = 'non_olympiad_dickson_led5secVNC';
 %     changestruct.screen_type = 'non_olympiad_branson_LPC1CsChr';
 %     changestruct.effector = 'CsChr';

@@ -239,9 +239,78 @@ rootdatadir = '/groups/branson/bransonlab/flydisco_data';
 % failure_category = 'tracked fly outside bubble';
 
 % fail WL 51 - temperature issue July 2024
-expdirlist = textread('/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/julytempissue_20240709and10.txt','%s');
-failure_category = 'temperature ctrl failed';
+% expdirlist = textread('/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/julytempissue_20240709and10.txt','%s');
+% failure_category = 'temperature ctrl failed';
 
+% WL 45
+% expdirlist = {'VNC3_JRC_SS34708_RigD_20240515T122741'};
+% failure_category = 'crud in bubble';
+%WL 46;
+% expdirlist = {'VNC3_JRC_SS46737_RigA_20240521T113401'};
+% failure_category = 'crud in bubble';
+% WL 47
+% expdirlist = {'VNC3_JRC_SS57959_RigB_20240528T111825'
+%     'VNC3_JRC_SS52765_RigB_20240528T121058'
+%     'VNC3_JRC_SS59153_RigB_20240528T125232'};
+% 
+% failure_category = 'crud in bubble';
+% WL 50
+% expdirlist = {'VNC3_JRC_SS37671_RigB_20240702T131521'};
+% failure_category  = 'long load time';
+% expdirlist = {'VNC3_JRC_SS38013_RigA_20240702T111149'
+%     'VNC3_JRC_SS38013_RigC_20240702T11133'
+%     'VNC3_JRC_SS38631_RigA_20240702T112317'};
+% expdirlist = {'VNC3_JRC_SS46233_RigD_20240702T120903'};
+% expdirlist = {'VNC3_JRC_SS38013_RigC_20240702T111337'}
+% failure_category = 'crud in bubble';
+
+%WL 52
+% expdirlist = {'VNC3_JRC_SS59230_RigC_20240723T104809'
+% 'VNC3_JRC_SS65765_RigA_20240723T110819'
+% 'VNC3_JRC_SS65765_RigD_20240723T111041'
+% 'VNC3_JRC_SS53050_RigA_20240723T112105'
+% 'VNC3_JRC_SS59225_RigA_20240723T114406'
+% 'VNC3_JRC_SS61036_RigA_20240723T115702' };
+% failure_category = 'crud in bubble';
+% %WL 53
+% expdirlist = {'VNC3_EXT_VGLUT-GAL4_RigC_20240730T110155'
+% 'VNC3_EXT_VGLUT-GAL4_RigD_20240730T110310'};
+% failure_category = 'tracked dead or damaged fly';
+% WL 54
+% expdirlist = {'VNC3_YNA_K_162984_RigD_20240806T115455'};
+% failure_category = 'crud in bubble';
+% WL 55
+% expdirlist = {'VNC3_JRC_SS105097_RigA_20240813T115528'};
+% failure_category = 'crud in bubble';
+% WL 56
+% expdirlist = {'VNC3_JRC_SS102245_RigA_20240827T122718'
+%     'VNC3_JRC_SS96563_RigC_20240827T111512'};
+% failure_category = 'crud in bubble';
+% WL 59
+% expdirlist = textread('/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/septtempissue_20240910.txt','%s');
+% failure_category = 'temperature ctrl failed';
+% WL 61
+% expdirlist = {'VNC3_JRC_SS50974_RigA_20240924T103307'};
+% failure_category = 'crud in bubble';
+% WL 62
+% expdirlist = {'VNC3_JRC_SS100065_RigB_20241008T112542'
+% 'VNC3_EXT_VGLUT-GAL4_RigA_20241009T105712'
+% 'VNC3_JRC_SS100065_RigB_20241009T121453'};
+% failure_category = 'crud in bubble';
+
+% WL 63
+% expdirlist = {'VNC3_JRC_SS102259_RigA_20241016T104603'
+% 'VNC3_JRC_SS102311_RigD_20241016T115405'
+% 'VNC3_JRC_SS48644_RigC_20241017T114320'};
+% failure_category = 'crud in bubble';
+
+% reviewing high trajectory number
+% expdirlist = {'VNC3_JRC_SS46706_RigD_20240924T121956'};
+% failure_category = 'tracked dead or damaged fly';
+% expdirlist = {'VNC3_JRC_SS97456_RigA_20240807T114733'};
+% failure_category = 'crud in bubble';
+expdirlist = {'VNC3_JRC_SS100086_RigA_20240820T124724'};
+failure_category = 'tracked dead or damaged fly';
 %%
 for i = 1:numel(expdirlist)
 explist{i} = fullfile(rootdatadir,expdirlist{i});

@@ -9,10 +9,14 @@ user_name_for_configuration_purposes = 'bransonlab' ;
 settings_folder_path = '/groups/branson/home/robiea/Code_versioned/BransonFlyDiscoSettings/settings';
 % analysis_protocol_use = '20240124_multibubble_secondtry';
 % analysis_protocol_use = '20240521_flybubble_LED_VNC3';
-analysis_protocol_use   = '20240908_flybubble_centralcomplex';
+% analysis_protocol_use   = '20240908_flybubble_centralcomplex';
+% analysis_protocol_use   = '20240912_flybubble_socialCsChr';
+% analysis_protocol_use = '20240910_flybubblered_nochr_flytracker';
+% analysis_protocol_use = '20240917_flybubblered_nochr_flytracker_finaljab';
+analysis_protocol_use = '20241203_flybubble_LED_VNC3';
 optional_argument_list = {'settingsdir', settings_folder_path,'analysis_protocol',analysis_protocol_use};
-do_use_bqueue = true ;
-do_actually_submit_jobs = true ;
+do_use_bqueue = false ;
+do_actually_submit_jobs = false ;
 do_try = true ;
 ssh_host_name = 'login2.int.janelia.org' ;
 
@@ -61,10 +65,37 @@ ssh_host_name = 'login2.int.janelia.org' ;
 % folder_path_from_experiment_index = {'/groups/branson/bransonlab/flydisco_data/VNC3_YNA_K_162984_RigD_20240702T123257'};
 
 %test new settings dir for cx
-folder_path_from_experiment_index = {'/groups/branson/home/robiea/Projects_data/FlyBubbleMethods/Data/CsChr_OL0046B/cx_GMR_OL0046B_CsChr_RigC_20150408T142551'};
+% folder_path_from_experiment_index = {'/groups/branson/home/robiea/Projects_data/FlyBubbleMethods/Data/CsChr_OL0046B/cx_GMR_OL0046B_CsChr_RigC_20150408T142551'};
 % folder_path_from_experiment_index = {'/groups/branson/home/robiea/Projects_data/FlyBubbleMethods/Data/CsChr_OL0046B/cx_GMR_OL0046B_CsChr_RigA_20150617T094711'
 % '/groups/branson/home/robiea/Projects_data/FlyBubbleMethods/Data/CsChr_OL0046B/cx_GMR_OL0046B_CsChr_RigB_20150623T102758'
 % '/groups/branson/home/robiea/Projects_data/FlyBubbleMethods/Data/CsChr_OL0046B/cx_GMR_OL0046B_CsChr_RigD_20150708T092748'}
+
+% test new settings for nochr
+% folder_path_from_experiment_index = {'/groups/branson/home/robiea/Projects_data/FlyBubbleMethods/Data/JAABA/nochr_TrpA71G01_Unknown_RigC_20201216T163316'};
+%run other 2 for JAABA
+% folder_path_from_experiment_index = {'/groups/branson/home/robiea/Projects_data/FlyBubbleMethods/Data/JAABA/nochr_TrpA91B01_Unknown_RigB_20201212T170551'
+% '/groups/branson/home/robiea/Projects_data/FlyBubbleMethods/Data/JAABA/nochr_TrpApBDP_Unknown_RigB_20201212T165050'};
+
+% %46B expdirs
+% folder_path_from_experiment_index = {'//groups/branson/home/robiea/Projects_data/FlyBubbleMethods/Data/CsChr_OL0046B/cx_GMR_OL0046B_CsChr_RigA_20150707T132832'
+% '/groups/branson/home/robiea/Projects_data/FlyBubbleMethods/Data/CsChr_OL0046B/cx_GMR_OL0046B_CsChr_RigB_20150708T092121'
+% '/groups/branson/home/robiea/Projects_data/FlyBubbleMethods/Data/CsChr_OL0046B/cx_GMR_OL0046B_CsChr_RigC_20150707T093155'
+% '/groups/branson/home/robiea/Projects_data/FlyBubbleMethods/Data/CsChr_OL0046B/cx_GMR_OL0046B_CsChr_RigD_20150708T092748'};
+
+% socialcsChr with cx settings dir 
+% folder_path_from_experiment_index = {'/groups/branson/home/robiea/Projects_data/FlyBubbleMethods/Data/JAABA/socialCsChr_JRC_SS36551_CsChrimson_RigB_20190910T160839'};
+
+% test experiemnts for social touch
+% folder_path_from_experiment_index = textread('/groups/branson/home/robiea/Projects_data/FlyBubbleMethods/Data/TrpA/explist.txt','%s');
+%replacement experiments for failed in list above
+% folder_path_from_experiment_index =  {'/groups/branson/home/robiea/Projects_data/FlyBubbleMethods/Data/TrpA/nochr_TrpA71G01_Unknown_RigA_20201216T153505a'
+% '/groups/branson/home/robiea/Projects_data/FlyBubbleMethods/Data/TrpA/nochr_TrpA91B01_Unknown_RigA_20201216T152414a'};
+
+% social touch test list
+% folder_path_from_experiment_index = textread('/groups/branson/home/robiea/Projects_data/FlyBubbleMethods/Data/TrpA/explist.txt','%s');
+% test locomotion stage
+folder_path_from_experiment_index = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20241203_testinglocomotion/VNC3_JRC_SS100086_RigD_20240820T125028'}
+
 % Call the user-facing run function to do the real work
 run_transfero_FlyDiscoPipeline_wrapper_on_experiment_list(folder_path_from_experiment_index, ...
                                                           cluster_billing_account_name, ...
