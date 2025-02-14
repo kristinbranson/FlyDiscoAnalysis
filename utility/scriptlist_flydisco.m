@@ -921,7 +921,9 @@ fclose(fid);
 
 % VNC2 data from 2023 
 % explist = textread('/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirlist_hightrajnum_2023.txt','%s');
-explist = textread('/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirlist_hightrajnum_2023_wl39to43.txt','%s');
+% explist = textread('/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirlist_hightrajnum_2023_wl39to43.txt','%s');
+explist = textread('/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirlist_hightrajnum_2024.txt','%s');
+
 rootdatadir = '/groups/branson/bransonlab/flydisco_data';
 
 for i = 1:numel(explist)
@@ -1098,8 +1100,9 @@ fclose(fid);
 % print out tsv from data pull with auto and manual fails (from logbook so
 % far) 
 % load /groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_2023_pulled202310032023_20231004T103003.mat
-load /groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_VNC2_2023_20240711T093349.mat
-savefile = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/VNC_2023_addedManualFail';
+% load /groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_VNC2_2023_20240711T093349.mat
+load /groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_VNC3_2024_traj_20241126T141528.mat % VNC3 2024
+savefile = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/VNC3_2024_addedManualFail';
 
 fid = fopen([savefile,'.tsv'],'w');
 

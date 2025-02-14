@@ -116,8 +116,10 @@
 % load /groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/rerunlist_may2023_noWalk2data.mat
 % explist = reprocesslist; 
 %rerun experiments that failed afte gpu queue updates
-explist = textread('/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/rerun_gpuqueuechange_20240906.txt','%s')
-
+% explist = textread('/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/rerun_gpuqueuechange_20240906.txt','%s')
+% explist = textread('/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/tobereprocessed_VNC3_20241126.txt','%s');
+ % rerun CUDA error in apt
+explist = {'/groups/branson/bransonlab/flydisco_data/VNC2_YNA_K_162984_RigB_20230926T105225'};
 
 %%
 toprocessdir =  '/groups/branson/bransonlab/flydisco_data/to-process';

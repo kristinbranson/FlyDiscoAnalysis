@@ -40,6 +40,13 @@ rootdatadir = '/groups/branson/bransonlab/flydisco_data';
 % [expdirstruct] = getExperimentDirsFlyDisco(rootdatadir,'metadatafile','Metadata.xml','expdirname','VNC3*','date','202407*','autocheckin',true,'autocheckcomplete',true,'manualcheck',false,'TrajNum',false);
 
 
+% savefile = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_VNC3_2024_traj';
+% [expdirstruct] = getExperimentDirsFlyDisco(rootdatadir,'metadatafile','Metadata.xml','expdirname','VNC3*','date','2024*','autocheckin',true,'autocheckcomplete',true,'manualcheck',true,'TrajNum',true);
+
+savefile = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_2024_allVNC';
+[expdirstruct] = getExperimentDirsFlyDisco(rootdatadir,'metadatafile','Metadata.xml','expdirname','VNC*','autocheckin',true,'autocheckcomplete',true,'manualcheck',true,'TrajNum',false);
+
+
 % savefile = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_VNC_20240711';
 % [expdirstruct] = getExperimentDirsFlyDisco(rootdatadir,'metadatafile','Metadata.xml','expdirname','VNC*','autocheckin',true,'autocheckcomplete',true,'manualcheck',true,'TrajNum',false);
 
@@ -47,13 +54,13 @@ rootdatadir = '/groups/branson/bransonlab/flydisco_data';
 % [expdirstruct] = getExperimentDirsFlyDisco(rootdatadir,'metadatafile','Metadata.xml','expdirname','VNC2*','autocheckin',true,'autocheckcomplete',true,'manualcheck',false,'TrajNum',false);
 
 % savefile = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_VNC2202305_20240822';
-% [expdirstruct] = getExperimentDirsFlyDisco(rootdatadir,'metadatafile','Metadata.xml','expdirname','VNC2*','date','202305*','autocheckin',true,'autocheckcomplete',true,'manualcheck',false,'TrajNum',false);
+% [expdirstruct] = getExperimentDirsFlyDisco(rootdatadir,'metadatafile','Metadata.xml'car,'expdirname','VNC2*','date','202305*','autocheckin',true,'autocheckcomplete',true,'manualcheck',false,'TrajNum',false);
 
 % savefile = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_VNC2202407_20240823';
 % [expdirstruct] = getExperimentDirsFlyDisco(rootdatadir,'metadatafile','Metadata.xml','expdirname','VNC3*','date','202407*','autocheckin',true,'autocheckcomplete',true,'manualcheck',false,'TrajNum',false);
 
-savefile = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_allVNC_tofindmanualF_20240824';
-[expdirstruct] = getExperimentDirsFlyDisco(rootdatadir,'metadatafile','Metadata.xml','expdirname','VNC*','autocheckin',true,'autocheckcomplete',true,'manualcheck',true,'TrajNum',false);
+% savefile = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_allVNC_tofindmanualF_20240824';
+% [expdirstruct] = getExperimentDirsFlyDisco(rootdatadir,'metadatafile','Metadata.xml','expdirname','VNC*','autocheckin',true,'autocheckcomplete',true,'manualcheck',true,'TrajNum',false);
 
 
 % savefile = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_VNC2_20220915';
@@ -156,6 +163,28 @@ end
 
 fclose(fid);
 
+%% make csv file for all experiments (use for pulling data for metadata changes) with autochecks and manual pf
+fid = fopen([savefile,'_metadata','.tsv'],'w');
+
+fprintf(fid,'%s\t %s\t %s\t %s\t %s\t %s\t %s\t %s\t %s\t %s \n','expname','date','datetime','linename','experimentor','gender','notes_tech','notes_behav','automated_pf','manual_f');
+
+for i = 1:numel(expdirstruct)  
+  [~,expname] = fileparts(expdirstruct(i).file_system_path);
+  datestr = expdirstruct(i).date;
+  datetimestr = expdirstruct(i).exp_datetime;
+  linename = expdirstruct(i).line;
+  experimenter = expdirstruct(i).experimenter;
+  gender = expdirstruct(i).gender;
+  notestech = expdirstruct(i).notes_technical;
+  notesbeh = expdirstruct(i).notes_behavioral;
+  autopf = expdirstruct(i).automated_pf;
+  manf = expdirstruct(i).manual_fail;
+
+%   notes = experiments_eddison(i).notes_curation;
+  fprintf(fid,'%s\t %s\t %s\t %s\t %s\t %s\t %s\t %s\t %s\t %s \n',expname, datestr,datetimestr,linename,experimenter,gender,notestech,notesbeh,autopf,manf);
+end
+
+fclose(fid);
 %% make experiment list for VNC and VNC2 with only autochecks = p  
 expdirstructOG = expdirstruct;
 
@@ -278,9 +307,10 @@ end
 
 fclose(fid);
 %% make csv file for all experiments (use for pulling data for metadata changes) with time of day 
-fid = fopen([savefile,'.tsv'],'w');
+fid = fopen([savefile,'_autofailcat','.tsv'],'w');
 
-fprintf(fid,'%s\t %s\t %s\t %s\t %s\t %s\t %s\t %s \n','expname','date','datetime','linename','automated_pf','automated_pf_category','manual_fail','manual_fail_category');
+% fprintf(fid,'%s\t %s\t %s\t %s\t %s\t %s\t %s\t %s \n','expname','date','datetime','linename','automated_pf','automated_pf_category','manual_fail','manual_fail_category');
+fprintf(fid,'%s\t %s\t %s\t %s\t %s\t %s\t \n','expname','date','datetime','linename','automated_pf','automated_pf_category');
 
 for i = 1:numel(expdirstruct)
     [~,expname] = fileparts(expdirstruct(i).file_system_path);
@@ -290,9 +320,10 @@ for i = 1:numel(expdirstruct)
     autopf = expdirstruct(i).automated_pf;
     autopfcat = expdirstruct(i).automated_pf_category;
     manpf = expdirstruct(i).manual_fail;
-    manpfcat = expdirstruct(i).manual_fail_category;
+%     manpfcat = expdirstruct(i).manual_fail_category;
     %   notes = experiments_eddison(i).notes_curation;
-    fprintf(fid,'%s\t %s\t %s\t %s\t %s\t %s\t %s\t %s \n',expname, datestr,datetimestr,linename,autopf,autopfcat,manpf,manpfcat);
+%     fprintf(fid,'%s\t %s\t %s\t %s\t %s\t %s\t %s\t %s \n',expname, datestr,datetimestr,linename,autopf,autopfcat,manpf,manpfcat);
+        fprintf(fid,'%s\t %s\t %s\t %s\t %s\t %s\t \n',expname, datestr,datetimestr,linename,autopf,autopfcat);
 end
 
 fclose(fid);
