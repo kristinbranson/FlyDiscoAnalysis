@@ -1,4 +1,4 @@
-function error_if_protocol_is_longer_than_video(expdir, settingsdir, analysis_protocol, do_run)
+function warn_if_protocol_is_longer_than_video(expdir, settingsdir, analysis_protocol, do_run)
 % Throws an error if this is an optogenetic experiment and the protocol is
 % longer than the video.  Otherwise, exits normally.  This reads all the info
 % it needs from the experiment folder and the analysis-protocol folder, even
@@ -68,8 +68,8 @@ total_protocol_duration = sum(duration_from_step_index) ;
 
 % Finally, compare the protocol duration to the video duration and error if
 % the protocol is longer.
-if total_protocol_duration > video_duration+5*dt ,  % Add a few frame's worth of 'slop' to be lenient
-  error('According to the protocol file, the protocol is longer in duration (%g s) than the video (%g s)', ...
-        total_protocol_duration, ...
-        video_duration) ;
+if total_protocol_duration > video_duration ,
+  warning('According to the protocol file, the protocol is longer in duration (%g s) than the video (%g s)', ...
+          total_protocol_duration, ...
+          video_duration) ;
 end
