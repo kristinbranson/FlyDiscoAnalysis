@@ -1,0 +1,14 @@
+# <per-frame feature>,<frame condition name>,<fly condition name>,<min n. frames both valid>,<min n. frames fly valid>,[<norm per-frame feature>],[<norm frame condition name>],[<norm fly condition name>],[<norm min n. frames both valid>],[<norm min n. frames fly valid>]
+
+# The average of velmag during prestim period, weak, medium, and strong stimuli
+velmag_ctr,prestim,any,25,50
+#velmag_ctr,stimweak,any,25,50
+#velmag_ctr,stimmed,any,25,50
+#velmag_ctr,stimstrg,any,25,50
+velmag_ctr,stimstrg,female,25,50
+velmag_ctr,stimweak,any,25,50,prestim
+velmag_ctr,stimstrg,female,25,50,prestim
+
+
+
+

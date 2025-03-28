@@ -1,0 +1,3 @@
+*velmag_female_stimstrg
+velmag_ctr_flyfemale_framestimstrg
+velmag_ctr_flyfemale_framestimstrg_norm_flyfemale_frameprestim
