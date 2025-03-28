@@ -119,8 +119,16 @@
 % explist = textread('/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/rerun_gpuqueuechange_20240906.txt','%s')
 % explist = textread('/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/tobereprocessed_VNC3_20241126.txt','%s');
  % rerun CUDA error in apt
-explist = {'/groups/branson/bransonlab/flydisco_data/VNC2_YNA_K_162984_RigB_20230926T105225'};
-
+% explist = {'/groups/branson/bransonlab/flydisco_data/VNC2_YNA_K_162984_RigB_20230926T105225'};
+%run locomotion stages on all VNC3 data
+% explist = textread('/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/VNC3_locomotionstage.txt','%s');
+%reprocessing flybubble_social
+% explist = {'/groups/branson/bransonlab/flybubble_social/CsChr_JHS_K_85321_RigC_20210903T060158'};
+explist = textread('/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/explist_socialbubblereprocessing.txt','%s');
+rootdatadir = '/groups/branson/bransonlab/flybubble_social';
+for i = 1:numel(explist)
+    explist{i} = fullfile(rootdatadir,explist{i});
+end
 %%
 toprocessdir =  '/groups/branson/bransonlab/flydisco_data/to-process';
 %ln -s source_file_or_directory_name  softlink_name

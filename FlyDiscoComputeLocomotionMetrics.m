@@ -10,12 +10,14 @@ function FlyDiscoComputeLocomotionMetrics(expdir, varargin)
 %version = '0.1';
 % addpath /groups/branson/home/robiea/Code_versioned/locomotion_analysis/Alice
 % Parse the optional arguments
-[settingsdir, analysis_protocol,datalocparamsfilestr,forcecompute] = ...
+[settingsdir, analysis_protocol,datalocparamsfilestr,forcecompute,~,debug] = ...
     myparse(varargin,...
     'settingsdir', default_settings_folder_path(), ...
     'analysis_protocol', 'current', ...
     'datalocparamsfilestr','dataloc_params.txt',...
-    'forcecompute', false) ;
+    'forcecompute', false, ...
+    'do_run', [],...
+    'debug', []) ;
 
 % starting stage messgage
 logfid = 1;
@@ -32,7 +34,7 @@ trx.AddExpDir(expdir,'dooverwrite',false,'openmovie',false);
 
 % make list of special perframe features being computed
 pfflist = {'nfeet_ground'};
-outputfiles = {trx.dataloc_params.locomotionmetricsswingstanceboutstatsfilestr};
+outputfiles = {trx.dataloc_params.locomotionmetricsswingstanceboutstatsfilestr,'tips_velmag.mat'};
 
 % if force compute is true, delete aptPFF if they exist
 %should check if files exist first
@@ -49,7 +51,7 @@ if forcecompute,
     for i = 1:numel(outputfiles)
         curr_out = fullfile(expdir,outputfiles{i});
         if exist(curr_out,'file')
-            fprintf(logfid,'Deleting FlyDiscoComputeLocomotionMetrics output file: %s\n',outputfiles{i});
+            fprintf(logfid,'Deleting FlyDiscoComputeLocomotionMetrics output files: %s\n',outputfiles{i});
             delete(curr_out);
         end
     end
@@ -107,6 +109,22 @@ else
     save(fullfile(expdir,'tips_velmag.mat'),'tips_velmag');
 end
 
+% tips_pos_body
+apt_pts_4_center = stage_params.apt_pts_4_center;
+apt_pt_4_theta = stage_params.apt_pt_4_theta;
+if exist(fullfile(expdir,"tips_pos_body.mat"),'file') 
+       % if tips positions in body reference already exists load them
+    load(fullfile(expdir,"tips_pos_body.mat"),'tips_pos_body');
+elseif ~exist('aptdata','var')
+    aptfile = trx.dataloc_params.apttrkfilestr;
+    aptdata = TrkFile.load(fullfile(expdir,aptfile));
+else
+    pTrk = aptdata.pTrk;
+    [tips_pos_body] = compute_tips_pos_body(pTrk,apt_pts_4_center,apt_pt_4_theta,legtip_landmarknums);
+    save(fullfile(expdir,'tips_pos_body.mat'),'tips_pos_body');
+end
+
+
 % run groundcontact detections
 gc_threshold_low = stage_params.gc_threshold_low;
 gc_threshold_high = stage_params.gc_threshold_high;
@@ -124,7 +142,7 @@ save(fullfile(expdir,trx.dataloc_params.perframedir,'nfeet_ground.mat'),'data','
 fprintf(logfid,'Computing swing and stance bout metrics ...\n')
 
 %compute swing stance bouts
-[perfly_limbboutdata] = limbSwingStance(groundcontact);
+[perfly_limbboutdata] = limbSwingStanceStep(groundcontact);
 
 % filter swing stance for during walking
 % how to load score data from trx file??
@@ -132,11 +150,15 @@ fprintf(logfid,'Computing swing and stance bout metrics ...\n')
 % load(ScoreFile,'allScores');
 % digitalscores = allScores.postprocessed;
 [~,digitalscores] = LoadScoresFromFile(trx,'scores_Walk2',1);
-[walkingSwingStance] = restrictedSwingStance(digitalscores,perfly_limbboutdata,'trajectory');
+% [walkingLimbBoutData] = restrictedSwingStance(digitalscores,perfly_limbboutdata,'trajectory',{'swing','stance'});
+% [walkingSteps] = restrictedStep(digitalscores,walkingLimbBoutData,'trajectory');
+[walkingLimbBoutData] = restrictedLimbBoutData(digitalscores,perfly_limbboutdata,'trajectory');
 
 
 % convert bout start and end indices to movie reference frame
-[walkingSwingStance] = convert_boutdata_to_movieformat(trx,walkingSwingStance);
+% [walkingSwingStance] = convert_boutdata_to_movieformat(trx,walkingSwingStance,{'swing','stance'});
+% [walkingSteps] = convert_boutdata_to_movieformat(trx,walkingSteps,{'step'});
+[walkingLimbBoutData] = convert_boutdata_to_movieformat(trx,walkingLimbBoutData);
 
 % seperate walking stwing stance for stimon and stimoff data
 % how to load stim data from trx file??
@@ -145,16 +167,23 @@ fprintf(logfid,'Computing swing and stance bout metrics ...\n')
 % digitalindicator = indicatorLED.indicatordigital;
 indicatordata = trx.getIndicatorLED(1);
 digitalindicator = indicatordata.indicatordigital;
-[stimON_walkingSwingStance] = restrictedSwingStance(digitalindicator,walkingSwingStance,'movie');
-[stimOFF_walkingSwingStance] = restrictedSwingStance(~digitalindicator,walkingSwingStance,'movie');
+% [stimON_walkingSwingStance] = restrictedSwingStance(digitalindicator,walkingSwingStance,'movie',{'swing','stance'});
+% [stimOFF_walkingSwingStance] = restrictedSwingStance(~digitalindicator,walkingSwingStance,'movie',{'swing','stance'});
+% %TO DO combine swing stance and step data, so that i don't duplicate
+% %structures. 
+% [stimON_walkingSteps] = restrictedSwingStance(digitalindicator,walkingSteps,'movie',{'step'});
+% [stimOFF_walkingSteps] = restrictedSwingStance(~digitalindicator,walkingSteps,'movie',{'step'});
 
+[stimON_walkingLimbBoutData] = restrictedLimbBoutData(digitalindicator,walkingLimbBoutData,'movie');
+[stimOFF_walkingLimbBoutData] = restrictedLimbBoutData(~digitalindicator,walkingLimbBoutData,'movie');
 
-% save(fullfile(expdir,'swingstance.mat'),'stimON_walkingSwingStance','stimOFF_walkingSwingStance');
-
+if debug
+save(fullfile(expdir,'swingtstancestep.mat'),'stimON_walkingLimbBoutData','stimOFF_walkingLimbBoutData');
+end
 
 % compute durations for bouts
-[bout_metrics_ON] = computeboutmetrics2(trx,stimON_walkingSwingStance);
-[bout_metrics_OFF] = computeboutmetrics2(trx,stimOFF_walkingSwingStance);
+[bout_metrics_ON] = computeboutmetrics2(trx,aptdata,tips_pos_body,stimON_walkingLimbBoutData);
+[bout_metrics_OFF] = computeboutmetrics2(trx,aptdata,tips_pos_body,stimOFF_walkingLimbBoutData);
 
 
 

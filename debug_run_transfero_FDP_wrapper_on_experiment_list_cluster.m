@@ -1,4 +1,4 @@
-% run pipeline locally AR 20231116
+% % run pipeline locally AR 20231116
 
 
 cluster_billing_account_name = 'branson' ;
@@ -6,14 +6,17 @@ user_name_for_configuration_purposes = 'bransonlab' ;
 
 % settings_folder_path = '/groups/branson/home/robiea/Code_versioned/BransonFlyDiscoSettings/settings';
 % settings_folder_path = '/groups/branson/home/robiea/Code_versioned/FlyDiscoAnalysis/settings-internal';
-settings_folder_path = '/groups/branson/home/robiea/Code_versioned/BransonFlyDiscoSettings/settings';
+% settings_folder_path = '/groups/branson/home/robiea/Code_versioned/BransonFlyDiscoSettings/settings';
 % analysis_protocol_use = '20240124_multibubble_secondtry';
 % analysis_protocol_use = '20240521_flybubble_LED_VNC3';
 % analysis_protocol_use   = '20240908_flybubble_centralcomplex';
 % analysis_protocol_use   = '20240912_flybubble_socialCsChr';
 % analysis_protocol_use = '20240910_flybubblered_nochr_flytracker';
 % analysis_protocol_use = '20240917_flybubblered_nochr_flytracker_finaljab';
-analysis_protocol_use = '20241203_flybubble_LED_VNC3';
+% analysis_protocol_use = '20241203_flybubble_LED_VNC3';
+settings_folder_path = '/groups/branson/home/robiea/Code_versioned/BransonFlyDiscoSettings/settings';
+analysis_protocol_use =  '20250111_flybubble_LED_NorpA';
+
 optional_argument_list = {'settingsdir', settings_folder_path,'analysis_protocol',analysis_protocol_use};
 do_use_bqueue = false ;
 do_actually_submit_jobs = false ;
@@ -94,7 +97,18 @@ ssh_host_name = 'login2.int.janelia.org' ;
 % social touch test list
 % folder_path_from_experiment_index = textread('/groups/branson/home/robiea/Projects_data/FlyBubbleMethods/Data/TrpA/explist.txt','%s');
 % test locomotion stage
-folder_path_from_experiment_index = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20241203_testinglocomotion/VNC3_JRC_SS100086_RigD_20240820T125028'}
+% folder_path_from_experiment_index = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20241203_testinglocomotion/VNC3_JRC_SS100086_RigD_20240820T125028'};
+% folder_path_from_experiment_index = {'/groups/branson/home/robiea/Projects_data/Labeler_APT/FlyTracker/cx_JHS_K_85321_CsChr_RigD_20150909T163219'
+% '/groups/branson/home/robiea/Projects_data/Labeler_APT/FlyTracker/cx_GMR_SS00168_CsChr_RigD_20150909T111218'
+% '/groups/branson/home/robiea/Projects_data/Labeler_APT/FlyTracker/cx_GMR_SS00038_CsChr_RigB_20150729T150617'};
+
+% folder_path_from_experiment_index = {'/groups/branson/home/robiea/Projects_data/Labeler_APT/FlyTracker/cx_GMR_SS00038_CsChr_RigB_20150729T150617'};
+
+% folder_path_from_experiment_index = {'/groups/branson/home/robiea/Projects_data/Labeler_APT/FlyTracker/to_reprocess/nochr_TrpA20A02_Unknown_RigB_20201216T154643'
+% '/groups/branson/home/robiea/Projects_data/Labeler_APT/FlyTracker/to_reprocess/nochr_TrpA71G01_Unknown_RigD_20201216T153831'
+% '/groups/branson/home/robiea/Projects_data/Labeler_APT/FlyTracker/to_reprocess/socialCsChr_JRC_SS56987_CsChrimson_RigB_20190910T163328'};
+
+folder_path_from_experiment_index = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20250111_testingFlybubble_social/NorpA5_JRC_SS56987_RigC_20210923T085517'};
 
 % Call the user-facing run function to do the real work
 run_transfero_FlyDiscoPipeline_wrapper_on_experiment_list(folder_path_from_experiment_index, ...

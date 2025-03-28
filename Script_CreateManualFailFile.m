@@ -309,7 +309,10 @@ rootdatadir = '/groups/branson/bransonlab/flydisco_data';
 % failure_category = 'tracked dead or damaged fly';
 % expdirlist = {'VNC3_JRC_SS97456_RigA_20240807T114733'};
 % failure_category = 'crud in bubble';
-expdirlist = {'VNC3_JRC_SS100086_RigA_20240820T124724'};
+% expdirlist = {'VNC3_JRC_SS100086_RigA_20240820T124724'};
+% failure_category = 'tracked dead or damaged fly';
+%
+expdirlist = {'VNC_JRC_SS38644_RigB_20210405T135539'};
 failure_category = 'tracked dead or damaged fly';
 %%
 for i = 1:numel(expdirlist)
