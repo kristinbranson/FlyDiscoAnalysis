@@ -1,9 +1,8 @@
 function [experiments_chosen,ngal4,ncontrol,idx] = choose_expdirs(experiments,ngal4,ncontrol,varargin)
 
-[doseparatecontrols,weight_order] = myparse(varargin,'doseparatecontrols',true,...
-  'weight_order',{'date','genotype','bowl','rig'});
+[doseparatecontrols,weight_order,control_line] = myparse(varargin,'doseparatecontrols',true,...
+  'weight_order',{'date','genotype','bowl','rig'},'control_line','pBDPGAL4U');
 
-control_line = 'pBDPGAL4U';
 
 if doseparatecontrols,
 
