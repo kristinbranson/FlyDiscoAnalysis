@@ -1,5 +1,5 @@
 # plotstim
-features,velmag_ctr,absdtheta
+features,velmag_ctr,absdtheta,ddcenter
 prestim,10
 poststim,10
 ylim_prctile,1
