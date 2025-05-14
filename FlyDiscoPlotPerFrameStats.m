@@ -239,6 +239,7 @@ hfigperfly = [];
 
 statfiles = {};
 statperflyfiles = {};
+groups = {};
 
 if plotstats,
   
@@ -329,6 +330,7 @@ if isempty(makestimvideos),
 end
 
 stimfiles = {};
+stimperflyfiles = {};
 if plotstim > 0 || makestimvideos > 0,
   trx = FBATrx('analysis_protocol',analysis_protocol,'settingsdir',settingsdir,...
     'datalocparamsfilestr',datalocparamsfilestr,...
@@ -370,7 +372,9 @@ if plotstim > 0,
   ind = trx.getIndicatorLED(1);
   setstarts = cellfun(@(x) min(x), stimulus_plotparams.stimsets(:,2));
   fliesplot = ChooseFliesPlot(trx,ind,setstarts,stimulus_plotparams.maxnflies);
-  
+  if ischar(stimulus_plotparams.features)
+      stimulus_plotparams.features = {stimulus_plotparams.features};
+  end
   for fi = 1:numel(stimulus_plotparams.features),
     field = stimulus_plotparams.features{fi};
     if isfield(bins,field),

@@ -23,8 +23,8 @@ function result = LoadIndicatorDataFromFileCore(id)
 % Extracts the pulse starts/ends from the indicatordigital signal and alose
 % the "after-pulse" starts/ends.  And puts it in a struct of the type that the
 % rest of the code expects.
+indicatordigital = id.indicatorLED.indicatordigital(1,:);
 
-indicatordigital = id.indicatorLED.indicatordigital ;
 
 % Just easier to recompute this stuff here from the digital signal
 % Also, pre-mid-2023 versions of the LED indicator stage have an off-by-one bug,
