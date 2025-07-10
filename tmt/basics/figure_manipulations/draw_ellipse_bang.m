@@ -1,0 +1,16 @@
+function line_handle = draw_ellipse_bang(axes_handle, center, a, b)
+    n_segs = 40 ;
+    theta = linspace(0,2*pi,n_segs+1) ;
+    sintheta = sin(theta) ;
+    costheta = cos(theta) ;
+    dx = a * costheta ;
+    dy = b * sintheta ;
+    x = center(1) + dx ;
+    y = center(2) + dy ;
+    line_handle = ...
+        line('Parent', axes_handle, ...
+             'Color', [1 0 0], ...
+             'XData', x, ...
+             'YData', y, ...
+             'ZData', repmat(2,[1 n_segs+1])) ;
+end

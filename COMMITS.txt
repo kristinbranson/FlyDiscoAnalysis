@@ -1,0 +1,39 @@
+The code in these subdirectories:
+
+APT
+FlyTracker
+JAABA
+tmt
+tpt
+
+used to be individual submodules.
+
+Then we decided to stop using submodules for various reasons, so we
+just made copies of the code in these repos that we now maintain
+within the FlyDiscoAnalysis repo.  This happened on 2025-07-10.
+
+Those commits are commits in the respective "ancestral" GitHub repo:
+
+APT:         https://github.com/kristinbranson/APT
+FlyTracker:  https://github.com/kristinbranson/FlyTracker
+JAABA:       https://github.com/kristinbranson/JAABA
+tmt:         https://github.com/JaneliaSciComp/tmt
+tpt:         https://github.com/JaneliaSciComp/tpt
+
+The plan is to sync up with the ancestral repos from time to time, and
+when you do that it's useful to know the commit that was sync'ed up
+with the last time this was done:
+
+These are the commits used at last sync:
+
+APT:         82a719dfcbdacc07854cc56e1043e7508c9868d3
+FlyTracker:  d0e4602c12f9f2cf47140ad73bdea01a4da0b824
+JAABA:       088a593a04747409cff9eb41ceae4773847168a6
+tmt:         07cfdec91babcd92c0e21a8997708bfc6fe99236
+tpt:         7179febc99a591f386eeba79239078dd533e7c3a
+
+When you do a re-sync with one of these repos, please update this
+file.
+
+ALT
+2025-07-10

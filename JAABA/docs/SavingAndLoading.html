@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<!--- OLD FORMATTING
+
+<style type="text/css">
+table {
+background-color:yellow;border:1px dotted black;width:80%;border-collapse:collapse;
+}
+table, td
+{
+padding:3px;
+}
+table, th{
+padding:3px; background-color:orange;color:white;
+}
+table, tr
+{
+padding:3px; background-color:yellow;color:black;
+
+}
+</style>
+
+--->
+
+<link rel="stylesheet" type="text/css" charset="utf-8" media="all" 
+href="styles/common.css">
+<link rel="stylesheet" type="text/css" charset="utf-8" media="screen" 
+href="styles/screen.css">
+<link rel="stylesheet" type="text/css" charset="utf-8" media="print" 
+href="styles/print.css">
+<link rel="stylesheet" type="text/css" charset="utf-8" 
+media="projection" href="styles/projection.css">
+
+<style type="text/css">
+strong.regular-font {
+  font-family: Arial, Lucida Grande, sans-serif;
+  font-style: italic;
+  font-size: 0.9em;
+}
+</style>
+
+
+</head>
+</body>
+<center><h1> <a href="index.html">JAABA</a>: Saving and Loading Results </h1></center>
+
+<hr class="h2-divider">
+
+<h2>Contents</h2>
+<ul>
+<li><a href="#LabelsAndClassifiers">Labels and Classifiers</a>
+<ul>
+<li><a href="#SavingLabels">Saving Labels</a></li>
+<li><a href="#LoadingLabels">Loading Labels</a></li>
+<li><a href="#SavingClassifier">Saving the Classifier and Labels</a></li>
+<li><a href="#LoadingClassifier">Loading a Classifier</a></li>
+</ul>
+<li><a href="#Predictions">Classifier's Predictions</a></li>
+<ul>
+<li><a href="#SavingPredictions">Saving Predictions</a></li>
+<li><a href="#LoadingPredictions">Loading Predictions</a></li>
+</ul>
+</ul>
+
+<hr class="h2-divider">
+
+<h2><a id="LabelsAndClassifiers">Saving the Classifier, Labels, and Project Parameters</a></h2>
+
+As described in <a href="NewProject.html">Creating a New Project</a>, all
+data associated with a given behavior classifier is stored in a JAABA 
+project file with the extension <b>.jab</b>, including the project 
+parameters, classifier, and training data labels and locations. These 
+can be saved to the current .jab file by selecting <b>File->Save</b> or 
+to a new .jab file by selecting <b>File->Save As...</b>. 
+
+<h3><a id="VersioningClassifiers">Creating Different Versions of a Behavior Classifier</a></h2>
+
+We often find it useful to create different versions of a behavior
+classifier. This can be thought of as creating a "restore point" that
+we can go back to if we do not like the modifications to the classifier
+we make. For example, we might do this if we have a classifier that is
+working fairly well, but we want to see what happens if we add a new
+type of data. To do this, we use the <b>File->Save As...</b> to create a
+new .jab file. Then, we can go back to the previous .jab file if we are
+unhappy with the changes we make. 
+
+<hr class="h2-divider">
+
+<h2><a id="Predictions">Classifier's Predictions</a></h2>
+
+<h3><a id="SavingPredictions">Saving Predictions</a></h3>
+
+<p>After training a classifier, the whole trajectory of a animal, the whole
+experiment, or all the experiments can be classified by selecting one of the options under
+the <b>Classifier -> Classify</b> menu, see 
+<a href="Training.html#Predictions">Examining the Classifier's Predictions</a> 
+for details. The classifier's predictions and raw output scores can be saved to a file for several 
+of the options under this menu. The saved predictions can also be used as <b>input</b> for other projects.
+<ul>
+<li><b>Current animal</b>: Predicts the behavior for all frames for the current animal and allows the 
+user to view these results within the current JAABA session, but does <b>not</b> save the predictions 
+to a file. </li>
+<li><b>Classifier -> Classify -> Current Experiment -> Don't Save</b>: Classifies all animals for the
+current experiment/video, and allows the user to view these results within the current JAABA session,
+but does <b>not</b> save the predictions to file. </li>
+<li><b>Classifier -> Classify -> Current Experiment -> Save to default</b>: Classifies all animals for the
+current experiment/video and saves to the <b>scores file</b> within the corresponding 
+<a href="DataFormatting.html#ExperimentDirectoryStructure">experiment directory</a>. The name of the 
+scores file within the experiment directory is the same for all experiments, and is specified during the
+project setup as <b>Score/Output File Name</b>.</li> 
+<li><b>Classifier -> Classify -> Current Experiment -> Save to different</b>: Classifies all animals for the
+current experiment/video, then prompts the user for the location to save the scores to, and saves to this file.</li>
+<b>Classifier -> Classify -> All Experiments -> Don't Save</b>: Classifies all animals for all experiments/videos, 
+and allows the user to view these results within the current JAABA session, but does <b>not</b> save the 
+predictions to file. </li>
+<li><b>Classifier -> Classify -> All Experiments -> Save to default</b>: Classifies all animals for 
+all experiments/videos, then saves to the <b>scores file</b> within each corresponding 
+<a href="DataFormatting.html#ExperimentDirectoryStructure">experiment directory</a>. The name of the 
+scores file within the experiment directory is the same for all experiments, and is specified during
+the project setup by <b>Score/Output File Name</b>.</li> 
+<li><b>Classifier -> Classify -> All Experiments -> Save to different</b>: Classifies all animals for 
+all experiments/videos, then prompts the user for a filename that will be used for all experiments. The
+classifier's predictions for each experment are stored into this selected filename within its 
+corresponding <a href="DataFormatting.html#ExperimentDirectoryStructure">experiment directory</a>.</li>
+</ul>
+
+<!--- KB: not true anymore, right?
+<p> The predictions computed using <b>Current Experiment</b> and <b>All Experiments</b> are shown at the 
+bottom of the prediction timeline (the <b>Loaded</b> option in the drop down menu).  </p>
+--->
+
+<h3><a id="LoadingPredictions">Loading Predictions</a></h3>
+
+<p> Previously saved predictions can be loaded from file into the current JAABA session. These loaded scores will be 
+shown in the bottom portion of the Automatic Timeline if <b>Loaded</b> is selected from the pop-up menu 
+on the left. Predictions can be loaded by selecting any of the options under the menu <b>File -> Load Scores</b>:
+<ul>
+<li> <b>File -> Load Scores -> For current experiment from default location</b>: Loads the scores for the current
+experiment from the default scores file within its corresponding 
+<a href="DataFormatting.html#ExperimentDirectoryStructure">experiment directory</a>. The name of the 
+scores file within the experiment directory is the same for all experiments, and is specified 
+during project setup as <b>Score/Output File Name</b>.</li> 
+<li> <b>File -> Load Scores -> For current experiment from different location</b>: Prompts the user
+for a file location, and loads the scores for the current experiment from that file.</li>
+<li> <b>File -> Load Scores -> For all experiments from default location</b>: Loads the scores for all
+experiments from the default scores file within each corresponding 
+<a href="DataFormatting.html#ExperimentDirectoryStructure">experiment directory</a>. The name of the 
+scores file within the experiment directory is the same for all experiments, and is specified
+during project setup as <b>Score/Output File Name</b>.</li> 
+</ul>
+Options not mentioned above should not be used, and are there for backwards compatability purposes. 
+
+</body>
+
+<footer>
+<hr class="h1-divider">
+<center>
+<a href="index.html">JAABA Documentation Home</a> | <a href="https://groups.google.com/forum/?fromgroups#!forum/jaaba">jaaba@googlegroups.com</a> | <i>Last Updated November 28, 2012</i>
+</center>
+</footer>
+
+
+</html>
