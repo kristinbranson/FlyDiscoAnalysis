@@ -71,7 +71,8 @@ end
 if exist(outtrxfile,'file'),
   delete(outtrxfile);
 end
-save(outtrxfile,'-struct','outtrx');
+save(outtrxfile,'-v7.3','-struct','outtrx');
+% save(outtrxfile,'-struct','outtrx');
 
 if ~exist(perframedir,'dir'),
   mkdir(perframedir);
