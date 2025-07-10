@@ -47,8 +47,12 @@ function modpath()
   % Add stuff intended to shadow JAABA, FlyTracker versions
   addpath(fullfile(path_to_this_folder, 'shadow'), '-begin') ;
   
-  % Add tests folder
+  % Add various folders
   addpath(fullfile(path_to_this_folder, 'tests'), '-begin') ;
+  addpath(fullfile(path_to_this_folder, 'scripts'), '-begin') ;
+  addpath(fullfile(path_to_this_folder, 'debug'), '-begin') ;
+  addpath(fullfile(path_to_this_folder, 'main'), '-begin') ;
+  addpath(fullfile(path_to_this_folder, 'stages'), '-begin') ;
   
   % Finally, add this folder itself, so we don't have to stay in this folder
   % Add at the beginning so that e.g. FlyTracker doesn't override
