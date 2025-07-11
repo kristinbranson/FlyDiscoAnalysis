@@ -136,7 +136,7 @@ try
   if exist(trxfile,'file'),
     delete(trxfile);
   end
-  save(trxfile,'trx','timestamps'); %??? which timestamps should this be? Shouldn't it be truncated to match registration data? 
+  save('-v7.3',trxfile,'trx','timestamps'); %??? which timestamps should this be? Shouldn't it be truncated to match registration data? 
   fprintf('Saved registered trx to file %s\n',trxfile);
 catch exception
   fprintf('Could not save registered trx:\n%s\n',getReport(exception));
