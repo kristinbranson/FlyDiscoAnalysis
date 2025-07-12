@@ -1,0 +1,124 @@
+<deployment-project plugin="plugin.ezdeploy" plugin-version="1.0">
+  <configuration file="/Users/kabram/Work/JAABA/compiled/JAABA_linux.prj" location="/Users/kabram/Work/JAABA/compiled" name="JAABA_linux" target="target.ezdeploy.standalone" target-name="MATLAB Compiler for Standalone Applications">
+    <param.appname>JAABA_linux</param.appname>
+    <param.icon />
+    <param.icons />
+    <param.version>1.0</param.version>
+    <param.authnamewatermark />
+    <param.email />
+    <param.company />
+    <param.summary />
+    <param.description />
+    <param.screenshot />
+    <param.guid />
+    <param.installpath.string>JAABA_linux</param.installpath.string>
+    <param.installpath.combo>option.installpath.systemwideapp</param.installpath.combo>
+    <param.logo />
+    <param.install.notes />
+    <param.intermediate>${PROJECT_ROOT}/JAABA_linux/for_testing</param.intermediate>
+    <param.output>${PROJECT_ROOT}/JAABA_linux/for_redistribution</param.output>
+    <param.user.defined.mcr.options />
+    <param.embed.ctf>true</param.embed.ctf>
+    <param.server.ctf>${PROJECT_ROOT}/JAABA_linux/for_testing/.ctf</param.server.ctf>
+    <param.server.readme>${PROJECT_ROOT}/JAABA_linux/for_testing/readme.txt</param.server.readme>
+    <param.target.type>subtarget.standalone</param.target.type>
+    <param.support.packages />
+    <param.web.mcr>true</param.web.mcr>
+    <param.package.mcr>false</param.package.mcr>
+    <param.no.mcr>false</param.no.mcr>
+    <param.web.mcr.name>MyAppInstaller_web</param.web.mcr.name>
+    <param.package.mcr.name>MyAppInstaller_mcr</param.package.mcr.name>
+    <param.no.mcr.name>MyAppInstaller_app</param.no.mcr.name>
+    <param.windows.command.prompt>true</param.windows.command.prompt>
+    <param.create.log>true</param.create.log>
+    <param.log.file>/tmp/JAABA_linux.log</param.log.file>
+    <unset>
+      <param.icon />
+      <param.icons />
+      <param.version />
+      <param.authnamewatermark />
+      <param.email />
+      <param.company />
+      <param.summary />
+      <param.description />
+      <param.screenshot />
+      <param.guid />
+      <param.installpath.combo />
+      <param.logo />
+      <param.install.notes />
+      <param.intermediate />
+      <param.output />
+      <param.user.defined.mcr.options />
+      <param.embed.ctf />
+      <param.server.ctf />
+      <param.server.readme />
+      <param.target.type />
+      <param.support.packages />
+      <param.web.mcr />
+      <param.package.mcr />
+      <param.no.mcr />
+      <param.web.mcr.name />
+      <param.package.mcr.name />
+      <param.no.mcr.name />
+      <param.windows.command.prompt />
+    </unset>
+    <fileset.main>
+      <file>/groups/branson/bransonlab/mayank/Jdetect/perframe/StartJAABA_compiled.m</file>
+    </fileset.main>
+    <fileset.resources>
+      <file>/groups/branson/bransonlab/mayank/Jdetect/filehandling</file>
+      <file>/groups/branson/bransonlab/mayank/Jdetect/misc</file>
+      <file>/groups/branson/bransonlab/mayank/Jdetect/perframe/ComputeChangeWindowFeatures.m</file>
+      <file>/groups/branson/bransonlab/mayank/Jdetect/perframe/ComputeConfusionMatrix.m</file>
+      <file>/groups/branson/bransonlab/mayank/Jdetect/perframe/ComputeDiffNeighborMaxWindowFeatures.m</file>
+      <file>/groups/branson/bransonlab/mayank/Jdetect/perframe/ComputeDiffNeighborMeanWindowFeatures.m</file>
+      <file>/groups/branson/bransonlab/mayank/Jdetect/perframe/ComputeDiffNeighborMinWindowFeatures.m</file>
+      <file>/groups/branson/bransonlab/mayank/Jdetect/perframe/ComputeHarmonicWindowFeatures.m</file>
+      <file>/groups/branson/bransonlab/mayank/Jdetect/perframe/ComputeHistWindowFeatures.m</file>
+      <file>/groups/branson/bransonlab/mayank/Jdetect/perframe/ComputeMaxDependencyRadius.m</file>
+      <file>/groups/branson/bransonlab/mayank/Jdetect/perframe/ComputeMaxWindowFeatures.m</file>
+      <file>/groups/branson/bransonlab/mayank/Jdetect/perframe/ComputeMeanWindowFeatures.m</file>
+      <file>/groups/branson/bransonlab/mayank/Jdetect/perframe/ComputeMinWindowFeatures.m</file>
+      <file>/groups/branson/bransonlab/mayank/Jdetect/perframe/ComputePerFrameTrans.m</file>
+      <file>/groups/branson/bransonlab/mayank/Jdetect/perframe/ComputePrctileWindowFeatures.m</file>
+      <file>/groups/branson/bransonlab/mayank/Jdetect/perframe/ComputeStdWindowFeatures.m</file>
+      <file>/groups/branson/bransonlab/mayank/Jdetect/perframe/ComputeWindowFeatures.m</file>
+      <file>/groups/branson/bransonlab/mayank/Jdetect/perframe/ComputeZScoreNeighborsWindowFeatures.m</file>
+      <file>/groups/branson/bransonlab/mayank/Jdetect/perframe/ComputeZscoreNeighborsWindowFeatures.m</file>
+      <file>/groups/branson/bransonlab/mayank/Jdetect/perframe/compute_perframe_features</file>
+      <file>/groups/branson/bransonlab/mayank/Jdetect/perframe/janelia_logo.png</file>
+      <file>/groups/branson/bransonlab/mayank/Jdetect/perframe/version.txt</file>
+    </fileset.resources>
+    <fileset.package>
+      <file>${PROJECT_ROOT}/ParallelComputingConfiguration_Local_Win4.settings</file>
+      <file>/groups/branson/bransonlab/mayank/Jdetect/compiled/ParallelComputingConfiguration_Local_Linux64.mat</file>
+      <file>/groups/branson/bransonlab/mayank/Jdetect/compiled/params</file>
+    </fileset.package>
+    <build-deliverables>
+      <file location="${PROJECT_ROOT}/JAABA_linux/for_testing" name="JAABA_linux.app" optional="false">/Users/kabram/Work/JAABA/compiled/JAABA_linux/for_testing/JAABA_linux.app</file>
+      <file location="${PROJECT_ROOT}/JAABA_linux/for_testing" name="readme.txt" optional="true">/Users/kabram/Work/JAABA/compiled/JAABA_linux/for_testing/readme.txt</file>
+      <file location="${PROJECT_ROOT}/JAABA_linux/for_testing" name="splash.png" optional="false">/Users/kabram/Work/JAABA/compiled/JAABA_linux/for_testing/splash.png</file>
+      <file location="${PROJECT_ROOT}/JAABA_linux/for_testing" name="run_JAABA_linux.sh" optional="false">/Users/kabram/Work/JAABA/compiled/JAABA_linux/for_testing/run_JAABA_linux.sh</file>
+    </build-deliverables>
+    <workflow />
+    <matlab>
+      <root>/Applications/MATLAB_R2014a.app</root>
+      <toolboxes />
+    </matlab>
+    <platform>
+      <unix>true</unix>
+      <mac>true</mac>
+      <windows>false</windows>
+      <win2k>false</win2k>
+      <winxp>false</winxp>
+      <vista>false</vista>
+      <linux>false</linux>
+      <solaris>false</solaris>
+      <osver>10.7.5</osver>
+      <os32>false</os32>
+      <os64>true</os64>
+      <arch>maci64</arch>
+      <matlab>true</matlab>
+    </platform>
+  </configuration>
+</deployment-project>
