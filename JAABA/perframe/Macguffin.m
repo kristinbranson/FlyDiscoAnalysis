@@ -614,7 +614,7 @@ classdef Macguffin < handle
           psz = stInfo.psize;
           base_st_params = struct('trans_types',{{'none'}},'type','spacetime');
           mndx = find(strcmp(stInfo.methods,stInfo.cur_method));
-          flow_name = stInfo.flownames{mndx};
+          flow_name = stInfo.flownames{mndx};  %#ok<FNDSB>
           if stInfo.is_stationary
               flow_name = [flow_name 's'];
           end
@@ -738,7 +738,9 @@ classdef Macguffin < handle
 
     
     function addversion(self)
-        vid = fopen('version.txt','r');
+        this_file_path = mfilename('fullpath') ;
+        this_dir_path = fileparts(this_file_path) ;
+        vid = fopen(fullfile(this_dir_path,'version.txt'),'r');
         vv = textscan(vid,'%s');
         fclose(vid);
         self.version = vv{1}{1};
