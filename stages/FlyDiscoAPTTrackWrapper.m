@@ -19,7 +19,8 @@ dataloc_params = ReadParams(datalocparamsfile) ;
 % Figure out where the APT code is
 this_script_path = mfilename('fullpath') ;
 source_folder_path = fileparts(this_script_path) ;
-aptrepopath = fullfile(source_folder_path, 'APT') ;  % use the subrepo APT
+fda_folder_path = fileparts(source_folder_path) ;
+aptrepopath = fullfile(fda_folder_path, 'APT') ;  % use the subrepo APT
 
 % Are we running on a submit host?  If not, use submit.int.janelia.org.
 [return_code, ~] = system('/usr/bin/which bsub') ;

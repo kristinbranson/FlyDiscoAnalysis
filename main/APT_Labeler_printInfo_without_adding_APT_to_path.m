@@ -9,7 +9,8 @@ fprintf('*** Start of APT Labeler.printInfo() output ***\n') ;
 
 % Where does this script live?
 this_script_path = mfilename('fullpath') ;
-fly_disco_analysis_folder_path = fileparts(this_script_path) ;
+this_folder_path = fileparts(this_script_path) ;
+fly_disco_analysis_folder_path = fileparts(this_folder_path) ;
 apt_folder_path = fullfile(fly_disco_analysis_folder_path, 'APT') ;
 
 % Set up the path for APT stuff

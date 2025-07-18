@@ -10,5 +10,6 @@ function FlyDiscoPipelineWithInternalSettingsFolder(expdir, varargin)
 
 this_script_path = mfilename('fullpath') ;
 source_folder_path = fileparts(this_script_path) ;
-internal_settings_folder_path = fullfile(source_folder_path, 'settings-internal') ;
+fda_folder_path = fileparts(source_folder_path) ;
+internal_settings_folder_path = fullfile(fda_folder_path, 'settings-internal') ;
 FlyDiscoPipeline(expdir, varargin{:}, 'settingsdir', internal_settings_folder_path) ;
