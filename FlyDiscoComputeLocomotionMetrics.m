@@ -182,8 +182,8 @@ save(fullfile(expdir,'swingtstancestep.mat'),'stimON_walkingLimbBoutData','stimO
 end
 
 % compute durations for bouts
-[bout_metrics_ON] = computeboutmetrics2(trx,aptdata,tips_pos_body,stimON_walkingLimbBoutData);
-[bout_metrics_OFF] = computeboutmetrics2(trx,aptdata,tips_pos_body,stimOFF_walkingLimbBoutData);
+[bout_metrics_ON] = computeboutmetrics2(trx,aptdata,tips_pos_body,legtip_landmarknums,stimON_walkingLimbBoutData);
+[bout_metrics_OFF] = computeboutmetrics2(trx,aptdata,tips_pos_body,legtip_landmarknums,stimOFF_walkingLimbBoutData);
 
 
 

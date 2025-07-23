@@ -26,13 +26,15 @@ end
 
 % code runs on single fly
 function [body_aligned_pts_perfly] = convert_global2body_perfly(pts,ctr_KPnums, theta_KPnum)
-
 [~,d,T] = size(pts);
 assert(d==2);
 
 % compute fly center
 ctrx = mean(pts(ctr_KPnums,1,:),1);
 ctry = mean(pts(ctr_KPnums,2,:),1);
+
+ 
+
 
 % substract off center
 % assert(d==2);
@@ -41,17 +43,26 @@ pts2 = permute(pts,[2,1,3]);
 pts2 = pts2-mu;
 
 % compute fly theta
-cx = pts2(1,theta_KPnum,:);
-cy = pts2(2,theta_KPnum,:);
+cx = mean(pts2(1,theta_KPnum,:),2);
+cy = mean(pts2(2,theta_KPnum,:),2);
+
 
 theta = atan2(cy,cx);
 
+% try to make robust to picking rotation and theta points in different
+% orien
+
+if mean(ctr_KPnums) < mean(theta_KPnum)
 % negative because theta should point to head + bias to get head to point
 % up
-b = pi/2 * ones(1,1,T);
-costheta = -(cos(theta-b));
-sintheta = -(sin(theta-b)) ;
-
+    b = pi/2 * ones(1,1,T);
+    costheta = -(cos(theta-b));
+    sintheta = -(sin(theta-b)) ;
+else
+    b = pi/2 * ones(1,1,T);
+    costheta = (cos(theta-b));
+    sintheta = (sin(theta-b)) ;
+end
 
 % align to postive y axis (in image coordinates = negative y axis)
 body_aligned_pts_perfly = [costheta.*pts2(1,:,:) + sintheta.*pts2(2,:,:)

@@ -1,4 +1,4 @@
-function [bout_metrics] = computeboutmetrics2(trx,aptdata,tips_pos_body,boutstruct)
+function [bout_metrics] = computeboutmetrics2(trx,aptdata,tips_pos_body,legtip_landmarknums,boutstruct)
 
 % input struct is output of detect_bouts or find_bout_overlap
 % name(fly).perlimb(1:6).start_indices
@@ -54,7 +54,7 @@ for is = 1:numel(state)
             tip_pos_body = tips_pos_body{fly};
             
 
-            boutfeatures = computeBoutFeatures(fly,trx,aptdata,tip_pos_body,limb,step_t0s,step_t1s,stance_t0s,stance_t1s,timestamps);
+            boutfeatures = computeBoutFeatures(fly,trx,aptdata,tip_pos_body,legtip_landmarknums,limb,step_t0s,step_t1s,stance_t0s,stance_t1s,timestamps);
 
             bout_metrics.perfly(fly).perlimb(limb).(state{is}) = boutfeatures;
 
