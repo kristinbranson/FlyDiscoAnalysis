@@ -95,3 +95,6 @@ save('-mat', '-v7.3', addpflies_ft_tracks_output_file_path, 'trk') ;
 % % Final message
 % end_timestamp = datestr(now(), 'yyyymmddTHHMMSS') ;
 % fprintf('\nFinished running %s at %s.\n', mfilename(), end_timestamp) ;
+
+end  % function
+

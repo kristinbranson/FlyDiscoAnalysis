@@ -168,143 +168,143 @@ pfly_radius = pixels_per_mm * pfly_radius_in_mm ;  % pels
 big_center_from_arena_index = reshape(center_from_arena_index, [dimension_count 1 arena_count]) ;
 pfly_position_from_frame_index_from_arena_index = big_center_from_arena_index + pfly_radius * pfly_theta_hat_from_frame_index ;
 
-if do_debug, 
-  % Read a frame in the middle of the dot movie
-  frame_index = round((frame_count+1)/2) ;
-  dot_movie_frame = ufmf_read_frame(dot_movie_header, frame_index) ;
-  [f, a, ih] = imglance(dot_movie_frame) ;  % show the frame
-  set_figure_size_in_pixels(f, [1100 1100]) ;
-  a.Position = [ 0 0 1 1 ] ;
-  
-  % For the current frame, get the pfly positions
-  position_from_arena_index = reshape(pfly_position_from_frame_index_from_arena_index(:,frame_index,:), ...
-                                      [dimension_count arena_count]) ;
-  
-  % Plot the arena centers on the image
-  center_dots_handle = ...
-    line('parent', a, ...
-         'xdata', center_from_arena_index(1,:), ...
-         'ydata', center_from_arena_index(2,:), ...
-         'linestyle', 'none', ...
-         'marker', 'o', ...
-         'markersize', 9, ...
-         'markerfacecolor', 'b', ...
-         'markeredgecolor', 'none') ;  %#ok<NASGU> 
-  
-  % Plot the arena boundaries
-  theta_from_index = linspace(0,2*pi,361) ;
-  for arena_index = 1 : arena_count ,  %#ok<FXUP> 
-    x = center_from_arena_index(1,arena_index) ;
-    y = center_from_arena_index(2,arena_index) ;
-    line(a, x + arena_radius*cos(theta_from_index), y + arena_radius*sin(theta_from_index)', 'color', [0 0.7 0], 'linewidth', 2) ;
-  end
-  
-  % Plot those on the image
-  pfly_dots_handle = ...
-    line('parent', a, ...
-         'xdata', position_from_arena_index(1,:), ...
-         'ydata', position_from_arena_index(2,:), ...
-         'linestyle', 'none', ...
-         'marker', 'o', ...
-         'markersize', 9, ...
-         'markerfacecolor', 'r', ...
-         'markeredgecolor', 'none') ;
-
-  %%
-  % Plot that every n frames
-  stride_count = 1000 ;
-  frame_index_from_debug_movie_frame_index = (1:stride_count:frame_count) ;
-  debug_movie_frame_count = numel(frame_index_from_debug_movie_frame_index) ;
-  
-  % Get the output movie started
-  output_movie_avi_file_name = sprintf('%s.avi', mfilename()) ;
-  profile = 'Motion JPEG AVI';
-  vw = VideoWriter(output_movie_avi_file_name, profile) ;
-  vw.FrameRate = 2 ;
-  vw.Quality = 100 ;
-  vw.open() ;
-  
-  for debug_movie_frame_index = 1 : debug_movie_frame_count ,
-    frame_index = frame_index_from_debug_movie_frame_index(debug_movie_frame_index) ;
-    dot_movie_frame = ufmf_read_frame(dot_movie_header, frame_index) ;
-    % For the current frame, get the pfly positions
-    position_from_arena_index = reshape(pfly_position_from_frame_index_from_arena_index(:,frame_index,:), ...
-                                        [dimension_count arena_count]) ;
-    
-    % plot
-    if debug_movie_frame_index == 1 ,
-      [f, a, ih] = imglance(dot_movie_frame) ;  % show the frame
-      set_figure_size_in_pixels(f, [1100 1100]) ;
-      a.Position = [ 0 0 1 1 ] ;
-      % Plot the arena centers on the image
-      center_dots_handle = ...
-        line('parent', a, ...
-             'xdata', center_from_arena_index(1,:), ...
-             'ydata', center_from_arena_index(2,:), ...
-             'linestyle', 'none', ...
-             'marker', 'o', ...
-             'markersize', 9, ...
-             'markerfacecolor', 'b', ...
-             'markeredgecolor', 'none') ;  %#ok<NASGU> 
-      % Plot the arena boundaries
-      theta_from_index = linspace(0,2*pi,361) ;
-      for arena_index = 1 : arena_count ,  %#ok<FXUP> 
-        x = center_from_arena_index(1,arena_index) ;
-        y = center_from_arena_index(2,arena_index) ;
-        line(a, x + arena_radius*cos(theta_from_index), y + arena_radius*sin(theta_from_index)', 'color', [0 0.7 0], 'linewidth', 2) ;
-      end
-      % Plot those on the image
-      pfly_dots_handle = ...
-        line('parent', a, ...
-             'xdata', position_from_arena_index(1,:), ...
-             'ydata', position_from_arena_index(2,:), ...
-             'linestyle', 'none', ...
-             'marker', 'o', ...
-             'markersize', 9, ...
-             'markerfacecolor', 'r', ...
-             'markeredgecolor', 'none') ;
-    else
-      % if not 1st output frame
-      ih.CData = dot_movie_frame ;
-      pfly_dots_handle.XData = position_from_arena_index(1,:) ;
-      pfly_dots_handle.YData = position_from_arena_index(2,:) ;
-    end
-  
-    % Write the frame to the video
-    output_movie_frame = getframe(a);
-    if debug_movie_frame_index == 1 ,
-      height = size(output_movie_frame.cdata,1);
-      width = size(output_movie_frame.cdata,2);
-    else
-      output_movie_frame.cdata = tweak_rgb_image_size(output_movie_frame.cdata, height, width) ;  % sometimes subsequent frames aren't quite the right size.
-    end
-    vw.writeVideo(output_movie_frame) ;
-  end
-  vw.close() ;
-
-  %%
-  
-  %
-  % Compress the .avi file to h.264
-  %
-  
-  % Tweak the frame size to be multiples of 4
-  newheight = 4*ceil(height/4);
-  newwidth = 4*ceil(width/4);
-  
-  % Generate the two command-line commands we need
-  mp4_file_path = replace_extension(output_movie_avi_file_name, '.mp4') ;
-  ffmpeg_command = 'env -u LD_LIBRARY_PATH /usr/bin/ffmpeg' ;  
-  cmd = ...
-    sprintf('%s -i %s -y -c:v h264 -pix_fmt yuv420p -s %dx%d -b:v 1600k -f mp4 %s',...
-            ffmpeg_command, output_movie_avi_file_name, newwidth, newheight, mp4_file_path) ;
-  
-  % Run the second command, deal with any error
-  system_with_error_handling(cmd) ;
-  
-  % If both commands succeeded, clean up the intermediate files that are no longer needed
-  delete(output_movie_avi_file_name);
-end
+% if do_debug, 
+%   % Read a frame in the middle of the dot movie
+%   frame_index = round((frame_count+1)/2) ;
+%   dot_movie_frame = ufmf_read_frame(dot_movie_header, frame_index) ;
+%   [f, a, ih] = imglance(dot_movie_frame) ;  % show the frame
+%   set_figure_size_in_pixels(f, [1100 1100]) ;
+%   a.Position = [ 0 0 1 1 ] ;
+% 
+%   % For the current frame, get the pfly positions
+%   position_from_arena_index = reshape(pfly_position_from_frame_index_from_arena_index(:,frame_index,:), ...
+%                                       [dimension_count arena_count]) ;
+% 
+%   % Plot the arena centers on the image
+%   center_dots_handle = ...
+%     line('parent', a, ...
+%          'xdata', center_from_arena_index(1,:), ...
+%          'ydata', center_from_arena_index(2,:), ...
+%          'linestyle', 'none', ...
+%          'marker', 'o', ...
+%          'markersize', 9, ...
+%          'markerfacecolor', 'b', ...
+%          'markeredgecolor', 'none') ;  %#ok<NASGU> 
+% 
+%   % Plot the arena boundaries
+%   theta_from_index = linspace(0,2*pi,361) ;
+%   for arena_index = 1 : arena_count ,  %#ok<FXUP> 
+%     x = center_from_arena_index(1,arena_index) ;
+%     y = center_from_arena_index(2,arena_index) ;
+%     line(a, x + arena_radius*cos(theta_from_index), y + arena_radius*sin(theta_from_index)', 'color', [0 0.7 0], 'linewidth', 2) ;
+%   end
+% 
+%   % Plot those on the image
+%   pfly_dots_handle = ...
+%     line('parent', a, ...
+%          'xdata', position_from_arena_index(1,:), ...
+%          'ydata', position_from_arena_index(2,:), ...
+%          'linestyle', 'none', ...
+%          'marker', 'o', ...
+%          'markersize', 9, ...
+%          'markerfacecolor', 'r', ...
+%          'markeredgecolor', 'none') ;
+% 
+%   %%
+%   % Plot that every n frames
+%   stride_count = 1000 ;
+%   frame_index_from_debug_movie_frame_index = (1:stride_count:frame_count) ;
+%   debug_movie_frame_count = numel(frame_index_from_debug_movie_frame_index) ;
+% 
+%   % Get the output movie started
+%   output_movie_avi_file_name = sprintf('%s.avi', mfilename()) ;
+%   profile = 'Motion JPEG AVI';
+%   vw = VideoWriter(output_movie_avi_file_name, profile) ;
+%   vw.FrameRate = 2 ;
+%   vw.Quality = 100 ;
+%   vw.open() ;
+% 
+%   for debug_movie_frame_index = 1 : debug_movie_frame_count ,
+%     frame_index = frame_index_from_debug_movie_frame_index(debug_movie_frame_index) ;
+%     dot_movie_frame = ufmf_read_frame(dot_movie_header, frame_index) ;
+%     % For the current frame, get the pfly positions
+%     position_from_arena_index = reshape(pfly_position_from_frame_index_from_arena_index(:,frame_index,:), ...
+%                                         [dimension_count arena_count]) ;
+% 
+%     % plot
+%     if debug_movie_frame_index == 1 ,
+%       [f, a, ih] = imglance(dot_movie_frame) ;  % show the frame
+%       set_figure_size_in_pixels(f, [1100 1100]) ;
+%       a.Position = [ 0 0 1 1 ] ;
+%       % Plot the arena centers on the image
+%       center_dots_handle = ...
+%         line('parent', a, ...
+%              'xdata', center_from_arena_index(1,:), ...
+%              'ydata', center_from_arena_index(2,:), ...
+%              'linestyle', 'none', ...
+%              'marker', 'o', ...
+%              'markersize', 9, ...
+%              'markerfacecolor', 'b', ...
+%              'markeredgecolor', 'none') ;  %#ok<NASGU> 
+%       % Plot the arena boundaries
+%       theta_from_index = linspace(0,2*pi,361) ;
+%       for arena_index = 1 : arena_count ,  %#ok<FXUP> 
+%         x = center_from_arena_index(1,arena_index) ;
+%         y = center_from_arena_index(2,arena_index) ;
+%         line(a, x + arena_radius*cos(theta_from_index), y + arena_radius*sin(theta_from_index)', 'color', [0 0.7 0], 'linewidth', 2) ;
+%       end
+%       % Plot those on the image
+%       pfly_dots_handle = ...
+%         line('parent', a, ...
+%              'xdata', position_from_arena_index(1,:), ...
+%              'ydata', position_from_arena_index(2,:), ...
+%              'linestyle', 'none', ...
+%              'marker', 'o', ...
+%              'markersize', 9, ...
+%              'markerfacecolor', 'r', ...
+%              'markeredgecolor', 'none') ;
+%     else
+%       % if not 1st output frame
+%       ih.CData = dot_movie_frame ;
+%       pfly_dots_handle.XData = position_from_arena_index(1,:) ;
+%       pfly_dots_handle.YData = position_from_arena_index(2,:) ;
+%     end
+% 
+%     % Write the frame to the video
+%     output_movie_frame = getframe(a);
+%     if debug_movie_frame_index == 1 ,
+%       height = size(output_movie_frame.cdata,1);
+%       width = size(output_movie_frame.cdata,2);
+%     else
+%       output_movie_frame.cdata = tweak_rgb_image_size(output_movie_frame.cdata, height, width) ;  % sometimes subsequent frames aren't quite the right size.
+%     end
+%     vw.writeVideo(output_movie_frame) ;
+%   end
+%   vw.close() ;
+% 
+%   %%
+% 
+%   %
+%   % Compress the .avi file to h.264
+%   %
+% 
+%   % Tweak the frame size to be multiples of 4
+%   newheight = 4*ceil(height/4);
+%   newwidth = 4*ceil(width/4);
+% 
+%   % Generate the two command-line commands we need
+%   mp4_file_path = replace_extension(output_movie_avi_file_name, '.mp4') ;
+%   ffmpeg_command = 'env -u LD_LIBRARY_PATH /usr/bin/ffmpeg' ;  
+%   cmd = ...
+%     sprintf('%s -i %s -y -c:v h264 -pix_fmt yuv420p -s %dx%d -b:v 1600k -f mp4 %s',...
+%             ffmpeg_command, output_movie_avi_file_name, newwidth, newheight, mp4_file_path) ;
+% 
+%   % Run the second command, deal with any error
+%   system_with_error_handling(cmd) ;
+% 
+%   % If both commands succeeded, clean up the intermediate files that are no longer needed
+%   delete(output_movie_avi_file_name);
+% end
 
 %%
 
@@ -363,7 +363,7 @@ frame_count = numel(timestamp_from_frame_index) ;
 ft_timestamp_from_frame_index = (1/fps) * (0:(frame_count-1)) ;  
   % The timestamps implied by the FT calibration can be slightly different than
   % the actual one from the stamp_log_cam<n>.txt file.
-timestamps = ft_timestamp_from_frame_index(is_pfly_on_from_frame_index) ;
+timestamps = ft_timestamp_from_frame_index(firstframe:endframe) ;
 dt = diff(timestamps) ;
 
 %pfly_theta_from_frame_index = atan2(pfly_theta_hat_from_frame_index(2,:), pfly_theta_hat_from_frame_index(1,:)) ;
@@ -373,10 +373,11 @@ pfly_heading_angle_from_frame_index = atan2(pfly_heading_hat_from_frame_index(2,
 function trx = trx_from_pfly_index(pfly_index)
   arena_index = pfly_index ;
 
-  nframes = sum(is_pfly_on_from_frame_index) ;
-  x = pfly_position_from_frame_index_from_arena_index(1, is_pfly_on_from_frame_index, arena_index) ;
-  y = pfly_position_from_frame_index_from_arena_index(2, is_pfly_on_from_frame_index, arena_index) ;
-  theta = pfly_heading_angle_from_frame_index(is_pfly_on_from_frame_index) ;
+  % nframes = sum(is_pfly_on_from_frame_index) ;
+  nframes = endframe - firstframe + 1 ;
+  x = pfly_position_from_frame_index_from_arena_index(1, firstframe:endframe, arena_index) ;
+  y = pfly_position_from_frame_index_from_arena_index(2, firstframe:endframe, arena_index) ;
+  theta = pfly_heading_angle_from_frame_index(firstframe:endframe) ;
   a = repmat(fake_fly_a, [1 nframes]) ;
   b = repmat(fake_fly_b, [1 nframes]) ;
   xwingl = nan(1, nframes) ;
