@@ -5,8 +5,11 @@ function [boutfeatures] = computeBoutFeatures(fly,trx,aptdata,tip_pos_body,legti
 % assume start and end indices are in movie reference frame
 boutfeatures = struct; 
 
+% boutfeatures.start_indices = step_t0s;
+% boutfeatures.end_indices = step_t1s;
+
 % Body reference metrics
-offcurrfly = trx(fly).off;
+% offcurrfly = trx(fly).off;
 
 % compute average body lengths in pixels
 meanbodylength = mean(trx(fly).a.*4);
@@ -34,13 +37,13 @@ assert(numel(stance_t0s) == numel(stance_t1s));
 
 % *AEP* anterior extreme position 
 AEP = nan(2,numel(stance_t0s));
-AEP(:,:) = tip_pos_body(limb,:,stance_t0s+offcurrfly);
+AEP(:,:) = tip_pos_body(limb,:,stance_t0s);
 boutfeatures.AEP = AEP;
 boutfeatures.AEP_BL = AEP./meanbodylength;
 
 % *PEP* posterior extrene position 
 PEP = nan(2,numel(stance_t1s));
-PEP(:,:) = tip_pos_body(limb,:,stance_t1s+offcurrfly);
+PEP(:,:) = tip_pos_body(limb,:,stance_t1s);
 boutfeatures.PEP  = PEP;
 boutfeatures.PEP_BL = PEP./meanbodylength;
 
@@ -60,7 +63,7 @@ nsteps = numel(step_t0s);
 % *step distance* total distance leg travels AEP to AEP in body ref (Pratt '24)
 distance_px = nan(1,nsteps);
 for i = 1:nsteps
-    curr_step = squeeze(tip_pos_body(limb,:,step_t0s(i)+offcurrfly:step_t1s(i)+offcurrfly));
+    curr_step = squeeze(tip_pos_body(limb,:,step_t0s(i):step_t1s(i)));
     dcurr_step = diff(curr_step,1,2)';
     curr_step_distances = hypot(dcurr_step(:,1), dcurr_step(:,2));
     distance_px(i) = sum(curr_step_distances);    
@@ -83,7 +86,7 @@ limb_data = squeeze(currfly_aptlegdata(limb,:,:));
 length_px=nan(1,nsteps);
 for i = 1:nsteps
     %only leg tips
-    curr_step = limb_data(:,step_t0s(i)+offcurrfly:step_t1s(i)+offcurrfly);
+    curr_step = limb_data(:,step_t0s(i):step_t1s(i));
     dcurr_step = diff(curr_step,1,2)';
     curr_step_distances = hypot(dcurr_step(:,1), dcurr_step(:,2));
     length_px(i) = sum(curr_step_distances);

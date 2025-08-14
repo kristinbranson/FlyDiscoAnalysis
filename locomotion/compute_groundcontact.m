@@ -21,6 +21,10 @@ else
     if ~isempty(pairs)
         % if using pair specific thresholding there must be a threshold for
         % each pair
+        if size(pairs,2) ~= 2
+            pairs = reshape(pairs,[2,3])';
+        end
+
         assert(size(pairs,1) == numel(gc_threshold_low),'number of low thresholds does not match number of pairs')
         assert(size(pairs,1) == numel(gc_threshold_high),'number of high thresholds does not match number of pairs')
 

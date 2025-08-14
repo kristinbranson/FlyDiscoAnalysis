@@ -128,7 +128,8 @@ end
 % run groundcontact detections
 gc_threshold_low = stage_params.gc_threshold_low;
 gc_threshold_high = stage_params.gc_threshold_high;
-[groundcontact] = compute_groundcontact(tips_velmag,'gc_threshold_low',gc_threshold_low,'gc_threshold_high',gc_threshold_high);
+pairs = stage_params.pairs;
+[groundcontact] = compute_groundcontact(tips_velmag,'pairs',pairs,'gc_threshold_low',gc_threshold_low,'gc_threshold_high',gc_threshold_high);
 
 %compute number of feet on the ground
 data = cell(1,trx.nflies);
@@ -145,52 +146,29 @@ fprintf(logfid,'Computing swing and stance bout metrics ...\n')
 [perfly_limbboutdata] = limbSwingStanceStep(groundcontact);
 
 % filter swing stance for during walking
-% how to load score data from trx file??
-% ScoreFile = fullfile(expdir,"scores_Walk2.mat");
-% load(ScoreFile,'allScores');
-% digitalscores = allScores.postprocessed;
-[~,digitalscores] = LoadScoresFromFile(trx,'scores_Walk2',1);
-% [walkingLimbBoutData] = restrictedSwingStance(digitalscores,perfly_limbboutdata,'trajectory',{'swing','stance'});
-% [walkingSteps] = restrictedStep(digitalscores,walkingLimbBoutData,'trajectory');
-[walkingLimbBoutData] = restrictedLimbBoutData(digitalscores,perfly_limbboutdata,'trajectory');
+% digitscores: tarjectory format of 0,1 behavior labels
+[~,walking_scores] = LoadScoresFromFile(trx,'scores_Walk2',1);
 
-
-% convert bout start and end indices to movie reference frame
-% [walkingSwingStance] = convert_boutdata_to_movieformat(trx,walkingSwingStance,{'swing','stance'});
-% [walkingSteps] = convert_boutdata_to_movieformat(trx,walkingSteps,{'step'});
-[walkingLimbBoutData] = convert_boutdata_to_movieformat(trx,walkingLimbBoutData);
-
-% seperate walking stwing stance for stimon and stimoff data
-% how to load stim data from trx file??
-% indicatorfile = fullfile(expdir,"indicatordata.mat");
-% load(indicatorfile,'indicatorLED');
 % digitalindicator = indicatorLED.indicatordigital;
 indicatordata = trx.getIndicatorLED(1);
 digitalindicator = indicatordata.indicatordigital;
-% [stimON_walkingSwingStance] = restrictedSwingStance(digitalindicator,walkingSwingStance,'movie',{'swing','stance'});
-% [stimOFF_walkingSwingStance] = restrictedSwingStance(~digitalindicator,walkingSwingStance,'movie',{'swing','stance'});
-% %TO DO combine swing stance and step data, so that i don't duplicate
-% %structures. 
-% [stimON_walkingSteps] = restrictedSwingStance(digitalindicator,walkingSteps,'movie',{'step'});
-% [stimOFF_walkingSteps] = restrictedSwingStance(~digitalindicator,walkingSteps,'movie',{'step'});
 
-[stimON_walkingLimbBoutData] = restrictedLimbBoutData(digitalindicator,walkingLimbBoutData,'movie');
-[stimOFF_walkingLimbBoutData] = restrictedLimbBoutData(~digitalindicator,walkingLimbBoutData,'movie');
+% intialize class
+loco_analyzer = LimbBoutAnalyzer(trx, aptdata, tips_pos_body, legtip_landmarknums, groundcontact, digitalindicator, walking_scores);
 
-if debug
-save(fullfile(expdir,'swingtstancestep.mat'),'stimON_walkingLimbBoutData','stimOFF_walkingLimbBoutData');
-end
+% compute locomotion metrics for swing, stance, and steps for walking
+% during stim on and stim off periods
+loco_analyzer.analyzeWalkingAndStimConditions();
 
-% compute durations for bouts
-[bout_metrics_ON] = computeboutmetrics2(trx,aptdata,tips_pos_body,legtip_landmarknums,stimON_walkingLimbBoutData);
-[bout_metrics_OFF] = computeboutmetrics2(trx,aptdata,tips_pos_body,legtip_landmarknums,stimOFF_walkingLimbBoutData);
-
-
+% % pull bout features  bouts
+% [bout_metrics_ON] = getConditionData(loco_analyzer,'walking_stimON_traj','metrics');
+% [bout_metrics_OFF] = getConditionData(loco_analyzer,'walking_stimOFF_traj','metrics');
 
 % If something goes wrong, throw an error.  Any values returned from this
 % function are ignored.
 try
-    save(fullfile(expdir,trx.dataloc_params.locomotionmetricsswingstanceboutstatsfilestr),'bout_metrics_ON','bout_metrics_OFF')
+    saveResults(loco_analyzer, fullfile(expdir,trx.dataloc_params.locomotionmetricsswingstanceboutstatsfilestr))
+    % save(fullfile(expdir,trx.dataloc_params.locomotionmetricsswingstanceboutstatsfilestr),'bout_metrics_ON','bout_metrics_OFF')
 catch ME
     warning('FlyDiscoComputeLocomotionMetrics:save',...
         'Could not save information to file %s: %s',filename,getReport(ME));
