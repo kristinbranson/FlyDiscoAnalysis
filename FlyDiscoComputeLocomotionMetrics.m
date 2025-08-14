@@ -129,7 +129,8 @@ end
 gc_threshold_low = stage_params.gc_threshold_low;
 gc_threshold_high = stage_params.gc_threshold_high;
 pairs = stage_params.pairs;
-[groundcontact] = compute_groundcontact(tips_velmag,'pairs',pairs,'gc_threshold_low',gc_threshold_low,'gc_threshold_high',gc_threshold_high);
+minimum_bout = stage_params.minimum_bout_groundcontact;
+[groundcontact] = compute_groundcontact(tips_velmag,'pairs',pairs,'gc_threshold_low',gc_threshold_low,'gc_threshold_high',gc_threshold_high,'minimum_bout',minimum_bout);
 
 %compute number of feet on the ground
 data = cell(1,trx.nflies);
