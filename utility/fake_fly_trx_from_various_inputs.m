@@ -128,8 +128,8 @@ if do_debug ,
 end
 
 % Extract the centroid position and heading angle (as a unit vector) for each tick.
-pfly_position_in_mm_from_tick_index = pfly_position_in_mm_from_lut_index(:,lut_index_from_tick_index) ;
-pfly_heading_hat_from_tick_index = pfly_heading_hat_from_lut_index(:,lut_index_from_tick_index) ;
+pfly_position_in_mm_from_tick_index = pfly_position_in_mm_from_lut_index(:,lut_index_from_tick_index) ;  % 2 x tick_count
+pfly_heading_hat_from_tick_index = pfly_heading_hat_from_lut_index(:,lut_index_from_tick_index) ;  % 2 x tick_count
 
 % Show a movie of the pfly positions, as a function of tick index
 if do_debug
@@ -204,11 +204,11 @@ end
 % Interpolate to get pfly position and heading at each movie frame timestamp.
 % Also transpose so that rows correspond to frames.
 pfly_position_in_mm_from_frame_index = interp1(timestamp_from_tick_index', pfly_position_in_mm_from_tick_index', timestamp_from_frame_index')' ;
-  % frame_count x 2 
+  % 2 x frame_count
 pfly_heading_hat_from_frame_index = interp1(timestamp_from_tick_index', pfly_heading_hat_from_tick_index', timestamp_from_frame_index')' ;
-  % frame_count x 2 
+  % 2 x frame_count 
 fractional_is_pfly_on_from_frame_index = interp1(timestamp_from_tick_index', is_pfly_on_from_tick_index', timestamp_from_frame_index')' ;
-is_pfly_on_from_frame_index = (fractional_is_pfly_on_from_frame_index>0.5) ;
+is_pfly_on_from_frame_index = (fractional_is_pfly_on_from_frame_index>0.5) ;  % 1 x frame_count
 
 % Plot the the per-frame quantities to check them
 if do_debug ,
@@ -228,11 +228,11 @@ raw_center_from_arena_index = flipud((flytracker_calibration.centroids)') ;   % 
 arena_count = size(raw_center_from_arena_index, 2) ; 
 center_from_arena_index = raw_center_from_arena_index + arena_center_shift ;
 pixels_per_mm = flytracker_calibration.PPM ;  % pixels per mm
-pfly_position_in_pels_from_frame_index = pixels_per_mm * pfly_position_in_mm_from_frame_index ;  % pels, frame_count x 2
+pfly_position_in_pels_from_frame_index = pixels_per_mm * pfly_position_in_mm_from_frame_index ;  % pels, 2 x frame_count
 
 % Generate the pfly position for each arena, for each frame
 big_center_from_arena_index = reshape(center_from_arena_index, [dimension_count 1 arena_count]) ;
-pfly_position_from_frame_index_from_arena_index = big_center_from_arena_index + pfly_position_in_pels_from_frame_index ;
+pfly_position_from_frame_index_from_arena_index = big_center_from_arena_index + pfly_position_in_pels_from_frame_index ;  % 2 x frame_count x arena_count
 
 % Extract things we need from the fake-fly config
 fake_fly_a_in_mm = fake_fly_params.maj_axis/4 ;
@@ -287,6 +287,7 @@ function trx = trx_from_pfly_index(pfly_index)
   b_mm = repmat(mm_per_pixel * fake_fly_b, [1 nframes]) ;
   theta_mm = theta ;
   id = maximum_real_fly_id + pfly_index ;
+  is_pfly_on = is_pfly_on_from_frame_index(firstframe:endframe) ;
 
   trx = ...
     struct('moviename', {moviename}, ...
@@ -315,7 +316,8 @@ function trx = trx_from_pfly_index(pfly_index)
            'theta_mm', {theta_mm}, ...
            'a_mm', {a_mm}, ...
            'b_mm', {b_mm}, ...
-           'is_pfly', {true}) ;
+           'is_pfly', {true}, ...
+           'is_pfly_on', is_pfly_on) ;
 end  % function
 
 % Use the just-defined function to create the fake_trx struct array

@@ -64,7 +64,7 @@ fake_trx = ...
                                    flytracker_calibration, fake_fly_params, maximum_real_fly_id, arena_center_shift, debug) ;
 
 % Create the final trx output struct
-augmented_original_trx = arrayfun(@(s)(add_fields(s, 'is_pfly', false)), original_trx) ;
+augmented_original_trx = arrayfun(@(s)(add_fields(s, 'is_pfly', false, 'is_pfly_on', [])), original_trx) ;
 trx = [ augmented_original_trx fake_trx ] ;
 trx_wrapper = struct('trx', {trx}, 'timestamps', {original_trx_wrapper.timestamps}) ;
 
