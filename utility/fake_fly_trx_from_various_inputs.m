@@ -14,18 +14,22 @@ function fake_trx = fake_fly_trx_from_various_inputs(movie_path, timestamp_from_
 %   the fps is 60, when it's actually e.g. 59.99542999267578125.
 % ellipse_trajectory: 1st col the x coord, 2nd col the y coord, 3rd col the
 %   heading angle in radians.  Number of rows is the number of entries in the
-%   look-up table (LUT).  x,y are in typical cartesian coordinates (y axis
-%   points up), heading angle uses usual convention (angle relative to x-axis,
-%   increasing counterclockwise)
+%   look-up table (LUT).  x,y are in mm, in typical cartesian coordinates (origin at
+%   center of arena, x axis points towards right of frame, y axis points
+%   towards top of frame), heading angle uses usual math-class convention
+%   (angle in radians, relative to x-axis, increasing counterclockwise).
 % actual_trajectory: 1st col a timestamp (in seconds); 2nd col the LUT index;
 %   3rd col 0 or 1, depending on whether the pfly ("projected fly") is visible or not
 % flytracker_calibration: The "calib" structure from a FlyTracker calibration
 %   file.
 % fake_fly_params: table or struct containing 'maj_axis' and 'min_axis'
 %   columns/fields that give the fake fly major/minor axis length.  This is
-%   the full length, the semi- axis length or quarter- axis length.  In mm.
-% maximum_real_fly_id: What the tin says.  Used to make the fake fly ids
-%   distinct.
+%   the full length, *not* the semi- axis length or quarter- axis length.  In
+%   mm.
+% maximum_real_fly_id: A fly "id" is a nonnegative (possibly strictly
+%   positive?) integer that uniquely identifies that fly.  This gives the largest 
+%   fly id of all the real flies.  The smallest fly id of the projected flies will be 
+%   this number plus one.
 % arena_center_shift: 2x1, in pixels.  How much the arena centers are shifted
 %   relative to values in flytracker_calibration.  Useful for movies that show
 %   the pfly dots.  Defaults to [0 0]' if empty.
@@ -39,60 +43,75 @@ end
 if ~exist('do_debug', 'var') || isempty(do_debug) ,
   do_debug = false ;
 end
-do_debug = false ;  % debug code is not working right now
-
-%experiment_folder_path = '/groups/branson/bransonlab/taylora/flydisco/pflySingleMale_pfly_SlowRamp_71G01_UASChrimsonVenusX0070_20240320T102203' ;
-%dotmovie_path = fullfile(experiment_folder_path, 'dotmovie.ufmf') ;
-%playfmf([], dotmovie_path) ;
-%movie_path = fullfile(experiment_folder_path, 'movie.ufmf') ;
-%playfmf([], movie_path) ;
 
 % ellipseTrajectory.csv contains a look-up table from indices to <x,y>
 % actualTraj.csv contains a LUT index for each frame
-%ellipse_trajectory_csv_path = fullfile(experiment_folder_path, 'ellipseTrajectory.csv') ;
-%ellipse_trajectory_struct = importdata(ellipse_trajectory_csv_path, ',', 1) ;
-%ellipse_trajectory = readmatrix(ellipse_trajectory_csv_path) ;
 dimension_count = 2 ;
-raw_pfly_xy_from_lut_index = [1 -1]' .* ellipse_trajectory(:,1:dimension_count)' ;  % 2 x 471, y sign convention is opposite of what we want
-pfly_radius_in_mm = mean(vecnorm(raw_pfly_xy_from_lut_index)) ;  % mm
-pfly_theta_hat_from_lut_index = raw_pfly_xy_from_lut_index / pfly_radius_in_mm ; % want a unit vector at each index
+lut_count = size(ellipse_trajectory,1) ;  %#ok<NASGU>  % Number of entries in the LUT
+pfly_position_in_mm_from_lut_index = [1 -1]' .* ellipse_trajectory(:,1:dimension_count)' ;  % mm, 2 x lut_count
+  % pfly_position_from_lut_index is 2 x number of LUT entries, uses convention that
+  % origin is at center of arena, x axis points to right of frame, y axis points
+  % to *bottom* of frame.  (We're going to call this "CRTesian coordinates".)
 
+% Plot the x-y coordinates of the pfly at each LUT row  
 if do_debug ,
   figure('color', 'w') ;
-  plot(pfly_theta_hat_from_lut_index(1,:), pfly_theta_hat_from_lut_index(2,:), 'k.') ;
-  axis equal
-  title('LUT (ellipseTrajectory.csv) x-y values') ;
-  xlabel('x') ;
-  ylabel('y') ;
-  % looks like a circle, early points are on the x-axis and points make a CCW
-  % circle
+  plot(pfly_position_in_mm_from_lut_index(1,:), pfly_position_in_mm_from_lut_index(2,:), 'k.') ;
+  axis equal ;
+  set(gca, 'YDir', 'reverse') ;
+  title('LUT (from ellipseTrajectory.csv) x-y values') ;
+  xlabel('x (mm)') ;
+  ylabel('y (mm)') ;
+  % For the original pfly protocol, looks like a circle, early points are on the
+  % x-axis and points make a CCW circle.  But later experiments do different
+  % things.
 end
 
-pfly_theta_from_lut_index = unwrap(atan2(pfly_theta_hat_from_lut_index(2,:), pfly_theta_hat_from_lut_index(1,:))) ;
-% theta starts and zero and increases steadily until it is equal to
-% 2*pi-epsilon
+% % Show a movie of the pfly positions, as a function of LUT index
+% if do_debug
+%   fig = figure('color', 'w') ;
+%   ax = axes('Parent', fig) ;
+%   plot(ax, pfly_position_in_mm_from_lut_index(1,:), pfly_position_in_mm_from_lut_index(2,:), '.', 'Color', 0.9*[1 1 1]) ;
+%   axis(ax, 'equal') ;
+%   set(ax, 'YDir', 'reverse') ;
+%   title(ax, 'LUT (from ellipseTrajectory.csv) x-y values') ;
+%   xlabel(ax, 'x (mm)') ;
+%   ylabel(ax, 'y (mm)') ;
+%   drawnow() ;
+% 
+%   set(ax, 'XLimMode', 'manual', 'YLimMode', 'manual') ;
+%   dot = line('Parent', ax, 'XData', [], 'YData', [], 'LineStyle', 'none', 'Marker', '.', 'MarkerFaceColor', 'k') ;
+%   for i = 1 : lut_count
+%     set(dot, 'XData', pfly_position_in_mm_from_lut_index(1,i), 'YData', pfly_position_in_mm_from_lut_index(2,i)) ;
+%     drawnow();
+%     pause(0.01) ;
+%   end
+% end
+
+% Get the angle of the pfly tail-to-head vector for each LUT index.
+% Note that ellipse_trajectory(lut_index,3) is an angle, in radians, relative to the x
+% axis, increasing counterclockwise.
 pfly_heading_angle_from_lut_index = -ellipse_trajectory(:,3)' ;
-assert(all(abs(pfly_heading_angle_from_lut_index-pfly_theta_from_lut_index+pi/2)<1e-9))
-% the pfly starts at 3 o'clock, goes around CCW, so the heading should be
-% theta-pi/2 in the "CRTesian" (y-axis points down) coordinate system.
+  % pfly_heading_angle_from_lut_index is 1 x lut_count, angle in radians,
+  % relative to x axis, increasing *clockwise*. (to be consistent with CRTesian
+  % coordinates).
+
+% Compute the unit vector describing the fly tail-to-head vector at each LUT
+% index.  This is in CRTesian coordinates (y-axis points to bottom of frame).
 pfly_heading_hat_from_lut_index = [ cos(pfly_heading_angle_from_lut_index) ; sin(pfly_heading_angle_from_lut_index) ] ;
 
 % How many frames in the video
 frame_count = numel(timestamp_from_frame_index) ;  %#ok<NASGU> 
 
-%% 
-%actual_trajectory_csv_path = fullfile(experiment_folder_path, 'actualTraj.csv') ;
-%actual_trajectory = load_actual_traj_csv(actual_trajectory_csv_path) ;
-% 1st col a timestamp, 2nd col the lut index, 3rd col 'on' or 'off' depending
-% on whether the fake fly is on or off.
+% Extract individual signals frm the actual_trajectory arrays
 timestamp_from_tick_index = actual_trajectory(:,1)' - actual_trajectory(1,1) ;  % s
 lut_index_from_tick_index = actual_trajectory(:,2)' ;
 is_pfly_on_from_tick_index = actual_trajectory(:,3)' ;
-% tick_count = numel(timestamp_from_tick_index) ;  % Usually many more ticks than frames
-%   % we use "tick" here instead of "frame" just because there are more of them
-%   % than the frame_count
+tick_count = numel(timestamp_from_tick_index) ;  % Usually many more ticks than frames
+  % we use "tick" here instead of "frame" just because there are more of them
+  % than the frame_count
 
-%%
+% Plot some stuff to sanity-check the timestamps
 if do_debug ,
   dtimestamp_from_tick_index = diff(timestamp_from_tick_index) ;  % s
   figure('color', 'w') ;
@@ -108,237 +127,114 @@ if do_debug ,
   title('pfly Timestamp delta vs timestamp')
 end
 
-%mean_tick_interval = mean(dtimestamp_from_tick_index) ;  % s
-%mean_tick_rate = 1/mean_tick_interval  % hz
-
-%%
-pfly_theta_hat_from_tick_index = pfly_theta_hat_from_lut_index(:,lut_index_from_tick_index) ;
+% Extract the centroid position and heading angle (as a unit vector) for each tick.
+pfly_position_in_mm_from_tick_index = pfly_position_in_mm_from_lut_index(:,lut_index_from_tick_index) ;
 pfly_heading_hat_from_tick_index = pfly_heading_hat_from_lut_index(:,lut_index_from_tick_index) ;
 
-if do_debug ,
-  figure('color', 'w') ;
-  plot(pfly_theta_hat_from_tick_index(1,:), pfly_theta_hat_from_tick_index(2,:), 'k.') ;
-  title('Pfly x-y values, tick index explicit') ;
-  xlabel('x') ;
-  ylabel('y') ;
-  axis equal
+% Show a movie of the pfly positions, as a function of tick index
+if do_debug
+  fig = figure('color', 'w') ;
+  ax = axes('Parent', fig) ;
+  plot(ax, pfly_position_in_mm_from_tick_index(1,:), pfly_position_in_mm_from_tick_index(2,:), '.', 'Color', 0.9*[1 1 1]) ;
+  axis(ax, 'equal') ;
+  set(ax, 'YDir', 'reverse') ;
+  title(ax, 'pFly positions') ;
+  xlabel(ax, 'x (mm)') ;
+  ylabel(ax, 'y (mm)') ;
+  drawnow() ;
+
+  set(ax, 'XLimMode', 'manual', 'YLimMode', 'manual') ;
+  dot = line('Parent', ax, 'XData', [], 'YData', [], 'LineStyle', 'none', 'Marker', '.', 'MarkerFaceColor', 'k') ;
+  for i = 1 : round(tick_count/10)
+    set(dot, 'XData', pfly_position_in_mm_from_tick_index(1,i), 'YData', pfly_position_in_mm_from_tick_index(2,i)) ;
+    drawnow();
+  end
 end
 
-%%
+% Plot the x-y coordinates of the pfly at each tick, with time coded by color
+if do_debug ,
+  desired_sample_count = 200 ;
+  stride = round(tick_count / desired_sample_count) ;
+  tick_index_from_sample_index = 1:stride:tick_count ;
+  % tick_index_from_sample_index = 1:10:450 ;  
+  sample_count = numel(tick_index_from_sample_index) ;
+  color_from_sample_index = turbo(sample_count) ;
+  fig = figure('color', 'w') ;
+  ax = axes('Parent', fig, 'DataAspectRatio', [1 1 1], 'YDir', 'reverse') ;
+  line('Parent', ax, 'XData', pfly_position_in_mm_from_tick_index(1,:), 'YData', pfly_position_in_mm_from_tick_index(2,:), ...
+       'LineStyle', 'none', 'Marker', '.', 'Color', 0.9*[1 1 1]) ;
 
-% First interpolate to get pfly x,y at each movie frame timestamp
-pfly_theta_hat_from_frame_index = interp1(timestamp_from_tick_index', pfly_theta_hat_from_tick_index', timestamp_from_frame_index')' ;
+  for sample_index = 1 : sample_count 
+    tick_index = tick_index_from_sample_index(sample_index) ;
+    pfly_position_in_mm = pfly_position_in_mm_from_tick_index(:,tick_index) ;
+    pfly_heading_hat = pfly_heading_hat_from_tick_index(:,tick_index) ;
+    heading_scale_factor = 1 ;    
+    clr = color_from_sample_index(sample_index,:) ;
+    line('Parent', ax, 'Color', clr, ...
+         'XData', pfly_position_in_mm(1)+[0 heading_scale_factor*pfly_heading_hat(1)], ...
+         'YData', pfly_position_in_mm(2)+[0 heading_scale_factor*pfly_heading_hat(2)]) ;    
+    line('Parent', ax, 'LineStyle', 'none', 'Marker', 'o', 'MarkerSize', 4, 'MarkerEdgeColor', 'none', 'MarkerFaceColor', clr, ...
+         'XData', pfly_position_in_mm(1), 'YData', pfly_position_in_mm(2)) ;
+  end
+  title(ax, 'pFly positions (blue->early, red->late)') ;
+  xlabel(ax, 'x (mm)') ;
+  ylabel(ax, 'y (mm)') ;
+end
+
+% For frames where the fly is moving at a decent speed, plot the heading
+% vector angle vs the angle of the velocity vector.  These should agree most of
+% the time.
+if do_debug
+  pfly_dxy_in_mm_from_intertick_index = diff(pfly_position_in_mm_from_tick_index, [], 2) ;  % 2 x (tick_count-1)
+  pfly_ds_in_mm_from_intertick_index = sqrt(sum(pfly_dxy_in_mm_from_intertick_index.^2,1)) ;  % mm, step size from tick to tick
+  ds_in_mm_threshold = 0.03 ;  % mm/tick, determined empirically
+  is_fast_enough_from_intertick_index = (pfly_ds_in_mm_from_intertick_index >= ds_in_mm_threshold) ;
+  pfly_heading_hat_from_intertick_index = (pfly_heading_hat_from_tick_index(:,1:end-1) + pfly_heading_hat_from_tick_index(:,2:end))/2 ;
+  pfly_heading_angle_from_intertick_index = atan2(pfly_heading_hat_from_intertick_index(2,:), pfly_heading_hat_from_intertick_index(1,:)) ;
+  pfly_dxy_angle_from_intertick_index = atan2(pfly_dxy_in_mm_from_intertick_index(2,:), pfly_dxy_in_mm_from_intertick_index(1,:)) ;
+  
+  figure('color', 'w');
+  plot(pfly_heading_angle_from_intertick_index(is_fast_enough_from_intertick_index), ...
+       pfly_dxy_angle_from_intertick_index(is_fast_enough_from_intertick_index), ...
+       'k.') ;
+  xlabel('Heading angle (rad)') ;
+  ylabel('Velocity angle (rad)') ;
+end
+
+% Interpolate to get pfly position and heading at each movie frame timestamp.
+% Also transpose so that rows correspond to frames.
+pfly_position_in_mm_from_frame_index = interp1(timestamp_from_tick_index', pfly_position_in_mm_from_tick_index', timestamp_from_frame_index')' ;
+  % frame_count x 2 
+pfly_heading_hat_from_frame_index = interp1(timestamp_from_tick_index', pfly_heading_hat_from_tick_index', timestamp_from_frame_index')' ;
   % frame_count x 2 
 fractional_is_pfly_on_from_frame_index = interp1(timestamp_from_tick_index', is_pfly_on_from_tick_index', timestamp_from_frame_index')' ;
 is_pfly_on_from_frame_index = (fractional_is_pfly_on_from_frame_index>0.5) ;
 
-% Do the same for the heading
-pfly_heading_hat_from_frame_index = interp1(timestamp_from_tick_index', pfly_heading_hat_from_tick_index', timestamp_from_frame_index')' ;
-  % frame_count x 2 
-
-% plot those  
+% Plot the the per-frame quantities to check them
 if do_debug ,
   figure('color', 'w') ;
   line_handles = ...
-    plot(timestamp_from_frame_index, pfly_theta_hat_from_frame_index(1,:), 'r', ...
-         timestamp_from_frame_index, pfly_theta_hat_from_frame_index(2,:), 'b') ;
+    plot(timestamp_from_frame_index, pfly_position_in_mm_from_frame_index(1,:), 'r', ...
+         timestamp_from_frame_index, pfly_position_in_mm_from_frame_index(2,:), 'b') ;
   xlabel('Movie timestamp (s)') ;
-  ylabel('Coordinate') ;
+  ylabel('Coordinate (mm)') ;
   legend(line_handles, {'x', 'y'}, 'location', 'northeast') ;
   title('Interpolated position vs movie timestamp') ;
   xlim([800 850]) ;  % zoom in on a random part---too much data otherwise
 end
 
-%%
-% Load the flytracker info about the arena locations and size
-%ft_calibration_path = fullfile(experiment_folder_path, 'flytracker-calibration.mat') ;
-%flytracker_calibration = load_anonymous(ft_calibration_path) ;
+% Extract the flytracker info about the arena locations and size
 raw_center_from_arena_index = flipud((flytracker_calibration.centroids)') ;   % 2x9, pels
 arena_count = size(raw_center_from_arena_index, 2) ; 
-%arena_radius = flytracker_calibration.r  % scalar, pels
-% One issue: turns out these are correct for the main movie, but the dot movie
-% is shifted somewhat.
-%center_from_arena_index = raw_center_from_arena_index + [0 16]' ;  % shift for dot-movie
 center_from_arena_index = raw_center_from_arena_index + arena_center_shift ;
 pixels_per_mm = flytracker_calibration.PPM ;  % pixels per mm
-% pfly_radius = 0.85*125  % pels
-pfly_radius = pixels_per_mm * pfly_radius_in_mm ;  % pels
+pfly_position_in_pels_from_frame_index = pixels_per_mm * pfly_position_in_mm_from_frame_index ;  % pels, frame_count x 2
 
 % Generate the pfly position for each arena, for each frame
 big_center_from_arena_index = reshape(center_from_arena_index, [dimension_count 1 arena_count]) ;
-pfly_position_from_frame_index_from_arena_index = big_center_from_arena_index + pfly_radius * pfly_theta_hat_from_frame_index ;
+pfly_position_from_frame_index_from_arena_index = big_center_from_arena_index + pfly_position_in_pels_from_frame_index ;
 
-% if do_debug, 
-%   % Read a frame in the middle of the dot movie
-%   frame_index = round((frame_count+1)/2) ;
-%   dot_movie_frame = ufmf_read_frame(dot_movie_header, frame_index) ;
-%   [f, a, ih] = imglance(dot_movie_frame) ;  % show the frame
-%   set_figure_size_in_pixels(f, [1100 1100]) ;
-%   a.Position = [ 0 0 1 1 ] ;
-% 
-%   % For the current frame, get the pfly positions
-%   position_from_arena_index = reshape(pfly_position_from_frame_index_from_arena_index(:,frame_index,:), ...
-%                                       [dimension_count arena_count]) ;
-% 
-%   % Plot the arena centers on the image
-%   center_dots_handle = ...
-%     line('parent', a, ...
-%          'xdata', center_from_arena_index(1,:), ...
-%          'ydata', center_from_arena_index(2,:), ...
-%          'linestyle', 'none', ...
-%          'marker', 'o', ...
-%          'markersize', 9, ...
-%          'markerfacecolor', 'b', ...
-%          'markeredgecolor', 'none') ;  %#ok<NASGU> 
-% 
-%   % Plot the arena boundaries
-%   theta_from_index = linspace(0,2*pi,361) ;
-%   for arena_index = 1 : arena_count ,  %#ok<FXUP> 
-%     x = center_from_arena_index(1,arena_index) ;
-%     y = center_from_arena_index(2,arena_index) ;
-%     line(a, x + arena_radius*cos(theta_from_index), y + arena_radius*sin(theta_from_index)', 'color', [0 0.7 0], 'linewidth', 2) ;
-%   end
-% 
-%   % Plot those on the image
-%   pfly_dots_handle = ...
-%     line('parent', a, ...
-%          'xdata', position_from_arena_index(1,:), ...
-%          'ydata', position_from_arena_index(2,:), ...
-%          'linestyle', 'none', ...
-%          'marker', 'o', ...
-%          'markersize', 9, ...
-%          'markerfacecolor', 'r', ...
-%          'markeredgecolor', 'none') ;
-% 
-%   %%
-%   % Plot that every n frames
-%   stride_count = 1000 ;
-%   frame_index_from_debug_movie_frame_index = (1:stride_count:frame_count) ;
-%   debug_movie_frame_count = numel(frame_index_from_debug_movie_frame_index) ;
-% 
-%   % Get the output movie started
-%   output_movie_avi_file_name = sprintf('%s.avi', mfilename()) ;
-%   profile = 'Motion JPEG AVI';
-%   vw = VideoWriter(output_movie_avi_file_name, profile) ;
-%   vw.FrameRate = 2 ;
-%   vw.Quality = 100 ;
-%   vw.open() ;
-% 
-%   for debug_movie_frame_index = 1 : debug_movie_frame_count ,
-%     frame_index = frame_index_from_debug_movie_frame_index(debug_movie_frame_index) ;
-%     dot_movie_frame = ufmf_read_frame(dot_movie_header, frame_index) ;
-%     % For the current frame, get the pfly positions
-%     position_from_arena_index = reshape(pfly_position_from_frame_index_from_arena_index(:,frame_index,:), ...
-%                                         [dimension_count arena_count]) ;
-% 
-%     % plot
-%     if debug_movie_frame_index == 1 ,
-%       [f, a, ih] = imglance(dot_movie_frame) ;  % show the frame
-%       set_figure_size_in_pixels(f, [1100 1100]) ;
-%       a.Position = [ 0 0 1 1 ] ;
-%       % Plot the arena centers on the image
-%       center_dots_handle = ...
-%         line('parent', a, ...
-%              'xdata', center_from_arena_index(1,:), ...
-%              'ydata', center_from_arena_index(2,:), ...
-%              'linestyle', 'none', ...
-%              'marker', 'o', ...
-%              'markersize', 9, ...
-%              'markerfacecolor', 'b', ...
-%              'markeredgecolor', 'none') ;  %#ok<NASGU> 
-%       % Plot the arena boundaries
-%       theta_from_index = linspace(0,2*pi,361) ;
-%       for arena_index = 1 : arena_count ,  %#ok<FXUP> 
-%         x = center_from_arena_index(1,arena_index) ;
-%         y = center_from_arena_index(2,arena_index) ;
-%         line(a, x + arena_radius*cos(theta_from_index), y + arena_radius*sin(theta_from_index)', 'color', [0 0.7 0], 'linewidth', 2) ;
-%       end
-%       % Plot those on the image
-%       pfly_dots_handle = ...
-%         line('parent', a, ...
-%              'xdata', position_from_arena_index(1,:), ...
-%              'ydata', position_from_arena_index(2,:), ...
-%              'linestyle', 'none', ...
-%              'marker', 'o', ...
-%              'markersize', 9, ...
-%              'markerfacecolor', 'r', ...
-%              'markeredgecolor', 'none') ;
-%     else
-%       % if not 1st output frame
-%       ih.CData = dot_movie_frame ;
-%       pfly_dots_handle.XData = position_from_arena_index(1,:) ;
-%       pfly_dots_handle.YData = position_from_arena_index(2,:) ;
-%     end
-% 
-%     % Write the frame to the video
-%     output_movie_frame = getframe(a);
-%     if debug_movie_frame_index == 1 ,
-%       height = size(output_movie_frame.cdata,1);
-%       width = size(output_movie_frame.cdata,2);
-%     else
-%       output_movie_frame.cdata = tweak_rgb_image_size(output_movie_frame.cdata, height, width) ;  % sometimes subsequent frames aren't quite the right size.
-%     end
-%     vw.writeVideo(output_movie_frame) ;
-%   end
-%   vw.close() ;
-% 
-%   %%
-% 
-%   %
-%   % Compress the .avi file to h.264
-%   %
-% 
-%   % Tweak the frame size to be multiples of 4
-%   newheight = 4*ceil(height/4);
-%   newwidth = 4*ceil(width/4);
-% 
-%   % Generate the two command-line commands we need
-%   mp4_file_path = replace_extension(output_movie_avi_file_name, '.mp4') ;
-%   ffmpeg_command = 'env -u LD_LIBRARY_PATH /usr/bin/ffmpeg' ;  
-%   cmd = ...
-%     sprintf('%s -i %s -y -c:v h264 -pix_fmt yuv420p -s %dx%d -b:v 1600k -f mp4 %s',...
-%             ffmpeg_command, output_movie_avi_file_name, newwidth, newheight, mp4_file_path) ;
-% 
-%   % Run the second command, deal with any error
-%   system_with_error_handling(cmd) ;
-% 
-%   % If both commands succeeded, clean up the intermediate files that are no longer needed
-%   delete(output_movie_avi_file_name);
-% end
-
-%%
-
-% % Read in the trx file produced by FlyTracker
-% flytracker_trx_file_path = fullfile(experiment_folder_path, 'movie_JAABA/trx.mat') ;
-% s = load(flytracker_trx_file_path);
-% trx_timestamp_from_frame_index = s.timestamps - s.timestamps(1) ;
-% ft_trx = s.trx ;  % ft_ is for FlyTracker
-% 
-% % How do these timestamps compare to the ones from the camera timestamp file?
-% trx_timestamp_diff_from_frame_index = trx_timestamp_from_frame_index - timestamp_from_frame_index ;
-% figure('color', 'w') ; 
-% plot(timestamp_from_frame_index, 1000*trx_timestamp_diff_from_frame_index, 'k') ;
-% xlabel('Timestamp from stamp_log file (s)', 'interpreter', 'none') ;
-% ylabel('Diff with trx timestamps (ms)') ;
-% title('Timestamps in trx file vs stamp_log file', 'interpreter', 'none') ;
-% % Goes from zero up to -80 ms at end.  That's several frame interval's worth.
-% 
-% % What is the frame interval from the .trx file?
-% mean_trx_timestamp_interval = mean(diff(trx_timestamp_from_frame_index))
-% sd_trx_timestamp_interval = std(diff(trx_timestamp_from_frame_index))
-% % Mean is 0.0166666666666667, SD is 3.0481100383374e-14
-% % So that's consistent with a frame rate of 60 Hz, which is not *exactly*
-% % right.  Does that add up to 80 ms difference by the end?
-% 
-% timestamp_diff_at_end_in_theory_in_ms = 1000*(frame_count*mean_trx_timestamp_interval - frame_count*camera_settings_frame_interval)  % ms
-% % About -77.7 ms.  So that's most of the difference.  Sigh.
-
-% Think we should use the timestamps from the stamp-log file.  They're likely
-% to be more accurate.
-
-% Read in the fake-fly config
-% fake_fly_params_file_path = fullfile(experiment_folder_path, 'ellipseTrajectory_config.csv') ;
-% fake_fly_params =  readtable(fake_fly_params_file_path); 
+% Extract things we need from the fake-fly config
 fake_fly_a_in_mm = fake_fly_params.maj_axis/4 ;
   % mm, length of longest line segment that spans ellipse (equal to diameter for a circle)
 fake_fly_b_in_mm = fake_fly_params.min_axis/4 ; 
@@ -366,14 +262,14 @@ ft_timestamp_from_frame_index = (1/fps) * (0:(frame_count-1)) ;
 timestamps = ft_timestamp_from_frame_index(firstframe:endframe) ;
 dt = diff(timestamps) ;
 
-%pfly_theta_from_frame_index = atan2(pfly_theta_hat_from_frame_index(2,:), pfly_theta_hat_from_frame_index(1,:)) ;
+% Convert the per-frame headings from unit vectors to angles in radians
+% (angles increasing clockwise from the x axis).
 pfly_heading_angle_from_frame_index = atan2(pfly_heading_hat_from_frame_index(2,:), pfly_heading_hat_from_frame_index(1,:)) ;
 
 % Define a function to map from pfly indices to scalar trx structs
 function trx = trx_from_pfly_index(pfly_index)
   arena_index = pfly_index ;
 
-  % nframes = sum(is_pfly_on_from_frame_index) ;
   nframes = endframe - firstframe + 1 ;
   x = pfly_position_from_frame_index_from_arena_index(1, firstframe:endframe, arena_index) ;
   y = pfly_position_from_frame_index_from_arena_index(2, firstframe:endframe, arena_index) ;
@@ -426,4 +322,4 @@ end  % function
 pfly_index_from_arena_index = (1:arena_count) ;
 fake_trx = arrayfun(@trx_from_pfly_index, pfly_index_from_arena_index) ;
 
-end
+end  % function

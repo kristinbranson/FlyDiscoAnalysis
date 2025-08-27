@@ -1,5 +1,5 @@
 experiment_folder_path = ...
-  '/groups/branson/bransonlab/taylora/flydisco/example-experiments/pflySingleMale_pfly_SlowRamp_71G01_UASChrimsonVenusX0070_20240320T102203' ;
+  '/groups/otopalik/otopaliklab/taylora/test-data-read-only/pflySingleMale_pfly_SlowRamp_71G01_UASChrimsonVenusX0070_20240320T102203' ;
 dot_movie_path = fullfile(experiment_folder_path, 'dotmovie.ufmf') ;
 %playfmf([], dotmovie_path) ;
 movie_path = fullfile(experiment_folder_path, 'movie.ufmf') ;
