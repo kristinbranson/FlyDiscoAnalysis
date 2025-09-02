@@ -16,6 +16,8 @@ params = {'settingsdir',settingsdir,...
 % explist = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20241203_testinglocomotion/VNC3_JRC_SS100086_RigD_20240820T125028'};
 % explist = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20241203_testinglocomotion/VNC3_YNA_K_162984_RigB_20240904T124501'};
 explist = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20241203_testinglocomotion/VNC3_JRC_SS98080_RigB_20240904T120747'};
+% explist = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20241203_testinglocomotion/VNC3_YNA_K_162984_RigB_20240904T124501'};
+% explist = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20241203_testinglocomotion/VNC3_YNA_K_162984_RigD_20240529T101336'};
 %% run code
 for i = 1:numel(explist)
     expdir = explist{i};

@@ -77,8 +77,10 @@ classdef LimbBoutAnalyzer < handle
             % Initialize containers
             obj.restrictedBoutData = containers.Map();
             obj.boutMetrics = containers.Map();
-
+            
+            if obj.debug
             obj.displayDataStructure();
+            end
         end
 
         function validateTrajectoryData(obj)
@@ -105,84 +107,21 @@ classdef LimbBoutAnalyzer < handle
                 'limbBoutData must be struct array with %d flies', obj.nflies);
         end
 
-        %might not need anymore? 
-        function analyzeStimConditions(obj)
-            % Analyze basic stimulus ON/OFF conditions (restricted data only, no metrics)
 
-            fprintf('Analyzing stimulus conditions (trajectory format)...\n');
+        function restrictBoutsbyCondition(obj,condition_name,boutdata,digital_signal_traj)
+            % Restrict bout data using trajectory format digital signal
+            % uses restrictedLimbBoutData - restrict to 'bouts' fully
+            % contained within the digital signal bouts. 
 
-            % Restrict bout data for stim ON/OFF using trajectory format
-            fprintf('Restricting bout data for stim ON condition...\n');
-            obj.restrictBoutDataByCondition('stimON', obj.digitalindicator, false); % Don't compute metrics
+            % Usage: analyzer.restrictBoutDataByCondition('stimON', digitalindicator_traj)
 
-            fprintf('Restricting bout data for stim OFF condition...\n');
-            stim_off_indicator = obj.invertTrajectoryIndicator(obj.digitalindicator);
-            obj.restrictBoutDataByCondition('stimOFF', stim_off_indicator, false); % Don't compute metrics
+            % Apply restriction in trajectory format
+            restricted_data_traj = restrictedLimbBoutData(digital_signal_traj, boutdata, 'trajectory');
 
-            if obj.debug
-                obj.saveBoutData({'stimON', 'stimOFF'});
-            end
+            % Store trajectory format
+            obj.restrictedBoutData([condition_name '_traj']) = restricted_data_traj;
 
-            fprintf('Stimulus condition restriction complete (no metrics computed)!\n');
         end
-
-        function analyzeWalkingAndStimConditions(obj)
-            % Analyze combinations of walking and stimulus conditions
-            % Uses both stored walking_scores and digitalindicator (both trajectory format)
-            
-            fprintf('Analyzing walking + stimulus conditions (trajectory format)...\n');
-            
-            % Restrict to walking periods first
-            fprintf('Restricting to walking periods...\n');
-            walkingBoutData = restrictedLimbBoutData(obj.walking_scores, obj.limbBoutData, 'trajectory');
-            
-            % Now restrict walking data by stimulus conditions
-            fprintf('Applying stimulus restrictions to walking data...\n');
-            stimON_walkingData = restrictedLimbBoutData(obj.digitalindicator, walkingBoutData, 'trajectory');
-            
-            stim_off_indicator = obj.invertTrajectoryIndicator(obj.digitalindicator);
-            stimOFF_walkingData = restrictedLimbBoutData(stim_off_indicator, walkingBoutData, 'trajectory');
-            
-            % Store trajectory format results
-            obj.restrictedBoutData('walking_stimON_traj') = stimON_walkingData;
-            obj.restrictedBoutData('walking_stimOFF_traj') = stimOFF_walkingData;
-            
-            
-            % Convert to movie format for metrics computation (your computeboutmetrics2 expects movie format)
-            % fprintf('Converting to movie format for metrics computation...\n');
-            % obj.restrictedBoutData('walking_stimON') = convert_boutdata_to_movieformat(obj.trx, stimON_walkingData);
-            % obj.restrictedBoutData('walking_stimOFF') = convert_boutdata_to_movieformat(obj.trx, stimOFF_walkingData);
-            
-            
-            % Compute metrics
-            fprintf('Computing bout metrics for walking conditions...\n');
-            obj.computeBoutMetricsByCondition('walking_stimON_traj');
-            obj.computeBoutMetricsByCondition('walking_stimOFF_traj');
-            
-            
-            fprintf('Walking + stimulus analysis complete!\n');
-        end
-
-        % function restrictBoutDataByCondition(obj, condition_name, digital_signal_traj, compute_metrics)
-        %     % Restrict bout data using trajectory format digital signal
-        %     % Usage: analyzer.restrictBoutDataByCondition('stimON', digitalindicator_traj, true)
-        % 
-        %     if nargin < 4
-        %         compute_metrics = true; % Default: compute metrics
-        %     end
-        % 
-        %     % Apply restriction in trajectory format
-        %     restricted_data_traj = restrictedLimbBoutData(digital_signal_traj, obj.limbBoutData, 'trajectory');
-        % 
-        %     % Store trajectory format
-        %     obj.restrictedBoutData([condition_name '_traj']) = restricted_data_traj;
-        % 
-        %     if compute_metrics
-        %         % Convert to movie format for metrics computation
-        %         restricted_data_movie = convert_boutdata_to_movieformat(obj.trx, restricted_data_traj);
-        %         obj.restrictedBoutData(condition_name) = restricted_data_movie;
-        %     end
-        % end
 
         function computeBoutMetricsByCondition(obj, condition_name)
             % Compute bout metrics using your computeboutmetrics2 function
@@ -195,24 +134,81 @@ classdef LimbBoutAnalyzer < handle
             bout_metrics = computeboutmetrics2(obj.trx, obj.aptdata, obj.tips_pos_body, obj.legtip_landmarknums, boutstruct);
             obj.boutMetrics(condition_name) = bout_metrics;
         end
+  
+        function analyzeWalkingAndStimConditions(obj)
+            % Analyze combinations of walking and stimulus conditions
+            % Uses both stored walking_scores and digitalindicator (both trajectory format)
+            
+            fprintf('Analyzing walking + stimulus conditions (trajectory format)...\n');
+            
+            % Restrict to walking periods first
+            if obj.debug
+            fprintf('Restricting to walking periods...\n');
+            end
+
+            % Now restrict limbBoutData data by walking scores as condition
+            restrictBoutsbyCondition(obj,'walkingBoutData',obj.limbBoutData,obj.walking_scores)
+            
+            % Now restrict walking data by stimulus conditions
+            if obj.debug
+            fprintf('Applying stimulus restrictions to walking data...\n');
+            end            
+            restrictBoutsbyCondition(obj,'walking_stimON',obj.restrictedBoutData('walkingBoutData_traj'),obj.digitalindicator)            
+            
+            % stim OFF
+            stim_off_indicator = obj.invertTrajectoryIndicator(obj.digitalindicator);
+            % stimOFF_walkingData = restrictedLimbBoutData(stim_off_indicator, walkingBoutData, 'trajectory');
+            restrictBoutsbyCondition(obj,'walking_stimOFF',obj.restrictedBoutData('walkingBoutData_traj'),stim_off_indicator)
+            
+            % Compute metrics
+            if obj.debug
+            fprintf('Computing bout metrics for walking conditions...\n');
+            end
+            obj.computeBoutMetricsByCondition('walking_stimON_traj');
+            obj.computeBoutMetricsByCondition('walking_stimOFF_traj');
+            
+            if obj.debug
+            fprintf('Walking + stimulus analysis complete!\n');
+            end
+        end
+
+        function saveBoutData(obj, condition_names)
+            % Save bout data for specified conditions
+            if nargin < 2
+                condition_names = keys(obj.restrictedBoutData);
+            end
+
+            if ~isempty(obj.expdir)
+                save_data = struct();
+                for i = 1:length(condition_names)
+                    condition = condition_names{i};
+                    if obj.restrictedBoutData.isKey(condition)
+                        % Use variable names matching your original code
+                        if strcmp(condition, 'stimON')
+                            save_data.stimON_walkingLimbBoutData = obj.restrictedBoutData(condition);
+                        elseif strcmp(condition, 'stimOFF')
+                            save_data.stimOFF_walkingLimbBoutData = obj.restrictedBoutData(condition);
+                        else
+                            save_data.(condition) = obj.restrictedBoutData(condition);
+                        end
+                    end
+                end
+
+                save(fullfile(obj.expdir, 'swingtstancestep.mat'), '-struct', 'save_data');
+                fprintf('Bout data saved to: %s\n', fullfile(obj.expdir, 'swingtstancestep.mat'));
+            end
+        end
         
-        function analyzeCustomCondition(obj, condition_name, custom_digital_signal_traj, compute_metrics)
+        function analyzeCustomCondition(obj, condition_name, custom_digital_signal_traj)
+            % Claude addition - haven't tested. Might be useful for other
+            % ways to chop up data by stim. 
             % Analyze data with custom digital indicator (trajectory format)
             % Usage: analyzer.analyzeCustomCondition('custom_condition', custom_signal_traj, true)
             %   where custom_signal_traj is cell array: custom_signal_traj{fly}
-            
-            if nargin < 4
-                compute_metrics = true; % Default: compute metrics
-            end
-            
+
             fprintf('Analyzing condition: %s\n', condition_name);
-            obj.restrictBoutDataByCondition(condition_name, custom_digital_signal_traj, compute_metrics);
-            
-            if compute_metrics
-                obj.computeBoutMetricsByCondition(condition_name);
-            end
-            
-            fprintf('Analysis complete for condition: %s\n', condition_name);
+            obj.restrictBoutsbyCondition(condition_name, custom_digital_signal_traj);            
+
         end
 
         function data = getConditionData(obj, condition_name, data_type)
@@ -270,62 +266,7 @@ classdef LimbBoutAnalyzer < handle
                     summary.(state_name).median = median(data);
                 end
             end
-        end
-
-        function saveBoutData(obj, condition_names)
-            % Save bout data for specified conditions
-            if nargin < 2
-                condition_names = keys(obj.restrictedBoutData);
-            end
-
-            if ~isempty(obj.expdir)
-                save_data = struct();
-                for i = 1:length(condition_names)
-                    condition = condition_names{i};
-                    if obj.restrictedBoutData.isKey(condition)
-                        % Use variable names matching your original code
-                        if strcmp(condition, 'stimON')
-                            save_data.stimON_walkingLimbBoutData = obj.restrictedBoutData(condition);
-                        elseif strcmp(condition, 'stimOFF')
-                            save_data.stimOFF_walkingLimbBoutData = obj.restrictedBoutData(condition);
-                        else
-                            save_data.(condition) = obj.restrictedBoutData(condition);
-                        end
-                    end
-                end
-
-                save(fullfile(obj.expdir, 'swingtstancestep.mat'), '-struct', 'save_data');
-                fprintf('Bout data saved to: %s\n', fullfile(obj.expdir, 'swingtstancestep.mat'));
-            end
-        end
-
-        function saveResults(obj, filename)
-            % Save analysis results in your format
-            if nargin < 2
-                filename = 'locomotionmetricsswingstanceboutstats.mat';
-            end
-            
-            if ~isempty(obj.expdir)
-                filepath = fullfile(obj.expdir, filename);
-            else
-                filepath = filename;
-            end
-            
-            % Save in format matching your original code
-            bout_metrics_ON = [];
-            bout_metrics_OFF = [];
-            
-            if obj.boutMetrics.isKey('walking_stimON_traj')
-                bout_metrics_ON = obj.boutMetrics('walking_stimON_traj');
-            end
-            
-            if obj.boutMetrics.isKey('walking_stimOFF_traj')
-                bout_metrics_OFF = obj.boutMetrics('walking_stimOFF_traj');
-            end
-            
-            save(filepath, 'bout_metrics_ON', 'bout_metrics_OFF');
-            fprintf('Results saved to: %s\n', filepath);
-        end
+        end        
 
         function displayDataStructure(obj)
             % Display information about the loaded data structure
