@@ -108,21 +108,21 @@ classdef LimbBoutAnalyzer < handle
         %might not need anymore? 
         function analyzeStimConditions(obj)
             % Analyze basic stimulus ON/OFF conditions (restricted data only, no metrics)
-            
+
             fprintf('Analyzing stimulus conditions (trajectory format)...\n');
-            
+
             % Restrict bout data for stim ON/OFF using trajectory format
             fprintf('Restricting bout data for stim ON condition...\n');
             obj.restrictBoutDataByCondition('stimON', obj.digitalindicator, false); % Don't compute metrics
-            
+
             fprintf('Restricting bout data for stim OFF condition...\n');
             stim_off_indicator = obj.invertTrajectoryIndicator(obj.digitalindicator);
             obj.restrictBoutDataByCondition('stimOFF', stim_off_indicator, false); % Don't compute metrics
-            
+
             if obj.debug
                 obj.saveBoutData({'stimON', 'stimOFF'});
             end
-            
+
             fprintf('Stimulus condition restriction complete (no metrics computed)!\n');
         end
 
@@ -163,26 +163,26 @@ classdef LimbBoutAnalyzer < handle
             fprintf('Walking + stimulus analysis complete!\n');
         end
 
-        function restrictBoutDataByCondition(obj, condition_name, digital_signal_traj, compute_metrics)
-            % Restrict bout data using trajectory format digital signal
-            % Usage: analyzer.restrictBoutDataByCondition('stimON', digitalindicator_traj, true)
-            
-            if nargin < 4
-                compute_metrics = true; % Default: compute metrics
-            end
-            
-            % Apply restriction in trajectory format
-            restricted_data_traj = restrictedLimbBoutData(digital_signal_traj, obj.limbBoutData, 'trajectory');
-            
-            % Store trajectory format
-            obj.restrictedBoutData([condition_name '_traj']) = restricted_data_traj;
-            
-            if compute_metrics
-                % Convert to movie format for metrics computation
-                restricted_data_movie = convert_boutdata_to_movieformat(obj.trx, restricted_data_traj);
-                obj.restrictedBoutData(condition_name) = restricted_data_movie;
-            end
-        end
+        % function restrictBoutDataByCondition(obj, condition_name, digital_signal_traj, compute_metrics)
+        %     % Restrict bout data using trajectory format digital signal
+        %     % Usage: analyzer.restrictBoutDataByCondition('stimON', digitalindicator_traj, true)
+        % 
+        %     if nargin < 4
+        %         compute_metrics = true; % Default: compute metrics
+        %     end
+        % 
+        %     % Apply restriction in trajectory format
+        %     restricted_data_traj = restrictedLimbBoutData(digital_signal_traj, obj.limbBoutData, 'trajectory');
+        % 
+        %     % Store trajectory format
+        %     obj.restrictedBoutData([condition_name '_traj']) = restricted_data_traj;
+        % 
+        %     if compute_metrics
+        %         % Convert to movie format for metrics computation
+        %         restricted_data_movie = convert_boutdata_to_movieformat(obj.trx, restricted_data_traj);
+        %         obj.restrictedBoutData(condition_name) = restricted_data_movie;
+        %     end
+        % end
 
         function computeBoutMetricsByCondition(obj, condition_name)
             % Compute bout metrics using your computeboutmetrics2 function

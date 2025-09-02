@@ -1,4 +1,4 @@
-function [boutfeatures] = computeBoutFeatures(fly,trx,aptdata,tip_pos_body,legtip_landmarknums,limb,step_t0s,step_t1s,stance_t0s,stance_t1s,timestamps)
+function [boutfeatures] = computeStepFeatures(fly,trx,aptdata,tip_pos_body,legtip_landmarknums,limb,step_t0s,step_t1s,stance_t0s,stance_t1s,timestamps)
 % tip_pos_body = 6 x 2 x T, data from tips_pos_body for 1 fly
 % tip_pos_body are in ctrax format - need to use offset from trx
 % assume start and end indices are stance only

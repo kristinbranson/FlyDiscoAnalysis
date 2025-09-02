@@ -144,7 +144,7 @@ save(fullfile(expdir,trx.dataloc_params.perframedir,'nfeet_ground.mat'),'data','
 fprintf(logfid,'Computing swing and stance bout metrics ...\n')
 
 %compute swing stance bouts
-[perfly_limbboutdata] = limbSwingStanceStep(groundcontact);
+% [perfly_limbboutdata] = limbSwingStanceStep(groundcontact);
 
 % filter swing stance for during walking
 % digitscores: tarjectory format of 0,1 behavior labels
