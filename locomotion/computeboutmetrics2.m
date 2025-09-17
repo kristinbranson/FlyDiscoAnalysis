@@ -15,6 +15,7 @@ npairs = size(pairs,1);
 nlimb = numel(boutstruct(1).perlimb);
 nflies = numel(boutstruct);
 timestamps = trx.movie_timestamps{1};
+pxpermm = trx.pxpermm; 
 bout_metrics = struct;
 
 
@@ -24,7 +25,7 @@ for is = 1:numel(state)
 %     is
     for fly = 1:numel(boutstruct)
 %         fly
-        timestamps_perfly = timestamps(trx.firstframes(fly):trx.endframes(fly));
+        currfly_timestamps = timestamps(trx.firstframes(fly):trx.endframes(fly));
         for limb = 1:numel(boutstruct(fly).perlimb)
 %             limb
             if ismember(state{is},{'swing','stance'})
@@ -33,13 +34,29 @@ for is = 1:numel(state)
             end_indices = boutstruct(fly).perlimb(limb).(state{is}).end_indices;
                 
             
-            % compute frame and time duration            
-            [durations_frames,durations_time] = computeBoutDurations(start_indices,end_indices,timestamps_perfly);
+            % compute frame and time duration (ms) from timestamps         
+            [durations_frames,durations_time] = computeBoutDurations(start_indices,end_indices,currfly_timestamps);
 
             % compute mean body speed during bout
-            [meanvelmag,stdnvelmag] = computeMeanPreframeDuringBout(fly,'velmag',trx,start_indices,end_indices);
+            [meanvelmag,stdnvelmag] = computeMeanPreframeDuringBout(fly,'velmag',trx,start_indices,end_indices,'first');
 
-            
+            % compute leg tip speeds in body coordinates
+            limb_idx = limb; 
+            [mean_tips_speed_bodyref,std_tips_speed_bodyref,min_speed_bodyref,max_speed_bodyref] = compute_legtipspeed(fly,tips_pos_body,limb_idx,start_indices,end_indices,currfly_timestamps,pxpermm);
+            bout_metrics.perfly(fly).perlimb(limb).(state{is}).mean_tips_speed_bodyref = mean_tips_speed_bodyref;
+            bout_metrics.perfly(fly).perlimb(limb).(state{is}).std_tips_speed_bodyref = std_tips_speed_bodyref;
+            bout_metrics.perfly(fly).perlimb(limb).(state{is}).min_speed_bodyref = min_speed_bodyref;
+            bout_metrics.perfly(fly).perlimb(limb).(state{is}).max_speed_bodyref = max_speed_bodyref;
+                       
+            % compute leg tip speeds in global coordinates
+            position_data = aptdata.pTrk;
+            limb_idx = legtip_landmarknums(limb);
+            [mean_tips_speed_globalref,std_tips_speed_globalref,min_speed_globalref,max_speed_globalref] = compute_legtipspeed(fly,position_data,limb_idx,start_indices,end_indices,currfly_timestamps,pxpermm);
+            bout_metrics.perfly(fly).perlimb(limb).(state{is}).mean_tips_speed_globalref = mean_tips_speed_globalref;
+            bout_metrics.perfly(fly).perlimb(limb).(state{is}).std_tips_speed_globalref = std_tips_speed_globalref;
+            bout_metrics.perfly(fly).perlimb(limb).(state{is}).min_speed_globalref = min_speed_globalref;
+            bout_metrics.perfly(fly).perlimb(limb).(state{is}).max_speed_globalref = max_speed_globalref;
+
             % pass along start and end indices
             bout_metrics.perfly(fly).perlimb(limb).(state{is}).start_indices = start_indices';
             bout_metrics.perfly(fly).perlimb(limb).(state{is}).end_indices = end_indices';
@@ -54,7 +71,9 @@ for is = 1:numel(state)
             bout_metrics.perfly(fly).perlimb(limb).(state{is}).meanvelmag = meanvelmag;
             bout_metrics.perfly(fly).perlimb(limb).(state{is}).stdvelmag = stdnvelmag;
 
+
             end
+
             if strcmp(state{is},'step')
 
             step_t0s = boutstruct(fly).perlimb(limb).(state{is}).start_indices;
@@ -64,9 +83,9 @@ for is = 1:numel(state)
             tip_pos_body = tips_pos_body{fly};
             
 
-            boutfeatures = computeStepFeatures(fly,trx,aptdata,tip_pos_body,legtip_landmarknums,limb,step_t0s,step_t1s,stance_t0s,stance_t1s,timestamps_perfly);
+            stepfeatures = computeStepFeatures(fly,trx,aptdata,tip_pos_body,legtip_landmarknums,limb,step_t0s,step_t1s,stance_t0s,stance_t1s,currfly_timestamps);
 
-            bout_metrics.perfly(fly).perlimb(limb).(state{is}) = boutfeatures;
+            bout_metrics.perfly(fly).perlimb(limb).(state{is}) = stepfeatures;
 
             % compute mean and standard deviation for each boutfeatures
 
@@ -146,7 +165,7 @@ for is = 1:2
         bout_metrics.allflies.pairs(pair).(state{is}).stdboutdurationsofvelmagbins = stdboutdurationsofvelmagbins;
     end
     % for all limbs
-    
+
     [Nboutspervelmagbin,velmagbincenters,meanboutdurationsofvelmagbins,stdboutdurationsofvelmagbins] = compute_meanboutdurationVSspeed(bout_metrics.allflies.all_limbs.(state{is}).durations_time,...
         bout_metrics.allflies.all_limbs.(state{is}).meanvelmag,'binedges',binedges);
     bout_metrics.allflies.all_limbs.(state{is}).Nboutspervelmagbin =Nboutspervelmagbin;

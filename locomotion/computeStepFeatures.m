@@ -1,4 +1,4 @@
-function [boutfeatures] = computeStepFeatures(fly,trx,aptdata,tip_pos_body,legtip_landmarknums,limb,step_t0s,step_t1s,stance_t0s,stance_t1s,timestamps)
+function [boutfeatures] = computeStepFeatures(fly,trx,aptdata,tip_pos_body,legtip_landmarknums,limb,step_t0s,step_t1s,stance_t0s,stance_t1s,currfly_timestamps)
 % tip_pos_body = 6 x 2 x T, data from tips_pos_body for 1 fly
 % tip_pos_body are in ctrax format - need to use offset from trx
 % assume start and end indices are stance only
@@ -11,19 +11,24 @@ boutfeatures.end_indices = step_t1s';
 % Body reference metrics
 % offcurrfly = trx(fly).off;
 
-% compute average body lengths in pixels
+% compute average body lengths in pixels (alt - compute from APT data)
 meanbodylength = mean(trx(fly).a.*4);
 
-% *step duration* in seconds
-duration_s = timestamps(step_t1s)' - timestamps(step_t0s)';
-boutfeatures.duration_s = duration_s';
+% *step duration* in seconds 
+% duration_s = currfly_timestamps(step_t1s)' - currfly_timestamps(step_t0s)';
+% boutfeatures.duration_s = duration_s';
+
+%compute the same way as swing and stance
+[durations_frames,durations_time] = computeBoutDurations(step_t0s,step_t1s,currfly_timestamps);
+boutfeatures.durations_frames = durations_frames;
+boutfeatures.durations_time = durations_time; %(milliseconds)
 
 % *step frequency* number of steps within a second
-boutfeatures.instataeous_frequency_steps = 1./boutfeatures.duration_s;
+boutfeatures.instataeous_frequency_steps = 1./(boutfeatures.durations_time./1000);
 
 % *step frequnecy* total
-time_stepping = sum(duration_s);
-nsteps = numel(duration_s);
+time_stepping = sum(durations_time)./1000;
+nsteps = numel(durations_time);
 boutfeatures.overall_frequency_steps = nsteps/time_stepping;
 
 
@@ -54,6 +59,8 @@ boutfeatures.amplitude_BL = boutfeatures.amplitude_px./meanbodylength;
 boutfeatures.amplitude_px = boutfeatures.amplitude_px';
 boutfeatures.amplitude_BL = boutfeatures.amplitude_BL';
 
+% *step direction* Yang 2024 (angle of vector from AEP to PEP) 
+boutfeatures.step_direction = atan2(PEP(2,:)-AEP(2,:),PEP(1,:)-AEP(1,:));
 
 %%%% metrics based on step = AEP(1) to AEP(2); only computed for pairs within continguous walking bout
 assert(numel(step_t0s) == numel(step_t1s));
@@ -73,8 +80,8 @@ boutfeatures.distance_BL = boutfeatures.distance_px./meanbodylength;
 
 % *step speed* step distance divide duration (Pratt '24) this seems weird -
 % includes the 'stance' frames
-boutfeatures.speed_pxpers = boutfeatures.distance_px./boutfeatures.duration_s;
-boutfeatures.speed_BLpers = boutfeatures.distance_BL./boutfeatures.duration_s;
+boutfeatures.speed_pxpers = boutfeatures.distance_px./boutfeatures.durations_time./1000;
+boutfeatures.speed_BLpers = boutfeatures.distance_BL./boutfeatures.durations_time./1000;
 
 
 % Global reference metrics

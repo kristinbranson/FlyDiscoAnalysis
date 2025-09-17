@@ -33,7 +33,7 @@ trx = FBATrx('analysis_protocol',analysis_protocol,'settingsdir',settingsdir,...
 trx.AddExpDir(expdir,'dooverwrite',false,'openmovie',false);
 
 % make list of special perframe features being computed
-pfflist = {'nfeet_ground'};
+pfflist = {'nfeet_ground','CoM_stabilty'};
 outputfiles = {trx.dataloc_params.locomotionmetricsswingstanceboutstatsfilestr,'tips_velmag.mat'};
 
 % if force compute is true, delete aptPFF if they exist
@@ -140,6 +140,20 @@ end
 units = parseunits('unit');
 save(fullfile(expdir,trx.dataloc_params.perframedir,'nfeet_ground.mat'),'data','units');
 
+% compute COM took ~24 seconds to compute, sped up with parfor ~3 seconds.
+% but WAY slower if have to start parallel pool. 
+CoMfilestr = fullfile(expdir,trx.dataloc_params.perframedir,'CoM_stability.mat');
+if exist(CoMfilestr,'file')
+    % if tips positions in body reference already exists load them
+    load(CoMfilestr,'data');
+    CoM_stability = data;
+else
+    CoM_stabilty = compute_CoMstability(aptdata,legtip_landmarknums,groundcontact);
+    toc
+    data = CoM_stabilty;
+    units = parseunits('px');
+    save(fullfile(expdir,trx.dataloc_params.perframedir,'CoM_stability.mat'),'data','units');
+end
 
 fprintf(logfid,'Computing swing and stance bout metrics ...\n')
 
