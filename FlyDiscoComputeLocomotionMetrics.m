@@ -33,7 +33,7 @@ trx = FBATrx('analysis_protocol',analysis_protocol,'settingsdir',settingsdir,...
 trx.AddExpDir(expdir,'dooverwrite',false,'openmovie',false);
 
 % make list of special perframe features being computed
-pfflist = {'nfeet_ground','CoM_stabilty'};
+pfflist = {'nfeet_ground','CoM_stability'};
 outputfiles = {trx.dataloc_params.locomotionmetricsswingstanceboutstatsfilestr,'tips_velmag.mat'};
 
 % if force compute is true, delete aptPFF if they exist
@@ -58,7 +58,7 @@ if forcecompute,
 end
 
 
-fprintf(logfid,'Computing nfeet_ground ...\n')
+fprintf(logfid,'Computing locomotion perframe features ...\n')
 % read in parameters
 stageparamsfile = fullfile(trx.settingsdir,trx.analysis_protocol,trx.dataloc_params.locomotionmetricsparamsfilestr);
 stage_params = ReadParams(stageparamsfile);
@@ -149,7 +149,6 @@ if exist(CoMfilestr,'file')
     CoM_stability = data;
 else
     CoM_stabilty = compute_CoMstability(aptdata,legtip_landmarknums,groundcontact);
-    toc
     data = CoM_stabilty;
     units = parseunits('px');
     save(fullfile(expdir,trx.dataloc_params.perframedir,'CoM_stability.mat'),'data','units');

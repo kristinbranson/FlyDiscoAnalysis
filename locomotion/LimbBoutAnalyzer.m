@@ -199,6 +199,32 @@ classdef LimbBoutAnalyzer < handle
             end
         end
         
+        function saveResults(obj, filename)
+            % Save analysis results in your format
+            if nargin < 2
+                filename = 'locomotionmetricsswingstanceboutstats.mat';
+            end
+            if ~isempty(obj.expdir)
+                filepath = fullfile(obj.expdir, filename);
+            else
+                filepath = filename;
+            end
+
+            % Save in format matching your original code
+
+            bout_metrics_ON = [];
+            bout_metrics_OFF = [];
+
+            if obj.boutMetrics.isKey('walking_stimON_traj')
+                bout_metrics_ON = obj.boutMetrics('walking_stimON_traj');
+            end
+            if obj.boutMetrics.isKey('walking_stimOFF_traj')
+                bout_metrics_OFF = obj.boutMetrics('walking_stimOFF_traj');
+            end
+            save(filepath, 'bout_metrics_ON', 'bout_metrics_OFF');
+            fprintf('Results saved to: %s\n', filepath);
+        end
+
         function analyzeCustomCondition(obj, condition_name, custom_digital_signal_traj)
             % Claude addition - haven't tested. Might be useful for other
             % ways to chop up data by stim. 

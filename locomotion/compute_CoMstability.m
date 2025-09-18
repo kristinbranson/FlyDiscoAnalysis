@@ -57,12 +57,25 @@ end
 if debug
     h = figure
     hold on
-    fly = 1;
-    frm = 1000;
-    plot(pTrk{fly}(:,1,frm),pTrk{fly}(:,2,frm),'.')
-    plot(ctr(1,frm),ctr(2,frm),'.r')
-    plot(CoM_body{fly}(1,frm),CoM_body{fly}(2,frm),'ok')
-    plot(CoM_thorax{fly}(1,frm),CoM_thorax{fly}(2,frm),'*r')
+    axis equal
+    fly = 4;
+    frm = 11500;
+    idx_gc = groundcontact{fly}(:,frm);
+    legs_idx = legtip_landmarknums(idx_gc)
+    XV = pTrk{fly}(legs_idx,1,frm);
+    YV = pTrk{fly}(legs_idx,2,frm);
+    X_CoM = CoM_thorax{fly}(1,frm);
+    Y_CoM = CoM_thorax{fly}(2,frm);
+    leftshoulder = squeeze(pTrk{fly}(4,:,frm));
+    rightshoulder  = squeeze(pTrk{fly}(5,:,frm));
+    ctr = (leftshoulder + rightshoulder) /2;
+    plot(pTrk{fly}(:,1,frm),pTrk{fly}(:,2,frm),'.');
+    plot(ctr(1),ctr(2),'.r');
+    % plot(CoM_body{fly}(1,frm),CoM_body{fly}(2,frm),'ok')
+    plot(CoM_thorax{fly}(1,frm),CoM_thorax{fly}(2,frm),'*r');
+    % not store - get from debug stop currently 
+    patch(XV',YV','r','FaceColor','none');
+    viscircles([X_CoM,Y_CoM],CoM_stabilty{fly}(frm));
 end
 
 
