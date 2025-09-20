@@ -17,11 +17,14 @@ nflies = numel(boutstruct);
 timestamps = trx.movie_timestamps{1};
 pxpermm = trx.pxpermm;
 bout_metrics = struct;
-% list of perframe features to compute stats over bouts
-pfflist = {'velmag_ctr','du_ctr','dv_ctr','dtheta','absdtheta','CoM_stability'};
-% perframe features if 'first' = 1st derivative (d) 'second' = second
-% derivative (dd), or 'none' = no derivative
-pfflist_flags = {'first','first','first','first','first','none'};
+% list of perframe features to compute stats over bouts that are 
+%  'first' = 1st derivative (d)  
+pfflist_first = {'velmag_ctr','absdv_ctr','absdu_ctr','absdtheta', ...
+    'left_vel','right_vel','forward_vel','backward_vel','right_dtheta','left_dtheta'};   
+% 'none' = no derivative
+pfflist_none = {'CoM_stability'};
+% 'second' = second derivative (dd)
+
 
 
 %compute metrics for each limb of each fly
@@ -38,7 +41,6 @@ for is = 1:numel(state)
                 start_indices = boutstruct(fly).perlimb(limb).(state{is}).start_indices;
                 end_indices = boutstruct(fly).perlimb(limb).(state{is}).end_indices;
 
-
                 % compute frame and time duration (ms) from timestamps
                 [durations_frames,durations_time] = computeBoutDurations(start_indices,end_indices,currfly_timestamps);
                 %durations
@@ -48,12 +50,17 @@ for is = 1:numel(state)
                 % % made more general AR 20250918
 
                 % loop over list of perframe features
-                for ifns = 1:numel(pfflist)
-                    fn = pfflist{ifns};
-                    derivative_flag = pfflist_flags{ifns};
-                    datastruct = compute_StatsofPreframeFeatureDuringBouts(fly,fn,trx,start_indices,end_indices,derivative_flag);
+                for ifns = 1:numel(pfflist_first)                                       
+                    fn = pfflist_first{ifns};                 
+                    datastruct = compute_StatsofPreframeFeatureDuringBouts(fly,fn,trx,start_indices,end_indices,'first');
                     bout_metrics.perfly(fly).perlimb(limb).(state{is}).(fn) = datastruct;
                 end
+                for ifns = 1:numel(pfflist_none)                                       
+                    fn = pfflist_none{ifns};                 
+                    datastruct = compute_StatsofPreframeFeatureDuringBouts(fly,fn,trx,start_indices,end_indices,'none');
+                    bout_metrics.perfly(fly).perlimb(limb).(state{is}).(fn) = datastruct;
+                end
+
 
                 % compute leg tip speeds in body coordinates AR 9/18/25 TO DO make general for legperframefeatures
                 % speed in mm/s
@@ -87,12 +94,24 @@ for is = 1:numel(state)
                 stance_t1s = boutstruct(fly).perlimb(limb).stance.end_indices;
                 tip_pos_body = tips_pos_body{fly};
 
+                % loop over list of perframe features
+                for ifns = 1:numel(pfflist_first)
+                    fn = pfflist_first{ifns};
+                    datastruct = compute_StatsofPreframeFeatureDuringBouts(fly,fn,trx,step_t0s,step_t1s,'first');
+                    bout_metrics.perfly(fly).perlimb(limb).(state{is}).(fn) = datastruct;
+                end
+                for ifns = 1:numel(pfflist_none)
+                    fn = pfflist_none{ifns};
+                    datastruct = compute_StatsofPreframeFeatureDuringBouts(fly,fn,trx,step_t0s,step_t1s,'none');
+                    bout_metrics.perfly(fly).perlimb(limb).(state{is}).(fn) = datastruct;
+                end
+
 
                 stepfeatures = computeStepFeatures(fly,trx,aptdata,tip_pos_body,legtip_landmarknums,limb,step_t0s,step_t1s,stance_t0s,stance_t1s,currfly_timestamps);
 
-                bout_metrics.perfly(fly).perlimb(limb).(state{is}) = stepfeatures;
+                bout_metrics.perfly(fly).perlimb(limb).(state{is}).stepfeatures = stepfeatures;
 
-                % compute mean and standard deviation for each boutfeatures
+                % TO DO compute mean and standard deviation for each boutfeatures
 
 
             end
