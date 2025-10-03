@@ -4,10 +4,13 @@ function [out_restrictedSwingStance] = restrictedSwingStance(digital_signal,perf
 % format == movie is for data in the movie frames format, 1 = first frame of movie
 % digtal signal should match the bout data frame of referece
 
+
+% find swing and stance contained within walking 
 state = {'swing','stance'};
 
 
 out_restrictedSwingStance = struct;
+
 for fly = 1:numel(perfly_limbboutdata)
     if strcmp(format,'trajectory')
         assert(iscell(digital_signal),'wrong data format')
@@ -24,22 +27,11 @@ for fly = 1:numel(perfly_limbboutdata)
             [out_start_indices, out_end_indices] = find_bout_overlap(curr_digital_signal, curr_start_indices,curr_end_indices);
             out_restrictedSwingStance(fly).perlimb(ileg).(state{is}).start_indices = out_start_indices;
             out_restrictedSwingStance(fly).perlimb(ileg).(state{is}).end_indices = out_end_indices;
-
         end
 
-        % stance during digital signal
-        %             curr_start_indices = perfly_limbboutdata(fly).perlimb(ileg).start_indices_stance;
-        %             curr_end_indices = perfly_limbboutdata(fly).perlimb(ileg).end_indices_stance;
-        %
-        %             [out_start_indices, out_end_indices] = find_bout_overlap(curr_digital_signal, curr_start_indices,curr_end_indices);
-        %             out_restrictedSwingStance(fly).perlimb(ileg).start_indices_stance = out_start_indices;
-        %             out_restrictedSwingStance(fly).perlimb(ileg).end_indices_stance = out_end_indices;
-        %
-        %             % swing during digital signal
-        %             curr_start_indices = perfly_limbboutdata(fly).perlimb(ileg).start_indices_swing;
-        %             curr_end_indices = perfly_limbboutdata(fly).perlimb(ileg).end_indices_swing;
-        %             [out_start_indices, out_end_indices] = find_bout_overlap(curr_digital_signal, curr_start_indices,curr_end_indices);
-        %             out_restrictedSwingStance(fly).perlimb(ileg).start_indices_swing = out_start_indices;
-        %             out_restrictedSwingStance(fly).perlimb(ileg).end_indices_swing = out_end_indices;
+        
     end
 end
+
+% find steps contained within walking
+

@@ -1214,4 +1214,60 @@ SE_weighted = sqrt(sigma_weighted)./sqrt(sum(Ns',1,'omitnan'));
 % 
 %     0.0369
 
+%% VNC screen Ns
+load /groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_2024_allVNC_20241206T101314.mat
 
+% N for each VNc, Vnc2, VNC3 
+% idx = strcmp({expdirstruct.automated_pf},'F');
+temp2 = {expdirstruct.screen_type};
+[d,e] = findgroups(temp2);
+counts = histcounts(d);
+
+% N for lines per VNC type
+for i = 1:numel(e)
+    tmplines = {expdirstruct(d ==i).line};
+%     [f,g] = findgroups(tmplines);
+    [c, ia, ic] = unique(tmplines,'stable');
+    sprintf('%d\n',numel(c))
+end
+% N lines for all data
+tmplines = {expdirstruct.line};
+cnt = numel(unique(tmplines,'stable'));
+
+%% reprocess flybubble social experiments
+explist = textread('/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/explist_socialbubblereprocessing.txt','%s');
+rootdir = '/groups/branson/bransonlab/flybubble_social';
+Metadatfile = 'Metadata.xml';
+for i = 1:numel(explist)
+   expdir = fullfile(rootdir,explist{i});
+   MD = ReadMetadataFile(fullfile(expdir,Metadatfile));
+    fprintf('%s\n',MD.screen_type)
+
+end
+% test removing perframe
+expdir = '/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20250111_testingFlybubble_social/NorpA5_JRC_SS56987_RigC_20210923T085517';
+rmdir(fullfile(expdir,'perframe'),'s')
+%% check for screening lines on feb 2025 discard list 
+discardlist = textread('/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/linediscardlist_202502.txt','%s');
+load /groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_2024_allVNC_20241206T101314.mat
+screeninglist = unique({expdirstruct.line})';
+
+overlap = intersect(discardlist,screeninglist)
+
+%% check which lines are screening lines in the branson robot lines 
+robotlist = textread('/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/linelistbranson_202502.txt','%s');
+load /groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_2024_allVNC_20241206T101314.mat
+screeninglist = unique({expdirstruct.line})'; %787
+remaininglist = textread('/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/remaininglist.txt','%s');
+
+% list of lines that we've screen and have stock for
+screenedlines_have = intersect(robotlist,screeninglist);%575
+writecell(screenedlines_have,'/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/screenedlines_have.txt');
+
+% list of lines the we've screened and don't have stock for
+screenedlines_donthave = setdiff(screeninglist,robotlist);%212
+writecell(screenedlines_donthave,'/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/screenedlines_donthave.txt');
+
+% list of lines we haven't screened
+robotlines_notscreened = setdiff(remaininglist,screeninglist);%45
+writecell(robotlines_notscreened,'/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/robotlines_notscreened.txt');

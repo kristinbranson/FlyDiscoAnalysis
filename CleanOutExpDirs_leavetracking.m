@@ -19,7 +19,7 @@ todeletefiles = {'automatic_checks_complete_info.mat',...
     'wingtracking_results.mat'};
 
 todeletewildcard = {'ANALYSIS*',...
-    'ctrax_results_movie_*.mp4'};
+    'ctrax_results_movie_*.mp4','apt*','ctrax*'};
 
 todeletedir = {'/perframe'};
 
