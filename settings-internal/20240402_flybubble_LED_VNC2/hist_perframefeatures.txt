@@ -10,5 +10,6 @@ velmag_ctr,prestim,any,25,50
 velmag_ctr,stimweak,any,25,50
 velmag_ctr,stimmed,any,25,50
 velmag_ctr,stimstrg,any,25,50
+velmag_ctr,walk,any,5,500
 
-
+duration,walk,any,5,500

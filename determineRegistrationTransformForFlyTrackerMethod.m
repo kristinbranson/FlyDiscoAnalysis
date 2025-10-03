@@ -18,20 +18,26 @@ end
 metadata = collect_metadata(expdir, dataloc_params.metadatafilestr) ;
 plate = getfield_robust(metadata, 'plate', []) ;
 
-% Figure out the actual bowlMarkerType, based on the value in registration
-% params, and the plate id, etc
-bowlMarkerType = determineBowlMarkerType(registration_params.bowlMarkerType, plate, analysis_protocol_folder_path) ;
-
 % Determine actual maxDistCornerFrac_BowlLabel, possibly by looking it up
 % based on the plate ID.
 maxDistCornerFrac_BowlLabel = ...
   determineMaxDistCornerFracLabel(registration_params.maxDistCornerFrac_BowlLabel, plate) ;
 
-% Load the bowlMarkerTemplate
-if ~endsWith(bowlMarkerType, '.png') ,
-  error('Only template-based registration mark types are currently supported.')
+% Figure out the actual bowlMarkerType, based on the value in registration
+% params, and the plate id, etc
+bowlMarkerTemplateFilePathOrEmpty = determineBowlMarkerTemplateFilePath(registration_params.bowlMarkerType, plate, analysis_protocol_folder_path) ;
+
+% Load the bowlMarkerTemplate, if there is one
+if isempty(bowlMarkerTemplateFilePathOrEmpty)
+  bowlMarkerTemplateOrEmpty = [] ;
+else
+  bowlMarkerTemplateFilePath = bowlMarkerTemplateFilePathOrEmpty ;
+  if exist(bowlMarkerTemplateFilePath, 'file') 
+    bowlMarkerTemplateOrEmpty = im2double(imread(bowlMarkerTemplateFilePathOrEmpty)) ;
+  else
+    error('Bowl marker template file %s is missing', bowlMarkerTemplateFilePath) ;
+  end
 end
-bowlMarkerTemplate = im2double(imread(bowlMarkerType));  % bowlMarkerType is the name of a .png image, perhaps surprisingly
 
 % Read in the FlyTracker calibration, to get the chamber borders
 flytracker_calibration_file_name = dataloc_params.flytrackercalibrationstr ;
@@ -45,7 +51,7 @@ registration_data = determineRegistrationTransformForFlyTrackerMethodCore(regist
                                                                           'bkgdImage',bkgdImage, ...
                                                                           'useNormXCorr',true, ...
                                                                           'maxDistCornerFrac_BowlLabel', maxDistCornerFrac_BowlLabel, ...
-                                                                          'bowlMarkerTemplate', bowlMarkerTemplate, ...
+                                                                          'bowlMarkerTemplateOrEmpty', bowlMarkerTemplateOrEmpty, ...
                                                                           'flytrackerCalibration', flytracker_calibration) ;
 %   'bkgdImage',[],...
 %   'minTemplateFeatureStrength',.92,...

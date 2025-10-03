@@ -102,7 +102,7 @@ else
 end
 
 % Make sure the protocol is shorter than the video
-error_if_protocol_is_longer_than_video(expdir, settingsdir, analysis_protocol, do_run) ;
+warn_if_protocol_is_longer_than_video(expdir, settingsdir, analysis_protocol, do_run) ;
 
 % Determine where the LED indicator is in the video frame
 [ledIndicatorPoints, templateShapeXY] = ...

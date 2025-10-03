@@ -1,0 +1,5 @@
+indicatorwindowr,35
+pad,20
+OptogeneticExp,1
+maxDistCornerFrac_LEDLabel,.13
+LEDMarkerType,LEDTemplates_multiBub2Gt.png

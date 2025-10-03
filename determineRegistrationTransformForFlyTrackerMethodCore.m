@@ -11,8 +11,7 @@ function registration_data = determineRegistrationTransformForFlyTrackerMethodCo
  nRotations,...
  minTemplateFeatureStrength,...
  maxDistCornerFrac_BowlLabel,...
- nBowlMarkers,...
- bowlMarkerTemplate,...
+ bowlMarkerTemplateOrEmpty,...
  isInDebugMode,...
  useNormXCorr, ...
  flytrackerCalibration] = ...
@@ -21,8 +20,7 @@ function registration_data = determineRegistrationTransformForFlyTrackerMethodCo
   'nRotations',20,...
   'minTemplateFeatureStrength',.92,...
   'maxDistCornerFrac_BowlLabel',.17,...
-  'nBowlMarkers',1,...
-  'bowlMarkerTemplate',[],...
+  'bowlMarkerTemplateOrEmpty',[],...
   'debug',false,...
   'useNormXCorr',false, ...
   'flytrackerCalibration', []);
@@ -31,9 +29,6 @@ function registration_data = determineRegistrationTransformForFlyTrackerMethodCo
 % Error if required args not supplied
 if isempty(bkgdImage) ,
   error('No background image supplied to %s()', mfilename()) ;
-end
-if isempty(bowlMarkerTemplate) ,
-  error('No registration mark template supplied to %s()', mfilename()) ;
 end
 if isempty(flytrackerCalibration) ,
   error('No FlyTracker output calibration supplied to %s()', mfilename()) ;
@@ -54,7 +49,7 @@ r = flytrackerCalibration.r ;  % pels, scalar for circular chambers
 if isempty(r) ,
   error('The FlyTracker calibration file "r" field is empty.  Currently, only circular chambers are supported.') ;
 end
-chamberCount = size(centroids,1) ;
+% chamberCount = size(centroids,1) ;
 circleRadius = r ;  % scalar, b/c all arenas have to be the same size
 circleCenterX = centroids(:,2) ;  % chamberCount x 1
 circleCenterY = centroids(:,1) ;  % chamberCount x 1
@@ -66,12 +61,11 @@ circleCenterY = centroids(:,1) ;  % chamberCount x 1
 %
 
 % compute distance to corners
-if nBowlMarkers>1 ,
-  error('Only zero or one registration mark is currently supported') ;
-end
-if nBowlMarkers == 0 ,
+if isempty(bowlMarkerTemplateOrEmpty) ,
+  % No bowl marker need be detected.
   bowlMarkerPoints = zeros(2,0);
 else
+  bowlMarkerTemplate = bowlMarkerTemplateOrEmpty ;
   corner_radius = maxDistCornerFrac_BowlLabel * min(nr,nc) ;
   bowlMarkerPoints = ...
     findTemplateMatchWithPossibleRotation(bkgdImage, bowlMarkerTemplate, minTemplateFeatureStrength, nRotations, useNormXCorr, corner_radius) ;
@@ -94,7 +88,7 @@ offY = -originY;  % chamberCount x 1, in pels
 
 % Determine the angle of the registration mark
 meanCentroid = mean(centroids,1) ;  % 1 x 2, in pels
-if nBowlMarkers > 0 ,
+if ~isempty(bowlMarkerTemplateOrEmpty) ,
   bowlMarkerPoint = mean(bowlMarkerPoints, 2, 'omitnan') ;
   bowlMarkerTheta = atan2(bowlMarkerPoint(2)-meanCentroid(2),bowlMarkerPoint(1)-meanCentroid(1));
 else
