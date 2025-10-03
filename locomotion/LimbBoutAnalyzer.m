@@ -258,12 +258,21 @@ classdef LimbBoutAnalyzer < handle
             end
         end
 
-        function condition_list = listConditions(obj)
+        function boutmetrics_list = listBoutMetrics(obj)
             % List all analyzed conditions
-            condition_list = keys(obj.boutMetrics);
-            fprintf('Analyzed conditions:\n');
-            for i = 1:length(condition_list)
-                fprintf('  %s\n', condition_list{i});
+            boutmetrics_list = keys(obj.boutMetrics);
+            fprintf('Bout Metrics for contions:\n');
+            for i = 1:length(boutmetrics_list)
+                fprintf('  %s\n', boutmetrics_list{i});
+            end
+        end
+
+        function conditions_list = listRestrictionConditions(obj)
+            % List all analyzed conditions
+            conditions_list = keys(obj.restrictedBoutData);
+            fprintf('Restricted conditions:\n');
+            for i = 1:length(conditions_list)
+                fprintf('  %s\n', conditions_list{i});
             end
         end
 
