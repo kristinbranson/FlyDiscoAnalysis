@@ -20,5 +20,6 @@ result.plotperframestats = @FlyDiscoPlotPerFrameStats ;
 result.makectraxresultsmovie = @FlyDiscoMakeCtraxResultsMovie ;
 result.makeaptresultsmovie = @FlyDiscoMakeAPTResultsMovie ;
 result.automaticcheckscomplete = @FlyDiscoAutomaticChecksComplete ;
+result.cleanup = @FlyDiscoCleanup ;
 
 end

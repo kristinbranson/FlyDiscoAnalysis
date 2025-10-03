@@ -102,6 +102,8 @@ for stage_index = 1 : stage_count ,
   elseif strcmp(stage_name, 'automaticcheckscomplete') ,
     required_file_names = { dataloc_params.automaticcheckscompleteresultsfilestr, ...
                             dataloc_params.automaticcheckscompleteinfomatfilestr } ;
+  elseif strcmp(stage_name, 'cleanup') ,
+    required_file_names = cell(1,0) ;
   else
     error('Unknown stage name %s', stage_name) ;
   end

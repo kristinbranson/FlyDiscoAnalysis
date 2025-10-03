@@ -1,0 +1,4 @@
+# perframe feature file name or score file name for beahvior
+features,velmag_ctr,scores_Walk
+bin,50
+perctimebin,75

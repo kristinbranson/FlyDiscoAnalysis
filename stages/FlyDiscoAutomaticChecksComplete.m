@@ -186,6 +186,10 @@ for i = 1:stage_count ,
     % of the stage right now!
     continue
   end
+  if strcmp(stage_name, 'cleanup') ,
+    % This stage runs after ACC.  (And also generates no new files.)
+    continue
+  end  
   if is_on_or_force(do_run.(stage_name)) ,
     required_file_names = required_file_names_from_stage_name.(stage_name) ;
     for j = 1 : numel(required_file_names) ,

@@ -2,6 +2,10 @@ function result = read_file_into_cellstring(file_name)
     % Read a text file into a cellstring, one line per element.
     % Newlines are discarded.
     file = read_file_into_char_array(file_name) ;
+    if isempty(file)
+      result = cell(1,0) ;
+      return
+    end
     % Delete carriage returns, in case it's a Windows-style file
     is_cr = (file==char(13)) ;
     file(is_cr) = [] ;

@@ -41,9 +41,10 @@ exception_stage_name_maybe = {} ;
 stage_count = numel(stage_name_from_stage_index) ;
 for stage_index = 1 : stage_count ,
   stage_name = stage_name_from_stage_index{stage_index} ;
-  is_core = ~(strcmp(stage_name, 'automaticchecksincoming') || strcmp(stage_name, 'automaticcheckscomplete')) ;
-  % We run the stage if it is non-core (ACI or ACC), OR if do_run_core_stages is
-  % true.
+  is_core = ~(strcmp(stage_name, 'automaticchecksincoming') || strcmp(stage_name, 'automaticcheckscomplete') || strcmp(stage_name, 'cleanup')) ;
+  % Decide whether or not to run the stage.
+  % Note that logic inside FlyDiscoPipelineStage() can decide not to *actually*
+  % run the stage, even if do_run_stage is true.
   do_run_stage =  ~is_core || (do_run_core_stages && isempty(core_pipeline_exception_maybe));
   if do_run_stage ,
     stage_function = stage_function_from_stage_name.(stage_name) ;
@@ -96,27 +97,5 @@ end
 
 % If we get here, analysis has completed successfully
 fprintf('Analysis pipeline completed!\n');
-
-end  % function
-
-
-
-
-
-function do_run_core_stages = CheckACIFile(expdir, dataloc_params, do_run)
-
-if is_on_or_force(do_run.automaticchecksincoming) ,
-  % Make sure the file usually named automatic_checks_incoming_results.txt
-  % contains either "automated_pf,P" or "automated_pf,U", but not
-  % "automated_pf,F" (nor anything else).
-  % This ensures the the core pipeline only runs if the current run or a previous run of the ACI stage
-  % indicated that it should do so.
-  do_run_core_stages = CheckACIResultsFileContents(expdir, dataloc_params) ;
-  if ~do_run_core_stages ,
-    fprintf('FlyDisco pipeline encountered issues with experiment during automaticchecksincoming stage.  Skipping core pipeline stages.\n');
-  end
-else
-  do_run_core_stages = true ;
-end
 
 end  % function

@@ -1,0 +1,19 @@
+# plotstim
+features,velmag_ctr,absdtheta
+prestim,10
+poststim,10
+ylim_prctile,1
+stimsets,weak:1_2_3_4_5_6_7_8_9_10,medium:11_12_13_14_15_16_17_18_19_20,strong:21_22_23_24_25_26_27_28_29_30
+
+# plotstimtrajs
+traj_prestim,.25
+traj_poststim,.25
+traj_minboxwidth,250
+traj_boxborder,5
+traj_downsample,30
+traj_nfliesplot,-1
+traj_nperiodsplot,3
+
+# both
+maxnflies,12
+

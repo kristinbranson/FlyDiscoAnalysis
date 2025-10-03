@@ -1327,7 +1327,7 @@ classdef JLabelData < matlab.mixin.Copyable
     % ---------------------------------------------------------------------
     function [success,msg] = AddExpDir(obj, ...
                                        expDirName, ...
-                                       interactivemode) %#ok
+                                       varargin)
       % Add a new experiment to the GUI.  This does not change self.expi,
       % and does not do any preloading.
       
@@ -1341,11 +1341,15 @@ classdef JLabelData < matlab.mixin.Copyable
       end
       
       % interactive mode is not stored in the instance vars
-      if exist('interactivemode','var')
+      if isscalar(varargin) && islogical(varargin{1})
         warning(['JLabelData.AddExpDir: Whether or not the JLabelData is interactive is now stored in the object.  ' ...
                  'Setting it for the call to AddExpDir() is ignored.']);
-      end
+      end      
       interactivemode = obj.isInteractive;
+
+      % Parse optional args
+      doEnableComputationOfPerFrameFeatures = myparse(varargin, ...
+                                                       'doEnableComputationOfPerFrameFeatures', true) ;
 
       % make sure directory exists
       obj.SetStatus('Checking that %s exists...',expDirName);
@@ -1421,43 +1425,45 @@ classdef JLabelData < matlab.mixin.Copyable
       end
       
       % If some files are missing, and we can generate them, do so
-      if obj.filesfixable && ~obj.allfilesexist,
-        obj.SetStatus('Some files missing for %s...',expName);
-        if interactivemode && isdisplay(),
-          if isempty(obj.GetGenerateMissingFiles) || ~obj.GetGenerateMissingFiles()
-            if numel(missingfiles)>10,
-              missingfiles = missingfiles(1:10);
-              missingfiles{end+1} = ' and more ';
+      if doEnableComputationOfPerFrameFeatures 
+        if obj.filesfixable && ~obj.allfilesexist,
+          obj.SetStatus('Some files missing for %s...',expName);
+          if interactivemode && isdisplay(),
+            if isempty(obj.GetGenerateMissingFiles) || ~obj.GetGenerateMissingFiles()
+              if numel(missingfiles)>10,
+                missingfiles = missingfiles(1:10);
+                missingfiles{end+1} = ' and more ';
+              end
+              % Would be good to move UI stuff out of JLabelData, which is
+              % essentially a model in MVC terms --ALT, Apr 30, 2013
+              res = questdlg(sprintf(['Experiment %s is missing required files:%s. '...
+                'Generate now?'],expDirName,sprintf(' %s',missingfiles{:})),...
+                'Generate missing files?','Yes','Cancel','Yes');
+              if strcmpi(res,'Yes')
+                obj.SetGenerateMissingFiles();
+              end
+            else 
+              res = 'Yes';
             end
-            % Would be good to move UI stuff out of JLabelData, which is
-            % essentially a model in MVC terms --ALT, Apr 30, 2013
-            res = questdlg(sprintf(['Experiment %s is missing required files:%s. '...
-              'Generate now?'],expDirName,sprintf(' %s',missingfiles{:})),...
-              'Generate missing files?','Yes','Cancel','Yes');
-            if strcmpi(res,'Yes')
-              obj.SetGenerateMissingFiles();
-            end
-          else 
+          else
             res = 'Yes';
           end
-        else
-          res = 'Yes';
-        end
-        if strcmpi(res,'Yes'),
-          obj.SetStatus('Generating missing files for %s...',expName);
-          [success,msg] = obj.GenerateMissingFiles(obj.nexps);
-          if ~success,
-            msg = sprintf(['Error generating missing required files %s '...
-              'for experiment %s: %s. Removing...'],...
-              sprintf(' %s',missingfiles{:}),expDirName,msg);
-            obj.SetStatus('Error generating missing files for %s...',expName);
+          if strcmpi(res,'Yes'),
+            obj.SetStatus('Generating missing files for %s...',expName);
+            [success,msg] = obj.GenerateMissingFiles(obj.nexps);
+            if ~success,
+              msg = sprintf(['Error generating missing required files %s '...
+                'for experiment %s: %s. Removing...'],...
+                sprintf(' %s',missingfiles{:}),expDirName,msg);
+              obj.SetStatus('Error generating missing files for %s...',expName);
+              obj.RemoveExpDirs(obj.nexps,needSaveIfSuccessfulRemoval);
+              return;
+            end
+          else
+            obj.SetStatus('Not generating missing files for %s, not adding...',expName);
             obj.RemoveExpDirs(obj.nexps,needSaveIfSuccessfulRemoval);
             return;
           end
-        else
-          obj.SetStatus('Not generating missing files for %s, not adding...',expName);
-          obj.RemoveExpDirs(obj.nexps,needSaveIfSuccessfulRemoval);
-          return;
         end
       end
       
