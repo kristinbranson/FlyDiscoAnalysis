@@ -1,0 +1,13 @@
+# <per-frame feature>,<frame condition name>,<fly condition name>,<min n. frames both valid>,<min n. frames fly valid>
+
+anglesub,stimonstrong,any,25,50
+anglesub,stimonweak,any,25,50
+anglesub,stimoff1,any,25,50
+dcenter,stimonstrong,any,25,100
+dcenter,stimonweak,any,25,100
+dcenter,stimoff1,any,25,100
+anglesub,agg,any,0,50
+anglesub,aggstrong,any,0,50
+anglesub,aggweak,any,0,50
+anglesub,aggstimoff1,any,0,50
+anglesub,notagg,any,0,50

@@ -1,0 +1,5 @@
+indicatorwindowr,35
+pad,20
+OptogeneticExp,1
+maxDistCornerFrac_LEDLabel,.16
+LEDMarkerType,A,LEDIndicator_largeovaloffcenter.png,B,LEDIndicator_largeovaloffcenter.png,C,LEDIndicator_largeovaloffcenter.png,D,LEDIndicator_largeovaloffcenter.png

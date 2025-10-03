@@ -5,7 +5,9 @@
 modpath
 % metadatafile = 'Metadata.xml';
 % %% pull expdirs and load all metdata
-rootdatadir = '/groups/branson/bransonlab/flydisco_data';
+% rootdatadir = '/groups/branson/bransonlab/flydisco_data';
+% rootdatadir = '/nearline/branson/VNCscreen_notinuse';
+rootdatadir = '/nearline/branson/ReiserFlyBubble'
 
 % %inputs to getExperimentDirsFlyDisco: 'metadatafile','Metadata.xml','expdirname','*','line_name','*', ...
 %     'date','*','nflies',false,'autocheckin',false,'movielength',false,'TrajNum',false,'autocheckcomplete',false);
@@ -43,7 +45,10 @@ rootdatadir = '/groups/branson/bransonlab/flydisco_data';
 % savefile = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_VNC3_2024_traj';
 % [expdirstruct] = getExperimentDirsFlyDisco(rootdatadir,'metadatafile','Metadata.xml','expdirname','VNC3*','date','2024*','autocheckin',true,'autocheckcomplete',true,'manualcheck',true,'TrajNum',true);
 
-savefile = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_2024_allVNC';
+% savefile = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_2024_allVNC';
+% [expdirstruct] = getExperimentDirsFlyDisco(rootdatadir,'metadatafile','Metadata.xml','expdirname','VNC*','autocheckin',true,'autocheckcomplete',true,'manualcheck',true,'TrajNum',false);
+
+savefile = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_2024_allVNC_failed';
 [expdirstruct] = getExperimentDirsFlyDisco(rootdatadir,'metadatafile','Metadata.xml','expdirname','VNC*','autocheckin',true,'autocheckcomplete',true,'manualcheck',true,'TrajNum',false);
 
 
@@ -73,8 +78,9 @@ savefile = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/
 % [expdirstruct] = getExperimentDirsFlyDisco(rootdatadir,'metadatafile','Metadata.xml','expdirname','VNC','autocheckin',true,'autocheckcomplete',true);
 
 
+savefile = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_LPC1';
+[expdirstruct] = getExperimentDirsFlyDisco(rootdatadir,'metadatafile','Metadata.xml');
 
-% [expdirstruct] = getExperimentDirsFlyDisco(rootdatadir,varagin);
 
 
 
