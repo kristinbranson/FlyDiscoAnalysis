@@ -44,7 +44,7 @@ for d = 1:numel(diffs)/2
 
         name = [legorder{diffs(d,1)},'_',legorder{diffs(d,2)}];
         currdata = phaselagdiffs;
-        phaseoffsetdata.(name).data = currdata;
+        phaseoffsetdata.(name).lagdata = currdata;
         phaseoffsetdata.(name).mean = circ_mean(currdata(~isnan(currdata)));
         phaseoffsetdata.(name).std = circ_std(currdata(~isnan(currdata)));
 

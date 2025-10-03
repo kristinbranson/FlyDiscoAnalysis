@@ -91,7 +91,7 @@ for d = 1:numel(diffs)/2
     % make reference correct.
     limbs = [diffs(d,2),diffs(d,1)];
     currdata = wrapTo2Pi(diff(unwrap(legphases(limbs,:),[],2)));
-    phasediff_interp.(name).data = currdata;
+    phasediff_interp.(name).diffdata = currdata;
     % reported in -pi to pi
     phasediff_interp.(name).mean = circ_mean(currdata(~isnan(currdata)));
     phasediff_interp.(name).std = circ_std(currdata(~isnan(currdata)));
