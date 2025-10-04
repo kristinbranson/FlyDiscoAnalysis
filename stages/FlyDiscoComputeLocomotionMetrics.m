@@ -110,15 +110,16 @@ else
 end
 
 % tips_pos_body
-apt_pts_4_center = stage_params.apt_pts_4_center;
-apt_pt_4_theta = stage_params.apt_pt_4_theta;
 if exist(fullfile(expdir,"tips_pos_body.mat"),'file') 
-       % if tips positions in body reference already exists load them
+    % if tips positions in body reference already exists load them
     load(fullfile(expdir,"tips_pos_body.mat"),'tips_pos_body');
-elseif ~exist('aptdata','var')
-    aptfile = trx.dataloc_params.apttrkfilestr;
-    aptdata = TrkFile.load(fullfile(expdir,aptfile));
 else
+    apt_pts_4_center = getfield_robust(stage_params, 'apt_pts_4_center', [4 5]) ;
+    apt_pt_4_theta = getfield_robust(stage_params, 'apt_pt_4_theta', 6) ;
+    if ~exist('aptdata','var')
+        aptfile = trx.dataloc_params.apttrkfilestr;
+        aptdata = TrkFile.load(fullfile(expdir,aptfile));
+    end
     pTrk = aptdata.pTrk;
     [tips_pos_body] = compute_tips_pos_body(pTrk,apt_pts_4_center,apt_pt_4_theta,legtip_landmarknums);
     save(fullfile(expdir,'tips_pos_body.mat'),'tips_pos_body');
@@ -128,8 +129,8 @@ end
 % run groundcontact detections
 gc_threshold_low = stage_params.gc_threshold_low;
 gc_threshold_high = stage_params.gc_threshold_high;
-pairs = stage_params.pairs;
-minimum_bout = stage_params.minimum_bout_groundcontact;
+pairs = getfield_robust(stage_params, 'pairs', []);
+minimum_bout = getfield_robust(stage_params, 'minimum_bout_groundcontact', []);
 [groundcontact] = compute_groundcontact(tips_velmag,'pairs',pairs,'gc_threshold_low',gc_threshold_low,'gc_threshold_high',gc_threshold_high,'minimum_bout',minimum_bout);
 
 %compute number of feet on the ground
@@ -148,6 +149,10 @@ if exist(CoMfilestr,'file')
     load(CoMfilestr,'data');
     CoM_stability = data;
 else
+    if ~exist('aptdata','var')
+        aptfile = trx.dataloc_params.apttrkfilestr;
+        aptdata = TrkFile.load(fullfile(expdir,aptfile));
+    end
     CoM_stabilty = compute_CoMstability(aptdata,legtip_landmarknums,groundcontact);
     data = CoM_stabilty;
     units = parseunits('px');
