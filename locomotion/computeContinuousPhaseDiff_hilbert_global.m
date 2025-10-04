@@ -1,22 +1,23 @@
-function [phasediff_hilbert] = computeContinuousPhaseDiff_hilbert(norm_ytips,loctall,locball, currwalk_tips_pos_body_Y,w,debug)
+function [phasediff_hilbert_global] = computeContinuousPhaseDiff_hilbert_global(currwalk_phases,currwalk_norm_ytips_global,loctall,locball, currwalk_tips_pos_body_Y,w,debug)
 
-nlimb = size(norm_ytips,1);
-nwalkfrms = size(norm_ytips,2);
+nlimb = size(currwalk_phases,1);
+nwalkfrms = size(currwalk_phases,2);
 
-phasediff_hilbert = struct;
+norm_ytips = currwalk_norm_ytips_global;
+phasediff_hilbert_global = struct;
 legphases = nan(nlimb,nwalkfrms);
 
 
 for limb = 1:nlimb
     loct = loctall{limb}(2,:);
     locb = locball{limb}(2,:);
-    % compute per leg phases with the hilbert transform
-    data = angle(hilbert(norm_ytips(limb,:)));
+    % % compute per leg phases with the hilbert transform
+    % data = angle(hilbert(norm_ytips(limb,:)));
 
     sidx = min(loct(1),locb(1));
     eidx = max(loct(end),locb(end));
     % only use data after first peak/trough and before last peak/trough
-    legphases(limb,sidx:eidx) = data(sidx:eidx);
+    legphases(limb,sidx:eidx) = currwalk_phases(limb,sidx:eidx);
 
 end
 
@@ -26,14 +27,14 @@ if debug
     limbs = [1,3];
     if ~isempty(legphases(~isnan(legphases(limbs(1),:)))) & ~isempty(legphases(~isnan(legphases(limbs(2),:))))
 
-        figure('Position',[400 747 827 883])
+        figure('Position',[1400 747 827 883])
         tiledlayout(6, 1);
 
         nexttile;
         plot(currwalk_tips_pos_body_Y(limbs,:)');
         set(gca,'XLim',[0,size(norm_ytips,2)+5])
         ylabel('bodyref Y of tips');
-        title(sprintf('walk: %d local hilbert phase analysis of limb %d vs limb %d',w,limbs(2),limbs(1)))
+        title(sprintf('walk: %d global hilbert phase analysis of limb %d vs limb %d',w,limbs(2),limbs(1)))
         legend(sprintf('limb %d',limbs(1)),sprintf('limb %d',limbs(2)))
 
         nexttile;
@@ -87,13 +88,13 @@ for d = 1:numel(diffs)/2
     % make reference correct.
     limbs = [diffs(d,2),diffs(d,1)];
     currdata = wrapTo2Pi(diff(unwrap(legphases(limbs,:),[],2)));
-    phasediff_hilbert.(name).diffdata = currdata;
+    phasediff_hilbert_global.(name).diffdata = currdata;
     % reported in -pi to pi
-    phasediff_hilbert.(name).mean = circ_mean(currdata(~isnan(currdata)));
-    phasediff_hilbert.(name).std = circ_std(currdata(~isnan(currdata)));
+    phasediff_hilbert_global.(name).mean = circ_mean(currdata(~isnan(currdata)));
+    phasediff_hilbert_global.(name).std = circ_std(currdata(~isnan(currdata)));
 
 
 end
-phasediff_hilbert.phasedata = legphases;
+phasediff_hilbert_global.phasedata = legphases;
 
 end

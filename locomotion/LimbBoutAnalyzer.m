@@ -165,7 +165,7 @@ classdef LimbBoutAnalyzer < handle
             fprintf('Computing bout metrics for walking conditions...\n');
             end
             obj.computeBoutMetricsByCondition('walking_stimON_traj');
-            obj.computeBoutMetricsByCondition('walking_stimOFF_traj');
+             obj.computeBoutMetricsByCondition('walking_stimOFF_traj');
             
             if obj.debug
             fprintf('Walking + stimulus analysis complete!\n');
