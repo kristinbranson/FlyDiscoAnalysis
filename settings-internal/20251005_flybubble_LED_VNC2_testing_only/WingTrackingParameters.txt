@@ -1,0 +1,44 @@
+# wing tracking parameters
+
+# background subtraction parameters
+
+# thresholds for wings
+mindwing_high,35
+mindwing_low,25
+# thresholds for body
+mindbody,100
+# morphology for body
+radius_dilate_body,2
+# morphology for wings
+radius_open_wing,2
+min_wingcc_area,9
+
+# maximum distaqnce from a body to wing cc
+max_wingcc_dist,.25
+# maximum angle to any pixel in the wing
+max_wingpx_angle,2.356194490192345
+# obsolete
+max_wing_angle_otherside,0.174532925199433
+# minimum non-zero wing angle
+min_nonzero_wing_angle,0.174532925199433
+# minimum distance in bins between peaks in the wing angle histogram
+wing_min_peak_dist_bins,3
+# minimum fraction of pixels that must fall in the peak bin
+wing_min_peak_threshold_frac,0
+# number of bins to histogram the wing angles into
+nbins_dthetawing,50
+# minimum fraction of pixels that must fall in the second peak bin, 
+# in units of the average fraction per bin
+wing_peak_min_frac_factor,2
+# smoothing filter for wing fraction
+wing_frac_filter,.25,.5,.25
+# method for fitting wings
+wing_fit_method,peaks
+# obsolete
+wing_min_prior,.25
+# minimum number of pixels in wings to even try to look for wings
+min_single_wing_area,40
+# number of bins to consider for sub-bin accuracy in fitting the wings
+wing_radius_quadfit_bins,1
+
+
