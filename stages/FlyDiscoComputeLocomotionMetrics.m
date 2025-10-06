@@ -89,6 +89,10 @@ for i = 1:numel(legtip_landmarknums)
     end
 end
 
+% need apt data 
+aptfile = trx.dataloc_params.apttrkfilestr;
+aptdata = TrkFile.load(fullfile(expdir,aptfile));
+
 if ~all(perframeload_success) && exist(fullfile(expdir,"tips_velmag.mat"),'file') 
 
     % if tips_velmag already exists load them
@@ -96,9 +100,6 @@ if ~all(perframeload_success) && exist(fullfile(expdir,"tips_velmag.mat"),'file'
 
 else
     % compute and save if doesn't already exist
-    % need apt data 
-    aptfile = trx.dataloc_params.apttrkfilestr;
-    aptdata = TrkFile.load(fullfile(expdir,aptfile));
     ts = trx.movie_timestamps{:};
     dt = diff(ts)';
     pxpermm = trx.pxpermm;
@@ -116,10 +117,6 @@ if exist(fullfile(expdir,"tips_pos_body.mat"),'file')
 else
     apt_pts_4_center = stage_params.apt_pts_4_center ;
     apt_pt_4_theta = stage_params.apt_pt_4_theta ;
-    if ~exist('aptdata','var')
-        aptfile = trx.dataloc_params.apttrkfilestr;
-        aptdata = TrkFile.load(fullfile(expdir,aptfile));
-    end
     pTrk = aptdata.pTrk;
     [tips_pos_body] = compute_tips_pos_body(pTrk,apt_pts_4_center,apt_pt_4_theta,legtip_landmarknums);
     save(fullfile(expdir,'tips_pos_body.mat'),'tips_pos_body');
@@ -149,10 +146,6 @@ if exist(CoMfilestr,'file')
     load(CoMfilestr,'data');
     CoM_stability = data;
 else
-    if ~exist('aptdata','var')
-        aptfile = trx.dataloc_params.apttrkfilestr;
-        aptdata = TrkFile.load(fullfile(expdir,aptfile));
-    end
     CoM_stabilty = compute_CoMstability(aptdata,legtip_landmarknums,groundcontact);
     data = CoM_stabilty;
     units = parseunits('px');
