@@ -172,7 +172,10 @@ loco_analyzer = LimbBoutAnalyzer(trx, aptdata, tips_pos_body, legtip_landmarknum
 
 % compute locomotion metrics for swing, stance, and steps for walking
 % during stim on and stim off periods
-loco_analyzer.analyzeWalkingAndStimConditions();
+loco_analyzer.analyzeBoutAndStimConditions();
+
+% compute locomotion metrics for walk bouts during stim on and off periods
+loco_analyzer.analyzeWalkAndStimConditions();
 
 % % pull bout features  bouts
 % [bout_metrics_ON] = getConditionData(loco_analyzer,'walking_stimON_traj','metrics');

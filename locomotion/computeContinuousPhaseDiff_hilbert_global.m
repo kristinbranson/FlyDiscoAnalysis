@@ -80,7 +80,10 @@ diffs = [5, 1
     4,3
     6,5
     1,2
-    2,3];
+    2,3
+    1,5
+    6,2
+    2,4];
 
 for d = 1:numel(diffs)/2
     name = [legorder{diffs(d,1)},'_',legorder{diffs(d,2)}];
@@ -88,13 +91,47 @@ for d = 1:numel(diffs)/2
     % make reference correct.
     limbs = [diffs(d,2),diffs(d,1)];
     currdata = wrapTo2Pi(diff(unwrap(legphases(limbs,:),[],2)));
-    phasediff_hilbert_global.(name).diffdata = currdata;
+    phasediff_hilbert_global.(name).data = currdata;
     % reported in -pi to pi
     phasediff_hilbert_global.(name).mean = circ_mean(currdata(~isnan(currdata)));
     phasediff_hilbert_global.(name).std = circ_std(currdata(~isnan(currdata)));
+    phasediff_hilbert_global.(name).n = numel(currdata(~isnan(currdata)));
 
 
 end
+
+% group ipsi and contra
+phasegroups = struct;
+phasegroups.ipsi_post_2 = {'LM_LH','RM_RH'};
+phasegroups.ipsi_ant_2 = {'LF_LM','RF_RM'};
+phasegroups.ipsi_A2P_4 = {'LM_LH','RM_RH','LF_LM','RF_RM'};
+phasegroups.conta_L2R_3 = {'LF_RF','LM_RM','LH_RH'};
+phasegroups.tripods_4 = {'RF_LM','LM_RH','LF_RM','RM_LH'};
+
+
+% combine phase groups
+flds = fields(phasegroups);
+for f= 1:numel(flds)
+phasegroupname = flds{f};
+phasegroup = phasegroups.(phasegroupname);
+
+curr_all = {};
+for p = 1:numel(phasegroup)
+    curr_all{p} = phasediff_hilbert_global.(phasegroup{p}).data;
+end
+diffdata = [];
+diffdata = horzcat(curr_all{:});
+phasediff_hilbert_global.(phasegroupname).data = diffdata;
+phasediff_hilbert_global.(phasegroupname).mean = circ_mean(diffdata(~isnan(diffdata)));
+phasediff_hilbert_global.(phasegroupname).std = circ_std(diffdata(~isnan(diffdata)));
+phasediff_hilbert_global.(phasegroupname).n = numel(diffdata(~isnan(diffdata)));
+
+
+end
+
+
+
+
 phasediff_hilbert_global.phasedata = legphases;
 
 end

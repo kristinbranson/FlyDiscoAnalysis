@@ -17,7 +17,10 @@ diffs = [5, 1
     4,3
     6,5
     1,2
-    2,3];
+    2,3
+    1,5
+    6,2
+    2,4];
 
 % 5 vs reference limb
 
@@ -42,10 +45,10 @@ for d = 1:numel(diffs)/2
 
     name = [legorder{diffs(d,1)},'_',legorder{diffs(d,2)}];
     currdata = phaselagdiffs;
-    phaseoffsetdata.(name).lagdata = currdata;
+    phaseoffsetdata.(name).data = currdata;
     phaseoffsetdata.(name).mean = circ_mean(currdata(~isnan(currdata)));
     phaseoffsetdata.(name).std = circ_std(currdata(~isnan(currdata)));
-
+    phaseoffsetdata.(name).n = numel(currdata(~isnan(currdata)));
 
 end
 end

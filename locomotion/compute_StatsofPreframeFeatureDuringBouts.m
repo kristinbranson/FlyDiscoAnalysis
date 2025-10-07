@@ -35,7 +35,7 @@ for i = 1:numel(start_indices)
     end
 
 end
-
+datastruct.data = boutdata;
 datastruct.mean = meanpff;
 datastruct.std = stdpff;
 datastruct.min = minpff;

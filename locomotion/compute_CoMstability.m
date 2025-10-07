@@ -1,5 +1,12 @@
 function [CoM_stabilty] = compute_CoMstability(aptdata,legtip_landmarknums,groundcontact)
+% output
+% minimum distance from thorax CoM to the edge of the polygon defined by leg tips on the
+% ground
+% -1 undefined when <3 legs on the ground
+% 0 outside the polygon from by the legs
 
+% CoM of thorax .6 of way between the average shoulders and notum
+% 
 debug = false;
 pTrk = aptdata.pTrk;
 

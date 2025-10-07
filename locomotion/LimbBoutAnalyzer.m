@@ -22,6 +22,8 @@ classdef LimbBoutAnalyzer < handle
         % Results storage
         restrictedBoutData = containers.Map()  % Store multiple restricted datasets
         boutMetrics = containers.Map()         % Store multiple bout metrics
+        validFrames = containers.Map()   % store computed digtal signals for restricting analysis frames in walk features
+        walkMetrics = containers.Map()         % Store muttiple walk metric datasets
 
         % Settings
         debug = false
@@ -77,6 +79,9 @@ classdef LimbBoutAnalyzer < handle
             % Initialize containers
             obj.restrictedBoutData = containers.Map();
             obj.boutMetrics = containers.Map();
+            obj.validFrames = containers.Map();
+            obj.walkMetrics = containers.Map();
+
             
             if obj.debug
             obj.displayDataStructure();
@@ -107,6 +112,12 @@ classdef LimbBoutAnalyzer < handle
                 'limbBoutData must be struct array with %d flies', obj.nflies);
         end
 
+        function createValidFrames_LED(obj)
+            obj.validFrames('led_on_traj') = obj.digitalindicator;
+
+            obj.validFrames('led_off_traj') = obj.invertTrajectoryIndicator(obj.digitalindicator);
+        end
+
 
         function restrictBoutsbyCondition(obj,condition_name,boutdata,digital_signal_traj)
             % Restrict bout data using trajectory format digital signal
@@ -134,12 +145,19 @@ classdef LimbBoutAnalyzer < handle
             bout_metrics = computeboutmetrics2(obj.trx, obj.aptdata, obj.tips_pos_body, obj.legtip_landmarknums, boutstruct);
             obj.boutMetrics(condition_name) = bout_metrics;
         end
+
+        function computeWalkMetricsforValidFrames(obj, validframes_name)
+
+            digital_signal = obj.validFrames(validframes_name);
+            walk_metrics = computeWalkMetrics(obj,digital_signal);
+            obj.walkMetrics(validframes_name) = walk_metrics;
+        end
   
-        function analyzeWalkingAndStimConditions(obj)
+        function analyzeBoutAndStimConditions(obj)
             % Analyze combinations of walking and stimulus conditions
             % Uses both stored walking_scores and digitalindicator (both trajectory format)
             
-            fprintf('Analyzing walking + stimulus conditions (trajectory format)...\n');
+            fprintf('Analyzing bout + stimulus conditions (trajectory format)...\n');
             
             % Restrict to walking periods first
             if obj.debug
@@ -165,12 +183,26 @@ classdef LimbBoutAnalyzer < handle
             fprintf('Computing bout metrics for walking conditions...\n');
             end
             obj.computeBoutMetricsByCondition('walking_stimON_traj');
-             obj.computeBoutMetricsByCondition('walking_stimOFF_traj');
+            obj.computeBoutMetricsByCondition('walking_stimOFF_traj');
             
             if obj.debug
             fprintf('Walking + stimulus analysis complete!\n');
             end
         end
+
+        function analyzeWalkAndStimConditions(obj)
+
+            fprintf('Analyzing walk + stimulus conditions ...\n');
+
+            % create valid frame signals for LED on and LED off
+            obj.createValidFrames_LED();           
+
+            % Compute metrics
+            obj.computeWalkMetricsforValidFrames('led_on_traj');
+            obj.computeWalkMetricsforValidFrames('led_off_traj');
+
+        end
+
 
         function saveBoutData(obj, condition_names)
             % Save bout data for specified conditions
@@ -215,13 +247,21 @@ classdef LimbBoutAnalyzer < handle
             bout_metrics_ON = [];
             bout_metrics_OFF = [];
 
+            % TO DO cleanup condition names everywhere at some point
             if obj.boutMetrics.isKey('walking_stimON_traj')
                 bout_metrics_ON = obj.boutMetrics('walking_stimON_traj');
             end
             if obj.boutMetrics.isKey('walking_stimOFF_traj')
                 bout_metrics_OFF = obj.boutMetrics('walking_stimOFF_traj');
             end
-            save(filepath, 'bout_metrics_ON', 'bout_metrics_OFF');
+            % add walk metrics
+            if obj.walkMetrics.isKey('led_on_traj')
+                walk_metrics_ON = obj.walkMetrics('led_on_traj');
+            end
+            if obj.walkMetrics.isKey('led_off_traj')
+                walk_metrics_OFF = obj.walkMetrics('led_off_traj');
+            end
+            save(filepath, 'bout_metrics_ON', 'bout_metrics_OFF','walk_metrics_ON','walk_metrics_OFF');
             fprintf('Results saved to: %s\n', filepath);
         end
 
@@ -360,7 +400,7 @@ classdef LimbBoutAnalyzer < handle
             % Show analysis suggestions
             fprintf('\nAnalysis suggestions:\n');
             if obj.restrictedBoutData.Count == 0 && obj.boutMetrics.Count == 0
-                fprintf('  Run analyzer.analyzeWalkingAndStimConditions() for walking + stimulus analysis (with metrics)\n');
+                fprintf('  Run analyzer.analyzeBoutAndStimConditions() for walking + stimulus analysis (with metrics)\n');
                 fprintf('  Run analyzer.analyzeStimConditions() for basic stimulus restriction (no metrics)\n');
             elseif obj.restrictedBoutData.Count > 0 && obj.boutMetrics.Count == 0
                 fprintf('  Run analyzer.computeBoutMetricsByCondition(condition_name) to compute metrics\n');
