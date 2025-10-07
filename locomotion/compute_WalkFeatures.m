@@ -1,4 +1,4 @@
-function [walkfeaturestruct,perflywalkfeatures] = compute_WalkFeatures(obj,fly,digital_signal,condition_name)
+function [walkfeaturestruct,perflywalkfeatures] = compute_WalkFeatures(obj,fly,digital_signal)
 
 % compute_WalkFeatures - Extract walking features from fly limb tracking data
 %
