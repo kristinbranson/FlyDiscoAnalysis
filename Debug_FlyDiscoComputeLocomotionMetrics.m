@@ -9,7 +9,7 @@ settingsdir = '/groups/branson/home/robiea/Code_versioned/BransonFlyDiscoSetting
 analysis_protocol = '20250721_flybubble_LED_VNC3';
 params = {'settingsdir',settingsdir,...
     'analysis_protocol',analysis_protocol, ...
-    'forcecompute', true,...
+    'forcecompute', false,...
     'debug',true};
 
 %% expdir
@@ -18,11 +18,11 @@ params = {'settingsdir',settingsdir,...
 % explist = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20241203_testinglocomotion/VNC3_JRC_SS98080_RigB_20240904T120747'};
 % explist = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20241203_testinglocomotion/VNC3_YNA_K_162984_RigB_20240904T124501'};
 % explist = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20241203_testinglocomotion/VNC3_YNA_K_162984_RigD_20240529T101336'};
-explist = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20241203_testinglocomotion/VNC3_JRC_SS98080_RigB_20240904T120747'
-'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20241203_testinglocomotion/VNC3_JRC_SS100086_RigD_20240820T125028'
-'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20241203_testinglocomotion/VNC3_YNA_K_162984_RigB_20240904T124501'
-'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20241203_testinglocomotion/VNC3_YNA_K_162984_RigD_20240529T101336'
-'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20241203_testinglocomotion/VNC3_EXT_VGLUT-GAL4_RigC_20240813T120718'};
+% explist = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20241203_testinglocomotion/VNC3_JRC_SS98080_RigB_20240904T120747'
+% '/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20241203_testinglocomotion/VNC3_JRC_SS100086_RigD_20240820T125028'
+% '/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20241203_testinglocomotion/VNC3_YNA_K_162984_RigB_20240904T124501'
+% '/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20241203_testinglocomotion/VNC3_YNA_K_162984_RigD_20240529T101336'};
+explist = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20241203_testinglocomotion/VNC3_EXT_VGLUT-GAL4_RigC_20240813T120718'};
 %% run code
 for i = 1:numel(explist)
     expdir = explist{i};

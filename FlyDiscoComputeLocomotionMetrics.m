@@ -183,10 +183,12 @@ loco_analyzer.analyzeWalkAndStimConditions();
 
 % If something goes wrong, throw an error.  Any values returned from this
 % function are ignored.
+
 try
-    saveResults(loco_analyzer, fullfile(expdir,trx.dataloc_params.locomotionmetricsswingstanceboutstatsfilestr))
+    savefilename = trx.dataloc_params.locomotionmetricsswingstanceboutstatsfilestr;
+    saveResults(loco_analyzer, fullfile(expdir,savefilename))
     % save(fullfile(expdir,trx.dataloc_params.locomotionmetricsswingstanceboutstatsfilestr),'bout_metrics_ON','bout_metrics_OFF')
 catch ME
     warning('FlyDiscoComputeLocomotionMetrics:save',...
-        'Could not save information to file %s: %s',filename,getReport(ME));
+        'Could not save information to file %s: %s',savefilename,getReport(ME));
 end

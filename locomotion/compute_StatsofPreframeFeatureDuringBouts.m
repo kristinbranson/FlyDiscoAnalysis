@@ -6,23 +6,34 @@ function [datastruct] = compute_StatsofPreframeFeatureDuringBouts(fly,fn,trx,sta
 % perframe features during each bout
 
 dataflycurr = trx.GetPerFrameData(fn,fly);
-meanpff = nan(1,numel(start_indices));
-stdpff = nan(1,numel(start_indices));
-minpff = nan(1,numel(start_indices));
-maxpff = nan(1,numel(start_indices));
-sumpff = nan(1,numel(start_indices));
-n = nan(1,numel(start_indices));
+% deal with empty case - return NaN OK?
+if isempty(start_indices)
+    start_indices = 1;
+    boutdata = [];
+    meanpff = nan(1,numel(start_indices));
+    stdpff = nan(1,numel(start_indices));
+    minpff = nan(1,numel(start_indices));
+    maxpff = nan(1,numel(start_indices));
+    sumpff = nan(1,numel(start_indices));
+    n = nan(1,numel(start_indices));
+    start_indices = [];
+else
+    meanpff = nan(1,numel(start_indices));
+    stdpff = nan(1,numel(start_indices));
+    minpff = nan(1,numel(start_indices));
+    maxpff = nan(1,numel(start_indices));
+    sumpff = nan(1,numel(start_indices));
+    n = nan(1,numel(start_indices));
 
-% account for indexing into a derivative perframe feature like velmag
-if strcmp('first',derivative_flag)
-    end_indices = end_indices-1;
-elseif strcmp('second',derivative_flag)
-    end_indices = end_indices-2;
-end
+    % account for indexing into a derivative perframe feature like velmag
+    if strcmp('first',derivative_flag)
+        end_indices = end_indices-1;
+    elseif strcmp('second',derivative_flag)
+        end_indices = end_indices-2;
+    end
 
 
-for i = 1:numel(start_indices)
-    if ~isempty(start_indices)
+    for i = 1:numel(start_indices)
         boutdata = dataflycurr(start_indices(i):end_indices(i));
         meanpff(i) = mean(boutdata);
         stdpff(i) = std(boutdata);
@@ -30,8 +41,6 @@ for i = 1:numel(start_indices)
         maxpff(i) = max(boutdata);
         sumpff(i) = sum(boutdata);
         n(i) = numel(boutdata);
-
-
     end
 
 end

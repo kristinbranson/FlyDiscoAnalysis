@@ -91,7 +91,7 @@ end
 % compute frames for analysis
 walk_digital = obj.walking_scores{fly};
 % digital_signal = obj.digitalindicator{fly};
-allowed_walks = walk_digital & ~digital_signal;
+allowed_walks = walk_digital & digital_signal;
 
 
 % loop over walks

@@ -17,10 +17,10 @@ nflies = numel(boutstruct);
 timestamps = trx.movie_timestamps{1};
 pxpermm = trx.pxpermm;
 bout_metrics = struct;
-% list of perframe features to compute stats over bouts that are 
-%  'first' = 1st derivative (d)  
+% list of perframe features to compute stats over bouts that are
+%  'first' = 1st derivative (d)
 pfflist_first = {'velmag_ctr','absdv_ctr','absdu_ctr','absdtheta', ...
-    'left_vel','right_vel','forward_vel','backward_vel','right_dtheta','left_dtheta'};   
+    'left_vel','right_vel','forward_vel','backward_vel','right_dtheta','left_dtheta'};
 % 'none' = no derivative
 pfflist_none = {'CoM_stability'};
 % 'second' = second derivative (dd)
@@ -50,13 +50,13 @@ for is = 1:numel(state)
                 % % made more general AR 20250918
 
                 % loop over list of perframe features
-                for ifns = 1:numel(pfflist_first)                                       
-                    fn = pfflist_first{ifns};                 
+                for ifns = 1:numel(pfflist_first)
+                    fn = pfflist_first{ifns};
                     datastruct = compute_StatsofPreframeFeatureDuringBouts(fly,fn,trx,start_indices,end_indices,'first');
                     bout_metrics.perfly(fly).perlimb(limb).(state{is}).(fn) = datastruct;
                 end
-                for ifns = 1:numel(pfflist_none)                                       
-                    fn = pfflist_none{ifns};                 
+                for ifns = 1:numel(pfflist_none)
+                    fn = pfflist_none{ifns};
                     datastruct = compute_StatsofPreframeFeatureDuringBouts(fly,fn,trx,start_indices,end_indices,'none');
                     bout_metrics.perfly(fly).perlimb(limb).(state{is}).(fn) = datastruct;
                 end
@@ -144,8 +144,8 @@ for is = 1:numel(state)
                     currfly_all_limbs{limb} = bout_metrics.perfly(fly).perlimb(limb).(state{is}).(flds{fld});
                 end
                 bout_metrics.perfly(fly).all_limbs.(state{is}).(flds{fld}) = horzcat(currfly_all_limbs{:});
-            % perframe feature structs loop over the fields of the
-            % datastruct
+                % perframe feature structs loop over the fields of the
+                % datastruct
             elseif isstruct(bout_metrics.perfly(fly).perlimb(limb).(state{is}).(flds{fld}))
 
                 subflds = fields(bout_metrics.perfly(fly).perlimb(pairs(pair,2)).(state{is}).(flds{fld}));
@@ -168,35 +168,36 @@ end
 % across movies?)
 
 for is = 1:numel(state)
+
     flds = fields(bout_metrics.perfly(1).perlimb(1).(state{is}));
     for fld = 1:numel(flds)
-        
+
         if ~isstruct(bout_metrics.perfly(fly).all_limbs.(state{is}).(flds{fld}))
-        % all limbs
-        curr_allfly=  {};
-        for fly = 1:numel(bout_metrics.perfly)
-            curr_allfly{fly} = (bout_metrics.perfly(fly).all_limbs.(state{is}).(flds{fld}));
-        end
-        bout_metrics.allflies.all_limbs.(state{is}).(flds{fld}) = horzcat(curr_allfly{:});
-
-        % per limb
-        for limb = 1:nlimb
-            curr_allfly = {};
-            for fly = 1:nflies
-                curr_allfly{fly} = (bout_metrics.perfly(fly).perlimb(limb).(state{is}).(flds{fld}));
+            % all limbs
+            curr_allfly=  {};
+            for fly = 1:numel(bout_metrics.perfly)
+                curr_allfly{fly} = (bout_metrics.perfly(fly).all_limbs.(state{is}).(flds{fld}));
             end
-            bout_metrics.allflies.perlimb(limb).(state{is}).(flds{fld}) = horzcat(curr_allfly{:});
-        end
+            bout_metrics.allflies.all_limbs.(state{is}).(flds{fld}) = horzcat(curr_allfly{:});
 
-        % per pairs
-
-        for pair = 1:npairs
-            curr_allfly = {};
-            for fly = 1:nflies
-                curr_allfly{fly} = (bout_metrics.perfly(fly).pairs(pair).(state{is}).(flds{fld}));
+            % per limb
+            for limb = 1:nlimb
+                curr_allfly = {};
+                for fly = 1:nflies
+                    curr_allfly{fly} = (bout_metrics.perfly(fly).perlimb(limb).(state{is}).(flds{fld}));
+                end
+                bout_metrics.allflies.perlimb(limb).(state{is}).(flds{fld}) = horzcat(curr_allfly{:});
             end
-            bout_metrics.allflies.pairs(pair).(state{is}).(flds{fld}) = horzcat(curr_allfly{:});
-        end
+
+            % per pairs
+
+            for pair = 1:npairs
+                curr_allfly = {};
+                for fly = 1:nflies
+                    curr_allfly{fly} = (bout_metrics.perfly(fly).pairs(pair).(state{is}).(flds{fld}));
+                end
+                bout_metrics.allflies.pairs(pair).(state{is}).(flds{fld}) = horzcat(curr_allfly{:});
+            end
         elseif isstruct(bout_metrics.perfly(fly).all_limbs.(state{is}).(flds{fld}))
             subflds = fields(bout_metrics.perfly(fly).perlimb(pairs(pair,2)).(state{is}).(flds{fld}));
             for sbf = 1:numel(subflds)
@@ -224,6 +225,58 @@ for is = 1:numel(state)
                     bout_metrics.allflies.pairs(pair).(state{is}).(flds{fld}).(subflds{sbf}) = horzcat(curr_allfly{:});
                 end
             end
+        end
+    end
+    % fly IDS
+    % all limbs
+    if ismember(state{is},{'swing','stance'})
+        all_IDs = {};
+        for fly = 1:nflies
+            all_IDs{fly} = fly*ones(1,numel(bout_metrics.perfly(fly).all_limbs.(state{is}).start_indices));
+        end
+        bout_metrics.allflies.all_limbs.(state{is}).fly = horzcat(all_IDs{:});
+
+        % pairs
+        for p = 1:npairs
+            all_IDs = {};
+            for fly = 1:nflies
+                all_IDs{fly} = fly*ones(1,numel(bout_metrics.perfly(fly).pairs(p).(state{is}).start_indices));
+            end
+            bout_metrics.allflies.pairs(p).(state{is}).fly = horzcat(all_IDs{:});
+        end
+
+        % perlimb
+        for l = 1:nlimb
+            all_IDs = {};
+            for fly = 1:nflies
+                all_IDs{fly} = fly*ones(1,numel(bout_metrics.perfly(fly).perlimb(l).(state{is}).start_indices));
+            end
+            bout_metrics.allflies.perlimb(l).(state{is}).fly = horzcat(all_IDs{:});
+        end
+    end
+    if strcmp(state{is},'step')
+        all_IDs = {};
+        for fly = 1:nflies
+            all_IDs{fly} = fly*ones(1,numel(bout_metrics.perfly(fly).all_limbs.(state{is}).stepfeatures.start_indices));
+        end
+        bout_metrics.allflies.all_limbs.(state{is}).fly = horzcat(all_IDs{:});
+
+        % pairs
+        for p = 1:npairs
+            all_IDs = {};
+            for fly = 1:nflies
+                all_IDs{fly} = fly*ones(1,numel(bout_metrics.perfly(fly).pairs(p).(state{is}).stepfeatures.start_indices));
+            end
+            bout_metrics.allflies.pairs(p).(state{is}).fly = horzcat(all_IDs{:});
+        end
+
+        % perlimb
+        for l = 1:nlimb
+            all_IDs = {};
+            for fly = 1:nflies
+                all_IDs{fly} = fly*ones(1,numel(bout_metrics.perfly(fly).perlimb(l).(state{is}).stepfeatures.start_indices));
+            end
+            bout_metrics.allflies.perlimb(l).(state{is}).fly = horzcat(all_IDs{:});
         end
     end
 end
