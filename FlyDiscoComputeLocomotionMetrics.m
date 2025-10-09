@@ -32,6 +32,11 @@ trx = FBATrx('analysis_protocol',analysis_protocol,'settingsdir',settingsdir,...
     'datalocparamsfilestr',datalocparamsfilestr);
 trx.AddExpDir(expdir,'dooverwrite',false,'openmovie',false);
 
+% load aptdata
+aptfile = trx.dataloc_params.apttrkfilestr;
+aptdata = TrkFile.load(fullfile(expdir,aptfile));
+
+
 % make list of special perframe features being computed
 pfflist = {'nfeet_ground','CoM_stability'};
 outputfiles = {trx.dataloc_params.locomotionmetricsswingstanceboutstatsfilestr,'tips_velmag.mat'};
@@ -96,9 +101,9 @@ if ~all(perframeload_success) && exist(fullfile(expdir,"tips_velmag.mat"),'file'
 
 else
     % compute and save if doesn't already exist
-    % need apt data 
-    aptfile = trx.dataloc_params.apttrkfilestr;
-    aptdata = TrkFile.load(fullfile(expdir,aptfile));
+    % % need apt data 
+    % aptfile = trx.dataloc_params.apttrkfilestr;
+    % aptdata = TrkFile.load(fullfile(expdir,aptfile));
     ts = trx.movie_timestamps{:};
     dt = diff(ts)';
     pxpermm = trx.pxpermm;
@@ -112,13 +117,14 @@ end
 % tips_pos_body
 apt_pts_4_center = stage_params.apt_pts_4_center;
 apt_pt_4_theta = stage_params.apt_pt_4_theta;
-if exist(fullfile(expdir,"tips_pos_body.mat"),'file') 
-       % if tips positions in body reference already exists load them
+if exist(fullfile(expdir,"tips_pos_body.mat"),'file')
+    % if tips positions in body reference already exists load them
     load(fullfile(expdir,"tips_pos_body.mat"),'tips_pos_body');
-elseif ~exist('aptdata','var')
-    aptfile = trx.dataloc_params.apttrkfilestr;
-    aptdata = TrkFile.load(fullfile(expdir,aptfile));
 else
+    % if ~exist('aptdata','var')
+    %     aptfile = trx.dataloc_params.apttrkfilestr;
+    %     aptdata = TrkFile.load(fullfile(expdir,aptfile));
+    % end
     pTrk = aptdata.pTrk;
     [tips_pos_body] = compute_tips_pos_body(pTrk,apt_pts_4_center,apt_pt_4_theta,legtip_landmarknums);
     save(fullfile(expdir,'tips_pos_body.mat'),'tips_pos_body');
