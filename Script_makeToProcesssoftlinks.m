@@ -124,11 +124,19 @@
 % explist = textread('/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/VNC3_locomotionstage.txt','%s');
 %reprocessing flybubble_social
 % explist = {'/groups/branson/bransonlab/flybubble_social/CsChr_JHS_K_85321_RigC_20210903T060158'};
-explist = textread('/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/explist_socialbubblereprocessing.txt','%s');
-rootdatadir = '/groups/branson/bransonlab/flybubble_social';
-for i = 1:numel(explist)
-    explist{i} = fullfile(rootdatadir,explist{i});
-end
+% explist = textread('/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/explist_socialbubblereprocessing.txt','%s');
+
+% testing loco stage on VNC3
+explist = {'/groups/branson/bransonlab/flydisco_data/VNC3_YNA_K_162984_RigD_20240618T110930'
+    '/groups/branson/bransonlab/flydisco_data/VNC3_JRC_SS97790_RigB_20240918T122900'
+    '/groups/branson/bransonlab/flydisco_data/VNC3_EXT_VGLUT-GAL4_RigC_20241008T114902'
+    '/groups/branson/bransonlab/flydisco_data/VNC3_JRC_SS103191_RigA_20240904T102606'
+    '/groups/branson/bransonlab/flydisco_data/VNC3_YNA_K_162984_RigB_20240821T105406'
+    '/groups/branson/bransonlab/flydisco_data/VNC3_EXT_VGLUT-GAL4_RigC_20240813T120718'}
+% rootdatadir = '/groups/branson/bransonlab/flybubble_social';
+% for i = 1:numel(explist)
+%     explist{i} = fullfile(rootdatadir,explist{i});
+% end
 %%
 toprocessdir =  '/groups/branson/bransonlab/flydisco_data/to-process';
 %ln -s source_file_or_directory_name  softlink_name

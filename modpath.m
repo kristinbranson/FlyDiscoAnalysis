@@ -43,6 +43,7 @@ function modpath()
   addpath(fullfile(path_to_this_folder, 'utility'), '-begin') ;  
   addpath(fullfile(path_to_this_folder, 'locomotion'), '-begin') ; 
   addpath(fullfile(path_to_this_folder, 'locomotion/external'), '-begin') ; 
+  addpath(fullfile(path_to_this_folder, 'locomotion/external/circstat-matlab'), '-begin') ;
 
   % Add stuff intended to shadow JAABA, FlyTracker versions
   addpath(fullfile(path_to_this_folder, 'shadow'), '-begin') ;
