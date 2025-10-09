@@ -42,7 +42,12 @@ for is = 1:numel(state)
                 end_indices = boutstruct(fly).perlimb(limb).(state{is}).end_indices;
 
                 % compute frame and time duration (ms) from timestamps
+                if isempty(start_indices)
+                    durations_frames = NaN;
+                    durations_time = NaN;
+                else
                 [durations_frames,durations_time] = computeBoutDurations(start_indices,end_indices,currfly_timestamps);
+                end
                 %durations
                 bout_metrics.perfly(fly).perlimb(limb).(state{is}).durations_frames = durations_frames;
                 bout_metrics.perfly(fly).perlimb(limb).(state{is}).durations_time = durations_time;
@@ -284,8 +289,9 @@ end
 % updated to match general schema change above - AR 20250918
 % compute mean bout durations in speed bins
 % % only run for swing and stance
-for is = 1:2
-    for pair = 1:npairs
+
+for is = 1:2    
+    for pair = 1:npairs        
         [Nboutspervelmagbin,velmagbincenters,meanboutdurationsofvelmagbins,stdboutdurationsofvelmagbins] = compute_meanboutdurationVSspeed(bout_metrics.allflies.pairs(pair).(state{is}).durations_time,...
             bout_metrics.allflies.pairs(pair).(state{is}).velmag_ctr.mean,'binedges',binedges);
         bout_metrics.allflies.pairs(pair).(state{is}).Nboutspervelmagbin =Nboutspervelmagbin;
