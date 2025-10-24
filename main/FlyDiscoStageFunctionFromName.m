@@ -19,6 +19,7 @@ result.computeperframestats = @FlyDiscoComputePerFrameStats ;
 result.plotperframestats = @FlyDiscoPlotPerFrameStats ;
 result.makectraxresultsmovie = @FlyDiscoMakeCtraxResultsMovie ;
 result.makeaptresultsmovie = @FlyDiscoMakeAPTResultsMovie ;
+result.foo = @FlyDiscoFoo ;
 result.automaticcheckscomplete = @FlyDiscoAutomaticChecksComplete ;
 result.cleanup = @FlyDiscoCleanup ;
 

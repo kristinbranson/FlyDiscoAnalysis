@@ -1,0 +1,102 @@
+How to make a new stage in the FlyDisco pipeline
+================================================
+
+Pick a stage name.  Should be all lowercase letters.  Example:
+"foo".
+
+Create the stage function .m file.  Name should be upper camelcase and
+start with "FlyDisco".  Example: "FlyDiscoFoo.m".
+
+Create a skeleton of the stage function.  See stages/FlyDiscoFoo.m for
+an example.  Note that this function must have a 'signature' like this:
+```
+function FlyDiscoFoo(expdir, varargin)
+```
+and must accept at least the six optional arguments shown in the
+example.  (You can add your own optional arguments as
+needed, for instance for use while testing your stage function, or
+running it outside the FlyDisco pipeline.)
+
+Add a line to
+```
+main/FlyDiscoStageFunctionFromName.m 
+```
+specifying what the stage function is for your new stage.  It should
+look something like:
+```
+result.foo = @FlyDiscoFoo ;
+```
+Usually putting this just before the line
+```
+result.automaticcheckscomplete = @FlyDiscoAutomaticChecksComplete ;
+```
+is a good idea, so that it can use any outputs from earlier stages you
+might need.
+
+Figure out what files your stage function should *always* produce if
+it runs properly.  Create a file like:
+```
+stages/FlyDiscoComputeRequiredFileNamesForStage_foo.m
+```
+that specifies the list of such file names.  See
+```
+stages/FlyDiscoComputeRequiredFileNamesForStage_foo.m
+```
+for an example.  The name of this file *must* be
+```
+FlyDiscoComputeRequiredFileNamesForStage_<stage name>.m
+```
+The output of this should be a row cell array listing all the names of
+the output files for the stage.
+
+Add a line to
+```
+main/FlyDiscoPipelineDefaultAnalysisParameters.m
+```
+for your stage.  Example:
+```
+         'dofoo','off', ...
+```
+Your stage should typically default to 'off' to avoid it running for
+screen types that don't use it.  Again, just before the line for
+`doautomaticcheckscomplete` is usually a good place for this line.
+
+In the analysis-protocol folder for any screen types that use your new
+stage, add a line like:
+```
+dofoo,on
+```
+to the `analysis-protocol-parameters.txt` file, to turn on your new
+stage for any screen type you'd like to use it for.
+
+If your stage has parameters that you'd like to be able to change for
+different screen types that use it (which it likely will), you should
+create a parameters file named e.g. "foo_params.txt" in your analysis
+protocol folder.  The name of this file should be specified in the
+`dataloc_params.txt` file in the analysis-protocol folder.  See 
+```
+settings-internal/20251024_foo_stage_example
+```
+for an example.  The new line in `dataloc_params.txt` should look
+like:
+```
+fooparamsfilestr,foo_params.txt
+```
+You'll note that the example code in `FlyDiscoFoo.m` reads this
+information out of the `dataloc_params.txt` file, then reads the
+foo params file.
+
+The names of your stage output files should also normally be specified
+in the `dataloc_params.txt` file.  For example
+```
+foooutputfilestr,foo_output.txt
+```
+has been added to the example `dataloc_params.txt` file, and is used
+in both `FlyDiscoFoo.m` and
+`FlyDiscoComputeRequiredFileNamesForStage_foo.m` in the typical way.
+
+With all these things in place, your new stage should run just like
+all the other stages in the FlyDisco pipeline.  Huzzah!
+
+ALT
+2025-10-24

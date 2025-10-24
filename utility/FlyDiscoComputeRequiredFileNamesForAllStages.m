@@ -105,9 +105,15 @@ for stage_index = 1 : stage_count ,
   elseif strcmp(stage_name, 'cleanup') ,
     required_file_names = cell(1,0) ;
   else
-    error('Unknown stage name %s', stage_name) ;
+    % Finally, check for a stage-specific function (probably should eventually
+    % have such a function for all the stages).
+    putativeFunctionName = sprintf('FlyDiscoComputeRequiredFileNamesForStage_%s', stage_name) ;
+    if ~isempty(which(putativeFunctionName))
+      required_file_names = feval(putativeFunctionName, analysis_protocol_folder_path, dataloc_params, expdir, metadata) ;      
+    else
+      error('Unknown stage name %s', stage_name) ;
+    end
   end
-  
   % Store the required files in the struct
   result.(stage_name) = required_file_names ;
 end
