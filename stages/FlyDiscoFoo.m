@@ -17,14 +17,25 @@ datalocparamsfile = fullfile(analysis_protocol_folder_path, datalocparamsfilestr
 dataloc_params = ReadParams(datalocparamsfile) ;
 
 % Load in the parameters file
-fooParamsFilePath = fullfile(expdir, dataloc_params.fooparamsfilestr) ;
+fooParamsFilePath = fullfile(analysis_protocol_folder_path, dataloc_params.fooparamsfilestr) ;
 fooParams = ReadParams(fooParamsFilePath) ;
 
 % Determine the output file path
 outputFileName = dataloc_params.foooutputfilestr ;
 outputFilePath = fullfile(expdir, outputFileName) ;
 
-% Do stuff
-touch(outputFilePath) ;  % Create an empty output file
+% 'Touch' the output file
+% touch(outputFilePath) ;  % Create an empty output file
+
+% Compute a zany statistic from the tracks
+trxFilePath = fullfile(expdir, dataloc_params.trxfilestr) ;
+metatrx = load(trxFilePath) ;
+trx = metatrx.trx ;
+crazy_statistic_from_tracklet_index = arrayfun(@(tracklet)(mean(tan(tracklet.x))), trx, 'UniformOutput', true) ;
+crazy_statistic = prod(crazy_statistic_from_tracklet_index) ;
+
+% Write the crazy statistic to the output file
+fo = file_object(outputFilePath, 'wt') ;
+fo.fprintf('crazy: %.17g\n', crazy_statistic) ;
 
 end  % function
