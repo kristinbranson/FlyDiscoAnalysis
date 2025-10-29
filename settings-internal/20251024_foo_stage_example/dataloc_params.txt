@@ -116,4 +116,4 @@ aptresultsmovieparamsfilestr,aptresultsmovie_params.txt
 locomotionmetricsparamsfilestr,locomotionmetrics_params.txt
 locomotionmetricsswingstanceboutstatsfilestr,locomotionmetrics_swingstancebouts.mat
 fooparamsfilestr,foo_params.txt
-foooutputfilestr,foo_output.txt
+foooutputfilestr,foo_output.png

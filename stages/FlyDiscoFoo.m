@@ -23,19 +23,21 @@ fooParams = ReadParams(fooParamsFilePath) ;
 % Determine the output file path
 outputFileName = dataloc_params.foooutputfilestr ;
 outputFilePath = fullfile(expdir, outputFileName) ;
+% [~,outputFileBase,~] = fileparts(outputFileName) ;
 
 % 'Touch' the output file
 % touch(outputFilePath) ;  % Create an empty output file
 
-% Compute a zany statistic from the tracks
+% Plot some random thing from the registered trx
 trxFilePath = fullfile(expdir, dataloc_params.trxfilestr) ;
 metatrx = load(trxFilePath) ;
 trx = metatrx.trx ;
-crazy_statistic_from_tracklet_index = arrayfun(@(tracklet)(mean(tan(tracklet.x))), trx, 'UniformOutput', true) ;
-crazy_statistic = prod(crazy_statistic_from_tracklet_index) ;
+x = { trx.x } ;
+fig = figure('color', 'w') ;
+cleaner = onCleanup(@()(close(fig))) ;
+plot(x{1}, 'k') ;
 
-% Write the crazy statistic to the output file
-fo = file_object(outputFilePath, 'wt') ;
-fo.fprintf('crazy: %.17g\n', crazy_statistic) ;
+% "Print" that to a .png
+print(fig, outputFilePath, '-dpng', '-r300') ;
 
 end  % function
