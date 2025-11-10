@@ -33,8 +33,6 @@ assert(d==2);
 ctrx = mean(pts(ctr_KPnums,1,:),1);
 ctry = mean(pts(ctr_KPnums,2,:),1);
 
- 
-
 
 % substract off center
 % assert(d==2);

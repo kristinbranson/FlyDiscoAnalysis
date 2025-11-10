@@ -36,10 +36,13 @@ else
                         curr_gc_threshold_low = gc_threshold_low(k);
                         curr_gc_threshold_high = gc_threshold_high(k);
                         currtip_velmag = tips_velmag{i}(j,:);
-
-                        currtip_gc = schmitt_trigger(currtip_velmag,curr_gc_threshold_low,curr_gc_threshold_high);
-
-                        groundcontact{i}(j,:) = ~currtip_gc;
+                        if numel(currtip_velmag) <= 1,
+                            groundcontact{i}(j,:) = false;
+                        else
+                            currtip_gc = schmitt_trigger(currtip_velmag,curr_gc_threshold_low,curr_gc_threshold_high);
+                            groundcontact{i}(j,:) = ~currtip_gc;
+                        end
+                        
                     end
                 end
             end
@@ -51,10 +54,12 @@ else
             for j = 1:ntips
                 %         currtip_velmag = tips_velmag{i}(j,:);
                 currtip_velmag = tips_velmag{i}(j,:);
-
-                currtip_gc = schmitt_trigger(currtip_velmag,gc_threshold_low,gc_threshold_high);
-
-                groundcontact{i}(j,:) = ~currtip_gc;
+                if numel(currtip_velmag) <= 1,
+                    groundcontact{i}(j,:) = false;
+                else
+                    currtip_gc = schmitt_trigger(currtip_velmag,curr_gc_threshold_low,curr_gc_threshold_high);
+                    groundcontact{i}(j,:) = ~currtip_gc;
+                end
             end
         end
     end
