@@ -202,9 +202,6 @@ function FlyDiscoPipeline(expdir, varargin)
         fprintf('%s', settings_git_report) ;        
     end
 
-    % Get the metadata file path
-    metadata_file_path = determine_metadata_file_path(expdir) ;
-    
     % See if analysis protocol was passed in
     try
         analysis_protocol = argument_parameters.analysis_protocol ;
@@ -214,6 +211,7 @@ function FlyDiscoPipeline(expdir, varargin)
             % Also depends on what options exist in the settingsdir
             % Don't want to do this if analysis-protocol was specified in varargin,
             % because sometimes metadata doesn't specify analysis_protocol at all.
+            metadata_file_path = determine_metadata_file_path(expdir) ;    
             analysis_protocol = analysis_protocol_from_metadata_file(metadata_file_path, settingsdir) ;
         else
             rethrow(me) ;

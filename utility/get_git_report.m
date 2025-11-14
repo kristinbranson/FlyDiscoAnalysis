@@ -3,6 +3,11 @@ function breadcrumb_string = get_git_report(source_repo_folder_path)
     % source_repo_folder_path.  Returns a string suitable for fprintf()ing to a
     % log.
     
+    if ispc()
+      breadcrumb_string = sprintf('(No git report implemented for Windows.)\n\n') ;
+      return
+    end
+      
     % Note the current dir, set up a clear to cd back to it when this function
     % exits, and cd to source_repo_folder_path
     original_pwd = pwd() ;
