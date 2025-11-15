@@ -37,3 +37,16 @@ file.
 
 ALT
 2025-07-10
+
+-----
+
+Bumped FlyTracker version.  New commits at last sync:
+
+APT:         82a719dfcbdacc07854cc56e1043e7508c9868d3
+FlyTracker:  8bbbacf17192e52976714fdcd0a8737139df63aa
+JAABA:       088a593a04747409cff9eb41ceae4773847168a6
+tmt:         07cfdec91babcd92c0e21a8997708bfc6fe99236
+tpt:         7179febc99a591f386eeba79239078dd533e7c3a
+
+ALT
+2025-11-14
