@@ -781,7 +781,7 @@ for segi = 1:numel(firstframes),
         else
           profile = 'Motion JPEG AVI';
         end
-        aviobj = VideoWriter(aviname,profile); %#ok<TNMLP>
+        aviobj = VideoWriter(aviname,profile);
         set(aviobj,'FrameRate',fps);
         if ~strcmpi(profile,'Uncompressed AVI'),
           set(aviobj,'Quality',100);

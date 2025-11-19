@@ -47,6 +47,10 @@ video_duration = dt*nframes ;
 
 % Read in the LED protocol, compute the total protocol duration
 ledprotocolfile = fullfile(expdir,dataloc_params.ledprotocolfilestr);
+if ~exist(ledprotocolfile, 'file') 
+  warning('LED protocol file %s does not exist, so not comparing it to video duration', ledprotocolfile) ;
+  return
+end
 raw_protocol = loadAnonymous(ledprotocolfile) ;
 protocol = downmixProtocolIfNeeded(raw_protocol, indicator_params) ;
   % We downmix the (possibly RGB) protocol as an expedient, because we want to

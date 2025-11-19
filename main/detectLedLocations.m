@@ -20,9 +20,10 @@ else
 end
 if exist(led_protocol_file_path,'file')
   protocolOfSomeKind = loadSingleVariableAnonymously(led_protocol_file_path, 'protocol') ;
-  protocol = downmixProtocolIfNeeded(protocolOfSomeKind, indicator_params) ;
+  protocolOrEmpty = downmixProtocolIfNeeded(protocolOfSomeKind, indicator_params) ;
 else
-  error('LED protocol file %s does not exist', dataloc_params.ledprotocolfilestr) ;
+  warning('LED protocol file %s does not exist, so using best guess about frames in which to look for lighted LED', dataloc_params.ledprotocolfilestr) ;
+  protocolOrEmpty = [] ;
 end
 
 
@@ -35,7 +36,7 @@ end
                                      dataloc_params, ...
                                      indicator_params, ...
                                      registration_data, ...
-                                     protocol, ...
+                                     protocolOrEmpty, ...
                                      dt, ...
                                      rigId) ;
 templateShapeXY = fliplr(size(template)) ;
@@ -48,11 +49,23 @@ templateShapeXY = fliplr(size(template)) ;
 % Find the location of the LED(s)
 ledMaxImageDouble = im2double(ledMaxImage) ;
 minTemplateFeatureStrength = -0.5 ;
-nRotations = 20 ;
-useNormXCorr = true ;
+if isfield(indicator_params, 'nRotations')
+  nRotations = indicator_params.nRotations ;
+else
+  nRotations = 20 ;
+end
+if isfield(indicator_params, 'useNormXCorr')
+  useNormXCorr = indicator_params.useNormXCorr ;
+else
+  useNormXCorr = true ;
+end
 [nr,nc,~] = size(ledMaxImageDouble) ;
 excluded_radius = indicator_params.maxDistCornerFrac_LEDLabel * min(nr,nc) ;
-excluded_xyrs = [registration_data.bowlMarkerPoints(1) registration_data.bowlMarkerPoints(2) excluded_radius] ;
+if isempty(registration_data.bowlMarkerPoints)
+  excluded_xyrs = zeros(0,3) ;
+else
+  excluded_xyrs = [registration_data.bowlMarkerPoints(1) registration_data.bowlMarkerPoints(2) excluded_radius] ;
+end
 corner_radius = indicator_params.maxDistCornerFrac_LEDLabel * min(nr,nc) ;
 result = findTemplateMatchWithPossibleRotation(ledMaxImageDouble, ...
                                                template, ...

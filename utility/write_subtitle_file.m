@@ -17,7 +17,7 @@ function subtitlefile = ...
     dt = [0,nframes];
     ts = cumsum(dt);
     
-    if isOptogeneticExp ,
+    if isOptogeneticExp && ~isempty(raw_protocol),
         protocol = downmixProtocolIfNeeded(raw_protocol, indicator_params) ;        
         indicatorLED = downmix_indicatorLED(indicator_data.indicatorLED) ;
         stimtimes = indicatorLED.starttimes(indicatorframes);
@@ -79,7 +79,7 @@ function subtitlefile = ...
                 ['for ',num2str(duration(snippet_index)), ' ms']);
         end
     else
-        % non-optogenetic experiment
+        % non-optogenetic experiment, or missing protocol
         for snippet_index = 1:snippet_count ,
             fprintf(fid,'%d\n',snippet_index);
             fprintf(fid,'%s --> %s\n',...

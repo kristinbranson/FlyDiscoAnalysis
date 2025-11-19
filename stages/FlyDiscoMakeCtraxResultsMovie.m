@@ -122,7 +122,13 @@ if isOptogeneticExp ,
   indicatorfile = fullfile(expdir,dataloc_params.indicatordatafilestr);
   indicator_data = load(indicatorfile) ;
   ledprotocolfile = fullfile(expdir,dataloc_params.ledprotocolfilestr);
-  raw_protocol = loadAnonymous(ledprotocolfile) ;
+  if exist(ledprotocolfile, 'file') 
+    raw_protocol = loadAnonymous(ledprotocolfile) ;
+  else
+    warning('This is allegedly an optogenetic experiment, but LED protocol file %s does not exist, so frames shown in ctrax results movie may be suboptimal', ...
+            ledprotocolfile) ;
+    raw_protocol = struct([]) ;
+  end
 else
   indicator_data = struct([]) ;
   raw_protocol = struct([]) ;

@@ -3,6 +3,13 @@ function result = downmixProtocolIfNeeded(raw_protocol, indicator_params)
 % the protocol.  A protocol from an RGB experiment has to be massaged a bit.
 % Other protocols are passed through unaltered.
 
+% If raw_protocol is empty, we can't really help, so just warn and return it as-is
+if isempty(raw_protocol)
+  warning('Attempt to downmix an empty protocol.  This is very likely a bug.  Returning empty protocol as-is')
+  result = raw_protocol ;
+  return
+end
+
 % Deal with arguments
 if ~exist('indicator_params', 'var') || isempty(indicator_params) ,
   indicator_params = [] ;

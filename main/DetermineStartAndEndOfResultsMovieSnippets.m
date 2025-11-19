@@ -31,8 +31,8 @@ function [firstframes, firstframes_off, endframes_off, nframes, indicatorframes]
     
     nframes_from_params = ctraxresultsmovie_params.nframes ;
     
-    if isOptogeneticExp ,
-        % If an optogenetic experiment
+    if isOptogeneticExp && ~isempty(raw_protocol) 
+        % If an optogenetic experiment with a nonempty protocol
         if is_using_default_ctrax_results_movie_params,
             % Extract the indicatorframes from the protocol
             protocol = downmixProtocolIfNeeded(raw_protocol, indicator_params) ;            
@@ -62,7 +62,7 @@ function [firstframes, firstframes_off, endframes_off, nframes, indicatorframes]
         end
         endframes_off = firstframes_off + nframes - 1 ;
     else
-        % If not an optogenetic experiment        
+        % If not an optogenetic experiment, and/or protocol is empty        
         % In this case, nframes_from_params should be the same size as
         % ctraxresultsmovie_params.firstframes, and their common length is the snippet
         % count.        

@@ -1,5 +1,5 @@
 bkgdNSampleFrames,10
-method,circle
+method,flytracker
 circleImageType,canny
 circleRLim,.475,.499
 circleXLim,.475,.525
@@ -17,7 +17,7 @@ featureRadius,30
 bowlMarkerPairTheta_true,2.3
 nBowlMarkers,1
 # bowl marker indexed by rig
-bowlMarkerType,CircleTemplateLarge.png
+bowlMarkerType,none
 minTemplateFeatureStrength,-0.5
 minTemplateFeatureStrength,-0.5
 minTemplateFeatureStrength,-0.5
@@ -26,3 +26,4 @@ usemediandt,0
 doTemporalRegistration,0
 doTemporalTruncation,391
 maxFlyTrackerNanInterpFrames,5
+doesYAxisPointUp,0
