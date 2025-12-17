@@ -48,6 +48,7 @@ function modpath()
   addpath(fullfile(path_to_this_folder, 'shadow'), '-begin') ;
   
   % Add various folders
+  addpath(fullfile(path_to_this_folder, 'per-lab-configurations'), '-begin') ;
   addpath(fullfile(path_to_this_folder, 'tests'), '-begin') ;
   addpath(fullfile(path_to_this_folder, 'scripts'), '-begin') ;
   addpath(fullfile(path_to_this_folder, 'debug'), '-begin') ;
