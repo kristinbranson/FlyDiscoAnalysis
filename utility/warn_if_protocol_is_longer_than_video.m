@@ -40,6 +40,14 @@ dt = fif(are_timestamps_reliable, median(diff(timestamps)), fallback_dt) ;  % fr
 nframes = numel(timestamps) ;
 video_duration = dt*nframes ;
 
+% Read the indicator params
+indicatorparamsfile = fullfile(settingsdir, analysis_protocol, indicatorparamsfilestr) ;
+if exist(indicatorparamsfile,'file'),
+  indicator_params_or_empty = loadIndicatorParams(indicatorparamsfile) ;
+else
+  indicator_params_or_empty = [] ;
+end
+
 % Read in the LED protocol, compute the total protocol duration
 ledprotocolfile = fullfile(expdir,dataloc_params.ledprotocolfilestr);
 if ~exist(ledprotocolfile, 'file') 
@@ -47,7 +55,7 @@ if ~exist(ledprotocolfile, 'file')
   return
 end
 raw_protocol = loadAnonymous(ledprotocolfile) ;
-protocol = downmixProtocolIfNeeded(raw_protocol, indicator_params) ;
+protocol = downmixProtocolIfNeeded(raw_protocol, indicator_params_or_empty) ;
   % We downmix the (possibly RGB) protocol as an expedient, because we want to
   % take an RGB protocol as input.  When we enrich support for RGB protocols, we
   % should change this.
