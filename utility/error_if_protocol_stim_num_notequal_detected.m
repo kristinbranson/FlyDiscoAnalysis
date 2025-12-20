@@ -11,13 +11,19 @@ datalocparamsfile = fullfile(settingsdir,analysis_protocol,'dataloc_params.txt')
 dataloc_params = ReadParams(datalocparamsfile);
 
 % Get a few things from the indicator params
-[isOptogeneticExp, doesUseProtocolDotMat] = ...
+[isOptogeneticExp, doesUseProtocolDotMat, indicator_params_or_empty] = ...
   readOptoStatusAndProtocolUseFromIndicatorParamsFile(settingsdir, analysis_protocol, dataloc_params.indicatorparamsfilestr) ;
 
 % This check only makes sense for opto experiments with protocol
 if ~(isOptogeneticExp && doesUseProtocolDotMat)
   return
 end
+
+% There should now be indicator params
+if isempty(indicator_params_or_empty)
+  error('Missing indicator params file %s', dataloc_params.indicatorparamsfilestr) ;
+end
+indicator_params = indicator_params_or_empty ;
 
 % Read in the LED protocol, compute the total protocol duration
 ledprotocolfile = fullfile(expdir,dataloc_params.ledprotocolfilestr);

@@ -41,7 +41,7 @@ nframes = numel(timestamps) ;
 video_duration = dt*nframes ;
 
 % Read the indicator params
-indicatorparamsfile = fullfile(settingsdir, analysis_protocol, indicatorparamsfilestr) ;
+indicatorparamsfile = fullfile(settingsdir, analysis_protocol, dataloc_params.indicatorparamsfilestr) ;
 if exist(indicatorparamsfile,'file'),
   indicator_params_or_empty = loadIndicatorParams(indicatorparamsfile) ;
 else
