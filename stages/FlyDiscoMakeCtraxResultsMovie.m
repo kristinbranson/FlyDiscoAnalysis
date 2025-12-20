@@ -24,14 +24,9 @@ raw_registration_params = ReadParams(registrationparamsfile);
 registration_params = modernizeRegistrationParams(raw_registration_params) ;
 doesYAxisPointUp = registration_params.doesYAxisPointUp ;
 
-% Get one thing from the indicator params
-indicatorparamsfile = fullfile(settingsdir,analysis_protocol,dataloc_params.indicatorparamsfilestr);
-if exist(indicatorparamsfile,'file'),
-  indicator_params = loadIndicatorParams(indicatorparamsfile) ;
-  isOptogeneticExp = logical(indicator_params.OptogeneticExp) ;
-else
-  isOptogeneticExp = false ;
-end
+% Get a few things from the indicator params
+[isOptogeneticExp, doesUseProtocolDotMat] = ...
+  readOptoStatusAndProtocolUseFromIndicatorParamsFile(settingsdir, analysis_protocol, dataloc_params.indicatorparamsfilestr) ;
 
 % Read in the experiment metadata
 metadatafile = fullfile(expdir,dataloc_params.metadatafilestr);
@@ -39,7 +34,7 @@ metadata = ReadMetadataFile(metadatafile);
 
 % Determine the ctrax movie parameters file name, and read in the params
 defaultctraxresultsmovieparamsfile = fullfile(settingsdir,analysis_protocol,dataloc_params.ctraxresultsmovieparamsfilestr);
-if isOptogeneticExp,
+if isOptogeneticExp ,
   % Branson Lab optogenetic experiments have a metadata field named
   % "led_protocol", with values like "protocolRGBms_locomotion_GtACR_20220414".
   % The Ctrax results movie params file to use depends on which LED protocol was
@@ -121,12 +116,16 @@ end
 if isOptogeneticExp ,
   indicatorfile = fullfile(expdir,dataloc_params.indicatordatafilestr);
   indicator_data = load(indicatorfile) ;
-  ledprotocolfile = fullfile(expdir,dataloc_params.ledprotocolfilestr);
-  if exist(ledprotocolfile, 'file') 
-    raw_protocol = loadAnonymous(ledprotocolfile) ;
+  if doesUseProtocolDotMat
+    ledprotocolfile = fullfile(expdir,dataloc_params.ledprotocolfilestr);
+    if exist(ledprotocolfile, 'file') 
+      raw_protocol = loadAnonymous(ledprotocolfile) ;
+    else
+      warning('This is allegedly an optogenetic experiment, but LED protocol file %s does not exist, so frames shown in ctrax results movie may be suboptimal', ...
+              ledprotocolfile) ;
+      raw_protocol = struct([]) ;
+    end
   else
-    warning('This is allegedly an optogenetic experiment, but LED protocol file %s does not exist, so frames shown in ctrax results movie may be suboptimal', ...
-            ledprotocolfile) ;
     raw_protocol = struct([]) ;
   end
 else
@@ -135,13 +134,27 @@ else
 end
 
 % Make sure the protocol is shorter than the video
-warn_if_protocol_is_longer_than_video(expdir, settingsdir, analysis_protocol, do_run) ;
+if doesUseProtocolDotMat
+  warn_if_protocol_is_longer_than_video(expdir, settingsdir, analysis_protocol, do_run) ;
+end
+
+% Load the indicator params
+if isOptogeneticExp
+  indicatorparamsfile = fullfile(settingsdir, analysis_protocol, dataloc_params.indicatorparamsfilestr) ;
+  if exist(indicatorparamsfile,'file'),
+    indicator_params_or_empty = loadIndicatorParams(indicatorparamsfile) ;
+  else
+    error('Indicator params file %s is missing', indicatorparamsfile) ;
+  end
+else
+  indicator_params_or_empty = [] ;
+end
 
 % Determine start and end frames of snippets
 [firstframes, firstframes_off, endframes_off, nframes, indicatorframes] = ...
   DetermineStartAndEndOfResultsMovieSnippets(isOptogeneticExp, registration_data, ctraxresultsmovie_params, ...
                                              is_using_default_ctrax_results_movie_params, indicator_data, raw_protocol, ...
-                                             indicator_params) ;
+                                             indicator_params_or_empty) ;
                                            
 % Determine the layout of the results movie frame
 [final_nzoomr, final_nzoomc, final_figpos] = ...
@@ -151,7 +164,7 @@ warn_if_protocol_is_longer_than_video(expdir, settingsdir, analysis_protocol, do
 [~,basename,~] = fileparts(expdir);
 subtitlefile = ...
   write_subtitle_file(expdir, nframes, isOptogeneticExp, ctraxresultsmovie_params, basename, firstframes_off, endframes_off, ...
-                      raw_protocol, indicator_data, indicatorframes, indicator_params) ;
+                      raw_protocol, indicator_data, indicatorframes, indicator_params_or_empty) ;
                 
 % Create results movie as .avi
 moviefile = fullfile(expdir,dataloc_params.moviefilestr);

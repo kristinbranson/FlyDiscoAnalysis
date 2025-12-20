@@ -1,7 +1,7 @@
 function [firstframes, firstframes_off, endframes_off, nframes, indicatorframes] = ...
         DetermineStartAndEndOfResultsMovieSnippets(isOptogeneticExp, registration_data, ctraxresultsmovie_params, ...
                                                    is_using_default_ctrax_results_movie_params, indicator_data, raw_protocol, ...
-                                                   indicator_params)
+                                                   indicator_params_or_empty)
 
     %DetermineStartAndEndOfResultsMovieSnippets  Use information from various
     %sources to determine which frames to use for each snippet included in the
@@ -35,7 +35,7 @@ function [firstframes, firstframes_off, endframes_off, nframes, indicatorframes]
         % If an optogenetic experiment with a nonempty protocol
         if is_using_default_ctrax_results_movie_params,
             % Extract the indicatorframes from the protocol
-            protocol = downmixProtocolIfNeeded(raw_protocol, indicator_params) ;            
+            protocol = downmixProtocolIfNeeded(raw_protocol, indicator_params_or_empty) ;            
             indicatorframes = indicatorframes_from_protocol(protocol) ;            
         else
             % Get the indicatorframes from the ctrax-results params

@@ -13,19 +13,22 @@ function [result, templateShapeXY] = ...
 %
 % For FlyBowlRGB and FlyBubbleRGB, convert RGB ledprotocol format to ChR led protocol format
 %
-if isfield(dataloc_params,'ledprotocolfilestr')
-  led_protocol_file_path = fullfile(expdir, dataloc_params.ledprotocolfilestr) ;
+if indicator_params.doesUseProtocolDotMat
+  if isfield(dataloc_params,'ledprotocolfilestr')
+    led_protocol_file_path = fullfile(expdir, dataloc_params.ledprotocolfilestr) ;
+  else
+    error('No ledprotocolfilestr defined in dataloc_params') ;
+  end
+  if exist(led_protocol_file_path,'file')
+    protocolOfSomeKind = loadSingleVariableAnonymously(led_protocol_file_path, 'protocol') ;
+    protocolOrEmpty = downmixProtocolIfNeeded(protocolOfSomeKind, indicator_params) ;
+  else
+    warning('LED protocol file %s does not exist, so using best guess about frames in which to look for lighted LED', dataloc_params.ledprotocolfilestr) ;
+    protocolOrEmpty = [] ;
+  end
 else
-  error('No ledprotocolfilestr defined in dataloc_params') ;
-end
-if exist(led_protocol_file_path,'file')
-  protocolOfSomeKind = loadSingleVariableAnonymously(led_protocol_file_path, 'protocol') ;
-  protocolOrEmpty = downmixProtocolIfNeeded(protocolOfSomeKind, indicator_params) ;
-else
-  warning('LED protocol file %s does not exist, so using best guess about frames in which to look for lighted LED', dataloc_params.ledprotocolfilestr) ;
   protocolOrEmpty = [] ;
-end
-
+end  
 
 %
 % Create max-value image for LED experiments, and get the LED template image

@@ -11,16 +11,11 @@ datalocparamsfile = fullfile(settingsdir,analysis_protocol, 'dataloc_params.txt'
 dataloc_params = ReadParams(datalocparamsfile) ;
 
 % Load the indicator params
-indicatorparamsfile = fullfile(settingsdir,analysis_protocol,dataloc_params.indicatorparamsfilestr);
-if exist(indicatorparamsfile,'file'),
-  indicator_params = loadIndicatorParams(indicatorparamsfile) ;
-  isOptogeneticExp = logical(indicator_params.OptogeneticExp) ;
-else
-  isOptogeneticExp = false ;
-end
+[isOptogeneticExp, doesUseProtocolDotMat] = ...
+  readOptoStatusAndProtocolUseFromIndicatorParamsFile(settingsdir, analysis_protocol, dataloc_params.indicatorparamsfilestr) ;
 
-% This check only makes sense for opto experiments
-if ~isOptogeneticExp ,
+% This check only makes sense for opto experiments with protocol
+if ~(isOptogeneticExp && doesUseProtocolDotMat)
   return
 end
 

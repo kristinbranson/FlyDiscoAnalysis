@@ -155,17 +155,11 @@ end
 if is_on_or_force(do_run.ledonoffdetection)
   datalocparamsfile = fullfile(settingsdir,analysis_protocol,'dataloc_params.txt');
   dataloc_params = ReadParams(datalocparamsfile);
-  indicatorparamsfile = fullfile(settingsdir,analysis_protocol,dataloc_params.indicatorparamsfilestr);
 
-  % Get one thing from the indicator params
-  if exist(indicatorparamsfile,'file'),
-    indicator_params = loadIndicatorParams(indicatorparamsfile) ;
-    isOptogeneticExp = logical(indicator_params.OptogeneticExp) ;
-  else
-    isOptogeneticExp = false ;
-    % add error here too?
-  end
-  if isOptogeneticExp
+  % Get a few things from the indicator params
+  [isOptogeneticExp, doesUseProtocolDotMat] = ...
+    readOptoStatusAndProtocolUseFromIndicatorParamsFile(settingsdir, analysis_protocol, dataloc_params.indicatorparamsfilestr) ;
+  if isOptogeneticExp && doesUseProtocolDotMat
     [do_stim_counts_match, message] = does_protocol_pulse_count_equal_measured(expdir, settingsdir, analysis_protocol) ;
     if ~do_stim_counts_match ,
       error_or_warning_messages{end+1} = message ;

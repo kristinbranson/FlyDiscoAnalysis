@@ -187,17 +187,8 @@ function FlyDiscoAutomaticChecksIncoming(expdir, varargin)
     end
     registration_params = ReadParams(registrationparamsfile);
     
-    indicatorparamsfile = fullfile(settingsdir,analysis_protocol,dataloc_params.indicatorparamsfilestr);
-    if exist(indicatorparamsfile,'file') ,
-      indicator_params = ReadParams(indicatorparamsfile) ;
-      if ~isfield(indicator_params, 'OptogeneticExp') ,
-        error('No optogenetics flag in indicator params')
-      end
-      isOptogeneticExp = indicator_params.OptogeneticExp ;
-    else
-      %error('Indicator params file %s does not exist',indicatorparamsfile);
-      isOptogeneticExp = false ;
-    end
+    [isOptogeneticExp, doesUseProtocolDotMat] = ...
+      readOptoStatusAndProtocolUseFromIndicatorParamsFile(settingsdir, analysis_protocol, dataloc_params.indicatorparamsfilestr) ;
 
     if exist(moviefile,'file')
       try
@@ -217,7 +208,7 @@ function FlyDiscoAutomaticChecksIncoming(expdir, varargin)
             end
             movielength = headerinfo.timestamps(end);
           end
-          if exist(protocolfile,'file')  % protocol file is checked for below not writing error here if doesn't exist
+          if doesUseProtocolDotMat && exist(protocolfile,'file')  % protocol file is checked for below not writing error here if doesn't exist
             protocolinfo = load(protocolfile);
             if ~isfield(protocolinfo.protocol,'duration')
               error('No duration field in protocol file')

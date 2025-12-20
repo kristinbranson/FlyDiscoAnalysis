@@ -22,7 +22,7 @@ function FlyDiscoRegisterTrx(expdir, varargin)
 % Need this 'global' in several places.
 trx_file_names_that_are_not_per_frame = ...
   {'id','moviename','annname','firstframe','arena','off',...
-   'nframes','endframe','matname','fps','pxpermm'} ;
+   'nframes','endframe','matname','fps','pxpermm', 'chamber_index'} ;
 
 
 %
@@ -49,6 +49,7 @@ registration_params = modernizeRegistrationParams(raw_registration_params) ;
 
 % Determine final dotemporalreg, dotemporaltruncation
 [dotemporalreg, dotemporaltruncation, idealVideoDuration] = determineTemporalStuff(registration_params, dotemporalreg, dotemporaltruncation) ;
+  % idealVideoDuration is in seconds
 if dotemporalreg && dotemporaltruncation ,
   error('Temporal registration and temporal truncation are mutually exclusive.  You can''t do both!') ;
 end

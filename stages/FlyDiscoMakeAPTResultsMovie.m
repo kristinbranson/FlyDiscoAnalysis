@@ -85,14 +85,9 @@ raw_registration_params = ReadParams(registrationparamsfile);
 registration_params = modernizeRegistrationParams(raw_registration_params) ;
 doesYAxisPointUp = registration_params.doesYAxisPointUp ;
 
-% Get one thing from the indicator params
-indicatorparamsfile = fullfile(settingsdir,analysis_protocol,dataloc_params.indicatorparamsfilestr);
-if exist(indicatorparamsfile,'file'),
-  indicator_params = loadIndicatorParams(indicatorparamsfile) ;
-  isOptogeneticExp = logical(indicator_params.OptogeneticExp) ;
-else
-  isOptogeneticExp = false ;
-end
+% Get a few things from the indicator params
+[isOptogeneticExp, doesUseProtocolDotMat] = ...
+  readOptoStatusAndProtocolUseFromIndicatorParamsFile(settingsdir, analysis_protocol, dataloc_params.indicatorparamsfilestr) ;
 
 %% location of data
 
