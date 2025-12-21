@@ -34,8 +34,12 @@ dataloc_params = ReadParams(datalocparamsfile) ;
 paramsfile = fullfile(analysis_protocol_folder_path, dataloc_params.automaticcheckscompleteparamsfilestr) ;
 check_params = ReadParams(paramsfile);
 % These fields are not longer used, so delete them
-check_params = rmfield(check_params, 'required_files') ;
-check_params = rmfield(check_params, 'file_categories') ;
+if isfield(check_params, 'required_files')
+  check_params = rmfield(check_params, 'required_files') ;
+end
+if isfield(check_params, 'file_categories')
+  check_params = rmfield(check_params, 'file_categories') ;
+end
 %metadatafile = fullfile(expdir,dataloc_params.metadatafilestr);
 automatedchecksincomingfile = fullfile(expdir,dataloc_params.automaticchecksincomingresultsfilestr);
 acc_text_output_file_path = fullfile(expdir,dataloc_params.automaticcheckscompleteresultsfilestr);
