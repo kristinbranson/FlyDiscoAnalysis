@@ -86,8 +86,11 @@ registration_params = modernizeRegistrationParams(raw_registration_params) ;
 doesYAxisPointUp = registration_params.doesYAxisPointUp ;
 
 % Get a few things from the indicator params
-[isOptogeneticExp, doesUseProtocolDotMat] = ...
+[isOptogeneticExp, doesUseProtocolDotMat, indicator_params_or_empty] = ...
   readOptoStatusAndProtocolUseFromIndicatorParamsFile(settingsdir, analysis_protocol, dataloc_params.indicatorparamsfilestr) ;
+if ~doesUseProtocolDotMat
+  warning('Function %s has not been updated to properly handle the doesUseProtocolDotMat==false case', mfilename()) ;
+end
 
 %% location of data
 
@@ -210,7 +213,7 @@ else
   if defaultparams,
     load(indicatorfile, 'indicatorLED') ;
     rgbProtocol = loadSingleVariableAnonymously(ledprotocolfile, 'protocol') ;
-    protocol = downmixProtocolIfNeeded(rgbProtocol, indicator_params) ;
+    protocol = downmixProtocolIfNeeded(rgbProtocol, indicator_params_or_empty) ;
     
     nsteps = numel(protocol.stepNum);
     % if there's only 1 step 
@@ -376,7 +379,7 @@ if ~hidemovietype,
   else
     
     protocolOfSomeKind = loadSingleVariableAnonymously(ledprotocolfile, 'protocol');
-    protocol = downmixProtocolIfNeeded(protocolOfSomeKind, indicator_params) ;
+    protocol = downmixProtocolIfNeeded(protocolOfSomeKind, indicator_params_or_empty) ;
     
     load(indicatorfile, 'indicatorLED') ;
     stimtimes = indicatorLED.starttimes(ctraxresultsmovie_params.indicatorframes);
