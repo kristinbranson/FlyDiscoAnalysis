@@ -1,4 +1,4 @@
-function saveLedDetectionImage(imsavename, bkgdImage, ledXY, templateShapeXY, doesYAxisPointUp, has_explicit_masks, mask_from_mask_index)
+function saveLedDetectionImage(imsavename, bkgdImage, ledXY, templateShapeXY, doesYAxisPointUp, has_explicit_masks, mask_from_mask_index, indicator_params)
 
 if isempty(imsavename) 
   return
@@ -57,7 +57,7 @@ line('Parent', a, ...
 nr = size(bkgdImage, 1) ;
 nc = size(bkgdImage, 2) ;
 [mask_count, trimmed_mask_from_mask_index, trimmed_mask_lo_bound_in_frame_coords, ~, ~] = ...
-  compute_trimmed_masks_and_bounds(has_explicit_masks, mask_from_mask_index, ledXY, nr, nc) ;
+  compute_trimmed_masks_and_bounds(has_explicit_masks, mask_from_mask_index, ledXY, nr, nc, indicator_params) ;
 
 if has_explicit_masks ,
   for mask_index = 1 : mask_count ,

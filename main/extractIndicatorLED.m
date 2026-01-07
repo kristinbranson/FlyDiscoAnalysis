@@ -15,7 +15,7 @@ timestamps = headerinfo.timestamps(:)' ;  % want row vector
 
 % Compute the trimmed masks and bounds
 [mask_count, trimmed_mask_from_mask_index, trimmed_mask_lo_bound_in_frame_coords, trimmed_mask_hi_bound_in_frame_coords, trimmed_mask_shape] = ...
-  compute_trimmed_masks_and_bounds(has_explicit_masks, mask_from_mask_index, ledIndicatorPointsXY, nr, nc) ;
+  compute_trimmed_masks_and_bounds(has_explicit_masks, mask_from_mask_index, ledIndicatorPointsXY, nr, nc, indicator_params) ;
 
 % Plot the middle frame along with the area(s) to be used for signal
 % extraction
