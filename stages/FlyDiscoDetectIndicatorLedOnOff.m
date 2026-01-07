@@ -114,13 +114,6 @@ warn_if_protocol_is_longer_than_video(expdir, settingsdir, analysis_protocol, do
                      dt, ...
                      rigId) ;
 
-% Save the LED detection image
-if exist(imsavename,'file'),
-  delete(imsavename);
-end
-saveLedDetectionImage(imsavename, bg_mean, ledIndicatorPoints, templateShapeXY, registration_params.doesYAxisPointUp) ;
-fprintf('Saved LED detection image to file %s\n', imsavename) ;
-
 % Read the LED masks, if present
 has_explicit_masks = isfield(indicator_params, 'ledmask1') ;
 if has_explicit_masks ,
@@ -141,6 +134,19 @@ if has_explicit_masks ,
 else
   mask_from_mask_index = [] ;
 end
+
+% Save the LED detection image
+if exist(imsavename,'file'),
+  delete(imsavename);
+end
+saveLedDetectionImage(imsavename, ...
+                      bg_mean, ...
+                      ledIndicatorPoints, ...
+                      templateShapeXY, ...
+                      registration_params.doesYAxisPointUp, ...
+                      has_explicit_masks, ...
+                      mask_from_mask_index) ;
+fprintf('Saved LED detection image to file %s\n', imsavename) ;
 
 % Extract indicatordata from the video
 indicatordata = extractIndicatorLED(expdir, dataloc_params, indicator_params, ledIndicatorPoints, has_explicit_masks, mask_from_mask_index, debug) ;
