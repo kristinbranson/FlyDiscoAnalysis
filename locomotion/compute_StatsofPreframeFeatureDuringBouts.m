@@ -32,9 +32,10 @@ else
         end_indices = end_indices-2;
     end
 
-
+    allboutdata = {};%
     for i = 1:numel(start_indices)
         boutdata = dataflycurr(start_indices(i):end_indices(i));
+        allboutdata{i} = boutdata;%
         meanpff(i) = mean(boutdata);
         stdpff(i) = std(boutdata);
         minpff(i) = min(boutdata);
@@ -42,9 +43,10 @@ else
         sumpff(i) = sum(boutdata);
         n(i) = numel(boutdata);
     end
+    boutdata = horcat(allboutdata{:}); % AR 2026012 fixing boutdata only saving data for last bout
 
 end
-datastruct.data = boutdata;
+datastruct.data = boutdata; 
 datastruct.mean = meanpff;
 datastruct.std = stdpff;
 datastruct.min = minpff;
@@ -52,6 +54,5 @@ datastruct.max = maxpff;
 datastruct.sum = sumpff;
 datastruct.n = n;
 datastruct.pffname = fn;
-
 
 
