@@ -9,6 +9,7 @@ function [perexpphasefeatures] = computePerExpphasefeatures(perwalk_metrics,perf
 % mean_walk_mean_fly = mean of mean_walk_fly data from perflymetrics
 
 subfieldnames = fields(perwalk_metrics(1).(fieldname));
+perexpphasefeatures = struct;
 
 for sf = 1:numel(subfieldnames)
 
@@ -29,10 +30,11 @@ for sf = 1:numel(subfieldnames)
         end
         curr_all = horzcat(curr_all{:});
         data = curr_all(~isnan(curr_all));
-        perexpphasefeatures.(fieldname).frm_data_exp = data;
-        perexpphasefeatures.(fieldname).frm_mean_exp = mean(data);
-        perexpphasefeatures.(fieldname).frm_n_exp = numel(data);
-        perexpphasefeatures.(fieldname).frm_std_exp = std(data);
+        perexpphasefeatures.(fieldname).(subfieldnames{sf}).frm_data_exp = data;
+        perexpphasefeatures.(fieldname).(subfieldnames{sf}).frm_mean_exp = circ_mean(data);
+        perexpphasefeatures.(fieldname).(subfieldnames{sf}).frm_n_exp = numel(data);
+        perexpphasefeatures.(fieldname).(subfieldnames{sf}).frm_std_exp = circ_std(data);
+       
 
         % walk_mean_exp
         curr_all = {};
@@ -42,10 +44,10 @@ for sf = 1:numel(subfieldnames)
         end
         curr_all = horzcat(curr_all{:});
         data = curr_all(~isnan(curr_all));
-        perexpphasefeatures.(fieldname).walk_data_exp = data;
-        perexpphasefeatures.(fieldname).walk_mean_exp = mean(data);
-        perexpphasefeatures.(fieldname).walk_n_exp = numel(data);
-        perexpphasefeatures.(fieldname).walk_std_exp = std(data);
+        perexpphasefeatures.(fieldname).(subfieldnames{sf}).walk_data_exp = data;
+        perexpphasefeatures.(fieldname).(subfieldnames{sf}).walk_mean_exp = circ_mean(data);
+        perexpphasefeatures.(fieldname).(subfieldnames{sf}).walk_n_exp = numel(data);
+        perexpphasefeatures.(fieldname).(subfieldnames{sf}).walk_std_exp = circ_std(data);
 
 
         % mean_frm_mean_fly
@@ -56,10 +58,10 @@ for sf = 1:numel(subfieldnames)
         end
         curr_all = horzcat(curr_all{:});
         data = curr_all(~isnan(curr_all));
-        perexpphasefeatures.(fieldname).data_frm_mean_fly = data;
-        perexpphasefeatures.(fieldname).mean_frm_mean_fly = mean(data);
-        perexpphasefeatures.(fieldname).n_frm_mean_fly = numel(data);
-        perexpphasefeatures.(fieldname).std_frm_mean_fly = std(data);
+        perexpphasefeatures.(fieldname).(subfieldnames{sf}).data_frm_mean_fly = data;
+        perexpphasefeatures.(fieldname).(subfieldnames{sf}).mean_frm_mean_fly = circ_mean(data);
+        perexpphasefeatures.(fieldname).(subfieldnames{sf}).n_frm_mean_fly = numel(data);
+        perexpphasefeatures.(fieldname).(subfieldnames{sf}).std_frm_mean_fly = circ_std(data);
 
 
         % mean_walk_mean_fly
@@ -70,10 +72,10 @@ for sf = 1:numel(subfieldnames)
         end
         curr_all = horzcat(curr_all{:});
         data = curr_all(~isnan(curr_all));
-        perexpphasefeatures.(fieldname).data_walk_mean_fly = data;
-        perexpphasefeatures.(fieldname).mean_walk_mean_fly = mean(data);
-        perexpphasefeatures.(fieldname).n_walk_mean_fly = numel(data);
-        perexpphasefeatures.(fieldname).std_walk_mean_fly = std(data);
+        perexpphasefeatures.(fieldname).(subfieldnames{sf}).data_walk_mean_fly = data;
+        perexpphasefeatures.(fieldname).(subfieldnames{sf}).mean_walk_mean_fly = circ_mean(data);
+        perexpphasefeatures.(fieldname).(subfieldnames{sf}).n_walk_mean_fly = numel(data);
+        perexpphasefeatures.(fieldname).(subfieldnames{sf}).std_walk_mean_fly = circ_std(data);
 
     end
 
