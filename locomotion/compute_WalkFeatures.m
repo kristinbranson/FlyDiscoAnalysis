@@ -57,7 +57,8 @@ function [walkfeaturestruct,perflywalkfeatures] = compute_WalkFeatures(obj,fly,d
 %           computeContinuousPhaseDiff_hilbert, detect_bouts
 
 
-% summary plots
+% summary plots for each walk - only use in debugging per fly at low n for
+% walks processed 
 debug = 0;
 
 % params for findpeaks

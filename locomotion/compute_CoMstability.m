@@ -39,7 +39,7 @@ parfor fly = 1:numel(pTrk)
     for i = 1:numel(valid_frames)
         frame_idx = valid_frames(i);
 
-        % find legs with groun contact
+        % find legs with ground contact
         idx_gc = groundcontact{fly}(:,frame_idx);
         legs_idx = legtip_landmarknums(idx_gc);
         % stance legs polygon vertices
