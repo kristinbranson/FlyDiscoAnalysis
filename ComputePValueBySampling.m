@@ -32,10 +32,12 @@ end
 idxgoodcontrolset = find(isgoodcontrolset);
 
 set2expcurr = nan(nsets,maxnexps);
+ngoodcontrolset = nan(1,nsets);
 for seti = idxgoodcontrolset,
   tmp = find(exp2setidx==seti & isgoodexp);
+  ngoodcontrolset(seti) = numel(tmp); % added AR 20260113 fix bug of NaN in setsampleis
   set2expcurr(seti,1:numel(tmp)) = tmp;
-end
+end 
 
 isgoodline = ~isnan(linestats.normmeans.(statfn)) & ...
   ~isinf(linestats.normmeans.(statfn));
@@ -68,10 +70,10 @@ for linei = 1:nlines-1,
   
   % sample
   setnormmu = nan(nsamples,nsetscurr);
-  for setii = 1:nsetscurr,
-    
+  for setii = 1:nsetscurr,    
     setidxallowed = find(isgoodcontrolset & ...
-      setstats.nexps.(statfn) >= nexpscurr(setii));
+      setstats.nexps.(statfn) >= nexpscurr(setii) & ...
+      ngoodcontrolset >= nexpscurr(setii)); % added AR 20260113 fix bug of NaN in setsampleis
     for nsub = 1:nexpscurr(setii)-1,
       if numel(setidxallowed) > 1,
         break;
@@ -87,8 +89,8 @@ for linei = 1:nlines-1,
     setsampleis = randsample(setidxallowed,nsamples,true);
     
     % choose the experiments per set
-    controlnexpscurr = setstats.nexps.(statfn)(setsampleis);
-    
+    % controlnexpscurr = setstats.nexps.(statfn)(setsampleis); % added AR 20260113 fix bug of NaN in setsampleis
+    controlnexpscurr = ngoodcontrolset(setsampleis); % added AR 20260113 fix bug of NaN in setsampleis
     % by default, use the first experiments
     expsampleis = set2expcurr(setsampleis,1:nexpscurr(setii));
     
@@ -101,7 +103,7 @@ for linei = 1:nlines-1,
     tmp = allstats.(statfn)(expsampleis);
     tmp = reshape(tmp,[nsamples,nexpscurr(setii)]);
     mu = mean(tmp,2);
-    setnormmu(:,setii) = mu - setstats.controlmeans.(statfn)(setsampleis)';
+    setnormmu(:,setii) = mu - setstats.controlmeans.(statfn)(setsampleis)' + controlmean(stati);
     
   end
   
