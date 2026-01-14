@@ -306,7 +306,7 @@ for is = 1:2
     bout_metrics.allflies.all_limbs.(state{is}).Nboutspervelmagbin =Nboutspervelmagbin;
     bout_metrics.allflies.all_limbs.(state{is}).velmagbincenters = velmagbincenters;
     bout_metrics.allflies.all_limbs.(state{is}).meanboutdurationsofvelmagbins = meanboutdurationsofvelmagbins;
-    bout_metrics.allflies.all_limbs.(state{is}).meanboutdurationsofvelmagbins = stdboutdurationsofvelmagbins;
+    bout_metrics.allflies.all_limbs.(state{is}).stdboutdurationsofvelmagbins = stdboutdurationsofvelmagbins; % fixed bug meanboutdurationsofvelmagbins was overwritten with stdboutdurationsofvelmagbins
 
 end
 
