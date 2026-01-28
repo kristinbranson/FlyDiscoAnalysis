@@ -9,10 +9,11 @@ settingsdir = '/groups/branson/home/robiea/Code_versioned/BransonFlyDiscoSetting
 % analysis_protocol = '20250721_flybubble_LED_VNC3';
 analysis_protocol = '20251009_flybubble_LED_VNC3'; %same as 20250721_flybubble_LED_VNC3 with updated README
 % analysis_protocol = '20251009_flybubble_LED_VNC2';
+% analysis_protocol = '20251009_flybubble_LED_VNC';
 
 params = {'settingsdir',settingsdir,...
     'analysis_protocol',analysis_protocol, ...
-    'forcecompute', false,...
+    'forcecompute', true,...
     'debug',true};
 
 %% expdir
@@ -30,7 +31,22 @@ params = {'settingsdir',settingsdir,...
 %test VNC2
 % explist = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20241203_testinglocomotion/VNC2_YNA_K_162984_RigB_20230927T120415'};
 %failed VNC3
-explist = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20241203_testinglocomotion/VNC3_JRC_SS97714_RigB_20240919T122459'};
+% explist = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20241203_testinglocomotion/VNC3_JRC_SS97714_RigB_20240919T122459'};
+% test VNC
+% explist = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20241203_testinglocomotion/VNC_JRC_SS68333_RigB_20210420T151346'};
+
+% explist = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20241203_testinglocomotion/VNC2_YNA_K_162984_RigB_20230927T120415'};
+%failed vglut exps - try to fix
+% explist = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20241203_testinglocomotion/VNC2_EXT_VGLUT-GAL4_RigB_20231025T123239'};
+% explist = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20241203_testinglocomotion/VNC3_YNA_K_162984_RigB_20240904T124501'};
+
+%reprocess test lines
+% explist = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20241203_testinglocomotion/VNC3_JRC_SS98080_RigB_20240904T120747' ...
+%     '/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20241203_testinglocomotion/VNC3_YNA_K_162984_RigD_20240529T101336' ...
+%     '/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20241203_testinglocomotion/VNC3_YNA_K_162984_RigB_20240904T124501' ...
+%     '/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20241203_testinglocomotion/VNC3_JRC_SS100086_RigD_20240820T125028'};
+
+explist = {'/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20241203_testinglocomotion/VNC3_JRC_SS100086_RigD_20240820T125028'};
 %% run code
 for i = 1:numel(explist)
     expdir = explist{i};

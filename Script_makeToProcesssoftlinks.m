@@ -135,7 +135,23 @@
 %     '/groups/branson/bransonlab/flydisco_data/VNC3_EXT_VGLUT-GAL4_RigC_20240813T120718'}
 
 %run loco stage on VNC3
-explist = textread('/groups/branson/home/robiea/Projects_data/FlyDisco/expdirlist_VNC3_20251009.txt','%s');
+% explist = textread('/groups/branson/home/robiea/Projects_data/FlyDisco/expdirlist_VNC3_20251009.txt','%s');
+% rerun fails on VNC3
+% explist = textread('/groups/branson/home/robiea/Projects_data/FlyDisco/expdirlist_VNC3_20251009_reruns.txt','%s');
+% 
+% % test loco stage on VNC2 and VNC
+% explist = {'/groups/branson/bransonlab/flydisco_data/VNC_JRC_SS63843_RigA_20210513T133925'
+%     '/groups/branson/bransonlab/flydisco_data/VNC_EXT_VGLUT-GAL4_RigC_20210422T142205'
+%     '/groups/branson/bransonlab/flydisco_data/VNC2_JRC_SS92015_RigC_20221004T114117'
+%     '/groups/branson/bransonlab/flydisco_data/VNC2_EXT_VGLUT-GAL4_RigB_20231114T124058'};
+%run VNC2 and VNC 
+% explist = textread('/groups/branson/home/robiea/Projects_data/FlyDisco/expdirlist_VNC2_20251009.txt','%s');
+% explist = textread('/groups/branson/home/robiea/Projects_data/FlyDisco/expdirlist_VNC_20251009.txt','%s');
+
+%list for kai's benchmark paper
+explist = textread('/groups/branson/home/robiea/Projects_data/Kai/expdirlist.txt','%s');
+
+
 % rootdatadir = '/groups/branson/bransonlab/flybubble_social';
 % for i = 1:numel(explist)
 %     explist{i} = fullfile(rootdatadir,explist{i});
