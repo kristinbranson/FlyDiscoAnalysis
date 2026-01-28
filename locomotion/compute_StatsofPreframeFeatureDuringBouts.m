@@ -43,10 +43,10 @@ else
         sumpff(i) = sum(boutdata);
         n(i) = numel(boutdata);
     end
-    boutdata = horcat(allboutdata{:}); % AR 2026012 fixing boutdata only saving data for last bout
+    allboutdata = horzcat(allboutdata{:}); % AR 2026019 fixing boutdata only saving data for last bout
 
 end
-datastruct.data = boutdata; 
+datastruct.data = allboutdata; 
 datastruct.mean = meanpff;
 datastruct.std = stdpff;
 datastruct.min = minpff;
