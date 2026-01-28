@@ -89,8 +89,13 @@ for d = 1:numel(diffs)/2
     name = [legorder{diffs(d,1)},'_',legorder{diffs(d,2)}];
     % NOTE using diff so limbs(2) - limbs(1) so reversing diffs values to
     % make reference correct.
-    limbs = [diffs(d,2),diffs(d,1)];
-    currdata = wrapTo2Pi(diff(unwrap(legphases(limbs,:),[],2)));
+    % limbs = [diffs(d,2),diffs(d,1)];
+    % currdata = wrapTo2Pi(diff(unwrap(legphases(limbs,:),[],2)));
+    
+    % compute circ_dist instead ... 
+    limbs = [diffs(d,1),diffs(d,2)];
+    currdata = circ_dist(legphases(limbs(1),:),legphases(limbs(2),:));
+
     phasediff_hilbert_global.(name).data = currdata;
     % reported in -pi to pi
     phasediff_hilbert_global.(name).mean = circ_mean(currdata(~isnan(currdata)));
