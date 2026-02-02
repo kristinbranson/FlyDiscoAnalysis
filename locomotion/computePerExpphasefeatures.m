@@ -15,7 +15,7 @@ for sf = 1:numel(subfieldnames)
 
     if strcmp(subfieldnames{sf},'phasedata')
         curr_all = {};
-        for w = 1:numel(perwalk_metrics(w))
+        for w = 1:numel(perwalk_metrics)
             curr_all{w} = [perwalk_metrics(w).(fieldname).(subfieldnames{sf})];
         end
         perexpphasefeatures.(fieldname).(subfieldnames{sf}) = horzcat(curr_all{:});
