@@ -39,7 +39,7 @@ aptdata = TrkFile.load(fullfile(expdir,aptfile));
 
 % make list of special perframe features being computed
 pfflist = {'nfeet_ground','CoM_stability'};
-outputfiles = {trx.dataloc_params.locomotionmetricsswingstanceboutstatsfilestr,'tips_velmag.mat'};
+outputfiles = {trx.dataloc_params.locomotionmetricsswingstanceboutstatsfilestr,'tips_velmag.mat','tips_pos_body.mat'};
 
 % if force compute is true, delete aptPFF if they exist
 %should check if files exist first
@@ -182,6 +182,9 @@ loco_analyzer.analyzeBoutAndStimConditions();
 
 % compute locomotion metrics for walk bouts during stim on and off periods
 loco_analyzer.analyzeWalkAndStimConditions();
+
+% create locostatsperexp file
+
 
 % % pull bout features  bouts
 % [bout_metrics_ON] = getConditionData(loco_analyzer,'walking_stimON_traj','metrics');

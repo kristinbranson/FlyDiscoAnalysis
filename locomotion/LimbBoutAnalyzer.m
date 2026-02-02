@@ -191,9 +191,9 @@ classdef LimbBoutAnalyzer < handle
         end
 
         function analyzeWalkAndStimConditions(obj)
-
+            if obj.debug
             fprintf('Analyzing walk + stimulus conditions ...\n');
-
+            end 
             % create valid frame signals for LED on and LED off
             obj.createValidFrames_LED();           
 
