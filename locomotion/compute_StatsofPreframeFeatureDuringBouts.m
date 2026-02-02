@@ -8,8 +8,7 @@ function [datastruct] = compute_StatsofPreframeFeatureDuringBouts(fly,fn,trx,sta
 dataflycurr = trx.GetPerFrameData(fn,fly);
 % deal with empty case - return NaN OK?
 if isempty(start_indices)
-    start_indices = 1;
-    boutdata = [];
+    start_indices = 1;    
     meanpff = nan(1,numel(start_indices));
     stdpff = nan(1,numel(start_indices));
     minpff = nan(1,numel(start_indices));
@@ -17,6 +16,7 @@ if isempty(start_indices)
     sumpff = nan(1,numel(start_indices));
     n = nan(1,numel(start_indices));
     start_indices = [];
+    allboutdata = [];
 else
     meanpff = nan(1,numel(start_indices));
     stdpff = nan(1,numel(start_indices));
