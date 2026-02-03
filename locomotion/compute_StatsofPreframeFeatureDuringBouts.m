@@ -1,11 +1,14 @@
-function [datastruct] = compute_StatsofPreframeFeatureDuringBouts(fly,fn,trx,start_indices,end_indices,derivative_flag);
+function [datastruct] = compute_StatsofPreframeFeatureDuringBouts(fly,fn,trx,start_indices,end_indices,derivative_flag,dataflycurr)
 %input fn = name of perframe feature, trx obj, start and end indices of
 %bouts in moveie frame of reference
+% optional: dataflycurr = pre-fetched perframe data to avoid repeated trx.GetPerFrameData calls
 
 % output = mean value of perframe features during each bout, std of
 % perframe features during each bout
 
-dataflycurr = trx.GetPerFrameData(fn,fly);
+if nargin < 7 || isempty(dataflycurr)
+    dataflycurr = trx.GetPerFrameData(fn,fly);
+end
 % deal with empty case - return NaN OK?
 if isempty(start_indices)
     start_indices = 1;    

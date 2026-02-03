@@ -74,6 +74,17 @@ pfflist_none = {'CoM_stability'};
 
 
 
+% Pre-fetch all perframe feature data once for this fly
+pff_cache = struct();
+for ifns = 1:numel(pfflist_first)
+    fn = pfflist_first{ifns};
+    pff_cache.(fn) = obj.trx.GetPerFrameData(fn, fly);
+end
+for ifns = 1:numel(pfflist_none)
+    fn = pfflist_none{ifns};
+    pff_cache.(fn) = obj.trx.GetPerFrameData(fn, fly);
+end
+
 currflyboutdata = obj.limbBoutData(fly);
 currfly_tips_pos_body = obj.tips_pos_body{fly};
 nlimb = size(currfly_tips_pos_body,1);
@@ -142,12 +153,12 @@ for w = 1:numel(walk_t0s)
         % loop over list of perframe features
         for ifns = 1:numel(pfflist_first)
             fn = pfflist_first{ifns};
-            datastruct = compute_StatsofPreframeFeatureDuringBouts(fly,fn,obj.trx,walk_t0,walk_t1,'first');
+            datastruct = compute_StatsofPreframeFeatureDuringBouts(fly,fn,obj.trx,walk_t0,walk_t1,'first',pff_cache.(fn));
             walkfeaturestruct(ct).(fn) = datastruct;
         end
         for ifns = 1:numel(pfflist_none)
             fn = pfflist_none{ifns};
-            datastruct = compute_StatsofPreframeFeatureDuringBouts(fly,fn,obj.trx,walk_t0,walk_t1,'none');
+            datastruct = compute_StatsofPreframeFeatureDuringBouts(fly,fn,obj.trx,walk_t0,walk_t1,'none',pff_cache.(fn));
             walkfeaturestruct(ct).(fn) = datastruct;
         end
 

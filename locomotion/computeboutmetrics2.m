@@ -27,6 +27,21 @@ pfflist_none = {'CoM_stability'};
 
 
 
+% Pre-fetch all perframe feature data once per fly to avoid redundant
+% trx.GetPerFrameData calls (otherwise called 3 states x 6 limbs = 18x per feature per fly)
+pff_cache = cell(1, nflies);
+for fly = 1:nflies
+    pff_cache{fly} = struct();
+    for ifns = 1:numel(pfflist_first)
+        fn = pfflist_first{ifns};
+        pff_cache{fly}.(fn) = trx.GetPerFrameData(fn, fly);
+    end
+    for ifns = 1:numel(pfflist_none)
+        fn = pfflist_none{ifns};
+        pff_cache{fly}.(fn) = trx.GetPerFrameData(fn, fly);
+    end
+end
+
 %compute metrics for each limb of each fly
 
 for is = 1:numel(state)
@@ -57,12 +72,12 @@ for is = 1:numel(state)
                 % loop over list of perframe features
                 for ifns = 1:numel(pfflist_first)
                     fn = pfflist_first{ifns};
-                    datastruct = compute_StatsofPreframeFeatureDuringBouts(fly,fn,trx,start_indices,end_indices,'first');
+                    datastruct = compute_StatsofPreframeFeatureDuringBouts(fly,fn,trx,start_indices,end_indices,'first',pff_cache{fly}.(fn));
                     bout_metrics.perfly(fly).perlimb(limb).(state{is}).(fn) = datastruct;
                 end
                 for ifns = 1:numel(pfflist_none)
                     fn = pfflist_none{ifns};
-                    datastruct = compute_StatsofPreframeFeatureDuringBouts(fly,fn,trx,start_indices,end_indices,'none');
+                    datastruct = compute_StatsofPreframeFeatureDuringBouts(fly,fn,trx,start_indices,end_indices,'none',pff_cache{fly}.(fn));
                     bout_metrics.perfly(fly).perlimb(limb).(state{is}).(fn) = datastruct;
                 end
 
@@ -102,12 +117,12 @@ for is = 1:numel(state)
                 % loop over list of perframe features
                 for ifns = 1:numel(pfflist_first)
                     fn = pfflist_first{ifns};
-                    datastruct = compute_StatsofPreframeFeatureDuringBouts(fly,fn,trx,step_t0s,step_t1s,'first');
+                    datastruct = compute_StatsofPreframeFeatureDuringBouts(fly,fn,trx,step_t0s,step_t1s,'first',pff_cache{fly}.(fn));
                     bout_metrics.perfly(fly).perlimb(limb).(state{is}).(fn) = datastruct;
                 end
                 for ifns = 1:numel(pfflist_none)
                     fn = pfflist_none{ifns};
-                    datastruct = compute_StatsofPreframeFeatureDuringBouts(fly,fn,trx,step_t0s,step_t1s,'none');
+                    datastruct = compute_StatsofPreframeFeatureDuringBouts(fly,fn,trx,step_t0s,step_t1s,'none',pff_cache{fly}.(fn));
                     bout_metrics.perfly(fly).perlimb(limb).(state{is}).(fn) = datastruct;
                 end
 
