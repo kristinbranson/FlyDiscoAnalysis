@@ -39,7 +39,9 @@ aptdata = TrkFile.load(fullfile(expdir,aptfile));
 
 % make list of special perframe features being computed
 pfflist = {'nfeet_ground','CoM_stability'};
-outputfiles = {trx.dataloc_params.locomotionmetricsswingstanceboutstatsfilestr,'tips_velmag.mat','tips_pos_body.mat','groundcontact.mat'};
+outputfiles = {trx.dataloc_params.locomotionmetricsswingstanceboutstatsfilestr, ...
+    trx.dataloc_params.locomotionmetricsperexpfilestr, ...
+    'tips_velmag.mat','tips_pos_body.mat','groundcontact.mat'};
 
 % if force compute is true, delete aptPFF if they exist
 %should check if files exist first
@@ -190,21 +192,23 @@ loco_analyzer.analyzeBoutAndStimConditions();
 % compute locomotion metrics for walk bouts during stim on and off periods
 loco_analyzer.analyzeWalkAndStimConditions();
 
-% create locostatsperexp file
-
-
-% % pull bout features  bouts
-% [bout_metrics_ON] = getConditionData(loco_analyzer,'walking_stimON_traj','metrics');
-% [bout_metrics_OFF] = getConditionData(loco_analyzer,'walking_stimOFF_traj','metrics');
-
 % If something goes wrong, throw an error.  Any values returned from this
 % function are ignored.
 
+% try
+%     savefilename = trx.dataloc_params.locomotionmetricsswingstanceboutstatsfilestr;
+%     saveResults(loco_analyzer, fullfile(expdir,savefilename))
+% catch ME
+%     warning('FlyDiscoComputeLocomotionMetrics:save',...
+%         'Could not save information to file %s: %s',savefilename,getReport(ME));
+% end
+
+% compute and save locostatsperexp
+loco_analyzer.computeStatsPerExp({'ON'});
 try
-    savefilename = trx.dataloc_params.locomotionmetricsswingstanceboutstatsfilestr;
-    saveResults(loco_analyzer, fullfile(expdir,savefilename))
-    % save(fullfile(expdir,trx.dataloc_params.locomotionmetricsswingstanceboutstatsfilestr),'bout_metrics_ON','bout_metrics_OFF')
+    perexpfilename = trx.dataloc_params.locomotionmetricsperexpfilestr;
+    loco_analyzer.saveStatsPerExp(fullfile(expdir, perexpfilename));
 catch ME
-    warning('FlyDiscoComputeLocomotionMetrics:save',...
-        'Could not save information to file %s: %s',savefilename,getReport(ME));
+    warning('FlyDiscoComputeLocomotionMetrics:saveStatsPerExp',...
+        'Could not save per-experiment stats to file %s: %s',perexpfilename,getReport(ME));
 end
