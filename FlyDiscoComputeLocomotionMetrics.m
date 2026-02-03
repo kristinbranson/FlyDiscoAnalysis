@@ -39,7 +39,7 @@ aptdata = TrkFile.load(fullfile(expdir,aptfile));
 
 % make list of special perframe features being computed
 pfflist = {'nfeet_ground','CoM_stability'};
-outputfiles = {trx.dataloc_params.locomotionmetricsswingstanceboutstatsfilestr,'tips_velmag.mat','tips_pos_body.mat'};
+outputfiles = {trx.dataloc_params.locomotionmetricsswingstanceboutstatsfilestr,'tips_velmag.mat','tips_pos_body.mat','groundcontact.mat'};
 
 % if force compute is true, delete aptPFF if they exist
 %should check if files exist first
@@ -136,7 +136,13 @@ gc_threshold_low = stage_params.gc_threshold_low;
 gc_threshold_high = stage_params.gc_threshold_high;
 pairs = stage_params.pairs;
 minimum_bout = stage_params.minimum_bout_groundcontact;
-[groundcontact] = compute_groundcontact(tips_velmag,'pairs',pairs,'gc_threshold_low',gc_threshold_low,'gc_threshold_high',gc_threshold_high,'minimum_bout',minimum_bout);
+groundcontact_file = fullfile(expdir,'groundcontact.mat');
+if exist(groundcontact_file,'file') && ~forcecompute
+    load(groundcontact_file,'groundcontact');
+else
+    [groundcontact] = compute_groundcontact(tips_velmag,'pairs',pairs,'gc_threshold_low',gc_threshold_low,'gc_threshold_high',gc_threshold_high,'minimum_bout',minimum_bout);
+    save(groundcontact_file,'groundcontact');
+end
 
 %compute number of feet on the ground
 data = cell(1,trx.nflies);
@@ -174,7 +180,8 @@ indicatordata = trx.getIndicatorLED(1);
 digitalindicator = indicatordata.indicatordigital;
 
 % intialize class
-loco_analyzer = LimbBoutAnalyzer(trx, aptdata, tips_pos_body, legtip_landmarknums, groundcontact, digitalindicator, walking_scores);
+loco_analyzer = LimbBoutAnalyzer(trx, aptdata, tips_pos_body, legtip_landmarknums, groundcontact, digitalindicator, walking_scores, ...
+    'phase_methods', {'phasediff_hilbert'});
 
 % compute locomotion metrics for swing, stance, and steps for walking
 % during stim on and stim off periods

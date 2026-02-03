@@ -27,6 +27,7 @@ classdef LimbBoutAnalyzer < handle
         locoStatsPerExp = struct()              % Flat struct of per-experiment stats; LED condition encoded in field names (LEDon/LEDoff)
 
         % Settings
+        phase_methods = {'phaselag', 'phasediff_interp', 'phasediff_hilbert', 'phasediff_hilbert_global'}
         debug = false
         expdir = ''
         nflies = 0
@@ -71,11 +72,13 @@ classdef LimbBoutAnalyzer < handle
             addParameter(p, 'debug', false, @islogical);
             addParameter(p, 'expdir', '', @ischar);
             addParameter(p, 'binedges', 5:2:34, @isnumeric);
+            addParameter(p, 'phase_methods', {'phaselag', 'phasediff_interp', 'phasediff_hilbert', 'phasediff_hilbert_global'}, @iscell);
             parse(p, varargin{:});
 
             obj.debug = p.Results.debug;
             obj.expdir = p.Results.expdir;
-            obj.binedges = p.Results.binedges;           
+            obj.binedges = p.Results.binedges;
+            obj.phase_methods = p.Results.phase_methods;           
 
             % Initialize containers
             obj.restrictedBoutData = containers.Map();
@@ -151,7 +154,7 @@ classdef LimbBoutAnalyzer < handle
         function computeWalkMetricsforValidFrames(obj, validframes_name)
 
             digital_signal = obj.validFrames(validframes_name);
-            walk_metrics = computeWalkMetrics(obj,digital_signal);
+            walk_metrics = computeWalkMetrics(obj,digital_signal,obj.phase_methods);
             obj.walkMetrics(validframes_name) = walk_metrics;
         end
   

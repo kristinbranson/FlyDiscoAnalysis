@@ -1,20 +1,23 @@
-function [walkfeaturestruct,perflywalkfeatures] = compute_WalkFeatures(obj,fly,digital_signal)
+function [walkfeaturestruct,perflywalkfeatures] = compute_WalkFeatures(obj,fly,digital_signal,phase_methods)
 
 % compute_WalkFeatures - Extract walking features from fly limb tracking data
 %
-% Computes various kinematic and phase-based features for individual walking 
+% Computes various kinematic and phase-based features for individual walking
 % bouts, including perframe statistics, phase relationships between limbs, and
 % gait coordination measures.
 %
 % Syntax:
-%   [walkfeaturestruct,perflywalkfeatures] = compute_WalkFeatures(obj,fly,digital_signal,condition_name)
+%   [walkfeaturestruct,perflywalkfeatures] = compute_WalkFeatures(obj,fly,digital_signal)
+%   [walkfeaturestruct,perflywalkfeatures] = compute_WalkFeatures(obj,fly,digital_signal,phase_methods)
 %
 % Input:
 %   obj              - LimbBoutAnalyzer object
 %   fly              - Integer index of the fly to analyze
 %   digital_signal   - Logical array [1 x nframes] indicating frames to exclude from analysis
 %                      (e.g., optogenetic stimulation periods)
-%   condition_name   - String describing the experimental condition (currently unused in function)
+%   phase_methods    - (optional) Cell array of phase methods to compute.
+%                      Options: 'phaselag', 'phasediff_interp', 'phasediff_hilbert', 'phasediff_hilbert_global'
+%                      Default: all four methods
 %
 % Output:
 %   walkfeaturestruct    - Structure array with one element per valid walking bout containing:
@@ -57,8 +60,13 @@ function [walkfeaturestruct,perflywalkfeatures] = compute_WalkFeatures(obj,fly,d
 %           computeContinuousPhaseDiff_hilbert, detect_bouts
 
 
+% Default: compute all phase methods
+if nargin < 4 || isempty(phase_methods)
+    phase_methods = {'phaselag', 'phasediff_interp', 'phasediff_hilbert', 'phasediff_hilbert_global'};
+end
+
 % summary plots for each walk - only use in debugging per fly at low n for
-% walks processed 
+% walks processed
 debug = 0;
 
 % params for findpeaks
@@ -90,12 +98,14 @@ currfly_tips_pos_body = obj.tips_pos_body{fly};
 nlimb = size(currfly_tips_pos_body,1);
 walkfeaturestruct = struct;
 
-% for hilbert global
-currfly_tips_pos_body_Y = squeeze(currfly_tips_pos_body(:,2,:));
-norm_ytips_global = zscore(currfly_tips_pos_body_Y')';
-phases = nan(size(norm_ytips_global));
-for limb = 1:nlimb
-    phases(limb,:) = angle(hilbert(norm_ytips_global(limb,:)));
+% for hilbert global - only compute if needed
+if ismember('phasediff_hilbert_global', phase_methods)
+    currfly_tips_pos_body_Y = squeeze(currfly_tips_pos_body(:,2,:));
+    norm_ytips_global = zscore(currfly_tips_pos_body_Y')';
+    phases = nan(size(norm_ytips_global));
+    for limb = 1:nlimb
+        phases(limb,:) = angle(hilbert(norm_ytips_global(limb,:)));
+    end
 end
 
 
@@ -126,8 +136,10 @@ for w = 1:numel(walk_t0s)
     % zscore tip data for peaks and hilbert
     norm_ytips = zscore(currwalk_tips_pos_body_Y');
     norm_ytips = norm_ytips';
-    currwalk_norm_ytips_global = norm_ytips_global(:,walk_t0:walk_t1);
-    currwalk_phases = phases(:,walk_t0:walk_t1);
+    if ismember('phasediff_hilbert_global', phase_methods)
+        currwalk_norm_ytips_global = norm_ytips_global(:,walk_t0:walk_t1);
+        currwalk_phases = phases(:,walk_t0:walk_t1);
+    end
 
     % find peaks in the Y pos signal
     if size(norm_ytips,2) < 3
@@ -164,23 +176,30 @@ for w = 1:numel(walk_t0s)
 
 
         % % method 1 - find phase lags relative to swing onset
-        phaseoffsetdata = computePhaseLag(currflyboutdata, walk_t0, walk_t1);
-        walkfeaturestruct(ct).phaselag = phaseoffsetdata;
+        if ismember('phaselag', phase_methods)
+            phaseoffsetdata = computePhaseLag(currflyboutdata, walk_t0, walk_t1);
+            walkfeaturestruct(ct).phaselag = phaseoffsetdata;
+        end
 
         % % method 2 - find phase diff from peaks and linear interpolation Yang '23
-        phasediff_interp = computeContinuousPhaseDiff_linearinterp(norm_ytips,loctall,locball,currwalk_tips_pos_body_Y,w,false);
-        walkfeaturestruct(ct).phasediff_interp = phasediff_interp;
+        if ismember('phasediff_interp', phase_methods)
+            phasediff_interp = computeContinuousPhaseDiff_linearinterp(norm_ytips,loctall,locball,currwalk_tips_pos_body_Y,w,false);
+            walkfeaturestruct(ct).phasediff_interp = phasediff_interp;
+        end
 
         % method 3 - compute hilbert for walk bout
-        phasediff_hilbert = computeContinuousPhaseDiff_hilbert(norm_ytips,loctall,locball,currwalk_tips_pos_body_Y,w,debug);
-        walkfeaturestruct(ct).phasediff_hilbert = phasediff_hilbert;
+        if ismember('phasediff_hilbert', phase_methods)
+            phasediff_hilbert = computeContinuousPhaseDiff_hilbert(norm_ytips,loctall,locball,currwalk_tips_pos_body_Y,w,debug);
+            walkfeaturestruct(ct).phasediff_hilbert = phasediff_hilbert;
+        end
 
         % method 4 - use precomputed hilbert for whole movie - i don't
         % think zscore works as well over the whole movie so local phases
-        % look better. 
-
-        phasediff_hilbert_global = computeContinuousPhaseDiff_hilbert_global(currwalk_phases,currwalk_norm_ytips_global,loctall,locball, currwalk_tips_pos_body_Y,w,debug);
-        walkfeaturestruct(ct).phasediff_hilbert_global = phasediff_hilbert_global;
+        % look better.
+        if ismember('phasediff_hilbert_global', phase_methods)
+            phasediff_hilbert_global = computeContinuousPhaseDiff_hilbert_global(currwalk_phases,currwalk_norm_ytips_global,loctall,locball, currwalk_tips_pos_body_Y,w,debug);
+            walkfeaturestruct(ct).phasediff_hilbert_global = phasediff_hilbert_global;
+        end
 
         % compute TCS from methor 1 or 2, for each tripod
         % TO DO

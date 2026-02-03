@@ -1,5 +1,9 @@
-function walkmetrics = computeWalkMetrics(obj,digital_signal)
+function walkmetrics = computeWalkMetrics(obj,digital_signal,phase_methods)
 
+% Default: compute all phase methods
+if nargin < 3 || isempty(phase_methods)
+    phase_methods = {'phaselag', 'phasediff_interp', 'phasediff_hilbert', 'phasediff_hilbert_global'};
+end
 
 % params
 
@@ -14,7 +18,7 @@ ct = 1;
 for fly = 1:nflies    
     currfly_digitalindicator = digital_signal{fly};
     % currfly_digitalindicator = zeros(size(currfly_digitalindicator)); % testing no walks 
-    [walkfeaturestruct,perflywalkfeatures] = compute_WalkFeatures(obj,fly,currfly_digitalindicator);
+    [walkfeaturestruct,perflywalkfeatures] = compute_WalkFeatures(obj,fly,currfly_digitalindicator,phase_methods);
     if isempty(fieldnames(walkfeaturestruct))
         ct = ct +1;
         % if fly == nflies & isempty(fieldnames(perwalk_metrics))

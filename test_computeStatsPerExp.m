@@ -47,7 +47,8 @@ digitalindicator = indicatordata.indicatordigital;
 %% Initialize LimbBoutAnalyzer and run pipeline
 fprintf('Initializing LimbBoutAnalyzer...\n');
 loco_analyzer = LimbBoutAnalyzer(trx, aptdata, tips_pos_body, legtip_landmarknums, ...
-    groundcontact, digitalindicator, walking_scores);
+    groundcontact, digitalindicator, walking_scores, ...
+    'phase_methods', {'phasediff_hilbert'});
 
 fprintf('Running analyzeBoutAndStimConditions...\n');
 tic;
