@@ -1,5 +1,12 @@
 % make softlinks in the flydisco/to-process folder
 %% %%%%% need to run as bransonlab %%%%%%
+% ssh -X bransonlab@login2
+% bsub -XF -Is -n1 -W 48:00 /bin/bash
+% matlab
+% cd FDA
+% modpath
+% run Script_makeTpProcessoftlinks
+% check on linkes in /groups/branson/bransonlab/flydisco_data/to-process
 %% make list
 %Katie
 % load /groups/branson/home/robiea/Projects_data/Katie/TrpAforReprocessing.mat
@@ -148,8 +155,16 @@
 % explist = textread('/groups/branson/home/robiea/Projects_data/FlyDisco/expdirlist_VNC2_20251009.txt','%s');
 % explist = textread('/groups/branson/home/robiea/Projects_data/FlyDisco/expdirlist_VNC_20251009.txt','%s');
 
-%list for kai's benchmark paper
-explist = textread('/groups/branson/home/robiea/Projects_data/Kai/expdirlist.txt','%s');
+%list for kai's benchmark paper - didn't work
+% explist = textread('/groups/branson/home/robiea/Projects_data/Kai/expdirlist.txt','%s');
+
+% loco stage fixes for vglut fails when no fly has any walk bouts
+% explist = {'/groups/branson/bransonlab/flydisco_data/VNC2_EXT_VGLUT-GAL4_RigB_20231025T123239'
+%    '/groups/branson/bransonlab/flydisco_data/VNC2_EXT_VGLUT-GAL4_RigB_20231115T093545'};
+
+% 20260202 - run updated locostage on all experiments
+% test
+explist = textread('/groups/branson/home/robiea/Projects_data/FlyDisco/expdirlist_VNCall_20251011.txt','%s');
 
 
 % rootdatadir = '/groups/branson/bransonlab/flybubble_social';

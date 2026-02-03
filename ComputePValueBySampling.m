@@ -1,4 +1,4 @@
-function [fracsmaller_stat,fracbigger_stat] = ComputePValueBySampling(stati,filename,outfiledir)
+function [fracsmaller_stat,fracbigger_stat] = ComputePValueBySampling(stati,filename,outfiledir,iscircstat)
 
 rng default;
 
@@ -42,7 +42,7 @@ end
 isgoodline = ~isnan(linestats.normmeans.(statfn)) & ...
   ~isinf(linestats.normmeans.(statfn));
 
-for linei = 1:nlines-1,
+for linei = 1:nlines-1, % not sure why nlines-1? avoids control line which is listed last in my data? 
   
   if mod(linei,100) == 1,
     fprintf('Stat %s (%d / %d), line %s (%d / %d)\n',statfn,stati,nstats,...
@@ -102,15 +102,28 @@ for linei = 1:nlines-1,
     
     tmp = allstats.(statfn)(expsampleis);
     tmp = reshape(tmp,[nsamples,nexpscurr(setii)]);
+    if iscircstat(stati)
+        mu = circ_mean(tmp,[],2);
+        % setnormmu(:,setii) = mu - setstats.controlmeans.(statfn)(setsampleis)' + controlmean(stati);
+        % Circular offset
+        offset = circ_dist(mu, setstats.controlmeans.(statfn)(setsampleis)');
+        % Add offset to control mean (circular addition = regular addition + wrapping)
+        setnormmu(:, setii) = angle(exp(1i * (controlmean(stati) + offset)));    
+    else
     mu = mean(tmp,2);
     setnormmu(:,setii) = mu - setstats.controlmeans.(statfn)(setsampleis)' + controlmean(stati);
+    end
     
   end
-  
-  mu = mean(setnormmu,2);
-  fracsmaller_stat(linei) = nnz(mu<linestats.normmeans.(statfn)(linei))/nsamples;
-  fracbigger_stat(linei) = nnz(mu>linestats.normmeans.(statfn)(linei))/nsamples;
-  
+  if iscircstat(stati)
+      mu = circ_mean(setnormmu,[],2);
+      fracsmaller_stat(linei) = nnz(0>circ_dist(linestats.normmeans.(statfn)(linei),mu))/nsamples;
+      fracbigger_stat(linei) = nnz(0<circ_dist(linestats.normmeans.(statfn)(linei),mu))/nsamples;
+  else
+      mu = mean(setnormmu,2);
+      fracsmaller_stat(linei) = nnz(mu<linestats.normmeans.(statfn)(linei))/nsamples;
+      fracbigger_stat(linei) = nnz(mu>linestats.normmeans.(statfn)(linei))/nsamples;
+  end
 end
 
 if ~exist(outfiledir,'dir'),
