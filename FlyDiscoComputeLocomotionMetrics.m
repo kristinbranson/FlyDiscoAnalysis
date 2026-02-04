@@ -204,7 +204,7 @@ loco_analyzer.analyzeWalkAndStimConditions();
 % end
 
 % compute and save locostatsperexp
-loco_analyzer.computeStatsPerExp({'ON'});
+loco_analyzer.computeStatsPerExp();
 try
     perexpfilename = trx.dataloc_params.locomotionmetricsperexpfilestr;
     loco_analyzer.saveStatsPerExp(fullfile(expdir, perexpfilename));
