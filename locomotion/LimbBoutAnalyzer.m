@@ -25,6 +25,7 @@ classdef LimbBoutAnalyzer < handle
         validFrames = containers.Map()   % store computed digtal signals for restricting analysis frames in walk features
         walkMetrics = containers.Map()         % Store muttiple walk metric datasets
         locoStatsPerExp = struct()              % Flat struct of per-experiment stats; LED condition encoded in field names (LEDon/LEDoff)
+        walkStruct = struct()                  % Per-condition walk/step struct-of-arrays; fields: walkStruct.OFF.walk_struct, walkStruct.OFF.step_struct
 
         % Settings
         phase_methods = {'phaselag', 'phasediff_interp', 'phasediff_hilbert', 'phasediff_hilbert_global'}
@@ -345,6 +346,77 @@ classdef LimbBoutAnalyzer < handle
             fprintf('Per-experiment stats saved to: %s\n', filepath);
         end
 
+        function buildWalkStruct(obj, conditions)
+            % Build flat per-walk and per-step struct-of-arrays from in-memory
+            % walk_metrics and bout_metrics. Same logic as build_walk_struct.m
+            % but operates on data already held in the analyzer.
+            %
+            % Usage:
+            %   analyzer.buildWalkStruct();          % both ON and OFF
+            %   analyzer.buildWalkStruct({'OFF'});   % OFF only
+
+            if nargin < 2
+                conditions = {'ON', 'OFF'};
+            end
+
+            condMap = struct();
+            condMap.ON.boutKey  = 'walking_stimON_traj';
+            condMap.ON.walkKey  = 'led_on_traj';
+            condMap.OFF.boutKey = 'walking_stimOFF_traj';
+            condMap.OFF.walkKey = 'led_off_traj';
+
+            for c = 1:numel(conditions)
+                cond = conditions{c};
+                if ~isfield(condMap, cond)
+                    error('Unknown condition "%s". Use "ON" or "OFF".', cond);
+                end
+                cm = condMap.(cond);
+
+                if ~obj.boutMetrics.isKey(cm.boutKey)
+                    error('Bout metrics key "%s" not found. Run analyzeBoutAndStimConditions first.', cm.boutKey);
+                end
+                if ~obj.walkMetrics.isKey(cm.walkKey)
+                    error('Walk metrics key "%s" not found. Run analyzeWalkAndStimConditions first.', cm.walkKey);
+                end
+
+                bout_metrics = obj.boutMetrics(cm.boutKey);
+                walk_metrics = obj.walkMetrics(cm.walkKey);
+
+                [walk_struct, step_struct] = obj.buildWalkStructForCondition(walk_metrics, bout_metrics);
+                obj.walkStruct.(cond).walk_struct = walk_struct;
+                obj.walkStruct.(cond).step_struct = step_struct;
+            end
+
+            fprintf('Walk struct built for conditions: %s\n', strjoin(conditions, ', '));
+        end
+
+        function saveWalkStruct(obj, filename)
+            % Save walk struct to .mat file with variables named
+            % walk_struct_OFF, step_struct_OFF, etc.
+            %
+            % Usage: analyzer.saveWalkStruct('locomotion_walkstruct.mat')
+
+            if nargin < 2
+                filename = 'locomotion_walkstruct.mat';
+            end
+            if ~isempty(obj.expdir)
+                filepath = fullfile(obj.expdir, filename);
+            else
+                filepath = filename;
+            end
+
+            conds = fieldnames(obj.walkStruct);
+            save_data = struct();
+            for c = 1:numel(conds)
+                cond = conds{c};
+                save_data.(['walk_struct_' cond]) = obj.walkStruct.(cond).walk_struct;
+                save_data.(['step_struct_' cond]) = obj.walkStruct.(cond).step_struct;
+            end
+
+            save(filepath, '-struct', 'save_data');
+            fprintf('Walk struct saved to: %s\n', filepath);
+        end
+
         function analyzeCustomCondition(obj, condition_name, custom_digital_signal_traj)
             % Claude addition - haven't tested. Might be useful for other
             % ways to chop up data by stim. 
@@ -550,6 +622,462 @@ classdef LimbBoutAnalyzer < handle
             elseif numlimb == 6
                 limbname = sprintf('limb%s', num2str(ll));
             end
+        end
+
+        function [walk_struct, step_struct] = buildWalkStructForCondition(obj, walk_metrics, bout_metrics) %#ok<INUSL>
+            % Build flat per-walk and per-step struct-of-arrays from
+            % walk_metrics and bout_metrics held in memory.
+            % Core logic ported from build_walk_struct.m.
+
+            pw = walk_metrics.perwalk;
+            nwalks = numel(pw);
+            nlimb = 6;
+            legnames = {'RF','RM','RH','LH','LM','LF'};
+
+            %% Field name definitions
+            movement_fields = {'velmag_ctr','absdv_ctr','absdu_ctr','absdtheta', ...
+                'forward_vel','backward_vel','left_vel','right_vel', ...
+                'left_dtheta','right_dtheta','CoM_stability'};
+
+            phase_pairs = {'LM_LH','RM_RH','LF_LM','RF_RM','RM_LH','LM_RH','LF_RM','RF_LM'};
+            abs_phase_pairs = {'absRF_LF','absRM_LM','absRH_LH'};
+            abs_phase_outnames = {'absphase_RF_LF','absphase_RM_LM','absphase_RH_LH'};
+            phase_groups = {'ipsi_post_2','ipsi_ant_2','tripods_4','ipsi_P2A_4'};
+
+            phase_group_pairs = struct();
+            phase_group_pairs.ipsi_post_2 = {{'LM_LH','RM_RH'}};
+            phase_group_pairs.ipsi_ant_2 = {{'LF_LM','RF_RM'}};
+            phase_group_pairs.tripods_4 = {{'RF_LM','LM_RH','LF_RM','RM_LH'}};
+            phase_group_pairs.ipsi_P2A_4 = {{'LM_LH','RM_RH','LF_LM','RF_RM'}};
+            abs_group_pairs = {'absRF_LF','absRM_LM','absRH_LH'};
+
+            step_geom_2row = {'AEP','AEP_BL','PEP','PEP_BL'};
+            step_geom_scalar = {'amplitude_BL','amplitude_px','distance_BL','distance_px', ...
+                'length_BL','length_px','step_direction','speed_BLpers','speed_pxpers'};
+
+            tipspeed_bodyref = {'mean_tips_speed_bodyref','std_tips_speed_bodyref','min_speed_bodyref','max_speed_bodyref'};
+            tipspeed_globalref = {'mean_tips_speed_globalref','std_tips_speed_globalref','min_speed_globalref','max_speed_globalref'};
+            tipspeed_out_bodyref = {'mean','std','min','max'};
+            tipspeed_out_globalref = {'mean','std','min','max'};
+
+            %% ===== BUILD WALK_STRUCT =====
+
+            walk_struct = struct();
+
+            % --- Metadata ---
+            walk_struct.fly = [pw.fly];
+            walk_struct.walk_t0 = [pw.walk_t0];
+            walk_struct.walk_t1 = [pw.walk_t1];
+            walk_struct.walk_duration = walk_struct.walk_t1 - walk_struct.walk_t0 + 1;
+            walk_struct.nframes = walk_struct.walk_duration;
+
+            % --- Movement means ---
+            for m = 1:numel(movement_fields)
+                fn = movement_fields{m};
+                vals = nan(1, nwalks);
+                for w = 1:nwalks
+                    vals(w) = pw(w).(fn).mean;
+                end
+                walk_struct.(fn) = vals;
+            end
+
+            % --- Phase groups (circular) ---
+            for g = 1:numel(phase_groups)
+                gname = phase_groups{g};
+                vals = nan(1, nwalks);
+                for w = 1:nwalks
+                    vals(w) = pw(w).phasediff_hilbert.(gname).mean;
+                end
+                walk_struct.(['phase_' gname]) = vals;
+            end
+
+            % --- Abs phase group (non-circular) ---
+            vals = nan(1, nwalks);
+            for w = 1:nwalks
+                vals(w) = pw(w).phasediff_hilbert.abscontra_L2R_3.mean;
+            end
+            walk_struct.absphase_contra_L2R_3 = vals;
+
+            % --- Phase pairs (circular) ---
+            for p = 1:numel(phase_pairs)
+                pname = phase_pairs{p};
+                vals = nan(1, nwalks);
+                for w = 1:nwalks
+                    vals(w) = pw(w).phasediff_hilbert.(pname).mean;
+                end
+                walk_struct.(['phase_' pname]) = vals;
+            end
+
+            % --- Abs phase pairs (non-circular) ---
+            for p = 1:numel(abs_phase_pairs)
+                pname = abs_phase_pairs{p};
+                vals = nan(1, nwalks);
+                for w = 1:nwalks
+                    vals(w) = pw(w).phasediff_hilbert.(pname).mean;
+                end
+                walk_struct.(abs_phase_outnames{p}) = vals;
+            end
+
+            % --- Phase trim per limb ---
+            for limb = 1:nlimb
+                ln = legnames{limb};
+                sidx_vals = nan(1, nwalks);
+                eidx_vals = nan(1, nwalks);
+                for w = 1:nwalks
+                    pd = pw(w).phasediff_hilbert.phasedata(limb,:);
+                    valid = find(~isnan(pd));
+                    if ~isempty(valid)
+                        sidx_vals(w) = valid(1);
+                        eidx_vals(w) = valid(end);
+                    end
+                end
+                walk_struct.(['phase_sidx_' ln]) = sidx_vals;
+                walk_struct.(['phase_eidx_' ln]) = eidx_vals;
+            end
+
+            % --- Initialize per-limb walk fields ---
+            for limb = 1:nlimb
+                ln = legnames{limb};
+                for f = 1:numel(step_geom_2row)
+                    fname = step_geom_2row{f};
+                    walk_struct.(['step_' fname 'x_' ln]) = nan(1, nwalks);
+                    walk_struct.(['step_' fname 'y_' ln]) = nan(1, nwalks);
+                end
+                for f = 1:numel(step_geom_scalar)
+                    walk_struct.(['step_' step_geom_scalar{f} '_' ln]) = nan(1, nwalks);
+                end
+                walk_struct.(['step_instataeous_frequency_steps_' ln]) = nan(1, nwalks);
+                walk_struct.(['step_duration_' ln]) = nan(1, nwalks);
+                walk_struct.(['swing_duration_' ln]) = nan(1, nwalks);
+                walk_struct.(['stance_duration_' ln]) = nan(1, nwalks);
+                for stat = tipspeed_out_bodyref
+                    walk_struct.(['swing_tips_speed_bodyref_' stat{1} '_' ln]) = nan(1, nwalks);
+                    walk_struct.(['stance_tips_speed_bodyref_' stat{1} '_' ln]) = nan(1, nwalks);
+                end
+                for stat = tipspeed_out_globalref
+                    walk_struct.(['swing_tips_speed_globalref_' stat{1} '_' ln]) = nan(1, nwalks);
+                    walk_struct.(['stance_tips_speed_globalref_' stat{1} '_' ln]) = nan(1, nwalks);
+                end
+                walk_struct.(['step_nsteps_' ln]) = zeros(1, nwalks);
+            end
+
+            %% ===== BUILD INDEX MAPS AND COUNT STEPS =====
+
+            nflies = numel(bout_metrics.perfly);
+            stance_map = cell(nflies, nlimb);
+            swing_map = cell(nflies, nlimb);
+            for fly = 1:nflies
+                for limb = 1:nlimb
+                    stance_starts = bout_metrics.perfly(fly).perlimb(limb).stance.start_indices;
+                    swing_ends = bout_metrics.perfly(fly).perlimb(limb).swing.end_indices;
+                    sm = containers.Map('KeyType','int64','ValueType','int64');
+                    for k = 1:numel(stance_starts)
+                        sm(int64(stance_starts(k))) = int64(k);
+                    end
+                    stance_map{fly, limb} = sm;
+                    wm = containers.Map('KeyType','int64','ValueType','int64');
+                    for k = 1:numel(swing_ends)
+                        wm(int64(swing_ends(k))) = int64(k);
+                    end
+                    swing_map{fly, limb} = wm;
+                end
+            end
+
+            total_steps = 0;
+            for w = 1:nwalks
+                fly = pw(w).fly;
+                wt0 = pw(w).walk_t0;
+                wt1 = pw(w).walk_t1;
+                for limb = 1:nlimb
+                    step_data = bout_metrics.perfly(fly).perlimb(limb).step;
+                    step_t0s = step_data.stepfeatures.start_indices;
+                    step_t1s = step_data.stepfeatures.end_indices;
+                    total_steps = total_steps + sum(step_t0s >= wt0 & step_t1s <= wt1);
+                end
+            end
+
+            %% ===== PRE-ALLOCATE STEP_STRUCT =====
+
+            step_struct = struct();
+            step_struct.walk_idx = zeros(1, total_steps);
+            step_struct.fly = zeros(1, total_steps);
+            step_struct.limb = zeros(1, total_steps);
+            step_struct.step_t0 = nan(1, total_steps);
+            step_struct.step_t1 = nan(1, total_steps);
+
+            for f = 1:numel(step_geom_2row)
+                fname = step_geom_2row{f};
+                step_struct.([fname 'x']) = nan(1, total_steps);
+                step_struct.([fname 'y']) = nan(1, total_steps);
+            end
+            for f = 1:numel(step_geom_scalar)
+                step_struct.(step_geom_scalar{f}) = nan(1, total_steps);
+            end
+
+            step_struct.step_duration = nan(1, total_steps);
+            step_struct.instataeous_frequency_steps = nan(1, total_steps);
+
+            step_struct.stance_t0 = nan(1, total_steps);
+            step_struct.stance_t1 = nan(1, total_steps);
+            step_struct.stance_duration = nan(1, total_steps);
+            step_struct.swing_t0 = nan(1, total_steps);
+            step_struct.swing_t1 = nan(1, total_steps);
+            step_struct.swing_duration = nan(1, total_steps);
+
+            for stat = tipspeed_out_bodyref
+                step_struct.(['swing_tips_speed_bodyref_' stat{1}]) = nan(1, total_steps);
+                step_struct.(['stance_tips_speed_bodyref_' stat{1}]) = nan(1, total_steps);
+            end
+            for stat = tipspeed_out_globalref
+                step_struct.(['swing_tips_speed_globalref_' stat{1}]) = nan(1, total_steps);
+                step_struct.(['stance_tips_speed_globalref_' stat{1}]) = nan(1, total_steps);
+            end
+
+            for m = 1:numel(movement_fields)
+                step_struct.(movement_fields{m}) = nan(1, total_steps);
+            end
+
+            for p = 1:numel(phase_pairs)
+                step_struct.(['phase_' phase_pairs{p}]) = nan(1, total_steps);
+            end
+            for g = 1:numel(phase_groups)
+                step_struct.(['phase_' phase_groups{g}]) = nan(1, total_steps);
+            end
+            for p = 1:numel(abs_phase_outnames)
+                step_struct.(abs_phase_outnames{p}) = nan(1, total_steps);
+            end
+            step_struct.absphase_contra_L2R_3 = nan(1, total_steps);
+            step_struct.phase_valid = false(1, total_steps);
+
+            %% ===== MAIN LOOP: POPULATE WALK PER-LIMB FIELDS AND STEP_STRUCT =====
+
+            step_ct = 0;
+
+            for w = 1:nwalks
+                fly = pw(w).fly;
+                wt0 = pw(w).walk_t0;
+                wt1 = pw(w).walk_t1;
+
+                for limb = 1:nlimb
+                    ln = legnames{limb};
+
+                    step_data = bout_metrics.perfly(fly).perlimb(limb).step;
+                    swing_data = bout_metrics.perfly(fly).perlimb(limb).swing;
+                    stance_data = bout_metrics.perfly(fly).perlimb(limb).stance;
+
+                    step_t0s = step_data.stepfeatures.start_indices;
+                    step_t1s = step_data.stepfeatures.end_indices;
+
+                    match_mask = step_t0s >= wt0 & step_t1s <= wt1;
+                    match_idx = find(match_mask);
+
+                    if isempty(match_idx)
+                        continue;
+                    end
+
+                    nmatched = numel(match_idx);
+                    walk_struct.(['step_nsteps_' ln])(w) = nmatched;
+
+                    % --- Step geometry 2-row fields ---
+                    for f = 1:numel(step_geom_2row)
+                        fname = step_geom_2row{f};
+                        geom_vals_x = nan(1, nmatched);
+                        geom_vals_y = nan(1, nmatched);
+                        for si = 1:nmatched
+                            i = match_idx(si);
+                            st_key = int64(step_t0s(i));
+                            if stance_map{fly, limb}.isKey(st_key)
+                                sidx = stance_map{fly, limb}(st_key);
+                                geom_vals_x(si) = step_data.stepfeatures.(fname)(1, sidx);
+                                geom_vals_y(si) = step_data.stepfeatures.(fname)(2, sidx);
+                            end
+                        end
+                        walk_struct.(['step_' fname 'x_' ln])(w) = mean(geom_vals_x, 'omitnan');
+                        walk_struct.(['step_' fname 'y_' ln])(w) = mean(geom_vals_y, 'omitnan');
+                    end
+
+                    % --- Step geometry scalar fields ---
+                    for f = 1:numel(step_geom_scalar)
+                        fn = step_geom_scalar{f};
+                        walk_struct.(['step_' fn '_' ln])(w) = mean(step_data.stepfeatures.(fn)(match_idx), 'omitnan');
+                    end
+                    walk_struct.(['step_instataeous_frequency_steps_' ln])(w) = mean(step_data.stepfeatures.instataeous_frequency_steps(match_idx), 'omitnan');
+
+                    % --- Step duration ---
+                    walk_struct.(['step_duration_' ln])(w) = mean(step_data.stepfeatures.durations_time(match_idx), 'omitnan');
+
+                    % --- Stance and swing durations and tip speeds ---
+                    stance_durs = nan(1, nmatched);
+                    swing_durs = nan(1, nmatched);
+                    swing_tipspeed = struct();
+                    stance_tipspeed = struct();
+                    for ts = 1:numel(tipspeed_bodyref)
+                        swing_tipspeed.(tipspeed_bodyref{ts}) = nan(1, nmatched);
+                        stance_tipspeed.(tipspeed_bodyref{ts}) = nan(1, nmatched);
+                    end
+                    for ts = 1:numel(tipspeed_globalref)
+                        swing_tipspeed.(tipspeed_globalref{ts}) = nan(1, nmatched);
+                        stance_tipspeed.(tipspeed_globalref{ts}) = nan(1, nmatched);
+                    end
+
+                    for si = 1:nmatched
+                        i = match_idx(si);
+                        st_key = int64(step_t0s(i));
+                        if stance_map{fly, limb}.isKey(st_key)
+                            sidx = stance_map{fly, limb}(st_key);
+                            stance_durs(si) = stance_data.durations_time(sidx);
+                            for ts = 1:numel(tipspeed_bodyref)
+                                stance_tipspeed.(tipspeed_bodyref{ts})(si) = stance_data.(tipspeed_bodyref{ts})(sidx);
+                            end
+                            for ts = 1:numel(tipspeed_globalref)
+                                stance_tipspeed.(tipspeed_globalref{ts})(si) = stance_data.(tipspeed_globalref{ts})(sidx);
+                            end
+                        end
+                        sw_key = int64(step_t1s(i));
+                        if swing_map{fly, limb}.isKey(sw_key)
+                            swidx = swing_map{fly, limb}(sw_key);
+                            swing_durs(si) = swing_data.durations_time(swidx);
+                            for ts = 1:numel(tipspeed_bodyref)
+                                swing_tipspeed.(tipspeed_bodyref{ts})(si) = swing_data.(tipspeed_bodyref{ts})(swidx);
+                            end
+                            for ts = 1:numel(tipspeed_globalref)
+                                swing_tipspeed.(tipspeed_globalref{ts})(si) = swing_data.(tipspeed_globalref{ts})(swidx);
+                            end
+                        end
+                    end
+
+                    walk_struct.(['stance_duration_' ln])(w) = mean(stance_durs, 'omitnan');
+                    walk_struct.(['swing_duration_' ln])(w) = mean(swing_durs, 'omitnan');
+
+                    for ts = 1:numel(tipspeed_out_bodyref)
+                        walk_struct.(['swing_tips_speed_bodyref_' tipspeed_out_bodyref{ts} '_' ln])(w) = mean(swing_tipspeed.(tipspeed_bodyref{ts}), 'omitnan');
+                        walk_struct.(['stance_tips_speed_bodyref_' tipspeed_out_bodyref{ts} '_' ln])(w) = mean(stance_tipspeed.(tipspeed_bodyref{ts}), 'omitnan');
+                    end
+                    for ts = 1:numel(tipspeed_out_globalref)
+                        walk_struct.(['swing_tips_speed_globalref_' tipspeed_out_globalref{ts} '_' ln])(w) = mean(swing_tipspeed.(tipspeed_globalref{ts}), 'omitnan');
+                        walk_struct.(['stance_tips_speed_globalref_' tipspeed_out_globalref{ts} '_' ln])(w) = mean(stance_tipspeed.(tipspeed_globalref{ts}), 'omitnan');
+                    end
+
+                    % --- Populate step_struct for each matched step ---
+                    for si = 1:nmatched
+                        step_ct = step_ct + 1;
+                        i = match_idx(si);
+
+                        step_struct.walk_idx(step_ct) = w;
+                        step_struct.fly(step_ct) = fly;
+                        step_struct.limb(step_ct) = limb;
+                        step_struct.step_t0(step_ct) = step_t0s(i);
+                        step_struct.step_t1(step_ct) = step_t1s(i);
+
+                        step_struct.step_duration(step_ct) = step_data.stepfeatures.durations_time(i);
+                        step_struct.instataeous_frequency_steps(step_ct) = step_data.stepfeatures.instataeous_frequency_steps(i);
+
+                        st_key = int64(step_t0s(i));
+                        if stance_map{fly, limb}.isKey(st_key)
+                            sidx = stance_map{fly, limb}(st_key);
+                            for f = 1:numel(step_geom_2row)
+                                fname = step_geom_2row{f};
+                                step_struct.([fname 'x'])(step_ct) = step_data.stepfeatures.(fname)(1, sidx);
+                                step_struct.([fname 'y'])(step_ct) = step_data.stepfeatures.(fname)(2, sidx);
+                            end
+                            step_struct.stance_t0(step_ct) = stance_data.start_indices(sidx);
+                            step_struct.stance_t1(step_ct) = stance_data.end_indices(sidx);
+                            step_struct.stance_duration(step_ct) = stance_data.durations_time(sidx);
+                            for ts = 1:numel(tipspeed_bodyref)
+                                step_struct.(['stance_tips_speed_bodyref_' tipspeed_out_bodyref{ts}])(step_ct) = stance_data.(tipspeed_bodyref{ts})(sidx);
+                            end
+                            for ts = 1:numel(tipspeed_globalref)
+                                step_struct.(['stance_tips_speed_globalref_' tipspeed_out_globalref{ts}])(step_ct) = stance_data.(tipspeed_globalref{ts})(sidx);
+                            end
+                        end
+
+                        for f = 1:numel(step_geom_scalar)
+                            fn = step_geom_scalar{f};
+                            step_struct.(fn)(step_ct) = step_data.stepfeatures.(fn)(i);
+                        end
+
+                        sw_key = int64(step_t1s(i));
+                        if swing_map{fly, limb}.isKey(sw_key)
+                            swidx = swing_map{fly, limb}(sw_key);
+                            step_struct.swing_t0(step_ct) = swing_data.start_indices(swidx);
+                            step_struct.swing_t1(step_ct) = swing_data.end_indices(swidx);
+                            step_struct.swing_duration(step_ct) = swing_data.durations_time(swidx);
+                            for ts = 1:numel(tipspeed_bodyref)
+                                step_struct.(['swing_tips_speed_bodyref_' tipspeed_out_bodyref{ts}])(step_ct) = swing_data.(tipspeed_bodyref{ts})(swidx);
+                            end
+                            for ts = 1:numel(tipspeed_globalref)
+                                step_struct.(['swing_tips_speed_globalref_' tipspeed_out_globalref{ts}])(step_ct) = swing_data.(tipspeed_globalref{ts})(swidx);
+                            end
+                        end
+
+                        for m = 1:numel(movement_fields)
+                            fn = movement_fields{m};
+                            step_struct.(fn)(step_ct) = step_data.(fn).mean(i);
+                        end
+
+                        % Phase during step
+                        rel_t0 = step_t0s(i) - wt0 + 1;
+                        rel_t1 = step_t1s(i) - wt0 + 1;
+                        nwf = size(pw(w).phasediff_hilbert.phasedata, 2);
+                        rel_t0 = max(1, rel_t0);
+                        rel_t1 = min(nwf, rel_t1);
+
+                        for p = 1:numel(phase_pairs)
+                            pname = phase_pairs{p};
+                            pdata = pw(w).phasediff_hilbert.(pname).data(rel_t0:rel_t1);
+                            valid_pd = pdata(~isnan(pdata));
+                            if ~isempty(valid_pd)
+                                step_struct.(['phase_' pname])(step_ct) = circ_mean(valid_pd(:));
+                            end
+                        end
+
+                        for p = 1:numel(abs_phase_pairs)
+                            pname = abs_phase_pairs{p};
+                            pdata = pw(w).phasediff_hilbert.(pname).data(rel_t0:rel_t1);
+                            valid_pd = pdata(~isnan(pdata));
+                            if ~isempty(valid_pd)
+                                step_struct.(abs_phase_outnames{p})(step_ct) = mean(valid_pd);
+                            end
+                        end
+
+                        for g = 1:numel(phase_groups)
+                            gname = phase_groups{g};
+                            pairs_in_group = phase_group_pairs.(gname){1};
+                            all_data = [];
+                            for pg = 1:numel(pairs_in_group)
+                                pdata = pw(w).phasediff_hilbert.(pairs_in_group{pg}).data(rel_t0:rel_t1);
+                                all_data = [all_data, pdata]; %#ok<AGROW>
+                            end
+                            valid_pd = all_data(~isnan(all_data));
+                            if ~isempty(valid_pd)
+                                step_struct.(['phase_' gname])(step_ct) = circ_mean(valid_pd(:));
+                            end
+                        end
+
+                        all_data = [];
+                        for pg = 1:numel(abs_group_pairs)
+                            pdata = pw(w).phasediff_hilbert.(abs_group_pairs{pg}).data(rel_t0:rel_t1);
+                            all_data = [all_data, pdata]; %#ok<AGROW>
+                        end
+                        valid_pd = all_data(~isnan(all_data));
+                        if ~isempty(valid_pd)
+                            step_struct.absphase_contra_L2R_3(step_ct) = mean(valid_pd);
+                        end
+
+                        phase_sidx = walk_struct.(['phase_sidx_' ln])(w);
+                        phase_eidx = walk_struct.(['phase_eidx_' ln])(w);
+                        if ~isnan(phase_sidx) && ~isnan(phase_eidx)
+                            step_struct.phase_valid(step_ct) = (rel_t0 >= phase_sidx) && (rel_t1 <= phase_eidx);
+                        end
+                    end
+                end
+
+                if mod(w, 200) == 0
+                    fprintf('  Processed %d/%d walks\n', w, nwalks);
+                end
+            end
+
+            fprintf('  Built walk_struct: %d walks, step_struct: %d steps\n', nwalks, step_ct);
         end
 
         function statsperexp = combineBoutMetrics(obj, bout_metrics, led_label, statsperexp)
