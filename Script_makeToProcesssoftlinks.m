@@ -167,7 +167,8 @@
 % 20260204 - run updated locotage to only output locostatsperexp 
 % test
 explist = textread('/groups/branson/home/robiea/Projects_data/FlyDisco/expdirlist_VNCall_20251011.txt','%s');
-explist = explist(1:10);
+% test on 10 
+% explist = explist(end-10:end);
 
 % rootdatadir = '/groups/branson/bransonlab/flybubble_social';
 % for i = 1:numel(explist)
@@ -181,5 +182,5 @@ for i = 1:numel(explist)
     [~,expname] = fileparts(expdir);
     outdir = fullfile(toprocessdir,expname);
     cmd = sprintf('ln -s %s %s', expdir, outdir);
-    system(cmd)
+    system(cmd);
 end
