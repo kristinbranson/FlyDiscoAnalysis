@@ -12,3 +12,19 @@ The pipeline is organized into distinct stages that are run in
 sequence.  One of the first stages in the tracking stage, which
 extracts the positions and orientations of each fly in each frame.
 
+
+## FlyTracker calibration
+
+The `n_flies` field inside the parent calibration .mat file
+(`flytracker-parent-calibration.mat`) is **not used** during tracking.
+Instead, `n_flies` is read from `flytracker-options.txt` in the
+analysis protocol folder, and that value overrides whatever is in the
+.mat file.  See `core_tracker.m` lines 234-235:
+
+```matlab
+if isfield(working_options, 'n_flies') && ~isempty(working_options.n_flies) ,
+    pre_fitting_calibration.n_flies = working_options.n_flies ;
+```
+
+The same applies to `n_flies_is_max` and `arena_r_mm`.
+
