@@ -171,6 +171,7 @@ updateEditsListboxesAndPopupmenus(handles);
 
 % Make the figure visible
 set(hObject,'Visible','on');
+uiwait(hObject);
 
 return
 
@@ -663,6 +664,7 @@ if basicParamsStruct.fromAPT
   scoreFileName=basicParamsStruct.file.scorefilename;
   wfparams=basicParamsStruct.windowFeaturesParams;
   cstuff=basicParamsStruct.classifierStuff;
+  sublexcon = basicParamsStruct.sublexiconPFNames;
   everythingParams = Macguffin(basicParamsStruct.featureLexiconName,basicParamsStruct.aptInfo);
   everythingParams.behaviors.names=behaviorName;
   everythingParams.behaviors.labelcolors=labelColors;
@@ -672,6 +674,7 @@ if basicParamsStruct.fromAPT
   everythingParams.file.scorefilename=scoreFileName;
   everythingParams.windowFeaturesParams=wfparams;
   everythingParams.classifierStuff=cstuff;
+  everythingParams.sublexiconPFNames = sublexcon;
 else
   everythingParams = Macguffin(basicParamsStruct); 
 end
@@ -710,6 +713,11 @@ try
 if ismember('Target Type',sellist)
     handles.basicParamsStruct.featureLexiconName = origparams.x.featureLexiconName;
     handles.basicParamsStruct.featureLexicon = origparams.x.featureLexicon;
+    handles.basicParamsStruct.fromAPT = origparams.x.fromAPT;
+    handles.basicParamsStruct.aptInfo = origparams.x.aptInfo;
+    if origparams.x.fromAPT
+      set(handles.radiobutton_apt,'Value',1);
+    end
 end
 
 if ismember('Behavior Name and File Names',sellist)
@@ -1075,7 +1083,10 @@ else
   end
   % Get the detail of APT
   lbl_file = fullfile(fpath,fname);
-  aptStruct = APTProject('lbl_file',lbl_file);
+  % aptStruct = APTProject('lbl_file',lbl_file);
+  temp_data = appData;
+  APTProject_App(temp_data,'lbl_file',lbl_file);
+  aptStruct = temp_data.aptStruct;
 end
 
 if isempty(aptStruct.featureLexicon)
@@ -1096,6 +1107,8 @@ movieFileName=handles.basicParamsStruct.file.moviefilename;
 movieIndexFileName=handles.basicParamsStruct.file.movieindexfilename;
 trackFileName=handles.basicParamsStruct.file.trxfilename;
 scoreFileName=handles.basicParamsStruct.file.scorefilename;
+
+handles.basicParamsStruct.featureLexiconName = aptStruct.origFeatureLexiconName;
 % Replace basicParamsStruct with one appropriate to the new feature lexicon
 % name
 old=warning('query','MATLAB:structOnObject');
@@ -1192,7 +1205,11 @@ if fname == 0,
 end
 % Get the detail of APT
 lbl_file = fullfile(fpath,fname);
-aptStruct = APTProject('lbl_file',lbl_file,'aptStruct',handles.basicParamsStruct.aptInfo);
+% aptStruct = APTProject('lbl_file',lbl_file,'aptStruct',handles.basicParamsStruct.aptInfo);
+temp_data = appData;
+APTProject_App(temp_data,'lbl_file',lbl_file,'aptStruct',handles.basicParamsStruct.aptInfo);
+aptStruct = temp_data.aptStruct;
+
 if isempty(aptStruct.featureLexicon)
   set(handles.radiobutton_apt,'Value',0);
   set(handles.radiobutton_list,'Value',1);

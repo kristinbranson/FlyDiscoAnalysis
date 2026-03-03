@@ -2924,10 +2924,11 @@ classdef JLabelData < matlab.mixin.Copyable
           return;
         end
       end
+      fprintf('Checked that all per-frame feature files exist.\n');
       
       stInfo = obj.stInfo;
       all_update = false(1,nPerframeFeatures);
-      for j = 1:nPerframeFeatures % TODO: change to parfor if it is for
+      parfor j = 1:nPerframeFeatures % TODO: change to parfor if it is for
         perframeFileName=perframeFileNameList{j};
         [ftmp,funits,update] = readPFData(perframeFileName,iTarget,stInfo);
 %         tmp = load(perframeFileName);
@@ -2938,6 +2939,8 @@ classdef JLabelData < matlab.mixin.Copyable
         perframeunits{j} = funits;
         all_update(j) = update;        
       end
+      fprintf('Loaded in all per-frame feature data.\n');
+
       if any(all_update)
           warndlg('The perframe features were generated with different parameters. To regenerate them with new parameters, delete them. JAABA, for now, will continue to use existing ones.'); 
       end
@@ -7326,7 +7329,7 @@ classdef JLabelData < matlab.mixin.Copyable
         macguffin = loadAnonymous(fileNameAbs);
         if isstruct(macguffin)
           if isfield(macguffin,'fromAPT') && macguffin.fromAPT
-            macguffin = Macguffin(macguffin,macguffin.aptInfo);
+            macguffin = Macguffin(macguffin,macguffin.aptInfo,true);
 
             % keep a copy of info as they will get removed when Macguffin
             % is called.
@@ -7501,7 +7504,8 @@ classdef JLabelData < matlab.mixin.Copyable
     % ---------------------------------------------------------------------
     function openJabFileNoExps(self, ...
         fileNameAbs, ...
-        groundTruthingMode)
+        groundTruthingMode,...
+        varargin)
       
       self.gtMode = groundTruthingMode;
       
@@ -7520,6 +7524,15 @@ classdef JLabelData < matlab.mixin.Copyable
         end
       end
       macguffin.modernize(true);
+
+      % override 
+      for i = 1:2:numel(varargin)-1,
+        if isprop(macguffin,varargin{i}),
+          macguffin.(varargin{i}) = varargin{i+1};
+        else
+          warning('%s is not a property of Macguffin, ignoring',varargin{i});
+        end
+      end
       
       % Set the JLD to match the Macguffin
       self.setMacguffin(macguffin,false);
@@ -7832,6 +7845,7 @@ classdef JLabelData < matlab.mixin.Copyable
     
     % ---------------------------------------------------------------------
     function setMacguffin(obj,everythingParams,loadexps)
+     
       % This initializes the JLabelData object based on the contents of
       % everythingParams
   

@@ -50,3 +50,18 @@ tpt:         7179febc99a591f386eeba79239078dd533e7c3a
 
 ALT
 2025-11-14
+
+-----
+
+Bumped JAABA version, by doing a three-way merge to preserve
+FlyDiscoAnalysis-specific changes.  New commits at last sync:
+
+APT:         82a719dfcbdacc07854cc56e1043e7508c9868d3
+FlyTracker:  8bbbacf17192e52976714fdcd0a8737139df63aa
+JAABA:       ad4843e21e99122f988da74de44b804884bf9d3f
+tmt:         07cfdec91babcd92c0e21a8997708bfc6fe99236
+tpt:         7179febc99a591f386eeba79239078dd533e7c3a
+
+ALT
+2026-03-03
+
