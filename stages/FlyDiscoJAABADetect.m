@@ -24,10 +24,18 @@ jabfiles = read_one_file_name_per_line(jaabaclassifierparamsfilestrs) ;
 % Set the fastcomputepffs option
 if isfield(dataloc_params, 'jaabadetectparamsfilestr')
   paramsfile = fullfile(settingsdir, analysis_protocol, dataloc_params.jaabadetectparamsfilestr) ;
-  params = ReadParams(paramsfile) ;
-  fastcomputepffs = logical(params.fastcomputepffs) ;
+  if exist(paramsfile, 'file')
+    params = ReadParams(paramsfile) ;
+    if isfield(params, 'fastcomputepffs')
+      fastcomputepffs = logical(params.fastcomputepffs) ;
+    else
+      fastcomputepffs = false ;
+    end
+  else
+    fastcomputepffs = false ;
+  end
 else
-  fastcomputepffs = false ;  
+  fastcomputepffs = false ;
 end
 
 % Actually call JAABADetect()
