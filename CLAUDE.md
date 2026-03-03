@@ -28,3 +28,9 @@ if isfield(working_options, 'n_flies') && ~isempty(working_options.n_flies) ,
 
 The same applies to `n_flies_is_max` and `arena_r_mm`.
 
+
+## Git and GitHub
+
+Commit messages should start with "<branch name>: ".
+
+Don't credit Claude in commit messages.
