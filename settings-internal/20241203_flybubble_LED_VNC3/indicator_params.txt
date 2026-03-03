@@ -1,0 +1,5 @@
+indicatorwindowr,35
+pad,20
+OptogeneticExp,1
+maxDistCornerFrac_LEDLabel,.16
+LEDMarkerType,A,LEDTemplates_RGG.png,B,LEDTemplates_RGG.png,C,LEDTemplates_RGG.png,D,LEDTemplates_RGG.png

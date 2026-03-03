@@ -1,0 +1,3 @@
+/groups/branson/home/bransonlab/JAABAProjectFiles/FlyBubble/Walk_RM.jab
+/groups/branson/home/bransonlab/JAABAProjectFiles/FlyBubble/Walk2p1.jab
+/home/taylora/flydisco-local/jdetect-feature-reducing-2/nottracking_aptv4.jab

@@ -1,11 +1,14 @@
 function [success,x,y] = ...
-  getFeaturePoint(filI, ...
-                  minTemplateFeatureStrength)
+  getFeaturePoint(templateMatchImage, ...
+                  minTemplateMatchStrength)
 
 % find the strongest feature
-[nc,nr,~] = size(filI) ;
-[featureStrength,j] = max(filI(:));
-[y,x] = ind2sub([nr,nc],j);
+assert(ismatrix(templateMatchImage), 'Internal error: templateMatchImage in getFeaturePoint() must be a matrix') ;
+[nr, nc] = size(templateMatchImage) ;
+[featureStrength, j] = max(templateMatchImage(:)) ;
+[y, x] = ind2sub([nr nc], j) ;
 
 % make sure it meets threshold
-success = (featureStrength >= minTemplateFeatureStrength) ;
+success = (featureStrength >= minTemplateMatchStrength) ;
+
+end  % function

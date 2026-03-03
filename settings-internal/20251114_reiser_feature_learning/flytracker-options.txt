@@ -1,0 +1,4 @@
+num_cores,8
+num_chunks,16
+n_flies,16
+n_flies_is_max,1

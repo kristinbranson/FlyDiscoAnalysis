@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<link rel="stylesheet" type="text/css" charset="utf-8" media="all" 
+href="styles/common.css">
+<link rel="stylesheet" type="text/css" charset="utf-8" media="screen" 
+href="styles/screen.css">
+<link rel="stylesheet" type="text/css" charset="utf-8" media="print" 
+href="styles/print.css">
+<link rel="stylesheet" type="text/css" charset="utf-8" 
+media="projection" href="styles/projection.css">
+
+<style type="text/css">
+strong.regular-font {
+  font-family: Arial, Lucida Grande, sans-serif;
+  font-style: italic;
+  font-size: 0.9em;
+}
+</style>
+
+<!--- OLD FORMATTING
+<style type="text/css">
+table {
+background-color:yellow;border:1px dotted black;width:80%;border-collapse:collapse;
+}
+table, td
+{
+padding:3px;
+}
+table, th{
+padding:3px; background-color:orange;color:white;
+}
+table, tr
+{
+padding:3px; background-color:yellow;color:black;
+
+}
+</style>
+--->
+
+</head>
+
+<body>
+<center><h1> Installation and Starting <a href="index.html">JAABA</a></h1></center>
+<br>
+<p>JAABA can either be run 
+<ul>
+<li> <a href="#Executables">Without MATLAB</a> using executables that can be <b>downloaded and clicked</b> on (users without an up-to-date version of MATLAB (>= R2012a)) or</li>
+<li> <a href="#Source">With MATLAB</a> from the MATLAB command line using our <b>source code</b>. 
+</ul>
+Please follow the appropriate instructions below. </p>
+
+<hr class="h2-divider">
+
+<h2><a id="Contents">Contents</a></h2>
+<ul>
+<li><a href="#ComputerRequirements">Minimum Computer Requirements</a></li>
+<li><a href="#Executables">Installation and Start-up: No MATLAB</a></li>
+<ul>
+<li><a href="#ExecutablesSoftwareRequirements">Software Requirements (No MATLAB)</a></li>
+<li><a href="#ExecutablesInstallation">Installation (No MATLAB)</a></li>
+<li><a href="#ExecutablesStartUp">Start-Up (No MATLAB)</a></li>
+</ul>
+<li><a href="#Source">Installation and Start-up: With MATLAB</a></li>
+<ul>
+<li><a href="#SourceSoftwareRequirements">Software Requirements (With MATLAB)</a></li>
+<li><a href="#SourceInstallation">Installation (With MATLAB)</a></li>
+<li><a href="#SourceStartUp">Start-Up (With MATLAB)</a></li>
+</ul>
+<li><a href="#WindowsFirewall">Windows Firewall Security Warning</a></li>
+</ul>
+
+<hr class="h2-divider">
+
+<h2><a id="ComputerRequirements">Minimum Computer Requirements</a></h3>
+
+JAABA can run on <b>Linux (64-bit)</b>, <b>Windows (32- or 64-bit)</b>, or <b>Mac OS X (64-bit)</b> systems with at least <b>4GB RAM</b>. JAABA uses parallel computation, and will be faster on multicore machines. JAABA is a <b>computationally intensive</b> program, and will run better on better machines. The amount of memory required scales with the complexity of the behavior. 
+
+To use the development version of the software, MATLAB version >= R2012a is required. 
+
+<hr class="h2-divider">
+
+<h2><a id="Executables">Installation and Start-up: No MATLAB</a></h2>
+
+Users who do not have an up-to-date version of MATLAB should use the executable version of JAABA. This only requires downloading a program and clicking it. 
+
+<h3><a id="ExecutablesSoftwareRequirements">Software Requirements (No MATLAB)</a></h3>
+
+The only requirement is the freely available <a href="http://www.mathworks.com/products/compiler/mcr/index.html">Matlab Compiler Runtime (MCR)</a> for R2012a. <a href="http://www.mathworks.com/products/compiler/mcr/index.html">MCR installers and instructions</a> are available at Mathworks website.</li>
+
+<h3><a id="ExecutablesInstallation">Installation (No MATLAB)</a></h3>
+
+<ol>
+<li> Download and install the <b>Matlab Compiler Runtime (MCR).</b>. <a href="http://www.mathworks.com/products/compiler/mcr/index.html">MCR installers
+and instructions </a> are available at Mathworks website.</li>
+<ul> 
+<li> For <b>Windows</b>, JAABA versions >= <b>0.6.0</b>, please use MCR <b>R2014b</b>. </li>
+<li> For <b>Mac</b>, JAABA versions >= <b>0.6.0</b>, please use MCR <b>R2014a</b>. </li>
+<li> For <b>older versions</b> of JAABA, use <b>MCR R2012a</b>. 
+</ul>
+<li> <b>Download</b> the JAABA package for your system from
+<a href="http://sourceforge.net/projects/jaaba/files">http://sourceforge.net/projects/jaaba/files</a>.
+<li> <b>Unzip</b> the package zip file. </li>
+<li> <b>Leave the executable</b> in the directory in the package. You can move the entire directory, but JAABA
+relies on other files in that directory, so please leave them in the same directory. </li>
+</ol>
+
+<h3><a id="ExecutablesStartUp">Start-Up (No MATLAB)</a></h3>
+
+Within the package, there is an executable program. The name of this file depends on the OS:
+<ul>
+<li> <b>Windows</b>: Double-click <b>JAABA.exe</b> to run JAABA. The first time you run this program, you may receive a Windows Security Warning from your firewall. This is normal, and we recommend allowing JAABA to run. See <a href="#WindowsFirewall">Windows Firewall Security Warning</a> below for more information. </li>
+<li> <b>Mac OS X</b>: Double-click the <b>JAABA</b> application to run JAABA.</li>
+<li> <b>Linux</b>: The shell script <b>run_JAABA.sh</b> runs JAABA. It should be run from within the JAABA package directory using the command
+<pre>./run_JAABA.sh [MCR location]</pre>
+</ul>
+Please be <b>patient</b>. Loading the MATLAB MCR is slow, hence once you run the executable it may take some time for JAABA to appear.
+
+<hr class="h2-divider">
+
+<h2><a id="Source">Installation and Start-up: (With MATLAB)</a></h2>
+
+Users with an up-to-date version of <b>MATLAB</b> and/or wanting to use the <b>development version</b> of JAABA can run JAABA from the source code within MATLAB. 
+
+<h3><a id="SourceSoftwareRequirements">Software Requirements (With MATLAB)</a></h3>
+
+<ul>
+<li> <a href="www.mathworks.com/">MATLAB</a> version >= 2012a (7.14.0.739)</li>
+<li> MATLAB Parallel Computing, Image Processing, and Statistics Toolboxes</li>
+</ul>
+
+<h3><a id="SourceInstallation">Installation (Advanced)</a></h3>
+
+<ol>
+<li> <b>Download</b> the source code. There are two options:
+<ul>
+<li> <b>git</b>: Clone the JAABA git repository at our <a href="https://github.com/kristinbranson/JAABA">github</a> site. There are <a href="http://sixrevisions.com/resources/git-tutorials-beginners/">lots of tutorials on using git</a>. Using git to version JAABA will allow one to easily obtain updates and bug fixes to the code.</li>
+<li> <b>zip file</b>: Download a <a href="https://github.com/kristinbranson/JAABA/archive/master.zip">source code zip file</a>. </li>
+</ul>
+<li> Change into the directory <b>perframe</b>:
+<pre>cd [JAABA location]/perframe</pre>
+</li>
+<li> Run <b>StartJAABA</b> on the command line to start JAABA.</li>
+</ol>
+
+<hr class="h2-divider">
+
+<h2><a id="WindowsFirewall">Windows Firewall Security Warning</a></h2>
+
+When JAABA is started for the first time in Windows, it may trigger a Windows Security Warning from your firewall. This is normal, and
+we recommend you allow JAABA to proceed. This warning is triggered when JAABA calls 
+<a href="http://www.mathworks.com/help/distcomp/matlabpool.html"><code>matlabpool</code></a>, 
+part of MATLAB's Parallel Computing Toolbox. The Parallel Computing Toolbox can be used to distribute
+jobs over a many computers over a network, which is why Windows creates a warning. JAABA only uses multiprocessing on a single machine, and thus will not be accessing your network. 
+
+When JAABA starts, it will ask you whether you want to:
+<ul>
+<li>Start a new project</li>
+<li>Open an existing project in training mode</li>
+<li>Open an existing project in ground-truthing mode</li>
+</ul>
+Training mode is the standard mode 
+</p>
+
+If you choose to <b>Start a new project</b> the <b>New...</b> dialog box will open, see <a href="NewProject.html">Creating a New Project</a> for more information. 
+
+If you choose to <b>Open an existing project in training mode</b>, you can open a project you have previously created to add new training data and train new classifiers. 
+
+If you choose to <b>Open an existing project in ground-truthing mode</b>, you can open a project you have previously created to quantitatively evaluate a classifier's performance on data selected in an unbiased manner. 
+
+<footer>
+<hr class="h1-divider">
+<center>
+<a href="index.html">JAABA Documentation Home</a> | <a href="https://groups.google.com/forum/?fromgroups#!forum/jaaba">jaaba@googlegroups.com</a> | <i>Last Updated June 25, 2013</i>
+</center>
+</footer>
+
+</body>
+</html>

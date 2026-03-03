@@ -1,0 +1,16 @@
+doautomaticchecksincoming,force
+doflytracking,on
+doaddpflies,off
+doregistration,on
+doledonoffdetection,on
+dosexclassification,on
+docomputeperframefeatures,on
+docomputehoghofperframefeatures,off
+dojaabadetect,on
+dolocomotionmetrics,on
+docomputeperframestats,off
+doplotperframestats,off
+domakectraxresultsmovie,on
+doapt,on
+domakeaptresultsmovie,on
+doautomaticcheckscomplete,force

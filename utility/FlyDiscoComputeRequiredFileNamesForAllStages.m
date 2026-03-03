@@ -8,7 +8,12 @@ function result = FlyDiscoComputeRequiredFileNamesForAllStages(analysis_protocol
 
 % This is sometimes needed to determine what files to expect
 metadatafile = fullfile(expdir,dataloc_params.metadatafilestr);
-metadata = ReadMetadataFile(metadatafile);
+if exist(metadatafile, 'file')
+  metadata = ReadMetadataFile(metadatafile);
+else
+  warningNoTrace('No metadata file found.  Hopefully that''s ok.') ;
+  metadata = struct() ;
+end
 
 name_from_stage_index = FlyDiscoStageNames() ;
 stage_count = numel(name_from_stage_index) ;
@@ -102,6 +107,8 @@ for stage_index = 1 : stage_count ,
   elseif strcmp(stage_name, 'automaticcheckscomplete') ,
     required_file_names = { dataloc_params.automaticcheckscompleteresultsfilestr, ...
                             dataloc_params.automaticcheckscompleteinfomatfilestr } ;
+  elseif strcmp(stage_name, 'cleanup') ,
+    required_file_names = cell(1,0) ;
   else
     error('Unknown stage name %s', stage_name) ;
   end

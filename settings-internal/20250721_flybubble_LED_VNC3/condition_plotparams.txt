@@ -1,0 +1,9 @@
+# condition,color,marker
+fly:female,frame:stimstrg,0.6350    0.0780    0.1840,o
+fly:any,frame:prestim,.35 .35 .35,o
+fly:any,frame:stimweak,0.7445    0.3546    0.4288,o
+fly:any,frame:stimmed,0.7080    0.2624    0.3472,o
+fly:any,frame:stimstrg,0.6532    0.1241    0.2248,o
+fly:any,frame:walk,0.6350    0.0780    0.1840,o
+fly:any,frame:walkprestim,.35 .35 .35,o
+

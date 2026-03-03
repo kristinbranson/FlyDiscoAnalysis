@@ -1,5 +1,5 @@
 experiment_folder_path = ...
-  '/groups/branson/bransonlab/taylora/flydisco/example-experiments/pflySingleMale_pfly_SlowRamp_71G01_UASChrimsonVenusX0070_20240320T102203' ;
+  '/groups/otopalik/otopaliklab/taylora/test-data-read-only/pflySingleMale_pfly_SlowRamp_71G01_UASChrimsonVenusX0070_20240320T102203' ;
 dot_movie_path = fullfile(experiment_folder_path, 'dotmovie.ufmf') ;
 %playfmf([], dotmovie_path) ;
 movie_path = fullfile(experiment_folder_path, 'movie.ufmf') ;
@@ -338,7 +338,7 @@ fake_trx = ...
                                    calib, fake_fly_params, maximum_real_fly_id, arena_center_shift, do_debug)
 
 % Concatenated the real tracks to the fake ones
-augmented_original_trx = arrayfun(@(s)(add_fields(s, 'is_pfly', false)), original_trx) ;
+augmented_original_trx = arrayfun(@(s)(add_fields(s, 'is_pfly', false, 'is_pfly_on', [])), original_trx) ;
 trx = [ augmented_original_trx fake_trx ] ;
 
 timestamps = (1/calib.FPS) * ( 0 : frame_count )' ;

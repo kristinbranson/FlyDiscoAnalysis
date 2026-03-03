@@ -10,22 +10,27 @@ indicatordata = myparse(varargin,'indicatordata',[]);
 datalocparamsfile = fullfile(settingsdir,analysis_protocol,'dataloc_params.txt');
 dataloc_params = ReadParams(datalocparamsfile);
 
-% Get one thing from the indicator params
-indicatorparamsfile = fullfile(settingsdir,analysis_protocol,dataloc_params.indicatorparamsfilestr);
-if exist(indicatorparamsfile,'file'),
-  indicator_params = loadIndicatorParams(indicatorparamsfile) ;
-  isOptogeneticExp = logical(indicator_params.OptogeneticExp) ;
-else
-  isOptogeneticExp = false ;
-end
+% Get a few things from the indicator params
+[isOptogeneticExp, doesUseProtocolDotMat, indicator_params_or_empty] = ...
+  readOptoStatusAndProtocolUseFromIndicatorParamsFile(settingsdir, analysis_protocol, dataloc_params.indicatorparamsfilestr) ;
 
-% This check only makes sense for opto experiments
-if ~isOptogeneticExp ,
+% This check only makes sense for opto experiments with protocol
+if ~(isOptogeneticExp && doesUseProtocolDotMat)
   return
 end
 
+% There should now be indicator params
+if isempty(indicator_params_or_empty)
+  error('Missing indicator params file %s', dataloc_params.indicatorparamsfilestr) ;
+end
+indicator_params = indicator_params_or_empty ;
+
 % Read in the LED protocol, compute the total protocol duration
 ledprotocolfile = fullfile(expdir,dataloc_params.ledprotocolfilestr);
+if ~exist(ledprotocolfile, 'file') 
+  warning('LED protocol file %s does not exist, so not comparing number of LED pulses to a protocol', ledprotocolfile) ;
+  return
+end
 raw_protocol = loadAnonymous(ledprotocolfile) ;
 protocol = downmixProtocolIfNeeded(raw_protocol, indicator_params) ;
 
