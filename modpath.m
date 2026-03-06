@@ -52,7 +52,7 @@ function modpath()
   addpath(fullfile(path_to_this_folder, 'tests'), '-begin') ;
   addpath(fullfile(path_to_this_folder, 'scripts'), '-begin') ;
   addpath(fullfile(path_to_this_folder, 'debug'), '-begin') ;
-  addpath(fullfile(path_to_this_folder, 'main'), '-begin') ;
+  addpath(fullfile(path_to_this_folder, 'core'), '-begin') ;
   addpath(fullfile(path_to_this_folder, 'stages'), '-begin') ;
   
   % Finally, add this folder itself, so we don't have to stay in this folder
