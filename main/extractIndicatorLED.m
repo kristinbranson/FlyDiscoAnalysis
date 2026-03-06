@@ -96,16 +96,17 @@ end
 % of that region for each frame
 pixel_max_signal = zeros(mask_count,nframes) ;
 pixel_mean_signal = zeros(mask_count,nframes) ;
+mask_pixel_count = sum(trimmed_mask_from_mask_index, [1 2]) ;  % 1 x 1 x mask_count, count of non-zero pixels per mask
 fprintf('Extracting LED indicator signal from video frames...\n') ;
 pbo = progress_bar_object(nframes) ;
 for frame_index = 1:nframes
   frame = readfcn(frame_index);
   detail = double(frame(trimmed_mask_lo_bound_in_frame_coords(1):trimmed_mask_hi_bound_in_frame_coords(1), ...
                         trimmed_mask_lo_bound_in_frame_coords(2):trimmed_mask_hi_bound_in_frame_coords(2))) ;
-  masked_detail = detail .* trimmed_mask_from_mask_index ;  % detail_height x detail_width x mark_count
+  masked_detail = detail .* trimmed_mask_from_mask_index ;  % detail_height x detail_width x mask_count
   pixel_max_signal(:,frame_index) = reshape(max(masked_detail, [], [1 2]), ...
                                             [mask_count 1]) ;
-  pixel_mean_signal(:,frame_index) = reshape(mean(masked_detail, [1 2]), ...
+  pixel_mean_signal(:,frame_index) = reshape(sum(masked_detail, [1 2]) ./ mask_pixel_count, ...
                                              [mask_count 1]) ;
   if (mod(frame_index,1000) == 0) ,    
     pbo.update(1000) ;
