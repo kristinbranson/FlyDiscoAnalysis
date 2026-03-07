@@ -117,6 +117,9 @@ indicatorfile = fullfile(expdir,dataloc_params.indicatordatafilestr);
 metadatafile = fullfile(expdir,dataloc_params.metadatafilestr);
 metadata = ReadMetadataFile(metadatafile);
 if isOptogeneticExp,
+  if ~isfield(metadata, 'led_protocol') ,
+    error('Optogenetic experiment but metadata in file %s is missing the led_protocol field, which is required for the nonce', metadatafile) ;
+  end
   datestrpattern = '20\d{6}';
   match = regexp(metadata.led_protocol,datestrpattern);
   assert(numel(match)==1);

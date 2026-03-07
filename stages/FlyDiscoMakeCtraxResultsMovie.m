@@ -43,27 +43,32 @@ if isOptogeneticExp ,
   % So we extract that date from the led_protocol field, and check if there's a
   % file named ctraxresultsmovie_params_<date>.txt in the analysis-protocol
   % file.  I think everyone acknowledges this is a little hacky.
-  datestrpattern = '20\d{6}';
-  match = regexp(metadata.led_protocol,datestrpattern);
-  if isempty(match) ,
-    % The led_protocol field does not seem to contain a date, so fall back to
-    % usual Ctrax results movie parameter file.
+  if ~isfield(metadata, 'led_protocol') ,
     ctraxresultsmovie_params = ReadParams(defaultctraxresultsmovieparamsfile);
     is_using_default_ctrax_results_movie_params = 1 ;
   else
-    % The led_protocol field seems to contain a date in the right format, so check
-    % for a matching ctraxresultsmovie_params_<date>.txt file.
-    ledprotocoldatestr = metadata.led_protocol(match:match+7);
-    specificctraxresultsmovie_paramsfile = fullfile(settingsdir,analysis_protocol,['ctraxresultsmovie_params_',ledprotocoldatestr,'.txt']);
-    if exist(specificctraxresultsmovie_paramsfile,'file'),
-      % The ctraxresultsmovie_params_<date>.txt file exists, so use it.
-      ctraxresultsmovie_params = ReadParams(specificctraxresultsmovie_paramsfile);
-      is_using_default_ctrax_results_movie_params = 0 ;
-    else
-      % The ctraxresultsmovie_params_<date>.txt file does not seem to exist, so fall back to
+    datestrpattern = '20\d{6}';
+    match = regexp(metadata.led_protocol,datestrpattern);
+    if isempty(match) ,
+      % The led_protocol field does not seem to contain a date, so fall back to
       % usual Ctrax results movie parameter file.
       ctraxresultsmovie_params = ReadParams(defaultctraxresultsmovieparamsfile);
       is_using_default_ctrax_results_movie_params = 1 ;
+    else
+      % The led_protocol field seems to contain a date in the right format, so check
+      % for a matching ctraxresultsmovie_params_<date>.txt file.
+      ledprotocoldatestr = metadata.led_protocol(match:match+7);
+      specificctraxresultsmovie_paramsfile = fullfile(settingsdir,analysis_protocol,['ctraxresultsmovie_params_',ledprotocoldatestr,'.txt']);
+      if exist(specificctraxresultsmovie_paramsfile,'file'),
+        % The ctraxresultsmovie_params_<date>.txt file exists, so use it.
+        ctraxresultsmovie_params = ReadParams(specificctraxresultsmovie_paramsfile);
+        is_using_default_ctrax_results_movie_params = 0 ;
+      else
+        % The ctraxresultsmovie_params_<date>.txt file does not seem to exist, so fall back to
+        % usual Ctrax results movie parameter file.
+        ctraxresultsmovie_params = ReadParams(defaultctraxresultsmovieparamsfile);
+        is_using_default_ctrax_results_movie_params = 1 ;
+      end
     end
   end
 else

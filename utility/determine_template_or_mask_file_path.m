@@ -10,6 +10,9 @@ if ischar(specification) ,
 else
   % In this case, LEDMarkerType should be something like {'A', 'led-image-A.png',
   % 'B', 'led-image-B.png', 'C', 'led-image-C.png', 'D', 'led-image-C.png'}
+  if isempty(rigId)
+    error('The rigId is empty, but given the LED template specification it should be a scalar char like ''A'', ''B'', etc') ;
+  end
   rigIdFromRigIndex = specification(1:2:end-1);
   templateFileNameFromRigIndex = specification(2:2:end);
   isMatchFromRigIndex = strcmp(rigId, rigIdFromRigIndex) ;

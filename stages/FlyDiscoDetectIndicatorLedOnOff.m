@@ -76,7 +76,14 @@ registration_data = load(registrationmatfile) ;
 
 % Load metadata
 metadata = collect_metadata(expdir, dataloc_params.metadatafilestr) ;
-rigId = metadata.rig ;  % Should be a scalar char array containing a single capital letter
+
+% Get the rigId, if one is specified in the metadata.  This is only used in
+% quite old experiments, AFAIK.  -- ALT, 2026-03-07
+if isfield(metadata, 'rig')
+  rigId = metadata.rig ;  % Should be a scalar char array containing a single capital letter
+else
+  rigId = '' ;
+end
 
 % Load trajectories
 ctraxfile = determine_downstream_trx_file_path(expdir, dataloc_params, do_run) ;
