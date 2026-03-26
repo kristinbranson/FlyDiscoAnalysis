@@ -33,6 +33,16 @@ classdef LimbBoutAnalyzer < handle
         expdir = ''
         nflies = 0
 
+        % Onfloor filtering
+        do_onfloor_filtering = false        % If true, run onfloor filtering path
+        onceiling_scores = {}               % Trajectory-format onceiling labels {fly}(1,nframes)
+        nottracking_scores = {}             % Trajectory-format nottracking labels {fly}(1,nframes)
+        frac_onfloor_threshold = 0.70       % Keep walks with frac_onfloor >= this threshold
+        is_onfloor_perframe = {}             % Per-frame onfloor label {fly}(1,nframes): ~(onceiling | nottracking)
+        walkonfloor_digital = {}            % Per-fly digital signal {fly}(1,nframes): true for frames in walks with frac_onfloor >= frac_onfloor_threshold
+        walkFracOnfloor = containers.Map()  % Keyed by condition, double array (1 x nwalks)
+        walkValidity = containers.Map()     % Keyed by condition, logical array (1 x nwalks)
+
     end
 
     methods
@@ -74,12 +84,20 @@ classdef LimbBoutAnalyzer < handle
             addParameter(p, 'expdir', '', @ischar);
             addParameter(p, 'binedges', 5:2:34, @isnumeric);
             addParameter(p, 'phase_methods', {'phaselag', 'phasediff_interp', 'phasediff_hilbert', 'phasediff_hilbert_global'}, @iscell);
+            addParameter(p, 'do_onfloor_filtering', false, @islogical);
+            addParameter(p, 'onceiling_scores', {}, @iscell);
+            addParameter(p, 'nottracking_scores', {}, @iscell);
+            addParameter(p, 'frac_onfloor_threshold', 0.70, @isnumeric);
             parse(p, varargin{:});
 
             obj.debug = p.Results.debug;
             obj.expdir = p.Results.expdir;
             obj.binedges = p.Results.binedges;
-            obj.phase_methods = p.Results.phase_methods;           
+            obj.phase_methods = p.Results.phase_methods;
+            obj.do_onfloor_filtering = p.Results.do_onfloor_filtering;
+            obj.onceiling_scores = p.Results.onceiling_scores;
+            obj.nottracking_scores = p.Results.nottracking_scores;
+            obj.frac_onfloor_threshold = p.Results.frac_onfloor_threshold;           
 
             % Initialize containers
             obj.restrictedBoutData = containers.Map();
@@ -87,6 +105,8 @@ classdef LimbBoutAnalyzer < handle
             obj.validFrames = containers.Map();
             obj.walkMetrics = containers.Map();
             obj.locoStatsPerExp = struct();
+            obj.walkFracOnfloor = containers.Map();
+            obj.walkValidity = containers.Map();
 
             
             if obj.debug
@@ -116,12 +136,81 @@ classdef LimbBoutAnalyzer < handle
             % Check limbBoutData
             assert(isstruct(obj.limbBoutData) && length(obj.limbBoutData) == obj.nflies, ...
                 'limbBoutData must be struct array with %d flies', obj.nflies);
+
+            % Check onfloor filtering scores (only if filtering is enabled)
+            if obj.do_onfloor_filtering
+                if isempty(obj.onceiling_scores) || isempty(obj.nottracking_scores)
+                    error('do_onfloor_filtering is true but onceiling_scores or nottracking_scores are empty');
+                end
+                assert(iscell(obj.onceiling_scores) && length(obj.onceiling_scores) == obj.nflies, ...
+                    'onceiling_scores must be cell array with %d flies', obj.nflies);
+                assert(iscell(obj.nottracking_scores) && length(obj.nottracking_scores) == obj.nflies, ...
+                    'nottracking_scores must be cell array with %d flies', obj.nflies);
+            end
         end
 
         function createValidFrames_LED(obj)
             obj.validFrames('led_on_traj') = obj.digitalindicator;
 
             obj.validFrames('led_off_traj') = obj.invertTrajectoryIndicator(obj.digitalindicator);
+        end
+
+
+        function computeOnfloorSignal(obj)
+            % Compute walkonfloor_digital: trajectory-format digital signal
+            % where true = frame is in a walk with frac_onfloor >= threshold.
+            %
+            % For each fly:
+            %   1. Compute is_onfloor_perframe = ~(onceiling | nottracking)
+            %   2. Detect walk bouts from walking_scores
+            %   3. For each walk, compute frac_onfloor = mean(is_onfloor_perframe(t0:t1))
+            %   4. Set walkonfloor_digital(t0:t1) = true only for walks with frac_onfloor >= threshold
+            %
+            % Also stores is_onfloor_perframe for use by buildWalkStructForCondition
+            % to compute frac_onfloor for condition-specific walks.
+
+            if isempty(obj.onceiling_scores) || isempty(obj.nottracking_scores)
+                error('LimbBoutAnalyzer:computeOnfloorSignal', ...
+                    'onceiling_scores and nottracking_scores must be set before calling computeOnfloorSignal.');
+            end
+
+            fprintf('Computing walkonfloor_digital (threshold = %.0f%%)...\n', obj.frac_onfloor_threshold * 100);
+
+            obj.is_onfloor_perframe = cell(1, obj.nflies);
+            obj.walkonfloor_digital = cell(1, obj.nflies);
+            total_walks = 0;
+            valid_walks = 0;
+
+            for fly = 1:obj.nflies
+                nframes = numel(obj.walking_scores{fly});
+
+                % Per-frame: true if neither classifier flags the frame
+                % NaN == 1 is false, so NaN is treated as not-flagged
+                obj.is_onfloor_perframe{fly} = ~(obj.onceiling_scores{fly} == 1 | obj.nottracking_scores{fly} == 1);
+
+                % Detect walk bouts from walking_scores
+                [walk_t0s, walk_t1s] = detect_bouts(obj.walking_scores{fly});
+
+                % walkonfloor_digital: true only for frames in walks with frac_onfloor >= threshold
+                obj.walkonfloor_digital{fly} = false(1, nframes);
+
+                for w = 1:numel(walk_t0s)
+                    t0 = walk_t0s(w);
+                    t1 = min(walk_t1s(w), nframes);
+                    if t0 < 1, continue; end
+
+                    frac_onfloor = mean(obj.is_onfloor_perframe{fly}(t0:t1));
+                    total_walks = total_walks + 1;
+
+                    if frac_onfloor >= obj.frac_onfloor_threshold
+                        obj.walkonfloor_digital{fly}(t0:t1) = true;
+                        valid_walks = valid_walks + 1;
+                    end
+                end
+            end
+
+            fprintf('  %d / %d walks pass onfloor threshold (%.1f%%)\n', ...
+                valid_walks, total_walks, 100 * valid_walks / max(1, total_walks));
         end
 
 
@@ -196,6 +285,39 @@ classdef LimbBoutAnalyzer < handle
             end
         end
 
+
+        function analyzeBoutAndStimConditions_onfloor(obj)
+            % Analyze bout + stimulus conditions, restricted to onfloor walks.
+            % Same restriction chain as analyzeBoutAndStimConditions but with
+            % walkonfloor_digital inserted: walking → onfloor → LED.
+            % Stores results under distinct keys with '_onfloor' suffix.
+
+            if isempty(obj.walkonfloor_digital)
+                obj.computeOnfloorSignal();
+            end
+
+            fprintf('Analyzing bout + stimulus conditions (onfloor filtered)...\n');
+
+            % Restrict to walking periods first (reuses existing walkingBoutData if available)
+            if ~obj.restrictedBoutData.isKey('walkingBoutData_traj')
+                restrictBoutsbyCondition(obj, 'walkingBoutData', obj.limbBoutData, obj.walking_scores);
+            end
+
+            % Restrict walking bouts to onfloor walks
+            restrictBoutsbyCondition(obj, 'walkingOnfloorBoutData', obj.restrictedBoutData('walkingBoutData_traj'), obj.walkonfloor_digital);
+
+            % Restrict onfloor walking bouts by stimulus conditions
+            restrictBoutsbyCondition(obj, 'walking_stimON_onfloor', obj.restrictedBoutData('walkingOnfloorBoutData_traj'), obj.digitalindicator);
+
+            stim_off_indicator = obj.invertTrajectoryIndicator(obj.digitalindicator);
+            restrictBoutsbyCondition(obj, 'walking_stimOFF_onfloor', obj.restrictedBoutData('walkingOnfloorBoutData_traj'), stim_off_indicator);
+
+            % Compute bout metrics
+            obj.computeBoutMetricsByCondition('walking_stimON_onfloor_traj');
+            obj.computeBoutMetricsByCondition('walking_stimOFF_onfloor_traj');
+        end
+
+
         function analyzeWalkAndStimConditions(obj)
             if obj.debug
             fprintf('Analyzing walk + stimulus conditions ...\n');
@@ -207,6 +329,35 @@ classdef LimbBoutAnalyzer < handle
             obj.computeWalkMetricsforValidFrames('led_on_traj');
             obj.computeWalkMetricsforValidFrames('led_off_traj');
 
+        end
+
+
+        function analyzeWalkAndStimConditions_onfloor(obj)
+            % Compute walk metrics for LED on/off, restricted to onfloor walks.
+            % Uses walkonfloor_digital AND'd with digitalindicator.
+            % Stores results under distinct keys: 'led_on_onfloor_traj', 'led_off_onfloor_traj'
+
+            if isempty(obj.walkonfloor_digital)
+                obj.computeOnfloorSignal();
+            end
+
+            fprintf('Analyzing walk + stimulus conditions (onfloor filtered)...\n');
+
+            % AND digitalindicator with walkonfloor_digital for each LED condition
+            led_on_onfloor = cell(obj.nflies, 1);
+            led_off_onfloor = cell(obj.nflies, 1);
+            stim_off_indicator = obj.invertTrajectoryIndicator(obj.digitalindicator);
+            for fly = 1:obj.nflies
+                led_on_onfloor{fly} = obj.digitalindicator{fly} & obj.walkonfloor_digital{fly};
+                led_off_onfloor{fly} = stim_off_indicator{fly} & obj.walkonfloor_digital{fly};
+            end
+
+            obj.validFrames('led_on_onfloor_traj') = led_on_onfloor;
+            obj.validFrames('led_off_onfloor_traj') = led_off_onfloor;
+
+            % Compute walk metrics on filtered valid frames
+            obj.computeWalkMetricsforValidFrames('led_on_onfloor_traj');
+            obj.computeWalkMetricsforValidFrames('led_off_onfloor_traj');
         end
 
 
@@ -271,28 +422,35 @@ classdef LimbBoutAnalyzer < handle
             fprintf('Results saved to: %s\n', filepath);
         end
 
-        function locostatsperexp = computeStatsPerExp(obj, conditions)
+        function locostatsperexp = computeStatsPerExp(obj, conditions, key_suffix)
             % Flatten bout_metrics and walk_metrics into a single per-experiment
             % summary struct. LED condition is encoded in each field name
             % (e.g. feature__swing__LEDon__all, feature__walk__LEDoff__all).
             %
             % Usage:
-            %   stats = analyzer.computeStatsPerExp();          % both ON and OFF
-            %   stats = analyzer.computeStatsPerExp({'ON'});    % ON only
+            %   stats = analyzer.computeStatsPerExp();                        % both ON and OFF, unfiltered
+            %   stats = analyzer.computeStatsPerExp({'ON'});                  % ON only
+            %   stats = analyzer.computeStatsPerExp({'ON','OFF'}, '_onfloor'); % onfloor-filtered keys
+            %
+            % key_suffix appended to map keys (e.g. '_onfloor' looks up
+            % 'walking_stimON_onfloor_traj' and 'led_on_onfloor_traj').
             %
             % Based on LocomotionCombinePerFrameStats.m (Alice)
 
             if nargin < 2
                 conditions = {'ON', 'OFF'};
             end
+            if nargin < 3
+                key_suffix = '';
+            end
 
             % Map condition labels to stored keys and LED field name labels
             condMap = struct();
-            condMap.ON.boutKey  = 'walking_stimON_traj';
-            condMap.ON.walkKey  = 'led_on_traj';
+            condMap.ON.boutKey  = ['walking_stimON' key_suffix '_traj'];
+            condMap.ON.walkKey  = ['led_on' key_suffix '_traj'];
             condMap.ON.label    = 'LEDon';
-            condMap.OFF.boutKey = 'walking_stimOFF_traj';
-            condMap.OFF.walkKey = 'led_off_traj';
+            condMap.OFF.boutKey = ['walking_stimOFF' key_suffix '_traj'];
+            condMap.OFF.walkKey = ['led_off' key_suffix '_traj'];
             condMap.OFF.label   = 'LEDoff';
 
             statsperexp = struct;
@@ -346,24 +504,28 @@ classdef LimbBoutAnalyzer < handle
             fprintf('Per-experiment stats saved to: %s\n', filepath);
         end
 
-        function buildWalkStruct(obj, conditions)
+        function buildWalkStruct(obj, conditions, key_suffix)
             % Build flat per-walk and per-step struct-of-arrays from in-memory
             % walk_metrics and bout_metrics. Same logic as build_walk_struct.m
             % but operates on data already held in the analyzer.
             %
             % Usage:
-            %   analyzer.buildWalkStruct();          % both ON and OFF
-            %   analyzer.buildWalkStruct({'OFF'});   % OFF only
+            %   analyzer.buildWalkStruct();                         % both ON and OFF, unfiltered
+            %   analyzer.buildWalkStruct({'OFF'});                  % OFF only
+            %   analyzer.buildWalkStruct({'ON','OFF'}, '_onfloor'); % onfloor-filtered keys
 
             if nargin < 2
                 conditions = {'ON', 'OFF'};
             end
+            if nargin < 3
+                key_suffix = '';
+            end
 
             condMap = struct();
-            condMap.ON.boutKey  = 'walking_stimON_traj';
-            condMap.ON.walkKey  = 'led_on_traj';
-            condMap.OFF.boutKey = 'walking_stimOFF_traj';
-            condMap.OFF.walkKey = 'led_off_traj';
+            condMap.ON.boutKey  = ['walking_stimON' key_suffix '_traj'];
+            condMap.ON.walkKey  = ['led_on' key_suffix '_traj'];
+            condMap.OFF.boutKey = ['walking_stimOFF' key_suffix '_traj'];
+            condMap.OFF.walkKey = ['led_off' key_suffix '_traj'];
 
             for c = 1:numel(conditions)
                 cond = conditions{c};
@@ -670,6 +832,22 @@ classdef LimbBoutAnalyzer < handle
             walk_struct.walk_t1 = [pw.walk_t1];
             walk_struct.walk_duration = walk_struct.walk_t1 - walk_struct.walk_t0 + 1;
             walk_struct.nframes = walk_struct.walk_duration;
+
+            % --- Onfloor filtering ---
+            % Compute frac_onfloor per walk from is_onfloor_perframe
+            walk_struct.frac_onfloor = nan(1, nwalks);
+            walk_struct.walk_valid = true(1, nwalks);  % default: all valid
+            if ~isempty(obj.is_onfloor_perframe)
+                for w = 1:nwalks
+                    fly = pw(w).fly;
+                    t0 = pw(w).walk_t0;
+                    t1 = min(pw(w).walk_t1, numel(obj.is_onfloor_perframe{fly}));
+                    if t0 >= 1 && t0 <= numel(obj.is_onfloor_perframe{fly})
+                        walk_struct.frac_onfloor(w) = mean(obj.is_onfloor_perframe{fly}(t0:t1));
+                    end
+                end
+                walk_struct.walk_valid = walk_struct.frac_onfloor >= obj.frac_onfloor_threshold;
+            end
 
             % --- Movement means ---
             for m = 1:numel(movement_fields)
@@ -1077,7 +1255,13 @@ classdef LimbBoutAnalyzer < handle
                 end
             end
 
-            fprintf('  Built walk_struct: %d walks, step_struct: %d steps\n', nwalks, step_ct);
+            % Inherit walk_valid into step_struct via walk_idx
+            valid_idx = step_struct.walk_idx(1:step_ct);
+            step_struct.walk_valid = false(1, total_steps);
+            step_struct.walk_valid(1:step_ct) = walk_struct.walk_valid(valid_idx);
+
+            fprintf('  Built walk_struct: %d walks (%d valid), step_struct: %d steps\n', ...
+                nwalks, sum(walk_struct.walk_valid), step_ct);
         end
 
         function statsperexp = combineBoutMetrics(obj, bout_metrics, led_label, statsperexp)
