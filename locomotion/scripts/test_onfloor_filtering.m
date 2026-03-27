@@ -29,7 +29,7 @@ load(fullfile(expdir,'tips_velmag.mat'),'tips_velmag');
     'minimum_bout',stage_params.minimum_bout_groundcontact);
 [~,walking_scores] = LoadScoresFromFile(trx,'scores_Walk2',1);
 [~,onceiling_scores] = LoadScoresFromFile(trx,'scores_onceiling_resnet_v2',1);
-[~,nottracking_scores] = LoadScoresFromFile(trx,'scores_nottracking_apt',1);
+[~,nottracking_scores] = LoadScoresFromFile(trx,'scores_nottracking',1);
 indicatordata = trx.getIndicatorLED(1);
 digitalindicator = indicatordata.indicatordigital;
 
@@ -184,7 +184,7 @@ nflies = numel(bout_metrics_unfiltered.perfly);
 
 % Load score files to build per-frame is_onfloor
 OC = load(fullfile(expdir, 'scores_onceiling_resnet_v2.mat'), 'allScores');
-NT = load(fullfile(expdir, 'scores_nottracking_apt.mat'), 'allScores');
+NT = load(fullfile(expdir, 'scores_nottracking.mat'), 'allScores');
 
 % Build per-fly is_onfloor and walkonfloor_digital from scores
 % (same logic as computeOnfloorSignal)

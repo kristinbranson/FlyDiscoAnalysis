@@ -173,38 +173,35 @@ fprintf(logfid,'Computing swing and stance bout metrics ...\n')
 %compute swing stance bouts
 % [perfly_limbboutdata] = limbSwingStanceStep(groundcontact);
 
-% filter swing stance for during walking
-% digitscores: tarjectory format of 0,1 behavior labels
-[~,walking_scores] = LoadScoresFromFile(trx,'scores_Walk2',1);
+% Load walking scores from stage_params
+[~,walking_scores] = LoadScoresFromFile(trx, stage_params.walking_score_file, 1);
 
-% digitalindicator = indicatorLED.indicatordigital;
+% Load onfloor filtering scores from stage_params
+[~,onceiling_scores] = LoadScoresFromFile(trx, stage_params.onceiling_score_file, 1);
+[~,nottracking_scores] = LoadScoresFromFile(trx, stage_params.nottracking_score_file, 1);
+
+% digitalindicator
 indicatordata = trx.getIndicatorLED(1);
 digitalindicator = indicatordata.indicatordigital;
 
-% intialize class
+% Initialize class with onfloor filtering
 loco_analyzer = LimbBoutAnalyzer(trx, aptdata, tips_pos_body, legtip_landmarknums, groundcontact, digitalindicator, walking_scores, ...
-    'phase_methods', {'phasediff_hilbert'});
+    'phase_methods', {'phasediff_hilbert'}, ...
+    'do_onfloor_filtering', true, ...
+    'onceiling_scores', onceiling_scores, ...
+    'nottracking_scores', nottracking_scores, ...
+    'frac_onfloor_threshold', stage_params.frac_onfloor_threshold);
 
 % compute locomotion metrics for swing, stance, and steps for walking
-% during stim on and stim off periods
-loco_analyzer.analyzeBoutAndStimConditions();
+% during stim on and stim off periods, filtered to onfloor walks
+loco_analyzer.analyzeBoutAndStimConditions_onfloor();
 
-% compute locomotion metrics for walk bouts during stim on and off periods
-loco_analyzer.analyzeWalkAndStimConditions();
+% compute locomotion metrics for walk bouts during stim on and off periods,
+% filtered to onfloor walks
+loco_analyzer.analyzeWalkAndStimConditions_onfloor();
 
-% If something goes wrong, throw an error.  Any values returned from this
-% function are ignored.
-
-% try
-%     savefilename = trx.dataloc_params.locomotionmetricsswingstanceboutstatsfilestr;
-%     saveResults(loco_analyzer, fullfile(expdir,savefilename))
-% catch ME
-%     warning('FlyDiscoComputeLocomotionMetrics:save',...
-%         'Could not save information to file %s: %s',savefilename,getReport(ME));
-% end
-
-% compute and save locostatsperexp
-loco_analyzer.computeStatsPerExp();
+% compute and save locostatsperexp (onfloor filtered)
+loco_analyzer.computeStatsPerExp({'ON','OFF'}, '_onfloor');
 try
     perexpfilename = trx.dataloc_params.locomotionmetricsperexpfilestr;
     loco_analyzer.saveStatsPerExp(fullfile(expdir, perexpfilename));

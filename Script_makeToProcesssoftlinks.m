@@ -166,10 +166,20 @@
 % space)
 % 20260204 - run updated locotage to only output locostatsperexp 
 % test
-explist = textread('/groups/branson/home/robiea/Projects_data/FlyDisco/expdirlist_VNCall_20251011.txt','%s');
+% explist = textread('/groups/branson/home/robiea/Projects_data/FlyDisco/expdirlist_VNCall_20251011.txt','%s');
 % test on 10 
 % explist = explist(end-10:end);
-
+% 
+% % test run using transfero to run nottracking and cleanup apt features. 
+% explist = {                                                                                                                                 
+%       '/groups/branson/bransonlab/flydisco_data/VNC_YNA_K_162984_RigA_20210406T150414'                                                                                  
+%       '/groups/branson/bransonlab/flydisco_data/VNC2_YNA_K_162984_RigA_20220419T110856'                                                                                 
+%       '/groups/branson/bransonlab/flydisco_data/VNC3_YNA_K_162984_RigA_20240514T113219'                                                                                 
+%   };                           
+% run nottracking on all VNC data
+explist = textread('/groups/branson/home/robiea/Projects_data/FlyDisco/expdirlist_VNCall_20251011.txt','%s');
+% test on 10 first. 
+explist = explist(11:end);
 % rootdatadir = '/groups/branson/bransonlab/flybubble_social';
 % for i = 1:numel(explist)
 %     explist{i} = fullfile(rootdatadir,explist{i});
