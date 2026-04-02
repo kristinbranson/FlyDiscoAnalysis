@@ -177,9 +177,14 @@
 %       '/groups/branson/bransonlab/flydisco_data/VNC3_YNA_K_162984_RigA_20240514T113219'                                                                                 
 %   };                           
 % run nottracking on all VNC data
-explist = textread('/groups/branson/home/robiea/Projects_data/FlyDisco/expdirlist_VNCall_20251011.txt','%s');
+% explist = textread('/groups/branson/home/robiea/Projects_data/FlyDisco/expdirlist_VNCall_20251011.txt','%s');
 % test on 10 first. 
-explist = explist(11:end);
+% % explist = explist(1:10);
+% explist = explist(11:end);
+
+%rerun 2
+explist = {'/groups/branson/bransonlab/flydisco_data/VNC2_JRC_SS29542_RigC_20231025T120751'
+    '/groups/branson/bransonlab/flydisco_data/VNC2_JRC_SS68348_RigA_20231108T093919'};
 % rootdatadir = '/groups/branson/bransonlab/flybubble_social';
 % for i = 1:numel(explist)
 %     explist{i} = fullfile(rootdatadir,explist{i});

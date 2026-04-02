@@ -117,8 +117,9 @@ for linei = 1:nlines-1, % not sure why nlines-1? avoids control line which is li
   end
   if iscircstat(stati)
       mu = circ_mean(setnormmu,[],2);
-      fracsmaller_stat(linei) = nnz(0>circ_dist(linestats.normmeans.(statfn)(linei),mu))/nsamples;
-      fracbigger_stat(linei) = nnz(0<circ_dist(linestats.normmeans.(statfn)(linei),mu))/nsamples;
+      % circ_dist(line,mu) > 0 means line > mu, so fraction of controls smaller than line
+      fracsmaller_stat(linei) = nnz(0<circ_dist(linestats.normmeans.(statfn)(linei),mu))/nsamples;
+      fracbigger_stat(linei) = nnz(0>circ_dist(linestats.normmeans.(statfn)(linei),mu))/nsamples;
   else
       mu = mean(setnormmu,2);
       fracsmaller_stat(linei) = nnz(mu<linestats.normmeans.(statfn)(linei))/nsamples;
