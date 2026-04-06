@@ -12,9 +12,10 @@
 
 modpath;
 
-%% parameters — must match ScriptComputePValuesVNC_20260331.m
-outmatfile = '/groups/branson/home/robiea/Code_versioned/locomotion_analysis/Alice/ComputePValueBySamplingData20260331.mat';
-resultsdir = '/groups/branson/home/robiea/Code_versioned/locomotion_analysis/Alice/ComputePValueBySamplingResults20260331';
+%% parameters — update these to match your ScriptComputePValuesVNC script
+outmatfile = '/groups/branson/home/robiea/Code_versioned/locomotion_analysis/Alice/ComputePValueBySamplingData20260402.mat';
+resultsdir = '/groups/branson/home/robiea/Code_versioned/locomotion_analysis/Alice/ComputePValueBySamplingResults20260402';
+forcecompute = false; % set to true to recompute all stats, even if result files exist
 
 %% load and verify outmatfile has required fields
 fprintf('Loading %s...\n', outmatfile);
@@ -36,8 +37,16 @@ nstats = D.nstats;
 %% create results directory
 if ~exist(resultsdir,'dir'), mkdir(resultsdir); end
 
-%% submit jobs
+%% submit jobs (skip stats with existing results unless forcecompute)
+n_submitted = 0;
+n_skipped = 0;
 for stati = 1:nstats
+    resultfile = fullfile(resultsdir, sprintf('PvaluesForStat%03d.mat', stati));
+    if ~forcecompute && exist(resultfile, 'file')
+        n_skipped = n_skipped + 1;
+        continue;
+    end
+
     jobname = sprintf('pval_%d', stati);
     logfile = fullfile(resultsdir, sprintf('ComputePValuesBySampling_P%d.log', stati));
 
@@ -49,9 +58,10 @@ for stati = 1:nstats
         jobname, logfile, stati, outmatfile, resultsdir);
 
     system(cmd);
-    if mod(stati, 100) == 0
-        fprintf('Submitted %d/%d jobs\n', stati, nstats);
+    n_submitted = n_submitted + 1;
+    if mod(n_submitted, 100) == 0
+        fprintf('Submitted %d jobs so far (%d skipped)\n', n_submitted, n_skipped);
     end
 end
 
-fprintf('All %d jobs submitted. Use bjobs to check status.\n', nstats);
+fprintf('Submitted %d jobs, skipped %d with existing results. Use bjobs to check status.\n', n_submitted, n_skipped);

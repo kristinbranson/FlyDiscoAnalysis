@@ -5,11 +5,11 @@
 modpath;
 
 %% load data
-S = load('/groups/branson/bransonlab/flydisco_linelevel_VNC/CollectedVNC23PerFrameStats20260331.mat', ...
+S = load('/groups/branson/bransonlab/flydisco_linelevel_VNC/CollectedVNC23PerFrameStats20260402.mat', ...
     'linestats', 'line_names', 'nlines', 'statfns', ...
     'qvalue_bigger_adj', 'qvalue_smaller_adj', 'idxcontrol');
 
-plotdir = '/groups/branson/home/robiea/Projects_data/FlyDisco/Locomotion_analysis/plots_20260401_sorteddata';
+plotdir = '/groups/branson/home/robiea/Projects_data/FlyDisco/Locomotion_analysis/plots_20260402_sorteddata';
 if ~isfolder(plotdir), mkdir(plotdir); end
 
 fdr_alpha = 0.1;
@@ -43,15 +43,6 @@ for mi = 1:size(metrics, 1)
     q_bigger = S.qvalue_bigger_adj(:, stati);
     q_smaller = S.qvalue_smaller_adj(:, stati);
 
-    % HACK: signed circular stats have swapped bigger/smaller in ComputePValueBySampling
-    % due to circ_dist sign convention. Swap them here until the root cause is fixed.
-    % Only affects signed phase (uses circ_dist), NOT absphase (uses linear stats).
-    is_circstat = startsWith(statfn, 'phase');
-    if is_circstat
-        q_tmp = q_bigger;
-        q_bigger = q_smaller;
-        q_smaller = q_tmp;
-    end
 
     % classify each line
     is_sig_bigger = q_bigger < fdr_alpha & ~isnan(q_bigger);

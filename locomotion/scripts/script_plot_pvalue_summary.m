@@ -5,12 +5,12 @@
 modpath;
 
 %% load data
-S = load('/groups/branson/bransonlab/flydisco_linelevel_VNC/CollectedVNC23PerFrameStats20260331.mat', ...
+S = load('/groups/branson/bransonlab/flydisco_linelevel_VNC/CollectedVNC23PerFrameStats20260402.mat', ...
     'pvalue_smaller_expected', 'pvalue_bigger_expected', ...
     'qvalue_smaller_adj', 'qvalue_bigger_adj', ...
     'statfns', 'line_names', 'nlines');
 
-plotdir = '/groups/branson/home/robiea/Projects_data/FlyDisco/Locomotion_analysis/plots_20260401_pvalues';
+plotdir = '/groups/branson/home/robiea/Projects_data/FlyDisco/Locomotion_analysis/plots_20260402_pvalues';
 if ~isfolder(plotdir), mkdir(plotdir); end
 
 %% metrics to plot
@@ -41,18 +41,7 @@ for mi = 1:size(metrics, 1)
     for direction = {'bigger', 'smaller'}
         dir = direction{1};
 
-        % HACK: signed circular stats have swapped bigger/smaller in ComputePValueBySampling
-        % due to circ_dist sign convention. Swap them here until root cause is fixed.
-        % Only affects signed phase (uses circ_dist), NOT absphase (uses linear stats).
-        is_circstat = startsWith(statfn, 'phase');
-        if is_circstat
-            swap_dir = struct('bigger','smaller','smaller','bigger');
-            use_dir = swap_dir.(dir);
-        else
-            use_dir = dir;
-        end
-
-        if strcmp(use_dir, 'bigger')
+        if strcmp(dir, 'bigger')
             pvals = S.pvalue_bigger_expected(:, stati);
             qvals = S.qvalue_bigger_adj(:, stati);
             dir_label = 'higher than control';
