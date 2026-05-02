@@ -56,7 +56,7 @@ boutfeatures.PEP  = PEP;
 boutfeatures.PEP_BL = PEP./meanbodylength;
 
 
-% *step amplitude* (distance between PEP to AEP Wosnitza 2013 ) 
+% *step amplitude* (distance between PEP to AEP, Wosnitza et al. 2012, J Exp Biol) 
 boutfeatures.amplitude_px = sqrt(sum((PEP' - AEP').^2, 2));
 boutfeatures.amplitude_BL = boutfeatures.amplitude_px./meanbodylength;
 boutfeatures.amplitude_px = boutfeatures.amplitude_px';
