@@ -129,6 +129,11 @@ phasegroups = struct;
 phasegroups.ipsi_post_2 = {'LM_LH','RM_RH'};
 phasegroups.ipsi_ant_2 = {'LF_LM','RF_RM'};
 phasegroups.ipsi_P2A_4 = {'LM_LH','RM_RH','LF_LM','RF_RM'};
+% tripods_4: 4 within-tripod contralateral pairs.
+%   Tripod A = {RF, LM, RH} -> pairs RF_LM, LM_RH
+%   Tripod B = {LF, RM, LH} -> pairs LF_RM, RM_LH
+%   At perfect tripod the within-tripod legs swing together, so this group
+%   has mean ~ 0 (NOT pi). Values shifted away from 0 indicate broken tripod.
 phasegroups.tripods_4 = {'RF_LM','LM_RH','LF_RM','RM_LH'};
 
 
