@@ -35,20 +35,23 @@ boutfeatures.overall_frequency_steps = nsteps/time_stepping;
 %%%% metrics bases on stance start and stance end; only computed for pairs within continguous walking bout
 assert(numel(stance_t0s) == numel(stance_t1s));
 
-% AEP - x,y at touch down - first frame of stance,t0s, 2 x T
-% PEP - x,y at lift off - last frame of stance,t1s, 2 x T
+% AEP - x,y at touch down - first frame of stance, stance_t0s, 2 x T
+%   stance_t0s is INCLUSIVE (first stance frame); see limbSwingStance.m and detect_bouts.m
+% PEP - x,y at lift off - last frame of stance, stance_t1s-1, 2 x T
+%   stance_t1s is EXCLUSIVE (first frame AFTER stance, i.e. first swing frame),
+%   so the last stance frame is stance_t1s-1.
 
 %TO DO check for flip in data AEP for limb 1 is -,+ instead of +,+
 
-% *AEP* anterior extreme position 
+% *AEP* anterior extreme position
 AEP = nan(2,numel(stance_t0s));
 AEP(:,:) = tip_pos_body(limb,:,stance_t0s);
 boutfeatures.AEP = AEP;
 boutfeatures.AEP_BL = AEP./meanbodylength;
 
-% *PEP* posterior extrene position 
+% *PEP* posterior extrene position
 PEP = nan(2,numel(stance_t1s));
-PEP(:,:) = tip_pos_body(limb,:,stance_t1s);
+PEP(:,:) = tip_pos_body(limb,:,stance_t1s-1);
 boutfeatures.PEP  = PEP;
 boutfeatures.PEP_BL = PEP./meanbodylength;
 
