@@ -24,7 +24,11 @@ parfor fly = 1:numel(pTrk)
     % CoM_body{fly} = head + (tail-head).*0.4;
     CoM_thorax{fly} = ctr + (notum - ctr).*0.6;
 
-    % compute CoM Stability based on doi.org/10.7554/eLife.65878
+    % compute static-stability margin (min distance from CoM to support polygon)
+    % based on Szczecinski et al. 2018, J Exp Biol, doi:10.1242/jeb.189142
+    % NOTE: differs from Szczecinski in two ways:
+    %   (a) CoM here is thorax-only (line 25), not mass-weighted whole-body
+    %   (b) output is raw pixel distance, not normalized to max-at-speed
     nframes = size(CoM_thorax{fly}, 2);
     CoM_stabilty{fly} = nan(1, nframes);
 
@@ -45,6 +49,15 @@ parfor fly = 1:numel(pTrk)
         % stance legs polygon vertices
         XV = pTrk{fly}(legs_idx,1,frame_idx);
         YV = pTrk{fly}(legs_idx,2,frame_idx);
+        % take convex hull so polygon is well-defined regardless of leg ordering
+        % or unusual leg-tip configurations (matches Szczecinski 2018)
+        try
+            K = convhull(XV, YV);
+            XV = XV(K(1:end-1));
+            YV = YV(K(1:end-1));
+        catch
+            % collinear/degenerate stance: fall back to iteration-order polygon
+        end
         % CoM
         X_CoM = CoM_thorax{fly}(1,frame_idx);
         Y_CoM = CoM_thorax{fly}(2,frame_idx);
