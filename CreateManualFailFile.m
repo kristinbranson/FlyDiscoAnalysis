@@ -18,6 +18,7 @@ function [success] = CreateManualFailFile(expdir,failure_reason,varargin)
 % 'bad video';
 % 'bubble occluded';
 % 'tracked fly outside bubble';
+% 'less than 10 percent of data on floor'; on floor = ~(nottracking|onceling)
 
 [file_name,Replace] = myparse(varargin,'file_name','manual_fail.txt','Replace',false);
 success = false(1,numel(expdir));

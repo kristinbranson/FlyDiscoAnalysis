@@ -312,7 +312,17 @@ rootdatadir = '/groups/branson/bransonlab/flydisco_data';
 % expdirlist = {'VNC3_JRC_SS100086_RigA_20240820T124724'};
 % failure_category = 'tracked dead or damaged fly';
 %
-expdirlist = {'VNC_JRC_SS38644_RigB_20210405T135539'};
+% expdirlist = {'VNC_JRC_SS38644_RigB_20210405T135539'};
+% failure_category = 'tracked dead or damaged fly';
+
+% %removing experiments where the flies were on the ceiling or nottracking
+% %for more than 90% of movie
+% expdirs = readlines('/groups/branson/home/robiea/Projects_data/FlyDisco/expdirs_pct_onfloor_below10.txt');                                  
+% explist = cellstr(expdirs(~startsWith(expdirs, '%') & strlength(expdirs) > 0));
+% failure_category = 'less than 10 percent of data on floor';
+
+% smooshed flies 
+expdirlist = {'VNC_YNA_K_162984_RigB_20210412T134611','VNC3_YNA_K_162984_RigD_20240625T124243','VNC_YNA_K_162984_RigC_20210511T133814'}
 failure_category = 'tracked dead or damaged fly';
 %%
 for i = 1:numel(expdirlist)
@@ -332,7 +342,7 @@ else
     fid = fopen(failtablefile,'a');
 end
 for i = 1:numel(explist)
-fprintf(fid,'\n%s\t %s\t %d\t ',expdirlist{i},failure_category,success(i));
+fprintf(fid,'\n%s\t %s\t %d\t ',explist{i},failure_category,success(i));
 end
 
 fclose(fid);

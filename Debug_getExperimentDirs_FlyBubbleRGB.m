@@ -15,8 +15,8 @@ rootdatadir = '/groups/branson/bransonlab/flydisco_data';
 % savefile = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_allflydisco_20230831';
 % [expdirstruct] = getExperimentDirsFlyDisco(rootdatadir,'metadatafile','Metadata.xml','movielength',false,'TrajNum',false,'autocheckin',false,'autocheckcomplete',true);
 
-savefile = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_allVNC_20251011';
-[expdirstruct] = getExperimentDirsFlyDisco(rootdatadir,'metadatafile','Metadata.xml','expdirname','VNC*','movielength',false,'TrajNum',false,'autocheckin',false,'autocheckcomplete',false);
+savefile = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_allVNC';
+[expdirstruct] = getExperimentDirsFlyDisco(rootdatadir,'metadatafile','Metadata.xml','expdirname','VNC*','movielength',false,'TrajNum',false,'autocheckin',false,'autocheckcomplete',false,'manualcheck',true);
 
 % savefile = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_allflydisco_20230831';
 % [expdirstruct] = getExperimentDirsFlyDisco(rootdatadir,'metadatafile','Metadata.xml','movielength',false,'TrajNum',false,'autocheckin',false,'autocheckcomplete',true,'manualcheck',true);
@@ -95,19 +95,28 @@ save([savefile,'_',nowdatetime,'.mat'],'expdirstruct');
 
 %% selec expdirs with VNC in path
 metadata = expdirstruct;
-save('/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_allVNC_20251011.mat','metadata')
+  % filter out manual_fail=F                                                                                                                                                                                                                                                                                       
+  mf_idx = strcmp({metadata.manual_fail}, 'F');
+  metadata = metadata(~mf_idx); 
+save('/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_allVNC_20260429.mat','metadata')
 
 idx1 = strcmp({expdirstruct.screen_type},'non_olympiad_dickson_VNC');
 expdirstruct2 = expdirstruct(idx1);
 metadata = expdirstruct2;
-save('/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_VNC_20251011.mat','metadata')
+  % filter out manual_fail=F                                                                                                                                                                                                                                                                                       
+  mf_idx = strcmp({metadata.manual_fail}, 'F');
+  metadata = metadata(~mf_idx); 
+save('/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_VNC_20260429.mat','metadata')
 
 idx2 = strcmp({expdirstruct.screen_type},'non_olympiad_dickson_VNC2');
 idx3 = strcmp({expdirstruct.screen_type},'non_olympiad_dickson_VNC3');
 idx23 = idx2+idx3;
 expdirstruct23 = expdirstruct(logical(idx23));
 metadata = expdirstruct23;
-save('/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_VNC23_20251011.mat','metadata')
+  % filter out manual_fail=F                                                                                                                                                                                                                                                                                       
+  mf_idx = strcmp({metadata.manual_fail}, 'F');
+  metadata = metadata(~mf_idx); 
+save('/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_VNC23_20260429.mat','metadata')
 
  
 

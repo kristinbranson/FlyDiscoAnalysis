@@ -3,7 +3,7 @@
 
 logfiledir = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/MetadataFixes';
 %%%CHANGE
-logfilename = 'expdirs_wl52_metadatachanges_logofauto.csv';
+logfilename = 'expdirs_wk4num2_metadatachanges_logofauto.csv';
 
 
 logfile = fullfile(logfiledir,logfilename);
@@ -310,7 +310,19 @@ fid2 = fopen(logfile,'a');
 % WL 50 line name JRC_SS37671
 % explist = {'VNC3_JRC_SS38631_RigD_20240703T121137'}
 % WL 52 line naeme JRC_SS60232
-explist = {'VNC3_JRC_SS65710_RigA_20240724T111510'}
+% explist = {'VNC3_JRC_SS65710_RigA_20240724T111510'}
+
+% % wk 28 line name JRC_SS90029
+% explist = {'VNC2_JRC_SS90534_RigA_20220526T123652'
+%     'VNC2_JRC_SS90534_RigB_20220526T123729'
+%     'VNC2_JRC_SS90534_RigC_20220526T123832'
+%     'VNC2_JRC_SS90534_RigD_20220526T123905'};
+% WL #55 line name JRC_SS105199
+% explist = {'VNC3_JRC_SS100196_RigC_20240814T111641','VNC3_JRC_SS100196_RigD_20240814T111703'}
+
+% 3 dead and damaged flies - 2 untracked
+explist = {'VNC_YNA_K_162984_RigB_20210412T134611'}
+
 %% 
 rootdatadir = '/groups/branson/bransonlab/flydisco_data';
 % for k =1:numel(expnamelist)
@@ -364,7 +376,9 @@ for j = 1:numel(explist)
 %       changestruct.line = 'GMR_SS02575';
 %       changestruct.line = 'BJD_SS02407';
 % changestruct.line = 'JRC_SS37671';
-changestruct.line = 'JRC_SS60232';
+% changestruct.line = 'JRC_SS60232';
+% changestruct.line = 'JRC_SS90029';
+% changestruct.line = 'JRC_SS105199';
 
 %     changestruct.screen_type = 'non_olympiad_dickson_led5secVNC';
 %     changestruct.screen_type = 'non_olympiad_branson_LPC1CsChr';
@@ -372,6 +386,8 @@ changestruct.line = 'JRC_SS60232';
 
 %     changestruct.gender = 'b';
 % changestruct.notes_technical = 'used mouth pipette';
+changestruct.num_flies_dead = 3;
+
     % replace metadata fields with changes
     fprintf(fid2,'%s, ',expdir);
     metadatafieldsTOBECHANGED = fieldnames(changestruct);
