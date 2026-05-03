@@ -201,8 +201,13 @@ for w = 1:numel(walk_t0s)
             walkfeaturestruct(ct).phasediff_hilbert_global = phasediff_hilbert_global;
         end
 
-        % compute TCS from methor 1 or 2, for each tripod
-        % TO DO
+        % Tripod Coordination Strength (TCS) per Wosnitza 2012.
+        % Uses swing/step bouts + the same Hilbert-valid window (Restriction
+        % C) and per-leg peaks (loctall/locball) that the phase methods use,
+        % so per-event filtering matches the phase metrics.
+        TCS = compute_TCS(currflyboutdata, walk_t0, walk_t1, ...
+                          loctall, locball, pff_cache.velmag_ctr);
+        walkfeaturestruct(ct).TCS = TCS;
 
     end
 
