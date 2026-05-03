@@ -38,7 +38,7 @@ aptdata = TrkFile.load(fullfile(expdir,aptfile));
 
 
 % make list of special perframe features being computed
-pfflist = {'nfeet_ground','CoM_stability'};
+pfflist = {'nfeet_ground','CoM_stability','gait_class'};
 outputfiles = {trx.dataloc_params.locomotionmetricsswingstanceboutstatsfilestr, ...
     trx.dataloc_params.locomotionmetricsperexpfilestr, ...
     'tips_velmag.mat','tips_pos_body.mat','groundcontact.mat'};
@@ -153,6 +153,17 @@ for fly = 1:trx.nflies
 end
 units = parseunits('unit');
 save(fullfile(expdir,trx.dataloc_params.perframedir,'nfeet_ground.mat'),'data','units');
+
+% compute gait class per frame (1=tripod, 2=tetrapod, 3=grounded,
+% 4=airborne, 5=other). See gait_pattern_constants.m.
+gaitfilestr = fullfile(expdir,trx.dataloc_params.perframedir,'gait_class.mat');
+if exist(gaitfilestr,'file') && ~forcecompute
+    % already on disk; nothing to do (LimbBoutAnalyzer reads via trx)
+else
+    data = compute_gait_class(groundcontact);
+    units = parseunits('unit');
+    save(gaitfilestr,'data','units');
+end
 
 % compute COM took ~24 seconds to compute, sped up with parfor ~3 seconds.
 % but WAY slower if have to start parallel pool. 

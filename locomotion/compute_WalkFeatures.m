@@ -72,12 +72,12 @@ debug = 0;
 % params for findpeaks
 minPeakProminence = 1;
 
-% list of perframe features to compute stats over bouts that are 
-%  'first' = 1st derivative (d)  
+% list of perframe features to compute stats over bouts that are
+%  'first' = 1st derivative (d)
 pfflist_first = {'velmag_ctr','absdv_ctr','absdu_ctr','absdtheta', ...
-    'left_vel','right_vel','forward_vel','backward_vel','right_dtheta','left_dtheta'};   
+    'left_vel','right_vel','forward_vel','backward_vel','right_dtheta','left_dtheta'};
 % 'none' = no derivative
-pfflist_none = {'CoM_stability'};
+pfflist_none = {'CoM_stability', 'nfeet_ground'};
 % 'second' = second derivative (dd)
 
 
@@ -91,6 +91,17 @@ end
 for ifns = 1:numel(pfflist_none)
     fn = pfflist_none{ifns};
     pff_cache.(fn) = obj.trx.GetPerFrameData(fn, fly);
+end
+
+% gait_class: prefer perframe file; fall back to in-memory compute from
+% groundcontact for experiments processed before gait_class was added to
+% the pipeline stage. Fallback is in-memory only (no write-back).
+gait_pf_file = fullfile(obj.trx.expdirs{1}, obj.trx.dataloc_params.perframedir, 'gait_class.mat');
+if exist(gait_pf_file, 'file')
+    pff_cache.gait_class = obj.trx.GetPerFrameData('gait_class', fly);
+else
+    gc_cell = compute_gait_class({obj.groundcontact{fly}});
+    pff_cache.gait_class = double(gc_cell{1});
 end
 
 currflyboutdata = obj.limbBoutData(fly);
@@ -209,6 +220,20 @@ for w = 1:numel(walk_t0s)
                           loctall, locball, pff_cache.velmag_ctr);
         walkfeaturestruct(ct).TCS = TCS;
 
+        % Per-frame gait class within this walk (1=tripod, 2=tetrapod,
+        % 3=grounded, 4=airborne, 5=other). Raw .data kept for downstream
+        % flexibility (e.g. speed-conditional pooling, equal-size chunks).
+        walk_gait = pff_cache.gait_class(walk_t0:walk_t1);
+        gc_struct = struct;
+        gc_struct.data           = walk_gait;
+        gc_struct.n_frames       = numel(walk_gait);
+        gc_struct.tripod_count   = sum(walk_gait == 1);
+        gc_struct.tetrapod_count = sum(walk_gait == 2);
+        gc_struct.grounded_count = sum(walk_gait == 3);
+        gc_struct.airborne_count = sum(walk_gait == 4);
+        gc_struct.other_count    = sum(walk_gait == 5);
+        walkfeaturestruct(ct).gait_class = gc_struct;
+
     end
 
 end
@@ -230,7 +255,7 @@ for fld = 1:numel(flds)
 
     % combine perframe data
     elseif any(strcmp(pfflist_first,flds{fld} )) || any(strcmp(pfflist_none,flds{fld}))
-        % isstruct(walkfeaturestruct(1).(flds{fld})) & 
+        % isstruct(walkfeaturestruct(1).(flds{fld})) &
         fieldname = flds{fld};
         perflyperframefeatures = computePerFlywalkperframefeatures(walkfeaturestruct,fieldname);
         perflywalkfeatures.(flds{fld}) = perflyperframefeatures.(flds{fld});
@@ -240,6 +265,9 @@ for fld = 1:numel(flds)
 
         perflyphasefeatures = computePerFlyphasefeatures(walkfeaturestruct,fieldname);
         perflywalkfeatures.(flds{fld}) = perflyphasefeatures.(flds{fld});
+
+    elseif strcmp(flds{fld}, 'gait_class')
+        perflywalkfeatures.gait_class = computePerFlygaitclass(walkfeaturestruct);
 
     end
 end

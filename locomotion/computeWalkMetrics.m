@@ -43,7 +43,7 @@ perexp_metrics = struct;
 pfflist_first = {'velmag_ctr','absdv_ctr','absdu_ctr','absdtheta', ...
     'left_vel','right_vel','forward_vel','backward_vel','right_dtheta','left_dtheta'};   
 % 'none' = no derivative
-pfflist_none = {'CoM_stability'};
+pfflist_none = {'CoM_stability', 'nfeet_ground'};
 % 'second' = second derivative (dd)
 
 flds = fields(perfly_metrics);
@@ -66,6 +66,9 @@ for fld = 1:numel(flds)
 
         perexpphasefeatures = computePerExpphasefeatures(perwalk_metrics,perfly_metrics,fieldname);
         perexp_metrics.(flds{fld}) = perexpphasefeatures.(flds{fld});
+
+    elseif strcmp(flds{fld}, 'gait_class')
+        perexp_metrics.gait_class = computePerExpgaitclass(perwalk_metrics, perfly_metrics);
 
     end
 end

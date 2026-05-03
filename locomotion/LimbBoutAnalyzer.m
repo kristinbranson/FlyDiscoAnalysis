@@ -63,6 +63,7 @@ classdef LimbBoutAnalyzer < handle
             obj.aptdata = aptdata;
             obj.tips_pos_body = tips_pos_body;
             obj.legtip_landmarknums = legtip_landmarknums;
+            obj.groundcontact = groundcontact;
             obj.walking_scores = walking_scores;
             obj.nflies = obj.trx.nflies;
 
@@ -476,6 +477,7 @@ classdef LimbBoutAnalyzer < handle
                     walk_metrics = obj.walkMetrics(cm.walkKey);
                     statsperexp = obj.combineWalkMetrics(walk_metrics, cm.label, statsperexp);
                     statsperexp = obj.combinePhaseMetrics(walk_metrics, cm.label, statsperexp);
+                    statsperexp = obj.combineGaitMetrics(walk_metrics, cm.label, statsperexp);
                 else
                     fprintf('Warning: walk metrics key "%s" not found, skipping walk/phase stats for %s\n', cm.walkKey, cond);
                 end
@@ -1412,7 +1414,7 @@ classdef LimbBoutAnalyzer < handle
 
             perframe_features = {'velmag_ctr', 'absdv_ctr', 'absdu_ctr', 'absdtheta', ...
                 'left_vel', 'right_vel', 'forward_vel', 'backward_vel', ...
-                'right_dtheta', 'left_dtheta', 'CoM_stability'};
+                'right_dtheta', 'left_dtheta', 'CoM_stability', 'nfeet_ground'};
 
             for pff = 1:numel(perframe_features)
                 funname = sprintf('%s__walk__%s__all', perframe_features{pff}, led_label);
@@ -1465,6 +1467,46 @@ classdef LimbBoutAnalyzer < handle
                 currstruct.mean = mean(currdata, 'omitnan');
                 currstruct.std = std(currdata, 'omitnan');
                 currstruct.Z = nnz(~isnan(currdata));
+                statsperexp.(funname) = currstruct;
+            end
+        end
+
+        function statsperexp = combineGaitMetrics(~, walk_metrics, led_label, statsperexp)
+            % Flatten gait_class fractions into statsperexp.
+            % Frame-pooled across all walking frames in the experiment for
+            % the given LED condition. Speed-conditional pooling is
+            % deferred (see plans.md).
+            %
+            % Fields produced (5 per LED condition):
+            %   gait_class__walk__{LEDoff,LEDon}__{tripod,tetrapod,grounded,airborne,other}_frac
+            % Each entry has .frac (= count/total) and .Z (= total frame count).
+            % NaN .frac if no walking frames for this condition.
+            %
+            % Class codes per gait_pattern_constants.m: 1=tripod 2=tetrapod
+            % 3=grounded 4=airborne 5=other.
+            class_names = {'tripod', 'tetrapod', 'grounded', 'airborne', 'other'};
+
+            % Pull per-exp counts; default to zero/empty if no walks.
+            total = 0;
+            counts = zeros(1, numel(class_names));
+            if ~isempty(fields(walk_metrics.perexp)) ...
+                    && isfield(walk_metrics.perexp, 'gait_class')
+                gc = walk_metrics.perexp.gait_class;
+                total = gc.frm_n_exp;
+                for c = 1:numel(class_names)
+                    counts(c) = gc.([class_names{c} '_count_exp']);
+                end
+            end
+
+            for c = 1:numel(class_names)
+                funname = sprintf('gait_class__walk__%s__%s_frac', led_label, class_names{c});
+                currstruct = struct;
+                if total > 0
+                    currstruct.frac = counts(c) / total;
+                else
+                    currstruct.frac = NaN;
+                end
+                currstruct.Z = total;
                 statsperexp.(funname) = currstruct;
             end
         end
