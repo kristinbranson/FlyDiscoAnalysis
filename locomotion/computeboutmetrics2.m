@@ -23,6 +23,13 @@ pfflist_first = {'velmag_ctr','absdv_ctr','absdu_ctr','absdtheta', ...
     'left_vel','right_vel','forward_vel','backward_vel','right_dtheta','left_dtheta'};
 % 'none' = no derivative
 pfflist_none = {'CoM_stability'};
+
+% computeStepFeatures stores x,y positions as 2-row matrix. Here we use the
+% magnitude of the lateral position (row 1), when combining data across the
+% midline.
+% TODO: list of R/L features computed by computeStepFeatures is hardcoded here.
+% UPDATE if new L/R features are added.
+ml_xy_features = {'AEP', 'AEP_BL', 'PEP', 'PEP_BL'};
 % 'second' = second derivative (dd)
 
 
@@ -151,9 +158,13 @@ for is = 1:numel(state)
                 elseif isstruct(bout_metrics.perfly(fly).perlimb(pairs(pair,2)).(state{is}).(flds{fld}))
                     subflds = fields(bout_metrics.perfly(fly).perlimb(pairs(pair,2)).(state{is}).(flds{fld}));
                     for sbf = 1:numel(subflds)
-
-                        bout_metrics.perfly(fly).pairs(pair).(state{is}).(flds{fld}).(subflds{sbf}) = [bout_metrics.perfly(fly).perlimb(pairs(pair,1)).(state{is}).(flds{fld}).(subflds{sbf}), ...
-                            bout_metrics.perfly(fly).perlimb(pairs(pair,2)).(state{is}).(flds{fld}).(subflds{sbf})];
+                        a = bout_metrics.perfly(fly).perlimb(pairs(pair,1)).(state{is}).(flds{fld}).(subflds{sbf});
+                        b = bout_metrics.perfly(fly).perlimb(pairs(pair,2)).(state{is}).(flds{fld}).(subflds{sbf});
+                        if ismember(subflds{sbf}, ml_xy_features) && size(a,1) == 2
+                            a(1,:) = abs(a(1,:));
+                            b(1,:) = abs(b(1,:));
+                        end
+                        bout_metrics.perfly(fly).pairs(pair).(state{is}).(flds{fld}).(subflds{sbf}) = [a, b];
                     end
                 end
             end
@@ -171,8 +182,13 @@ for is = 1:numel(state)
                 subflds = fields(bout_metrics.perfly(fly).perlimb(pairs(pair,2)).(state{is}).(flds{fld}));
                 for sbf = 1:numel(subflds)
                     currfly_all_limbs = {};
+                    is_ml = ismember(subflds{sbf}, ml_xy_features);
                     for limb = 1:numel(boutstruct(fly).perlimb)
-                        currfly_all_limbs{limb} = bout_metrics.perfly(fly).perlimb(limb).(state{is}).(flds{fld}).(subflds{sbf});
+                        curr = bout_metrics.perfly(fly).perlimb(limb).(state{is}).(flds{fld}).(subflds{sbf});
+                        if is_ml && size(curr,1) == 2
+                            curr(1,:) = abs(curr(1,:));
+                        end
+                        currfly_all_limbs{limb} = curr;
                     end
                     bout_metrics.perfly(fly).all_limbs.(state{is}).(flds{fld}).(subflds{sbf}) = horzcat(currfly_all_limbs{:});
                 end
