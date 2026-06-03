@@ -1,9 +1,14 @@
-function [boutfeatures] = computeStepFeatures(fly,trx,aptdata,tip_pos_body,legtip_landmarknums,limb,step_t0s,step_t1s,stance_t0s,stance_t1s,currfly_timestamps)
+function [boutfeatures] = computeStepFeatures(fly,trx,aptdata,tip_pos_body,legtip_landmarknums,limb,step_t0s,step_t1s,stance_t0s,stance_t1s,currfly_timestamps,stance_durations_time)
 % tip_pos_body = 6 x 2 x T, data from tips_pos_body for 1 fly
 % tip_pos_body are in ctrax format - need to use offset from trx
 % assume start and end indices are stance only
 % assume start and end indices are in movie reference frame
-boutfeatures = struct; 
+% compute stance_durations_time if not passed in
+if nargin < 12 || isempty(stance_durations_time)
+    [~, stance_durations_time] = computeBoutDurations(stance_t0s, stance_t1s, currfly_timestamps);
+end
+
+boutfeatures = struct;
 
 boutfeatures.start_indices = step_t0s';
 boutfeatures.end_indices = step_t1s';
@@ -22,6 +27,21 @@ meanbodylength = mean(trx(fly).a.*4);
 [durations_frames,durations_time] = computeBoutDurations(step_t0s,step_t1s,currfly_timestamps);
 boutfeatures.durations_frames = durations_frames;
 boutfeatures.durations_time = durations_time; %(milliseconds)
+
+% *duty factor* stance fraction of step cycle (Mendes 2013, Wosnitza 2013)
+% duty_factor = stance_duration / step_duration; swing duty = 1 - duty_factor
+% stance_durations_time already computed upstream in computeboutmetrics2.
+% After restriction to walking bouts, step/stance arrays may lose alignment,
+% so match each step to its stance by step_t0 == stance_t0.
+nsteps_df = numel(step_t0s);
+duty_factor = nan(size(durations_time));
+for si = 1:nsteps_df
+    midx = find(stance_t0s == step_t0s(si), 1);
+    if ~isempty(midx) && durations_time(si) ~= 0
+        duty_factor(si) = stance_durations_time(midx) / durations_time(si);
+    end
+end
+boutfeatures.duty_factor = duty_factor;
 
 % *step frequency* number of steps within a second
 boutfeatures.instataeous_frequency_steps = 1./(boutfeatures.durations_time./1000);

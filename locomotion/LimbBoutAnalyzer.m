@@ -478,6 +478,7 @@ classdef LimbBoutAnalyzer < handle
                     statsperexp = obj.combineWalkMetrics(walk_metrics, cm.label, statsperexp);
                     statsperexp = obj.combinePhaseMetrics(walk_metrics, cm.label, statsperexp);
                     statsperexp = obj.combineGaitMetrics(walk_metrics, cm.label, statsperexp);
+                    statsperexp = obj.combineTCSMetrics(walk_metrics, cm.label, statsperexp);
                 else
                     fprintf('Warning: walk metrics key "%s" not found, skipping walk/phase stats for %s\n', cm.walkKey, cond);
                 end
@@ -817,7 +818,7 @@ classdef LimbBoutAnalyzer < handle
 
             step_geom_2row = {'AEP','AEP_BL','PEP','PEP_BL'};
             step_geom_scalar = {'amplitude_BL','amplitude_px','distance_BL','distance_px', ...
-                'length_BL','length_px','step_direction','speed_BLpers','speed_pxpers'};
+                'length_BL','length_px','step_direction','speed_BLpers','speed_pxpers','duty_factor'};
 
             tipspeed_bodyref = {'mean_tips_speed_bodyref','std_tips_speed_bodyref','min_speed_bodyref','max_speed_bodyref'};
             tipspeed_globalref = {'mean_tips_speed_globalref','std_tips_speed_globalref','min_speed_globalref','max_speed_globalref'};
@@ -860,6 +861,13 @@ classdef LimbBoutAnalyzer < handle
                 end
                 walk_struct.(fn) = vals;
             end
+
+            % --- Tripod Coordination Strength (per-walk mean over events) ---
+            tcs_vals = nan(1, nwalks);
+            for w = 1:nwalks
+                tcs_vals(w) = pw(w).TCS.both.mean;
+            end
+            walk_struct.TCS = tcs_vals;
 
             % --- Phase groups (circular) ---
             for g = 1:numel(phase_groups)
@@ -1350,7 +1358,7 @@ classdef LimbBoutAnalyzer < handle
 
             stepfeatures = {'durations_frames', 'durations_time', 'instataeous_frequency_steps', ...
                 'amplitude_px', 'amplitude_BL', 'step_direction', 'distance_px', 'distance_BL', ...
-                'speed_pxpers', 'speed_BLpers', 'length_px', 'length_BL'};
+                'speed_pxpers', 'speed_BLpers', 'length_px', 'length_BL', 'duty_factor'};
 
             xystepfeatures = {'AEP', 'AEP_BL', 'PEP', 'PEP_BL'};
             xyname = {'x', 'y'};
@@ -1509,6 +1517,32 @@ classdef LimbBoutAnalyzer < handle
                 currstruct.Z = total;
                 statsperexp.(funname) = currstruct;
             end
+        end
+
+        function statsperexp = combineTCSMetrics(~, walk_metrics, led_label, statsperexp)
+            % Flatten Tripod Coordination Strength into statsperexp.
+            % Event-pooled across all tripod events in the experiment for
+            % the given LED condition.
+            %
+            % Field produced (1 per LED condition):
+            %   TCS__walk__{LEDoff,LEDon}__all
+            % Each entry has .mean, .std (linear, TCS is scalar [0,1]) and
+            % .Z (= number of tripod events). NaN mean/std and Z=0 if no
+            % tripod events for this condition.
+            funname = sprintf('TCS__walk__%s__all', led_label);
+            currstruct = struct;
+            if ~isempty(fields(walk_metrics.perexp)) ...
+                    && isfield(walk_metrics.perexp, 'TCS')
+                tcs = walk_metrics.perexp.TCS;
+                currstruct.mean = tcs.mean;
+                currstruct.std  = tcs.std;
+                currstruct.Z    = tcs.n;
+            else
+                currstruct.mean = NaN;
+                currstruct.std  = NaN;
+                currstruct.Z    = 0;
+            end
+            statsperexp.(funname) = currstruct;
         end
 
     end

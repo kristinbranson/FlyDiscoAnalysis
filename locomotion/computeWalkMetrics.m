@@ -70,6 +70,9 @@ for fld = 1:numel(flds)
     elseif strcmp(flds{fld}, 'gait_class')
         perexp_metrics.gait_class = computePerExpgaitclass(perwalk_metrics, perfly_metrics);
 
+    elseif strcmp(flds{fld}, 'TCS')
+        perexp_metrics.TCS = computePerExpTCS(perwalk_metrics, perfly_metrics);
+
     end
 end
 

@@ -269,6 +269,9 @@ for fld = 1:numel(flds)
     elseif strcmp(flds{fld}, 'gait_class')
         perflywalkfeatures.gait_class = computePerFlygaitclass(walkfeaturestruct);
 
+    elseif strcmp(flds{fld}, 'TCS')
+        perflywalkfeatures.TCS = computePerFlyTCS(walkfeaturestruct);
+
     end
 end
 
