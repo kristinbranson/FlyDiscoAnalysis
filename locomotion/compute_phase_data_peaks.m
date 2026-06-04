@@ -68,7 +68,7 @@ for flyi = 1:nflies
     end
     
     % Detect walking bouts
-    [walk_t0s, walk_t1s] = detect_bouts(walkscores{flyi});
+    [walk_t0s, walk_t1s] = detect_bouts(walkscores{flyi}, true);
     
     % Process each walking bout
     for w = 1:numel(walk_t0s)

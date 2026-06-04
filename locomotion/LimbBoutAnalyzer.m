@@ -190,7 +190,7 @@ classdef LimbBoutAnalyzer < handle
                 obj.is_onfloor_perframe{fly} = ~(obj.onceiling_scores{fly} == 1 | obj.nottracking_scores{fly} == 1);
 
                 % Detect walk bouts from walking_scores
-                [walk_t0s, walk_t1s] = detect_bouts(obj.walking_scores{fly});
+                [walk_t0s, walk_t1s] = detect_bouts(obj.walking_scores{fly}, true);
 
                 % walkonfloor_digital: true only for frames in walks with frac_onfloor >= threshold
                 obj.walkonfloor_digital{fly} = false(1, nframes);

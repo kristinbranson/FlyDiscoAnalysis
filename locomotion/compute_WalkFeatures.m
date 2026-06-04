@@ -128,7 +128,7 @@ allowed_walks = walk_digital & digital_signal;
 
 
 % loop over walks
-[walk_t0s,walk_t1s] = detect_bouts(allowed_walks);
+[walk_t0s,walk_t1s] = detect_bouts(allowed_walks, true);
 assert(numel(walk_t0s) == numel(walk_t1s))
 
 
