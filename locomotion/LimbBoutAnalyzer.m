@@ -479,6 +479,8 @@ classdef LimbBoutAnalyzer < handle
                     statsperexp = obj.combinePhaseMetrics(walk_metrics, cm.label, statsperexp);
                     statsperexp = obj.combineGaitMetrics(walk_metrics, cm.label, statsperexp);
                     statsperexp = obj.combineTCSMetrics(walk_metrics, cm.label, statsperexp);
+                    statsperexp = obj.combineP2ALagMetrics(walk_metrics, 'Pliftoff2Aliftoff_lag', cm.label, statsperexp);
+                    statsperexp = obj.combineP2ALagMetrics(walk_metrics, 'Ptouchdown2Aliftoff_lag', cm.label, statsperexp);
                 else
                     fprintf('Warning: walk metrics key "%s" not found, skipping walk/phase stats for %s\n', cm.walkKey, cond);
                 end
@@ -870,6 +872,22 @@ classdef LimbBoutAnalyzer < handle
                 tcs_vals(w) = pw(w).TCS.both.mean;
             end
             walk_struct.TCS = tcs_vals;
+
+            % --- Posterior-to-anterior onset lags (per-walk mean, ms) ---
+            % Two metrics, 7 sub-fields each (4 pairs + H_to_M, M_to_F, all).
+            p2a_metrics = {'Pliftoff2Aliftoff_lag', 'Ptouchdown2Aliftoff_lag'};
+            p2a_subfields = {'RH_to_RM','RM_to_RF','LH_to_LM','LM_to_LF','H_to_M','M_to_F','all'};
+            for mi = 1:numel(p2a_metrics)
+                mn = p2a_metrics{mi};
+                for si = 1:numel(p2a_subfields)
+                    sn = p2a_subfields{si};
+                    vals = nan(1, nwalks);
+                    for w = 1:nwalks
+                        vals(w) = pw(w).(mn).(sn).mean;
+                    end
+                    walk_struct.([mn '_' sn]) = vals;
+                end
+            end
 
             % --- Phase groups (circular) ---
             for g = 1:numel(phase_groups)
@@ -1545,6 +1563,38 @@ classdef LimbBoutAnalyzer < handle
                 currstruct.Z    = 0;
             end
             statsperexp.(funname) = currstruct;
+        end
+
+        function statsperexp = combineP2ALagMetrics(~, walk_metrics, fieldname, led_label, statsperexp)
+            % Flatten a posterior-to-anterior (P2A) onset lag metric into
+            % statsperexp. fieldname is 'Pliftoff2Aliftoff_lag' or
+            % 'Ptouchdown2Aliftoff_lag'. Event-pooled across all pair events
+            % in the experiment for the given LED condition.
+            %
+            % Fields produced (3 per metric per LED condition):
+            %   <fieldname>__walk__{LEDoff,LEDon}__{all,H_to_M,M_to_F}
+            % Each entry has .mean, .std (linear, lag is scalar ms) and
+            % .Z (= number of pooled events). NaN mean/std and Z=0 if no
+            % events for this condition.
+            subfields = {'all', 'H_to_M', 'M_to_F'};
+            has = ~isempty(fields(walk_metrics.perexp)) ...
+                  && isfield(walk_metrics.perexp, fieldname);
+            for s = 1:numel(subfields)
+                sn = subfields{s};
+                funname = sprintf('%s__walk__%s__%s', fieldname, led_label, sn);
+                currstruct = struct;
+                if has && isfield(walk_metrics.perexp.(fieldname), sn)
+                    m = walk_metrics.perexp.(fieldname).(sn);
+                    currstruct.mean = m.frm_mean_exp;
+                    currstruct.std  = m.frm_std_exp;
+                    currstruct.Z    = m.frm_n_exp;
+                else
+                    currstruct.mean = NaN;
+                    currstruct.std  = NaN;
+                    currstruct.Z    = 0;
+                end
+                statsperexp.(funname) = currstruct;
+            end
         end
 
     end

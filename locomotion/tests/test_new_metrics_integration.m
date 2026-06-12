@@ -438,6 +438,117 @@ else
     nfail = nfail + 1;
 end
 
+%% ===== P2A ONSET LAG TESTS =====
+fprintf('\n--- P2A Onset Lag Integration Tests ---\n');
+p2a_metrics = {'Pliftoff2Aliftoff_lag', 'Ptouchdown2Aliftoff_lag'};
+
+%% Test 17: P2A fields in locostatsperexp (2 metrics x 2 LED x 3 subfields)
+fprintf('Test 17: P2A lag fields in locostatsperexp...\n');
+p2a_missing = {};
+for mi = 1:numel(p2a_metrics)
+    for cond = {'LEDon','LEDoff'}
+        for grp = {'all','H_to_M','M_to_F'}
+            fn = sprintf('%s__walk__%s__%s', p2a_metrics{mi}, cond{1}, grp{1});
+            if ~isfield(stats, fn)
+                p2a_missing{end+1} = fn; %#ok<SAGROW>
+            end
+        end
+    end
+end
+if isempty(p2a_missing)
+    fprintf('  PASS: all 12 P2A lag fields present in locostatsperexp\n');
+    npass = npass + 1;
+else
+    fprintf('  FAIL: missing %d fields: %s\n', numel(p2a_missing), strjoin(p2a_missing, ', '));
+    nfail = nfail + 1;
+end
+
+%% Test 18: P2A 'all' values sane (finite, Z>0; forward metric also >= 0)
+fprintf('Test 18: P2A lag values sane...\n');
+pass18 = true;
+for mi = 1:numel(p2a_metrics)
+    s = stats.(sprintf('%s__walk__LEDoff__all', p2a_metrics{mi}));
+    fprintf('  %s LEDoff all: mean=%.3f ms, std=%.3f, Z=%d\n', p2a_metrics{mi}, s.mean, s.std, s.Z);
+    okval = isfinite(s.mean) && s.Z > 0;
+    if strcmp(p2a_metrics{mi}, 'Pliftoff2Aliftoff_lag')
+        okval = okval && s.mean >= 0;   % forward-only window -> non-negative
+    end   % Ptouchdown2Aliftoff_lag is signed -> may be negative
+    if ~okval, pass18 = false; end
+end
+if pass18
+    fprintf('  PASS: P2A lag means finite, non-negative, Z>0\n');
+    npass = npass + 1;
+else
+    fprintf('  FAIL: P2A lag values out of expected range\n');
+    nfail = nfail + 1;
+end
+
+%% Test 19: P2A in walk_struct (2 metrics x 7 subfields = 14 fields)
+fprintf('Test 19: P2A lag fields in walk_struct...\n');
+wk_off = ws.OFF.walk_struct;
+p2a_subfields = {'RH_to_RM','RM_to_RF','LH_to_LM','LM_to_LF','H_to_M','M_to_F','all'};
+ws_missing = {};
+for mi = 1:numel(p2a_metrics)
+    for si = 1:numel(p2a_subfields)
+        fn = [p2a_metrics{mi} '_' p2a_subfields{si}];
+        if ~isfield(wk_off, fn)
+            ws_missing{end+1} = fn; %#ok<SAGROW>
+        end
+    end
+end
+if isempty(ws_missing)
+    n_valid = nnz(~isnan(wk_off.Pliftoff2Aliftoff_lag_all));
+    fprintf('  PASS: all 14 P2A walk_struct fields present (all: %d/%d non-NaN)\n', ...
+        n_valid, numel(wk_off.Pliftoff2Aliftoff_lag_all));
+    npass = npass + 1;
+else
+    fprintf('  FAIL: missing %d walk_struct fields: %s\n', numel(ws_missing), strjoin(ws_missing, ', '));
+    nfail = nfail + 1;
+end
+
+%% Test 20: P2A aggregation chain consistency
+% pooled per-walk .data mean == perexp frm_mean_exp == locostatsperexp mean
+fprintf('Test 20: P2A aggregation chain consistency...\n');
+pass20 = true;
+okstr = {'MISMATCH','OK'};
+for mi = 1:numel(p2a_metrics)
+    mn = p2a_metrics{mi};
+    pooled = [];
+    for w = 1:numel(wm_off.perwalk)
+        pooled = [pooled, wm_off.perwalk(w).(mn).all.data]; %#ok<AGROW>
+    end
+    manual_mean  = mean(pooled, 'omitnan');
+    perexp_mean  = wm_off.perexp.(mn).all.frm_mean_exp;
+    stats_mean   = stats.(sprintf('%s__walk__LEDoff__all', mn)).mean;
+    ok = (isnan(manual_mean) && isnan(perexp_mean) && isnan(stats_mean)) || ...
+         (abs(manual_mean - perexp_mean) < 1e-9 && abs(perexp_mean - stats_mean) < 1e-9);
+    fprintf('  %s: manual=%.6f perexp=%.6f stats=%.6f  %s\n', mn, manual_mean, perexp_mean, stats_mean, okstr{ok+1});
+    pass20 = pass20 && ok;
+end
+if pass20
+    fprintf('  PASS: P2A aggregation chain consistent\n');
+    npass = npass + 1;
+else
+    fprintf('  FAIL: P2A aggregation chain mismatch\n');
+    nfail = nfail + 1;
+end
+
+%% Test 21: P2A survives saveResults (walk_metrics_OFF.perexp)
+fprintf('Test 21: P2A lag in saveResults output...\n');
+pass21 = true;
+for mi = 1:numel(p2a_metrics)
+    if ~(isfield(loaded, 'walk_metrics_OFF') && isfield(loaded.walk_metrics_OFF.perexp, p2a_metrics{mi}))
+        fprintf('  FAIL: %s not in saved walk_metrics_OFF.perexp\n', p2a_metrics{mi});
+        pass21 = false;
+    end
+end
+if pass21
+    fprintf('  PASS: both P2A metrics present in saved walk_metrics_OFF.perexp\n');
+    npass = npass + 1;
+else
+    nfail = nfail + 1;
+end
+
 %% ===== CLEANUP =====
 delete(tmpfile);
 

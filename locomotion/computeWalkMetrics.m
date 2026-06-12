@@ -73,6 +73,9 @@ for fld = 1:numel(flds)
     elseif strcmp(flds{fld}, 'TCS')
         perexp_metrics.TCS = computePerExpTCS(perwalk_metrics, perfly_metrics);
 
+    elseif strcmp(flds{fld}, 'Pliftoff2Aliftoff_lag') || strcmp(flds{fld}, 'Ptouchdown2Aliftoff_lag')
+        perexp_metrics.(flds{fld}) = computePerExpP2ALag(perwalk_metrics, perfly_metrics, flds{fld});
+
     end
 end
 

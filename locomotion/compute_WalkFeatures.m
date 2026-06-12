@@ -105,6 +105,11 @@ else
 end
 
 currflyboutdata = obj.limbBoutData(fly);
+
+% per-fly timestamps (trajectory format, seconds) for P2A onset lags (ms)
+movie_timestamps = obj.trx.movie_timestamps{1};
+currfly_timestamps = movie_timestamps(obj.trx.firstframes(fly):obj.trx.endframes(fly));
+
 currfly_tips_pos_body = obj.tips_pos_body{fly};
 nlimb = size(currfly_tips_pos_body,1);
 walkfeaturestruct = struct;
@@ -241,6 +246,19 @@ for w = 1:numel(walk_t0s)
         gc_struct.other_count    = sum(walk_gait == 5);
         walkfeaturestruct(ct).gait_class = gc_struct;
 
+        % Posterior-to-anterior (P2A) onset lags (ms) for ipsilateral pairs.
+        % Reuses computePhaseLag's swing-onset pairing (findClosestSteps),
+        % forward window of one reference period. Two metrics share one fn,
+        % differing only in the posterior reference event:
+        %   Pliftoff2Aliftoff_lag  - posterior swing onset -> anterior swing onset
+        %   Ptouchdown2Aliftoff_lag - posterior stance onset -> anterior swing onset (Cruse Rule 2)
+        % liftoff->liftoff wave is ~antiphase -> forward-only window;
+        % touchdown->liftoff (Rule 2) is centered ~0 -> signed nearest (+/-0.5P).
+        walkfeaturestruct(ct).Pliftoff2Aliftoff_lag  = ...
+            computeP2ALag(currflyboutdata, walk_t0, walk_t1, currfly_timestamps, fly, 'swing',  'forward');
+        walkfeaturestruct(ct).Ptouchdown2Aliftoff_lag = ...
+            computeP2ALag(currflyboutdata, walk_t0, walk_t1, currfly_timestamps, fly, 'stance', 'signed');
+
     end
 
 end
@@ -278,6 +296,9 @@ for fld = 1:numel(flds)
 
     elseif strcmp(flds{fld}, 'TCS')
         perflywalkfeatures.TCS = computePerFlyTCS(walkfeaturestruct);
+
+    elseif strcmp(flds{fld}, 'Pliftoff2Aliftoff_lag') || strcmp(flds{fld}, 'Ptouchdown2Aliftoff_lag')
+        perflywalkfeatures.(flds{fld}) = computePerFlyP2ALag(walkfeaturestruct, flds{fld});
 
     end
 end
