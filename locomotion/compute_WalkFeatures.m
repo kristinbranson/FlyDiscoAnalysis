@@ -143,13 +143,17 @@ for w = 1:numel(walk_t0s)
     % general computations
     walk_t0 = walk_t0s(w);
     walk_t1 = walk_t1s(w);
-    currwalk_tips_pos_body_Y = squeeze(currfly_tips_pos_body(:,2,walk_t0:walk_t1));
+    % position/global slices use the trailing endpoint (walk_t0:walk_t1) per
+    % the displacement convention; clamp only the terminal edge bout, where
+    % the exclusive walk_t1 has no corresponding frame.
+    walk_t1_pos = min(walk_t1, size(currfly_tips_pos_body,3));
+    currwalk_tips_pos_body_Y = squeeze(currfly_tips_pos_body(:,2,walk_t0:walk_t1_pos));
     % zscore tip data for peaks and hilbert
     norm_ytips = zscore(currwalk_tips_pos_body_Y');
     norm_ytips = norm_ytips';
     if ismember('phasediff_hilbert_global', phase_methods)
-        currwalk_norm_ytips_global = norm_ytips_global(:,walk_t0:walk_t1);
-        currwalk_phases = phases(:,walk_t0:walk_t1);
+        currwalk_norm_ytips_global = norm_ytips_global(:,walk_t0:walk_t1_pos);
+        currwalk_phases = phases(:,walk_t0:walk_t1_pos);
     end
 
     % find peaks in the Y pos signal
@@ -176,12 +180,12 @@ for w = 1:numel(walk_t0s)
         % loop over list of perframe features
         for ifns = 1:numel(pfflist_first)
             fn = pfflist_first{ifns};
-            datastruct = compute_StatsofPreframeFeatureDuringBouts(fly,fn,obj.trx,walk_t0,walk_t1,'first',pff_cache.(fn));
+            datastruct = compute_StatsofPreframeFeatureDuringBouts(fly,fn,obj.trx,walk_t0,walk_t1,pff_cache.(fn));
             walkfeaturestruct(ct).(fn) = datastruct;
         end
         for ifns = 1:numel(pfflist_none)
             fn = pfflist_none{ifns};
-            datastruct = compute_StatsofPreframeFeatureDuringBouts(fly,fn,obj.trx,walk_t0,walk_t1,'none',pff_cache.(fn));
+            datastruct = compute_StatsofPreframeFeatureDuringBouts(fly,fn,obj.trx,walk_t0,walk_t1,pff_cache.(fn));
             walkfeaturestruct(ct).(fn) = datastruct;
         end
 
@@ -223,7 +227,10 @@ for w = 1:numel(walk_t0s)
         % Per-frame gait class within this walk (1=tripod, 2=tetrapod,
         % 3=grounded, 4=airborne, 5=other). Raw .data kept for downstream
         % flexibility (e.g. speed-conditional pooling, equal-size chunks).
-        walk_gait = pff_cache.gait_class(walk_t0:walk_t1);
+        % gait_class is a per-frame state aligned to frame i (length n-1, it
+        % is derived from groundcontact/velocity). Take the walking frames
+        % walk_t0..walk_t1-1, clamped to the available data for the terminal bout.
+        walk_gait = pff_cache.gait_class(walk_t0:min(walk_t1-1, numel(pff_cache.gait_class)));
         gc_struct = struct;
         gc_struct.data           = walk_gait;
         gc_struct.n_frames       = numel(walk_gait);

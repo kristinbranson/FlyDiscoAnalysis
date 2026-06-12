@@ -833,7 +833,9 @@ classdef LimbBoutAnalyzer < handle
             walk_struct.fly = [pw.fly];
             walk_struct.walk_t0 = [pw.walk_t0];
             walk_struct.walk_t1 = [pw.walk_t1];
-            walk_struct.walk_duration = walk_struct.walk_t1 - walk_struct.walk_t0 + 1;
+            % walk_t1 is exclusive (first frame after walk), so the number of
+            % walking frames is walk_t1 - walk_t0 (no +1).
+            walk_struct.walk_duration = walk_struct.walk_t1 - walk_struct.walk_t0;
             walk_struct.nframes = walk_struct.walk_duration;
 
             % --- Onfloor filtering ---

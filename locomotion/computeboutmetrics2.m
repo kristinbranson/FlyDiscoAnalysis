@@ -79,12 +79,12 @@ for is = 1:numel(state)
                 % loop over list of perframe features
                 for ifns = 1:numel(pfflist_first)
                     fn = pfflist_first{ifns};
-                    datastruct = compute_StatsofPreframeFeatureDuringBouts(fly,fn,trx,start_indices,end_indices,'first',pff_cache{fly}.(fn));
+                    datastruct = compute_StatsofPreframeFeatureDuringBouts(fly,fn,trx,start_indices,end_indices,pff_cache{fly}.(fn));
                     bout_metrics.perfly(fly).perlimb(limb).(state{is}).(fn) = datastruct;
                 end
                 for ifns = 1:numel(pfflist_none)
                     fn = pfflist_none{ifns};
-                    datastruct = compute_StatsofPreframeFeatureDuringBouts(fly,fn,trx,start_indices,end_indices,'none',pff_cache{fly}.(fn));
+                    datastruct = compute_StatsofPreframeFeatureDuringBouts(fly,fn,trx,start_indices,end_indices,pff_cache{fly}.(fn));
                     bout_metrics.perfly(fly).perlimb(limb).(state{is}).(fn) = datastruct;
                 end
 
@@ -124,12 +124,12 @@ for is = 1:numel(state)
                 % loop over list of perframe features
                 for ifns = 1:numel(pfflist_first)
                     fn = pfflist_first{ifns};
-                    datastruct = compute_StatsofPreframeFeatureDuringBouts(fly,fn,trx,step_t0s,step_t1s,'first',pff_cache{fly}.(fn));
+                    datastruct = compute_StatsofPreframeFeatureDuringBouts(fly,fn,trx,step_t0s,step_t1s,pff_cache{fly}.(fn));
                     bout_metrics.perfly(fly).perlimb(limb).(state{is}).(fn) = datastruct;
                 end
                 for ifns = 1:numel(pfflist_none)
                     fn = pfflist_none{ifns};
-                    datastruct = compute_StatsofPreframeFeatureDuringBouts(fly,fn,trx,step_t0s,step_t1s,'none',pff_cache{fly}.(fn));
+                    datastruct = compute_StatsofPreframeFeatureDuringBouts(fly,fn,trx,step_t0s,step_t1s,pff_cache{fly}.(fn));
                     bout_metrics.perfly(fly).perlimb(limb).(state{is}).(fn) = datastruct;
                 end
 

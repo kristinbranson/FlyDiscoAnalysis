@@ -1,4 +1,4 @@
-function [datastruct] = compute_StatsofPreframeFeatureDuringBouts(fly,fn,trx,start_indices,end_indices,derivative_flag,dataflycurr)
+function [datastruct] = compute_StatsofPreframeFeatureDuringBouts(fly,fn,trx,start_indices,end_indices,dataflycurr)
 %input fn = name of perframe feature, trx obj, start and end indices of
 %bouts in moveie frame of reference
 % optional: dataflycurr = pre-fetched perframe data to avoid repeated trx.GetPerFrameData calls
@@ -6,7 +6,7 @@ function [datastruct] = compute_StatsofPreframeFeatureDuringBouts(fly,fn,trx,sta
 % output = mean value of perframe features during each bout, std of
 % perframe features during each bout
 
-if nargin < 7 || isempty(dataflycurr)
+if nargin < 6 || isempty(dataflycurr)
     dataflycurr = trx.GetPerFrameData(fn,fly);
 end
 % deal with empty case - return NaN OK?
@@ -28,12 +28,12 @@ else
     sumpff = nan(1,numel(start_indices));
     n = nan(1,numel(start_indices));
 
-    % account for indexing into a derivative perframe feature like velmag
-    if strcmp('first',derivative_flag)
-        end_indices = end_indices-1;
-    elseif strcmp('second',derivative_flag)
-        end_indices = end_indices-2;
-    end
+    % end_indices are exclusive (first frame after the bout). Perframe
+    % features are aligned to frame i (raw: value at i; first derivative:
+    % forward diff i->i+1), so the last in-bout index is end-1. Clamp to the
+    % available data for the terminal bout, where the final frame/transition
+    % has no entry (e.g. a length n-1 derivative on the last frame).
+    end_indices = min(end_indices - 1, numel(dataflycurr));
 
     allboutdata = {};%
     for i = 1:numel(start_indices)
