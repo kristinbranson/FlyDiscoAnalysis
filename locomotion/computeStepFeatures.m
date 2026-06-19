@@ -55,11 +55,14 @@ boutfeatures.overall_frequency_steps = nsteps/time_stepping;
 %%%% metrics bases on stance start and stance end; only computed for pairs within continguous walking bout
 assert(numel(stance_t0s) == numel(stance_t1s));
 
-% AEP - x,y at touch down - first frame of stance, stance_t0s, 2 x T
-%   stance_t0s is INCLUSIVE (first stance frame); see limbSwingStance.m and detect_bouts.m
-% PEP - x,y at lift off - last frame of stance, stance_t1s-1, 2 x T
-%   stance_t1s is EXCLUSIVE (first frame AFTER stance, i.e. first swing frame),
-%   so the last stance frame is stance_t1s-1.
+% AEP - x,y at touch down (anterior extreme position) = stance_t0s, 2 x T
+%   stance_t0s is INCLUSIVE (first in-contact frame); see limbSwingStance.m / detect_bouts.m
+% PEP - x,y at lift off (posterior extreme position) = stance_t1s, 2 x T
+%   velocity[t] = |pos[t+1]-pos[t]| (forward difference), so gc[t]=1 means the foot is
+%   planted over the interval [t, t+1]. The foot's last in-contact interval is
+%   [stance_t1s-1, stance_t1s] and it first moves over [stance_t1s, stance_t1s+1], so the
+%   lift-off position is pos[stance_t1s]. (stance_t1s is the EXCLUSIVE bout end = first
+%   swing index.) NB: pos[stance_t1s-1] is one frame too early (was the prior definition).
 
 %TO DO check for flip in data AEP for limb 1 is -,+ instead of +,+
 
@@ -71,7 +74,7 @@ boutfeatures.AEP_BL = AEP./meanbodylength;
 
 % *PEP* posterior extrene position
 PEP = nan(2,numel(stance_t1s));
-PEP(:,:) = tip_pos_body(limb,:,stance_t1s-1);
+PEP(:,:) = tip_pos_body(limb,:,stance_t1s);
 boutfeatures.PEP  = PEP;
 boutfeatures.PEP_BL = PEP./meanbodylength;
 
