@@ -24,7 +24,8 @@ for fly = 1:numel(perfly_limbboutdata)
         for is = 1:(numel(state)) % state = swing or stance
             curr_start_indices = perfly_limbboutdata(fly).perlimb(ileg).(state{is}).start_indices;
             curr_end_indices = perfly_limbboutdata(fly).perlimb(ileg).(state{is}).end_indices;
-            [out_start_indices, out_end_indices] = find_bout_overlap(curr_digital_signal, curr_start_indices,curr_end_indices);
+            % swing/stance ends are exclusive (first frame after bout) -> test start:end-1.
+            [out_start_indices, out_end_indices] = find_bout_overlap(curr_digital_signal, curr_start_indices,curr_end_indices,true);
             out_restrictedSwingStance(fly).perlimb(ileg).(state{is}).start_indices = out_start_indices;
             out_restrictedSwingStance(fly).perlimb(ileg).(state{is}).end_indices = out_end_indices;
         end
