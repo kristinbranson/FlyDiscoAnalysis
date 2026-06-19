@@ -406,6 +406,33 @@ else
     nfail = nfail + 1;
 end
 
+%% Test 14b: gait_class fractions in walk_struct (5 fracs + nframes)
+fprintf('Test 14b: gait_class fractions in walk_struct...\n');
+gait_frac_fields = {'gait_tripod_frac','gait_tetrapod_frac','gait_grounded_frac', ...
+    'gait_airborne_frac','gait_other_frac'};
+gf_missing = gait_frac_fields(~ismember(gait_frac_fields, fieldnames(wk_off)));
+if isempty(gf_missing) && isfield(wk_off, 'gait_nframes')
+    % Per walk with frames, the 5 fractions should sum to 1.
+    fracsum = zeros(1, numel(wk_off.gait_nframes));
+    for gi = 1:numel(gait_frac_fields)
+        fracsum = fracsum + wk_off.(gait_frac_fields{gi});
+    end
+    haswalk = wk_off.gait_nframes > 0;
+    if all(abs(fracsum(haswalk) - 1) < 1e-9)
+        fprintf('  PASS: 5 gait fracs + gait_nframes present; fracs sum to 1 over %d walks\n', ...
+            nnz(haswalk));
+        npass = npass + 1;
+    else
+        fprintf('  FAIL: gait fractions do not sum to 1 for %d walks\n', ...
+            nnz(haswalk & abs(fracsum - 1) >= 1e-9));
+        nfail = nfail + 1;
+    end
+else
+    fprintf('  FAIL: missing walk_struct gait fields: %s\n', ...
+        strjoin([gf_missing, repmat({'gait_nframes'}, 1, ~isfield(wk_off,'gait_nframes'))], ', '));
+    nfail = nfail + 1;
+end
+
 %% Test 15: TCS in walk_metrics perexp
 fprintf('Test 15: TCS in walk_metrics perexp...\n');
 wm_off = loco_analyzer.walkMetrics('led_off_traj');

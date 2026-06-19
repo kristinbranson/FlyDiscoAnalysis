@@ -873,6 +873,28 @@ classdef LimbBoutAnalyzer < handle
             end
             walk_struct.TCS = tcs_vals;
 
+            % --- Gait class per-walk fractions ---
+            % gait_class is a per-frame state; per walk we store the fraction of
+            % walking frames in each class plus the frame count for re-pooling.
+            % Codes per gait_pattern_constants.m: 1=tripod 2=tetrapod 3=grounded
+            % 4=airborne 5=other. NaN frac if the walk has no frames.
+            gait_class_names = {'tripod','tetrapod','grounded','airborne','other'};
+            gait_nframes = nan(1, nwalks);
+            gait_fracs = nan(numel(gait_class_names), nwalks);
+            for w = 1:nwalks
+                gc = pw(w).gait_class;
+                gait_nframes(w) = gc.n_frames;
+                if gc.n_frames > 0
+                    for c = 1:numel(gait_class_names)
+                        gait_fracs(c,w) = gc.([gait_class_names{c} '_count']) / gc.n_frames;
+                    end
+                end
+            end
+            walk_struct.gait_nframes = gait_nframes;
+            for c = 1:numel(gait_class_names)
+                walk_struct.(['gait_' gait_class_names{c} '_frac']) = gait_fracs(c,:);
+            end
+
             % --- Posterior-to-anterior onset lags (per-walk mean, ms) ---
             % Two metrics, 7 sub-fields each (4 pairs + H_to_M, M_to_F, all).
             p2a_metrics = {'Pliftoff2Aliftoff_lag', 'Ptouchdown2Aliftoff_lag'};
