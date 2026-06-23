@@ -24,3 +24,10 @@ pflySingleMale_pfly_SlowRamp_71G01_UASChrimsonVenusX0070_20240320T102203
 *.mat
 matlabopenfiles20251125_myFDA
 ComputePValueBySamplingResults20260113/
+
+# Claude Code session/config files
+.claude/
+CLAUDE.md
+
+# Exploration / scratch scripts (use `git add -f` to track a specific one)
+locomotion/scripts/
