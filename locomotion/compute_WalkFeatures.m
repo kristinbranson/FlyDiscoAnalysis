@@ -75,7 +75,8 @@ minPeakProminence = 1;
 % list of perframe features to compute stats over bouts that are
 %  'first' = 1st derivative (d)
 pfflist_first = {'velmag_ctr','absdv_ctr','absdu_ctr','absdtheta', ...
-    'left_vel','right_vel','forward_vel','backward_vel','right_dtheta','left_dtheta'};
+    'left_vel','right_vel','forward_vel','backward_vel','right_dtheta','left_dtheta', ...
+    'smoothvelmag_ctr'};   % smoothed speed: per-frame bin-assignment signal (Path B)
 % 'none' = no derivative
 pfflist_none = {'CoM_stability', 'nfeet_ground'};
 % 'second' = second derivative (dd)
@@ -209,7 +210,19 @@ for w = 1:numel(walk_t0s)
 
         % method 3 - compute hilbert for walk bout
         if ismember('phasediff_hilbert', phase_methods)
-            phasediff_hilbert = computeContinuousPhaseDiff_hilbert(norm_ytips,loctall,locball,currwalk_tips_pos_body_Y,w,debug);
+            % per-frame smoothed speed aligned to the walk's phase frames
+            % (norm_ytips spans walk_t0:walk_t1_pos). smoothvelmag is diff-based
+            % (length nframes-1), so the trailing phase frame has no speed -> NaN
+            % pad (that frame is in the trimmed-NaN phase region anyway).
+            sv_fly = pff_cache.smoothvelmag_ctr;
+            nwf = size(norm_ytips,2);
+            currwalk_smoothspeed = nan(1,nwf);
+            jhi = min(walk_t1_pos, numel(sv_fly));
+            nfill = jhi - walk_t0 + 1;
+            if nfill > 0
+                currwalk_smoothspeed(1:nfill) = sv_fly(walk_t0:jhi);
+            end
+            phasediff_hilbert = computeContinuousPhaseDiff_hilbert(norm_ytips,loctall,locball,currwalk_tips_pos_body_Y,w,debug,currwalk_smoothspeed);
             walkfeaturestruct(ct).phasediff_hilbert = phasediff_hilbert;
         end
 
@@ -255,9 +268,9 @@ for w = 1:numel(walk_t0s)
         % liftoff->liftoff wave is ~antiphase -> forward-only window;
         % touchdown->liftoff (Rule 2) is centered ~0 -> signed nearest (+/-0.5P).
         walkfeaturestruct(ct).Pliftoff2Aliftoff_lag  = ...
-            computeP2ALag(currflyboutdata, walk_t0, walk_t1, currfly_timestamps, fly, 'swing',  'forward');
+            computeP2ALag(currflyboutdata, walk_t0, walk_t1, currfly_timestamps, fly, 'swing',  'forward', pff_cache.smoothvelmag_ctr);
         walkfeaturestruct(ct).Ptouchdown2Aliftoff_lag = ...
-            computeP2ALag(currflyboutdata, walk_t0, walk_t1, currfly_timestamps, fly, 'stance', 'signed');
+            computeP2ALag(currflyboutdata, walk_t0, walk_t1, currfly_timestamps, fly, 'stance', 'signed', pff_cache.smoothvelmag_ctr);
 
     end
 

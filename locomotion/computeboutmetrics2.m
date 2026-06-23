@@ -135,7 +135,7 @@ for is = 1:numel(state)
 
 
                 stance_durations_time = bout_metrics.perfly(fly).perlimb(limb).stance.durations_time;
-                stepfeatures = computeStepFeatures(fly,trx,aptdata,tip_pos_body,legtip_landmarknums,limb,step_t0s,step_t1s,stance_t0s,stance_t1s,currfly_timestamps,stance_durations_time);
+                stepfeatures = computeStepFeatures(fly,trx,aptdata,tip_pos_body,legtip_landmarknums,limb,step_t0s,step_t1s,stance_t0s,stance_t1s,currfly_timestamps,stance_durations_time,pff_cache{fly}.velmag_ctr);
 
                 bout_metrics.perfly(fly).perlimb(limb).(state{is}).stepfeatures = stepfeatures;
 

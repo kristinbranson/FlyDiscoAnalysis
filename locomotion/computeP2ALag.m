@@ -1,4 +1,4 @@
-function out = computeP2ALag(currflyboutdata, walk_t0, walk_t1, timestamps, fly, ref_event_type, pairing)
+function out = computeP2ALag(currflyboutdata, walk_t0, walk_t1, timestamps, fly, ref_event_type, pairing, smoothvelmag)
 % computeP2ALag - Per-walk posterior-to-anterior (P2A) onset lag (ms).
 %
 % Time delay from a posterior (reference) leg event to a nearby swing onset
@@ -38,6 +38,7 @@ if nargin < 6 || isempty(ref_event_type), ref_event_type = 'swing'; end
 if nargin < 7 || isempty(pairing)
     if strcmp(ref_event_type, 'stance'), pairing = 'signed'; else, pairing = 'forward'; end
 end
+if nargin < 8, smoothvelmag = []; end   % per-fly per-frame speed for speed-binning
 assert(ismember(ref_event_type, {'swing','stance'}), 'ref_event_type must be ''swing'' or ''stance''');
 assert(ismember(pairing, {'forward','signed'}), 'pairing must be ''forward'' or ''signed''');
 
@@ -69,24 +70,33 @@ for d = 1:size(pairs,1)
     ref_onsets = sort(refbouts.start_indices(idx));
 
     if strcmp(pairing, 'forward')
-        lag = pair_forward(ref_onsets, stepdata, target_limb, timestamps, nts, ...
+        [lag, ref_frames] = pair_forward(ref_onsets, stepdata, target_limb, timestamps, nts, ...
                            fly, walk_t0, walk_t1, name, ref_event_type);
     else
-        lag = pair_signed(ref_onsets, stepdata{target_limb}, timestamps, nts);
+        [lag, ref_frames] = pair_signed(ref_onsets, stepdata{target_limb}, timestamps, nts);
     end
-    out.(name) = lagstats(lag);
+    % per-event speed = smoothed speed at the reference-onset frame (co-indexed
+    % with lag); NaN where unavailable/out of range.
+    speed = nan(size(lag));
+    if ~isempty(smoothvelmag)
+        inr = ~isnan(ref_frames) & ref_frames >= 1 & ref_frames <= numel(smoothvelmag);
+        speed(inr) = smoothvelmag(ref_frames(inr));
+    end
+    out.(name) = lagstats(lag, speed);
 end
 
 % segment aggregates and pooled all (concatenate-then-mean)
-out.H_to_M = lagstats([out.RH_to_RM.data, out.LH_to_LM.data]);
-out.M_to_F = lagstats([out.RM_to_RF.data, out.LM_to_LF.data]);
+out.H_to_M = lagstats([out.RH_to_RM.data, out.LH_to_LM.data], [out.RH_to_RM.speed, out.LH_to_LM.speed]);
+out.M_to_F = lagstats([out.RM_to_RF.data, out.LM_to_LF.data], [out.RM_to_RF.speed, out.LM_to_LF.speed]);
 out.all    = lagstats([out.RH_to_RM.data, out.RM_to_RF.data, ...
-                       out.LH_to_LM.data, out.LM_to_LF.data]);
+                       out.LH_to_LM.data, out.LM_to_LF.data], ...
+                      [out.RH_to_RM.speed, out.RM_to_RF.speed, ...
+                       out.LH_to_LM.speed, out.LM_to_LF.speed]);
 
 end
 
 % ---------------------------------------------------------------------------
-function lag = pair_forward(ref_onsets, stepdata, target_limb, ts, nts, fly, walk_t0, walk_t1, name, ref_event_type)
+function [lag, ref_frames] = pair_forward(ref_onsets, stepdata, target_limb, ts, nts, fly, walk_t0, walk_t1, name, ref_event_type)
 % forward-only [ref, ref+period) match via findClosestSteps; lag >= 0
 try
     matched_stepdata = findClosestSteps(ref_onsets', stepdata, 0);   % pre_pad=0
@@ -98,6 +108,7 @@ catch ME
     matched_target = nan(1, max(0, numel(ref_onsets)-1));
 end
 matched_ref = ref_onsets(1:end-1); matched_ref = matched_ref(:)';
+ref_frames = matched_ref;   % co-indexed with lag (reference-onset frame per event)
 lag = nan(1, numel(matched_target));
 valid = ~isnan(matched_target) & ~isnan(matched_ref) & ...
         matched_target >= 1 & matched_target <= nts & ...
@@ -106,10 +117,11 @@ lag(valid) = (ts(matched_target(valid)) - ts(matched_ref(valid))) * 1000;
 end
 
 % ---------------------------------------------------------------------------
-function lag = pair_signed(ref_onsets, ant_onsets, ts, nts)
+function [lag, ref_frames] = pair_signed(ref_onsets, ant_onsets, ts, nts)
 % nearest anterior onset within +/-0.5*median(period); signed lag (ms)
 n = numel(ref_onsets);
 lag = nan(1, n);
+ref_frames = ref_onsets(:)';                % co-indexed with lag
 if n < 2, return; end                       % need >=2 onsets for a period
 ant = sort(ant_onsets(:)');
 halfwin = 0.5 * median(diff(ref_onsets));
@@ -126,10 +138,15 @@ end
 end
 
 % ---------------------------------------------------------------------------
-function s = lagstats(data)
-% linear stats over per-event lags (ms), ignoring NaN
-s.data = data;
-s.mean = mean(data, 'omitnan');
-s.std  = std(data, 'omitnan');
-s.n    = sum(~isnan(data));
+function s = lagstats(data, speed)
+% linear stats over per-event lags (ms), ignoring NaN. speed is the co-indexed
+% per-event speed (for speed-binning); defaults to NaN if not supplied.
+if nargin < 2 || isempty(speed)
+    speed = nan(size(data));
+end
+s.data  = data;
+s.speed = speed;
+s.mean  = mean(data, 'omitnan');
+s.std   = std(data, 'omitnan');
+s.n     = sum(~isnan(data));
 end

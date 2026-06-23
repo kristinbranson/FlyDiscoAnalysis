@@ -22,18 +22,36 @@ for sf = 1:numel(subfieldnames)
     else
         
 
-        % frm_mean_exp
+        % frm_mean_exp (+ co-indexed per-frame speed for speed-binning)
         curr_all = {};
+        spd_all = {};
         data =[];
+        have_speed = isfield(perwalk_metrics(1).(fieldname).(subfieldnames{sf}), 'speed');
         for w = 1:numel(perwalk_metrics)
             curr_all{w} = [perwalk_metrics(w).(fieldname).(subfieldnames{sf}).data];
+            if have_speed
+                spd_all{w} = [perwalk_metrics(w).(fieldname).(subfieldnames{sf}).speed];
+            end
         end
         curr_all = horzcat(curr_all{:});
-        data = curr_all(~isnan(curr_all));
+        framemask = ~isnan(curr_all);
+        data = curr_all(framemask);
         perexpphasefeatures.(fieldname).(subfieldnames{sf}).frm_data_exp = data;
         perexpphasefeatures.(fieldname).(subfieldnames{sf}).frm_mean_exp = circ_mean(data);
         perexpphasefeatures.(fieldname).(subfieldnames{sf}).frm_n_exp = numel(data);
         perexpphasefeatures.(fieldname).(subfieldnames{sf}).frm_std_exp = circ_std(data);
+        % co-indexed smoothed speed (same NaN-data mask); [] if unavailable or
+        % length mismatch (then speed-binning is skipped downstream).
+        if have_speed
+            spd_all = horzcat(spd_all{:});
+            if numel(spd_all) == numel(curr_all)
+                perexpphasefeatures.(fieldname).(subfieldnames{sf}).frm_speed_exp = spd_all(framemask);
+            else
+                perexpphasefeatures.(fieldname).(subfieldnames{sf}).frm_speed_exp = [];
+            end
+        else
+            perexpphasefeatures.(fieldname).(subfieldnames{sf}).frm_speed_exp = [];
+        end
        
 
         % walk_mean_exp

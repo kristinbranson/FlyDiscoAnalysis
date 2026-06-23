@@ -70,6 +70,32 @@ fprintf(logfid,'Computing locomotion perframe features ...\n')
 stageparamsfile = fullfile(trx.settingsdir,trx.analysis_protocol,trx.dataloc_params.locomotionmetricsparamsfilestr);
 stage_params = ReadParams(stageparamsfile);
 
+% onfloor filtering is opt-in via the param file. Default false (no filtering)
+% when the param is absent, for backward-compatibility with settings dirs that
+% predate onceiling detection.
+if isfield(stage_params,'do_onfloor_filtering')
+    do_onfloor_filtering = logical(stage_params.do_onfloor_filtering);
+else
+    do_onfloor_filtering = false;
+end
+% optionally save the (large) per-fly bout/walk metrics file; default off.
+if isfield(stage_params,'save_swingstancebouts')
+    save_swingstancebouts = logical(stage_params.save_swingstancebouts);
+else
+    save_swingstancebouts = false;
+end
+% speed-bin edges (mm/s) for slow/med/fast conditional metrics; default [8 20].
+if isfield(stage_params,'velmag_bin_edges')
+    velmag_bin_edges = stage_params.velmag_bin_edges;
+else
+    velmag_bin_edges = [8 20];
+end
+% '_onfloor' suffix on map keys and output filenames when filtering is on.
+key_suffix = '';
+if do_onfloor_filtering
+    key_suffix = '_onfloor';
+end
+
 
 % get leg tip velocities
 
@@ -187,36 +213,71 @@ fprintf(logfid,'Computing swing and stance bout metrics ...\n')
 % Load walking scores from stage_params
 [~,walking_scores] = LoadScoresFromFile(trx, stage_params.walking_score_file, 1);
 
-% Load onfloor filtering scores from stage_params
-[~,onceiling_scores] = LoadScoresFromFile(trx, stage_params.onceiling_score_file, 1);
-[~,nottracking_scores] = LoadScoresFromFile(trx, stage_params.nottracking_score_file, 1);
+% Load onfloor filtering scores only when filtering is enabled. When enabled,
+% the score files are required: LoadScoresFromFile errors if they are missing
+% (deterministic - do not silently skip filtering).
+if do_onfloor_filtering
+    fprintf(logfid,'onfloor filtering ON: requiring onceiling + nottracking scores\n');
+    [~,onceiling_scores] = LoadScoresFromFile(trx, stage_params.onceiling_score_file, 1);
+    [~,nottracking_scores] = LoadScoresFromFile(trx, stage_params.nottracking_score_file, 1);
+else
+    fprintf(logfid,'onfloor filtering OFF: walks are not filtered for onceiling/nottracking\n');
+    onceiling_scores = {};
+    nottracking_scores = {};
+end
 
 % digitalindicator
 indicatordata = trx.getIndicatorLED(1);
 digitalindicator = indicatordata.indicatordigital;
 
-% Initialize class with onfloor filtering
+% Initialize analyzer (onfloor filtering optional)
 loco_analyzer = LimbBoutAnalyzer(trx, aptdata, tips_pos_body, legtip_landmarknums, groundcontact, digitalindicator, walking_scores, ...
     'phase_methods', {'phasediff_hilbert'}, ...
-    'do_onfloor_filtering', true, ...
+    'do_onfloor_filtering', do_onfloor_filtering, ...
     'onceiling_scores', onceiling_scores, ...
     'nottracking_scores', nottracking_scores, ...
     'frac_onfloor_threshold', stage_params.frac_onfloor_threshold);
+loco_analyzer.velmag_bin_edges = velmag_bin_edges;
 
-% compute locomotion metrics for swing, stance, and steps for walking
-% during stim on and stim off periods, filtered to onfloor walks
-loco_analyzer.analyzeBoutAndStimConditions_onfloor();
+% compute bout + walk metrics for walking during stim on/off, using the
+% onfloor-filtered or plain methods depending on do_onfloor_filtering.
+if do_onfloor_filtering
+    loco_analyzer.analyzeBoutAndStimConditions_onfloor();
+    loco_analyzer.analyzeWalkAndStimConditions_onfloor();
+else
+    loco_analyzer.analyzeBoutAndStimConditions();
+    loco_analyzer.analyzeWalkAndStimConditions();
+end
 
-% compute locomotion metrics for walk bouts during stim on and off periods,
-% filtered to onfloor walks
-loco_analyzer.analyzeWalkAndStimConditions_onfloor();
-
-% compute and save locostatsperexp (onfloor filtered)
-loco_analyzer.computeStatsPerExp({'ON','OFF'}, '_onfloor');
+% compute and save locostatsperexp; output filename reflects filtering mode.
+loco_analyzer.computeStatsPerExp({'ON','OFF'}, key_suffix);
 try
-    perexpfilename = trx.dataloc_params.locomotionmetricsperexpfilestr;
+    perexpfilename = apply_mode_suffix(trx.dataloc_params.locomotionmetricsperexpfilestr, key_suffix);
     loco_analyzer.saveStatsPerExp(fullfile(expdir, perexpfilename));
 catch ME
     warning('FlyDiscoComputeLocomotionMetrics:saveStatsPerExp',...
         'Could not save per-experiment stats to file %s: %s',perexpfilename,getReport(ME));
+end
+
+% optionally save the full per-fly bout/walk metrics (large file).
+if save_swingstancebouts
+    try
+        ssbfilename = apply_mode_suffix(trx.dataloc_params.locomotionmetricsswingstanceboutstatsfilestr, key_suffix);
+        loco_analyzer.saveResults(fullfile(expdir, ssbfilename), key_suffix);
+    catch ME
+        warning('FlyDiscoComputeLocomotionMetrics:saveResults',...
+            'Could not save swingstancebouts file: %s',getReport(ME));
+    end
+end
+
+end  % function FlyDiscoComputeLocomotionMetrics
+
+
+function fname = apply_mode_suffix(fname, key_suffix)
+% Insert key_suffix before the extension, after stripping any pre-existing
+% '_onfloor' baked into the dataloc filename, so the name reflects the mode
+% actually run (e.g. 'locostatsperexp_onfloor.mat' -> base 'locostatsperexp').
+[d,nm,ext] = fileparts(fname);
+nm = regexprep(nm,'_onfloor$','');
+fname = fullfile(d,[nm key_suffix ext]);
 end

@@ -1,4 +1,7 @@
-function [boutfeatures] = computeStepFeatures(fly,trx,aptdata,tip_pos_body,legtip_landmarknums,limb,step_t0s,step_t1s,stance_t0s,stance_t1s,currfly_timestamps,stance_durations_time)
+function [boutfeatures] = computeStepFeatures(fly,trx,aptdata,tip_pos_body,legtip_landmarknums,limb,step_t0s,step_t1s,stance_t0s,stance_t1s,currfly_timestamps,stance_durations_time,velmag)
+% velmag (optional): per-fly per-frame velmag_ctr (1 x nframes-1), used to
+% compute a per-step and per-stance mean body speed co-indexed with the step /
+% stance geometry features below (for speed-conditional binning). [] -> NaN.
 % tip_pos_body = 6 x 2 x T, data from tips_pos_body for 1 fly
 % tip_pos_body are in ctrax format - need to use offset from trx
 % assume start and end indices are stance only
@@ -7,6 +10,7 @@ function [boutfeatures] = computeStepFeatures(fly,trx,aptdata,tip_pos_body,legti
 if nargin < 12 || isempty(stance_durations_time)
     [~, stance_durations_time] = computeBoutDurations(stance_t0s, stance_t1s, currfly_timestamps);
 end
+if nargin < 13, velmag = []; end
 
 boutfeatures = struct;
 
@@ -128,4 +132,25 @@ boutfeatures.length_px= length_px;
 boutfeatures.length_BL = length_px./meanbodylength;
 boutfeatures.length_BL = boutfeatures.length_BL;
 
-% add mean body velocity
+% add mean body velocity per step / per stance, co-indexed with the step-
+% and stance-indexed geometry features above (for speed-conditional binning).
+% velmag is per-frame (length nframes-1); average over each bout's frames.
+nsv = numel(velmag);
+step_velmag   = nan(1, numel(step_t0s));
+stance_velmag = nan(1, numel(stance_t0s));
+if ~isempty(velmag)
+    for i = 1:numel(step_t0s)
+        a = step_t0s(i); b = min(max(step_t1s(i)-1, a), nsv);
+        if a >= 1 && b >= a && a <= nsv
+            step_velmag(i) = mean(velmag(a:b), 'omitnan');
+        end
+    end
+    for i = 1:numel(stance_t0s)
+        a = stance_t0s(i); b = min(max(stance_t1s(i)-1, a), nsv);
+        if a >= 1 && b >= a && a <= nsv
+            stance_velmag(i) = mean(velmag(a:b), 'omitnan');
+        end
+    end
+end
+boutfeatures.step_velmag   = step_velmag;    % co-indexed with length_BL/duty_factor/...
+boutfeatures.stance_velmag = stance_velmag;  % co-indexed with AEP/PEP/amplitude

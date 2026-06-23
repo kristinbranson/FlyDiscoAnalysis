@@ -1,7 +1,13 @@
-function [phasediff_hilbert] = computeContinuousPhaseDiff_hilbert(norm_ytips,loctall,locball, currwalk_tips_pos_body_Y,w,debug)
+function [phasediff_hilbert] = computeContinuousPhaseDiff_hilbert(norm_ytips,loctall,locball, currwalk_tips_pos_body_Y,w,debug,currwalk_smoothspeed)
 
 nlimb = size(norm_ytips,1);
 nwalkfrms = size(norm_ytips,2);
+
+% per-frame smoothed speed co-indexed with each pair's .data (length nwalkfrms);
+% [] if not supplied (then no .speed is attached and speed-binning is skipped).
+if nargin < 7
+    currwalk_smoothspeed = [];
+end
 
 phasediff_hilbert = struct;
 legphases = nan(nlimb,nwalkfrms);
@@ -103,6 +109,7 @@ for d = 1:size(diffs,1)
     % plot(legphases(limbs(2),:),'.r')
 
     phasediff_hilbert.(name).data = currdata;
+    phasediff_hilbert.(name).speed = currwalk_smoothspeed;   % co-indexed per-frame speed
     % reported in -pi to pi
     phasediff_hilbert.(name).mean = circ_mean(currdata(~isnan(currdata)));
     phasediff_hilbert.(name).std = circ_std(currdata(~isnan(currdata)));
@@ -117,6 +124,7 @@ for d = 1:size(absdiffs,1)
     limbs = [absdiffs(d,1),absdiffs(d,2)];
     currdata = abs(circ_dist(legphases(limbs(1),:),legphases(limbs(2),:)));
     phasediff_hilbert.(name).data = currdata;
+    phasediff_hilbert.(name).speed = currwalk_smoothspeed;   % co-indexed per-frame speed
     phasediff_hilbert.(name).mean = mean(currdata(~isnan(currdata)));
     phasediff_hilbert.(name).std = std(currdata(~isnan(currdata)));
     phasediff_hilbert.(name).n = nnz(~isnan(currdata));
@@ -144,11 +152,14 @@ for f= 1:numel(flds)
     phasegroup = phasegroups.(phasegroupname);
 
     curr_all = {};
+    curr_speed = {};
     for p = 1:numel(phasegroup)
         curr_all{p} = phasediff_hilbert.(phasegroup{p}).data;
+        curr_speed{p} = phasediff_hilbert.(phasegroup{p}).speed;
     end
     diffdata = horzcat(curr_all{:});
     phasediff_hilbert.(phasegroupname).data = diffdata;
+    phasediff_hilbert.(phasegroupname).speed = horzcat(curr_speed{:});   % mirrors .data stacking
     phasediff_hilbert.(phasegroupname).mean = circ_mean(diffdata(~isnan(diffdata)));
     phasediff_hilbert.(phasegroupname).std = circ_std(diffdata(~isnan(diffdata)));
     phasediff_hilbert.(phasegroupname).n = nnz(~isnan(diffdata));
@@ -158,11 +169,14 @@ end
 phasegroupname = 'abscontra_L2R_3';
 phasegroup = {'absRF_LF','absRM_LM','absRH_LH'};
 curr_all = {};
+curr_speed = {};
 for p = 1:numel(phasegroup)
     curr_all{p} = phasediff_hilbert.(phasegroup{p}).data;
+    curr_speed{p} = phasediff_hilbert.(phasegroup{p}).speed;
 end
 diffdata = horzcat(curr_all{:});
 phasediff_hilbert.(phasegroupname).data = diffdata;
+phasediff_hilbert.(phasegroupname).speed = horzcat(curr_speed{:});   % mirrors .data stacking
 phasediff_hilbert.(phasegroupname).mean = mean(diffdata,'omitnan');
 phasediff_hilbert.(phasegroupname).std = std(diffdata,'omitnan');
 phasediff_hilbert.(phasegroupname).n = nnz(~isnan(diffdata));

@@ -1,5 +1,13 @@
 function [mean_speed,std_speed, min_speed, max_speed] = compute_legtipspeed(fly,position_data,limb_idx,start_indices,end_indices,currfly_timestamps,pxpermm)
 
+% Empty-bout convention: a fly with no bouts contributes a single NaN
+% placeholder (matching computeBoutDurations and
+% compute_StatsofPreframeFeatureDuringBouts), so per-bout arrays stay
+% co-indexed across all bout features (incl. for speed-conditional binning).
+if isempty(start_indices)
+    mean_speed = NaN; std_speed = NaN; min_speed = NaN; max_speed = NaN;
+    return
+end
 
 mean_speed = nan(1,numel(start_indices));
 std_speed = nan(1,numel(start_indices));

@@ -23,9 +23,14 @@ for sf = 1:numel(subfields)
     sn = subfields{sf};
 
     frm_cells = cell(1, nwalks);
+    spd_cells = cell(1, nwalks);
     walk_means = nan(1, nwalks);
+    have_speed = isfield(perwalk_metrics(1).(fieldname).(sn), 'speed');
     for w = 1:nwalks
         frm_cells{w} = perwalk_metrics(w).(fieldname).(sn).data;
+        if have_speed
+            spd_cells{w} = perwalk_metrics(w).(fieldname).(sn).speed;
+        end
         walk_means(w) = perwalk_metrics(w).(fieldname).(sn).mean;
     end
 
@@ -34,6 +39,18 @@ for sf = 1:numel(subfields)
     perexplag.(sn).frm_mean_exp = mean(frmdata, 'omitnan');
     perexplag.(sn).frm_std_exp  = std(frmdata, 'omitnan');
     perexplag.(sn).frm_n_exp    = sum(~isnan(frmdata));
+    % co-indexed per-event speed (same length/order as frm_data_exp); [] if
+    % unavailable or length mismatch (speed-binning then skipped).
+    if have_speed
+        spddata = horzcat(spd_cells{:});
+        if numel(spddata) == numel(frmdata)
+            perexplag.(sn).frm_speed_exp = spddata;
+        else
+            perexplag.(sn).frm_speed_exp = [];
+        end
+    else
+        perexplag.(sn).frm_speed_exp = [];
+    end
 
     perexplag.(sn).walk_data_exp = walk_means;
     perexplag.(sn).walk_mean_exp = mean(walk_means, 'omitnan');

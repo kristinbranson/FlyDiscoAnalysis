@@ -18,6 +18,7 @@ classdef LimbBoutAnalyzer < handle
         pairs = [1,6; 2,5; 3,4] % limb pair idx into legtip_landmarks
         pairNames = {'Front', 'Mid', 'Rear'}
         binedges = 5:2:34 % histogram bin edges
+        velmag_bin_edges = [8 20] % speed-bin edges (mm/s): slow [<8] / med [8-20) / fast [>=20]
 
         % Results storage
         restrictedBoutData = containers.Map()  % Store multiple restricted datasets
@@ -389,10 +390,17 @@ classdef LimbBoutAnalyzer < handle
             end
         end
         
-        function saveResults(obj, filename)
-            % Save analysis results in your format
-            if nargin < 2
+        function saveResults(obj, filename, key_suffix)
+            % Save per-fly bout and walk metrics (bout_metrics_ON/OFF,
+            % walk_metrics_ON/OFF). key_suffix selects which map keys to read,
+            % matching the analysis path that was run: '' for the plain path
+            % (keys 'walking_stimON_traj'/'led_on_traj'), '_onfloor' for the
+            % onfloor-filtered path ('walking_stimON_onfloor_traj' etc.).
+            if nargin < 2 || isempty(filename)
                 filename = 'locomotionmetricsswingstanceboutstats.mat';
+            end
+            if nargin < 3
+                key_suffix = '';
             end
             if ~isempty(obj.expdir)
                 filepath = fullfile(obj.expdir, filename);
@@ -400,24 +408,27 @@ classdef LimbBoutAnalyzer < handle
                 filepath = filename;
             end
 
-            % Save in format matching your original code
+            boutON_key  = ['walking_stimON'  key_suffix '_traj'];
+            boutOFF_key = ['walking_stimOFF' key_suffix '_traj'];
+            walkON_key  = ['led_on'  key_suffix '_traj'];
+            walkOFF_key = ['led_off' key_suffix '_traj'];
 
             bout_metrics_ON = [];
             bout_metrics_OFF = [];
+            walk_metrics_ON = [];
+            walk_metrics_OFF = [];
 
-            % TO DO cleanup condition names everywhere at some point
-            if obj.boutMetrics.isKey('walking_stimON_traj')
-                bout_metrics_ON = obj.boutMetrics('walking_stimON_traj');
+            if obj.boutMetrics.isKey(boutON_key)
+                bout_metrics_ON = obj.boutMetrics(boutON_key);
             end
-            if obj.boutMetrics.isKey('walking_stimOFF_traj')
-                bout_metrics_OFF = obj.boutMetrics('walking_stimOFF_traj');
+            if obj.boutMetrics.isKey(boutOFF_key)
+                bout_metrics_OFF = obj.boutMetrics(boutOFF_key);
             end
-            % add walk metrics
-            if obj.walkMetrics.isKey('led_on_traj')
-                walk_metrics_ON = obj.walkMetrics('led_on_traj');
+            if obj.walkMetrics.isKey(walkON_key)
+                walk_metrics_ON = obj.walkMetrics(walkON_key);
             end
-            if obj.walkMetrics.isKey('led_off_traj')
-                walk_metrics_OFF = obj.walkMetrics('led_off_traj');
+            if obj.walkMetrics.isKey(walkOFF_key)
+                walk_metrics_OFF = obj.walkMetrics(walkOFF_key);
             end
             save(filepath, 'bout_metrics_ON', 'bout_metrics_OFF','walk_metrics_ON','walk_metrics_OFF');
             fprintf('Results saved to: %s\n', filepath);
@@ -1327,6 +1338,8 @@ classdef LimbBoutAnalyzer < handle
                 'Nboutspervelmagbin', 'velmagbincenters', ...
                 'meanboutdurationsofvelmagbins', 'stdboutdurationsofvelmagbins'};
 
+            curated = getCuratedSpeedbinMetrics();
+
             for l = 1:numel(limbs)
                 numlimb = numel(bout_metrics.(flies).(limbs{l}));
 
@@ -1334,6 +1347,13 @@ classdef LimbBoutAnalyzer < handle
                     limbname = obj.getLimbName(numlimb, ll);
 
                     for s = 1:numel(state)
+                        % Per-bout speed (co-indexed with all per-bout arrays for this limb+state)
+                        spd = [];
+                        if isfield(bout_metrics.(flies).(limbs{l})(ll).(state{s}), 'velmag_ctr') ...
+                                && ~isempty(bout_metrics.(flies).(limbs{l})(ll).(state{s}).velmag_ctr)
+                            spd = bout_metrics.(flies).(limbs{l})(ll).(state{s}).velmag_ctr.mean;
+                        end
+
                         featurefields = fields(bout_metrics.(flies).(limbs{l})(ll).(state{s}));
                         for f = 1:numel(featurefields)
                             if ismember(featurefields{f}, ignorelist)
@@ -1364,6 +1384,7 @@ classdef LimbBoutAnalyzer < handle
                                 currstruct.Z = nnz(~isnan(currdata));
                             end
                             statsperexp.(funname) = currstruct;
+                            statsperexp = obj.emitSpeedBins(statsperexp, funname, led_label, currdata, spd, 'linear', curated);
                         end
 
                         % Velmag-conditioned durations
@@ -1405,11 +1426,31 @@ classdef LimbBoutAnalyzer < handle
             xystepfeatures = {'AEP', 'AEP_BL', 'PEP', 'PEP_BL'};
             xyname = {'x', 'y'};
 
+            curated = getCuratedSpeedbinMetrics();
+
             for l = 1:numel(limbs)
                 numlimb = numel(bout_metrics.(flies).(limbs{l}));
 
                 for ll = 1:numlimb
                     limbname = obj.getLimbName(numlimb, ll);
+
+                    % Co-indexed speeds for binning (each matched to its
+                    % feature's own step set, guaranteeing alignment):
+                    %  - perframe-during-step features (velmag/CoM/...) -> the
+                    %    per-step velmag mean (same bouts: velmag_ctr.mean)
+                    %  - step geometry (length_BL/duty/distance/...) -> stepfeatures.step_velmag
+                    %  - stance geometry (AEP/PEP/amplitude) -> stepfeatures.stance_velmag
+                    pf_velmag = [];
+                    if isfield(bout_metrics.(flies).(limbs{l})(ll).step, 'velmag_ctr') ...
+                            && ~isempty(bout_metrics.(flies).(limbs{l})(ll).step.velmag_ctr)
+                        pf_velmag = bout_metrics.(flies).(limbs{l})(ll).step.velmag_ctr.mean;
+                    end
+                    sf_struct = bout_metrics.(flies).(limbs{l})(ll).step.stepfeatures;
+                    sgeom_velmag = [];
+                    if isfield(sf_struct, 'step_velmag'),   sgeom_velmag  = sf_struct.step_velmag;   end
+                    stgeom_velmag = [];
+                    if isfield(sf_struct, 'stance_velmag'), stgeom_velmag = sf_struct.stance_velmag; end
+                    stance_indexed = {'amplitude_px', 'amplitude_BL', 'step_direction'};
 
                     % Per-frame features during steps
                     for pff = 1:numel(perframe_features_step)
@@ -1423,6 +1464,7 @@ classdef LimbBoutAnalyzer < handle
                         currstruct.std = std(currdata, 'omitnan');
                         currstruct.Z = nnz(~isnan(currdata));
                         statsperexp.(funname) = currstruct;
+                        statsperexp = obj.emitSpeedBins(statsperexp, funname, led_label, currdata, pf_velmag, 'linear', curated);
                     end
 
                     % Step-level features
@@ -1437,6 +1479,12 @@ classdef LimbBoutAnalyzer < handle
                         currstruct.std = std(currdata, 'omitnan');
                         currstruct.Z = nnz(~isnan(currdata));
                         statsperexp.(funname) = currstruct;
+                        if ismember(stepfeatures{sf}, stance_indexed)
+                            spd_use = stgeom_velmag;   % stance-indexed geometry
+                        else
+                            spd_use = sgeom_velmag;    % step-indexed geometry
+                        end
+                        statsperexp = obj.emitSpeedBins(statsperexp, funname, led_label, currdata, spd_use, 'linear', curated);
                     end
 
                     % X,Y step features (AEP, PEP)
@@ -1453,75 +1501,155 @@ classdef LimbBoutAnalyzer < handle
                             currstruct.std = std(currdata, 'omitnan');
                             currstruct.Z = nnz(~isnan(currdata));
                             statsperexp.(funname) = currstruct;
+                            statsperexp = obj.emitSpeedBins(statsperexp, funname, led_label, currdata, stgeom_velmag, 'linear', curated);
                         end
                     end
                 end
             end
         end
 
-        function statsperexp = combineWalkMetrics(~, walk_metrics, led_label, statsperexp)
+        function statsperexp = emitSpeedBins(obj, statsperexp, funname, led_label, currdata, speeddata, stattype, curated)
+            % Append __slow/__med/__fast speed-binned fields for a curated
+            % metric. funname is the full LED-bearing field name; it is
+            % LED-stripped to test membership in the curated set. speeddata is a
+            % co-indexed speed vector, or a CELL of candidate speed vectors (the
+            % one matching numel(currdata) is used; lets per-step vs per-stance
+            % features pick the right speed). If none is co-indexed, binning is
+            % skipped. stattype is 'linear'|'circular'|'fraction'.
+            key = strrep(funname, ['__' led_label '__'], '__');   % drop LED token
+            if ~ismember(key, curated)
+                return;
+            end
+            if iscell(speeddata)
+                spd = [];
+                for c = 1:numel(speeddata)
+                    if numel(speeddata{c}) == numel(currdata)
+                        spd = speeddata{c}; break;
+                    end
+                end
+            else
+                spd = speeddata;
+            end
+            if isempty(spd) || numel(currdata) ~= numel(spd)
+                return;   % not co-indexed -> skip (no binned fields for this metric)
+            end
+            binned = compute_speedbin_stats(currdata, spd, obj.velmag_bin_edges, stattype);
+            labs = fieldnames(binned);
+            for k = 1:numel(labs)
+                statsperexp.([funname '__' labs{k}]) = binned.(labs{k});
+            end
+        end
+
+        function statsperexp = combineWalkMetrics(obj, walk_metrics, led_label, statsperexp)
             % Flatten walk per-frame features into statsperexp.
 
             perframe_features = {'velmag_ctr', 'absdv_ctr', 'absdu_ctr', 'absdtheta', ...
                 'left_vel', 'right_vel', 'forward_vel', 'backward_vel', ...
                 'right_dtheta', 'left_dtheta', 'CoM_stability', 'nfeet_ground'};
 
+            curated = getCuratedSpeedbinMetrics();
+
             for pff = 1:numel(perframe_features)
                 funname = sprintf('%s__walk__%s__all', perframe_features{pff}, led_label);
                 currstruct = struct;
                 currdata = [];
+                speeddata = [];
                 if ~isempty(fields(walk_metrics.perexp))
                     currdata = walk_metrics.perexp.(perframe_features{pff}).frm_data_exp;
+                    if isfield(walk_metrics.perexp.(perframe_features{pff}), 'frm_speed_exp')
+                        speeddata = walk_metrics.perexp.(perframe_features{pff}).frm_speed_exp;
+                    end
                 end
                 currstruct.mean = mean(currdata, 'omitnan');
                 currstruct.std = std(currdata, 'omitnan');
                 currstruct.Z = nnz(~isnan(currdata));
                 statsperexp.(funname) = currstruct;
+                statsperexp = obj.emitSpeedBins(statsperexp, funname, led_label, currdata, speeddata, 'linear', curated);
             end
         end
 
-        function statsperexp = combinePhaseMetrics(~, walk_metrics, led_label, statsperexp)
+        function statsperexp = combinePhaseMetrics(obj, walk_metrics, led_label, statsperexp)
             % Flatten phase difference metrics into statsperexp.
-            % Uses circ_mean/circ_std for signed phase, regular mean/std for absolute phase.
+            % Signed groups: circ_mean/circ_std. Absolute groups: linear mean/std.
+            % Emits, per group: the phase MEAN field (phasediff_hilbert/absphasediff_hilbert),
+            % the phase VARIABILITY field (phasevar_hilbert/absphasevar_hilbert, value = std
+            % stored in .mean so it is a first-class pullable feature), and the speed-binned
+            % variants of both (per-frame, by co-indexed smoothvelmag).
 
             feature = 'phasediff_hilbert';
             stat = 'frm_data_exp';
+            speedstat = 'frm_speed_exp';
+            curated = getCuratedSpeedbinMetrics();
+            haveperexp = ~isempty(fields(walk_metrics.perexp));
 
-            % Signed phase — use circular statistics
+            % Signed phase — circular statistics
             subfeature_signed = {'tripods_4', 'ipsi_P2A_4', 'ipsi_ant_2', 'ipsi_post_2'};
-
             for sf = 1:numel(subfeature_signed)
-                funname = sprintf('%s__walk__%s__%s', feature, led_label, subfeature_signed{sf});
-                currstruct = struct;
-                currdata = [];
-                if ~isempty(fields(walk_metrics.perexp))
-                    currdata = walk_metrics.perexp.(feature).(subfeature_signed{sf}).(stat);
+                grp = subfeature_signed{sf};
+                meanfun = sprintf('phasediff_hilbert__walk__%s__%s', led_label, grp);
+                varfun  = sprintf('phasevar_hilbert__walk__%s__%s', led_label, grp);
+                currdata = []; speeddata = [];
+                if haveperexp
+                    currdata = walk_metrics.perexp.(feature).(grp).(stat);
+                    if isfield(walk_metrics.perexp.(feature).(grp), speedstat)
+                        speeddata = walk_metrics.perexp.(feature).(grp).(speedstat);
+                    end
                 end
                 valid = currdata(~isnan(currdata));
-                currstruct.mean = circ_mean(valid);
-                currstruct.std = circ_std(valid);
-                currstruct.Z = nnz(~isnan(currdata));
-                statsperexp.(funname) = currstruct;
+                statsperexp.(meanfun) = struct('mean', circ_mean(valid), 'std', circ_std(valid), 'Z', numel(valid));
+                statsperexp.(varfun)  = struct('mean', circ_std(valid), 'Z', numel(valid));
+                statsperexp = obj.emitPhaseBins(statsperexp, meanfun, varfun, led_label, currdata, speeddata, 'circular', curated);
             end
 
-            % Absolute phase — use regular statistics
+            % Absolute phase — linear statistics
             subfeature_abs = {'abscontra_L2R_3', 'absRF_LF', 'absRM_LM', 'absRH_LH'};
-
             for sf = 1:numel(subfeature_abs)
-                funname = sprintf('abs%s__walk__%s__%s', feature, led_label, subfeature_abs{sf});
-                currstruct = struct;
-                currdata = [];
-                if ~isempty(fields(walk_metrics.perexp))
-                    currdata = walk_metrics.perexp.(feature).(subfeature_abs{sf}).(stat);
+                grp = subfeature_abs{sf};
+                meanfun = sprintf('absphasediff_hilbert__walk__%s__%s', led_label, grp);
+                varfun  = sprintf('absphasevar_hilbert__walk__%s__%s', led_label, grp);
+                currdata = []; speeddata = [];
+                if haveperexp
+                    currdata = walk_metrics.perexp.(feature).(grp).(stat);
+                    if isfield(walk_metrics.perexp.(feature).(grp), speedstat)
+                        speeddata = walk_metrics.perexp.(feature).(grp).(speedstat);
+                    end
                 end
-                currstruct.mean = mean(currdata, 'omitnan');
-                currstruct.std = std(currdata, 'omitnan');
-                currstruct.Z = nnz(~isnan(currdata));
-                statsperexp.(funname) = currstruct;
+                validn = nnz(~isnan(currdata));
+                statsperexp.(meanfun) = struct('mean', mean(currdata, 'omitnan'), 'std', std(currdata, 'omitnan'), 'Z', validn);
+                statsperexp.(varfun)  = struct('mean', std(currdata, 'omitnan'), 'Z', validn);
+                statsperexp = obj.emitPhaseBins(statsperexp, meanfun, varfun, led_label, currdata, speeddata, 'linear', curated);
             end
         end
 
-        function statsperexp = combineGaitMetrics(~, walk_metrics, led_label, statsperexp)
+        function statsperexp = emitPhaseBins(obj, statsperexp, meanfun, varfun, led_label, currdata, speeddata, stattype, curated)
+            % Speed-bin a phase group, emitting binned phase-MEAN (meanfun) and
+            % phase-VARIABILITY (varfun) fields. compute_speedbin_stats returns
+            % per-bin (mean,std,Z); the phase-mean field takes that struct as-is,
+            % the phase-variability field stores the per-bin std in .mean (so the
+            % variability is a first-class pullable value, like the unbinned one).
+            if isempty(speeddata) || numel(currdata) ~= numel(speeddata)
+                return;
+            end
+            meankey = strrep(meanfun, ['__' led_label '__'], '__');
+            varkey  = strrep(varfun,  ['__' led_label '__'], '__');
+            do_mean = ismember(meankey, curated);
+            do_var  = ismember(varkey, curated);
+            if ~do_mean && ~do_var
+                return;
+            end
+            binned = compute_speedbin_stats(currdata, speeddata, obj.velmag_bin_edges, stattype);
+            labs = fieldnames(binned);
+            for k = 1:numel(labs)
+                if do_mean
+                    statsperexp.([meanfun '__' labs{k}]) = binned.(labs{k});
+                end
+                if do_var
+                    statsperexp.([varfun '__' labs{k}]) = struct('mean', binned.(labs{k}).std, 'Z', binned.(labs{k}).Z);
+                end
+            end
+        end
+
+        function statsperexp = combineGaitMetrics(obj, walk_metrics, led_label, statsperexp)
             % Flatten gait_class fractions into statsperexp.
             % Frame-pooled across all walking frames in the experiment for
             % the given LED condition. Speed-conditional pooling is
@@ -1539,6 +1667,8 @@ classdef LimbBoutAnalyzer < handle
             % Pull per-exp counts; default to zero/empty if no walks.
             total = 0;
             counts = zeros(1, numel(class_names));
+            frm_codes = [];
+            frm_speed = [];
             if ~isempty(fields(walk_metrics.perexp)) ...
                     && isfield(walk_metrics.perexp, 'gait_class')
                 gc = walk_metrics.perexp.gait_class;
@@ -1546,7 +1676,13 @@ classdef LimbBoutAnalyzer < handle
                 for c = 1:numel(class_names)
                     counts(c) = gc.([class_names{c} '_count_exp']);
                 end
+                frm_codes = gc.frm_data_exp;
+                if isfield(gc, 'frm_speed_exp')
+                    frm_speed = gc.frm_speed_exp;
+                end
             end
+
+            curated = getCuratedSpeedbinMetrics();
 
             for c = 1:numel(class_names)
                 funname = sprintf('gait_class__walk__%s__%s_frac', led_label, class_names{c});
@@ -1558,10 +1694,16 @@ classdef LimbBoutAnalyzer < handle
                 end
                 currstruct.Z = total;
                 statsperexp.(funname) = currstruct;
+                % Speed-binned class fraction (per-frame membership vs smoothvelmag).
+                % class code c == index c (tripod=1..other=5).
+                if ~isempty(frm_codes)
+                    membership = double(frm_codes == c);
+                    statsperexp = obj.emitSpeedBins(statsperexp, funname, led_label, membership, frm_speed, 'fraction', curated);
+                end
             end
         end
 
-        function statsperexp = combineTCSMetrics(~, walk_metrics, led_label, statsperexp)
+        function statsperexp = combineTCSMetrics(obj, walk_metrics, led_label, statsperexp)
             % Flatten Tripod Coordination Strength into statsperexp.
             % Event-pooled across all tripod events in the experiment for
             % the given LED condition.
@@ -1585,9 +1727,17 @@ classdef LimbBoutAnalyzer < handle
                 currstruct.Z    = 0;
             end
             statsperexp.(funname) = currstruct;
+
+            % Speed-binned TCS (per-event, by event_speeds)
+            if ~isempty(fields(walk_metrics.perexp)) && isfield(walk_metrics.perexp, 'TCS') ...
+                    && isfield(walk_metrics.perexp.TCS, 'data') && isfield(walk_metrics.perexp.TCS, 'event_speeds')
+                curated = getCuratedSpeedbinMetrics();
+                statsperexp = obj.emitSpeedBins(statsperexp, funname, led_label, ...
+                    walk_metrics.perexp.TCS.data, walk_metrics.perexp.TCS.event_speeds, 'linear', curated);
+            end
         end
 
-        function statsperexp = combineP2ALagMetrics(~, walk_metrics, fieldname, led_label, statsperexp)
+        function statsperexp = combineP2ALagMetrics(obj, walk_metrics, fieldname, led_label, statsperexp)
             % Flatten a posterior-to-anterior (P2A) onset lag metric into
             % statsperexp. fieldname is 'Pliftoff2Aliftoff_lag' or
             % 'Ptouchdown2Aliftoff_lag'. Event-pooled across all pair events
@@ -1601,6 +1751,7 @@ classdef LimbBoutAnalyzer < handle
             subfields = {'all', 'H_to_M', 'M_to_F'};
             has = ~isempty(fields(walk_metrics.perexp)) ...
                   && isfield(walk_metrics.perexp, fieldname);
+            curated = getCuratedSpeedbinMetrics();
             for s = 1:numel(subfields)
                 sn = subfields{s};
                 funname = sprintf('%s__walk__%s__%s', fieldname, led_label, sn);
@@ -1610,12 +1761,17 @@ classdef LimbBoutAnalyzer < handle
                     currstruct.mean = m.frm_mean_exp;
                     currstruct.std  = m.frm_std_exp;
                     currstruct.Z    = m.frm_n_exp;
+                    statsperexp.(funname) = currstruct;
+                    % Speed-binned (per-event, by co-indexed onset-frame speed)
+                    if isfield(m, 'frm_speed_exp')
+                        statsperexp = obj.emitSpeedBins(statsperexp, funname, led_label, m.frm_data_exp, m.frm_speed_exp, 'linear', curated);
+                    end
                 else
                     currstruct.mean = NaN;
                     currstruct.std  = NaN;
                     currstruct.Z    = 0;
+                    statsperexp.(funname) = currstruct;
                 end
-                statsperexp.(funname) = currstruct;
             end
         end
 

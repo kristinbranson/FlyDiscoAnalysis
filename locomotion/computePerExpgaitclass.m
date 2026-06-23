@@ -36,6 +36,21 @@ end
 perexpgait.frm_data_exp = horzcat(data_cells{:});
 perexpgait.frm_n_exp    = numel(perexpgait.frm_data_exp);
 
+% Co-indexed smoothed speed (per-frame) for speed-binning; gait codes carry no
+% NaN, so frm_speed_exp is the smoothvelmag concatenation in the same frame
+% order. [] if unavailable or length mismatch (binning then skipped).
+perexpgait.frm_speed_exp = [];
+if isfield(perwalk_metrics, 'smoothvelmag_ctr')
+    spd_cells = cell(1, nwalks);
+    for w = 1:nwalks
+        spd_cells{w} = perwalk_metrics(w).smoothvelmag_ctr.data;
+    end
+    spd = horzcat(spd_cells{:});
+    if numel(spd) == numel(perexpgait.frm_data_exp)
+        perexpgait.frm_speed_exp = spd;
+    end
+end
+
 % Sum per-class counts across walks
 for c = 1:numel(class_names)
     cf = [class_names{c} '_count'];
