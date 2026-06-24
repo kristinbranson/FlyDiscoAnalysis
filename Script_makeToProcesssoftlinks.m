@@ -183,12 +183,16 @@
 % explist = explist(11:end);
 
 %rerun 2
-explist = {'/groups/branson/bransonlab/flydisco_data/VNC2_JRC_SS29542_RigC_20231025T120751'
-    '/groups/branson/bransonlab/flydisco_data/VNC2_JRC_SS68348_RigA_20231108T093919'};
+% explist = {'/groups/branson/bransonlab/flydisco_data/VNC2_JRC_SS29542_RigC_20231025T120751'
+    % '/groups/branson/bransonlab/flydisco_data/VNC2_JRC_SS68348_RigA_20231108T093919'};
 % rootdatadir = '/groups/branson/bransonlab/flybubble_social';
 % for i = 1:numel(explist)
 %     explist{i} = fullfile(rootdatadir,explist{i});
 % end
+% rerun may 2026 experiments with fixes to settings dirs
+% explist = textread('/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/explist_rerunMSA_socialCsChr.txt','%s');
+explist = textread('/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_20260609_socialCsChrRERUN.txt','%s');
+
 %%
 toprocessdir =  '/groups/branson/bransonlab/flydisco_data/to-process';
 %ln -s source_file_or_directory_name  softlink_name

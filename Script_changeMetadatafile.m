@@ -3,7 +3,7 @@
 
 logfiledir = '/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/MetadataFixes';
 %%%CHANGE
-logfilename = 'expdirs_wk4num2_metadatachanges_logofauto.csv';
+logfilename = 'expdirs_socialTrpA_metadatachanges_logofauto.csv';
 
 
 logfile = fullfile(logfiledir,logfilename);
@@ -321,7 +321,12 @@ fid2 = fopen(logfile,'a');
 % explist = {'VNC3_JRC_SS100196_RigC_20240814T111641','VNC3_JRC_SS100196_RigD_20240814T111703'}
 
 % 3 dead and damaged flies - 2 untracked
-explist = {'VNC_YNA_K_162984_RigB_20210412T134611'}
+% explist = {'VNC_YNA_K_162984_RigB_20210412T134611'}
+
+% forgot to scan the barcode for the last run of the night. 
+explist = {'socialTrpA_JRC_SS03661_RigA_20260609T181505'
+'socialTrpA_JRC_SS03661_RigC_20260609T181620'
+'socialTrpA_JRC_SS03661_RigD_20260609T181750'};
 
 %% 
 rootdatadir = '/groups/branson/bransonlab/flydisco_data';
@@ -379,7 +384,7 @@ for j = 1:numel(explist)
 % changestruct.line = 'JRC_SS60232';
 % changestruct.line = 'JRC_SS90029';
 % changestruct.line = 'JRC_SS105199';
-
+changestruct.line = 'GMR_13F04_AE_01';
 %     changestruct.screen_type = 'non_olympiad_dickson_led5secVNC';
 %     changestruct.screen_type = 'non_olympiad_branson_LPC1CsChr';
 %     changestruct.effector = 'CsChr';
@@ -387,6 +392,7 @@ for j = 1:numel(explist)
 %     changestruct.gender = 'b';
 % changestruct.notes_technical = 'used mouth pipette';
 changestruct.num_flies_dead = 3;
+
 
     % replace metadata fields with changes
     fprintf(fid2,'%s, ',expdir);
