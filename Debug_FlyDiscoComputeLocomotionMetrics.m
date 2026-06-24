@@ -1,3 +1,4 @@
+
 %% setpath
 modpath
 
@@ -8,8 +9,9 @@ settingsdir = '/groups/branson/home/robiea/Code_versioned/BransonFlyDiscoSetting
 % analysis_protocol = '20241210_flybubble_LED_VNC3';
 % analysis_protocol = '20250721_flybubble_LED_VNC3';
 % analysis_protocol = '20251009_flybubble_LED_VNC3'; %same as 20250721_flybubble_LED_VNC3 with updated README
-analysis_protocol = '20251009_flybubble_LED_VNC2';
+% analysis_protocol = '20251009_flybubble_LED_VNC2';
 % analysis_protocol = '20251009_flybubble_LED_VNC';
+analysis_protocol = '20260326_flybubble_LED_VNC2';
 
 params = {'settingsdir',settingsdir,...
     'analysis_protocol',analysis_protocol, ...
