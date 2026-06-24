@@ -191,8 +191,11 @@
 % end
 % rerun may 2026 experiments with fixes to settings dirs
 % explist = textread('/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/explist_rerunMSA_socialCsChr.txt','%s');
-explist = textread('/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_20260609_socialCsChrRERUN.txt','%s');
+% explist = textread('/groups/branson/home/robiea/Projects_data/FlyDisco/FlyDiscoPipeline/expdirs_20260609_socialCsChrRERUN.txt','%s');
 
+%running of salil paper lines
+explist = textread('/groups/branson/home/robiea/Projects_data/FlyDisco/Bubble_data/20260619_velmag_speedbins/SSlines_EMtypes_expdirs_20260624.txt','%s');
+explist = explist(1:10);
 %%
 toprocessdir =  '/groups/branson/bransonlab/flydisco_data/to-process';
 %ln -s source_file_or_directory_name  softlink_name
