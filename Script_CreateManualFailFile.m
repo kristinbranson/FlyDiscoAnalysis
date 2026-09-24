@@ -322,8 +322,28 @@ rootdatadir = '/groups/branson/bransonlab/flydisco_data';
 % failure_category = 'less than 10 percent of data on floor';
 
 % smooshed flies 
-expdirlist = {'VNC_YNA_K_162984_RigB_20210412T134611','VNC3_YNA_K_162984_RigD_20240625T124243','VNC_YNA_K_162984_RigC_20210511T133814'}
+% expdirlist = {'VNC_YNA_K_162984_RigB_20210412T134611','VNC3_YNA_K_162984_RigD_20240625T124243','VNC_YNA_K_162984_RigC_20210511T133814'}
+% failure_category = 'tracked dead or damaged fly';
+
+% MSA and VNC4
+
+expdirlist = {'MSA_CantonS_10days_RigC_20260608T184246'
+'MSA_emptysplit_20days_RigB_20260423T103553'
+'MSA_emptysplit_20days_RigD_20260423T103736'
+'MSA_emptysplit_10days_RigA_20260423T104810'
+'MSA_emptysplit_10days_RigC_20260423T105226'
+'MSA_P1633_10days_RigD_20260423T105620'
+'VNC4_GMR_46H11_AE_01_RigC_20260428T110913'
+'VNC4_FCF_pBDPGAL4U_1500437_RigB_20260428T114601'
+'VNC4_GMR_46H11_AE_01_RigD_20260519T095030'
+'MSA_P1633_10days_RigB_20260423T112857'
+'VNC4_GMR_27E02_AE_01_RigB_20260428T113323'
+'VNC4_YNA_K_162984_RigD_20260519T105744'
+'MSA_CantonS_10days_RigD_20260608T183119'};
+
 failure_category = 'tracked dead or damaged fly';
+
+
 %%
 for i = 1:numel(expdirlist)
 explist{i} = fullfile(rootdatadir,expdirlist{i});
